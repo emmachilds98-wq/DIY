@@ -45,6 +45,14 @@ QUESTIONS = [
      "If it's pipe boxing it stays; if not, it might go.", "A photo is quickest.", True),
     ("ports", "Wired ports for the projector (master) and the music room (bedroom 2)?",
      "Each is one more Cat6 run on the electrician's visit; cheaper now than later.", "Yes or no for each.", False),
+    ("stairs", "The stairwell by the door: do the stairs go up or down, and which way do they run?",
+     "The render now shows an open stairwell behind a wooden banister, stairs going down.", "A photo from the room, or a line: up or down, towards the window or the wall.", True),
+    ("games", "Roughly how many PS2, Xbox 360 and Xbox One games? (from your v6.1 plan)",
+     "The game drawer holds about 48, 12 of them face-out; more needs an overflow spot.", "A count of each is plenty.", False),
+    ("surge", "Is the 10-gang surge-protected, and where are its two switches? (from v6.1)",
+     "It feeds the TV and the modern consoles; if not, swap it for one that is.", "Look for 'surge' on the label.", False),
+    ("models", "Console model numbers, from the labels underneath (optional, from v6.1)",
+     "The rows assume the largest version of each console; real models may free up height.", "Photos of the labels are fine.", True),
 ]
 
 
@@ -89,7 +97,7 @@ def downloads_list():
         items.append((p, f"{label}, v{VERSION}", "PDF"))
     for p in sorted(OUT.glob(f"Media wall v{VERSION} - *.png")):
         items.append((p, p.stem.replace(f"Media wall v{VERSION} - ", "").replace(" (HD)", "") + " (HD render)", "PNG"))
-    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")):
+    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")):
         items.append((p, p.stem, "PNG"))
     return items
 
@@ -149,7 +157,7 @@ section.block > h2 { font-size: 1.6rem; font-weight: 700; }
 .counts div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 0; }
 .counts strong { display: block; font-family: var(--display); font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .counts span { font-size: 13.5px; color: var(--muted); }
-ul.plain { margin: 0; padding-left: 1.1rem; display: grid; gap: 6px; }
+ul.plain, ol.plain { margin: 0; padding-left: 1.3rem; display: grid; gap: 8px; max-width: 80ch; }
 .plans { display: grid; gap: 14px; }
 .notice { background: var(--note); border-radius: 8px; padding: 10px 14px; margin: 0; font-size: 15px; }
 .notice[hidden] { display: none; }
@@ -217,7 +225,7 @@ table.fit sup { color: var(--muted); font-size: 10px; }
 
 def page(site=False):
     prefix = "media-wall/src/" if site else ""
-    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "slats", "four", "six") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "key_slats"]}
+    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "slats", "four", "six", "side") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "key_slats"]}
     rows = track_rows()
     _, lo_tot, hi_tot = phase_totals()
     phases = []
@@ -262,8 +270,8 @@ def page(site=False):
   <header>
     <h1>Media Wall v{VERSION}</h1>
     <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch views and greens, turn on the numbered key, answer the open questions, and tick off the buy list as you go.</p>
-    <p class="change"><b>What changed in v{VERSION}:</b> the layout is v11's, as you agreed it. New: the table set for six, out in the room, with both spot bars in view; fit checks for six and eight seats against the sub (it moves 3 cm towards the TV, and comes out for eight); a published size behind the Xbox 360 brick; and this page now takes your answers and photos, and keeps a buy tracker you can both tick.</p>
-    <nav class="jump" aria-label="On this page"><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
+    <p class="change"><b>What changed in v{VERSION}:</b> the layout is v11's, as you agreed it. The sub gets a slatted oak box, oak slats come in on the PC screen, its cable run and the turntable zone, the folded table gets a reeded underside, and your v6.1 upgrades are back where they fit. Two new views (six at the table, the PC side wall), a storage sheet to scale, and this page now takes your answers and photos and keeps a buy tracker you can both tick.</p>
+    <nav class="jump" aria-label="On this page"><a href="#next">New in v12</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
   </header>
 
   <div class="viewer">
@@ -274,6 +282,7 @@ def page(site=False):
           <button id="s-join" data-style="join" aria-pressed="true">Artisan oak (main)</button>
           <button id="s-four" data-style="four" aria-pressed="false">Dining, four at the wall</button>
           <button id="s-six" data-style="six" aria-pressed="false">Dining, six in the room</button>
+          <button id="s-side" data-style="side" aria-pressed="false">PC side wall</button>
           <button id="s-slats" data-style="slats" aria-pressed="false">Slat wall</button>
         </div></div>
       <div class="group"><span class="label" id="l-paint">Paint</span>
@@ -328,6 +337,19 @@ def page(site=False):
     </section>
   </div>
 
+  <section class="block" id="next">
+    <h2>New in v12</h2>
+    <ul class="plain">
+      <li><b>The sub in a slatted oak box</b>, 52 × 30 × 42: about 40% open on the front and both ends so the sound and the port's air get out; a solid top; hands and feet stay out. It lifts off for eight at the table.</li>
+      <li><b>Oak slats</b> on the PC screen (v6.1's: 1.2 cm gaps, open top for the exhaust), a slatted spine over the PC's cable drop, and a slatted panel behind the turntable zone.</li>
+      <li><b>The folded table</b> gets a reeded oak underside, so folded up it reads as a fluted oak panel, with small brass inserts for the legs instead of black plates.</li>
+      <li><b>Two new views</b>: the table set for six, and the PC side wall. The main view now shows the second spot bar and the open stairwell with its wooden banister.</li>
+      <li><b>A storage sheet</b> under the plans: every space drawn to scale with what fits and how many, plus the overflow options.</li>
+      <li><b>From your v6.1 plan</b>: the roll-out keyboard tray, a 2700K lamp by the sofa, a finger pull on the plinth drawer instead of push-to-open, an optional conduit to TV height, and four more questions below.</li>
+      <li>Fit proof: {fc[fit.PASS]} of {nfit} checks fit outright, {fc[fit.TIGHT]} are tight, {fc[fit.CHECK]} need a check on site, none fail.</li>
+    </ul>
+  </section>
+
   <section class="block" id="answers">
     <div class="qhead"><h2>What we still need from you</h2><div class="meter"><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
     <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Answers saved here reach both of you and the next round of the plan. A photo is often quicker than words.</p>
@@ -359,9 +381,10 @@ def page(site=False):
   </section>
 
   <section class="block plans" id="plans">
-    <h2>The living room, the dining layouts and the house</h2>
+    <h2>The living room, the dining layouts, storage and the house</h2>
     <div class="frame"><img src="{prefix}art/zz_living.jpg" alt="Living room plan drawn from the measured sketch: media wall, side-wall shelf and PC over the L-sofa, the dining wall, both spotlight bars, socket and viewing distance" width="2064" height="1464" loading="lazy"></div>
     <div class="frame"><img src="{prefix}art/zz_seating.jpg" alt="Three small plans of the dining table: four at the wall, six and eight with the table lifted off and pulled into the room" width="2064" height="1200" loading="lazy"></div>
+    <div class="frame"><img src="{prefix}art/zz_storage.jpg" alt="Storage options: every space in the wall drawn to scale with what fits and how many, and the overflow options" width="2160" height="2592" loading="lazy"></div>
     <div class="frame"><img src="{prefix}art/zz_house.jpg" alt="Three floor plans with the Decos, Cat6 runs, chimney breast, brick cupboard and sloped ceilings" width="2064" height="1488" loading="lazy"></div>
     <p class="caption">The living room is drawn from your measurements; the L-sofa is drawn at a typical {G.SOFA_W:g} × {G.SOFA_D:g} cm until you measure yours. The house outline is traced from the agent's plans.</p>
   </section>
@@ -382,21 +405,22 @@ const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v
 
 /* ---------- the render viewer */
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
-const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table lifted off and set for six, with both spot bars", slats: "Slat wall alternative" }};
+const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table lifted off and set for six, with both spot bars", side: "The PC side wall, seen from the room", slats: "Slat wall alternative" }};
 const view = Object.assign({{ style: "join", paint: "card_room", key: false }}, store.get("mw12-view", {{}}));
 const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key");
 function draw() {{
   if (!VIEWS[view.style]) view.style = "join";
-  if (view.style === "four" || view.style === "six") view.key = false;
+  if (view.style === "four" || view.style === "six" || view.style === "side") view.key = false;
   shot.src = view.key ? DATA.img["key_" + view.style] : DATA.img["art_" + view.style + "_" + view.paint];
   shot.alt = VIEWS[view.style] + (view.key ? " with numbered key" : " in " + NAMES[view.paint]);
   $$("[data-style]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.style === view.style)));
   $$("[data-paint]").forEach(b => {{ b.setAttribute("aria-pressed", String(!view.key && b.dataset.paint === view.paint)); b.disabled = view.key; }});
   keyBtn.setAttribute("aria-pressed", String(view.key));
-  keyBtn.disabled = view.style === "four" || view.style === "six";
+  keyBtn.disabled = view.style === "four" || view.style === "six" || view.style === "side";
   cap.textContent = view.key
     ? (view.style === "slats" ? "Numbered key for the slat wall alternative, in Card Room Green. Game drawer and lower record tray pulled out 30 cm." : "Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
     : view.style === "six" ? "The table lifted off onto four legs, 60 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stair box and door are drawn roughly until you confirm the west end."
+    : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC with its slatted screen and keyboard tray, the slatted cable spine, the sofa below, the media wall end-on at the right (the breast cut away)."
     : VIEWS[view.style] + ", shown in " + NAMES[view.paint] + ". Evening light, drawn to the measured room.";
   store.set("mw12-view", view);
 }}

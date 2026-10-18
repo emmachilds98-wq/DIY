@@ -119,6 +119,10 @@ PC_SHELF_TOP = LEDGE_TOP                   # one line with the ledge
 PC_CASE = (23.0, 47.0, 45.0)               # W (off the wall), H, D (along the wall): assumed mid-tower (model to confirm)
 PC_Z = (-134.0, -134.0 - PC_CASE[2])       # front faces the alcove
 PAD_DOCK = (18.0, 2.2, 9.0)
+PC_SCREEN_SLAT = (2.1, 1.2)                # v6.1's slatted screen: oak slats 2.1 wide, 1.2 gaps, open top
+KB_TRAY = dict(h=7.0, out=25.0, runners=30.0)   # v6.1's roll-out keyboard tray: 7 cm housing under the PC shelf, rolls 25 cm out
+SPINE = (6.0, 6.0)                          # slatted oak spine over the PC's cable drop: off the wall, along the wall
+RZ_SLATS = (2.5, 1.5, 2.2)                  # slatted oak panel behind the turntable zone: slat width, gap, depth with battens
 
 # ---------------------------------------------------------------- the L-sofa (assumed until measured) and the sub
 SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 247.0, 168.0, 95.0, 80.0   # overall width, overall depth with the chaise, back-to-front, height
@@ -127,7 +131,9 @@ SOFA_BACK_Z = WINDOW_Z + 10.0              # -299: 10 cm off the window wall and
 SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
-SUB_POS = dict(x=(229.0, 229.0 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # under the dining wall, between the bracket arms, on its side to the breast: driver east, port 24 cm from the west arm (v12: 3 cm east, so the six-seat chairs clear it)
+SUB_BOX = dict(x=(207.5, 259.5), z=(-30.0, 0.0), h=42.0)   # v12: slatted oak box over the sub and its riser, between the folded arms
+SUB_BOX_SLAT = (2.0, 1.4, 1.5)             # slat width, gap, thickness: about 40% open on the front and both ends; solid oak top
+SUB_POS = dict(x=(214.5, 214.5 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # inside the box: driver east 7 cm from the slats, rear port 14.6 cm from them
 COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
 
 # ---------------------------------------------------------------- the dining wall on the chimney breast
@@ -140,7 +146,8 @@ RAIL = (TABLE[0], 22.0, 3.0)               # oak backboard on the breast: L, H, 
 RAIL_TOP = TABLE_TOP - TABLE[2]            # 73.3
 TABLE_Z = (-RAIL[2], -RAIL[2] - TABLE[1])  # -3 .. -83 when down at the wall
 FOLDED_TOP = RAIL_TOP + TABLE[1]           # 153.3: the folded table's top edge
-FOLDED_D = RAIL[2] + TABLE[2] + 1.2        # about 7 off the breast, leg plates included
+REED = (2.0, 1.0, 1.0)                     # v12: reeded underside, oak strips 2 wide, 1 apart, 1 thick, between the breadboard ends
+FOLDED_D = RAIL[2] + TABLE[2] + REED[2] + 0.3   # about 7 off the breast
 HEBGO = (58.0, 22.0)                       # Häfele Hebgo 287.43.428: arm 580, height 220; 500 kg a pair
 HEBGO_X = (TABLE_CX - 40.0, TABLE_CX + 40.0)   # 80 apart (Häfele: up to 800 between brackets)
 LEG_H = 71.0                               # Emuca steel legs, 710 (adjustable to 730), screw-in plates

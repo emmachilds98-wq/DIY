@@ -25,7 +25,7 @@ def svgs():
     return names
 
 
-PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight")]
+PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space")]
 
 
 def main(diagrams=True):
@@ -44,12 +44,14 @@ def main(diagrams=True):
         ("v12_join_dims.svg", OUT / "Media wall v12 - artisan oak - heights and widths (HD).png", W, H, 2.0),
         ("v12_dining_four.svg", OUT / "Media wall v12 - dining wall set for four (HD).png", W, H, 2.0),
         ("v12_dining_six.svg", OUT / "Media wall v12 - table set for six, both spot bars (HD).png", W, H, 2.0),
+        ("v12_side.svg", OUT / "Media wall v12 - the PC side wall (HD).png", W, H, 2.0),
+        ("v12_side.svg", "render_v12_side.png", W, H, 1.1),
         ("v12_slat_key.svg", OUT / "Media wall v12 - slat wall alternative - numbered key.png", KW, H, 1.25),
         ("v12_slat_clean.svg", OUT / "Media wall v12 - slat wall alternative.png", W, H, 1.25),
     ]
     for k in ("card_room", "sage", "treron", "deep"):
         jobs.append((f"v12_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
-        for st, tag in (("joinery", "join"), ("slats", "slats"), ("four", "four"), ("six", "six")):
+        for st, tag in (("joinery", "join"), ("slats", "slats"), ("four", "four"), ("six", "six"), ("side", "side")):
             jobs.append((f"v12_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
     for k in R.SKIRT_OPTIONS:
         jobs.append((f"v12_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
@@ -57,7 +59,7 @@ def main(diagrams=True):
     jobs.append(("v12_slat_key.svg", "art_key_slats.png", KW, H, 0.82))
     # plan diagrams as images for out/ and the viewer
     for name, label in (PLANS if diagrams else []):
-        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating}[name]
+        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage}[name]
         s = fn()
         vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', s)
         w, h = int(vb.group(1)), int(vb.group(2))
@@ -80,7 +82,7 @@ def main(diagrams=True):
     grid.save(OUT / "Paint options - four greens.png")
 
     # skirting options: the same corner of the room in three skirting colours
-    crop = (1150, 985, 2050, 1395)   # the breast and recess skirting, under the folded table
+    crop = (880, 1010, 1700, 1250)   # the breast and recess skirting, under the folded table (v12 camera)
     labs = {"card_room": "Card Room Green, Estate Eggshell (recommended)", "green_smoke": "Green Smoke (darker edge)", "off_white": "Soft off-white"}
     cw, ch = crop[2] - crop[0], crop[3] - crop[1]
     strip = Image.new("RGB", (3 * cw + 4 * gap, ch + 60 + 2 * gap), "#f4efe4")

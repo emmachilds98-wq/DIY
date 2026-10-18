@@ -1,5 +1,32 @@
 # Handoff: Home Network & Media Wall Plan
 
+## Update 18 Oct 2026, round 6: v12 delivered (the v11 layout, upgraded)
+**Delivered:** `out/Home_Network_Plan_v12.pdf` (45 pages), `out/Build_Guide_v12.pdf` (9 pages), HD renders in `out/` (v11 outputs
+moved to `out/v11/`), the viewer artifact **https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2** (the client's copy of the v11 viewer on
+this account; update this one in place), and `index.html`. The root `README.md` now carries the key renders, heights, storage sheet and
+open questions so the client can read them on GitHub without downloading.
+
+**What changed (the client's list from the session that hit its limit, their comments, and their v6.1 upgrades)**
+- Sub in a slatted oak box (`SUB_BOX`, `sub_box()`): 52 × 30 × 42 between the folded arms; sub moved to x 214.5–244.9 inside it.
+- Oak slats: PC screen (v6.1: 2.1 slats, 1.2 gaps, open top), a slatted cable spine (`SPINE`), a slatted panel behind the turntable
+  zone (`rz_slats()`, preamp moved 2.2 forward; deck now 6.6 from the panel: tight).
+- Folded table: reeded underside (`REED`), brass inserts instead of leg plates (client comment).
+- Camera: default pulled back (`CAM_DEFAULT` = eye 120, X0 290, S 3.4, shift 150; v11's is `CAM_V11`) so bar 2 shows (client
+  comment). The west end is an open stairwell with a wooden banister (`west_end()`, client comment; up/down asked, drawn going down).
+- New views: dining for six (`CAM_SIX`), the PC side wall (`build_side()`, `VIEW = "side"`; `box()` now culls faces against
+  `cam_pos()` in both views; the side view draws the media wall as massing in `media_end_on()` and leaves the breast out).
+- `diagrams.storage()`: every space to one scale with counts and overflow options (high shelf spine-out ≈380 LPs; a second
+  bay-3 unit west of the sofa).
+- From v6.1: keyboard tray (`KB_TRAY`), lamp by the sofa, plinth-drawer finger pull, conduit to TV height, questions on games
+  count, 10-gang surge protection, console models.
+- Viewer (`build_viewer.py`): views join/four/six/side/slats × 4 paints; open questions with answers and photos saved to the artifact's
+  db (`answers/<id>`, photos via assets); shared buy tracker (`tracker/<id>`); fit proof; downloads (published under `files/`).
+  Read the client's answers with ArtifactData `list` on `answers` next round.
+- Fit proof: 57 checks, 42 fit, 10 tight, 5 check, 0 fail.
+
+**Next:** read the answers in the viewer's db; fix the stairwell direction; sofa size → PC shelf and clearances; walls solid or not → fixings.
+
+
 ## Update 18 Oct 2026, round 5: v11 delivered (turntable back in the alcove, dining wall, side-wall wrap)
 **Delivered:** `out/Home_Network_Plan_v11.pdf` (40 pages), `out/Build_Guide_v11.pdf` (8 pages, beginner-friendly, with tool list
 and shopping list), HD renders in `out/` (v10 outputs in `out/v10/`), the viewer artifact
