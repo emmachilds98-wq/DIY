@@ -1,9 +1,15 @@
-"""Builds every render and diagram image the plan, the out/ folder and the viewer use (v10).
+"""Builds every render and diagram image the plan, the out/ folder and the viewer use (v11).
 python3 make_images.py          -> SVGs here, PNGs for the PDF here, HD PNGs in ../out, viewer JPGs in art/
+python3 make_images.py renders  -> the renders only (skips the plan diagrams)
 """
+import sys
 import pathlib, re
 from PIL import Image, ImageDraw, ImageFont
-import render as R, diagrams as D, shot
+import render as R, shot
+try:
+    import diagrams as D
+except Exception:      # diagrams mid-edit: renders can still be built with `renders`
+    D = None
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
@@ -19,31 +25,37 @@ def svgs():
     return names
 
 
-def main():
+PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight")]
+
+
+def main(diagrams=True):
     svgs()
     W, H, KW = R.W, R.H, R.W + R.KEYW
     jobs = [
         # for the PDF
-        ("v10_join_key.svg", "render_v10_join_key_scene.png", W, H, 1.1),
-        ("v10_join_clean.svg", "render_v10_join_clean.png", W, H, 1.1),
-        ("v10_slat_clean.svg", "render_v10_slat_clean.png", W, H, 0.9),
+        ("v11_join_key.svg", "render_v11_join_key_scene.png", W, H, 1.1),
+        ("v11_join_clean.svg", "render_v11_join_clean.png", W, H, 1.1),
+        ("v11_dining_four.svg", "render_v11_dining_four.png", W, H, 1.1),
+        ("v11_slat_clean.svg", "render_v11_slat_clean.png", W, H, 0.9),
         # HD, labelled, for the client
-        ("v10_join_clean.svg", OUT / "Media wall v10 - artisan oak - Card Room Green (HD).png", W, H, 2.0),
-        ("v10_join_key.svg", OUT / "Media wall v10 - artisan oak - numbered key (HD).png", KW, H, 2.0),
-        ("v10_join_dims.svg", OUT / "Media wall v10 - artisan oak - heights and widths (HD).png", W, H, 2.0),
-        ("v10_slat_key.svg", OUT / "Media wall v10 - slat wall alternative - numbered key.png", KW, H, 1.25),
-        ("v10_slat_clean.svg", OUT / "Media wall v10 - slat wall alternative.png", W, H, 1.25),
+        ("v11_join_clean.svg", OUT / "Media wall v11 - artisan oak - Card Room Green (HD).png", W, H, 2.0),
+        ("v11_join_key.svg", OUT / "Media wall v11 - artisan oak - numbered key (HD).png", KW, H, 2.0),
+        ("v11_join_dims.svg", OUT / "Media wall v11 - artisan oak - heights and widths (HD).png", W, H, 2.0),
+        ("v11_dining_four.svg", OUT / "Media wall v11 - dining wall set for four (HD).png", W, H, 2.0),
+        ("v11_slat_key.svg", OUT / "Media wall v11 - slat wall alternative - numbered key.png", KW, H, 1.25),
+        ("v11_slat_clean.svg", OUT / "Media wall v11 - slat wall alternative.png", W, H, 1.25),
     ]
     for k in ("card_room", "sage", "treron", "deep"):
-        jobs.append((f"v10_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
-        for st, tag in (("joinery", "join"), ("slats", "slats")):
-            jobs.append((f"v10_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
+        jobs.append((f"v11_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
+        for st, tag in (("joinery", "join"), ("slats", "slats"), ("four", "four")):
+            jobs.append((f"v11_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
     for k in R.SKIRT_OPTIONS:
-        jobs.append((f"v10_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
-    jobs.append(("v10_join_key.svg", "art_key_join.png", KW, H, 0.82))
-    jobs.append(("v10_slat_key.svg", "art_key_slats.png", KW, H, 0.82))
+        jobs.append((f"v11_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
+    jobs.append(("v11_join_key.svg", "art_key_join.png", KW, H, 0.82))
+    jobs.append(("v11_slat_key.svg", "art_key_slats.png", KW, H, 0.82))
     # plan diagrams as images for out/ and the viewer
-    for name, fn, label in [("house", D.house, "House plan - Decos and Cat6"), ("living", D.living_plan, "Living room plan - as measured")]:
+    for name, label in (PLANS if diagrams else []):
+        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating}[name]
         s = fn()
         vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', s)
         w, h = int(vb.group(1)), int(vb.group(2))
@@ -66,7 +78,7 @@ def main():
     grid.save(OUT / "Paint options - four greens.png")
 
     # skirting options: the same corner of the room in three skirting colours
-    crop = (110, 990, 1010, 1400)
+    crop = (1150, 985, 2050, 1395)   # the breast and recess skirting, under the folded table
     labs = {"card_room": "Card Room Green, Estate Eggshell (recommended)", "green_smoke": "Green Smoke (darker edge)", "off_white": "Soft off-white"}
     cw, ch = crop[2] - crop[0], crop[3] - crop[1]
     strip = Image.new("RGB", (3 * cw + 4 * gap, ch + 60 + 2 * gap), "#f4efe4")
@@ -83,12 +95,12 @@ def main():
     for p in HERE.glob("art_*.png"):
         Image.open(p).convert("RGB").save(ART / (p.stem.replace("art_key_", "key_") + ".jpg"), quality=86, optimize=True)
         p.unlink()
-    for name, label in (("zz_house", "House plan - Decos and Cat6"), ("zz_living", "Living room plan - as measured")):
-        Image.open(OUT / f"{label}.png").convert("RGB").save(ART / f"{name}.jpg", quality=88, optimize=True)
+    for name, label in (PLANS if diagrams else []):
+        Image.open(OUT / f"{label}.png").convert("RGB").save(ART / f"zz_{name}.jpg", quality=88, optimize=True)
     for p in list(HERE.glob("p_*.png")) + list(HERE.glob("skirt_*.png")):
         p.unlink()
     print("images ok")
 
 
 if __name__ == "__main__":
-    main()
+    main(diagrams="renders" not in sys.argv[1:])

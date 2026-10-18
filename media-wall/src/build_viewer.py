@@ -1,12 +1,12 @@
-"""Builds the interactive viewer page (v10): style × paint × key, with the images in art/.
-python3 build_viewer.py  -> media_wall_viewer.html (images referenced as art/*.jpg, published alongside it)"""
+"""Builds the interactive viewer page (v11): view × paint × key, with the images in art/.
+python3 build_viewer.py  -> media_wall_viewer.html (images referenced as art/*.jpg, published alongside it)
+                            and ../../index.html, the same page for GitHub Pages"""
 import json, pathlib
 import geometry as G
-import fit
 
 HERE = pathlib.Path(__file__).parent
-LPS = 2 * G.TRAY_LPS + G.BROWSER_LPS + G.LEDGE_LPS
-SINGLES = 2 * G.TRAY_SINGLES + G.BAYB_SINGLES
+LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
+SINGLES = 2 * G.TRAY_SINGLES
 
 STYLE = """<style>
 /* Layout: one column, the render as the hero with its controls directly under it; facts in a two-column band below */
@@ -55,28 +55,49 @@ ul.plain { margin: 0; padding-left: 1.1rem; display: grid; gap: 6px; }
 </style>"""
 
 
-def page():
-    c = fit.counts()
-    total = sum(c.values())
-    imgs = {k: f"art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "slats") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "key_slats"]}
-    return f"""<title>Media Wall v10</title>
+def fit_line():
+    try:
+        import fit
+        c = fit.counts()
+        total = sum(c.values())
+        return (f"<li>Fit proof: {c[fit.PASS]} of {total} checks fit outright against published sizes; "
+                f"{c[fit.TIGHT]} are tight and {c[fit.CHECK]} get a check on site (the full table is in the plan).</li>")
+    except Exception:
+        return ""
+
+
+def page(prefix="", downloads=""):
+    plans = (HERE / "art" / "zz_seating.jpg").exists()
+    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "slats", "four") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "key_slats"]}
+    plan_html = ""
+    if plans:
+        plan_html = f"""
+  <section class="plans">
+    <h2>The living room, the dining layouts and the house</h2>
+    <div class="frame"><img src="{prefix}art/zz_living.jpg" alt="Living room plan drawn from the measured sketch: media wall, side-wall shelf and PC over the L-sofa, the dining wall, both spotlight bars, socket and viewing distance" width="2064" height="1440"></div>
+    <div class="frame"><img src="{prefix}art/zz_seating.jpg" alt="Three small plans of the dining table: four at the wall, six and eight with the table lifted off and pulled into the room" width="2064" height="1200"></div>
+    <div class="frame"><img src="{prefix}art/zz_house.jpg" alt="Three floor plans with the Decos, Cat6 runs, chimney breast, brick cupboard and sloped ceilings" width="2064" height="1488"></div>
+    <p class="caption">The living room is drawn from your measurements; the L-sofa is drawn at a typical 247 × 168 cm until you measure yours. The house outline is traced from the agent's plans.</p>
+  </section>"""
+    return f"""<title>Portsmouth Close Media Wall</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {STYLE}
 <div class="wrap">
   <header>
-    <h1>Media Wall v10</h1>
-    <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, now drawn to the room as you measured it. Compare it with the slat wall, try the other greens, or turn on the numbered key.</p>
-    <p class="change"><b>What changed:</b> the alcove is {G.ALC_W:g} × {G.ALC_D:g} cm with a {G.CEIL:g} cm ceiling, not 225 × 50 × 220. The TV, the Series X and three bays still fit; a turntable doesn't, so the deck, the LP browser and both record trays move into a matching oak cabinet against the chimney breast.</p>
+    <h1>Media Wall v11</h1>
+    <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch between the media wall, the slat wall and the dining wall set for four, try the other greens, or turn on the numbered key.</p>
+    <p class="change"><b>What changed in v11:</b> the TV moves {G.TV_SHIFT:.0f} cm nearer the side wall, so the turntable fits in the alcove with the Series X on a shelf above it and the record trays in the bay below. The record ledge wraps round onto the side wall, with the PC on a shelf above the end of the L-sofa. The chimney breast gets a fold-down oak dining table for four (six or eight with it lifted off), and a second spotlight bar hangs over it by the stairs.</p>
   </header>
 
   <div class="viewer">
     <div class="frame"><img id="shot" alt="Render of the media wall" width="1804" height="1148"></div>
     <div class="controls">
-      <div class="group"><span class="label" id="l-style">Version</span>
+      <div class="group"><span class="label" id="l-style">View</span>
         <div class="seg" role="group" aria-labelledby="l-style">
           <button id="s-join" data-style="join" aria-pressed="true">Artisan oak (main)</button>
+          <button id="s-four" data-style="four" aria-pressed="false">Dining wall, set for four</button>
           <button id="s-slats" data-style="slats" aria-pressed="false">Slat wall</button>
         </div></div>
       <div class="group"><span class="label" id="l-paint">Paint</span>
@@ -99,12 +120,13 @@ def page():
       <h2>Heights, from the floor</h2>
       <ul class="heights">
         <li><b>{G.CEIL:g}</b><span>Ceiling, as measured</span></li>
-        <li><b>{G.HIGH_TOP:g}</b><span>High shelf: books up to 30 cm, a box, a print, Deco B</span></li>
-        <li><b>{G.SIDE_SHELF_TOP:g}</b><span>Side shelves · record ledge at {G.LEDGE_TOP:g}</span></li>
-        <li><b>{G.LID_CLEAR_TO:g}</b><span>Chimney breast kept clear to here for the deck's lid</span></li>
+        <li><b>{G.HIGH_TOP:g}</b><span>High shelf: books, a box, a print, the “now playing” single, Deco B</span></li>
+        <li><b>{G.LEDGE_TOP:g}</b><span>Record ledges over the TV and round the corner; the PC shelf on the side wall</span></li>
+        <li><b>{G.FOLDED_TOP:g}</b><span>Top of the dining table, folded up</span></li>
+        <li><b>{G.RZ_SHELF_TOP:g}</b><span>Series X shelf, over the turntable (its lid has to {G.LID_CLEAR_TO:g})</span></li>
         <li><b>116.5</b><span>TV centre, LG C6 55in on its stand</span></li>
-        <li><b>{G.WORKTOP:g}</b><span>Oak worktop and the vinyl cabinet's top</span></li>
-        <li><b>{G.PLINTH:g}</b><span>Plinth under the two BESTÅ bays</span></li>
+        <li><b>{G.WORKTOP:g}</b><span>Oak worktop, and the dining table when it's down</span></li>
+        <li><b>{G.PLINTH:g}</b><span>Plinth under the two BESTÅ bays, with a hidden drawer</span></li>
       </ul>
     </section>
     <section>
@@ -112,56 +134,75 @@ def page():
       <div class="counts">
         <div><strong>~{LPS}</strong><span>LPs, all face-out</span></div>
         <div><strong>~{SINGLES}</strong><span>singles, all face-out</span></div>
-        <div><strong>~48</strong><span>games, every title visible</span></div>
+        <div><strong>4–8</strong><span>at the dining table</span></div>
       </div>
       <ul class="plain">
-        <li>Alcove: the TV between two oak uprights, the Series X on its fan stand to the left, three 60 cm bays below for the Xbox consoles, the PlayStations and the sub.</li>
-        <li>Vinyl cabinet, 100 × 44 × 76 cm: two face-out record trays, a singles drawer and a preamp cubby, with the deck and the LP browser on top.</li>
-        <li>Fit proof: {c[fit.PASS]} of {total} checks fit outright against published sizes; the Series X's sides are tight, and the RetroTINK and the door get a check on site.</li>
-        <li>Power: the socket on the side wall in front of bay 1 becomes a double; Deco B runs from an always-on socket via the groove behind the right upright.</li>
+        <li>Alcove: the TV between two oak uprights, now {G.TV_SHIFT:.0f} cm nearer the side wall; the turntable on the worktop to its right with the Series X on a shelf above; three 60 cm bays below for the Xbox consoles, the PlayStations and the two face-out record trays.</li>
+        <li>Side wall: the record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, with the pad dock beside it.</li>
+        <li>Chimney breast: a 110 × 80 cm solid oak table on an oak backboard, folded flat every day, down on two steel brackets for four, lifted off onto legs for six or eight.</li>
+        {fit_line()}
       </ul>
     </section>
     <section>
       <h2>Lighting</h2>
       <ul class="plain">
         <li>The LED strip you have now, on the ceiling round the whole room, facing down.</li>
-        <li>A four-head cone spotlight bar on the existing rose, Wolston style: sage and blue on the shelves and ledge, mustard on the coffee table, pink on the vinyl corner. None at the TV.</li>
-        <li>LED grooves in the oak uprights and a bias light behind the TV.</li>
+        <li>Two four-head cone spotlight bars, Wolston style. The first, on the existing rose, lights the shelves, the ledge, the coffee table and the turntable. The second, on a new ceiling point by the stairs, lights the table and the framed LPs above it.</li>
+        <li>LED grooves in the oak uprights and a bias light behind the TV. No spot ever points at the screen.</li>
       </ul>
     </section>
-  </div>
-  <section class="plans">
-    <h2>The living room and the house</h2>
-    <div class="frame"><img src="art/zz_living.jpg" alt="Living room plan drawn from the measured sketch, with the media wall, vinyl cabinet, sofa, spotlight bar, socket and viewing distance" width="2064" height="1440"></div>
-    <div class="frame"><img src="art/zz_house.jpg" alt="Three floor plans with the Decos, Cat6 runs, chimney breast, brick cupboard and sloped ceilings" width="2064" height="1488"></div>
-    <p class="caption">The living room is drawn from your measurements; the house outline is traced from the agent's plans. Deco A and Switch 1 sit in bedroom 3 with the Hub 5, and both Cat6 runs drop through the airing cupboard, right over the media wall's corner.</p>
-  </section>
+  </div>{plan_html}{downloads}
 </div>
 <script>
 const IMG = {json.dumps(imgs)};
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
+const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", slats: "Slat wall alternative" }};
 const state = {{ style: "join", paint: "card_room", key: false }};
-try {{ const s = JSON.parse(localStorage.getItem("mw10") || "{{}}"); Object.assign(state, s); }} catch (e) {{}}
-const shot = document.getElementById("shot"), cap = document.getElementById("cap");
+try {{ const s = JSON.parse(localStorage.getItem("mw11") || "{{}}"); Object.assign(state, s); }} catch (e) {{}}
+const shot = document.getElementById("shot"), cap = document.getElementById("cap"), keyBtn = document.getElementById("k-key");
 function draw() {{
+  if (state.style === "four") state.key = false;
   shot.src = state.key ? IMG["key_" + state.style] : IMG["art_" + state.style + "_" + state.paint];
-  shot.alt = (state.style === "slats" ? "Slat wall" : "Artisan oak") + " version" + (state.key ? " with numbered key" : " in " + NAMES[state.paint]);
+  shot.alt = VIEWS[state.style] + (state.key ? " with numbered key" : " in " + NAMES[state.paint]);
   document.querySelectorAll("[data-style]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.style === state.style)));
   document.querySelectorAll("[data-paint]").forEach(b => {{ b.setAttribute("aria-pressed", String(!state.key && b.dataset.paint === state.paint)); b.disabled = state.key; }});
-  document.getElementById("k-key").setAttribute("aria-pressed", String(state.key));
+  keyBtn.setAttribute("aria-pressed", String(state.key));
+  keyBtn.disabled = state.style === "four";
   cap.textContent = state.key
-    ? (state.style === "slats" ? "Numbered key for the slat wall alternative, in Card Room Green. Game drawer and lower record tray pulled out 30 cm." : "Full numbered key for the artisan oak build, in Card Room Green. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
-    : "Shown in " + NAMES[state.paint] + ". Evening light, drawn to the measured room.";
-  try {{ localStorage.setItem("mw10", JSON.stringify(state)); }} catch (e) {{}}
+    ? (state.style === "slats" ? "Numbered key for the slat wall alternative, in Card Room Green. Game drawer and lower record tray pulled out 30 cm." : "Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
+    : VIEWS[state.style] + ", shown in " + NAMES[state.paint] + ". Evening light, drawn to the measured room.";
+  try {{ localStorage.setItem("mw11", JSON.stringify(state)); }} catch (e) {{}}
 }}
 document.querySelectorAll("[data-style]").forEach(b => b.addEventListener("click", () => {{ state.style = b.dataset.style; draw(); }}));
 document.querySelectorAll("[data-paint]").forEach(b => b.addEventListener("click", () => {{ state.paint = b.dataset.paint; draw(); }}));
-document.getElementById("k-key").addEventListener("click", () => {{ state.key = !state.key; draw(); }});
+keyBtn.addEventListener("click", () => {{ state.key = !state.key; draw(); }});
 draw();
 </script>
 """
 
 
+def site():
+    """The same page for GitHub Pages at the repo root: a full document, paths into media-wall/, and downloads."""
+    import urllib.parse
+    out = HERE.parent / "out"
+    pdfs = sorted(out.glob("Home_Network_Plan_v*.pdf")) + sorted(out.glob("Build_Guide_v*.pdf"))
+    def link(path, label):
+        return f'<li><a href="media-wall/out/{urllib.parse.quote(path.name)}">{label}</a></li>'
+    items = [link(p_, p_.stem.replace("_", " ").replace("Home Network Plan", "The full plan,") + " (PDF)") for p_ in pdfs]
+    items += [link(p_, p_.stem) for p_ in sorted(out.glob("*.png"))]
+    dl = ('\n  <section class="plans"><h2>Downloads</h2><ul class="plain">' + "".join(items) +
+          '</ul><p class="caption">The PDF and the full-resolution renders, straight from the project folder. '
+          'This page and the Claude viewer update together each round.</p></section>')
+    body = page(prefix="media-wall/src/", downloads=dl)
+    css_extra = "a { color: var(--oak); text-underline-offset: 2px; } a:focus-visible { outline: 2px solid var(--oak); outline-offset: 2px; }\n"
+    body = body.replace("</style>", css_extra + "</style>", 1).replace("body { background", "body { margin: 0; background", 1)
+    head, rest = body.split("</style>", 1)
+    return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+            '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            + head + "</style>\n</head>\n<body>" + rest + "</body>\n</html>\n")
+
+
 if __name__ == "__main__":
     (HERE / "media_wall_viewer.html").write_text(page())
+    (HERE.parent.parent / "index.html").write_text(site())
     print("viewer ok")
