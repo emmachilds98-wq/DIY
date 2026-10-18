@@ -1,4 +1,4 @@
-"""Builds every render and diagram image the plan, the out/ folder and the viewer use (v11).
+"""Builds every render and diagram image the plan, the out/ folder and the viewer use (v12).
 python3 make_images.py          -> SVGs here, PNGs for the PDF here, HD PNGs in ../out, viewer JPGs in art/
 python3 make_images.py renders  -> the renders only (skips the plan diagrams)
 """
@@ -33,26 +33,28 @@ def main(diagrams=True):
     W, H, KW = R.W, R.H, R.W + R.KEYW
     jobs = [
         # for the PDF
-        ("v11_join_key.svg", "render_v11_join_key_scene.png", W, H, 1.1),
-        ("v11_join_clean.svg", "render_v11_join_clean.png", W, H, 1.1),
-        ("v11_dining_four.svg", "render_v11_dining_four.png", W, H, 1.1),
-        ("v11_slat_clean.svg", "render_v11_slat_clean.png", W, H, 0.9),
+        ("v12_join_key.svg", "render_v12_join_key_scene.png", W, H, 1.1),
+        ("v12_join_clean.svg", "render_v12_join_clean.png", W, H, 1.1),
+        ("v12_dining_four.svg", "render_v12_dining_four.png", W, H, 1.1),
+        ("v12_dining_six.svg", "render_v12_dining_six.png", W, H, 1.1),
+        ("v12_slat_clean.svg", "render_v12_slat_clean.png", W, H, 0.9),
         # HD, labelled, for the client
-        ("v11_join_clean.svg", OUT / "Media wall v11 - artisan oak - Card Room Green (HD).png", W, H, 2.0),
-        ("v11_join_key.svg", OUT / "Media wall v11 - artisan oak - numbered key (HD).png", KW, H, 2.0),
-        ("v11_join_dims.svg", OUT / "Media wall v11 - artisan oak - heights and widths (HD).png", W, H, 2.0),
-        ("v11_dining_four.svg", OUT / "Media wall v11 - dining wall set for four (HD).png", W, H, 2.0),
-        ("v11_slat_key.svg", OUT / "Media wall v11 - slat wall alternative - numbered key.png", KW, H, 1.25),
-        ("v11_slat_clean.svg", OUT / "Media wall v11 - slat wall alternative.png", W, H, 1.25),
+        ("v12_join_clean.svg", OUT / "Media wall v12 - artisan oak - Card Room Green (HD).png", W, H, 2.0),
+        ("v12_join_key.svg", OUT / "Media wall v12 - artisan oak - numbered key (HD).png", KW, H, 2.0),
+        ("v12_join_dims.svg", OUT / "Media wall v12 - artisan oak - heights and widths (HD).png", W, H, 2.0),
+        ("v12_dining_four.svg", OUT / "Media wall v12 - dining wall set for four (HD).png", W, H, 2.0),
+        ("v12_dining_six.svg", OUT / "Media wall v12 - table set for six, both spot bars (HD).png", W, H, 2.0),
+        ("v12_slat_key.svg", OUT / "Media wall v12 - slat wall alternative - numbered key.png", KW, H, 1.25),
+        ("v12_slat_clean.svg", OUT / "Media wall v12 - slat wall alternative.png", W, H, 1.25),
     ]
     for k in ("card_room", "sage", "treron", "deep"):
-        jobs.append((f"v11_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
-        for st, tag in (("joinery", "join"), ("slats", "slats"), ("four", "four")):
-            jobs.append((f"v11_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
+        jobs.append((f"v12_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
+        for st, tag in (("joinery", "join"), ("slats", "slats"), ("four", "four"), ("six", "six")):
+            jobs.append((f"v12_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
     for k in R.SKIRT_OPTIONS:
-        jobs.append((f"v11_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
-    jobs.append(("v11_join_key.svg", "art_key_join.png", KW, H, 0.82))
-    jobs.append(("v11_slat_key.svg", "art_key_slats.png", KW, H, 0.82))
+        jobs.append((f"v12_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
+    jobs.append(("v12_join_key.svg", "art_key_join.png", KW, H, 0.82))
+    jobs.append(("v12_slat_key.svg", "art_key_slats.png", KW, H, 0.82))
     # plan diagrams as images for out/ and the viewer
     for name, label in (PLANS if diagrams else []):
         fn = {"house": D.house, "living": D.living_plan, "seating": D.seating}[name]

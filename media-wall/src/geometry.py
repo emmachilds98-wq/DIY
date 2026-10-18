@@ -1,4 +1,4 @@
-"""v11: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
+"""v12: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
 
 Every number the renders, diagrams, fit-proof tables and plan text use comes from here, so a change
 in one place moves everything. Room measurements are from the client's hand-measured sketch
@@ -127,7 +127,7 @@ SOFA_BACK_Z = WINDOW_Z + 10.0              # -299: 10 cm off the window wall and
 SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
-SUB_POS = dict(x=(232.0, 232.0 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # under the dining wall, between the bracket arms, on its side to the breast: driver east, port 22 cm from the west arm
+SUB_POS = dict(x=(229.0, 229.0 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # under the dining wall, between the bracket arms, on its side to the breast: driver east, port 24 cm from the west arm (v12: 3 cm east, so the six-seat chairs clear it)
 COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
 
 # ---------------------------------------------------------------- the dining wall on the chimney breast
@@ -150,6 +150,7 @@ DINE_W = 60.0                              # table edge per diner (UK guide)
 CLEAR_MIN, CLEAR_OK, CLEAR_WALK = 60.0, 75.0, 100.0   # table edge to wall: tight minimum, aim, walk behind
 FREE_Z = (-60.0, -140.0)                   # where the table stands for six or eight: 60 off the breast
 SIX_X = (255.0, 365.0)
+SIX_CHAIR_BACK = CHAIR[1]                   # breast-side chairs at the table's edge: their backs reach 49 of the 60 cm to the breast
 EIGHT_X = (220.0, 390.0)
 
 FRAMES_Y = 165.0                           # two framed LPs on the breast above the folded table

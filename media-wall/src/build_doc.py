@@ -1,4 +1,4 @@
-"""Builds the plan (v11) as HTML, then PDF via headless Chromium, plus the beginner's build guide as its own PDF.
+"""Builds the plan (v12) as HTML, then PDF via headless Chromium, plus the beginner's build guide as its own PDF.
 The plan reads in build order: decision, room, media wall and fit proof, records and turntable, dining wall, side wall,
 joinery, paint and light, power and network, build guide, buy list, then what's left to confirm.
 Numbers come from geometry.py and fit.py."""
@@ -9,7 +9,7 @@ from diagrams import (network, front, drawer, sound, game_drawer, av, power, rou
                       living_plan, why_layout, seating, dining_section)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "11"
+VERSION = "12"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -290,11 +290,11 @@ def build():
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION}, drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v11.</b> The TV moves <b>{n(g.TV_SHIFT)} cm nearer the side wall</b>. The two narrow gaps beside it become one {n(g.RZ_W)} cm zone, so the <b>turntable comes back into the alcove</b>, with the Series X on an oak shelf above it and both record trays in the bay below. The record ledge <b>wraps round onto the side wall</b>, with the PC on a shelf above the end of the L-sofa. The chimney breast gets a <b>fold-down oak dining table</b> for four (six or eight with it lifted off), and a <b>second spotlight bar</b> goes on your existing ceiling point by the door. The <b>sub</b> moves under the dining wall, on the front wall beside the TV.</div>
+<div class="decision"><b>What changed in v12.</b> The layout is v11's, as agreed. New: a render of the <b>table set for six</b> with <b>both spot bars</b> in view; fit checks for six and eight seats against the sub (it moves <b>3 cm towards the TV</b>, and comes out for eight); a published size behind the Xbox 360 brick; what's <b>agreed</b> and what's <b>open</b> now listed apart. The viewer takes your answers and photos, and has a buy tracker you can both tick.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
-<figure class="render">{img("render_v11_join_clean.png", "The artisan oak media wall in Card Room Green with the dining wall folded")}
+<figure class="render">{img("render_v12_join_clean.png", "The artisan oak media wall in Card Room Green with the dining wall folded")}
 <figcaption>Drawn to your measurements, in Card Room Green: the alcove with the turntable zone on the right, the dining wall folded on the chimney breast, both spot bars. Full-resolution renders come with this plan.</figcaption></figure>
 <div class="summary">
 <div><b>£{money(tl, th)}</b><span>plus the electrician, item by item in section 11</span></div>
@@ -303,14 +303,14 @@ def build():
 </div></div>
 <table><tr><th>Area</th><th>Decision</th></tr>
 <tr><td>Alcove</td><td>The TV between two oak uprights, the left one now a corner post on the side wall; on the right, the turntable on the worktop and the Series X on a shelf at {n(g.RZ_SHELF_TOP)}; below, three 60 cm bays: the Xbox consoles, the PlayStations and the two record trays.</td></tr>
-<tr><td>Side wall</td><td>The record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, clear of the TV's sightlines; the sub on the floor by the wall.</td></tr>
-<tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off onto legs for six, with a leaf for eight.</td></tr>
+<tr><td>Side wall</td><td>The record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, clear of the TV's sightlines.</td></tr>
+<tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off onto legs for six, with a leaf for eight. The sub stands under it on an oak riser.</td></tr>
 <tr><td>Records</td><td>Every record face-out: about {LPS} LPs (180 in the trays, 8 on the two ledges) and {SINGLES} singles.</td></tr>
 <tr><td>Heights</td><td>Worktop and table {n(g.WORKTOP)} · TV centre 116.5 · Series X shelf {n(g.RZ_SHELF_TOP)} · ledges and PC shelf {n(g.LEDGE_TOP)} · high shelf {n(g.HIGH_TOP)}, {n(g.CEIL - g.HIGH_TOP)} under the {n(g.CEIL)} ceiling.</td></tr>
 <tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars on your two existing ceiling points: between the TV and the sofa, and between the door and the wall.</td></tr>
 <tr><td>Power and network</td><td>The side-wall socket becomes a double: left for the 10-gang (everything modern), right for the retro set, switched at the wall. A new socket behind the sofa for the PC and the rears. Deco A in bedroom 3, Cat6 down the airing cupboard.</td></tr>
 </table>
-<p class="confirm"><b>To confirm (full list in section 12):</b> the L-sofa's size · where the door to the hall hinges, and the west end's sizes · the turntable, PC case and fan stand models · chairs you already have · where the leaf and legs live · the 23 × 22 cm box by the window.</p>
+<p class="confirm"><b>To confirm (section 12):</b> the sofa's size · the door's hinge and the west end's sizes · turntable, PC case and fan stand models · chairs · where the leaf and legs live · the 23 × 22 cm box by the window.</p>
 </div>
 
 <h2 class="pb">2 · The room</h2>
@@ -340,7 +340,7 @@ def build():
 <li><b>The vinyl cabinet on the breast as well as a table:</b> a table needs the breast's full width, and a cabinet in front would put the diners 44 cm further into the room.</li>
 <li><b>A gateleg table in the recess:</b> it would block the door; the breast is the only clear wall.</li>
 </ul></div>
-<figure class="render">{img("render_v11_join_key_scene.png", "Render with numbered parts")}
+<figure class="render">{img("render_v12_join_key_scene.png", "Render with numbered parts")}
 <figcaption>Numbered view: the game drawer and the lower record tray are pulled out 30 cm, with a view of each from above. Dashed lines show what's hidden: gold for data, audio and low-voltage leads, coral for mains. The sofa isn't drawn so the base stays in view; the room plan shows it.</figcaption></figure>
 {key_table()}
 
@@ -419,8 +419,10 @@ def build():
 
 <h2 class="pb">5 · The dining wall</h2>
 <p>The chimney breast becomes the dining wall. A solid oak table, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard. Every day it stands folded flat against the breast, about {n(g.FOLDED_D)} cm deep. Down, it's a table for four at the same 76 cm as the alcove's worktop. Lifted off onto four legs, it seats six in the room, or eight with a matching leaf.</p>
-<figure class="render">{img("render_v11_dining_four.png", "The dining wall down and set for four")}
-<figcaption>Down and set for four: two on the room side, one at each end, the sub tucked under the wall. The second spot bar, on the point by the door just out of view, lights the table and the framed LPs.</figcaption></figure>
+<figure class="render">{img("render_v12_dining_four.png", "The dining wall down and set for four")}
+<figcaption>Down and set for four: two on the room side, one at each end, the sub tucked under the wall. The second spot bar, on the point by the door just out of view here, lights the table and the framed LPs.</figcaption></figure>
+<figure class="render">{img("render_v12_dining_six.png", "The table lifted off and set for six, with both spot bars")}
+<figcaption>Lifted off onto four legs and set for six, {n(-g.FREE_Z[0])} cm off the breast: two a side, one at each end. The camera stands back in line with the alcove's edge, so both spot bars show: bar 1 on the rose over the coffee table, bar 2 on the point by the door, two heads on the table. The backboard and the folded brackets stay on the breast; the sub sits just east of the chairs. The stair box and the door are drawn roughly until you confirm the west end.</figcaption></figure>
 <figure>{dining_section()}</figure>
 <h3>How it works</h3>
 <ul>
@@ -436,7 +438,7 @@ def build():
 <table class="tight"><tr><th>Seats</th><th>Where the table stands</th><th>Per diner</th><th>Clearances</th></tr>
 <tr><td>Four</td><td>Down at the wall, on its brackets</td><td>55 on the room side (60 is ideal); the ends are 80 wide</td><td>{n(g.TABLE_Z[1] - g.SOFA_FRONT_Z)} to the sofa: room to walk behind</td></tr>
 <tr><td>Six</td><td>Lifted off, centred at about {n((g.SIX_X[0] + g.SIX_X[1]) / 2)} from the side wall, 60 off the breast</td><td>55, two a side</td><td>60 to the breast (the tight minimum), {n(g.FREE_Z[1] - g.WINDOW_Z)} to the window, {n(g.ROOM_W - g.SIX_X[1])} to the west wall</td></tr>
-<tr><td>Eight</td><td>Plus the leaf: 170 × 80</td><td>57, three a side</td><td>{n(g.ROOM_W - g.EIGHT_X[1])} to the west wall, {n(g.FREE_Z[1] - g.SOFA_FRONT_Z)} to the sofa at the east end: tight but fine for a dinner</td></tr>
+<tr><td>Eight</td><td>Plus the leaf: 170 × 80</td><td>57, three a side</td><td>{n(g.ROOM_W - g.EIGHT_X[1])} to the west wall, {n(g.FREE_Z[1] - g.SOFA_FRONT_Z)} to the sofa at the east end: tight but fine for a dinner. Lift the sub out to the end of the base first: the breast-side end chair lands on it</td></tr>
 </table>
 <p>Clearances from a UK planning guide: 60 cm of table edge per diner, 60 cm from the table to a wall as a tight minimum, 75 to aim for, 100–110 to walk behind someone seated<sup>{fit.ORDER.index("dining") + 1}</sup>. For six or eight, slide the coffee table to the window first, and keep the door to the hall shut while you eat if it opens into the room: the chairs on that side sit in its swing.</p>
 <h3>Cut list and hardware</h3>
@@ -494,7 +496,7 @@ def build():
 <h3>Paint: Farrow &amp; Ball Card Room Green No. 79</h3>
 <p>The room is colour-drenched in Card Room Green: walls, ceiling, alcove, chimney breast, skirting, door and frame, radiator and the trunking. It's a soft grey-green that lets the oak and the records lead.</p>
 <figure>{img("paint_grid.png", "The artisan oak render in four greens")}
-<figcaption>The v11 wall in Card Room Green (chosen) beside Sage Green, Treron and the earlier deep green. Screen colours are approximate and the renders are lit as in the evening: judge from painted samples.</figcaption></figure>
+<figcaption>The wall in Card Room Green (chosen) beside Sage Green, Treron and the earlier deep green. Screen colours are approximate and the renders are lit as in the evening: judge from painted samples.</figcaption></figure>
 <ul>
 <li><b>Finishes:</b> Estate or Modern Emulsion on walls, ceiling, alcove and breast; Estate Eggshell in the same colour on skirting, door, frame, radiator and trunking (Modern Eggshell if the skirting takes knocks).</li>
 <li><b>Order:</b> paint before anything is fixed, so nothing needs cutting in round the uprights, shelves or the dining wall.</li>
@@ -560,7 +562,7 @@ def build():
 <h3>Sound layout</h3>
 <figure>{sound()}</figure>
 <ul>
-<li><b>Sub:</b> wireless, on an oak riser under the dining wall, between the folded bracket arms, on its side to the breast with the driver towards the TV and the rear port 22 cm clear. On the front wall, beside the soundbar, its bass blends with the bar instead of coming from behind you; it's out of the walkway, so nobody trips on it or its lead; and the folded table and the oak riser frame it. If the bass booms, turn it down rather than moving it.</li>
+<li><b>Sub:</b> wireless, on an oak riser under the dining wall, between the folded bracket arms, on its side to the breast with the driver towards the TV and the rear port {n(round(g.HEBGO_X[1] - 1.4 - g.SUB_POS["x"][1]))} cm clear. On the front wall, beside the soundbar, its bass blends with the bar instead of coming from behind you; it's out of the walkway, so nobody trips on it or its lead; and the folded table and the oak riser frame it. If the bass booms, turn it down rather than moving it.</li>
 <li><b>Rears:</b> one on the side wall at seated ear height behind the sofa's corner, one on a stand past the sofa's west end; linked by a cable behind the sofa, powered from the new socket.</li>
 </ul>
 
@@ -588,11 +590,15 @@ def build():
 <li>The 23 × 22 cm box in the window's west corner.</li>
 <li>Records: roughly how many LPs and singles (the wall holds about {LPS} and {SINGLES}), and are most in thick outer sleeves?</li>
 <li>Wired ports for the projector (master) and the music room (bedroom 2)?</li>
-<li class="done">The TV {n(g.TV_SHIFT)} cm nearer the side wall, the turntable in the alcove, the Series X above it, the records below.</li>
-<li class="done">A fold-down oak dining table on the chimney breast; the spot bars on the existing ceiling points; the sub under the dining wall.</li>
 <li>The second ceiling point's exact spot (the plan puts it about 35 cm in from the west wall, 2.3 m from the window): measure it from the wall and the window.</li>
-<li class="done">The ledge wrapping round onto the side wall, with the PC above the sofa.</li>
-<li class="done">Artisan oak, Card Room Green with matching eggshell skirting, every record face-out, the game drawer as designed.</li>
+</ul>
+<p class="note">Easiest way to answer: the viewer page has a box for each of these and takes photos; or reply in a message, a line each.</p>
+<h3>Agreed so far</h3>
+<ul class="agreed">
+<li>Artisan oak, Card Room Green with matching eggshell skirting, every record face-out, the game drawer as designed.</li>
+<li>The TV {n(g.TV_SHIFT)} cm nearer the side wall, the turntable in the alcove, the Series X above it, the records below.</li>
+<li>The ledge wrapping round onto the side wall, with the PC above the sofa.</li>
+<li>A fold-down oak dining table on the chimney breast; the spot bars on the existing ceiling points; the sub under the dining wall.</li>
 </ul>
 <h3>Later ideas</h3>
 <ul>
@@ -604,7 +610,7 @@ def build():
 
 <h2 class="pb">Appendix · The slat wall alternative</h2>
 <p>Kept for reference, drawn to the v11 layout. The base, the records, the consoles, the side wall and the dining wall are identical. Above the worktop, oak slat panels on battens run from the worktop to the ceiling instead of the uprights; the shelves sit on hidden cleats and the light comes from strips under each shelf. Quicker to fit, but it loses the record ledge over the TV and the joints on show.</p>
-<figure class="render small">{img("render_v11_slat_clean.png", "Slat wall alternative")}</figure>
+<figure class="render small">{img("render_v12_slat_clean.png", "Slat wall alternative")}</figure>
 <h3>Options we rejected along the way</h3>
 <table class="tight"><tr><th>Option</th><th>Why not</th></tr>
 <tr><td>The vinyl cabinet on the chimney breast (v10)</td><td>The breast is the only clear wall for a table; the turntable fits in the alcove now</td></tr>
@@ -620,7 +626,7 @@ def build():
     guide = f"""<!doctype html><html><head><meta charset="utf-8"><title>Build Guide</title><style>{css}</style></head><body>
 <h1>Media Wall &amp; Dining Wall: Build Guide</h1>
 <p class="byline">Version {VERSION} · Oct 18, 2026 · for Emma and Dave · sizes in cm; the full plan has the drawings and the fit proof</p>
-<figure class="render small">{img("render_v11_join_clean.png", "The finished wall")}</figure>
+<figure class="render small">{img("render_v12_join_clean.png", "The finished wall")}</figure>
 {guide_html()}
 <h2 class="pb">Shopping list</h2>
 <p>About £{money(tl, th)} plus the electrician, in build order.</p>

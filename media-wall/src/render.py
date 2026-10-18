@@ -1,4 +1,5 @@
-"""Media wall concept render, v11: drawn to the real room (alcove 186 × 38, ceiling 235) in cm,
+"""Media wall concept render, v12 (v11 layout; v12 adds the dining view for six and the west end):
+v11: drawn to the real room (alcove 186 × 38, ceiling 235) in cm,
 with a simple one-point perspective. Every dimension comes from geometry.py.
 v11: the TV 25 cm nearer the side wall, the turntable and Series X in the right-hand zone, records in bay 3,
 the record ledge wrapping round onto the side wall with the PC above the sofa, the fold-down dining wall on the
@@ -18,6 +19,16 @@ VY = Y0 - EYE_Y * S
 D = 505.0           # camera distance in front of the breast face, cm
 
 XOFF = YOFF = ZOFF = 0.0   # offsets applied by P(), used to place whole groups
+CAM_DEFAULT = (EYE_X, X0, S, SHIFT)
+
+
+def camera(eye_x, x0, s, shift):
+    """Move the camera. The default looks at the alcove; the dining view (v12) stands in line with the breast's reveal,
+    so nothing in the alcove hides behind the breast, and pulls back to take in the west end and the second bar."""
+    global EYE_X, X0, S, SHIFT, VX, VY
+    EYE_X, X0, S, SHIFT = eye_x, x0, s, shift
+    VX = X0 + EYE_X * S
+    VY = Y0 - EYE_Y * S
 
 CEIL, ALC_W, ALC_D = G.CEIL, G.ALC_W, G.ALC_D
 WORKTOP = G.WORKTOP
@@ -144,6 +155,8 @@ def defs():
     return f'''<defs>
   <linearGradient id="leftwall" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="{G_LEFT0}"/><stop offset="1" stop-color="{G_LEFT1}"/></linearGradient>
+  <linearGradient id="rightwall" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="{G_LEFT1}"/><stop offset="1" stop-color="{G_LEFT0}"/></linearGradient>
   <linearGradient id="backwall" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#2c5643"/><stop offset="1" stop-color="#2a5340"/></linearGradient>
   <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
@@ -722,6 +735,25 @@ def room():
     o.append(box(dx2 + 6, 0, zr - 1.8, far - dx2 - 6, sh, 1.8, sk[0], sk[1], sk[2]))
     # a rug in front of the alcove
     o.append(poly([P(104, 0.1, -20), P(184, 0.1, -20), P(184, 0.1, -128), P(104, 0.1, -128)], "#8a7f70", 'opacity="0.5"'))
+    o.append(west_end(sk))
+    return "\n".join(o)
+
+
+def west_end(sk):
+    """The stair box in the south-west corner and the west wall (both drawn roughly until the client confirms the
+    west end's sizes). Mostly out of frame in the alcove views; the dining view (v12) shows them."""
+    o = []
+    sx0, sx1 = G.STAIR_X
+    sz = ALC_D - G.STAIR_D                      # the stair box's front face, about -41
+    wx = G.ROOM_W
+    o.append(poly([P(wx, 0, sz), P(wx, CEIL, sz), P(wx, CEIL, -470), P(wx, 0, -470)], "url(#rightwall)"))
+    o.append(box(sx0, 0, sz, sx1 - sx0, CEIL, G.BREAST_D_WEST - sz, "#2c5643", side="#2a5141"))
+    sh = G.SKIRT_H
+    o.append(box(sx0, 0, sz - 1.8, sx1 - sx0, sh, 1.8, sk[0], sk[1], sk[2]))
+    o.append(poly([P(sx0 - 1.8, 0, sz), P(sx0 - 1.8, sh, sz), P(sx0 - 1.8, sh, G.BREAST_D_WEST), P(sx0 - 1.8, 0, G.BREAST_D_WEST)], sk[3]))
+    o.append(poly([P(wx, 0, sz), P(wx, sh, sz), P(wx, sh, -470), P(wx, 0, -470)], sk[3]))
+    o.append(_line(P(sx0, 0, sz), P(sx0, CEIL, sz), "#21443a", 1.2))
+    o.append(_line(P(sx1, 0, sz), P(sx1, CEIL, sz), "#21443a", 1.2))
     return "\n".join(o)
 
 
@@ -986,7 +1018,7 @@ def wrap():
 
 def subwoofer():
     """The Hisense sub under the dining wall, between the folded bracket arms, on an oak riser: on its side to the breast,
-    driver towards the alcove, rear port 22 cm clear of the west arm."""
+    driver towards the alcove, rear port 24 cm clear of the west arm."""
     o = []
     xa, xb = G.SUB_POS["x"]
     za, zb = G.SUB_POS["z"]
@@ -1125,7 +1157,7 @@ def dining_wall():
     arm, bh = G.HEBGO
     for bx in G.HEBGO_X:
         o.append(box(bx - 1.6, rt - bh + 1, -Dr - 0.6, 3.2, bh - 1, 0.6, STEEL, STEEL_T, STEEL_S))           # wall plate
-        if DINING == "folded":
+        if DINING != "four":
             o.append(box(bx - 1.4, rt - arm, -Dr - 2.6, 2.8, arm - 0.5, 2.0, STEEL, STEEL_T, STEEL_S))       # arm folded down
         else:
             o.append(box(bx - 1.4, rt - 2.4, -Dr - arm, 2.8, 2.4, arm - 0.6, STEEL, STEEL_T, STEEL_S))       # arm out under the top
@@ -1148,6 +1180,9 @@ def dining_wall():
         o.append(_line(P(x0 + 1, rt + td - 0.6, zt - 0.06), P(x1 - 1, rt + td - 0.6, zt - 0.06), "#e9bd86", 1.2))
         for bxx in (x0 + 16, x1 - 16):                   # turn buttons on the breast hold it up
             o.append(box(bxx - 2.6, G.FOLDED_TOP + 0.4, -2.4, 5.2, 2.6, 2.2, OAK_D, OAK_T, OAK_S))
+    elif DINING == "six":                                # the top is off its hinges, out in the room on four legs
+        for bxx in (x0 + 16, x1 - 16):
+            o.append(box(bxx - 2.6, G.FOLDED_TOP + 0.4, -2.4, 5.2, 2.6, 2.2, OAK_D, OAK_T, OAK_S))
     else:
         o.append(box(x0, rt, -Dr - td, tw, tt, td, OAK, OAK_T, OAK_S, extra=GH))
         bb = G.BREADBOARD
@@ -1159,24 +1194,31 @@ def dining_wall():
     return "\n".join(o)
 
 
-def table_settings():
-    """Set for four: plates, glasses, a jug and a candle."""
+def table_settings(x0=None, x1=None, zb=None, zf=None, y=None):
+    """Plates, glasses, a jug and a candle: four at the wall (two on the room side, one at each end), or six with the
+    table out in the room (two each side, one at each end)."""
     o = []
-    x0, x1 = G.TABLE_X
-    y = G.TABLE_TOP + 0.02
-    zf = G.TABLE_Z[1]
-    zm = (G.TABLE_Z[0] + G.TABLE_Z[1]) / 2
-    places = [(G.TABLE_CX - 27.5, zf + 15), (G.TABLE_CX + 27.5, zf + 15), (x0 + 15, zm), (x1 - 15, zm)]
+    four = x0 is None
+    if four:
+        x0, x1 = G.TABLE_X
+        zb, zf, y = G.TABLE_Z[0], G.TABLE_Z[1], G.TABLE_TOP
+    y += 0.02
+    cx, zm = (x0 + x1) / 2, (zb + zf) / 2
+    places = [(cx - 27.5, zf + 15), (cx + 27.5, zf + 15), (x0 + 15, zm), (x1 - 15, zm)]
+    glasses = [(cx - 13, zf + 30), (cx + 41, zf + 30), (x0 + 25, zm + 16), (x1 - 25, zm - 16)]
+    if not four:
+        places += [(cx - 27.5, zb - 15), (cx + 27.5, zb - 15)]
+        glasses += [(cx - 41, zb - 30), (cx + 13, zb - 30)]
     for (px, pz) in places:
         o.append(ellipse_flat(px, y, pz, 12.5, 12.5, "#efe9df", 'stroke="#cfc6b6" stroke-width="0.8"'))
         o.append(ellipse_flat(px, y + 0.05, pz, 8.5, 8.5, "#e4dccd"))
         o.append(box(px + 15, y, pz - 8, 1.0, 0.3, 16, "#c9cbcd"))
         o.append(box(px - 16, y, pz - 8, 1.0, 0.3, 16, "#c9cbcd"))
-    for (gx_, gz_) in ((G.TABLE_CX - 13, zf + 30), (G.TABLE_CX + 41, zf + 30), (x0 + 25, zm + 16), (x1 - 25, zm - 16)):
+    for (gx_, gz_) in glasses:
         o.append(box(gx_ - 3, y, gz_ - 3, 6, 10, 6, "url(#glass)", "url(#glass)", "url(#glass)", extra='stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"'))
-    o.append(box(G.TABLE_CX - 5, y, zm - 4, 10, 18, 9, "#3f6f8f", "#4f7f9f", "#2f5f7f"))                 # jug
-    o.append(box(G.TABLE_CX + 10, y, zm - 2, 4, 14, 4, "#efe6d2", "#f7f0e2", "#d9cfbc"))                # candle
-    c = P(G.TABLE_CX + 12, y + 15.5, zm)
+    o.append(box(cx - 5, y, zm - 4, 10, 18, 9, "#3f6f8f", "#4f7f9f", "#2f5f7f"))                 # jug
+    o.append(box(cx + 10, y, zm - 2, 4, 14, 4, "#efe6d2", "#f7f0e2", "#d9cfbc"))                # candle
+    c = P(cx + 12, y + 15.5, zm)
     o.append(f'<ellipse cx="{c[0]:.1f}" cy="{c[1]:.1f}" rx="3" ry="5" fill="#ffd27a" opacity="0.9"/>')
     o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="22" fill="#ffd27a" opacity="0.18" filter="url(#soft)"/>')
     return "\n".join(o)
@@ -1192,6 +1234,8 @@ def chair(cx, cz, face):
             return box(cx - w / 2 + a0, y0, cz - d / 2 + b0, a1 - a0, y1 - y0, b1 - b0, *col)
         if face == "+x":
             return box(cx - d / 2 + b0, y0, cz - w / 2 + a0, b1 - b0, y1 - y0, a1 - a0, *col)
+        if face == "-z":
+            return box(cx - w / 2 + a0, y0, cz + d / 2 - b1, a1 - a0, y1 - y0, b1 - b0, *col)
         return box(cx + d / 2 - b1, y0, cz - w / 2 + a0, b1 - b0, y1 - y0, a1 - a0, *col)
     leg = 2.6
     o.append(bx(0, leg, d - 6, d - 6 + leg, 0, sh - 2))
@@ -1204,6 +1248,8 @@ def chair(cx, cz, face):
 
 
 def dining_chairs():
+    if DINING == "six":
+        return free_table()
     if DINING != "four":
         return ""
     x0, x1 = G.TABLE_X
@@ -1213,6 +1259,35 @@ def dining_chairs():
     tuck = 8.0
     o = [chair(x0 - d / 2 + tuck, zm, "+x"), chair(x1 + d / 2 - tuck, zm, "-x")]
     o += [chair(G.TABLE_CX - 27.5, zf - d / 2 + tuck, "+z"), chair(G.TABLE_CX + 27.5, zf - d / 2 + tuck, "+z")]
+    return "\n".join(o)
+
+
+def free_table():
+    """Six: the top lifted off its hinges onto four Emuca legs, out in the room 60 cm off the breast, two a side and one
+    at each end. The long-side chairs stand at the table's edge, clear of the legs; the sub sits east of them."""
+    w, d, h, sh = G.CHAIR
+    x0, x1 = G.SIX_X
+    zb, zf = G.FREE_Z                    # breast side, room side
+    tw, td, tt = G.TABLE
+    top = G.LEG_H + tt
+    cx, zm = (x0 + x1) / 2, (zb + zf) / 2
+    o = []
+    o.append(poly([P(x0 - 6, 0.05, zb + 6), P(x1 + 6, 0.05, zb + 6), P(x1 + 6, 0.05, zf - 6), P(x0 - 6, 0.05, zf - 6)], "#000", 'opacity="0.18" filter="url(#soft)"'))
+    tuck_b = zb + G.SIX_CHAIR_BACK - d / 2           # breast side: chair backs held clear of the sub
+    o += [chair(cx - 27.5, tuck_b, "-z"), chair(cx + 27.5, tuck_b, "-z")]
+    o += [chair(x0 - d / 2 + 8, zm, "+x"), chair(x1 + d / 2 - 8, zm, "-x")]
+    li = 5.0
+    for (lx, lz) in ((x0 + li, zb - li - 5), (x1 - li - 5, zb - li - 5), (x0 + li, zf + li), (x1 - li - 5, zf + li)):
+        o.append(box(lx, 0, lz, 5, G.LEG_H, 5, STEEL, STEEL_T, STEEL_S))
+        o.append(box(lx - 2, G.LEG_H - 0.6, lz - 2, 9, 0.6, 9, STEEL_S))                               # mounting plate
+    o.append(box(x0, G.LEG_H, zf, tw, tt, td, OAK, OAK_T, OAK_S, extra=GH))
+    bb = G.BREADBOARD
+    for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):
+        o.append(poly([P(ea, top + 0.01, zf), P(eb, top + 0.01, zf), P(eb, top + 0.01, zb), P(ea, top + 0.01, zb)], OAK_D, GV))
+        o.append(quad_front(ea, G.LEG_H, zf - 0.02, eb - ea, tt, OAK_S))
+    o.append(table_settings(x0, x1, zb, zf, top))
+    zn = zf - d / 2
+    o += [chair(cx - 27.5, zn, "+z"), chair(cx + 27.5, zn, "+z")]
     return "\n".join(o)
 
 
@@ -1271,11 +1346,15 @@ def ceiling_leds():
     o = []
     y = CEIL - 0.6
     zr = G.BREAST_D_WEST
+    sx0, sz, wx = G.STAIR_X[0], ALC_D - G.STAIR_D, G.ROOM_W
     runs = [((0.8, -260), (0.8, ALC_D - 0.8)), ((0.8, ALC_D - 0.8), (ALC_W - 0.8, ALC_D - 0.8)),
             ((ALC_W - 0.8, ALC_D - 0.8), (ALC_W - 0.8, -0.8)), ((ALC_W - 0.8, -0.8), (BX1 + 0.8, -0.8)),
-            ((BX1 + 0.8, -0.8), (BX1 + 0.8, zr - 0.8)), ((BX1 + 0.8, zr - 0.8), (BX1 + 300, zr - 0.8))]
+            ((BX1 + 0.8, -0.8), (BX1 + 0.8, zr - 0.8)), ((BX1 + 0.8, zr - 0.8), (sx0 - 0.8, zr - 0.8)),
+            ((sx0 - 0.8, zr - 0.8), (sx0 - 0.8, sz - 0.8)), ((sx0 - 0.8, sz - 0.8), (wx - 0.8, sz - 0.8)),
+            ((wx - 0.8, sz - 0.8), (wx - 0.8, -300))]
     walls = [((0.1, -260), (0.1, ALC_D - 0.1)), ((0, ALC_D - 0.1), (ALC_W, ALC_D - 0.1)), ((ALC_W - 0.1, ALC_D), (ALC_W - 0.1, 0)),
-             ((ALC_W, -0.1), (BX1, -0.1)), ((BX1, zr - 0.1), (BX1 + 300, zr - 0.1))]
+             ((ALC_W, -0.1), (BX1, -0.1)), ((BX1, zr - 0.1), (sx0, zr - 0.1)), ((sx0, sz - 0.1), (wx, sz - 0.1)),
+             ((wx - 0.1, sz), (wx - 0.1, -300))]
     for (x0, z0), (x1, z1) in walls:
         q = [P(x0, CEIL, z0), P(x1, CEIL, z1), P(x1, CEIL - 26, z1), P(x0, CEIL - 26, z0)]
         o.append(poly(q, "#ffe3b3", 'opacity="0.20" filter="url(#softer)"'))
@@ -1308,9 +1387,12 @@ def spot_heads2():
     """The second bar, on the existing point between the door and the west wall: two heads on the table, one on the
     framed LPs, one down onto the way in."""
     ty, tz = (G.TABLE_TOP, -45.0) if DINING == "four" else (115.0, -6.0)
+    tx = G.TABLE_CX
+    if DINING == "six":
+        tx, ty, tz = sum(G.SIX_X) / 2, G.LEG_H + G.TABLE[2], sum(G.FREE_Z) / 2
     return [(-31.5, "#a9c7ab", "#8db59c", (G.TABLE_CX, G.FRAMES_Y + 17, -2.0)),
-            (-10.5, "#a7d0d8", "#7fbfc8", (G.TABLE_CX - 22, ty, tz)),
-            (10.5, "#e8b53f", "#dca52f", (G.TABLE_CX + 22, ty, tz)),
+            (-10.5, "#a7d0d8", "#7fbfc8", (tx - 22, ty, tz)),
+            (10.5, "#e8b53f", "#dca52f", (tx + 22, ty, tz)),
             (31.5, "#e79c95", "#d9877f", (G.BAR2_X, 0.0, G.BAR2_Z + 40))]
 
 
@@ -1507,7 +1589,7 @@ JOIN_KEY = [
     (38, (38, 78.6, 34), "10-gang extension, hidden behind the TV"),
     (39, (95, CEIL - 0.6, ALC_D - 0.8), "LED strip round the ceiling edge (as now)"),
     (40, (G.PEND_X, 226, G.PEND_Z), "Spot bar on the existing rose, between TV and sofa"),
-    (41, (396, 222, 30), "Second spot bar, existing point by the door (just out of view)"),
+    (41, (396, 222, 30), "Second spot bar, existing point by the door (in the six-seat view)"),
 ]
 
 def _numbered(items):
@@ -1570,8 +1652,22 @@ INSET_DRAWER = (24, 905)
 INSET_RECORD = (330, -182)
 
 
-def build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="joinery", rec_open_up=0.0, label=None,
-          dining="folded", ghost=None):
+CAM_SIX = (185.0, 180.0, 3.6, 120)   # the dining view: in line with the reveal, pulled back to show the west end
+
+
+def build(*a, dining="folded", **kw):
+    """One render. The dining view for six moves the camera, then puts it back."""
+    if dining != "six":
+        return _build(*a, dining=dining, **kw)
+    camera(*CAM_SIX)
+    try:
+        return _build(*a, dining=dining, **kw)
+    finally:
+        camera(*CAM_DEFAULT)
+
+
+def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="joinery", rec_open_up=0.0, label=None,
+           dining="folded", ghost=None):
     global GAME_OPEN, REC_OPEN, STYLE, REC_OPEN_UP, DINING, SOFA_GHOST
     REC_OPEN_UP, STYLE, GAME_OPEN, REC_OPEN, DINING = rec_open_up, style, game_open, rec_open, dining
     SOFA_GHOST = bool(ghost)
@@ -1613,7 +1709,7 @@ def build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="jo
     o.append('</svg>')
     if numbered:
         title = "Key: artisan oak media wall" if STYLE == "joinery" else "Key: slat wall alternative"
-        o.append(key_panel2(W, key, title, f"v11 · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
+        o.append(key_panel2(W, key, title, f"v12 · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
     o.append('</svg>')
     return repaint("\n".join(o))
 
@@ -1624,27 +1720,34 @@ def all_svgs():
     out = {}
     set_paint(PAINTS[MAIN_PAINT][0])
     sub = "Farrow & Ball Card Room Green No. 79 · drawn to the measured room, evening light"
-    out["v11_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v11_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v11", sub))
-    out["v11_join_dims"] = build(with_dims=True, style="joinery")
-    out["v11_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("The dining wall, down and set for four · v11", "Fold-down oak table on the chimney breast · " + sub))
-    out["v11_slat_key"] = build(with_dims=True, numbered=True, style="slats", game_open=30, rec_open=30)
-    out["v11_slat_clean"] = build(with_dims=False, style="slats", label=("Slat wall · alternative, v11", sub))
+    six_sub = "Lifted off onto four legs · both spot bars · the west end drawn roughly until you confirm it"
+    out["v12_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
+    out["v12_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v12", sub))
+    out["v12_join_dims"] = build(with_dims=True, style="joinery")
+    out["v12_dining_four"] = build(with_dims=False, style="joinery", dining="four",
+                                   label=("The dining wall, down and set for four · v12", "Fold-down oak table on the chimney breast · " + sub))
+    out["v12_dining_six"] = build(with_dims=False, style="joinery", dining="six",
+                                  label=("The table set for six, out in the room · v12", six_sub))
+    out["v12_slat_key"] = build(with_dims=True, numbered=True, style="slats", game_open=30, rec_open=30)
+    out["v12_slat_clean"] = build(with_dims=False, style="slats", label=("Slat wall · alternative, v12", sub))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
+        lab = name + (" · chosen" if k == MAIN_PAINT else "")
         for st in ("joinery", "slats"):
-            out[f"v11_paint_{k}_{st}"] = build(with_dims=False, style=st, label=(name + (" · chosen" if k == MAIN_PAINT else ""),
+            out[f"v12_paint_{k}_{st}"] = build(with_dims=False, style=st, label=(lab,
                                                ("Artisan oak" if st == "joinery" else "Slat wall") + " version · walls, ceiling and skirting in the one colour"))
-        out[f"v11_paint_{k}_four"] = build(with_dims=False, style="joinery", dining="four", label=(name + (" · chosen" if k == MAIN_PAINT else ""), "The dining wall set for four"))
+        out[f"v12_paint_{k}_four"] = build(with_dims=False, style="joinery", dining="four", label=(lab, "The dining wall set for four"))
+        out[f"v12_paint_{k}_six"] = build(with_dims=False, style="joinery", dining="six", label=(lab, "The table set for six, out in the room"))
     PAINT = "deep"
+    deep = "Deep forest green · earlier colour, for comparison"
     for st in ("joinery", "slats"):
-        out[f"v11_paint_deep_{st}"] = build(with_dims=False, style=st, label=("Deep forest green · earlier colour, for comparison", "Artisan oak version" if st == "joinery" else "Slat wall version"))
-    out["v11_paint_deep_four"] = build(with_dims=False, style="joinery", dining="four", label=("Deep forest green · earlier colour, for comparison", "The dining wall set for four"))
+        out[f"v12_paint_deep_{st}"] = build(with_dims=False, style=st, label=(deep, "Artisan oak version" if st == "joinery" else "Slat wall version"))
+    out["v12_paint_deep_four"] = build(with_dims=False, style="joinery", dining="four", label=(deep, "The dining wall set for four"))
+    out["v12_paint_deep_six"] = build(with_dims=False, style="joinery", dining="six", label=(deep, "The table set for six, out in the room"))
     set_paint(PAINTS[MAIN_PAINT][0])
     for k, sk in SKIRT_OPTIONS.items():
         SKIRT = sk
-        out[f"v11_skirt_{k}"] = build(with_dims=False, style="joinery")
+        out[f"v12_skirt_{k}"] = build(with_dims=False, style="joinery")
     SKIRT = None
     return out
 

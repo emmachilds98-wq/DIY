@@ -30,8 +30,9 @@ figcaption { color: #6b6862; font-size: 8.6pt; margin-top: 5pt; line-height: 1.4
 ul.checks { list-style: none; padding-left: 0; }
 ul.checks li { padding-left: 16pt; position: relative; }
 ul.checks li::before { content: "☐"; position: absolute; left: 0; color: #6b6862; }
-ul.checks li.done { color: #8a867e; text-decoration: line-through; }
-ul.checks li.done::before { content: "☑"; }
+ul.agreed { list-style: none; padding-left: 0; }
+ul.agreed li { padding-left: 16pt; position: relative; }
+ul.agreed li::before { content: "✓"; position: absolute; left: 0; color: #3f7a4f; font-weight: 700; }
 ul.sources { font-size: 8.4pt; color: #4a4741; }
 table.tracker { break-before: page; }
 table.tracker thead { display: table-header-group; }

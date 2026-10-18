@@ -1,4 +1,4 @@
-"""Diagrams for the plan (v11: drawn from geometry.py, the measured room), as standalone SVG strings (Inter, light theme)."""
+"""Diagrams for the plan (v12, v11 layout: drawn from geometry.py, the measured room), as standalone SVG strings (Inter, light theme)."""
 import geometry as G
 
 
@@ -937,7 +937,7 @@ def sound():
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
     o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
     o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub on an oak riser under the dining wall,", 9.5, "middle", 600, SND_S))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, "on the front wall beside the TV, port 22 cm clear", 9, "middle", 400, MUTED))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, f"on the front wall beside the TV, port {round(g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1])} cm clear", 9, "middle", 400, MUTED))
     for (x, z, lab) in [(16, -280, "rear, on the side wall"), (272, -296, "rear, on a stand")]:
         o.append(rect(X(x), Y(z), 15 * k, 15 * k, SND_F, SND_S, 3))
         o.append(t(X(x) + (10 if x < 100 else -6), Y(z) + 30, lab, 9, "start" if x < 100 else "end", 600, SND_S))

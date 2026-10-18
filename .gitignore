@@ -4,6 +4,7 @@ __pycache__/
 media-wall/src/v8_*.svg
 media-wall/src/v10_*.svg
 media-wall/src/v11_*.svg
+media-wall/src/v12_*.svg
 media-wall/src/d_*.svg
 media-wall/src/art_*.svg
 media-wall/src/skirt_*.svg
@@ -13,3 +14,4 @@ media-wall/src/plan.html
 *.zip
 .DS_Store
 media-wall/src/guide.html
+media-wall/src/publish_files.json

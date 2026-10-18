@@ -1,4 +1,4 @@
-"""v11 fit proof: every item that goes in the wall, its size and where the size comes from, the space it goes
+"""v12 fit proof (v11 layout; v12 adds the six- and eight-seat checks against the sub): every item that goes in the wall, its size and where the size comes from, the space it goes
 into, what's left, and a verdict. Spares are computed from geometry.py, so the tables can't drift from the
 renders and diagrams. build_doc.py turns ZONES into one table per zone and SOURCES into the numbered list."""
 import geometry as G
@@ -20,7 +20,7 @@ SOURCES = {
     "media": "Record and case sizes: LP sleeve 31.4 cm (12⅜ in); 7-inch sleeve 18.3–18.4 cm; DVD-style keep case 19 × 13.5 × 1.4 cm; Xbox One case 17 × 13.5 × 1.1–1.2 cm (videogamecasesize.info; Walvis Products; Wikipedia: Keep case)",
     "wolston": "Dunelm: Elements Wolston 4-light spotlight bar, £49: 84 × 16 cm, 22.4 cm drop, shades 15 cm, E14 6 W max (dunelm.com, product 1000189449)",
     "runners": "Emuca heavy-duty full-extension runners, 400 mm, 68 kg per pair; Accuride DZ3832EC 350 mm, 43 kg; runner fitting allowance 12.5 mm a side",
-    "x360psu": "Xbox 360 original 203 W power supply: no manufacturer size published; allowance of 21 × 10 × 6 cm used here (measure yours)",
+    "x360psu": "Xbox 360 original 203 W power supply: no Microsoft size published; Akyga's 203 W replacement for it (AK-PD-14) is 210 × 77 × 55 mm (b2b.akyga.com), so an allowance of 21 × 10 × 6 cm is used here (measure yours)",
     "lid": "Turntable Lab: Audio-Technica replacement dust cover for the AT-LP120XUSB (705-140XP-1815), 17.375 × 13.625 × 2.75 in (44.1 × 34.6 × 7.0 cm)",
     "hebgo": "Häfele UK, Technology catalogue 2023, p. 7.206: Hebgo heavy-duty folding bracket 287.43.428, arm 580 mm, height 220 mm, 500 kg per pair, locks automatically when raised; up to 800 mm between brackets (Häfele 287.43.419 listing)",
     "liftoff": "Screwfix: Union PowerLoad lift-off hinges, 100 × 88 mm, 3-pack (5938T), 120 kg maximum door weight",
@@ -33,7 +33,7 @@ ORDER = list(SOURCES)
 
 
 def ref(*keys):
-    return "".join(f"<sup>{ORDER.index(k) + 1}</sup>" for k in keys)
+    return "<sup>" + ",".join(str(ORDER.index(k) + 1) for k in keys) + "</sup>"
 
 
 # ---------------------------------------------------------------- the zones
@@ -70,6 +70,12 @@ def zones():
     eight_sofa = g.FREE_Z[1] - g.SOFA_FRONT_Z
     four_sofa = g.TABLE_Z[1] - g.SOFA_FRONT_Z
     weight = tw * td * tt * 0.72 / 1000
+    cw, cd = g.CHAIR[0], g.CHAIR[1]
+    six_cx = sum(g.SIX_X) / 2
+    six_sub_gap = (six_cx - 27.5 - cw / 2) - g.SUB_POS["x"][1]          # breast-side chair's east edge to the sub's west end
+    e_first = g.EIGHT_X[0] + (g.EIGHT_X[1] - g.EIGHT_X[0]) / 6           # first breast-side chair's centre, three a side
+    e_overlap = min(e_first + cw / 2, g.SUB_POS["x"][1]) - max(e_first - cw / 2, g.SUB_POS["x"][0])
+    e_back = g.FREE_Z[0] + cd                                            # its back, at the table's edge
     return [
         ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the left one now a corner post on the side wall; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
             ("LG OLED C6 55 in, on its stand", f"{r1(g.TV_W)} × {r1(g.TV_H)} × {r1(g.TV_D)} panel; {r1(g.TV_STAND_H)} tall on the stand", ref("lg"), f"{r1(g.TV_GAP)} wide", f"{r1(g.TV_CLEAR)} each side", PASS),
@@ -132,6 +138,8 @@ def zones():
             ("Six: the west end", f"table end at {r1(g.SIX_X[1])}", ref("dining"), f"west wall at {r1(g.ROOM_W)}", f"{r1(six_wall)}", PASS),
             ("Eight: with the 60 × 80 leaf", f"{r1(tw + g.LEAF[0])} long, three a side", ref("dining", "legs"), f"{r1(g.DINE_W)} each", f"{r1(eight_edge)} each", TIGHT),
             ("Eight: the west end and the sofa", f"table {r1(g.EIGHT_X[0])}–{r1(g.EIGHT_X[1])}", ref("dining", "sofa"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(eight_wall)} to the wall; {r1(eight_sofa)} to the sofa's front at the east end", TIGHT),
+            ("Six: the breast-side chairs and the sub", f"chairs {r1(cw)} wide at the table's edge, backs at {r1(-(g.FREE_Z[0] + cd))} from the breast", ref("terje", "hisense"), f"sub at x {r1(g.SUB_POS['x'][0])}–{r1(g.SUB_POS['x'][1])}, {r1(-g.SUB_POS['z'][0])} out", f"{r1(six_sub_gap)} beside it: pushed back, a chair passes the sub instead of hitting it", TIGHT),
+            ("Eight: the breast-side end chair and the sub", f"chair at x {r1(e_first - cw / 2)}–{r1(e_first + cw / 2)}, back at {r1(-e_back)} from the breast", ref("terje", "hisense"), f"sub {r1(-g.SUB_POS['z'][0])} out from the breast", f"they overlap {r1(e_overlap)} across and {r1(-g.SUB_POS['z'][0] + e_back)} deep: for eight, lift the sub out to the end of the base first (it's wireless; leave 1 m of slack in its lead)", CHECK),
             ("Sub under the dining wall, on its side", f"{r1(g.SUB[2])} long × {r1(g.SUB[0])} out × {r1(g.SUB[1])} tall, on a 5 cm riser", ref("hisense"), f"between the bracket arms, {r1(g.HEBGO_X[1] - g.HEBGO_X[0])} apart", f"{r1(g.SUB_POS['x'][0] - g.HEBGO_X[0] - 1.4)} to the east arm; {r1(g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1])} behind the rear port", PASS),
             ("Feet under the table, four at the wall", f"sub {r1(-g.SUB_POS['z'][0] + 2)} out from the breast", ref("terje"), f"table {r1(td)} deep", f"{r1(td + g.RAIL[2] - (-g.SUB_POS['z'][0] + 2))} of legroom in front of it on the room side; the end seats are clear", PASS),
             ("Chairs at the table", f"seat {r1(g.CHAIR[3])}", ref("terje"), f"top {r1(g.TABLE_TOP)}", f"{r1(g.TABLE_TOP - g.CHAIR[3])} seat to top, the usual 25–30", PASS),
