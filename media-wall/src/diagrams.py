@@ -590,8 +590,11 @@ def front():
     o.append(t(X(g.TABLE_CX), Y(122) + 27, "on lift-off hinges", 9.5, "middle", 400, MUTED))
     for bx in g.HEBGO_X:
         o.append(rect(X(bx - 1.4), Y(g.RAIL_TOP), 2.8 * s, g.HEBGO[0] * s, "#d6d8da", "#8a8c8f", 1))
-    o.append(t(X(g.TABLE_CX), Y(36), "Hebgo brackets", 9, "middle", 600, MUTED))
-    o.append(t(X(g.TABLE_CX), Y(36) + 11, "folded flat", 9, "middle", 400, MUTED))
+    o.append(t(X(g.TABLE_CX), Y(46), "Hebgo brackets folded flat", 9, "middle", 600, MUTED))
+    sxx = g.SUB_POS["x"]
+    o.append(rect(X(sxx[0] - 2), Y(5), (sxx[1] - sxx[0] + 4) * s, 5 * s, "#e9dccb", "#b88a55", 1))
+    o.append(rect(X(sxx[0]), Y(5 + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
+    o.append(t(X((sxx[0] + sxx[1]) / 2), Y(20), "sub", 9.5, "middle", 600))
     o.append(f'<rect x="{X(x0)}" y="{Y(g.TABLE_TOP)}" width="{g.TABLE[0]*s}" height="{g.TABLE[2]*s}" fill="none" stroke="{BLUE}" stroke-dasharray="5 3"/>')
     o.append(t(X(x0) + 4, Y(g.TABLE_TOP) - 4, "the top's height when down", 8.5, "start", 600, BLUE))
     cxc = g.TABLE_CX
@@ -678,13 +681,13 @@ def living_plan():
     X, Y = _room(o, k, 150, 64)
     _sofa(o, X, Y, k)
     _side_wall(o, X, Y, k)
-    o.append(t(X(g.TABLE_CX), Y(-g.FOLDED_D) - 6, "dining wall, folded", 9, "middle", 650, "#7a5130"))
+
     x0, x1 = g.TABLE_X
     o.append(f'<rect x="{X(x1):.1f}" y="{Y(g.TABLE_Z[1]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.TABLE[1]*k:.1f}" fill="none" stroke="#9c6a3f" stroke-dasharray="5 3"/>')
     o.append(t(X(g.TABLE_CX), Y(g.TABLE_Z[1]) - 8, "down, for four", 8.5, "middle", 500, "#9c6a3f"))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 22, "media wall, 46 deep", 9, "middle", 650, "#7a5130"))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 34, "TV 25 cm nearer the side wall · deck right", 8.5, "middle", 400, "#7a5130"))
-    o.append(t(X(g.TABLE_CX), Y(0) + 26, "chimney breast", 9.5, "middle", 650, "#8f5b45"))
+    o.append(t(X(g.TABLE_CX), Y(0) + 26, "breast · dining wall", 9.5, "middle", 650, "#8f5b45"))
     o.append(t(X(g.ROOM_W - 30), Y(g.ALC_D - g.STAIR_D) - 6, "stair box (to confirm)", 9, "middle", 400, MUTED))
     o.append(t(X(g.DOOR_X[0] + 42), Y(g.BREAST_D_WEST) - 6, "door: which side hinges?", 9, "middle", 600, "#d0573b"))
     # side-wall labels
@@ -696,7 +699,7 @@ def living_plan():
     o.append(t(X((cx[0] + cx[1]) / 2), Y((cz[0] + cz[1]) / 2) + 3, "coffee table", 8.5, "middle", 400, MUTED))
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
-    o.append(t(X(sx[1]) - 5, Y((sz[0] + sz[1]) / 2) + 4, "sub", 9, "end", 600, SND_S))
+    o.append(t(X(sx[1]) - 5, Y(sz[0]) - 4, "sub", 9, "end", 600, SND_S))
     o.append(rect(X(16), Y(-280), 14 * k, 15 * k, SND_F, SND_S, 3))
     o.append(rect(X(272), Y(-296), 15 * k, 14 * k, SND_F, SND_S, 3))
     o.append(t(X(265), Y(-296) - 4, "rear", 8, "middle", 400, MUTED))
@@ -709,8 +712,8 @@ def living_plan():
     o.append(t(X(0) + 10, Y(z2) - 4, "new socket behind", 8.5, "start", 600, "#d0573b"))
     o.append(t(X(0) + 10, Y(z2) + 7, "the sofa: PC, rears", 8.5, "start", 400, "#d0573b"))
     # the two spot bars
-    for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "spot bar on the existing rose"),
-                                  (g.BAR2_X, g.BAR2_Z, [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (380, 30))], "second bar, new point")]:
+    for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1, existing rose"),
+                                  (g.BAR2_X, g.BAR2_Z, [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "second bar, existing point")]:
         rx_, ry_ = X(bx), Y(bz)
         o.append(f'<rect x="{rx_ - 42*k:.1f}" y="{ry_ - 2:.1f}" width="{84*k:.1f}" height="4" fill="#ddd9d0" stroke="#999"/>')
         for dx, col, (tx_, tz_) in heads:
@@ -732,7 +735,7 @@ def living_plan():
     o.append(f'<line x1="{X(sm[0]):.1f}" y1="{Y(sm[1]):.1f}" x2="{tvx:.1f}" y2="{tvz:.1f}" stroke="{BLUE}" stroke-width="1.4" stroke-dasharray="5 3"/>')
     o.append(f'<line x1="{X(50):.1f}" y1="{Y(g.CHAISE_EYES_Z):.1f}" x2="{tvx:.1f}" y2="{tvz:.1f}" stroke="{BLUE}" stroke-width="1.4" stroke-dasharray="5 3"/>')
     o.append(t(X(sm[0]) + 8, Y(sm[1]) - 34, f"eyes to screen about {g.VIEW_DIST/100:.2f} m", 9.5, "start", 650, BLUE))
-    o.append(t(X(97) - 8, Y(g.CHAISE_END_Z) + 16, f"from the end of the sofa's return, {g.TV_PANEL_Z[0] - g.CHAISE_EYES_Z:.0f} cm, square on", 9, "end", 600, BLUE))
+    o.append(t(X(97) - 8, Y(-70), f"from the end of the sofa's return, {g.TV_PANEL_Z[0] - g.CHAISE_EYES_Z:.0f} cm, square on", 9, "end", 600, BLUE))
     # dimensions
     def hdim(e1, e2, n, lab, below=True):
         o.append(f'<line x1="{X(e1):.1f}" y1="{n:.1f}" x2="{X(e2):.1f}" y2="{n:.1f}" stroke="{MUTED}"/>')
@@ -792,6 +795,8 @@ def seating():
         o.append(f'<rect x="{X(x1s):.1f}" y="{Y(zb):.1f}" width="{(x1s - 120)*k:.1f}" height="{(zf - zb)*k:.1f}" fill="#ecebe6" stroke="#b9b4a8"/>')
         o.append(t((X(x1s) + X(120)) / 2, Y((zb + zf) / 2) + 3, "sofa", 9, "middle", 600, MUTED))
         o.append(f'<rect x="{X(g.TABLE_X[1]):.1f}" y="{Y(-g.RAIL[2]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.RAIL[2]*k:.1f}" fill="#d9b48a"/>')
+        sxx, szz = g.SUB_POS["x"], g.SUB_POS["z"]
+        o.append(f'<rect x="{X(sxx[1]):.1f}" y="{Y(szz[0]):.1f}" width="{(sxx[1]-sxx[0])*k:.1f}" height="{(szz[1]-szz[0])*k:.1f}" fill="{SND_F}" stroke="{SND_S}"/>')
         # the table and chairs
         if mode == "four":
             tx0, tx1 = g.TABLE_X
@@ -878,6 +883,11 @@ def dining_section():
     o.append(rect(Z(2.4), Y(g.FOLDED_TOP + 3), 2.4 * s, 3 * s, "#c48c57", "#7a5130", 0))
     # frames
     o.append(rect(Z(2.2), Y(g.FRAMES_Y + 34), 2 * s, 34 * s, "#333", "#111", 0))
+    # the sub on its riser, on its side to the breast, beyond the cut
+    sd_ = -g.SUB_POS["z"][0]
+    o.append(rect(Z(sd_ + 1), Y(5), (sd_ - 1) * s, 5 * s, "#e9dccb", "#b88a55", 0, 1, 'stroke-dasharray="4 3"'))
+    o.append(rect(Z(sd_), Y(5 + g.SUB[1]), (sd_ - 2) * s, g.SUB[1] * s, SND_F, SND_S, 2, 1, 'stroke-dasharray="4 3"'))
+    o.append(t(Z(sd_ / 2 + 1), Y(22), "sub", 9, "middle", 600, SND_S))
     # a chair pulled up to the table, room side
     w, d, h, sh = g.CHAIR
     cz0 = Dr + td - 8                     # its front edge 8 under the table
@@ -925,9 +935,9 @@ def sound():
     o.append(t(X(g.TV_CX), Y(-7) - 6, "soundbar under the TV", 9.5, "middle", 600, SND_S))
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
-    o.append(arrow(X(sx[1]), Y((sz[0] + sz[1]) / 2), X(sx[1] + 70), Y((sz[0] + sz[1]) / 2), SND_S, 2))
-    o.append(t(X(sx[1] + 74), Y((sz[0] + sz[1]) / 2) - 8, "sub on its riser, firing across the room,", 9.5, "end", 600, SND_S))
-    o.append(t(X(sx[1] + 74), Y((sz[0] + sz[1]) / 2) + 22, "10 cm off the side wall for its rear port", 9, "end", 400, MUTED))
+    o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub on an oak riser under the dining wall,", 9.5, "middle", 600, SND_S))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, "on the front wall beside the TV, port 22 cm clear", 9, "middle", 400, MUTED))
     for (x, z, lab) in [(16, -280, "rear, on the side wall"), (272, -296, "rear, on a stand")]:
         o.append(rect(X(x), Y(z), 15 * k, 15 * k, SND_F, SND_S, 3))
         o.append(t(X(x) + (10 if x < 100 else -6), Y(z) + 30, lab, 9, "start" if x < 100 else "end", 600, SND_S))
@@ -936,9 +946,9 @@ def sound():
     o.append(rect(X(g.DECK_X[1]), Y(g.DECK_Z[0]), g.DECK[0] * k, g.DECK[2] * k, VIN_F, VIN_S, 2))
     o.append(t(X(g.DECK_X[0]) - 4, Y(g.DECK_Z[0]) - 4, "turntable", 9, "end", 600, VIN_S))
     d_ = ((g.SUB_POS["x"][1] - g.DECK_X[0]) ** 2 + (g.SUB_POS["z"][1] - g.DECK_Z[0]) ** 2) ** 0.5
-    o.append(t(X(120), Y(-40), f"sub to deck about {d_/100:.1f} m, separate floors of furniture", 9, "middle", 400, MUTED))
-    return svg(W, H, "\n".join(o), "Sound: the sub fires across the room, the rears sit behind the sofa",
-               "To scale, north at the top. The soundbar stays under the TV; the sub is wireless, so it sits on the floor by the side wall")
+    o.append(t(X(120), Y(-60), f"sub to deck about {d_/100:.1f} m, on separate furniture", 9, "middle", 400, MUTED))
+    return svg(W, H, "\n".join(o), "Sound: the sub on the front wall with the TV, the rears behind the sofa",
+               "To scale, north at the top. The sub is wireless: on the front wall it blends with the soundbar, out of the way of feet")
 
 
 def power():
@@ -970,7 +980,7 @@ def power():
     notes = ["The socket on the side wall is a single today: the electrician swaps it for a double, at the same spot.",
              "The retro switch moves to the wall: with the TV 2 cm from the left upright, the 10-gang's own switches can't be reached any more.",
              "PC and rear speakers: a new double socket low on the side wall behind the sofa; the PC (500–850 W) stays off these strips.",
-             "The dining wall needs no power. The second spot bar needs a new ceiling point and switch (electrician).",
+             "The sub plugs into the 10-gang: its lead runs along the channel and the breast's skirting. Both spot bars use existing ceiling points.",
              "Load check: the 10-gang about 0.7 kW with everything on, the 6-way up to about 0.8 kW with a launch PS3 running; each well under 13 A (3 kW).",
              "Check the 10-gang is surge-protected; if not, use a surge-protected one for the TV and consoles. Label both outlets."]
     for i, n in enumerate(notes):
@@ -1024,9 +1034,9 @@ def routes():
     o.append(rect(F(g.PC_SHELF_Z[1]), Y(g.PC_SHELF_TOP), (g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]) * s, 4 * s, "#e9dccb", "#c9b79f", 1))
     o.append(rect(F(g.PC_Z[1]), Y(g.PC_SHELF_TOP + g.PC_CASE[1]), g.PC_CASE[2] * s, g.PC_CASE[1] * s, GAME_F, GAME_S, 3))
     o.append(t(F((g.PC_Z[0] + g.PC_Z[1]) / 2), Y(g.PC_SHELF_TOP + 22), "PC", 11, "middle", 650))
-    sz = g.SUB_POS["z"]
-    o.append(rect(F(sz[0]), Y(34.4), (sz[1] - sz[0]) * s, 34.4 * s, SND_F, SND_S, 2))
-    o.append(t(F((sz[0] + sz[1]) / 2), Y(36), "sub", 9, "middle", 600, SND_S))
+    sxx = g.SUB_POS["x"]
+    o.append(rect(X(sxx[0]), Y(34.4), (sxx[1] - sxx[0]) * s, 34.4 * s, SND_F, SND_S, 2))
+    o.append(t(X((sxx[0] + sxx[1]) / 2), Y(36), "sub", 9, "middle", 600, SND_S))
     o.append(f'<rect x="{F(g.ALC_D - side_len)}" y="{Y(80)}" width="{(g.CHAISE_END_Z - g.ALC_D + side_len)*s}" height="{80*s}" fill="none" stroke="#c9c5bb" stroke-dasharray="3 3"/>')
     o.append(t(F(-170), Y(40), "sofa (beyond)", 9, "middle", 400, MUTED))
     DATA = BLUE; MAINS = VIN_S; DC = "#2fa47a"; AUD = "#b07a1f"
@@ -1054,11 +1064,11 @@ def routes():
     o.append(t(X(g.RZ[0] + 26), Y(116), "deck → preamp → soundbar AUX", 9, "middle", 500, AUD))
     o.append(wire([(F(g.SOCKET["z"]), Y(25.7)), (F(g.SOCKET["z"]), Y(3)), (X(14), Y(3)), (X(14), Y(76))], MAINS, 1.8))
     o.append(wire([(F(g.SOCKET["z"]) + 4, Y(25.7)), (F(g.SOCKET["z"]) + 4, Y(1.5)), (X(66), Y(1.5))], MAINS, 1.8))
-    o.append(wire([(X(20), Y(77)), (X(20), Y(4)), (X(0), Y(4)), (F(sz[1]), Y(4)), (F(sz[1]), Y(10))], MAINS, 1.4))
+    o.append(wire([(X(20), Y(77)), (X(20), Y(4)), (X(g.ALC_W), Y(4)), (X(sxx[0]), Y(4)), (X(sxx[0]), Y(10))], MAINS, 1.4))
     for i, (c, lab, d) in enumerate([(DATA, "HDMI / Cat6", None), (MAINS, "mains leads", None), (DC, "12 V DC lead", "6 3"), (AUD, "vinyl audio", None)]):
         o.append(wire([(i * 210, 452), (i * 210 + 28, 452)], c, 2.2, d)); o.append(t(i * 210 + 36, 456, lab, 10.5, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "Cable routes: everything ends in the channel behind the base",
-               "Front view, schematic, with the side wall folded flat to the left so the PC's and the sub's routes show")
+               "Front view, schematic, with the side wall folded flat to the left so the PC's route shows; the sub sits under the dining wall")
 
 
 def pc_shelf():
@@ -1093,8 +1103,6 @@ def pc_shelf():
     o.append(t(Xp(30), Yp(g.PC_SHELF_Z[1] + 14) + 4, "pad dock", 9.5, "start", 500, MUTED))
     o.append(t(Xp(60), Yp(-215), "the sofa's return", 10, "middle", 600, MUTED))
     o.append(t(Xp(60), Yp(-215) + 12, "(chaise end at the top)", 9, "middle", 400, MUTED))
-    o.append(rect(Xp(g.SUB_POS["x"][0]), Yp(g.SUB_POS["z"][1]), g.SUB[2] * s, g.SUB[0] * s, SND_F, SND_S, 3))
-    o.append(t(Xp(g.SUB_POS["x"][1]) + 6, Yp(-74) + 4, "sub", 9.5, "start", 600, SND_S))
     # elevation, looking at the side wall from the room: the alcove on the right
     ex, ey = 478, 432
     k = 1.32
@@ -1115,7 +1123,6 @@ def pc_shelf():
     # the sofa's return in side view: seat 45, back 80
     o.append(f'<path d="M{E(-240)},{V(0)} L{E(-240)},{V(g.SOFA_H)} L{E(g.CHAISE_END_Z + 22)},{V(g.SOFA_H)} L{E(g.CHAISE_END_Z + 22)},{V(62)} L{E(g.CHAISE_END_Z)},{V(62)} L{E(g.CHAISE_END_Z)},{V(0)}" fill="#ecebe6" stroke="#b9b4a8"/>')
     o.append(t(E(-200), V(40), "sofa", 9.5, "middle", 600, MUTED))
-    o.append(rect(E(g.SUB_POS["z"][0]), V(34.4), g.SUB[0] * k, 34.4 * k, SND_F, SND_S, 2))
     hx = E(-240) - 6
     for hgt, lab in [(g.SOFA_H, f"{_fmt(g.SOFA_H)} sofa back"), (g.PC_SHELF_TOP - g.PC_SHELF_T, f"{_fmt(g.PC_SHELF_TOP - g.PC_SHELF_T)} shelf underside"),
                      (g.PC_SHELF_TOP + g.PC_CASE[1], f"{_fmt(g.PC_SHELF_TOP + g.PC_CASE[1])} PC top"), (g.CEIL, f"{_fmt(g.CEIL)}")]:

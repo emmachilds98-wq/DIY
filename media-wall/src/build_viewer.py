@@ -88,7 +88,7 @@ def page(prefix="", downloads=""):
   <header>
     <h1>Media Wall v11</h1>
     <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch between the media wall, the slat wall and the dining wall set for four, try the other greens, or turn on the numbered key.</p>
-    <p class="change"><b>What changed in v11:</b> the TV moves {G.TV_SHIFT:.0f} cm nearer the side wall, so the turntable fits in the alcove with the Series X on a shelf above it and the record trays in the bay below. The record ledge wraps round onto the side wall, with the PC on a shelf above the end of the L-sofa. The chimney breast gets a fold-down oak dining table for four (six or eight with it lifted off), and a second spotlight bar hangs over it by the stairs.</p>
+    <p class="change"><b>What changed in v11:</b> the TV moves {G.TV_SHIFT:.0f} cm nearer the side wall, so the turntable fits in the alcove with the Series X on a shelf above it and the record trays in the bay below. The record ledge wraps round onto the side wall, with the PC on a shelf above the end of the L-sofa. The chimney breast gets a fold-down oak dining table for four (six or eight with it lifted off), a second spotlight bar goes on your existing point by the door, and the sub moves under the dining wall, on the front wall beside the TV.</p>
   </header>
 
   <div class="viewer">
@@ -139,7 +139,7 @@ def page(prefix="", downloads=""):
       <ul class="plain">
         <li>Alcove: the TV between two oak uprights, now {G.TV_SHIFT:.0f} cm nearer the side wall; the turntable on the worktop to its right with the Series X on a shelf above; three 60 cm bays below for the Xbox consoles, the PlayStations and the two face-out record trays.</li>
         <li>Side wall: the record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, with the pad dock beside it.</li>
-        <li>Chimney breast: a 110 × 80 cm solid oak table on an oak backboard, folded flat every day, down on two steel brackets for four, lifted off onto legs for six or eight.</li>
+        <li>Chimney breast: a 110 × 80 cm solid oak table with pegged breadboard ends, folded flat every day, down on two steel brackets for four, lifted off onto legs for six or eight.</li>
         {fit_line()}
       </ul>
     </section>
@@ -147,7 +147,7 @@ def page(prefix="", downloads=""):
       <h2>Lighting</h2>
       <ul class="plain">
         <li>The LED strip you have now, on the ceiling round the whole room, facing down.</li>
-        <li>Two four-head cone spotlight bars, Wolston style. The first, on the existing rose, lights the shelves, the ledge, the coffee table and the turntable. The second, on a new ceiling point by the stairs, lights the table and the framed LPs above it.</li>
+        <li>Two four-head cone spotlight bars, Wolston style. The first, on the existing rose between the TV and the sofa, lights the shelves, the ledge, the coffee table and the turntable. The second, on the existing point between the door and the wall, lights the table and the framed LPs above it.</li>
         <li>LED grooves in the oak uprights and a bias light behind the TV. No spot ever points at the screen.</li>
       </ul>
     </section>

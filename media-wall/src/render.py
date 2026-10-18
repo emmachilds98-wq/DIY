@@ -985,16 +985,17 @@ def wrap():
 
 
 def subwoofer():
-    """The Hisense sub on the floor by the side wall, firing across the room, 10 cm clear behind its rear port."""
+    """The Hisense sub under the dining wall, between the folded bracket arms, on an oak riser: on its side to the breast,
+    driver towards the alcove, rear port 22 cm clear of the west arm."""
     o = []
     xa, xb = G.SUB_POS["x"]
     za, zb = G.SUB_POS["z"]
     o.append(poly([P(xa - 3, 0.05, za - 3), P(xb + 4, 0.05, za - 3), P(xb + 4, 0.05, zb + 3), P(xa - 3, 0.05, zb + 3)], "#000", 'opacity="0.22" filter="url(#soft)"'))
-    o.append(box(xa - 2, 0, za - 2, xb - xa + 4, 5, zb - za + 4, "#3c3c3e", "#4a4a4d", "#2d2d2f"))
+    o.append(box(xa - 2, 0, za - 2, xb - xa + 4, 5, zb - za + 2, OAK_D, OAK_T, OAK_S, extra=GH))
     o.append(box(xa, 5, za, xb - xa, G.SUB[1], zb - za, "#1a1a1b", "#2b2b2d", "#111112"))
     zc, yc = (za + zb) / 2, 5 + G.SUB[1] / 2
-    o.append(disc_x(xb + 0.03, yc, zc, 7.6, "#0c0c0c", 'stroke="#3a3a3c" stroke-width="2"'))
-    o.append(disc_x(xb + 0.05, yc, zc, 2.5, "#2a2a2c"))
+    o.append(disc_x(xa - 0.03, yc, zc, 7.6, "#0c0c0c", 'stroke="#3a3a3c" stroke-width="2"'))
+    o.append(disc_x(xa - 0.05, yc, zc, 2.5, "#2a2a2c"))
     return "\n".join(o)
 
 
@@ -1135,6 +1136,12 @@ def dining_wall():
     if DINING == "folded":
         zt = -Dr - tt - 0.3
         o.append(box(x0, rt + 0.2, zt, tw, td, tt, OAK, OAK_T, OAK_S, extra=GH))
+        bb = G.BREADBOARD
+        for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):                                                   # breadboard ends, pegged
+            o.append(quad_front(ea, rt + 0.2, zt - 0.03, eb - ea, td, OAK_D, GV))
+            for py in (rt + 14, rt + td / 2, rt + td - 14):
+                c = P((ea + eb) / 2, py, zt - 0.04)
+                o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="2.2" fill="#5e3d22"/>')
         o.append(_line(P(x0, rt + 0.2, zt - 0.02), P(x1, rt + 0.2, zt - 0.02), "#5a3a20", 1.8))          # the hinge line
         for (lx, ly) in ((x0 + 7, rt + 7), (x1 - 7, rt + 7), (x0 + 7, rt + td - 7), (x1 - 7, rt + td - 7)):
             o.append(disc_z(lx, ly, zt - 0.05, 3.4, "#3a3c3f", 'stroke="#55585b" stroke-width="1"'))   # leg plates
@@ -1143,6 +1150,10 @@ def dining_wall():
             o.append(box(bxx - 2.6, G.FOLDED_TOP + 0.4, -2.4, 5.2, 2.6, 2.2, OAK_D, OAK_T, OAK_S))
     else:
         o.append(box(x0, rt, -Dr - td, tw, tt, td, OAK, OAK_T, OAK_S, extra=GH))
+        bb = G.BREADBOARD
+        for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):
+            o.append(poly([P(ea, rt + tt + 0.01, -Dr - td), P(eb, rt + tt + 0.01, -Dr - td), P(eb, rt + tt + 0.01, -Dr), P(ea, rt + tt + 0.01, -Dr)], OAK_D, GV))
+            o.append(quad_front(ea, rt, -Dr - td - 0.02, eb - ea, tt, OAK_S))
         o.append(table_settings())
     o.append(breast_frames())
     return "\n".join(o)
@@ -1294,12 +1305,13 @@ SPOT_HEADS = [
 
 
 def spot_heads2():
-    """The second bar, over the dining area by the stairs: two heads on the table, one on the framed LPs, one on the door."""
+    """The second bar, on the existing point between the door and the west wall: two heads on the table, one on the
+    framed LPs, one down onto the way in."""
     ty, tz = (G.TABLE_TOP, -45.0) if DINING == "four" else (115.0, -6.0)
     return [(-31.5, "#a9c7ab", "#8db59c", (G.TABLE_CX, G.FRAMES_Y + 17, -2.0)),
             (-10.5, "#a7d0d8", "#7fbfc8", (G.TABLE_CX - 22, ty, tz)),
             (10.5, "#e8b53f", "#dca52f", (G.TABLE_CX + 22, ty, tz)),
-            (31.5, "#e79c95", "#d9877f", (380.0, 130.0, 30.0))]
+            (31.5, "#e79c95", "#d9877f", (G.BAR2_X, 0.0, G.BAR2_Z + 40))]
 
 
 def spot_bar(cx, cz, spots):
@@ -1380,9 +1392,9 @@ def services(show_hidden):
     # mains from the side-wall socket: left outlet to the 10-gang behind the TV, right outlet (the retro switch) to the 6-way
     o.append(path([(1.5, 4, G.SOCKET["z"] - 2), (1.5, 4, bf - 0.5), (4, 4, bf + 20), (4, 4, 35), (14, 6, 35), (14, 77, 33), gang], CORAL, 2.0))
     o.append(path([(1.5, 3, G.SOCKET["z"] + 2), (1.5, 3, bf - 0.5), (6, 3, 36), (66, 3, 36)], CORAL, 2.0))
-    # the sub's mains from the 10-gang: down the slot, along the channel to the end, out at the plinth notch to the sub
+    # the sub's mains from the 10-gang: down the slot, along the channel to bay 3's end, out at the reveal, along the breast's skirting
     sx = G.SUB_POS["x"][0] + 4
-    o.append(path([(20, 77, 34), (20, 4, 36), (3, 4, bf + 6), (1.5, 2, bf - 3), (1.5, 2, G.SUB_POS["z"][1] - 4), (sx, 4, G.SUB_POS["z"][1] - 4)], CORAL, 1.8))
+    o.append(path([(20, 77, 34), (20, 4, 36), (182, 4, 36), (185, 4, -1), (sx, 4, -1)], CORAL, 1.8))
     # the 10-gang lying behind the TV; the retro 6-way in the channel behind bay 2
     for (xa, ya, xb, yb, z) in ((10, WORKTOP, 66, WORKTOP + 4.5, 34), (66, 1, 100, 5.5, 36)):
         p1, p2 = P(xa, ya, z), P(xb, yb, z)
@@ -1395,7 +1407,7 @@ def dimensions():
     o = ['<g id="dims">']
     bf = G.BASE_FRONT_Z
     a, b = P(0, CEIL, bf), P(ALC_W, CEIL, bf)
-    o.append(dim_line(a, b, f"alcove {G.ALC_W:g} wide · {G.ALC_D:g} deep · floor to ceiling", ((a[0] + b[0]) / 2, a[1] - 9)))
+    o.append(dim_line(a, b, f"alcove {G.ALC_W:g} wide · {G.ALC_D:g} deep · floor to ceiling", ((a[0] + b[0]) / 2 + 60, a[1] + 18)))
     a, b = P(ALC_W, CEIL - 8, -1), P(BX1, CEIL - 8, -1)
     o.append(dim_line(a, b, f"chimney breast {G.BREAST_W:g} · the dining wall", ((a[0] + b[0]) / 2, a[1] + 20)))
     a, b = P(RZ[0], 224, 0), P(RZ[1], 224, 0)
@@ -1479,23 +1491,23 @@ JOIN_KEY = [
     (24, (93, 4.6, G.BASE_FRONT_Z - 0.1), "Hidden slim drawer in the plinth, push to open"),
     (H_, "The dining wall on the chimney breast"),
     (25, (G.TABLE_X[0] + 9, G.RAIL_TOP - 11, -G.RAIL[2]), "Oak backboard: lift-off hinges on top, brackets below"),
-    (26, (G.TABLE_CX, 118, -6), "Oak table 110 × 80: folds up flat, down for four"),
+    (26, (G.TABLE_CX, 118, -6), "Oak table 110 × 80, pegged breadboard ends: folds up flat"),
     (27, (G.HEBGO_X[1], 40, -4), "Häfele Hebgo folding brackets, 500 kg a pair"),
     (28, (G.TABLE_X[0] + 16, G.FOLDED_TOP + 2, -3), "Turn buttons hold the folded table"),
     (29, (G.TABLE_CX + 21, G.FRAMES_Y + 17, -2.3), "Two framed LPs above"),
+    (34, (G.SUB_POS["x"][0], 22, (G.SUB_POS["z"][0] + G.SUB_POS["z"][1]) / 2), "Subwoofer on an oak riser, between the brackets"),
     (H_, "The side wall"),
     (30, (25.5, 182, -150), "PC on its oak shelf, above the end of the sofa (see the room plan)"),
     (31, (14, 175, -184), "Oak frame with woven cane hides the PC's ports"),
     (32, (8, 160, -197), "Pad charging dock"),
     (33, (1, 80, -209), "PC cables: trunking down to the skirting"),
-    (34, (G.SUB_POS["x"][1], 20, (G.SUB_POS["z"][0] + G.SUB_POS["z"][1]) / 2), "Subwoofer on a riser, firing across the room"),
     (H_, "Power, network and light"),
     (36, (ALC_W - 9.5, 203, 22), "Deco B: leads in the groove behind the right upright"),
     (37, (0.3, 36, G.SOCKET["z"]), "Double socket: its right switch is the retro switch"),
     (38, (38, 78.6, 34), "10-gang extension, hidden behind the TV"),
     (39, (95, CEIL - 0.6, ALC_D - 0.8), "LED strip round the ceiling edge (as now)"),
-    (40, (G.PEND_X, 226, G.PEND_Z), "Spot bar on the existing rose"),
-    (41, (G.BAR2_X, 226, G.BAR2_Z), "Second spot bar over the dining area, by the stairs"),
+    (40, (G.PEND_X, 226, G.PEND_Z), "Spot bar on the existing rose, between TV and sofa"),
+    (41, (396, 222, 30), "Second spot bar, existing point by the door (just out of view)"),
 ]
 
 def _numbered(items):

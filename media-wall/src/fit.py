@@ -61,7 +61,6 @@ def zones():
     pc_len = g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]
     under = g.PC_SHELF_TOP - g.PC_SHELF_T
     drawer_out = g.BASE_FRONT_Z - 35.0
-    sub_gap = drawer_out - g.SUB_POS["z"][1]
     tw, td, tt = g.TABLE
     six_edge, eight_edge = tw / 2, (tw + g.LEAF[0]) / 3
     free_breast = -g.FREE_Z[0]
@@ -118,7 +117,6 @@ def zones():
             ("Air above the PC", f"top at {r1(g.PC_SHELF_TOP + g.PC_CASE[1])}", "", f"{r1(g.CEIL)} ceiling", f"{r1(g.CEIL - g.PC_SHELF_TOP - g.PC_CASE[1])} for the top exhaust", PASS),
             ("Shelf over the end of the sofa", f"underside {r1(under)}", ref("sofa"), f"sofa back {r1(g.SOFA_H)}", f"{r1(under - g.SOFA_H)}; the shelf covers only the 28 cm nearest the wall", PASS),
             ("Out of the TV's sightlines", "PC about 54° left of the line to the screen from the sofa", ref("room"), "—", "v10's PC sat at the screen's left edge", PASS),
-            ("Sub on the floor by the side wall", f"{r1(g.SUB[0])} × {r1(g.SUB[2])} on a riser, 10 off the wall", ref("hisense"), "between the base and the sofa", f"{r1(sub_gap)} clear of the game drawer pulled right out", PASS),
         ]),
         ("The dining wall on the chimney breast", f"breast {r1(g.BREAST_W)} wide; the table {r1(tw)} × {r1(td)} × {r1(tt)} solid oak, about {weight:.0f} kg", [
             ("Table on the breast", f"{r1(tw)} wide", ref("room"), f"{r1(g.BREAST_W)}", f"{r1((g.BREAST_W - tw) / 2)} each side", PASS),
@@ -134,6 +132,8 @@ def zones():
             ("Six: the west end", f"table end at {r1(g.SIX_X[1])}", ref("dining"), f"west wall at {r1(g.ROOM_W)}", f"{r1(six_wall)}", PASS),
             ("Eight: with the 60 × 80 leaf", f"{r1(tw + g.LEAF[0])} long, three a side", ref("dining", "legs"), f"{r1(g.DINE_W)} each", f"{r1(eight_edge)} each", TIGHT),
             ("Eight: the west end and the sofa", f"table {r1(g.EIGHT_X[0])}–{r1(g.EIGHT_X[1])}", ref("dining", "sofa"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(eight_wall)} to the wall; {r1(eight_sofa)} to the sofa's front at the east end", TIGHT),
+            ("Sub under the dining wall, on its side", f"{r1(g.SUB[2])} long × {r1(g.SUB[0])} out × {r1(g.SUB[1])} tall, on a 5 cm riser", ref("hisense"), f"between the bracket arms, {r1(g.HEBGO_X[1] - g.HEBGO_X[0])} apart", f"{r1(g.SUB_POS['x'][0] - g.HEBGO_X[0] - 1.4)} to the east arm; {r1(g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1])} behind the rear port", PASS),
+            ("Feet under the table, four at the wall", f"sub {r1(-g.SUB_POS['z'][0] + 2)} out from the breast", ref("terje"), f"table {r1(td)} deep", f"{r1(td + g.RAIL[2] - (-g.SUB_POS['z'][0] + 2))} of legroom in front of it on the room side; the end seats are clear", PASS),
             ("Chairs at the table", f"seat {r1(g.CHAIR[3])}", ref("terje"), f"top {r1(g.TABLE_TOP)}", f"{r1(g.TABLE_TOP - g.CHAIR[3])} seat to top, the usual 25–30", PASS),
         ]),
         ("The room", f"{r1(g.ROOM_W)} × {r1(g.ROOM_D)}, ceiling {r1(g.CEIL)}", [

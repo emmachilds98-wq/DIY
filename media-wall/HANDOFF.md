@@ -14,13 +14,13 @@ committed it; this round rebuilt it from the client's agreed layout.
   oak shelf at 134 (underside 130), flush wedged tenons through the right upright (proud ones would touch the TV), 15 cm air
   each side, 21.4 above; phono preamp hung under the shelf at the back.
 - Base: bay 1 Xbox, bay 2 PlayStation (unchanged), bay 3 = the two v9/v10 face-out record trays. Hidden slim drawer moved into
-  the plinth under bay 2 (push to open). Sub on the floor by the side wall at z −84…−62.6, firing across the room.
+  the plinth under bay 2 (push to open). Sub under the dining wall between the Hebgo arms (x 232–262.4, on its side, driver east, oak riser) — round-5 feedback.
 - Side wall: record ledge wraps the corner (7 deep, z 8 → −126, 4 LPs), then the PC shelf (82 × 28 at 155.4, z −130 → −212)
   over the end of the L-sofa; cane screen, pad dock, trunking down to the skirting. No keyboard tray (over the sofa).
 - Dining wall on the breast: oak backboard 110 × 22 × 3, a 110 × 80 × 2.7 oak top on three lift-off hinges, two Häfele Hebgo
   287.43.428 brackets 80 apart. Folded: ≈7 cm deep, top edge 153.3. Four at the wall; six lifted off onto Emuca 710 legs
   (table at x 255–365, z −60…−140); eight with a 60 × 80 leaf (x 220–390). Clearances checked in `fit.py`.
-- Second Wolston bar at (305, −100) on a new ceiling point; two-gang dimmer. Double socket: left → 10-gang (always on),
+- Spot bars on the client's two existing ceiling points: bar 1 straight out from the TV unit halfway to the sofa (93, −106); bar 2 between the door and the west wall (433, −80, to confirm; just out of the render's frame). Dimmers only, no new point. Table: pegged 7 cm breadboard ends, 5 cm radius corners, oak or Emuca legs. Double socket: left → 10-gang (always on),
   right → retro 6-way, so the wall switch is the retro switch. New socket behind the sofa for the PC and rears.
 - L-sofa assumed 247 × 168 × 80 (M&S Easy Velvet corner size) with the return along the side wall; **ask for the real size**.
 - Records: ~188 LPs (180 trays + 4 + 4) and ~240 singles face-out (v10 had 234/350 with the browser and singles drawer).

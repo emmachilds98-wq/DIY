@@ -35,7 +35,7 @@ TRACK = [
     ("To do", "Add Deco B and Deco C over Wi-Fi for now; speed-test each room and the Xbox", "1 Network, now", "", None, None),
     ("To buy", "Cat6 patch leads, 0.5–2 m", "1 Network, now", "11", 15, 20),
     ("To buy", "TP-Link TL-SG108 8-port switch: one for the living room, one to replace the 5-port in bedroom 3", "1 Network, now", "2", 36, 50),
-    ("To do", "Book one electrician visit: Cat6 from bedroom 3 down through the airing cupboard to the alcove's right corner (Deco B) and on to the kitchen (Deco C), a spare pulled with each, and the optional runs to the master and bedroom 2; swap the side-wall socket for a double <b>at the same spot</b>; a new double socket low on the side wall behind the sofa for the PC and the rear speakers <b>(new)</b>; a new ceiling point by the stairs for the second spot bar, with a two-gang LED dimmer by the door <b>(new)</b>; a fused spur for the LED drivers; fit both spot bars", "2 Electrician and cabling", "", None, None),
+    ("To do", "Book one electrician visit: Cat6 from bedroom 3 down through the airing cupboard to the alcove's right corner (Deco B) and on to the kitchen (Deco C), a spare pulled with each, and the optional runs to the master and bedroom 2; swap the side-wall socket for a double <b>at the same spot</b>; a new double socket low on the side wall behind the sofa for the PC and the rear speakers <b>(new)</b>; LED-compatible dimmers for both ceiling points; a fused spur for the LED drivers; fit both spot bars, on the existing rose between the TV and the sofa and the existing point by the door <b>(changed: no new point)</b>", "2 Electrician and cabling", "", None, None),
     ("To buy", "Cat6 solid pure copper, round (not CCA): two runs, four with the optional ones", "2 Electrician and cabling", "2–4 runs", 30, 60),
     ("To buy", "6-way surge-protected extension for the retro set (Xbox One, 360, PS3, PS2, PS1, RetroTINK) <b>(changed: switched at the wall)</b>", "2 Electrician and cabling", "1", 20, 35),
     ("To buy", "4-port USB charger, 5 V 2 A per port (HDMI switch, fan stand, pad dock, bias light)", "2 Electrician and cabling", "1", 10, 20),
@@ -60,7 +60,6 @@ TRACK = [
     ("To buy", "Anti-tip brackets and 4 cm spacer blocks: both frames and bay 3", "4 Base unit", "1 set", 15, 25),
     ("To do", "Measure about ten games of each kind (PS2, Xbox 360, Xbox One) before cutting the game drawer", "4 Base unit", "", None, None),
     ("To buy", "Game drawer kit: 12 mm birch ply cut to size, 350 mm full-extension soft-close runners (35–49 kg), oak lip, follower block, felt", "4 Base unit", "1", 50, 90),
-    ("To buy", "Compact isolation riser for the sub, about 30 × 35 cm, 4–6 cm tall", "4 Base unit", "1", 20, 40),
     ("To do", "Build the plinth and bay 3, fix everything to the wall, fit the shelves, drawers and trays; place the TV and soundbar", "4 Base unit", "", None, None),
     ("To buy", "Two solid oak uprights, 165 × 30 × 4.5 cm (cut to 159), quarter-sawn if possible", "5 Oak joinery", "2", 150, 300),
     ("To buy", "Solid oak for the shelves: high shelf in two lengths (128.9 and 51.7 × 30 × 4), Series X shelf 55 × 30 × 4, record ledge 128.9 × 7 × 2.4, wrap ledge 134 × 7 × 2.4, PC shelf 82 × 28 × 4, lips <b>(changed)</b>", "5 Oak joinery", "1 set", 200, 340),
@@ -69,13 +68,14 @@ TRACK = [
     ("To buy", "Oak face frame, 20 mm, 186 cm for the base", "5 Oak joinery", "1", 60, 120),
     ("To buy", "Cane screen for the PC: oak frame and pre-woven cane, 26 × 48 cm", "5 Oak joinery", "1", 20, 40),
     ("To do", "Cut the joints and fit the uprights, shelves, ledges and face frame; notch the uprights for the ceiling strip", "5 Oak joinery", "", None, None),
-    ("To buy", "Solid oak table top 110 × 80 × 2.7 and a 60 × 80 × 2.7 leaf (edge-glued staves from a timber merchant, or cut from a 90 cm deep oak worktop) <b>(new)</b>", "6 Dining wall", "1 set", 200, 380),
+    ("To buy", "Solid oak table top 110 × 80 × 2.7 with pegged breadboard ends, and a 60 × 80 × 2.7 leaf (edge-glued staves from a timber merchant, who can also radius the corners) <b>(new)</b>", "6 Dining wall", "1 set", 220, 400),
     ("To buy", "Two Häfele Hebgo heavy-duty folding brackets, 287.43.428 (580 arm, 500 kg a pair) <b>(new)</b>", "6 Dining wall", "2", 70, 120),
     ("To buy", "Union PowerLoad lift-off hinges, 100 × 88, one 3-pack (all the same hand) <b>(new)</b>", "6 Dining wall", "1", 16, 20),
-    ("To buy", "Eight Emuca Ø60 × 710 mm screw-in table legs with plates (two sets of four): four for the top, four for the leaf <b>(new)</b>", "6 Dining wall", "2 sets", 70, 140),
+    ("To buy", "Eight legs on screw-in plates: tapered oak legs on M8 hanger bolts (to match), or Emuca Ø60 × 710 mm steel legs (cheaper); four for the top, four for the leaf <b>(new)</b>", "6 Dining wall", "8", 70, 160),
     ("To buy", "Two oak turn buttons, two leaf-alignment dowels and two table clips for the leaf, felt pads <b>(new)</b>", "6 Dining wall", "1", 10, 20),
     ("To buy", "Four folding chairs, IKEA TERJE or similar (skip if yours fit: seat about 45–48) <b>(new)</b>", "6 Dining wall", "4", 100, 160),
     ("To buy", "Two LP frames for the chimney breast, hung from 165 cm", "6 Dining wall", "2", 20, 40),
+    ("To buy", "Oak riser for the sub, 34 × 25 × 5 cm, with felt or sorbothane feet (from the worktop offcut) <b>(changed: under the dining wall)</b>", "6 Dining wall", "1", 5, 15),
     ("To do", "Fix the backboard to the breast, hang the brackets and the top, check it folds and locks; set the legs to the right height", "6 Dining wall", "", None, None),
     ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, driver; 6500K bias light for the TV", "7 Lighting", "1", 40, 90),
     ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars (£49 each), plus eight warm-white (2700K) dimmable E14 LED bulbs, 6 W max <b>(changed: two)</b>", "7 Lighting", "2", 120, 160),
@@ -229,7 +229,7 @@ Sizes are finished sizes in centimetres.</p>
 <li><b>Check every wall before you drill.</b> Run the cable and pipe detector over the spot, and never drill straight above, below or beside a socket or switch: cables run vertically and horizontally from them.</li>
 <li><b>Measure twice, mark once, cut once.</b> Walls are rarely square: measure the alcove at the floor, 76, 134, 155, 196 and the ceiling, and cut to the smallest.</li>
 <li><b>Two people for anything over 15 kg</b>: the uprights, the worktop, the table top, the TV.</li>
-<li><b>Mains wiring is the electrician's.</b> Swapping the socket, the new socket behind the sofa and the new ceiling point are all theirs. Adding to existing circuits like this isn't normally notifiable under Part P, but a registered electrician certifies it either way.</li>
+<li><b>Mains wiring is the electrician's.</b> Swapping the socket, the new socket behind the sofa and the dimmers are all theirs. Adding to existing circuits like this isn't normally notifiable under Part P, but a registered electrician certifies it either way.</li>
 <li><b>Dry-fit everything</b> (assemble without glue or screws) before the final fix.</li>
 </ul></div>
 
@@ -290,7 +290,7 @@ def build():
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION}, drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v11.</b> The TV moves <b>{n(g.TV_SHIFT)} cm nearer the side wall</b>. The two narrow gaps beside it become one {n(g.RZ_W)} cm zone, so the <b>turntable comes back into the alcove</b>, with the Series X on an oak shelf above it and both record trays in the bay below. The record ledge <b>wraps round onto the side wall</b>, with the PC on a shelf above the end of the L-sofa. The chimney breast gets a <b>fold-down oak dining table</b> for four (six or eight with it lifted off), and a <b>second spotlight bar</b> hangs over it by the stairs.</div>
+<div class="decision"><b>What changed in v11.</b> The TV moves <b>{n(g.TV_SHIFT)} cm nearer the side wall</b>. The two narrow gaps beside it become one {n(g.RZ_W)} cm zone, so the <b>turntable comes back into the alcove</b>, with the Series X on an oak shelf above it and both record trays in the bay below. The record ledge <b>wraps round onto the side wall</b>, with the PC on a shelf above the end of the L-sofa. The chimney breast gets a <b>fold-down oak dining table</b> for four (six or eight with it lifted off), and a <b>second spotlight bar</b> goes on your existing ceiling point by the door. The <b>sub</b> moves under the dining wall, on the front wall beside the TV.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -307,7 +307,7 @@ def build():
 <tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off onto legs for six, with a leaf for eight.</td></tr>
 <tr><td>Records</td><td>Every record face-out: about {LPS} LPs (180 in the trays, 8 on the two ledges) and {SINGLES} singles.</td></tr>
 <tr><td>Heights</td><td>Worktop and table {n(g.WORKTOP)} · TV centre 116.5 · Series X shelf {n(g.RZ_SHELF_TOP)} · ledges and PC shelf {n(g.LEDGE_TOP)} · high shelf {n(g.HIGH_TOP)}, {n(g.CEIL - g.HIGH_TOP)} under the {n(g.CEIL)} ceiling.</td></tr>
-<tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars: one on the existing rose, one on a new point over the dining area.</td></tr>
+<tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars on your two existing ceiling points: between the TV and the sofa, and between the door and the wall.</td></tr>
 <tr><td>Power and network</td><td>The side-wall socket becomes a double: left for the 10-gang (everything modern), right for the retro set, switched at the wall. A new socket behind the sofa for the PC and the rears. Deco A in bedroom 3, Cat6 down the airing cupboard.</td></tr>
 </table>
 <p class="confirm"><b>To confirm (full list in section 12):</b> the L-sofa's size · where the door to the hall hinges, and the west end's sizes · the turntable, PC case and fan stand models · chairs you already have · where the leaf and legs live · the 23 × 22 cm box by the window.</p>
@@ -379,7 +379,7 @@ def build():
 <ul>
 <li><b>Box:</b> about 54.3 × 35 cm outside on 350 mm full-extension soft-close runners screwed to the BESTÅ sides; sides 15 cm; 9 mm base lined in felt. About 48 games.</li>
 <li><b>Runners:</b> Accuride DZ3832EC (43 kg) or Screwfix Essentials 964VN (40 kg); not IKEA's BESTÅ runners, which aren't full extension.</li>
-<li><b>The sub:</b> it now sits on the floor by the side wall; with the drawer pulled right out there's still {n((g.BASE_FRONT_Z - 35.0) - g.SUB_POS["z"][1])} cm between them.</li>
+<li><b>The sub:</b> it sits under the dining wall now, so nothing stands in front of the game drawer.</li>
 </ul>
 
 <h2 class="pb">4 · The records and the turntable</h2>
@@ -403,7 +403,7 @@ def build():
 <ul>
 <li><b>The deck:</b> on isolation feet, 2 cm back from the worktop's front edge, with {n(g.ALC_D - g.DECK_Z[1])} cm behind it for the lid's hinges. The zone takes a deck up to the size of an AT-LP120X (45.2 × 35.2 cm); most decks are smaller.</li>
 <li><b>The lid:</b> AT's cover is 44.1 × 34.6 cm<sup>{fit.ORDER.index("lid") + 1}</sup>, so standing open its top edge is at about {n(round(g.LID_TOP_OPEN))}; the shelf's underside is at {n(g.LID_CLEAR_TO)}.</li>
-<li><b>Bass:</b> the sub is on the floor by the side wall, a separate piece of furniture from the deck; isolation feet under the deck take care of the rest.</li>
+<li><b>Bass:</b> the sub stands under the dining wall on its own oak riser, off the base the deck sits on; isolation feet under the deck take care of the rest.</li>
 <li><b>Signal path:</b> turntable set to PHONO → the preamp under the shelf → a 2 m RCA-to-3.5 mm lead down the groove behind the right upright and along the back of the worktop to the soundbar's AUX. If the deck has no PHONO/LINE switch, plug it straight into the AUX.</li>
 <li><b>Soundbar:</b> Music mode, bass up, surround, night and dialogue modes off. Always the AUX cable, never Bluetooth.</li>
 </ul>
@@ -420,15 +420,16 @@ def build():
 <h2 class="pb">5 · The dining wall</h2>
 <p>The chimney breast becomes the dining wall. A solid oak table, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard. Every day it stands folded flat against the breast, about {n(g.FOLDED_D)} cm deep. Down, it's a table for four at the same 76 cm as the alcove's worktop. Lifted off onto four legs, it seats six in the room, or eight with a matching leaf.</p>
 <figure class="render">{img("render_v11_dining_four.png", "The dining wall down and set for four")}
-<figcaption>Down and set for four: two on the room side, one at each end. The second spot bar lights the table and the framed LPs above it.</figcaption></figure>
+<figcaption>Down and set for four: two on the room side, one at each end, the sub tucked under the wall. The second spot bar, on the point by the door just out of view, lights the table and the framed LPs.</figcaption></figure>
 <figure>{dining_section()}</figure>
 <h3>How it works</h3>
 <ul>
+<li><b>The top:</b> solid oak with <b>pegged breadboard ends</b>, 7 cm oak strips across each end on a tongue, pinned with three oak pegs in slotted holes so the top can move. They stop it cupping when it lives upright, and they frame it like the uprights frame the TV. The corners are rounded to a 5 cm radius (kinder on hips by a door), and the underside edges are chamfered 1 cm so it reads slim.</li>
 <li><b>Backboard:</b> oak, {n(g.RAIL[0])} × {n(g.RAIL[1])} × {n(g.RAIL[2])}, from the worktop's offcut, screwed to the breast with plugs every 20 cm, top at {n(g.RAIL_TOP)}.</li>
 <li><b>Brackets:</b> two Häfele Hebgo heavy-duty folding brackets (287.43.428: 580 mm arm, 500 kg a pair<sup>{fit.ORDER.index("hebgo") + 1}</sup>), {n(g.HEBGO_X[1] - g.HEBGO_X[0])} cm apart on the backboard's face. Raised, they lock on their own; a light lift on the arm releases them, and they fold flat down the breast.</li>
 <li><b>Hinges:</b> three 100 mm lift-off hinges<sup>{fit.ORDER.index("liftoff") + 1}</sup>, all the same hand, along the backboard's top edge. Slide the table 5 cm sideways and it comes off.</li>
-<li><b>Folded:</b> two oak turn buttons on the breast hold the top edge at {n(g.FOLDED_TOP)}. The underside faces the room, so it's oiled like the top; the four leg plates show as small dark discs.</li>
-<li><b>For six or eight:</b> lift it off (two people, about 18 kg), screw four Emuca 710 mm legs<sup>{fit.ORDER.index("legs") + 1}</sup> into the plates (each adjusts to 730), and stand it in the room. For eight, butt the 60 × 80 leaf, on its own four legs, against one end, joined by two alignment dowels and two table clips.</li>
+<li><b>Folded:</b> two oak turn buttons on the breast, plus a magnetic catch, hold the top edge at {n(g.FOLDED_TOP)}. The underside faces the room, so it's oiled like the top; the four leg plates show as small dark discs.</li>
+<li><b>For six or eight:</b> lift it off (two people, about 18 kg), screw four legs into the plates: tapered oak legs (4.5 cm to 3 cm, on M8 hanger bolts) to match the wall, or Emuca 710 mm steel legs<sup>{fit.ORDER.index("legs") + 1}</sup> (adjustable to 730) as the cheaper option, and stand it in the room. For eight, butt the 60 × 80 leaf, on its own four legs, against one end, joined by two alignment dowels and two table clips.</li>
 <li><b>Chairs:</b> drawn at IKEA TERJE size (43 × 49, seat 48<sup>{fit.ORDER.index("terje") + 1}</sup>), which folds flat. Any dining chair with a 45–48 cm seat works.</li>
 </ul>
 <figure>{seating()}</figure>
@@ -440,12 +441,15 @@ def build():
 <p>Clearances from a UK planning guide: 60 cm of table edge per diner, 60 cm from the table to a wall as a tight minimum, 75 to aim for, 100–110 to walk behind someone seated<sup>{fit.ORDER.index("dining") + 1}</sup>. For six or eight, slide the coffee table to the window first, and keep the door to the hall shut while you eat if it opens into the room: the chairs on that side sit in its swing.</p>
 <h3>Cut list and hardware</h3>
 <table class="tight"><tr><th>Part</th><th>Material</th><th>Size (cm)</th><th>Qty</th></tr>
-<tr><td>Table top · leaf</td><td>Solid oak, edge-glued staves</td><td>110 × 80 × 2.7 · 60 × 80 × 2.7</td><td>1 · 1</td></tr>
+<tr><td>Table top · leaf</td><td>Solid oak, edge-glued staves</td><td>96 × 80 × 2.7 centre + two 7 × 80 breadboard ends (110 overall) · 60 × 80 × 2.7</td><td>1 · 1</td></tr>
+<tr><td>Breadboard pegs</td><td>10 mm oak dowel, slotted holes in the tongue</td><td>3 per end</td><td>6</td></tr>
+<tr><td>Legs (oak option)</td><td>Solid oak, tapered on two inside faces</td><td>71 × 4.5 tapering to 3, M8 hanger bolt and angled plate</td><td>8</td></tr>
 <tr><td>Backboard</td><td>Solid oak, from the worktop offcut</td><td>110 × 22 × 3</td><td>1</td></tr>
 <tr><td>Turn buttons</td><td>Oak offcut</td><td>6 × 2.5 × 2.2, on a single screw</td><td>2</td></tr>
+<tr><td>Sub riser</td><td>Oak offcut, felt feet</td><td>34 × 25 × 5</td><td>1</td></tr>
 <tr><td>Folding brackets</td><td>Häfele Hebgo 287.43.428</td><td>arm 58, height 22</td><td>2</td></tr>
 <tr><td>Lift-off hinges</td><td>Union PowerLoad, 100 × 88</td><td>one 3-pack, same hand</td><td>3</td></tr>
-<tr><td>Legs</td><td>Emuca Ø60 steel, 710–730 mm, with plates</td><td>—</td><td>8</td></tr>
+<tr><td>Legs (steel option)</td><td>Emuca Ø60 steel, 710–730 mm, with plates</td><td>—</td><td>8</td></tr>
 <tr><td>Leaf joint</td><td>Alignment dowels, table clips</td><td>—</td><td>2 + 2</td></tr>
 </table>
 <p class="note">Safety: never fold it up with anything on it, keep both turn buttons turned when it's up, and check the brackets have locked (a click each side) before you load it.</p>
@@ -460,7 +464,6 @@ def build():
 <li><b>Power:</b> a new double socket low on the side wall behind the sofa (electrician) takes the PC and the rear speakers, so the PC's 500–850 W stays off the media wall's strips.</li>
 <li><b>Keyboard and mouse:</b> no tray over the sofa; a wireless set on a lap board lives on the shelf or in the plinth drawer.</li>
 <li><b>Headroom:</b> the shelf's underside is at {n(g.PC_SHELF_TOP - g.PC_SHELF_T)}, and it covers only the 28 cm of the sofa nearest the wall.</li>
-<li><b>Sub:</b> on its riser on the floor by the side wall, between the base and the sofa, firing across the room, 10 cm off the wall for its rear port.</li>
 </ul>
 
 <h2 class="pb">7 · The oak joinery</h2>
@@ -503,15 +506,15 @@ def build():
 <ul>
 <li><b>The LED strip on the ceiling</b> (as now): round the room's edge, into the alcove and across the breast; 2700K on a dimmer.</li>
 <li><b>Built into the oak:</b> a 2700K strip in each upright's groove, on a driver on the fused spur; a 6500K bias light on the back of the TV from its USB port.</li>
-<li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>), parallel to the media wall. One hangs on the existing rose; the second hangs on a new ceiling point by the stairs, over the dining area. A two-gang LED dimmer by the door runs them separately.</li>
+<li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>), parallel to the media wall, on your two existing ceiling points. Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa. Bar 2 hangs on the point between the door and the west wall, and its heads swing to the table. Each gets an LED-compatible dimmer, so no new wiring is needed. Bar 1 sits in front of the screen, so tilt its heads up and away: none should be visible in the screen from the sofa.</li>
 </ul>
 <table class="tight"><tr><th>Head</th><th>Bar 1, on the existing rose</th><th>Bar 2, over the dining area</th></tr>
 <tr><td>Sage</td><td>The books and the left of the high shelf</td><td>The framed LPs above the table</td></tr>
 <tr><td>Pale blue</td><td>The record ledge above the TV</td><td>The table (the folded top, when it's up)</td></tr>
 <tr><td>Mustard</td><td>Down onto the coffee table</td><td>The table</td></tr>
-<tr><td>Dusty pink</td><td>The turntable and the Series X</td><td>The door and the stairs</td></tr>
+<tr><td>Dusty pink</td><td>The turntable and the Series X</td><td>Down onto the way in, by the door</td></tr>
 </table>
-<p>Never point a head at the TV. For six or eight, swing bar 2's blue and mustard heads onto the table where it stands. Use warm-white (2700K) dimmable E14 LED bulbs throughout.</p>
+<p>Never point a head at the TV. For six or eight the table stands right under bar 2: point its blue and mustard heads straight down onto it. Use warm-white (2700K) dimmable E14 LED bulbs throughout.</p>
 
 <h2 class="pb">9 · Power, cables and network</h2>
 <h3>Power</h3>
@@ -528,7 +531,7 @@ def build():
 <li><b>The channel:</b> 4 cm behind the frames, flat two-compartment trunking: mains on one side, HDMI, Cat6 and audio on the other. Switch 2 and the retro 6-way stand on edge in it.</li>
 <li><b>The groove behind the right upright:</b> Deco B's 12 V and patch leads, the Series X's HDMI and power, and the vinyl lead, down to the worktop's slot.</li>
 <li><b>The PC:</b> down the trunking at the far end of its shelf, along the skirting behind the sofa and into the plinth notch.</li>
-<li><b>The sub:</b> its mains lead from the 10-gang runs down the slot, along the channel and out at the plinth notch, along the skirting to the sub.</li>
+<li><b>The sub:</b> its mains lead from the 10-gang runs down the slot, along the channel to the end of bay 3, out at the reveal and along the breast's skirting to the sub, about 70 cm.</li>
 <li><b>Airflow:</b> console bays stay open-backed; the Series X has 15 cm each side and 21 above.</li>
 </ul>
 <h3>Network</h3>
@@ -557,7 +560,7 @@ def build():
 <h3>Sound layout</h3>
 <figure>{sound()}</figure>
 <ul>
-<li><b>Sub:</b> wireless, on its riser on the floor by the side wall, firing across the room; turn it down rather than moving it if the bass booms.</li>
+<li><b>Sub:</b> wireless, on an oak riser under the dining wall, between the folded bracket arms, on its side to the breast with the driver towards the TV and the rear port 22 cm clear. On the front wall, beside the soundbar, its bass blends with the bar instead of coming from behind you; it's out of the walkway, so nobody trips on it or its lead; and the folded table and the oak riser frame it. If the bass booms, turn it down rather than moving it.</li>
 <li><b>Rears:</b> one on the side wall at seated ear height behind the sofa's corner, one on a stand past the sofa's west end; linked by a cable behind the sofa, powered from the new socket.</li>
 </ul>
 
@@ -586,7 +589,8 @@ def build():
 <li>Records: roughly how many LPs and singles (the wall holds about {LPS} and {SINGLES}), and are most in thick outer sleeves?</li>
 <li>Wired ports for the projector (master) and the music room (bedroom 2)?</li>
 <li class="done">The TV {n(g.TV_SHIFT)} cm nearer the side wall, the turntable in the alcove, the Series X above it, the records below.</li>
-<li class="done">A fold-down oak dining table on the chimney breast; a second spot bar by the stairs.</li>
+<li class="done">A fold-down oak dining table on the chimney breast; the spot bars on the existing ceiling points; the sub under the dining wall.</li>
+<li>The second ceiling point's exact spot (the plan puts it about 35 cm in from the west wall, 2.3 m from the window): measure it from the wall and the window.</li>
 <li class="done">The ledge wrapping round onto the side wall, with the PC above the sofa.</li>
 <li class="done">Artisan oak, Card Room Green with matching eggshell skirting, every record face-out, the game drawer as designed.</li>
 </ul>

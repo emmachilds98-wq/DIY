@@ -127,11 +127,12 @@ SOFA_BACK_Z = WINDOW_Z + 10.0              # -299: 10 cm off the window wall and
 SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
-SUB_POS = dict(x=(10.0, 10.0 + SUB[2]), z=(-84.0, -84.0 + SUB[0]))   # on the floor by the side wall, firing across the room; 10 cm behind its port
+SUB_POS = dict(x=(232.0, 232.0 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # under the dining wall, between the bracket arms, on its side to the breast: driver east, port 22 cm from the west arm
 COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
 
 # ---------------------------------------------------------------- the dining wall on the chimney breast
 TABLE = (110.0, 80.0, 2.7)                 # W, D, thickness: solid oak
+BREADBOARD = 7.0                           # oak breadboard ends, each, pegged; corners radiused 5, underside chamfered
 TABLE_CX = (BREAST_X[0] + BREAST_X[1]) / 2 # 244.75
 TABLE_X = (TABLE_CX - TABLE[0] / 2, TABLE_CX + TABLE[0] / 2)   # 189.75 .. 299.75
 TABLE_TOP = WORKTOP                        # 76 at the wall, on one line with the alcove worktop
@@ -154,10 +155,10 @@ EIGHT_X = (220.0, 390.0)
 FRAMES_Y = 165.0                           # two framed LPs on the breast above the folded table
 
 # ---------------------------------------------------------------- lighting and viewing
-PEND_X = ALC_W                             # the existing rose: in line with the breast's corner...
-PEND_Z = WINDOW_Z + 173.5                  # ...and 173.5 from the window wall: -135.5
+PEND_X = ALC_W / 2                         # the existing rose: straight out from the TV unit...
+PEND_Z = (BASE_FRONT_Z + SOFA_FRONT_Z) / 2 # ...halfway to the sofa: -106
 BAR = (84.0, 16.0, 22.4)                   # Wolston-style bar: length, depth, drop
-BAR2_X, BAR2_Z = 305.0, -100.0             # the second bar: over the dining area, by the stairs (new ceiling point)
+BAR2_X, BAR2_Z = 433.0, -80.0              # the second bar: on the existing point between the door and the west wall (to confirm)
 EYES_FROM_WINDOW = 70.0
 EYE_HEIGHT = (105.0, 112.0)
 SCREEN_FROM_WINDOW = ROOM_D - (ALC_D - TV_PANEL_Z[0])   # 335
