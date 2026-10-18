@@ -1,4 +1,55 @@
-# Handoff: Home Network & Media Wall Plan, final accurate version (v10)
+# Handoff: Home Network & Media Wall Plan
+
+## Update 18 Oct 2026, round 4: v10 delivered (drawn to the measured room)
+**Delivered:** `out/Home_Network_Plan_v10.pdf` (34 pages, restructured: plan on a page → room → media wall + fit proof →
+vinyl corner → joinery → paint and light → power/cables/network → build guide → buy list → confirm/sources; slat wall
+in an appendix), HD renders in `out/` (v9 outputs moved to `out/v9/`), and the viewer page rebuilt from `src/art/`.
+
+**What changed in the code**
+- `src/geometry.py` (new) holds every dimension; `render.py`, `diagrams.py`, `fit.py` and `build_doc.py` read from it.
+  Change a number there and rebuild: `python3 make_images.py && python3 build_doc.py && python3 build_viewer.py`.
+- `src/fit.py` (new) is the fit proof: 39 checks with numbered sources (34 fit, 1 tight, 2 check on site, 2 don't fit).
+- `src/render.py` was rebuilt for the real room: `P()` now honours `XOFF/YOFF/ZOFF` via `place(dx, dy, dz, fn)`, and
+  `box()` culls faces in world coordinates. New: `vinyl_cabinet()`, `singles_drawer()`, `browser()`, `deck()`,
+  `breast_frames()`, `side_shelves()`, the recess and door in `room()`. The v9 drawings of consoles, trays and the
+  game drawer are unchanged. Backups: `render_v9_backup.py`, `diagrams_v9_backup.py`, `build_doc_v9_backup.py`.
+- New diagram `why_layout()`; `living_plan()`, `house()`, `front()`, `section()` (now A alcove + B vinyl cabinet),
+  `routes()`, `network()`, `sound()`, `joints()` and `drawer()` redrawn for v10.
+
+**Design decisions taken this round (all in the plan)**
+- Alcove: uprights at 25.25–29.75 and 156.25–160.75, TV gap 126.5, side zones 25.25 (Series X left, pad dock right).
+  Base 3 + 60 + 60 + 60 + 3: BESTÅ bays 1–2 on the 9 cm plinth, bay 3 a ply carcass for the sub (sub 2 cm forward of
+  v9's spot: 11.6 cm behind it for the rear port), hidden slim drawer 56.4 wide. Base 46 deep (40 + 4 channel + 2 face
+  frame), 8 cm proud of the breast; the vinyl cabinet's oak end panel covers that step.
+- Heights: worktop 76; side shelves 156 both sides; ledge 155.4; high shelf moved to **196** (39 cm to the 235 ceiling,
+  5.5 cm above the ledge LPs).
+- **Joinery fix:** the side shelves' through-tenons now sit 12 and 20 cm from the wall (6 wide), clear of the ledge's
+  7 cm housing. In v9 they collided with the ledge housing (hidden by draw order).
+- Vinyl cabinet 100 × 44 × 76 at x 186–286, tight to the reveal, 17.5 cm short of the breast's west corner. Bay A:
+  the two v9 trays. Bay B (40): preamp cubby over a new face-out singles drawer (~110). Top: browser left, deck right
+  (AT-LP120X size allowed), breast clear to 130, two LP frames from 150. Totals: ~234 LPs, ~350 singles, all face-out.
+- Spot bar on the rose at x 186, 173.5 from the window: pink head now aims at the vinyl cabinet; lowest shade 212.6.
+- PC shelf moved 20 cm towards the alcove (z −110 to −175) to clear an assumed 2.0 × 0.95 m sofa.
+- Deco A + Switch 1 in bedroom 3; optional Cat6 to the master (projector) and bedroom 2 (music room).
+- Series X fit is **tight** on the sides (5 cm vs Microsoft's recommended 10–15 cm); offered option: shift the TV and
+  uprights 5 cm right (left zone 30.25, right 20.25).
+
+**Questions sent to the client (await answers before v11)**
+1. OK to move the vinyl corner to the oak cabinet on the chimney breast?
+2. Where does the door hinge, and which of 935 / 1045 / 660 / 820 are the recess, door and stair box?
+3. Models: turntable, PC case, Series X fan stand; the 10-gang's length.
+4. What's the 230 × 220 box in the window corner?
+5. Wired ports for the projector and the music room?
+6. Keep the TV centred, or shift it 5 cm right to give the Series X more air?
+7. Sofa size (the plan assumes about 2.0 × 0.95 m) and where the rear speakers can go.
+
+**Viewer artifact:** the old viewer link (9cB8xgi6Pt22gT4GUNNQEk) couldn't be opened from this account, so v10 was
+published as a new viewer artifact: https://claude.ai/artifact/D9y2P2ve6WveMJwyWrTNLQ (built from `src/media_wall_viewer.html` + `src/art/`). Update that one in place next time. The client's "Media Wall Build
+Tracker" artifact (4sWMHkRn3XhmwqJgG7NU3x) is still the first-round version (225 × 220 × 50); offered to refresh it.
+
+---
+
+# Earlier brief for v10 (kept for reference)
 
 **Read this first.** The client (Emma, with Dave) has now sent an accurate hand-measured sketch of the living room
 (`inputs/room_sketch_accurate_mm.png`). It changes the core geometry: everything since v6 assumed an alcove
