@@ -41,3 +41,13 @@ table.key { font-size: 8.4pt; } table.key td { padding: 2.4pt 5pt; } table.key t
 figure.joinery img { width: 82%; } figure.joinery figcaption { width: 82%; }
 .keycols { break-inside: avoid; display: grid; grid-template-columns: 1fr 1fr; gap: 0 14pt; align-items: start; } .keycols table.key { margin-top: 0; }
 table.key td.kg { background: #eef0e8; font-weight: 650; font-size: 7.8pt; letter-spacing: 0.06em; text-transform: uppercase; color: #4a5040; }
+/* v10 */
+h4 { font-size: 9.6pt; font-weight: 650; margin: 10pt 0 3pt; color: #4a4741; break-after: avoid; }
+sup.ref { font-size: 6.5pt; color: #8a6a1a; margin-left: 1pt; }
+table.fit td:last-child { width: 26pt; text-align: center; }
+.pass { color: #2f7a4f; font-weight: 650; } .fail { color: #b5442c; font-weight: 650; }
+.decision { background: #fbf3e6; border: 1px solid #ecd9b8; border-left: 4pt solid #c48c57; border-radius: 6pt; padding: 8pt 11pt 4pt; margin: 4pt 0 10pt; break-inside: avoid; }
+.decision b:first-child { color: #7a5130; }
+.toc { columns: 2; font-size: 8.8pt; color: #4a4741; margin: 0 0 8pt; padding-left: 14pt; }
+ol.sources { font-size: 8.4pt; color: #4a4741; }
+.twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14pt; }

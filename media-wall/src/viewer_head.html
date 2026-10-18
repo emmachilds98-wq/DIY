@@ -1,0 +1,50 @@
+<title>Media Wall v9</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column, the render as the hero with its controls directly under it; facts in a two-column band below */
+:root {
+  --bg: #eef0ea; --surface: #ffffff; --ink: #1d241e; --muted: #5b6457; --line: #d4d9cd; --oak: #9a6634; --chip: #e3e7dd;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #151a16; --surface: #1d231e; --ink: #e7ebe3; --muted: #9ba596; --line: #2f3830; --oak: #d9a46c; --chip: #262d27; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #151a16; --surface: #1d231e; --ink: #e7ebe3; --muted: #9ba596; --line: #2f3830; --oak: #d9a46c; --chip: #262d27; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; max-width: 62ch; }
+.viewer { display: grid; gap: 14px; }
+.frame { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.frame img { display: block; width: 100%; height: auto; }
+.controls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-start; }
+.group { display: grid; gap: 6px; min-width: 0; }
+.label { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: inherit; font-size: 14.5px; color: var(--ink); background: var(--chip); border: 1px solid transparent; border-radius: 999px; padding: 6px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.seg button[aria-pressed="true"] { background: var(--surface); border-color: var(--oak); box-shadow: inset 0 0 0 1px var(--oak); }
+.seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+.seg button:focus-visible { outline: 2px solid var(--oak); outline-offset: 2px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); flex: none; }
+.caption { color: var(--muted); font-size: 14px; margin: 0; }
+.band { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; }
+.band > section { min-width: 0; display: grid; gap: 10px; align-content: start; }
+h2 { font-family: var(--display); font-weight: 500; font-size: 1.35rem; margin: 0; }
+.heights { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.heights li { display: grid; grid-template-columns: 4.2rem 1fr; gap: 12px; padding: 5px 0 5px 12px; position: relative; }
+.heights li::before { content: ""; position: absolute; left: -2px; top: 50%; width: 8px; height: 2px; background: var(--muted); }
+.heights b { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.counts div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.counts strong { display: block; font-family: var(--display); font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.counts span { font-size: 13.5px; color: var(--muted); }
+ul.plain { margin: 0; padding-left: 1.1rem; display: grid; gap: 6px; }
+.plans { display: grid; gap: 14px; }
+.wait { border: 1px dashed var(--oak); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; }
+.wait p { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .frame img { transition: opacity .18s ease; } }
+</style>

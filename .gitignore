@@ -9,3 +9,8 @@ media-wall/src/p_*.png
 media-wall/src/plan.html
 *.zip
 .DS_Store
+media-wall/src/v10_*.svg
+media-wall/src/s_*.png
+media-wall/src/k_join.png
+media-wall/src/zz_*.png
+media-wall/src/skirt_*.png

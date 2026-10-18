@@ -1,4 +1,52 @@
-# Handoff: Home Network & Media Wall Plan, final accurate version (v10)
+# Handoff: Home Network & Media Wall Plan (v10 delivered, 18 Oct 2026)
+
+**Read this first.** v10 re-fits everything to the client's measured sketch (`inputs/room_sketch_accurate_mm.png`):
+alcove **186 × 38**, chimney breast **117.5**, ceiling **235**, room 467 × 347. Section 1 of the older notes below still
+holds the room facts; the rest of those notes describe v9 and earlier.
+
+## State after v10
+| Deliverable | Where |
+|---|---|
+| Plan PDF (43 pp, restructured) | `out/Home_Network_Plan_v10.pdf` (built by `src/build_doc.py`) |
+| HD renders, labelled | `out/Media wall v10 - …(HD).png` (key, clean, slat alternative); paint grid, skirting, living room and house plans also in `out/` |
+| Viewer artifact | https://claude.ai/artifact/9cB8xgi6Pt22gT4GUNNQEk (v4), built by `src/build_viewer.py` from `src/art/` |
+| v9 outputs | archived in `out/v9/` |
+
+**The one open decision (raised with the client):** the turntable and the two record trays no longer fit in the alcove,
+so they moved to an oak **vinyl cabinet** (100 × 44 × 76) on the chimney breast: bay A 60 = the unchanged two face-out
+trays, bay B 40 = preamp/kit shelf with overflow singles below; turntable (AT-LP120X worst case) and LP browser on top;
+three LP frames on the breast from 140 up (40 cm lid clearance). If the client rejects it, see "Why this layout" in the plan.
+
+## v10 geometry (source of truth: constants at the top of `src/render.py`; `src/diagrams.py` repeats them)
+- Coordinates: x from the east wall, y up, z from the breast face (alcove back wall at z = 38, room at -z, window wall z = -309).
+- Uprights 4.5 × 30 × 159 at x 25.25–29.75 and 156.25–160.75 (126.5 clear); TV centred at x 93, screen 81.4–151.8.
+- Left gap: Series X on its fan stand (20.5 square reserved). Right gap: "this month's game" on an oak easel.
+- Ledge underside 153 / top 155.4; side shelves top 156 (through-tenoned); high shelf top 200 (35 to the ceiling).
+- Base 3 + 60 + 60 + 60 + 3: BESTÅ bays 1–2 on a 9 cm plinth (contents unchanged), bay 3 = open ply carcass for the sub
+  (riser, shelf 40–41.8, hidden drawer under the top, 6-way at the back). 4 cm channel + 40 + 2 face frame = 46 deep,
+  8 cm proud of the breast. Worktop 186 × 42 × 3, top 76.
+- Spot bar on the rose at x 186, z -135.5 (173.5 from the window wall); lowest shade ~212.
+- Sofa can't centre on the TV (93 from the east wall): drawn from 22 cm off the east wall.
+
+## Code notes
+- `render.py` was rebuilt: new room/base/cabinet code plus the v9 console, tray, drawer, PC and lamp code reused unchanged.
+  `at3(dx, dy, dz, fn)` offsets whole groups (the v9 bays and trays are drawn through it); `box()` culls faces on the
+  offset position. Backups: `render_v9_backup.py`, `build_doc_v9.py`, `diagrams_v9.py`.
+- `specs.py` holds every cited size (`SOURCES`) and the fit-proof tables (`FIT`); the plan's numbered Sources come from it.
+- `shot.py` falls back to `/opt/pw-browsers/chromium` when Playwright's own browser is missing.
+- Build: `cd src && python3 render.py && python3 build_doc.py && python3 build_viewer.py`; HD: `python3 shot.py v10_join_key.svg HD_join_key.png 2540 1300 2.2`.
+
+## Still to ask / next
+1. Client's answer on the vinyl cabinet; the door position and hinge side (cabinet's west end comes out 44 cm).
+2. Turntable, PC case, Series X fan stand models; the 10-gang's length; the 23 × 22 box in the window corner; stair box figures.
+3. Wired ports for the projector (master) and the music room (bedroom 2)?
+4. RetroTINK-6X CE size is still unpublished (23 × 23 × 8 reserved).
+5. No slat-wall numbered key in v10 (only clean slat renders); add one if the client asks about the slat version again.
+
+---
+
+# Earlier notes: v10 brief (written before the v10 work)
+
 
 **Read this first.** The client (Emma, with Dave) has now sent an accurate hand-measured sketch of the living room
 (`inputs/room_sketch_accurate_mm.png`). It changes the core geometry: everything since v6 assumed an alcove

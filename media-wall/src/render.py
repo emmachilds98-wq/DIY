@@ -1,32 +1,70 @@
-"""Media wall concept render, drawn to real measurements (cm) with a simple
-one-point perspective. Produces SVG for stage 1 (tapestry) and stage 2 (slats).
-Usage: python3 render.py  -> render_stage1.svg, render_stage2.svg
+"""Media wall render, v10: drawn to the client's hand-measured room (inputs/room_sketch_accurate_mm.png)
+in real cm, with a simple one-point perspective.
+Usage: python3 render.py  -> v10_*.svg (rasterise with shot.py)
+
+Coordinates: x runs from the east (left) wall towards the west, y up from the floor, z from the chimney
+breast's face (z = 0) back into the alcove (+z, back wall at z = 38) and out into the room (-z).
 """
 import math, random
 
 W, H = 1900, 1300
-SHIFT = 150         # v8: scene drawn 150 px lower so the ceiling and the room's pendant fit in frame
-S = 3.9            # px per cm at the alcove opening plane
-X0, Y0 = 462, 930  # px of alcove left edge / floor at the opening plane
-EYE_X, EYE_Y = 112.5, 112.0   # camera position in cm (centre of alcove, seated eye height)
+SHIFT = 0           # v10: the camera itself is framed to take in the ceiling and the spotlight bar
+S = 3.6             # px per cm at the breast-face plane (z = 0)
+X0, Y0 = 376, 1038  # px of the east wall / floor at the breast-face plane
+EYE_X, EYE_Y = 140.0, 112.0   # camera: between the alcove and the breast, seated eye height
 VX = X0 + EYE_X * S
 VY = Y0 - EYE_Y * S
-D = 505.0          # camera distance from the opening plane, cm
+D = 505.0           # camera distance from the breast-face plane, cm (a cutaway: the window wall is at z = -309)
 
-YOFF = 0.0          # vertical offset applied by P(), used to lift whole groups
-RAISE = 9.0         # the unit stands 9 cm taller than a plain BESTÅ run: worktop top ~75.8
+XOFF = YOFF = ZOFF = 0.0   # offsets applied by P(), used to place whole groups
+RAISE = 9.0         # plinth under the two BESTÅ frames: their tops at 73, worktop top at 76
 
-def at(off, fn, *a, **kw):
-    global YOFF
-    old = YOFF
-    YOFF = off
+# ---------------------------------------------------------------- the real room (cm), v10
+ALC_W, ALC_D, CEIL = 186.0, 38.0, 235.0     # TV alcove: east wall to chimney breast, depth, floor to ceiling
+BREAST_W = 117.5                            # chimney breast face
+BR_X2 = ALC_W + BREAST_W                    # 303.5: the breast's west jamb
+REC_D = 39.0                                # west recess depth (breast projects 390 on that side)
+ROOM_D = 347.0                              # window wall to the alcove's back wall
+WIN_Z = ALC_D - ROOM_D                      # -309: the window wall
+SKIRT_H, SKIRT_T = 6.0, 2.0
+# the base in the alcove: 3 + 60 + 60 + 60 + 3
+BAYS = [(3.0, 63.0), (63.0, 123.0), (123.0, 183.0)]
+BASE_F = -8.0       # front of the oak face frame: 8 cm proud of the breast
+CARC_F = -6.0       # front of the frames and carcass (40 deep)
+CARC_B = 34.0       # back of the frames: a 4 cm cable channel to the wall at 38
+WT = 76.0           # worktop top
+WT_TH = 3.0
+# above the worktop
+UPL, UPR = (25.25, 29.75), (156.25, 160.75)   # oak uprights, 4.5 thick, 126.5 clear between
+UP_D = 30.0
+UP_Z = ALC_D - UP_D                         # uprights' front face, z = 8
+TV_W, TV_H, TV_D = 122.2, 70.4, 4.6
+TV_CX = (UPL[1] + UPR[0]) / 2               # 93.0
+TV_Y = WT + 5.4                             # bottom of the screen on LG's stand: 81.4
+HS_TOP, HS_TH = 200.0, 4.0                  # high shelf top (35 cm to the ceiling)
+SH_TOP = 156.0                              # left and right shelves
+LEDGE_Y, LEDGE_TOP = 153.0, 155.4           # record ledge underside / top
+# the vinyl cabinet against the chimney breast
+CAB_X1, CAB_X2 = 188.0, 288.0
+CAB_F = -44.0       # face frame front; carcass 40 deep, 2 cm off the breast for the skirting
+CAB_TOP = 76.0
+
+
+def at3(dx, dy, dz, fn, *a, **kw):
+    """Draw fn with every point shifted by (dx, dy, dz) cm."""
+    global XOFF, YOFF, ZOFF
+    old = (XOFF, YOFF, ZOFF)
+    XOFF, YOFF, ZOFF = old[0] + dx, old[1] + dy, old[2] + dz
     try:
         return fn(*a, **kw)
     finally:
-        YOFF = old
+        XOFF, YOFF, ZOFF = old
+
+def at(off, fn, *a, **kw):
+    return at3(0, off, 0, fn, *a, **kw)
 
 def P(x, y, z):
-    y = y + YOFF
+    x, y, z = x + XOFF, y + YOFF, z + ZOFF
     k = D / (D + z)
     return (VX + (X0 + x * S - VX) * k, VY + (Y0 - y * S - VY) * k)
 
@@ -40,19 +78,20 @@ def quad_front(x, y, z, w, h, fill, extra=""):
     return poly([P(x, y, z), P(x + w, y, z), P(x + w, y + h, z), P(x, y + h, z)], fill, extra)
 
 def box(x, y, z, w, h, d, front, top=None, side=None, bottom=None, extra=""):
-    """Axis-aligned box. (x,y,z) = front-bottom-left; extends +x, +y (up), +z (back)."""
+    """Axis-aligned box. (x,y,z) = front-bottom-left; extends +x, +y (up), +z (back).
+    Faces are culled against the camera using the offset (world) position."""
     top = top or front
     side = side or front
     bottom = bottom or side
     out = []
-    # side faces
-    if x + w < EYE_X:   # right face visible
+    wx, wy = x + XOFF, y + YOFF
+    if wx + w < EYE_X:   # right face visible
         out.append(poly([P(x + w, y, z), P(x + w, y, z + d), P(x + w, y + h, z + d), P(x + w, y + h, z)], side, extra))
-    if x > EYE_X:       # left face visible
+    if wx > EYE_X:       # left face visible
         out.append(poly([P(x, y, z), P(x, y, z + d), P(x, y + h, z + d), P(x, y + h, z)], side, extra))
-    if y + h < EYE_Y:   # top visible
+    if wy + h < EYE_Y:   # top visible
         out.append(poly([P(x, y + h, z), P(x + w, y + h, z), P(x + w, y + h, z + d), P(x, y + h, z + d)], top, extra))
-    if y > EYE_Y:       # underside visible
+    if wy > EYE_Y:       # underside visible
         out.append(poly([P(x, y, z), P(x + w, y, z), P(x + w, y, z + d), P(x, y, z + d)], bottom, extra))
     out.append(quad_front(x, y, z, w, h, front, extra))
     return "\n".join(out)
@@ -139,148 +178,151 @@ def defs():
 </defs>'''
 
 
-CEIL = 220.0
+
 SKIRT = None   # None = painted in the wall colour (eggshell); or a 5-tuple of colours
-STYLE = "slats"      # "slats" or "joinery"    # the alcove runs to the ceiling, so the room is 220 cm high throughout
+STYLE = "joinery"    # "joinery" (main) or "slats" (alternative)
+FAR = -470.0         # nearest wall/floor depth drawn (P() breaks at z <= -505)
 
 def room():
+    """The room shell, v10: alcove 186 wide x 38 deep on the east end of the south wall, the chimney breast
+    (117.5 wide) beside it, the west recess (39 deep) beyond, one 235 cm ceiling, 6 cm skirting."""
     o = []
-    o.append(f'<rect x="0" y="{-SHIFT - 60}" width="{W}" height="{H + SHIFT + 120}" fill="url(#backwall)"/>')
-    # alcove interior: back wall, right reveal, floor
-    o.append(quad_front(0, 0, 50, 225, CEIL, "#244a39"))
-    o.append(poly([P(225, 0, 0), P(225, CEIL, 0), P(225, CEIL, 50), P(225, 0, 50)], G_REVR))
-    o.append(poly([P(0, 0, 0), P(225, 0, 0), P(225, 0, 50), P(0, 0, 50)], "#4f4a43"))
-    # left wall plane x=0, continuous into the alcove, floor to ceiling
-    lw = [P(0, CEIL, -470), P(0, CEIL, 50), P(0, 0, 50), P(0, 0, -470)]
-    o.append(poly(lw, "url(#leftwall)"))
-    # ceiling: one plane at 220 over the room and the alcove (drenched, a touch lighter)
-    cl = [P(0, CEIL, 50), P(225, CEIL, 50), P(225, CEIL, 0), (W + 10, P(225, CEIL, 0)[1]), (W + 10, -SHIFT - 40), (-10, -SHIFT - 40), P(0, CEIL, -470)]
-    o.append(poly(cl, "#33604a"))
-    o.append(f'<line x1="{P(225, CEIL, 0)[0]:.1f}" y1="{P(225, CEIL, 0)[1]:.1f}" x2="{W+10}" y2="{P(225, CEIL, 0)[1]:.1f}" stroke="#264c3a" stroke-width="1.5"/>')
-    # room floor
-    fl = [P(0, 0, 0), (W + 10, P(0, 0, 0)[1]), (W + 10, H + 10), P(0, 0, -470)]
-    o.append(poly(fl, "url(#floor)"))
-    # skirting: back wall right of alcove (front face + top), left wall
+    o.append(f'<rect x="0" y="-60" width="{W}" height="{H + 120}" fill="url(#backwall)"/>')
+    XR = 640.0      # draw the recess and floor well past the frame's right edge
+    # floor (walls drawn over it hide the parts behind them)
+    a, b = P(0, 0, ALC_D), P(XR, 0, ALC_D)
+    o.append(poly([a, b, (W + 10, b[1]), (W + 10, H + 10), P(0, 0, FAR)], "url(#floor)"))
+    # ceiling, one plane at 235
+    a, b = P(0, CEIL, ALC_D), P(XR, CEIL, ALC_D)
+    o.append(poly([a, b, (W + 10, b[1]), (W + 10, -70), (-10, -70), P(0, CEIL, FAR)], "#33604a"))
+    # west recess back wall, alcove back wall, alcove floor, reveal, chimney breast face
+    o.append(quad_front(BR_X2, 0, REC_D, XR - BR_X2, CEIL, "#2a5340"))
+    o.append(quad_front(0, 0, ALC_D, ALC_W, CEIL, "#244a39"))
+    o.append(poly([P(0, 0, 0), P(ALC_W, 0, 0), P(ALC_W, 0, ALC_D), P(0, 0, ALC_D)], "#4f4a43"))
+    o.append(poly([P(ALC_W, 0, 0), P(ALC_W, CEIL, 0), P(ALC_W, CEIL, ALC_D), P(ALC_W, 0, ALC_D)], G_REVR))
+    o.append(quad_front(ALC_W, 0, 0, BREAST_W, CEIL, G_WALL))
+    # east (left) wall, from the room into the alcove
+    o.append(poly([P(0, CEIL, FAR), P(0, CEIL, ALC_D), P(0, 0, ALC_D), P(0, 0, FAR)], "url(#leftwall)"))
+    for (p, q) in [(P(ALC_W, CEIL, 0), P(BR_X2, CEIL, 0)), (P(0, CEIL, ALC_D), P(ALC_W, CEIL, ALC_D)),
+                   (P(BR_X2, CEIL, REC_D), P(XR, CEIL, REC_D))]:
+        o.append(f'<line x1="{p[0]:.1f}" y1="{p[1]:.1f}" x2="{q[0]:.1f}" y2="{q[1]:.1f}" stroke="#264c3a" stroke-width="1.5"/>')
+    # skirting, 6 high x 2 thick, painted in the wall colour: breast face, recess, east wall
     sk = SKIRT or ("#346650", "#3d7259", "#2b5643", "#2d5a46", "#3b6e56")
-    o.append(box(225, 0, -1.8, 700, 10, 1.8, sk[0], sk[1], sk[2]))
-    o.append(poly([P(0, 0, 0), P(0, 10, 0), P(0, 10, -470), P(0, 0, -470)], sk[3]))
-    o.append(poly([P(0, 10, 0), P(1.8, 10, 0), P(1.8, 10, -470), P(0, 10, -470)], sk[4]))
-    o.append(poly([P(20, 0.1, -60), P(215, 0.1, -60), P(215, 0.1, -330), P(20, 0.1, -330)], "#8a7f70", 'opacity="0.55"'))
+    o.append(box(BR_X2, 0, REC_D - SKIRT_T, XR - BR_X2, SKIRT_H, SKIRT_T, sk[0], sk[1], sk[2]))
+    o.append(box(ALC_W, 0, -SKIRT_T, BREAST_W, SKIRT_H, SKIRT_T, sk[0], sk[1], sk[2]))
+    o.append(poly([P(0, 0, BASE_F), P(0, SKIRT_H, BASE_F), P(0, SKIRT_H, FAR), P(0, 0, FAR)], sk[3]))
+    o.append(poly([P(0, SKIRT_H, BASE_F), P(SKIRT_T, SKIRT_H, BASE_F), P(SKIRT_T, SKIRT_H, FAR), P(0, SKIRT_H, FAR)], sk[4]))
+    # rug in front of the wall
+    o.append(poly([P(18, 0.1, -62), P(262, 0.1, -62), P(262, 0.1, -300), P(18, 0.1, -300)], "#8a7f70", 'opacity="0.55"'))
     return "\n".join(o)
 
 
 def slats():
+    """Slat wall alternative: oak slats on battens on the alcove's back wall, worktop to ceiling."""
     o = []
-    y0, y1 = 66.8 + RAISE, CEIL
-    o.append(quad_front(0, y0, 50, 225, y1 - y0, G_FELT))
+    y0, y1 = WT, CEIL
+    o.append(quad_front(0, y0, ALC_D, ALC_W, y1 - y0, G_FELT))
     x = 1.0
     rnd = random.Random(4)
-    while x < 224:
+    while x < ALC_W - 1:
         c = rnd.choice(["#bf8853", "#c58f59", "#b98250", "#c99560", "#b57d4b"])
-        o.append(quad_front(x, y0, 50, 2.6, y1 - y0, c))
-        o.append(quad_front(x + 2.1, y0, 50, 0.5, y1 - y0, "#9b6a3e", 'opacity="0.6"'))
+        o.append(quad_front(x, y0, ALC_D, 2.6, y1 - y0, c))
+        o.append(quad_front(x + 2.1, y0, ALC_D, 0.5, y1 - y0, "#9b6a3e", 'opacity="0.6"'))
         x += 4.0
     return "\n".join(o)
 
 
-def tapestry():
+def high_shelf():
+    """High shelf, top 200 (35 cm to the ceiling): solid oak 30 x 4, wall to wall, housed into both uprights.
+    Books up to about 30 cm in the middle, a lidded box, a print; Deco B on the right end."""
     o = []
-    o.append(quad_front(0, 66.8, 50, 225, 153.2, "#244a39"))
-    # cloth hung from a rail at 205 cm, 170 wide, centred
-    cx, cy = 112.5, 140
-    o.append(quad_front(27, 74, 49, 171, 131, "#173a2b"))
-    o.append(quad_front(27, 74, 48.9, 171, 131, "none", 'stroke="#8cbc98" stroke-opacity="0.55" stroke-width="3"'))
-    o.append(quad_front(31, 78, 48.9, 163, 123, "none", 'stroke="#8cbc98" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="3 5"'))
-    for i in range(43):
-        fx = 28 + i * 4
-        a, b = P(fx, 74, 48.9), P(fx, 70.5, 48.9)
-        o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#7fa88a" stroke-width="1.4" opacity="0.7"/>')
-    c = P(cx, cy, 49)
-    k = D / (D + 49)
-    for r, n, col in [(10, 10, "#7fb08d"), (20, 18, "#6aa07b"), (30, 26, "#7fb08d"), (40, 34, "#5d9270"),
-                      (50, 42, "#7fb08d"), (60, 50, "#5d9270"), (72, 58, "#6aa07b")]:
-        for i in range(n):
-            t = 2 * math.pi * i / n
-            px, py = c[0] + r * S * k * math.cos(t), c[1] + r * S * k * math.sin(t)
-            # keep within cloth
-            x_cm, y_cm = cx + r * math.cos(t), cy - r * math.sin(t)
-            if 29 < x_cm < 196 and 76 < y_cm < 203:
-                o.append(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="{2.6 + r / 40:.1f}" fill="{col}" opacity="0.8"/>')
-    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="{14 * S * k:.1f}" fill="none" stroke="#8cbc98" stroke-width="2" opacity="0.7"/>')
-    o.append(box(25, 205, 48, 175, 1.2, 1.2, "#3a3a3a"))
-    return "\n".join(o)
-
-
-def high_shelf(stage):
-    o = []
-    th = 4 if stage == 2 else 2.5
-    y = 190 - th
-    if stage == 2:
-        o.append(poly([P(0, y - 32, 49.9), P(225, y - 32, 49.9), P(225, y, 49.9), P(0, y, 49.9)], "url(#ledDown)", 'opacity="0.45"' if STYLE == "joinery" else ""))
-    o.append(box(0, y, 20, 225, th, 30, OAK, OAK_T, OAK_S, "#8e6038", GH))
+    y = HS_TOP - HS_TH
+    zf = ALC_D - 30
+    o.append(poly([P(0, y - 34, ALC_D - 0.1), P(ALC_W, y - 34, ALC_D - 0.1), P(ALC_W, y, ALC_D - 0.1), P(0, y, ALC_D - 0.1)],
+                  "url(#ledDown)", 'opacity="0.45"' if STYLE == "joinery" else ""))
+    o.append(box(0, y, zf, ALC_W, HS_TH, 30, OAK, OAK_T, OAK_S, "#8e6038", GH))
     if STYLE == "joinery":   # chamfered front edge
-        a_, b_ = P(0, y + th - 0.4, 19.99), P(225, y + th - 0.4, 19.99)
+        a_, b_ = P(0, y + HS_TH - 0.4, zf - 0.01), P(ALC_W, y + HS_TH - 0.4, zf - 0.01)
         o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="#e9bd86" stroke-width="1.2"/>')
-    # books (hardbacks and paperbacks, up to 28 cm; 30 cm clear to the ceiling) with an oak bookend
+    cols = ["#2f3e5c", "#c8452f", "#e0b43a", "#1f6f8b", "#efe6d2", "#3a3a3a", "#6a8f5a", "#b3307a", "#d27a2e", "#14806d"]
+    # left end: a short stack of books lying flat and a small pot
+    for i, (bw, bh, c) in enumerate([(19, 3.0, "#2f3e5c"), (17.5, 2.6, "#e0b43a"), (18.5, 3.4, "#c8452f")]):
+        yy = HS_TOP + sum(v[1] for v in [(19, 3.0), (17.5, 2.6), (18.5, 3.4)][:i])
+        o.append(box(3 + i * 0.6, yy, 20, bw, bh, 15, c, side="#222"))
+    o.append(box(8, HS_TOP + 9.0, 24, 9, 9, 9, "#c76d45", "#d98a62", "#a85a38"))
+    o.append(ellipse_flat(12.5, HS_TOP + 18.1, 28.5, 4.6, 4.6, "#3a8f4a"))
+    # centre: books (hardbacks and paperbacks, up to 30 cm), then an oak bookend
     rnd = random.Random(9)
-    x = 3.0
-    while x < 104:
+    x = UPL[1] + 2.0
+    while x < 88:
         tw = rnd.choice([2.2, 2.6, 3.0, 3.4, 4.0, 2.0])
-        th_ = rnd.choice([21.6, 23.4, 24.0, 19.8, 25.0, 24.0])
-        col = rnd.choice(["#2f3e5c", "#c8452f", "#e0b43a", "#1f6f8b", "#efe6d2", "#3a3a3a", "#6a8f5a", "#b3307a", "#d27a2e", "#14806d"])
-        o.append(box(x, 190, 24, tw, th_, rnd.choice([15.5, 16, 17]), col, side="#222"))
-        o.append(box(x + tw * 0.2, 190 + th_ * 0.62, 23.99, tw * 0.6, 1.0, 0.1, "#f2efe6"))
+        th_ = rnd.choice([21.6, 23.4, 24.0, 19.8, 25.0, 24.0, 28.5, 29.5])
+        col = rnd.choice(cols)
+        o.append(box(x, HS_TOP, 21, tw, th_, rnd.choice([15.5, 16, 17]), col, side="#222"))
+        o.append(box(x + tw * 0.2, HS_TOP + th_ * 0.62, 20.99, tw * 0.6, 1.0, 0.1, "#f2efe6"))
         x += tw + 0.1
-    o.append(box(x + 0.3, 190, 24, 1.8, 16, 15, OAK, OAK_T, OAK_S))
-    # one lidded storage box
-    for bx in (108,):
-        o.append(box(bx, 190, 23, 32, 21, 25, "#a7a29a", "#bcb7ae", "#8f8a82"))
-        o.append(box(bx, 190 + 21, 23, 32, 1.5, 25, "#b3aea6", "#c4bfb6", "#9a958c"))
-        a, b = P(bx + 12, 203, 23), P(bx + 20, 203, 23)
-        o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#77736b" stroke-width="2"/>')
-    # framed print (original abstract)
-    o.append(box(147, 190, 42, 27, 27, 2, "url(#art1)", side="#555"))
-    o.append(box(178, 190, 36, 7, 14, 7, "#e8e2d6", "#f3eee5", "#cfc8bb"))
-    # Deco B (round-ish white unit 11 x 11.4)
-    o.append(box(196, 190, 30, 11, 11.4, 11, WHT, WHT_T, WHT_S, extra='rx="6"'))
-    o.append(ellipse_flat(201.5, 201.45, 35.5, 1.6, 1.6, "#4fd17a"))          # status light: solid green = online
-    o.append(ellipse_flat(201.5, 201.5, 35.5, 3.2, 3.2, "#4fd17a", 'opacity="0.25"'))
-    if STYLE == "joinery":   # 12 V lead and patch lead: along the back of the shelf into the groove behind the right upright
-        a_, b_, c_ = P(197, 190.3, 40.5), P(184, 190.3, 47), P(180.2, 190.3, 48)
-        o.append(f'<path d="M{a_[0]:.1f},{a_[1]:.1f} Q{b_[0]:.1f},{b_[1]:.1f} {c_[0]:.1f},{c_[1]:.1f}" stroke="#2b2b2b" stroke-width="2.2" fill="none"/>')
-        a_, c_ = P(198, 190.3, 42.5), P(180.2, 190.3, 49)
-        o.append(f'<path d="M{a_[0]:.1f},{a_[1]:.1f} L{c_[0]:.1f},{c_[1]:.1f}" stroke="#6f86a8" stroke-width="1.8" fill="none"/>')
-    st = P(201.5, 201.4, 41); en = P(224, 217, 49)
-    o.append(f'<path d="M{st[0]:.1f},{st[1]:.1f} Q{en[0]-10:.1f},{st[1]-6:.1f} {en[0]:.1f},{en[1]:.1f}" stroke="#7d8c84" stroke-width="2" fill="none" opacity="0.8"/>')
+    o.append(box(x + 0.3, HS_TOP, 21, 1.8, 16, 15, OAK, OAK_T, OAK_S))
+    # one lidded storage box for cables and controllers
+    bx = 96.0
+    o.append(box(bx, HS_TOP, 12, 32, 21, 25, "#a7a29a", "#bcb7ae", "#8f8a82"))
+    o.append(box(bx, HS_TOP + 21, 12, 32, 1.5, 25, "#b3aea6", "#c4bfb6", "#9a958c"))
+    a, b = P(bx + 12, HS_TOP + 13, 12), P(bx + 20, HS_TOP + 13, 12)
+    o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#77736b" stroke-width="2"/>')
+    # framed print leaning on the wall, and a small vase
+    o.append(box(131, HS_TOP, 34, 22, 27, 2, "url(#art1)", side="#555"))
+    o.append(box(146, HS_TOP, 26, 6, 13, 6, "#e8e2d6", "#f3eee5", "#cfc8bb"))
+    # Deco B on the right end (11 x 11 x 11.4), the Cat6 dropping in from the ceiling in the corner
+    dx0 = 168.5
+    o.append(box(dx0, HS_TOP, 22, 11, 11.4, 11, WHT, WHT_T, WHT_S, extra='rx="6"'))
+    o.append(ellipse_flat(dx0 + 5.5, HS_TOP + 11.45, 27.5, 1.6, 1.6, "#4fd17a"))          # solid green = online
+    o.append(ellipse_flat(dx0 + 5.5, HS_TOP + 11.5, 27.5, 3.2, 3.2, "#4fd17a", 'opacity="0.25"'))
+    st = P(dx0 + 10.5, HS_TOP + 4, 32); en = P(183.5, CEIL, 36.5)
+    o.append(f'<path d="M{st[0]:.1f},{st[1]:.1f} Q{en[0]:.1f},{st[1]-4:.1f} {en[0]:.1f},{en[1]:.1f}" stroke="#7d8c84" stroke-width="2" fill="none" opacity="0.85"/>')
+    if STYLE == "joinery":   # Deco's 12 V lead and patch lead along the back of the shelf into the groove behind the right upright
+        a_, c_ = P(dx0 + 1, HS_TOP + 0.3, 31.5), P(UPR[0] + 2.2, HS_TOP + 0.3, ALC_D - 0.3)
+        o.append(f'<path d="M{a_[0]:.1f},{a_[1]:.1f} L{c_[0]:.1f},{c_[1]:.1f}" stroke="#2b2b2b" stroke-width="2.2" fill="none"/>')
     return "\n".join(o)
 
 
-def left_shelf(stage):
+def side_shelves():
+    """Left and right oak shelves, top 156, 25 deep: through-tenoned into the uprights (joinery) or on cleats (slats)."""
     o = []
-    th = 4 if stage == 2 else 2.5
-    if stage == 2:
-        o.append(poly([P(2, 120, 49.9), P(48, 120, 49.9), P(48, 150 - th, 49.9), P(2, 150 - th, 49.9)], "url(#ledDown)"))
-    o.append(box(0, 150 - th, 25, 44.5 if STYLE == "joinery" else 48, th, 25, OAK, OAK_T, OAK_S, extra=GH))
-    cols = ["#1d7a3a", "#2b2b2b", "#1f5fa8", "#c23b2e", "#e0b43a", "#1d7a3a", "#2b2b2b", "#2f8f4e"]
-    x = 6
+    th = 4.0
+    z0 = ALC_D - 25
+    for (x1, x2) in ((0.0, UPL[0]), (UPR[1], ALC_W)):
+        o.append(poly([P(x1 + 1, SH_TOP - th - 30, ALC_D - 0.1), P(x2 - 1, SH_TOP - th - 30, ALC_D - 0.1),
+                       P(x2 - 1, SH_TOP - th, ALC_D - 0.1), P(x1 + 1, SH_TOP - th, ALC_D - 0.1)], "url(#ledDown)"))
+        o.append(box(x1, SH_TOP - th, z0, x2 - x1, th, 25, OAK, OAK_T, OAK_S, extra=GH))
+    # left: a few favourite games standing, and a small red speaker
+    cols = ["#1d7a3a", "#2b2b2b", "#1f5fa8", "#c23b2e", "#e0b43a", "#2f8f4e"]
+    x = 3.0
     for c in cols:
-        o.append(box(x, 150, 32, 1.5, 19, 13.5, c, side="#111"))
+        o.append(box(x, SH_TOP, 22, 1.5, 19, 13.5, c, side="#111"))
         x += 1.6
-    o.append(box(22, 150, 33, 11, 12, 11, "#c84b34", "#d8634b", "#a83d2a"))
+    o.append(box(14.0, SH_TOP, 24, 9, 10, 9, "#c84b34", "#d8634b", "#a83d2a"))
+    # right: a 7-inch single in a small frame and a trailing plant
+    o.append(box(UPR[1] + 3, SH_TOP, 33, 20, 20, 1.6, "#1b1b1b", side="#111"))
+    o.append(quad_front(UPR[1] + 4.2, SH_TOP + 1.2, 32.9, 17.6, 17.6, "#e9b44c"))
+    o.append(quad_front(UPR[1] + 6.5, SH_TOP + 3.5, 32.8, 13, 13, "#c8452f"))
+    c = P(UPR[1] + 13, SH_TOP + 10, 32.7)
+    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="5" fill="#1b1b1b"/>')
+    o.append(box(UPR[1] + 13, SH_TOP, 20, 9, 8, 9, "#e7e1d4", "#f2ede3", "#cbc4b6"))
+    p = P(UPR[1] + 17.5, SH_TOP + 8, 24)
+    for i, (dx, dy) in enumerate([(-14, 40), (-4, 62), (8, 48)]):
+        o.append(f'<path d="M{p[0]:.1f},{p[1]:.1f} q {dx/2:.1f},{dy/3:.1f} {dx:.1f},{dy:.1f}" stroke="#2f6f3a" stroke-width="2" fill="none"/>')
+        for t in range(4):
+            lx, ly = p[0] + dx * (t + 1) / 4, p[1] + dy * (t + 1) / 4
+            o.append(f'<ellipse cx="{lx:.1f}" cy="{ly:.1f}" rx="5" ry="3" fill="#3a8f4a" transform="rotate({-30 + i * 25} {lx:.1f} {ly:.1f})"/>')
     return "\n".join(o)
 
 
 def tv():
+    """LG OLED C6 55in (122.2 x 70.4 x 4.6) on LG's stand (47 x 23.1), centred between the uprights."""
     o = []
-    x, y, z, w, h = 51.0, 72.2, 28.0, 122.5, 70.5
-    cx = x + w / 2
-    # bias light (stage 2 only — added by caller)
-    # stand
-    o.append(box(cx - 23.5, 66.8, 16, 47, 1.6, 23, "#2a2a2c", "#3a3a3d", "#202022"))
-    o.append(box(cx - 6, 68.4, 28.5, 12, 4.2, 3, "#232325"))
-    # panel
-    o.append(box(x, y, z, w, h, 4, "#0d0d0f", "#202022", "#151517"))
-    # screen picture: dusk over hills (original image)
+    x, y, z, w, h = TV_CX - TV_W / 2, TV_Y, 18.0, TV_W, TV_H
+    o.append(box(TV_CX - 23.5, WT, 9.0, 47, 1.6, 23.1, "#2a2a2c", "#3a3a3d", "#202022"))
+    o.append(box(TV_CX - 6, WT + 1.6, 18.5, 12, TV_Y - WT - 1.6 + 1, 3, "#232325"))
+    o.append(box(x, y, z, w, h, TV_D, "#0d0d0f", "#202022", "#151517"))
     a, b = P(x + 0.6, y + h - 0.6, z), P(x + w - 0.6, y + 0.6, z)
     sx, sy, sw, sh = a[0], a[1], b[0] - a[0], b[1] - a[1]
     o.append(f'<svg x="{sx:.1f}" y="{sy:.1f}" width="{sw:.1f}" height="{sh:.1f}" viewBox="0 0 100 57.6" preserveAspectRatio="none">'
@@ -291,52 +333,6 @@ def tv():
              f'<path d="M0,53 L20,50 L40,53 L58,50 L80,54 L100,51 L100,57.6 L0,57.6Z" fill="#150f24"/>'
              f'</svg>')
     return "\n".join(o)
-
-
-TT = 104.0   # turntable shelf top, raised from 100 so LPs stand underneath
-
-def turntable(stage):
-    o = []
-    th = 4 if stage == 2 else 2.5
-    sb = TT - th     # shelf underside
-    if stage == 2:
-        o.append(poly([P(176, sb - 30, 49.9), P(224.5, sb - 30, 49.9), P(224.5, sb, 49.9), P(176, sb, 49.9)], "url(#ledDown)"))
-    # LP browser on the worktop under the deck: 48 wide, 24 deep, ~50 LPs face-out leaning back 10°
-    bx0, bw = (180.5, 44.0) if STYLE == "joinery" else (176.5, 48.0)    # joinery: clear of the right upright
-    rx0 = bx0 + (bw - 31.4) / 2
-    o.append(box(bx0, 66.8, 2, bw, 0.8, 24, "#c79a63", "#d9ad75", "#a87d4a"))
-    lean = math.radians(10); hgt = 31.4 * math.cos(lean); dz = 31.4 * math.sin(lean)
-    cols = ["#e9e3d3", "#2f3e5c", "#c8452f", "#f0c24b", "#1f1f1f", "#6a8f5a", "#3a6ea5", "#b3307a", "#efe6d2", "#2c2c2c", "#d24a3a"]
-    for i, col in enumerate(cols):
-        zz = 21 - i * 1.6
-        q = [P(rx0, 67.6, zz - dz), P(rx0 + 31.4, 67.6, zz - dz), P(rx0 + 31.4, 67.6 + hgt, zz), P(rx0, 67.6 + hgt, zz)]
-        o.append(poly(q, col, 'stroke="#000" stroke-opacity="0.25" stroke-width="0.6"'))
-    zf = 4.6
-    fq = [P(rx0, 67.6, zf - dz), P(rx0 + 31.4, 67.6, zf - dz), P(rx0 + 31.4, 67.6 + hgt, zf), P(rx0, 67.6 + hgt, zf)]
-    o.append(poly(fq, "#1f3a52", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
-    def L(u, v):
-        bl, br, tr, tl = fq
-        bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
-        tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
-        return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
-    for (u1, u2, v1, v2, c) in [(0.0, 1.0, 0.0, 0.42, "#e9b44c"), (0.12, 0.88, 0.5, 0.9, "#d8613e"), (0.35, 0.65, 0.58, 0.82, "#f5e6c6")]:
-        o.append(poly([L(u1, v1), L(u2, v1), L(u2, v2), L(u1, v2)], c))
-    o.append(box(bx0, 66.8, 1.2, bw, 4.0, 1.2, OAK, OAK_T, OAK_S))     # low front rail
-    o.append(box(bx0, 66.8, 2, 1.2, 9, 24, OAK, OAK_T, OAK_S))
-    # the raised shelf
-    o.append(box(180 if STYLE == "joinery" else 176.5, sb, 5, 45 if STYLE == "joinery" else 48, th, 45, OAK, OAK_T, OAK_S, extra=GH))
-    for fx in (181, 216):
-        o.append(box(fx, TT, 12, 3, 1.2, 3, "#3a3a3a"))
-    o.append(box(179, TT + 1.2, 10, 42, 9.5, 34, "#1c1c1e", "#2c2c2f", "#121213"))
-    o.append(ellipse_flat(195, TT + 10.8, 27, 15, 15, "#3a3a3d"))
-    o.append(ellipse_flat(195, TT + 11.4, 27, 15, 15, "#0b0b0c"))
-    o.append(ellipse_flat(195, TT + 11.5, 27, 4.5, 4.5, "#d4553f"))
-    a, b = P(215, TT + 12.5, 33), P(205, TT + 12.5, 16)
-    o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#cfcfd2" stroke-width="2.5"/>')
-    o.append(box(213.5, TT + 10.7, 30, 4, 2.5, 4, "#9a9aa0"))
-    o.append(box(179, TT + 10.7, 10, 42, 6, 34, "url(#glass)", "url(#glass)", "url(#glass)", extra='stroke="#ffffff" stroke-opacity="0.25" stroke-width="1"'))
-    return "\n".join(o)
-
 
 def _line(a, b, col, w=1.2, extra=""):
     return f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{col}" stroke-width="{w}" {extra}/>'
@@ -435,7 +431,8 @@ def singles(xa, xb, y0):
         x = xa + 0.5
         while x < xb - 0.8:
             t = rnd.choice([0.22, 0.25, 0.25, 0.3, 0.35])
-            o.append(box(x, yb, z, t, 18.3, 18.3, rnd.choice(cols), None, "#00000044"))
+            c = rnd.choice(cols)
+            o.append(box(x, yb, z, t, 18.3, 18.3, c, None, c, extra='stroke="#00000033" stroke-width="0.3"'))
             x += t + 0.01
     row(y0 + 3.0, 20.0)
     o.append(box(xa, y0, 19.5, xb - xa, 3.0, 19.0, "#d8c39f", "#e6d2ae", "#b99e78"))   # step
@@ -443,98 +440,114 @@ def singles(xa, xb, y0):
     return "\n".join(o)
 
 
-def unit(stage):
-    """Bays 1-2: BESTÅ 60x40x64 frames on a 9 cm plinth (tops at 73). Bay 3: custom 18 mm ply carcass
-    60 x 40 x 73 from the floor with two face-out record drawers. Sub bay open from the floor. Worktop on top at 73."""
-    o = []
-    side_l, side_r, floor_c = "#d9c29b", "#b89b72", "#cbb085"
-    o.append(poly([P(-1, 0.05, 0), P(226, 0.05, 0), P(226, 0.05, -10), P(-1, 0.05, -10)], "#000", 'opacity="0.18" filter="url(#soft)"'))
 
-    def bay(x1, x2, y1, y2):
-        b = [quad_front(x1, y1, 40, x2 - x1, y2 - y1, "url(#bayBack)"),
-             poly([P(x1, y1, 0), P(x1, y1, 40), P(x1, y2, 40), P(x1, y2, 0)], side_l),
-             poly([P(x2, y1, 0), P(x2, y1, 40), P(x2, y2, 40), P(x2, y2, 0)], side_r),
-             poly([P(x1, y1, 0), P(x2, y1, 0), P(x2, y1, 40), P(x1, y1, 40)], floor_c)]
-        return "\n".join(b)
+PLY, PLY_T, PLY_S = "#d9c09a", "#e8d3b0", "#b99e78"
+SIDE_L, SIDE_R, FLOOR_C = "#d9c29b", "#b89b72", "#cbb085"
 
-    def shelf(x1, x2, y):
-        return box(x1, y, 1.0, x2 - x1, 1.8, 36, "#d8c39f", "#e6d2ae", "#b99e78")
+def bay(x1, x2, y1, y2, d=40):
+    """Open bay interior seen from the front (sides, floor and a dark open back), front at z = 0."""
+    b = [quad_front(x1, y1, d, x2 - x1, y2 - y1, "url(#bayBack)"),
+         poly([P(x1, y1, 0), P(x1, y1, d), P(x1, y2, d), P(x1, y2, 0)], SIDE_L),
+         poly([P(x2, y1, 0), P(x2, y1, d), P(x2, y2, d), P(x2, y2, 0)], SIDE_R),
+         poly([P(x1, y1, 0), P(x2, y1, 0), P(x2, y1, d), P(x1, y1, d)], FLOOR_C)]
+    return "\n".join(b)
 
-    def bays12():
-        q = []
-        for (a, b) in [(1.6, 58.4), (61.6, 118.4)]:
-            q.append(bay(a, b, 1.6, 62.4))
-            q.append(poly([P(a, 62.4, 2), P(b, 62.4, 2), P(b, 40, 2), P(a, 40, 2)], "url(#warmpool)", 'opacity="0.9"'))
-        q.append(shelf(1.6, 58.4, 26.8)); q.append(shelf(1.6, 58.4, 44.6))
-        q.append(xbox360(5, 28.6, 6)); q.append(box(38.5, 28.6, 9, 18, 6.2, 10, "#262628", "#333336", "#1a1a1c"))
-        q.append(xboxone(5, 46.4, 6)); q.append(box(40.5, 46.4, 9, 16, 5.6, 9, "#262628", "#333336", "#1a1a1c"))
-        q.append(shelf(61.6, 118.4, 18.6)); q.append(shelf(61.6, 118.4, 36.9))
-        q.append(ps1(63.5, 1.6, 6))
-        q.append(box(93.5, 1.6, 8, 20, 4.5, 15, "#2a2b2e", "#3a3b3f", "#1a1b1d")); q.append(box(95, 3.4, 7.99, 1.6, 0.6, 0.1, "#79b8ff"))
-        q.append(ps2(63.5, 20.4, 6))
-        q.append(box(97, 20.4, 3, 13, 2.4, 7, "#1f1f22", "#303034")); q.append(box(98, 21.2, 2.99, 1, 0.5, 0.1, "#ff5a4a"))
-        q.append(ps3(63.5, 38.7, 6))
-        q.append(box(99, 38.7, 4, 17.5, 10, 16, "#c9a26a", "#d8b480", "#a98455"))
-        for i in range(5):
-            q.append(box(99.2, 39.5 + i * 2, 3.99, 17.1, 0.25, 0.1, "#a8834f"))
-        if GAME_OPEN == 0:
-            q.append(game_drawer(0))
-        return "\n".join(q)
-    o.append(at(RAISE, bays12))
 
-    o.append(bay(121.8, 178.2, 1.8, 71.2))
-    o.append(poly([P(121.8, 71.2, 2), P(178.2, 71.2, 2), P(178.2, 48, 2), P(121.8, 48, 2)], "url(#warmpool)", 'opacity="0.9"'))
-    if REC_OPEN_UP == 0:
-        o.append(record_tier(37.0, 0))
-    if REC_OPEN == 0:
-        o.append(record_tier(2.3, 0))
-
-    o.append(quad_front(181.5, 0, 50, 42, 73, "#22432f"))
-    o.append(box(180.4, 35.6, 2, 1.5, 1.4, 30, "#8a6a45"))
-    o.append(box(180.4, 37.0, 2, 44.4, 1.8, 30, OAK, OAK_T, OAK_S))
-    o.append(box(183.0, 38.8, 9, 12, 3.2, 11, "#202022", "#343437"))
-    o.append(box(183.8, 40.0, 8.99, 1.2, 0.8, 0.1, "#ff9a3c"))
-    o.append(box(184.5, 42.0, 12, 8, 2.5, 4, "#1d1d1f", "#2e2e31"))
-    o.append(box(196.0, 38.8, 10, 7, 5, 8, "#e7e1d4", "#f2ede3", "#cbc4b6"))
-    rnd = random.Random(31)
-    x = 204.0
-    while x < 223.6:
-        t = rnd.choice([0.22, 0.25, 0.3, 0.35])
-        o.append(box(x, 38.8, 3, t, 18.3, 18.3, rnd.choice(["#e9e3d3", "#2f3e5c", "#c8452f", "#f0c24b", "#1f1f1f", "#6a8f5a", "#3a6ea5", "#b3307a", "#d27a2e"]), None, "#00000044"))
-        x += t + 0.01
-    o.append(box(181.5, 65.6, 0, 42, 7.4, 2.0, OAK, OAK_T, OAK_S))
-    a_, b_ = P(196, 65.6, -0.01), P(210, 65.6, -0.01)
-    o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]+1:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]+1:.1f}" stroke="#6b4527" stroke-width="2.5"/>')
-    o.append(box(184.0, 29.5, 45.5, 34, 4.2, 4, WHT, WHT_T, WHT_S))                    # 6-way, each socket switched
-    for i in range(6):
-        o.append(box(186.0 + i * 5.3, 32.0, 45.49, 1.6, 1.2, 0.05, "#ff7a45" if i < 5 else "#9a9a9a"))
-    o.append(box(187.2, 0, 3, 30, 5, 35, "#3c3c3e", "#4a4a4d", "#2d2d2f"))
-    o.append(box(191.5, 5, 6, 21.4, 29.4, 30.4, "#1a1a1b", "#2b2b2d", "#111112"))
-    c = P(202.2, 20.5, 5.99)
-    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="{7.6 * S * D / (D + 6):.1f}" fill="#0c0c0c" stroke="#3a3a3c" stroke-width="2"/>')
-    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="{2.5 * S * D / (D + 6):.1f}" fill="#2a2a2c"/>')
-
-    outer = [P(0, 0, 0), P(225, 0, 0), P(225, 73, 0), P(0, 73, 0)]
-    holes = [(2.6, 57.4, 11.6), (62.6, 117.4, 11.6), (122.6, 177.4, 2.6), (182.6, 222.4, 2.6)]
+def face_frame(x1, x2, holes, top=73.0):
+    """Oak face frame (or painted, slat version) with openings (a, b, bottom); openings run up to 71."""
+    outer = [P(x1, 0, 0), P(x2, 0, 0), P(x2, top, 0), P(x1, top, 0)]
     d = "M" + " L".join(f"{p[0]:.1f},{p[1]:.1f}" for p in outer) + " Z"
     for (a, b, yb) in holes:
-        h = [P(a, yb, 0), P(b, yb, 0), P(b, 71.0, 0), P(a, 71.0, 0)]
+        h = [P(a, yb, 0), P(b, yb, 0), P(b, top - 2.0, 0), P(a, top - 2.0, 0)]
         d += " M" + " L".join(f"{p[0]:.1f},{p[1]:.1f}" for p in h) + " Z"
-    o.append(f'<path d="{d}" fill="{OAK if STYLE == "joinery" else G_FRAME}" fill-rule="evenodd" {GH if STYLE == "joinery" else ""}/>')
-    o.append(f'<path d="{d}" fill="none" stroke="#000" stroke-opacity="0.18" stroke-width="1"/>')
-    a_, b_ = P(0, 9, -0.02), P(120, 9, -0.02)
-    o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="#000" stroke-opacity="0.2" stroke-width="1"/>')
+    oak = STYLE == "joinery"
+    return (f'<path d="{d}" fill="{OAK if oak else G_FRAME}" fill-rule="evenodd" {GH if oak else ""}/>\n'
+            f'<path d="{d}" fill="none" stroke="#000" stroke-opacity="0.18" stroke-width="1"/>')
 
-    o.append(at(RAISE, lambda: game_drawer(GAME_OPEN) if GAME_OPEN > 0 else game_drawer(0, "lip")))
-    o.append(record_tier(37.0, REC_OPEN_UP) if REC_OPEN_UP > 0 else record_tier(37.0, 0, "lip"))
-    o.append(record_tier(2.3, REC_OPEN) if REC_OPEN > 0 else record_tier(2.3, 0, "lip"))
-    th = 3.0 if STYLE == "joinery" else 2.8
-    o.append(box(0, 73, 0, 225, th, 40, OAK, OAK_T, OAK_D, extra=GH))
-    if STYLE == "joinery":
-        a_, b_ = P(0, 73 + th - 0.4, -0.01), P(225, 73 + th - 0.4, -0.01)
-        o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="#ecc28c" stroke-width="1.4"/>')
+
+def bays12():
+    """Bays 1-2: the v7-v9 BESTÅ contents, unchanged (drawn in frame coordinates: x from bay 1's left side,
+    z from the face frame, y from the top of the plinth)."""
+    q = []
+    for (a, b) in [(1.6, 58.4), (61.6, 118.4)]:
+        q.append(bay(a, b, 1.6, 62.4))
+        q.append(poly([P(a, 62.4, 2), P(b, 62.4, 2), P(b, 40, 2), P(a, 40, 2)], "url(#warmpool)", 'opacity="0.9"'))
+    def shelf(x1, x2, y):
+        return box(x1, y, 1.0, x2 - x1, 1.8, 36, "#d8c39f", "#e6d2ae", "#b99e78")
+    q.append(shelf(1.6, 58.4, 26.8)); q.append(shelf(1.6, 58.4, 44.6))
+    q.append(xbox360(5, 28.6, 6)); q.append(box(38.5, 28.6, 9, 18, 6.2, 10, "#262628", "#333336", "#1a1a1c"))
+    q.append(xboxone(5, 46.4, 6)); q.append(box(40.5, 46.4, 9, 16, 5.6, 9, "#262628", "#333336", "#1a1a1c"))
+    q.append(shelf(61.6, 118.4, 18.6)); q.append(shelf(61.6, 118.4, 36.9))
+    q.append(ps1(63.5, 1.6, 6))
+    q.append(box(93.5, 1.6, 8, 20, 4.5, 15, "#2a2b2e", "#3a3b3f", "#1a1b1d")); q.append(box(95, 3.4, 7.99, 1.6, 0.6, 0.1, "#79b8ff"))
+    q.append(ps2(63.5, 20.4, 6))
+    q.append(box(97, 20.4, 3, 13, 2.4, 7, "#1f1f22", "#303034")); q.append(box(98, 21.2, 2.99, 1, 0.5, 0.1, "#ff5a4a"))
+    q.append(ps3(63.5, 38.7, 6))
+    q.append(box(99, 38.7, 4, 17.5, 10, 16, "#c9a26a", "#d8b480", "#a98455"))
+    for i in range(5):
+        q.append(box(99.2, 39.5 + i * 2, 3.99, 17.1, 0.25, 0.1, "#a8834f"))
+    if GAME_OPEN == 0:
+        q.append(game_drawer(0))
+    return "\n".join(q)
+
+
+def sub_bay():
+    """Bay 3: an open 18 mm ply carcass 60 x 40 x 73 from the floor (front at the face frame, z = 0 here).
+    Subwoofer on a 5 cm riser on the floor, a shelf above for the controller dock and spares, the 6-way at the
+    back, and the hidden slim drawer under the worktop."""
+    o = []
+    x1, x2 = BAYS[2][0] + 1.8, BAYS[2][1] - 1.8      # 124.8 .. 181.2
+    o.append(bay(x1, x2, 1.8, 71.2))
+    o.append(poly([P(x1, 71.2, 2), P(x2, 71.2, 2), P(x2, 48, 2), P(x1, 48, 2)], "url(#warmpool)", 'opacity="0.9"'))
+    # 6-way surge strip, each socket switched, screwed to the back under the shelf
+    o.append(box(x1 + 4, 33.0, 38.5, 34, 4.2, 1.5, WHT, WHT_T, WHT_S))
+    for i in range(6):
+        o.append(box(x1 + 6 + i * 5.3, 35.4, 38.49, 1.6, 1.2, 0.05, "#ff7a45" if i < 5 else "#9a9a9a"))
+    # shelf, top 41.8 (3.8 cm over the sub): Xbox and PlayStation pads on a charging dock, a basket of spare pads and cables
+    o.append(box(x1, 40.0, 1.0, x2 - x1, 1.8, 36, OAK, OAK_T, OAK_S))
+    o.append(box(x1 + 3, 41.8, 8, 22, 2.6, 9, "#1d1e21", "#2b2c30", "#141416"))
+    for i, col in enumerate(("#f2f1ec", "#1b1c1e")):
+        cx = x1 + 8 + i * 11
+        o.append(box(cx - 4.5, 44.4, 11, 9, 6.2, 4.5, col, side="#00000055"))
+        p = P(cx, 48.5, 10.99)
+        o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.6" fill="{"#3fae54" if i == 0 else "#2c4bb0"}"/>')
+    o.append(box(x1 + 29, 41.8, 6, 24, 11, 18, "#c9a26a", "#d8b480", "#a98455"))
+    for i in range(4):
+        o.append(box(x1 + 29.2, 42.6 + i * 2.4, 5.99, 23.6, 0.25, 0.1, "#a8834f"))
+    # riser and subwoofer (Hisense AX5100G sub 21.4 W x 29.4 H x 30.4 D), facing the sofa
+    sx = (x1 + x2) / 2 - 10.7
+    o.append(box(sx - 4.3, 1.8, 3, 30, 5, 34, "#3c3c3e", "#4a4a4d", "#2d2d2f"))
+    o.append(box(sx, 6.8, 4, 21.4, 29.4, 30.4, "#1a1a1b", "#2b2b2d", "#111112"))
+    c = P(sx + 10.7, 21.5, 3.99)
+    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="{7.6 * S * D / (D + BASE_F + 4):.1f}" fill="#0c0c0c" stroke="#3a3a3c" stroke-width="2"/>')
+    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="{2.5 * S * D / (D + BASE_F + 4):.1f}" fill="#2a2a2c"/>')
     return "\n".join(o)
 
+
+def unit():
+    """The base in the alcove, v10: 3 + 60 + 60 + 60 + 3 = 186. Bays 1-2 are BESTÅ 60x40x64 frames on a 9 cm
+    plinth, bay 3 an open ply carcass for the sub. 4 cm cable channel behind, 2 cm oak face frame in front,
+    so the front sits 8 cm proud of the chimney breast. Solid oak worktop 186 x 42 x 3, top at 76."""
+    o = []
+    o.append(poly([P(-1, 0.05, BASE_F), P(ALC_W, 0.05, BASE_F), P(ALC_W, 0.05, BASE_F - 10), P(-1, 0.05, BASE_F - 10)],
+                  "#000", 'opacity="0.18" filter="url(#soft)"'))
+    o.append(at3(BAYS[0][0], RAISE, BASE_F, bays12))
+    o.append(at3(0, 0, BASE_F, sub_bay))
+    holes = [(5.6, 60.4, 11.6), (65.6, 120.4, 11.6), (125.6, 180.4, 2.6)]
+    o.append(at3(0, 0, BASE_F, face_frame, 0, ALC_W, holes))
+    a_, b_ = P(0, 9, BASE_F - 0.02), P(123, 9, BASE_F - 0.02)
+    o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="#000" stroke-opacity="0.2" stroke-width="1"/>')
+    o.append(at3(BAYS[0][0], RAISE, BASE_F, lambda: game_drawer(GAME_OPEN) if GAME_OPEN > 0 else game_drawer(0, "lip")))
+    # hidden slim drawer under the worktop in bay 3: oak front 54.8 x 5.4 with a finger pull underneath
+    o.append(box(125.6, 65.6, BASE_F - 0.6, 54.8, 5.4, 2.0, OAK, OAK_T, OAK_S))
+    a_, b_ = P(146, 65.6, BASE_F - 0.61), P(160, 65.6, BASE_F - 0.61)
+    o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]+1:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]+1:.1f}" stroke="#6b4527" stroke-width="2.5"/>')
+    # solid oak worktop 186 x 42 x 3 (front at the face frame, 4 cm slot behind for cables)
+    o.append(box(0, WT - WT_TH, BASE_F, ALC_W, WT_TH, CARC_B - BASE_F, OAK, OAK_T, OAK_D, extra=GH))
+    if STYLE == "joinery":
+        a_, b_ = P(0, WT - 0.4, BASE_F - 0.01), P(ALC_W, WT - 0.4, BASE_F - 0.01)
+        o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="#ecc28c" stroke-width="1.4"/>')
+    return "\n".join(o)
 
 REC_OPEN = 0.0      # lower record drawer
 REC_OPEN_UP = 0.0   # upper record drawer
@@ -710,24 +723,164 @@ def game_drawer(open_cm, part="all"):
     return "\n".join(o)
 
 
-def worktop_items(stage):
+
+def worktop_items():
+    """On the worktop: Series X on its fan stand in the left zone, the soundbar centred at the front edge,
+    and a 'now playing' game on a small oak easel in the right zone."""
     o = []
-    # Series X on its fan stand at the left (15 cm from wall)
-    o.append(box(15, 66.8, 12, 20.5, 6.5, 20.5, "#1c1d1f", "#2a2b2d", "#141516"))
-    o.append(poly([P(15, 73.3, 12), P(35.5, 73.3, 12), P(35.5, 66.8, 12), P(15, 66.8, 12)], "url(#seriesGlow)", 'opacity="0.9"'))
-    o.append(box(15.2, 66.85, 11.9, 20.1, 0.9, 0.1, "#3dff8a", extra='opacity="0.85"'))
-    o.append(box(17.7, 73.3, 14.7, 15.1, 30.1, 15.1, "#151617", "#1f2a22", "#0d0e0f"))
-    o.append(ellipse_flat(25.25, 103.45, 22.25, 6.2, 6.2, "#0b2a17"))
-    o.append(ellipse_flat(25.25, 103.5, 22.25, 4.6, 4.6, "#2fbf62", 'opacity="0.55"'))
-    p = P(19.4, 101, 14.69)
-    o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.2" fill="#f1f1f1"/>')
-    # soundbar at the front edge, 92 x 6 x 9
-    o.append(box(66.5, 66.8, 1, 92, 6, 9, "#1b1c1e", "#2a2b2d", "#121314"))
+    # Series X fan stand (20.5 square reserved, about 6.5 tall), console 15.1 x 15.1 x 30.1: 2.4 cm clear each side
+    sx = (UPL[0] - 20.5) / 2
+    o.append(box(sx, WT, 10, 20.5, 6.5, 20.5, "#1c1d1f", "#2a2b2d", "#141516"))
+    o.append(poly([P(sx, WT + 6.5, 10), P(sx + 20.5, WT + 6.5, 10), P(sx + 20.5, WT, 10), P(sx, WT, 10)], "url(#seriesGlow)", 'opacity="0.9"'))
+    o.append(box(sx + 0.2, WT + 0.05, 9.9, 20.1, 0.9, 0.1, "#3dff8a", extra='opacity="0.85"'))
+    cx = sx + 10.25
+    o.append(box(cx - 7.55, WT + 6.5, 12.7, 15.1, 30.1, 15.1, "#151617", "#1f2a22", "#0d0e0f"))
+    o.append(ellipse_flat(cx, WT + 36.65, 20.25, 6.2, 6.2, "#0b2a17"))
+    o.append(ellipse_flat(cx, WT + 36.7, 20.25, 4.6, 4.6, "#2fbf62", 'opacity="0.55"'))
+    p = P(cx - 5.8, WT + 34.2, 12.69)
+    o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.0" fill="#f1f1f1"/>')
+    # soundbar at the front edge, Hisense AX5100G 92 x 6 x 9
+    o.append(box(TV_CX - 46, WT, BASE_F + 1, 92, 6, 9, "#1b1c1e", "#2a2b2d", "#121314"))
     for i in range(40):
-        xx = 68 + i * 2.25
-        o.append(box(xx, 67.6, 0.99, 0.9, 4.4, 0.05, "#26272a"))
+        o.append(box(TV_CX - 44.5 + i * 2.25, WT + 0.8, BASE_F + 0.99, 0.9, 4.4, 0.05, "#26272a"))
+    # right zone: an oak easel with this month's game, face-out
+    ex = UPR[1] + (ALC_W - UPR[1]) / 2
+    o.append(box(ex - 8.5, WT, 14, 17, 1.2, 9, OAK, OAK_T, OAK_S))
+    lean = math.radians(14)
+    hh, dz = 19 * math.cos(lean), 19 * math.sin(lean)
+    q = [P(ex - 6.75, WT + 1.2, 16), P(ex + 6.75, WT + 1.2, 16), P(ex + 6.75, WT + 1.2 + hh, 16 + dz), P(ex - 6.75, WT + 1.2 + hh, 16 + dz)]
+    o.append(poly(q, "#2c8f3e", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
+    def L(u, v):
+        bl, br, tr, tl = q
+        bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
+        tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
+        return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
+    for (u1, u2, v1, v2, col) in [(0.08, 0.92, 0.1, 0.82, "#1a2a3a"), (0.2, 0.8, 0.45, 0.72, "#e0b43a"), (0.3, 0.7, 0.18, 0.4, "#c84b34"), (0, 1, 0.86, 1, "#3fae54")]:
+        o.append(poly([L(u1, v1), L(u2, v1), L(u2, v2), L(u1, v2)], col))
+    o.append(box(ex - 8.5, WT + 1.2, 14.6, 17, 2.2, 1.2, OAK, OAK_T, OAK_S))
     return "\n".join(o)
 
+
+def lp_art(q, art, ring=False):
+    """Fill a projected quad (bl, br, tr, tl) with blocks of colour: original sleeve designs."""
+    o = []
+    def L(u, v):
+        bl, br, tr, tl = q
+        bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
+        tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
+        return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
+    for (c, u1, u2, v1, v2) in art:
+        o.append(poly([L(u1, v1), L(u2, v1), L(u2, v2), L(u1, v2)], c))
+    o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
+    return "\n".join(o)
+
+
+def browser(bx0, y0, zf, bw=44.0, n=11):
+    """Oak LP browser, 44 x 24: about 50 LPs face-out leaning back 10 degrees, a low front rail and an end."""
+    o = []
+    rx0 = bx0 + (bw - 31.4) / 2
+    o.append(box(bx0, y0, zf + 0.8, bw, 0.8, 24, "#c79a63", "#d9ad75", "#a87d4a"))
+    lean = math.radians(10); hgt = 31.4 * math.cos(lean); dz = 31.4 * math.sin(lean)
+    cols = ["#e9e3d3", "#2f3e5c", "#c8452f", "#f0c24b", "#1f1f1f", "#6a8f5a", "#3a6ea5", "#b3307a", "#efe6d2", "#2c2c2c", "#d24a3a"]
+    for i, col in enumerate(cols[:n]):
+        zz = zf + 19.8 - i * 1.6
+        q = [P(rx0, y0 + 0.8, zz - dz), P(rx0 + 31.4, y0 + 0.8, zz - dz), P(rx0 + 31.4, y0 + 0.8 + hgt, zz), P(rx0, y0 + 0.8 + hgt, zz)]
+        o.append(poly(q, col, 'stroke="#000" stroke-opacity="0.25" stroke-width="0.6"'))
+    z1 = zf + 3.4
+    fq = [P(rx0, y0 + 0.8, z1 - dz), P(rx0 + 31.4, y0 + 0.8, z1 - dz), P(rx0 + 31.4, y0 + 0.8 + hgt, z1), P(rx0, y0 + 0.8 + hgt, z1)]
+    o.append(poly(fq, "#1f3a52"))
+    o.append(lp_art(fq, [("#e9b44c", 0.0, 1.0, 0.0, 0.42), ("#d8613e", 0.12, 0.88, 0.5, 0.9), ("#f5e6c6", 0.35, 0.65, 0.58, 0.82)]))
+    o.append(box(bx0, y0, zf, bw, 4.0, 1.2, OAK, OAK_T, OAK_S))           # low front rail
+    o.append(box(bx0, y0, zf + 0.8, 1.2, 9, 24, OAK, OAK_T, OAK_S))       # end
+    return "\n".join(o)
+
+
+def deck(x0, y0, z0, w=45.0, d=35.0):
+    """Turntable, allowing for a deck as big as the Audio-Technica AT-LP120X (45.2 x 35.2 x 14.2), lid closed."""
+    o = []
+    kx = w / 42.0
+    X = lambda u: x0 + u * kx          # positions from the v9 drawing (42 wide), stretched to w
+    for fx in (2, 37):
+        o.append(box(X(fx), y0, z0 + 2, 3, 1.2, 3, "#3a3a3a"))
+    o.append(box(x0, y0 + 1.2, z0, w, 9.5, d, "#1c1c1e", "#2c2c2f", "#121213"))
+    pc = (X(16), z0 + 17)
+    o.append(ellipse_flat(pc[0], y0 + 10.8, pc[1], 15, 15, "#3a3a3d"))
+    o.append(ellipse_flat(pc[0], y0 + 11.4, pc[1], 15, 15, "#0b0b0c"))
+    o.append(ellipse_flat(pc[0], y0 + 11.5, pc[1], 4.5, 4.5, "#d4553f"))
+    a, b = P(X(36), y0 + 12.5, z0 + 23), P(X(26), y0 + 12.5, z0 + 6)
+    o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#cfcfd2" stroke-width="2.5"/>')
+    o.append(box(X(34.5), y0 + 10.7, z0 + 20, 4, 2.5, 4, "#9a9aa0"))
+    o.append(box(x0, y0 + 10.7, z0, w, 6, d, "url(#glass)", "url(#glass)", "url(#glass)", extra='stroke="#ffffff" stroke-opacity="0.25" stroke-width="1"'))
+    return "\n".join(o)
+
+
+def cabinet_inner():
+    """The vinyl cabinet's carcass, drawn with z = 0 at its face frame (world z = -44).
+    Bay A (60, 18 mm ply): the two face-out record trays, unchanged from v9, on 400 mm runners.
+    Bay B (40): phono preamp, stylus, brush and cleaning kit on a shelf; overflow singles below."""
+    o = []
+    o.append(poly([P(CAB_X1 - 1, 0.05, 0), P(CAB_X2 + 1, 0.05, 0), P(CAB_X2 + 1, 0.05, -10), P(CAB_X1 - 1, 0.05, -10)],
+                  "#000", 'opacity="0.18" filter="url(#soft)"'))
+    # outer left side, oak
+    o.append(poly([P(CAB_X1, 0, 0), P(CAB_X1, 0, 42), P(CAB_X1, 73, 42), P(CAB_X1, 73, 0)], "#b98450", GV))
+    ax1, ax2 = CAB_X1 + 1.8, CAB_X1 + 58.2          # bay A inside 56.4, as the v9 bay 3
+    o.append(bay(ax1, ax2, 1.8, 71.2))
+    o.append(poly([P(ax1, 71.2, 2), P(ax2, 71.2, 2), P(ax2, 48, 2), P(ax1, 48, 2)], "url(#warmpool)", 'opacity="0.9"'))
+    dx = CAB_X1 - 120.0                              # v9's bay 3 carcass started at x = 120
+    if REC_OPEN_UP == 0:
+        o.append(at3(dx, 0, 0, record_tier, 37.0, 0))
+    if REC_OPEN == 0:
+        o.append(at3(dx, 0, 0, record_tier, 2.3, 0))
+    bx1, bx2 = CAB_X1 + 60.0, CAB_X2 - 1.8           # bay B inside 38.2
+    o.append(bay(bx1, bx2, 1.8, 71.2))
+    o.append(poly([P(bx1, 71.2, 2), P(bx2, 71.2, 2), P(bx2, 48, 2), P(bx1, 48, 2)], "url(#warmpool)", 'opacity="0.9"'))
+    o.append(box(bx1, 37.0, 1.0, bx2 - bx1, 1.8, 38, OAK, OAK_T, OAK_S))     # shelf, top 38.8
+    o.append(box(bx1 + 2.5, 38.8, 9, 12, 3.2, 11, "#202022", "#343437"))     # phono preamp
+    o.append(box(bx1 + 3.3, 40.0, 8.99, 1.2, 0.8, 0.1, "#ff9a3c"))
+    o.append(box(bx1 + 3.0, 42.0, 12, 8, 2.5, 4, "#1d1d1f", "#2e2e31"))      # stylus box
+    o.append(box(bx1 + 17, 38.8, 10, 7, 5, 8, "#e7e1d4", "#f2ede3", "#cbc4b6"))   # cleaning kit
+    o.append(box(bx1 + 26, 38.8, 8, 10, 14, 18, "#efe9dc", "#f7f3ea", "#d8d0bf"))  # spare inner sleeves
+    o.append(singles(bx1 + 0.3, bx2 - 0.3, 1.8))                              # overflow singles
+    o.append(face_frame(CAB_X1, CAB_X2, [(CAB_X1 + 2.6, CAB_X1 + 57.4, 2.6), (CAB_X1 + 62.6, CAB_X2 - 2.6, 2.6)]))
+    if REC_OPEN_UP > 0:
+        o.append(at3(dx, 0, 0, record_tier, 37.0, REC_OPEN_UP))
+    else:
+        o.append(at3(dx, 0, 0, record_tier, 37.0, 0, "lip"))
+    if REC_OPEN > 0:
+        o.append(at3(dx, 0, 0, record_tier, 2.3, REC_OPEN))
+    else:
+        o.append(at3(dx, 0, 0, record_tier, 2.3, 0, "lip"))
+    return "\n".join(o)
+
+
+def vinyl_cabinet():
+    """v10: the vinyl corner moves to the chimney breast. A matching oak cabinet 100 wide x 44 deep x 76 high,
+    with the turntable and the LP browser on top and LP frames on the breast above (40 cm left clear for the lid)."""
+    o = [at3(0, 0, CAB_F, cabinet_inner)]
+    o.append(box(CAB_X1, 73, CAB_F - 1, CAB_X2 - CAB_X1, 3, -CAB_F + 1, OAK, OAK_T, OAK_D, extra=GH))
+    if STYLE == "joinery":
+        a_, b_ = P(CAB_X1, CAB_TOP - 0.4, CAB_F - 1.01), P(CAB_X2, CAB_TOP - 0.4, CAB_F - 1.01)
+        o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="#ecc28c" stroke-width="1.4"/>')
+    o.append(browser(CAB_X1 + 3, CAB_TOP, CAB_F + 1))
+    o.append(deck(CAB_X2 - 47, CAB_TOP, CAB_F + 5))
+    return "\n".join(o)
+
+
+LP_FRAMES = [
+    [("#efe6d2", 0, 1, 0, 1), ("#2f3e5c", 0.1, 0.9, 0.55, 0.9), ("#c8452f", 0.3, 0.7, 0.15, 0.45)],
+    [("#14806d", 0, 1, 0, 1), ("#f0c24b", 0.2, 0.8, 0.2, 0.8), ("#1f1f1f", 0.42, 0.58, 0.42, 0.58)],
+    [("#2c2c2c", 0, 1, 0, 1), ("#e8603c", 0.08, 0.92, 0.1, 0.3), ("#efe6d2", 0.08, 0.92, 0.66, 0.9)],
+]
+
+def breast_frames():
+    """Three LP frames on the chimney breast above the deck, bottoms at 140 (the lid needs up to about 132)."""
+    o = []
+    for i, art in enumerate(LP_FRAMES):
+        x0 = CAB_X1 + 4 + i * 35.0
+        o.append(box(x0, 140, -1.6, 32.5, 32.5, 1.6, "#1d1a17", "#2a2622", "#141210"))
+        q = [P(x0 + 0.55, 140.55, -1.61), P(x0 + 31.95, 140.55, -1.61), P(x0 + 31.95, 171.95, -1.61), P(x0 + 0.55, 171.95, -1.61)]
+        o.append(lp_art(q, art))
+    return "\n".join(o)
 
 def left_wall_items():
     o = []
@@ -807,10 +960,12 @@ def left_wall_items():
     return "\n".join(o)
 
 
+
 def plant():
+    """A big leafy plant in the west recess, beyond the vinyl cabinet."""
     o = []
-    base = P(272, 0, -55)
-    k = D / (D - 55)
+    base = P(345, 0, 4)
+    k = D / (D + 4)
     s = S * k
     x, y = base
     pw_top, pw_bot, ph = 30 * s, 23 * s, 28 * s
@@ -831,19 +986,13 @@ def plant():
     o.extend(leaves)
     o.append(f'<path d="M{x - pw_top / 2:.1f},{y - ph:.1f} L{x + pw_top / 2:.1f},{y - ph:.1f} L{x + pw_bot / 2:.1f},{y:.1f} L{x - pw_bot / 2:.1f},{y:.1f}Z" fill="url(#pot)"/>')
     o.append(f'<rect x="{x - pw_top / 2 - 3:.1f}" y="{y - ph - 4:.1f}" width="{pw_top + 6:.1f}" height="{9 * k:.1f}" fill="#c76d45"/>')
-    # trailing stem
-    o.append(f'<path d="M{x - pw_top / 2 + 6:.1f},{y - ph + 4:.1f} q -14,60 -6,120 t -16,80" stroke="#2f6f3a" stroke-width="2.5" fill="none"/>')
-    for t in range(9):
-        o.append(f'<ellipse cx="{x - pw_top / 2 + 2 - t * 1.6:.1f}" cy="{y - ph + 20 + t * 22:.1f}" rx="6" ry="3.5" fill="#3a8f4a" transform="rotate(-30 {x - pw_top / 2 + 2 - t * 1.6:.1f} {y - ph + 20 + t * 22:.1f})"/>')
     return "\n".join(o)
 
 
 def glow_overlays():
-    o = []
-    # bias light behind the TV (6500K)
-    c = P(112.25, 107.5 + RAISE, 49)
-    o.append(f'<ellipse cx="{c[0]:.1f}" cy="{c[1]:.1f}" rx="340" ry="230" fill="url(#bias)"/>')
-    return "\n".join(o)
+    """Bias light behind the TV (6500K)."""
+    c = P(TV_CX, TV_Y + TV_H / 2, ALC_D - 0.5)
+    return f'<ellipse cx="{c[0]:.1f}" cy="{c[1]:.1f}" rx="300" ry="205" fill="url(#bias)"/>'
 
 
 # ------------------------------------------------------------- dimensions
@@ -861,20 +1010,20 @@ def dim_line(a, b, label=None, lpos=None, tick=7, size=13, anchor="middle", op=0
     return "\n".join(out)
 
 
+
 def uprights():
-    """Joinery version: two solid oak uprights, worktop to ceiling, 4.5 thick, 30 deep, against the back wall.
-    Shelves are housed in; the left shelf and turntable shelf pass through as wedged through-tenons;
-    a record ledge spans between them above the TV; LED grooves on the inner faces wash the wall."""
+    """Joinery version: two solid oak uprights, worktop to ceiling (159 long), 4.5 thick, 30 deep, against the
+    back wall, 2 cm clear of the screen each side. The high shelf and the record ledge are housed and pegged;
+    the left and right shelves pass through as wedged through-tenons; LED grooves on the inner faces."""
     o = []
     UP, UP_T, UP_S, UP_IN = "#c08a52", "#d6a26a", "#a06c3a", "#b17d47"
-    L, R = (44.5, 49.0), (175.5, 180.0)
-    # glow from LED grooves in the inner faces (TV side), washing the green wall
-    for (x1, x2), side in ((L, 1), (R, -1)):
+    for (x1, x2), side in ((UPL, 1), (UPR, -1)):
         xe = x2 if side == 1 else x1
-        a, b = P(xe, 79, 49.8), P(xe + side * 22, 186, 49.8)
+        a, b = P(xe, WT + 3, ALC_D - 0.2), P(xe + side * 20, HS_TOP - 8, ALC_D - 0.2)
         o.append(f'<rect x="{min(a[0], b[0]):.1f}" y="{b[1]:.1f}" width="{abs(b[0]-a[0]):.1f}" height="{a[1]-b[1]:.1f}" fill="#ffd9a0" opacity="0.10" filter="url(#softer)"/>')
-    # record ledge between the uprights: 126.5 long, 7 deep, top at 150, 1.5 cm lip; four LPs leaning on the wall
-    o.append(box(49.0, 153.0, 43, 126.5, 2.4, 7, UP, UP_T, UP_S, extra=GH))
+    # record ledge between the uprights: 126.5 long, 7 deep, top at 155.4, 1.5 cm lip; four LPs face-out (125.6)
+    lz = ALC_D - 7
+    o.append(box(UPL[1], LEDGE_Y, lz, UPR[0] - UPL[1], LEDGE_TOP - LEDGE_Y, 7, UP, UP_T, UP_S, extra=GH))
     lean = math.radians(8); hgt = 31.4 * math.cos(lean); dzl = 31.4 * math.sin(lean)
     arts = [
         [("#1f3a52", 0, 1, 0, 1), ("#e9b44c", 0, 1, 0, 0.42), ("#d8613e", 0.12, 0.88, 0.5, 0.9)],
@@ -882,188 +1031,112 @@ def uprights():
         [("#14806d", 0, 1, 0, 1), ("#f0c24b", 0.2, 0.8, 0.2, 0.8), ("#1f1f1f", 0.42, 0.58, 0.42, 0.58)],
         [("#2c2c2c", 0, 1, 0, 1), ("#e8603c", 0.08, 0.92, 0.1, 0.3), ("#efe6d2", 0.08, 0.92, 0.66, 0.9)],
     ]
-    xs = [54.0, 86.0, 118.0, 150.0]
-    for x0, art in zip(xs, arts):
-        zb = 46.5
-        q = [P(x0, 155.4, zb), P(x0 + 31.4, 155.4, zb), P(x0 + 31.4, 155.4 + hgt, zb + dzl), P(x0, 155.4 + hgt, zb + dzl)]
-        def Lq(u, v, q=q):
-            bl, br, tr, tl = q
-            bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
-            tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
-            return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
-        for (c, u1, u2, v1, v2) in art:
-            o.append(poly([Lq(u1, v1), Lq(u2, v1), Lq(u2, v2), Lq(u1, v2)], c))
-        o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.35" stroke-width="0.8"'))
-    o.append(box(49.0, 155.4, 43, 126.5, 1.5, 0.9, UP, UP_T, UP_S))          # lip
-    # the uprights
-    for (x1, x2) in (L, R):
-        o.append(box(x1, 75.8, 20, x2 - x1, CEIL - 75.8, 30, UP, UP_T, UP_IN, extra=GV))
-        a, b = P(x1 + 0.5, 75.8, 19.98), P(x1 + 0.5, CEIL, 19.98)
+    for i, art in enumerate(arts):
+        x0 = UPL[1] + 0.45 + i * 31.42
+        zb = ALC_D - 4.5
+        q = [P(x0, LEDGE_TOP, zb), P(x0 + 31.4, LEDGE_TOP, zb), P(x0 + 31.4, LEDGE_TOP + hgt, zb + dzl), P(x0, LEDGE_TOP + hgt, zb + dzl)]
+        o.append(lp_art(q, art))
+    o.append(box(UPL[1], LEDGE_TOP, lz, UPR[0] - UPL[1], 1.5, 0.9, UP, UP_T, UP_S))          # lip
+    for (x1, x2) in (UPL, UPR):
+        o.append(box(x1, WT, UP_Z, x2 - x1, CEIL - WT, UP_D, UP, UP_T, UP_IN, extra=GV))
+        a, b = P(x1 + 0.5, WT, UP_Z - 0.02), P(x1 + 0.5, CEIL, UP_Z - 0.02)
         o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#e7b57c" stroke-width="1"/>')
-        a, b = P(x2 - 0.5, 75.8, 19.98), P(x2 - 0.5, CEIL, 19.98)
+        a, b = P(x2 - 0.5, WT, UP_Z - 0.02), P(x2 - 0.5, CEIL, UP_Z - 0.02)
         o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#8f5e33" stroke-width="1"/>')
-        # oak pegs at the housed shelves: high shelf (188) and ledge (149)
-        for yy in (190.0, 154.2):
-            for zz in (24.0,):
-                p = P((x1 + x2) / 2, yy, 19.97)
-                o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.4" fill="#5e3d22"/>')
-                o.append(f'<circle cx="{p[0]-0.6:.1f}" cy="{p[1]-0.6:.1f}" r="0.9" fill="#8a5c36"/>')
-    # LED grooves on the inner faces
-    for xe, z1 in ((49.0, 22), (175.5, 22)):
-        a, b = P(xe, 79, 30), P(xe, 186, 30)
+        for yy in (HS_TOP - 2.0, LEDGE_Y + 1.2):          # oak pegs: high shelf and ledge
+            p = P((x1 + x2) / 2, yy, UP_Z - 0.03)
+            o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.3" fill="#5e3d22"/>')
+            o.append(f'<circle cx="{p[0]-0.6:.1f}" cy="{p[1]-0.6:.1f}" r="0.9" fill="#8a5c36"/>')
+    for xe in (UPL[1], UPR[0]):                          # LED grooves on the inner faces
+        a, b = P(xe, WT + 3, UP_Z + 14), P(xe, HS_TOP - 7, UP_Z + 14)
         o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#ffe2b0" stroke-width="2" opacity="0.85"/>')
-    # wedged through-tenons: left shelf through the left upright, turntable shelf through the right upright
-    def tenon(xface, dirn, ytop, zcs=(27.0, 39.0)):
+    def tenon(xface, dirn, ytop, zcs):
         th_t = 2.4
         for zc in zcs:
             x_a, x_b = (xface, xface + 2.0) if dirn == 1 else (xface - 2.0, xface)
             o.append(box(x_a, ytop - 0.8 - th_t, zc - 3.5, x_b - x_a, th_t, 7, "#a8743f", "#c9935a", "#7e5128"))
-            # end grain + wedge
             xe = x_b if dirn == 1 else x_a
             ym = ytop - 0.8 - th_t / 2      # flat kerf: the wedge spreads the tenon along the upright's grain
             p1, p2 = P(xe, ym, zc - 3.0), P(xe, ym, zc + 3.0)
             o.append(f'<line x1="{p1[0]:.1f}" y1="{p1[1]:.1f}" x2="{p2[0]:.1f}" y2="{p2[1]:.1f}" stroke="#4a2f19" stroke-width="1.6"/>')
-    tenon(49.0, 1, 156, (31.5, 43.5))          # left shelf, top 156 (25 deep, against the wall)
-    tenon(175.5, -1, TT + RAISE, (28.0, 43.0))  # turntable shelf, within the upright's 30 cm depth
+    tenon(UPL[1], 1, SH_TOP, (19.5, 31.5))       # left shelf, through the left upright
+    tenon(UPR[0], -1, SH_TOP, (19.5, 31.5))      # right shelf, through the right upright
     return "\n".join(o)
 
 
-def led_lines(stage):
-    """Visible warm LED strips under the shelves (stage 2)."""
-    if stage != 2:
-        return ""
+def led_lines():
+    """Slat version: warm LED strips under the shelves."""
     o = []
-    for (x1, x2, y, z) in [(1, 224, 188, 22), (3, 47, 152, 27), (177.5, 223.5, TT + RAISE - 4, 7)]:
+    for (x1, x2, y, z) in [(1, ALC_W - 1, HS_TOP - HS_TH, 10), (2, UPL[0] - 1, SH_TOP - 4, 15), (UPR[1] + 1, ALC_W - 2, SH_TOP - 4, 15)]:
         a, b = P(x1, y - 0.1, z), P(x2, y - 0.1, z)
         o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#ffe2b0" stroke-width="2.2" opacity="0.9"/>')
     return "\n".join(o)
 
 
-def dimensions(stage):
+def dimensions():
     o = ['<g id="dims">']
-    a, b = P(0, 220, -8), P(225, 220, -8)
-    o.append(dim_line(a, b, "alcove 225 cm wide, floor to ceiling", ((a[0] + b[0]) / 2, a[1] - 9)))
-    lx = 236
-    a, b = P(lx, 0, 0), P(lx, 220, 0)
+    a, b = P(0, CEIL - 6, -2), P(ALC_W, CEIL - 6, -2)
+    o.append(dim_line(a, b, "alcove 186 wide × 38 deep, floor to ceiling", ((a[0] + b[0]) / 2, a[1] - 9)))
+    a, b = P(ALC_W, CEIL - 6, -2), P(BR_X2, CEIL - 6, -2)
+    o.append(dim_line(a, b, "chimney breast 117.5", ((a[0] + b[0]) / 2, a[1] - 9)))
+    lx = BR_X2 + 8
+    a, b = P(lx, 0, 0), P(lx, CEIL, 0)
     o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{LC}" stroke-opacity="0.6" stroke-width="1.2"/>')
-    ticks = [(0, "0 floor"), (76, "76 worktop"), (113, "113 turntable shelf"), (116.5, "116.5 TV centre"),
-             (156, "156 left shelf, 155 ledge" if STYLE == "joinery" else "156 left shelf"), (192, "192 high shelf, 30 deep"), (220, "220 ceiling (to confirm)")]
+    ticks = [(0, "0 floor"), (WT, "76 worktop + cabinet top"), (TV_Y + TV_H / 2, "116.6 TV centre"), (140, "140 LP frames"),
+             (SH_TOP, "156 side shelves · 155.4 ledge"), (HS_TOP, "200 high shelf, 30 deep"), (CEIL, "235 ceiling")]
     for h, lab in ticks:
         p = P(lx, h, 0)
         o.append(f'<line x1="{p[0] - 5:.1f}" y1="{p[1]:.1f}" x2="{p[0] + 5:.1f}" y2="{p[1]:.1f}" stroke="{LC}" stroke-opacity="0.75" stroke-width="1.2"/>')
-        dy = 9 if h == 113 else (-6 if h == 116.5 else 0)
-        o.append(text(p[0] + 10, p[1] + 4.5 + dy, lab, size=12.5))
-    o.append(text(P(lx, 0, 0)[0] - 4, P(lx, 230, 0)[1] - 3, "height, cm", size=11.5, op=0.7))
-    zf = -36 if GAME_OPEN > 0 else -9
-    edges = [0, 60, 120, 180, 225]
-    a, b = P(0, 0, zf), P(225, 0, zf)
+        o.append(text(p[0] + 10, p[1] + 4.5, lab, size=12.5))
+    o.append(text(P(lx, 0, 0)[0] + 10, P(lx, CEIL, 0)[1] - 22, "height, cm", size=11.5, op=0.7))
+    # widths along the floor in front of the base
+    zf = BASE_F - (40 if GAME_OPEN > 0 else 6)
+    edges = [0, 3, 63, 123, 183, ALC_W]
+    a, b = P(0, 0, zf), P(ALC_W, 0, zf)
     o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{LC}" stroke-opacity="0.7" stroke-width="1.2"/>')
-    labels = ["60 · Xbox bay + game drawer", "60 · PlayStation bay", "60 · vinyl: 2 face-out trays", "45 · sub bay"]
+    labels = [None, "60 · Xbox bay + game drawer", "60 · PlayStation bay", "60 · sub bay", None]
     for i, e in enumerate(edges):
         p = P(e, 0, zf)
         o.append(f'<line x1="{p[0]:.1f}" y1="{p[1] - 5:.1f}" x2="{p[0]:.1f}" y2="{p[1] + 5:.1f}" stroke="{LC}" stroke-opacity="0.75" stroke-width="1.2"/>')
-        if i < 4:
+        if i < 5 and labels[i]:
             m = P((e + edges[i + 1]) / 2, 0, zf)
             o.append(text(m[0], m[1] + 19, labels[i], size=12.5, anchor="middle"))
+    zc = CAB_F - (36 if REC_OPEN > 0 else 6)
+    a, b = P(CAB_X1, 0, zc), P(CAB_X2, 0, zc)
+    o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{LC}" stroke-opacity="0.7" stroke-width="1.2"/>')
+    for e in (CAB_X1, CAB_X1 + 60, CAB_X2):
+        p = P(e, 0, zc)
+        o.append(f'<line x1="{p[0]:.1f}" y1="{p[1] - 5:.1f}" x2="{p[0]:.1f}" y2="{p[1] + 5:.1f}" stroke="{LC}" stroke-opacity="0.75" stroke-width="1.2"/>')
+    m = P(CAB_X1 + 30, 0, zc); o.append(text(m[0], m[1] + 19, "60 · two record trays", size=12.5, anchor="middle"))
+    m = P(CAB_X1 + 80, 0, zc); o.append(text(m[0], m[1] + 19, "40 · preamp + kit", size=12.5, anchor="middle"))
     if GAME_OPEN > 0:
-        a, b = P(58.4, 0.2, -0.6), P(58.4, 0.2, -GAME_OPEN - 0.6)
+        a, b = P(BAYS[0][0] + 58.4, RAISE + 0.2, BASE_F - 0.6), P(BAYS[0][0] + 58.4, RAISE + 0.2, BASE_F - GAME_OPEN - 0.6)
         o.append(dim_line(a, b, op=0.75))
         o.append(text(b[0] + 12, b[1] - 2, "rolls out 30 cm", size=11.5, anchor="start"))
-    p1, p2 = P(179, TT + RAISE + 11, 10), P(221, TT + RAISE + 51, 10)
+    # 40 cm lid clearance over the deck
+    p1, p2 = P(CAB_X2 - 47, CAB_TOP + 15, CAB_F + 5), P(CAB_X2 - 2, CAB_TOP + 55, CAB_F + 5)
     o.append(f'<rect x="{p1[0]:.1f}" y="{p2[1]:.1f}" width="{p2[0] - p1[0]:.1f}" height="{p1[1] - p2[1]:.1f}" fill="none" stroke="{LC}" stroke-opacity="0.5" stroke-width="1.1" stroke-dasharray="5 4"/>')
     o.append(text((p1[0] + p2[0]) / 2, p2[1] + 18, "40 cm lid clearance", size=11, anchor="middle", op=0.8))
     o.append('</g>')
     return "\n".join(o)
 
 
-CALLOUTS = [
-    (1, (27.5, 128, -152), "PC, glass side to the room · shelf 65 × 32, top 110"),
-    (2, (16, 134, -194.8), "Oak slatted screen hides the PC's back ports"),
-    (3, (34, 102.5, -158), "Keyboard + mouse tray, rolls out 25 cm"),
-    (4, (0.4, 55, -188), "PC cables: shelf notch → trunking → skirting"),
-    (5, (0.6, 178, -170), "Framed prints on the left wall"),
-    (6, (124, 202, 23), "Lidded box for cables and controllers"),
-    (7, (160.5, 207, 42), "Display print"),
-    (8, (201.5, 198, 30), "Deco B · power + Cat6 run down the right side"),
-    (9, (40, 130, 50), "Oak slat wall, worktop to ceiling · LED under shelves"),
-    (10, (30, 153.5, 25), "Optional display shelf at 156"),
-    (11, (25.25, 99, 14.7), "Xbox Series X on fan stand · 37 tall"),
-    (12, (66, 141, 30), "LG OLED C6 55in · centre about 116"),
-    (13, (112, 78.2, 36), "10-gang extension, hidden behind the TV"),
-    (14, (75, 78.8, 1), "Soundbar · eARC, optical and AUX inputs"),
-    (15, (199, 119, 10), "Turntable on oak shelf at 113 · 40 lid clear"),
-    (16, (200, 101, 4.6), "LP browser under the deck · ~50 LPs face-out"),
-    (17, (165, 74.4, 0), "Worktop 225 × 40 · top at 76"),
-    (18, (20, 59.4, 6), "Xbox One + power brick · bay 1 top row"),
-    (19, (20, 41.6, 6), "Xbox 360 + power brick · bay 1 middle row"),
-    (20, (12, 24, None), "Game drawer front: 2 display bins + tray"),
-    (21, (30, 26.5, "back"), "Game drawer back: spine-up rows, titles up"),
-    (22, (80, 52.5, 6), "PS3 + controller basket · bay 2 top row"),
-    (23, (80, 33.3, 6), "PS2 + HDMI switch · bay 2 middle row"),
-    (24, (75, 13.5, 6), "PS1 + RetroTINK · bay 2 bottom row"),
-    (25, (140, 56, 3), "Upper record tray: ~90 LPs + ~120 singles, face-out"),
-    (26, (140, 22, "rec"), "Lower record tray: the same, pulled out"),
-    (27, (214, 47, 9), "Kit shelf over the sub: preamp, brush, singles"),
-    (28, (202.2, 28, 6), "Subwoofer on 5 cm riser, on the floor"),
-    (29, (60, 5, 0), "9 cm plinth under bays 1–2 (face frame covers it)"),
-    (30, (150, 160, 49), "Bias light behind the TV (6500K)"),
-    (31, (50, 207, 24), "Books on the high shelf · up to 26 cm tall"),
-    (32, (196, 69.3, -0.1), "Hidden slim drawer under the worktop"),
-]
-
-
-def deco_route(stage, show_hidden):
-    """Deco B's DC lead and the Cat6 run down the right-hand side to the worktop slot.
-    Stage 1: slim trunking in the back-right corner, painted green. Stage 2: hidden in the batten gap."""
-    o = []
-    if stage == 1:
-        o.append(box(222.2, 66.8, 46.4, 2.6, 119.2, 2.6, "#3a6d55", "#447a60", "#315c48"))
-    if show_hidden:
-        a, b, c = P(207, 194, 40), P(222, 194, 49), P(222, 76, 49)
-        o.append(f'<path d="M{a[0]:.1f},{a[1]:.1f} L{b[0]:.1f},{b[1]:.1f} L{c[0]:.1f},{c[1]:.1f}" fill="none" stroke="#ffd37a" stroke-width="2.4" stroke-dasharray="7 5" opacity="0.95"/>')
-        d, e = P(222, 76, 46), P(140, 76, 44)
-        o.append(f'<path d="M{d[0]:.1f},{d[1]:.1f} L{e[0]:.1f},{e[1]:.1f}" fill="none" stroke="#ffd37a" stroke-width="2.4" stroke-dasharray="7 5" opacity="0.95"/>')
-        p1, p2 = P(84, 75.8, 36), P(140, 80.5, 36)
-        o.append(f'<rect x="{p1[0]:.1f}" y="{p2[1]:.1f}" width="{p2[0]-p1[0]:.1f}" height="{p1[1]-p2[1]:.1f}" fill="#ffd37a" fill-opacity="0.15" stroke="#ffd37a" stroke-width="2" stroke-dasharray="6 4"/>')
-    return "\n".join(o)
-
-
-JOIN_CALLOUTS = [
-    (1, (46.75, 125, 20), "Solid oak uprights, worktop to ceiling, 4.5 × 30"),
-    (2, (52.5, 151.5, 31.5), "Wedged through-tenons: left shelf"),
-    (3, (172, 108.5, 28), "Wedged through-tenons: turntable shelf"),
-    (4, (177.75, 190, 20), "Oak pegs where the shelves are housed"),
-    (5, (112, 172, 46), "Record ledge above the TV: 4 LPs face-out"),
-    (6, (60, 190, 20), "Solid oak high shelf, housed into both uprights"),
-    (7, (51, 180, 30), "LED groove in each upright washes the green wall"),
-    (8, (112, 146, 49.5), "Green wall left bare behind the TV"),
-    (9, (30, 74.8, 0), "Solid oak worktop, 3 thick, chamfered edge"),
-    (10, (120, 5, 0), "Oak face frame: the base reads as one sideboard"),
-    (11, (30, 14.5, -0.7), "Drawer fronts with hand-cut finger pulls"),
-    (12, (16, 134, -194.9), "Oak frame with woven cane hides the PC's ports"),
-    (13, (202.5, 69.3, -0.1), "Hidden slim drawer under the worktop"),
-    (14, (222, 150, 49), "Deco lead in a groove in the back of the right upright"),
-]
-
-
-
-# ------------------------------------------------------------- v8 additions
 def ceiling_leds():
     """The existing LED strip: stuck to the ceiling facing down, right round the room's edge
-    (left wall, into the alcove, along its back wall and reveal, then across the chimney breast)."""
+    (east wall, into the alcove, along its back wall and reveal, across the chimney breast, round the recess)."""
     o = []
     y = CEIL - 0.6
-    runs = [((0.8, y, -260), (0.8, y, 49.2)), ((0.8, y, 49.2), (224.2, y, 49.2)),
-            ((224.2, y, 49.2), (224.2, y, 0.8)), ((224.2, y, -0.8), (900, y, -0.8))]
-    # warm wash down the top of each wall: one soft band per run
-    def band(p0, p1):
-        (x0, _, z0), (x1, _, z1) = p0, p1
+    runs = [((0.8, y, -300), (0.8, y, ALC_D - 0.8)), ((0.8, y, ALC_D - 0.8), (ALC_W - 0.8, y, ALC_D - 0.8)),
+            ((ALC_W - 0.8, y, ALC_D - 0.8), (ALC_W - 0.8, y, 0.8)), ((ALC_W - 0.8, y, -0.8), (BR_X2 + 0.8, y, -0.8)),
+            ((BR_X2 + 0.8, y, -0.8), (BR_X2 + 0.8, y, REC_D - 0.8)), ((BR_X2 + 0.8, y, REC_D - 0.8), (700, y, REC_D - 0.8))]
+    def band(x0, z0, x1, z1):
         q = [P(x0, CEIL, z0), P(x1, CEIL, z1), P(x1, CEIL - 26, z1), P(x0, CEIL - 26, z0)]
         return poly(q, "#ffe3b3", 'opacity="0.20" filter="url(#softer)"')
-    o.append(band((0.1, 0, -260), (0.1, 0, 49.9)))
-    o.append(band((0, 0, 49.9), (225, 0, 49.9)))
-    o.append(band((224.9, 0, 49.9), (224.9, 0, 0)))
-    o.append(band((225, 0, -0.1), (900, 0, -0.1)))
+    o.append(band(0.1, -300, 0.1, ALC_D - 0.1))
+    o.append(band(0, ALC_D - 0.1, ALC_W, ALC_D - 0.1))
+    o.append(band(ALC_W - 0.1, ALC_D, ALC_W - 0.1, 0))
+    o.append(band(ALC_W, -0.1, BR_X2, -0.1))
+    o.append(band(BR_X2, REC_D - 0.1, 700, REC_D - 0.1))
     for a, b in runs:
         pa, pb = P(*a), P(*b)
         o.append(f'<line x1="{pa[0]:.1f}" y1="{pa[1]:.1f}" x2="{pb[0]:.1f}" y2="{pb[1]:.1f}" stroke="#ffe7bd" stroke-width="7" opacity="0.45" filter="url(#soft)"/>')
@@ -1073,13 +1146,15 @@ def ceiling_leds():
 
 def wall_shadows():
     """Soft contact shadows on the wall under each oak shelf, and a little shade in the alcove's corners."""
-    o = [quad_front(0, 76, 49.95, 7, CEIL - 76, "url(#shadeL)"), quad_front(218, 76, 49.95, 7, CEIL - 76, "url(#shadeR)")]
-    for (x1, x2, yu, dh) in [(0, 225, 188, 7), (0, 44.5, 152, 6), (49, 175.5, 153, 5), (180, 225, TT + RAISE - 4, 6)]:
-        o.append(quad_front(x1, yu - dh, 49.9, x2 - x1, dh, "url(#shadeDown)"))
+    o = [quad_front(0, WT, ALC_D - 0.05, 7, CEIL - WT, "url(#shadeL)"), quad_front(ALC_W - 7, WT, ALC_D - 0.05, 7, CEIL - WT, "url(#shadeR)")]
+    for (x1, x2, yu, dh) in [(0, ALC_W, HS_TOP - HS_TH, 7), (0, UPL[0], SH_TOP - 4, 6), (UPR[1], ALC_W, SH_TOP - 4, 6),
+                             (UPL[1], UPR[0], LEDGE_Y, 5)]:
+        o.append(quad_front(x1, yu - dh, ALC_D - 0.1, x2 - x1, dh, "url(#shadeDown)"))
     return "\n".join(o)
 
 
-PEND_X, PEND_Z = 225.0, -170.0      # in line with the alcove's right-hand edge, out in the middle of the room
+# the existing rose: in line with the breast's reveal (186 from the east wall), 173.5 from the window wall
+PEND_X, PEND_Z = ALC_W, WIN_Z + 173.5
 
 def _hull(pts_):
     pts_ = sorted(set((round(x, 2), round(y, 2)) for x, y in pts_))
@@ -1131,8 +1206,8 @@ def pendant():
         d = _norm(d)
         if d[2] > 0:
             ap = (cx + dx, CEIL - 6.5, cz)
-            t = (49.9 - ap[2]) / d[2]
-            hit = (ap[0] + d[0] * t, ap[1] + d[1] * t, 49.9)
+            t = (ALC_D - 0.1 - ap[2]) / d[2]
+            hit = (ap[0] + d[0] * t, ap[1] + d[1] * t, ALC_D - 0.1)
             c = P(*hit)
             o.append(f'<ellipse cx="{c[0]:.1f}" cy="{c[1]:.1f}" rx="95" ry="70" fill="#fff1d2" opacity="0.16" filter="url(#softer)"/>')
     # ceiling plate and bar
@@ -1160,20 +1235,23 @@ def pendant():
     return "\n".join(o)
 
 
+
+SOCKET_Z = (-29.3, -14.7)   # on the east wall just in front of the base (bay 1), about 30 cm up
+
 def wall_socket():
-    """The room's socket: on the side wall just in front of bay 1, about 30 cm up (to confirm); becomes a double."""
+    """The room's socket: on the east (side) wall just in front of bay 1, about 30 cm up; becomes a double."""
     o = []
-    z1, z2, y1, y2 = -29.3, -14.7, 25.7, 34.3
+    z1, z2, y1, y2 = SOCKET_Z[0], SOCKET_Z[1], 25.7, 34.3
     o.append(poly([P(0.4, y1, z1), P(0.4, y1, z2), P(0.4, y2, z2), P(0.4, y2, z1)], "#f4f2ed", 'stroke="#c9c5bc" stroke-width="1"'))
-    for zc in (-25.5, -18.5):
+    for zc in (z1 + 3.8, z2 - 3.8):
         o.append(poly([P(0.9, 27.5, zc - 1.6), P(0.9, 27.5, zc + 1.6), P(0.9, 32.0, zc + 1.6), P(0.9, 32.0, zc - 1.6)], "#e9e6df", 'stroke="#b9b4aa" stroke-width="0.8"'))
-        a_, b_, c_ = P(1.2, 27.5, zc), P(1.6, 6, zc + 2), P(1.2, 3, -0.5)
+        a_, b_, c_ = P(1.2, 27.5, zc), P(1.6, 6, zc + 2), P(1.2, 3, BASE_F - 0.5)
         o.append(f'<path d="M{a_[0]:.1f},{a_[1]:.1f} Q{b_[0]:.1f},{b_[1]:.1f} {c_[0]:.1f},{c_[1]:.1f}" stroke="#f0eee8" stroke-width="2.6" fill="none"/>')
     return "\n".join(o)
 
 
-def services(stage, show_hidden):
-    """Hidden routes, drawn dashed in the numbered views. Gold: data and low-voltage. Coral: mains."""
+def services(show_hidden):
+    """Hidden routes, drawn dashed in the numbered views. Gold: data, audio and low-voltage. Coral: mains."""
     if not show_hidden:
         return ""
     o = []
@@ -1182,18 +1260,21 @@ def services(stage, show_hidden):
         q = [P(*p) for p in pts_]
         d = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in q)
         return f'<path d="{d}" fill="none" stroke="{col}" stroke-width="{w}" stroke-dasharray="7 5" opacity="0.95"/>'
-    if STYLE == "joinery":
-        o.append(path([(197, 192, 41), (178, 192, 49), (178, 77, 49), (178, 74, 46), (190, 34, 47)], GOLD))
-    else:
-        o.append(path([(207, 194, 40), (222, 194, 49), (222, 76, 49), (205, 36, 47)], GOLD))
-    # mains from the side-wall socket: in through a notch at the left end of the plinth, back through the plinth to the channel
-    o.append(path([(1.5, 4, -2), (4, 4, 20), (4, 4, 46), (60, 6, 48), (110, 6, 48), (110, 77, 44)], CORAL, 2.0))
-    o.append(path([(110, 6, 48), (184, 31.5, 48)], CORAL, 2.0))
+    gx = UPR[0] + 2.2 if STYLE == "joinery" else ALC_W - 2
+    # Cat6 down from the ceiling to Deco B; Deco's leads along the shelf's back, down the groove, into the channel
+    o.append(path([(183.5, CEIL, 36.5), (183.5, HS_TOP + 6, 36.5), (178, HS_TOP + 4, 33)], GOLD))
+    o.append(path([(170, HS_TOP + 0.5, 34), (gx, HS_TOP + 0.5, 37.3), (gx, WT, 37.3), (gx, 40, 36), (150, 36, 36)], GOLD))
+    # vinyl: deck leads down through a grommet to the preamp in bay B; preamp -> soundbar AUX across to the alcove
+    o.append(path([(CAB_X2 - 20, CAB_TOP, -12), (CAB_X2 - 20, 42, -12), (CAB_X1 + 72, 42, -30)], GOLD))
+    o.append(path([(CAB_X1 + 66, 40, -30), (CAB_X1 + 4, 4, -30), (CAB_X1 - 1, 4, -4), (ALC_W - 4, 4, -4), (170, 4, 34), (150, 74, 35), (TV_CX + 40, WT + 1, 2)], GOLD, 2.0))
+    # mains from the side-wall socket: in through a notch at the left end of the plinth, back through it to the channel
+    o.append(path([(1.5, 4, BASE_F + 1), (4, 4, 10), (4, 4, 36), (60, 6, 36.5), (100, 6, 36.5), (100, WT + 1, 32)], CORAL, 2.0))
+    o.append(path([(100, 6, 36.5), (150, 34, 36.5)], CORAL, 2.0))
+    o.append(path([(150, 30, 36.5), (178, 3, 30), (ALC_W + 1, 3, -5), (CAB_X1 + 4, 3, -30), (CAB_X1 + 70, 30, -30)], CORAL, 2.0))
     # the 10-gang behind the TV
-    p1, p2 = P(84, 75.8, 36), P(140, 80.5, 36)
+    p1, p2 = P(TV_CX - 30, WT, 26), P(TV_CX + 30, WT + 4.5, 26)
     o.append(f'<rect x="{p1[0]:.1f}" y="{p2[1]:.1f}" width="{p2[0]-p1[0]:.1f}" height="{p1[1]-p2[1]:.1f}" fill="{GOLD}" fill-opacity="0.15" stroke="{GOLD}" stroke-width="2" stroke-dasharray="6 4"/>')
     return "\n".join(o)
-
 
 def plate(title, sub, x=24, y=None, w=640):
     """Label plate on the plain renders."""
@@ -1204,50 +1285,56 @@ def plate(title, sub, x=24, y=None, w=640):
             f'<text x="{x + 20}" y="{y + 51}" font-family="Inter, sans-serif" font-size="13" fill="#5f5a50">{sub}</text>')
 
 
+
 H_ = "H"
 JOIN_KEY = [
     (H_, "Oak joinery"),
-    (1, (46.75, 125, 20), "Solid oak uprights, worktop to ceiling, 4.5 × 30"),
-    (2, (52.5, 151.5, 31.5), "Wedged through-tenons: left shelf, top 156"),
-    (3, (172, 108.5, 28), "Wedged through-tenons: turntable shelf, top 113"),
-    (4, (177.75, 190, 20), "Oak pegs where the shelves are housed"),
-    (5, (70, 205, 24), "High shelf, top 192: books up to 26 cm"),
-    (6, (112, 172, 46), "Record ledge above the TV: 4 LPs face-out"),
-    (7, (51, 182, 30), "LED groove in each upright washes the wall"),
+    (1, (UPL[0] + 2.25, 128, UP_Z), "Solid oak uprights, worktop to ceiling, 4.5 × 30 × 159"),
+    (2, (UPL[1] + 3.5, 150.5, 19.5), "Wedged through-tenons: side shelves, top 156"),
+    (3, (UPR[0] + 2.25, HS_TOP - 2, UP_Z), "Oak pegs where the high shelf and ledge are housed"),
+    (4, (60, HS_TOP + 14, 21), "High shelf, top 200: books up to 30 cm"),
+    (5, (TV_CX, 172, ALC_D - 3), "Record ledge above the TV: 4 LPs face-out"),
+    (6, (UPL[1], 186, UP_Z + 14), "LED groove in each upright washes the wall"),
     (H_, "On the worktop"),
-    (8, (66, 141, 30), "LG OLED C6 55in on its stand · centre 116.5"),
-    (9, (75, 79, 1), "Soundbar · eARC, optical and AUX inputs"),
-    (10, (25.25, 99, 14.7), "Xbox Series X on its fan stand · 37 tall"),
-    (11, (199, 119, 10), "Turntable on its oak shelf · 40 cm lid clearance"),
-    (12, (200, 101, 4.6), "LP browser under the deck · ~50 LPs face-out"),
-    (13, (30, 74.6, 0), "Solid oak worktop 225 × 40 × 3, top at 76"),
-    (H_, "In the base"),
-    (14, (90, 5, 0), "Oak face frame; its bottom rail hides the 9 cm plinth"),
-    (15, (20, 59.4, 6), "Xbox One + power brick · bay 1 top row"),
-    (16, (20, 41.6, 6), "Xbox 360 + power brick · bay 1 middle row"),
-    (17, (12, 24, None), "Game drawer: 2 face-out bins, spine-up rows behind"),
-    (18, (80, 52.5, 6), "PS3 + controller basket · bay 2 top row"),
-    (19, (80, 33.3, 6), "PS2 + HDMI switch · bay 2 middle row"),
-    (20, (75, 13.5, 6), "PS1 + RetroTINK · bay 2 bottom row"),
-    (21, (140, 56, 3), "Upper record tray: ~90 LPs + ~120 singles, all face-out"),
-    (22, (140, 22, "rec"), "Lower record tray: the same, shown pulled out"),
-    (23, (214, 47, 9), "Kit shelf: preamp, brush, ~70 singles"),
-    (24, (202.2, 24, 6), "Subwoofer on a 5 cm riser"),
-    (25, (202.5, 69.3, -0.1), "Hidden slim drawer under the worktop"),
+    (7, (48, 138, 18), "LG OLED C6 55in on its stand · centre 116.6"),
+    (8, (TV_CX - 32, WT + 3, BASE_F + 1), "Soundbar · eARC, optical and AUX inputs"),
+    (9, (12.6, 104, 12.7), "Series X on its fan stand · 2.4 clear each side"),
+    (10, (ALC_W - 12.6, 97, 15), "Right zone: this month's game on an oak easel"),
+    (11, (12, WT - 1.4, BASE_F), "Solid oak worktop 186 × 42 × 3, top at 76"),
+    (H_, "In the base (alcove)"),
+    (12, (93, 4.6, BASE_F), "Oak face frame, 8 cm proud of the breast"),
+    (13, (23, 59.4, -2), "Xbox One + power brick · bay 1 top row"),
+    (14, (23, 41.6, -2), "Xbox 360 + power brick · bay 1 middle row"),
+    (15, (15, 24, None), "Game drawer: 2 face-out bins, spine-up rows behind"),
+    (16, (83, 52.5, -2), "PS3 + controller basket · bay 2 top row"),
+    (17, (83, 33.3, -2), "PS2 + HDMI switch · bay 2 middle row"),
+    (18, (78, 13.5, -2), "PS1 + RetroTINK · bay 2 bottom row"),
+    (19, (153, 22, -4), "Subwoofer on a 5 cm riser · bay 3"),
+    (20, (171, 52, -4), "Bay 3 shelf: controller dock, spare pads"),
+    (21, (138, 68.3, BASE_F - 0.7), "Hidden slim drawer under the worktop"),
+    (H_, "Vinyl corner (chimney breast)"),
+    (22, (CAB_X1 + 4, 36, CAB_F), "Oak vinyl cabinet, 100 × 44 × 76"),
+    (23, (CAB_X1 + 30, 56, CAB_F + 3), "Upper record tray: ~90 LPs + ~120 singles, face-out"),
+    (24, (CAB_X1 + 30, 22, "rec"), "Lower record tray: the same, shown pulled out"),
+    (25, (CAB_X1 + 80, 50, CAB_F + 9), "Bay B: preamp, stylus, brush; singles below"),
+    (26, (CAB_X2 - 25, 97, CAB_F + 22), "Turntable on top · 40 cm clear for the lid"),
+    (27, (CAB_X1 + 25, 103, CAB_F + 4.4), "LP browser · about 50 LPs face-out"),
+    (28, (CAB_X1 + 56, 168, -1.7), "LP frames on the breast, from 140 up"),
     (H_, "Power, network and light"),
-    (26, (201.5, 198, 30), "Deco B, powered: leads in the groove behind the upright"),
-    (27, (223, 214, 49), "Cat6 from the top floor, through the ceiling"),
-    (28, (0.3, 34, -22), "Double socket on the side wall, in front of bay 1"),
-    (29, (112, 78.2, 36), "10-gang extension, hidden behind the TV"),
-    (30, (186.5, 31.5, 45.4), "6-way switched strip: Deco, switch, deck, preamp"),
-    (31, (95, 219.4, 49.2), "LED strip round the ceiling edge (as now)"),
-    (32, (PEND_X, 213, PEND_Z), "Ceiling light: 4-spot cone bar on the existing rose"),
+    (29, (174, HS_TOP + 16, 22), "Deco B: leads in the groove behind the upright"),
+    (30, (183.5, 224, 36.5), "Cat6 from upstairs, through the ceiling"),
+    (31, (0.3, 34, -22), "Double socket on the side wall, in front of bay 1"),
+    (32, (TV_CX, WT + 3, 26), "10-gang extension, hidden behind the TV"),
+    (33, (150, 37, 30), "6-way switched strip at the back of bay 3"),
+    (34, (0.8, CEIL - 0.6, -60), "LED strip round the ceiling edge (as now)"),
+    (35, (PEND_X, CEIL - 22, PEND_Z), "Ceiling light: 4-spot cone bar on the rose"),
     (H_, "PC corner"),
-    (33, (27.5, 128, -152), "PC, glass side to the room · shelf top 110"),
-    (34, (16, 134, -194.9), "Oak frame with woven cane hides the PC's ports"),
-    (35, (34, 102.5, -158), "Keyboard + mouse tray, rolls out 25 cm"),
-    (36, (0.4, 55, -188), "PC cables: shelf notch → trunking → skirting"),
+    (36, (27.5, 128, -152), "PC, glass side to the room · shelf top 110"),
+    (37, (16, 134, -194.9), "Oak frame with woven cane hides the ports"),
+    (38, (34, 102.5, -158), "Keyboard + mouse tray, rolls out 25 cm"),
+    (39, (0.4, 55, -188), "PC cables: shelf notch → trunking → skirting"),
 ]
+
 KEYW = 640
 
 def key_panel2(x0, items, title, sub, step=26.5):
@@ -1279,11 +1366,11 @@ def callouts(items=None):
             continue
         n, (x, y, z), _ = it
         if z is None:
-            z = -GAME_OPEN + 4
+            z = BASE_F - GAME_OPEN + 4
         elif z == "back":
-            z = -GAME_OPEN + 22
+            z = BASE_F - GAME_OPEN + 22
         elif z == "rec":
-            z = -REC_OPEN + 1
+            z = CAB_F - REC_OPEN + 1
         cx, cy = P(x, y, z)
         o.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="15" fill="#000" opacity="0.25" filter="url(#soft)"/>')
         o.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="13.5" fill="#f7f1e3" stroke="#10241b" stroke-width="1.6"/>')
@@ -1415,69 +1502,64 @@ def repaint(svg):
         svg = svg.replace(h, _soft(h)).replace(h.upper(), _soft(h))
     return svg
 
-def build(stage, with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="joinery", rec_open_up=0.0, label=None):
+
+def build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="joinery", rec_open_up=0.0, label=None):
     global GAME_OPEN, REC_OPEN, STYLE, REC_OPEN_UP
-    REC_OPEN_UP = rec_open_up
-    STYLE = style
-    GAME_OPEN = game_open
-    REC_OPEN = rec_open
-    kw = (KEYW if STYLE == "joinery" else 560) if numbered else 0
+    REC_OPEN_UP, STYLE, GAME_OPEN, REC_OPEN = rec_open_up, style, game_open, rec_open
+    kw = KEYW if numbered else 0
     width = W + kw
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{H}" viewBox="0 0 {width} {H}">', defs(),
          f'<svg x="0" y="0" width="{W}" height="{H}" viewBox="0 0 {W} {H}" overflow="hidden">',
          f'<g transform="translate(0,{SHIFT})">', room(), ceiling_leds()]
-    if STYLE == "joinery":
-        o.append(wall_shadows())
-    else:
-        o.append(slats() if stage == 2 else tapestry())
-    if stage == 2:
-        o.append(glow_overlays())
-    o.append(at(2, high_shelf, stage))
-    o.append(at(6, left_shelf, stage))
-    o.append(led_lines(stage))
-    o.append(at(RAISE, tv))
+    o.append(wall_shadows() if STYLE == "joinery" else slats())
+    o.append(glow_overlays())
+    o.append(high_shelf())
+    o.append(side_shelves())
+    if STYLE != "joinery":
+        o.append(led_lines())
+    o.append(tv())
     if STYLE == "joinery":
         o.append(uprights())
-    o.append(at(RAISE, turntable, stage))
-    o.append(unit(stage))
-    o.append(at(RAISE, worktop_items, stage))
+    o.append(breast_frames())
+    o.append(plant())
+    o.append(unit())
+    o.append(worktop_items())
+    o.append(vinyl_cabinet())
     o.append(left_wall_items())
     o.append(wall_socket())
-    o.append(services(stage, numbered))
-    o.append(plant())
+    o.append(services(numbered))
     o.append(pendant())
     if with_dims:
-        o.append(dimensions(stage))
-    if numbered and STYLE == "joinery":
-        o.append(drawer_inset(num=17))
-        o.append(record_inset(num=22))
+        o.append(dimensions())
+    if numbered:
+        x0_, y0_, sc_ = INSET_DRAWER
+        o.append(f'<g transform="translate({x0_},{y0_}) scale({sc_}) translate({-x0_},{-y0_})">' + drawer_inset(x0_, y0_, num=15) + '</g>')
+        o.append(record_inset(*INSET_RECORD, num=23))
         o.append(callouts(JOIN_KEY))
-    elif numbered:
-        o.append(drawer_inset())
-        o.append(record_inset())
-        o.append(callouts())
     o.append('</g>')
     if label:
         o.append(plate(*label))
     o.append('</svg>')
-    if numbered and STYLE == "joinery":
-        o.append(key_panel2(W, JOIN_KEY, "Key: artisan oak media wall", "Main plan · numbers match the plan · sizes in cm"))
-    elif numbered:
-        o.append(key_panel(W, title="Key: slat wall alternative"))
+    if numbered:
+        o.append(key_panel2(W, JOIN_KEY, "Key: artisan oak media wall, v10", "Fitted to your measured room · numbers match the plan · cm", step=23.4))
     o.append('</svg>')
     return repaint("\n".join(o))
 
 
+INSET_DRAWER = (14, 1000, 0.84)
+INSET_RECORD = (1645, 1040)
+
 if __name__ == "__main__":
     set_paint(PAINTS[MAIN_PAINT][0])
-    sub = "Farrow & Ball Card Room Green No. 79 · front view to scale, evening light"
-    open("v8_join_key.svg", "w").write(build(2, with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30))
-    open("v8_join_clean.svg", "w").write(build(2, with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v9", sub)))
-    open("v8_slat_key.svg", "w").write(build(2, with_dims=True, numbered=True, style="slats", game_open=30, rec_open=30))
-    open("v8_slat_clean.svg", "w").write(build(2, with_dims=False, style="slats", label=("Slat wall · alternative, v9", sub)))
+    sub = "Farrow & Ball Card Room Green No. 79 · fitted to your measured room, evening light"
+    open("v10_join_key.svg", "w").write(build(with_dims=True, numbered=True, game_open=30, rec_open=30))
+    open("v10_join_clean.svg", "w").write(build(with_dims=False, label=("Artisan oak media wall · main plan, v10", sub)))
+    open("v10_slat_clean.svg", "w").write(build(with_dims=False, style="slats", label=("Slat wall · alternative, v10", sub)))
     for k, (hx, name) in list(PAINTS.items()):
         set_paint(hx)
-        open(f"v8_paint_{k}.svg", "w").write(build(2, with_dims=False, style="joinery", label=(name + (" · chosen" if k == MAIN_PAINT else ""), "Artisan oak version · walls, ceiling and skirting in the one colour")))
+        open(f"v10_paint_{k}.svg", "w").write(build(with_dims=False, label=(name + (" · chosen" if k == MAIN_PAINT else ""), "Artisan oak version · walls, ceiling and skirting in the one colour")))
+        open(f"v10_slats_{k}.svg", "w").write(build(with_dims=False, style="slats", label=(name + " · slat wall", "Slat wall alternative · walls, ceiling and skirting in the one colour")))
     PAINT = "deep"
-    open("v8_paint_deep.svg", "w").write(build(2, with_dims=False, style="joinery", label=("Deep forest green · earlier colour, for comparison", "Artisan oak version")))
+    open("v10_paint_deep.svg", "w").write(build(with_dims=False, label=("Deep forest green · earlier colour, for comparison", "Artisan oak version")))
+    open("v10_slats_deep.svg", "w").write(build(with_dims=False, style="slats", label=("Deep forest green · slat wall", "Slat wall alternative")))
     print("ok")
