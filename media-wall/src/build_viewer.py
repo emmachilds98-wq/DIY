@@ -74,7 +74,7 @@ def page(prefix="", downloads=""):
         plan_html = f"""
   <section class="plans">
     <h2>The living room, the dining layouts and the house</h2>
-    <div class="frame"><img src="{prefix}art/zz_living.jpg" alt="Living room plan drawn from the measured sketch: media wall, side-wall shelf and PC over the L-sofa, the dining wall, both spotlight bars, socket and viewing distance" width="2064" height="1440"></div>
+    <div class="frame"><img src="{prefix}art/zz_living.jpg" alt="Living room plan drawn from the measured sketch: media wall, side-wall shelf and PC over the L-sofa, the dining wall, both spotlight bars, socket and viewing distance" width="2064" height="1464"></div>
     <div class="frame"><img src="{prefix}art/zz_seating.jpg" alt="Three small plans of the dining table: four at the wall, six and eight with the table lifted off and pulled into the room" width="2064" height="1200"></div>
     <div class="frame"><img src="{prefix}art/zz_house.jpg" alt="Three floor plans with the Decos, Cat6 runs, chimney breast, brick cupboard and sloped ceilings" width="2064" height="1488"></div>
     <p class="caption">The living room is drawn from your measurements; the L-sofa is drawn at a typical 247 × 168 cm until you measure yours. The house outline is traced from the agent's plans.</p>

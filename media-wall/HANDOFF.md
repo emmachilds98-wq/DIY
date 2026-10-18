@@ -1,5 +1,51 @@
 # Handoff: Home Network & Media Wall Plan
 
+## Update 18 Oct 2026, round 5: v11 delivered (turntable back in the alcove, dining wall, side-wall wrap)
+**Delivered:** `out/Home_Network_Plan_v11.pdf` (40 pages), `out/Build_Guide_v11.pdf` (8 pages, beginner-friendly, with tool list
+and shopping list), HD renders in `out/` (v10 outputs in `out/v10/`), the viewer artifact
+https://claude.ai/artifact/42PUQjJwfafV93mrjeFYX9 (update this one in place; it is the account this repo's sessions use) and
+`index.html` at the repo root, the same viewer for GitHub Pages (Settings → Pages → deploy from this branch, root).
+PR: https://github.com/emmachilds98-wq/DIY/pull/2 (contains v10's commit too). Note: an earlier session drafted v11 but never
+committed it; this round rebuilt it from the client's agreed layout.
+
+**The v11 layout (all numbers in `src/geometry.py`)**
+- TV shifted 25.25 cm towards the side wall (centre 67.75). Left upright = corner post at x 0–4.5; right upright 131–135.5.
+- Right-hand zone 135.5–186 (50.5): turntable on the worktop (AT-LP120X size, 2.65 each side, lid top ≈121), Series X on an
+  oak shelf at 134 (underside 130), flush wedged tenons through the right upright (proud ones would touch the TV), 15 cm air
+  each side, 21.4 above; phono preamp hung under the shelf at the back.
+- Base: bay 1 Xbox, bay 2 PlayStation (unchanged), bay 3 = the two v9/v10 face-out record trays. Hidden slim drawer moved into
+  the plinth under bay 2 (push to open). Sub on the floor by the side wall at z −84…−62.6, firing across the room.
+- Side wall: record ledge wraps the corner (7 deep, z 8 → −126, 4 LPs), then the PC shelf (82 × 28 at 155.4, z −130 → −212)
+  over the end of the L-sofa; cane screen, pad dock, trunking down to the skirting. No keyboard tray (over the sofa).
+- Dining wall on the breast: oak backboard 110 × 22 × 3, a 110 × 80 × 2.7 oak top on three lift-off hinges, two Häfele Hebgo
+  287.43.428 brackets 80 apart. Folded: ≈7 cm deep, top edge 153.3. Four at the wall; six lifted off onto Emuca 710 legs
+  (table at x 255–365, z −60…−140); eight with a 60 × 80 leaf (x 220–390). Clearances checked in `fit.py`.
+- Second Wolston bar at (305, −100) on a new ceiling point; two-gang dimmer. Double socket: left → 10-gang (always on),
+  right → retro 6-way, so the wall switch is the retro switch. New socket behind the sofa for the PC and rears.
+- L-sofa assumed 247 × 168 × 80 (M&S Easy Velvet corner size) with the return along the side wall; **ask for the real size**.
+- Records: ~188 LPs (180 trays + 4 + 4) and ~240 singles face-out (v10 had 234/350 with the browser and singles drawer).
+- Fit proof: 52 checks, 40 fit, 8 tight, 4 check on site, none fail.
+
+**Code**
+- `render.py`: camera moved to EYE_X 120; new `rz_shelf()`, `series_x()`, `wrap()`, `dining_wall()` (DINING "folded"/"four"),
+  `chair()`, `table_settings()`, `subwoofer()`, `spot_bar()` (two bars), `sofa()` (see-through; off by default, it read as
+  if in front of the base). The key numbers itself (`_numbered`).
+- `diagrams.py`: `_room()`/`_sofa()`/`_side_wall()` helpers; new `seating()`, `dining_section()`; v11 `front`, `section`
+  (A TV, B turntable zone), `routes`, `pc_shelf`, `sound`, `power`, `living_plan`, `why_layout` (what moved in v11).
+- `build_doc.py` writes `plan.html` + `guide.html` and both PDFs. `build_viewer.py` writes the viewer and `../../index.html`.
+- `make_images.py renders` skips the diagrams (handy mid-edit). Backups: `*_v10_backup.py`.
+
+**Questions for the client (ask together)**
+1. The L-sofa's size, and that its return runs along the side wall.
+2. The door to the hall: which side it hinges, and does it open into the room? (The dining chairs on that side sit in its swing.)
+3. Models: turntable, PC case, Series X fan stand.
+4. Chairs: theirs, or four folding ones? Where do the leaf and the legs live?
+5. Are the side wall and the chimney breast solid or plasterboard?
+6. Roughly how many LPs and singles? (Capacity fell to ~188 / ~240.)
+7. Still open from v10: the west end sizes, the 23 × 22 box, wired ports for the projector and music room.
+
+---
+
 ## Update 18 Oct 2026, round 4: v10 delivered (drawn to the measured room)
 **Delivered:** `out/Home_Network_Plan_v10.pdf` (34 pages, restructured: plan on a page → room → media wall + fit proof →
 vinyl corner → joinery → paint and light → power/cables/network → build guide → buy list → confirm/sources; slat wall

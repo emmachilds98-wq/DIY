@@ -128,7 +128,7 @@ SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
 SUB_POS = dict(x=(10.0, 10.0 + SUB[2]), z=(-84.0, -84.0 + SUB[0]))   # on the floor by the side wall, firing across the room; 10 cm behind its port
-COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 60.0, SOFA_FRONT_Z + 10.0))   # 90 × 50
+COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
 
 # ---------------------------------------------------------------- the dining wall on the chimney breast
 TABLE = (110.0, 80.0, 2.7)                 # W, D, thickness: solid oak
@@ -164,6 +164,7 @@ SCREEN_FROM_WINDOW = ROOM_D - (ALC_D - TV_PANEL_Z[0])   # 335
 VIEW_DIST = SCREEN_FROM_WINDOW - EYES_FROM_WINDOW        # 265
 CHAISE_EYES_Z = CHAISE_END_Z - 60.0        # sitting up at the chaise's end
 SOCKET = dict(x=0.0, z=-22.0, y=30.0)      # on the east wall, just in front of bay 1
+SOCKET2 = dict(x=0.0, z=-205.0, y=30.0)    # new: low on the east wall behind the sofa (PC, rear speakers)
 
 
 def summary():

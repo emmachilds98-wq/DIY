@@ -6,14 +6,15 @@ Home projects for Emma and Dave's house (Portsmouth Close).
 The living room media wall and whole-house network plan: an artisan oak wall in Farrow & Ball Card Room Green,
 face-out record trays, a Deco mesh wired by Cat6, AV and power plans, and a build guide.
 
-- **Latest plan:** [`media-wall/out/Home_Network_Plan_v10.pdf`](media-wall/out/Home_Network_Plan_v10.pdf) (v9 and its renders are kept in `media-wall/out/v9/`)
+- **Latest plan:** [`media-wall/out/Home_Network_Plan_v11.pdf`](media-wall/out/Home_Network_Plan_v11.pdf) and the [build guide](media-wall/out/Build_Guide_v11.pdf) (earlier versions in `media-wall/out/v10/` and `v9/`)
+- **Viewer:** `index.html` at the repo root (GitHub Pages), the same page as the Claude viewer artifact
 - **Latest renders:** [`media-wall/out/`](media-wall/out/)
 - **Where things stand and what's next:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md) (read this first)
 - **Client inputs** (accurate room sketch, floor plans, photos): [`media-wall/inputs/`](media-wall/inputs/)
 
-> **Status:** v10 is drawn to the measured room (alcove **186 × 38 cm**, ceiling **235 cm**, chimney breast 117.5 cm).
-> The vinyl corner moved to an oak cabinet against the chimney breast; every item is checked against its published
-> size in the plan's fit proof. Open questions for the client are at the top of `HANDOFF.md`.
+> **Status:** v11: the TV 25 cm nearer the side wall with the turntable and Series X in the alcove, the records in bay 3,
+> the ledge wrapping onto the side wall with the PC above the sofa, and a fold-down oak dining table on the chimney breast.
+> Open questions for the client are at the top of `HANDOFF.md`.
 
 ### Rebuilding the plan and renders
 Requires Python 3.10+ and Chromium via Playwright.
@@ -25,8 +26,8 @@ cd src
 python3 geometry.py                     # prints the derived layout numbers (the one source of truth)
 python3 fit.py                          # prints the fit proof, zone by zone
 python3 make_images.py                  # every render, montage and viewer image (HD copies into ../out/)
-python3 build_doc.py                    # builds plan.html and the PDF into ../out/
-python3 build_viewer.py                 # the interactive viewer page (images in art/)
+python3 build_doc.py                    # builds the plan and the build guide PDFs into ../out/
+python3 build_viewer.py                 # the viewer page (images in art/) and ../../index.html for GitHub Pages
 ```
 
 | File | What it does |

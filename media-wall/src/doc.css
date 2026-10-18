@@ -73,3 +73,7 @@ figure.render.small img { width: 78%; }
 .p1 .hero .summary { grid-template-columns: 1fr; margin: 0; gap: 6pt; }
 .p1 .hero .summary b { font-size: 14pt; }
 .p1 p.confirm { font-size: 8.4pt; background: #f6f5f1; border: 1px solid #e6e3dc; border-radius: 5pt; padding: 5pt 8pt; margin: 0; }
+/* v11 */
+table.tools tr.ph td { background: #eef0e8; font-weight: 650; font-size: 7.8pt; letter-spacing: 0.04em; text-transform: uppercase; color: #4a5040; }
+table.tools td:first-child { width: 30%; } table.tools td:last-child { width: 12%; }
+table.steps td:first-child { width: 14pt; text-align: center; font-weight: 650; } table.steps td:nth-child(2) { width: 16%; font-weight: 600; } table.steps td:last-child { width: 10%; }
