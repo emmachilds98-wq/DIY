@@ -1,5 +1,27 @@
 # Handoff: Home Network & Media Wall Plan
 
+## START HERE (next agent)
+- **Branch:** `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4 (draft; contains v10, v11 and v12;
+  supersedes PRs 1–3). `main` is still at v9 until it's merged.
+- **Viewer artifact (this account):** https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2. Update it in place: `python3 build_viewer.py`, then
+  publish `src/media_wall_viewer.html` with the files map in `src/publish_files.json` (written by build_viewer). It declares
+  db + user + assets + downloads. **Read the client's answers first:** ArtifactData `list` on `answers` (and `tracker` for buy ticks).
+  Read its comments too (ArtifactComments `read`): the stairwell thread is open with a question.
+- **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
+- **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
+
+## Update 18 Oct 2026, round 6b: v12.1, the client's answers
+- Sofa (photo `inputs/photo_sofa_window_wall.webp`): black jumbo-cord L-sofa; the long side under the window ends in line with the
+  breast's reveal → `SOFA_W = 188` (was 247). Return along the side wall still assumed 168, footstool at its end. Ask its length.
+- Door: hinged on the chimney-breast side, opens into the room (`DOOR_HINGE`, `DOOR_OPENS_IN`); the fit row says keep it shut while
+  eating (west-end and breast-side chairs sit in its swing) or rehang it to open into the hall.
+- Walls: side wall and breast solid (`WALLS_SOLID`): masonry plugs and screws; the "check the walls" tracker item is Done.
+- PC: "average gaming case" → `PC_CASE = (23, 46.6, 45.3)` (Corsair 4000D, 453 × 230 × 466 mm, TechPowerUp); the check now passes.
+- Fit proof: 57 checks, 44 fit, 10 tight, 3 check, 0 fail. Answers written to the viewer's db (`answers/sofa|door|walls|pc`).
+- Still open: sofa return length, west-end sizes, stairs up or down, LP/single/game counts, turntable and fan-stand models, 10-gang
+  length and surge protection, second ceiling point position, chairs, the 23 × 22 box, wired ports, console models.
+
+
 ## Update 18 Oct 2026, round 6: v12 delivered (the v11 layout, upgraded)
 **Delivered:** `out/Home_Network_Plan_v12.pdf` (45 pages), `out/Build_Guide_v12.pdf` (9 pages), HD renders in `out/` (v11 outputs
 moved to `out/v11/`), the viewer artifact **https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2** (the client's copy of the v11 viewer on

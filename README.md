@@ -16,7 +16,8 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - The main view shows **both spot bars** and the **open stairwell** with its wooden banister.
 - New views of the **table set for six** and the **PC side wall**, and a **storage sheet** drawn to scale.
 - From the v6.1 plan: the **roll-out keyboard tray**, a **2700K lamp** by the sofa, a **finger pull** on the plinth drawer (no push-to-open at floor level) and an optional **conduit to TV height**.
-- Fit proof: 57 checks, 42 fit, 10 tight, 5 to check on site, none fail.
+- Fit proof: 57 checks, 44 fit, 10 tight, 3 to check on site, none fail.
+- **Your answers (v12.1):** the sofa's long side ends in line with the breast's reveal (about 188 cm, from your photo); the door hinges on the breast side and opens in; the side wall and breast are solid; the PC is an average gaming case.
 
 | The table set for six, both spot bars | The PC side wall |
 |---|---|
@@ -44,8 +45,8 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 ![Dining layouts](media-wall/out/Dining%20layouts%20-%20four,%20six%20and%20eight.png)
 
 ### Still to confirm (answer in the viewer's form, or in a message)
-The sofa's size · the door's hinge and the west end's sizes · the stairs: up or down? · side wall and breast: solid or plasterboard? ·
-how many LPs, singles and games · turntable, PC case and fan stand models · the 10-gang's length and surge protection · the second
+The sofa's return length · the west end's sizes · the stairs: up or down? ·
+how many LPs, singles and games · turntable and fan stand models · the 10-gang's length and surge protection · the second
 ceiling point's exact spot · chairs, and where the leaf and legs live · the 23 × 22 cm box by the window · wired ports for the projector
 and music room · console model numbers (optional).
 

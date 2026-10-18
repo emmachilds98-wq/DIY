@@ -10,6 +10,7 @@ from diagrams import (storage, network, front, drawer, sound, game_drawer, av, p
 
 HERE = pathlib.Path(__file__).parent
 VERSION = "12"
+REVISION = "12.1: your answers on the sofa, door, walls and PC"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -50,7 +51,7 @@ TRACK = [
     ("To do", "Paint the whole room before anything is fixed: alcove and breast included; skirting and door from white to eggshell", "3 Paint", "", None, None),
     ("Done", "Check the alcove back wall for fixings (solid)", "4 Base unit", "", None, None),
     ("To do", "Measure the alcove's width at the floor, 76, 134, 155 and 196 and the ceiling, and the floor's level across it", "4 Base unit", "", None, None),
-    ("To do", "Check the side wall where the ledge and PC shelf go, and the chimney breast where the dining wall goes: solid, or plasterboard on studs <b>(new)</b>", "4 Base unit", "", None, None),
+    ("Done", "Check the side wall where the ledge and PC shelf go, and the chimney breast where the dining wall goes: solid (you confirmed) <b>(new)</b>", "4 Base unit", "", None, None),
     ("To buy", "Two IKEA BESTÅ 60×40×64 frames, white stained oak effect, for bays 1–2", "4 Base unit", "2", 70, 200),
     ("To buy", "Plinth for bays 1–2: 18 mm ply ladder frame 120 × 38 × 9 cm with a clear bay under bay 2, plus shims", "4 Base unit", "1", 15, 30),
     ("To buy", "Hidden plinth drawer: oak front 54 × 6 with a finger-pull groove underneath, 12 mm ply box 52 × 34 × 5, 300 mm full-extension runners <b>(changed: no push-to-open at floor level, as v6.1 said)</b>", "4 Base unit", "1", 30, 50),
@@ -294,7 +295,7 @@ def build():
 
 <div class="p1">
 <h1>Home Network &amp; Media Wall Plan</h1>
-<p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION}, drawn to your measurements</p>
+<p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
 <div class="decision"><b>What changed in v12.</b> The layout is v11's, as agreed. New: the sub in a <b>slatted oak box</b>; <b>oak slats</b> on the PC screen, its cable run and behind the turntable; a <b>reeded oak underside</b> for the folded table; both spot bars and the open <b>stairwell</b> in the main view; new views of the <b>table set for six</b> and the <b>PC side wall</b>; a <b>storage sheet</b> to scale; and from your v6.1 plan, the <b>keyboard tray</b>, a lamp by the sofa and finger pulls at floor level.</div>
 
@@ -316,11 +317,11 @@ def build():
 <tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars on your two existing ceiling points: between the TV and the sofa, and between the door and the wall.</td></tr>
 <tr><td>Power and network</td><td>The side-wall socket becomes a double: left for the 10-gang (everything modern), right for the retro set, switched at the wall. A new socket behind the sofa for the PC and the rears. Deco A in bedroom 3, Cat6 down the airing cupboard.</td></tr>
 </table>
-<p class="confirm"><b>To confirm (section 12):</b> the sofa's size · the door's hinge and the west end's sizes · turntable, PC case and fan stand models · chairs · where the leaf and legs live · the 23 × 22 cm box by the window.</p>
+<p class="confirm"><b>To confirm (section 12):</b> the sofa's return length · the west end's sizes · the stairs: up or down? · turntable, PC case and fan stand models · chairs · where the leaf and legs live · the 23 × 22 cm box by the window.</p>
 </div>
 
 <h2 class="pb">2 · The room</h2>
-<p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is drawn at a typical {n(g.SOFA_W)} × {n(g.SOFA_D)} cm (a corner sofa of that size<sup>{fit.ORDER.index("sofa") + 1}</sup>) until you measure yours.</p>
+<p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is drawn from your photo<sup>{fit.ORDER.index("sofa") + 1}</sup>: its long side ends in line with the breast's reveal (about {n(g.SOFA_W)} cm); the return along the side wall is a typical {n(g.SOFA_D)} until you measure it.</p>
 <figure>{living_plan()}</figure>
 <table class="tight"><tr><th>From your sketch</th><th>mm</th><th>Notes</th></tr>
 <tr><td>Room, east to west along the window</td><td class="num">{n(g.ROOM_W*10)}</td><td>The media wall is the south wall, shared with the hall and garage</td></tr>
@@ -469,7 +470,7 @@ def build():
 <h2 class="pb">6 · The side wall</h2>
 <p>One oak line at {n(g.LEDGE_TOP)} cm runs from the ledge over the TV, round the corner on the left upright, and along the side wall: first a 7 cm record ledge with four more LPs face-out, then an oak shelf for the PC over the end of the sofa. It ties the alcove to the rest of the room and moves the PC out of the TV's sightlines.</p>
 <figure class="render">{img("render_v12_side.png", "The PC side wall")}
-<figcaption>The side wall from the room: the ledge round the corner with its four LPs, the PC on its shelf with the slatted screen beyond it and the keyboard tray's housing underneath, the slatted cable spine down to the skirting, the sofa below (drawn at a typical 247 × 168 until you measure yours), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on.</figcaption></figure>
+<figcaption>The side wall from the room: the ledge round the corner with its four LPs, the PC on its shelf with the slatted screen beyond it and the keyboard tray's housing underneath, the slatted cable spine down to the skirting, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on.</figcaption></figure>
 <figure>{pc_shelf()}</figure>
 <ul>
 <li><b>Wrap ledge:</b> 134 × 7 × 2.4 cm with a 1.5 cm lip, on an oak cleat screwed to the side wall, butt-jointed to the left upright's front edge on two 10 mm dowels.</li>
@@ -595,14 +596,11 @@ def build():
 <h2 class="pb">12 · Still to confirm, later ideas, sources</h2>
 <h3>Still to confirm</h3>
 <ul class="checks">
-<li>The L-sofa's size (the plan uses {n(g.SOFA_W)} × {n(g.SOFA_D)} × {n(g.SOFA_H)} high) and which way its return points.</li>
-<li>The door to the hall: which side it hinges, and whether it opens into the room (the dining chairs on that side sit in its swing).</li>
+<li>The sofa's return: how far it runs along the side wall (the long side is about {n(g.SOFA_W)} from your photo; the return is drawn at {n(g.SOFA_D)}).</li>
 <li>The west end's sizes: which of 935, 1045, 660 and 820 are the recess, the door and the stair box.</li>
 <li>The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.</li>
-<li>The PC case's model (the shelf allows {n(g.PC_CASE[0])} × {n(g.PC_CASE[2])} × {n(g.PC_CASE[1])} tall) and that its window is on the left.</li>
 <li>The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.</li>
 <li>Dining chairs: use ones you have (seat 45–48), or four folding ones? And where the leaf and the legs live (the garage?).</li>
-<li>The side wall and the chimney breast: solid, or plasterboard? The ledge, PC shelf and dining wall all fix to them.</li>
 <li>The 23 × 22 cm box in the window's west corner.</li>
 <li>Records: roughly how many LPs and singles (the wall holds about {LPS} and {SINGLES}), and are most in thick outer sleeves?</li>
 <li>Wired ports for the projector (master) and the music room (bedroom 2)?</li>
@@ -615,6 +613,7 @@ def build():
 <p class="note">Easiest way to answer: the viewer page has a box for each of these and takes photos; or reply in a message, a line each.</p>
 <h3>Agreed so far</h3>
 <ul class="agreed">
+<li>From your answers (v12.1): the sofa's long side ends in line with the breast's reveal; the door hinges on the breast side and opens in; the side wall and breast are solid (plugs and screws, no stud fixings); the PC is an average gaming case (allowed for at 23 × 45.3 × 46.6).</li>
 <li>Artisan oak, Card Room Green with matching eggshell skirting, every record face-out, the game drawer as designed.</li>
 <li>The TV {n(g.TV_SHIFT)} cm nearer the side wall, the turntable in the alcove, the Series X above it, the records below.</li>
 <li>The ledge wrapping round onto the side wall, with the PC above the sofa.</li>

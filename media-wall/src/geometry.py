@@ -116,7 +116,7 @@ WRAP_D = LEDGE_D                           # 7 deep, same as the ledge over the 
 PC_SHELF_Z = (-130.0, -212.0)              # an oak shelf 82 long over the chaise end of the sofa
 PC_SHELF_D, PC_SHELF_T = 28.0, 4.0
 PC_SHELF_TOP = LEDGE_TOP                   # one line with the ledge
-PC_CASE = (23.0, 47.0, 45.0)               # W (off the wall), H, D (along the wall): assumed mid-tower (model to confirm)
+PC_CASE = (23.0, 46.6, 45.3)               # W (off the wall), H, D (along the wall): client: 'average gaming case' = a mid-tower like the Corsair 4000D, 230 × 466 × 453 mm
 PC_Z = (-134.0, -134.0 - PC_CASE[2])       # front faces the alcove
 PAD_DOCK = (18.0, 2.2, 9.0)
 PC_SCREEN_SLAT = (2.1, 1.2)                # v6.1's slatted screen: oak slats 2.1 wide, 1.2 gaps, open top
@@ -125,7 +125,9 @@ SPINE = (6.0, 6.0)                          # slatted oak spine over the PC's ca
 RZ_SLATS = (2.5, 1.5, 2.2)                  # slatted oak panel behind the turntable zone: slat width, gap, depth with battens
 
 # ---------------------------------------------------------------- the L-sofa (assumed until measured) and the sub
-SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 247.0, 168.0, 95.0, 80.0   # overall width, overall depth with the chaise, back-to-front, height
+SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 188.0, 168.0, 95.0, 80.0   # v12.1 client photo: the long side runs from the side wall to in line with the breast's reveal (about 188); the return along the side wall (168) still assumed
+DOOR_HINGE, DOOR_OPENS_IN = "breast", True  # v12.1 client: hinged on the chimney-breast side, opens into the room
+WALLS_SOLID = True                          # v12.1 client: the side wall and the chimney breast are solid
 SOFA_X = (2.0, 2.0 + SOFA_W)               # 2 .. 249 along the window wall
 SOFA_BACK_Z = WINDOW_Z + 10.0              # -299: 10 cm off the window wall and radiator
 SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front

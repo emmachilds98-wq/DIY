@@ -1860,7 +1860,7 @@ SOFA_COL = ("#8c8276", "#a0968a", "#776e63")
 
 
 def sofa_solid():
-    """The L-sofa drawn solid (assumed 247 × 168 × 80 until measured): the return along the side wall under the PC shelf,
+    """The L-sofa drawn solid (long side about 188 from the client's photo, return 168 assumed): the return along the side wall under the PC shelf,
     the long side against the window wall."""
     c, t, sd = SOFA_COL
     x0 = G.SOFA_X[0]

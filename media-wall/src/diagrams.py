@@ -639,7 +639,7 @@ def _room(o, k, ox, oy, xmin=0.0, label_walls=True):
     # window and radiator
     o.append(f'<rect x="{X(g.WINDOW_X[1]):.1f}" y="{Y(g.WINDOW_Z) - 4:.1f}" width="{(g.WINDOW_X[1]-g.WINDOW_X[0])*k:.1f}" height="8" fill="#cfe3f2" stroke="#7aa6c8"/>')
     o.append(f'<rect x="{X(g.RADIATOR_X[1]):.1f}" y="{Y(g.WINDOW_Z) + 5:.1f}" width="{(g.RADIATOR_X[1]-g.RADIATOR_X[0])*k:.1f}" height="6" fill="#eceae4" stroke="#b9b4a8"/>')
-    # door, swinging into the room (which side hinges is to confirm)
+    # door, swinging into the room, hinged on the breast side (client confirmed)
     hx = g.DOOR_X[0]
     r = g.DOOR_SWING
     o.append(f'<path d="M{X(hx + r):.1f},{Y(g.BREAST_D_WEST):.1f} A{r*k:.1f},{r*k:.1f} 0 0 1 {X(hx):.1f},{Y(g.BREAST_D_WEST - r):.1f}" fill="none" stroke="#9a958b" stroke-dasharray="3 2"/>')
@@ -674,7 +674,7 @@ def _sofa(o, X, Y, k, label=True):
     back = [(x0, zb), (x1, zb), (x1, zb + 22), (x0 + 22, zb + 22), (x0 + 22, ze), (x0, ze)]
     o.append('<polygon points="' + " ".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in back) + '" fill="#dfddd6" stroke="none"/>')
     if label:
-        o.append(t((X(cx1) + X(x1)) / 2, Y((zb + zf) / 2) + 4, f"L-sofa, about {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} (to measure)", 9.5, "middle", 650))
+        o.append(t((X(cx1) + X(x1)) / 2, Y((zb + zf) / 2) + 4, f"L-sofa, about {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} (from your photo)", 9.5, "middle", 650))
 
 
 def living_plan():
@@ -693,8 +693,8 @@ def living_plan():
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 22, "media wall, 46 deep", 9, "middle", 650, "#7a5130"))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 34, "TV 25 cm nearer the side wall · deck right", 8.5, "middle", 400, "#7a5130"))
     o.append(t(X(g.TABLE_CX), Y(0) + 26, "breast · dining wall", 9.5, "middle", 650, "#8f5b45"))
-    o.append(t(X(g.ROOM_W - 30), Y(g.ALC_D - g.STAIR_D) - 6, "stair box (to confirm)", 9, "middle", 400, MUTED))
-    o.append(t(X(g.DOOR_X[0] + 42), Y(g.BREAST_D_WEST) - 6, "door: which side hinges?", 9, "middle", 600, "#d0573b"))
+    o.append(t(X(g.ROOM_W - 30), Y(g.ALC_D - g.STAIR_D) - 6, "stairwell, banister (to confirm)", 9, "middle", 400, MUTED))
+    o.append(t(X(g.DOOR_X[0] + 42), Y(g.BREAST_D_WEST) - 6, "door opens in · hinge by the breast", 9, "middle", 600, "#d0573b"))
     # side-wall labels
     o.append(t(X(0) + 10, Y((g.WRAP_Z[0] + g.WRAP_Z[1]) / 2) + 4, "ledge wraps the corner, 4 LPs", 9, "start", 600, "#7a5130"))
     o.append(t(X(0) + 10, Y((g.PC_SHELF_Z[0] + g.PC_SHELF_Z[1]) / 2) + 4, "PC shelf at 155.4, over the sofa", 9, "start", 600, GAME_S))
@@ -708,8 +708,8 @@ def living_plan():
     bxx_, bzz_ = g.SUB_BOX["x"], g.SUB_BOX["z"]
     o.append(rect(X(bxx_[1]), Y(bzz_[0]), (bxx_[1] - bxx_[0]) * k, (bzz_[1] - bzz_[0]) * k, "none", "#b88a55", 1, 1.4, 'stroke-dasharray="3 2"'))
     o.append(rect(X(16), Y(-280), 14 * k, 15 * k, SND_F, SND_S, 3))
-    o.append(rect(X(272), Y(-296), 15 * k, 14 * k, SND_F, SND_S, 3))
-    o.append(t(X(265), Y(-296) - 4, "rear", 8, "middle", 400, MUTED))
+    o.append(rect(X(g.SOFA_X[1] + 14), Y(-296), 15 * k, 14 * k, SND_F, SND_S, 3))
+    o.append(t(X(g.SOFA_X[1] + 7), Y(-296) - 4, "rear", 8, "middle", 400, MUTED))
     o.append(t(X(0) + 10, Y(-272) + 4, "rear, on the wall", 8, "start", 400, MUTED))
     # sockets
     o.append(rect(X(0) - 7, Y(g.SOCKET["z"]) - 8, 7, 16, "#fff", "#d0573b", 1))
@@ -757,7 +757,7 @@ def living_plan():
     o.append(t(X(g.ROOM_W) - 36, Y(-150), f"{_fmt(g.ROOM_D*10)} mm", 9.5, "end", 400, MUTED))
     o.append(t(X(g.ROOM_W) - 36, Y(-150) + 12, "window to alcove back", 9, "end", 400, MUTED))
     o.append(t(X((g.WINDOW_X[0] + g.WINDOW_X[1]) / 2), Y(g.WINDOW_Z) - 10, f"window {_fmt(g.WINDOW_X[1]-g.WINDOW_X[0])} · radiator below", 9.5, "middle", 400, MUTED))
-    o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. The L-sofa is drawn at a typical {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} cm until you measure yours; the west end (stair box, door) is drawn roughly until you confirm it.", 9, "start", 400, MUTED))
+    o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. Sofa from your photo (long side to the reveal; return {_fmt(g.SOFA_D)} assumed). Stairwell drawn roughly.", 9, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "The living room from above, as you measured it",
                "To scale, north at the top. Media wall in the alcove, the ledge and PC shelf on the side wall over the sofa, the dining wall on the chimney breast, two spot bars")
 
@@ -950,11 +950,11 @@ def sound():
     o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
     o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub in a slatted oak box under the dining wall,", 9.5, "middle", 600, SND_S))
     o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, f"port {g.SUB_BOX['x'][1] - g.SUB_POS['x'][1]:.0f} cm from its slats", 9, "middle", 400, MUTED))
-    for (x, z, lab) in [(16, -280, "rear, on the side wall"), (272, -296, "rear, on a stand")]:
+    for (x, z, lab) in [(16, -280, "rear, on the side wall"), (g.SOFA_X[1] + 14, -296, "rear, on a stand")]:
         o.append(rect(X(x), Y(z), 15 * k, 15 * k, SND_F, SND_S, 3))
         o.append(t(X(x) + (10 if x < 100 else -6), Y(z) + 30, lab, 9, "start" if x < 100 else "end", 600, SND_S))
     o.append(wire([(X(23), Y(-280)), (X(23), Y(-302)), (X(279), Y(-302)), (X(279), Y(-296))], VIN_S, 1.6, "5 3"))
-    o.append(t(X(272) + 6, Y(-296) + 42, "linked by a cable behind the sofa", 9, "end", 500, VIN_S))
+    o.append(t(X(g.SOFA_X[1] + 14) + 6, Y(-296) + 42, "linked by a cable behind the sofa", 9, "end", 500, VIN_S))
     o.append(rect(X(g.DECK_X[1]), Y(g.DECK_Z[0]), g.DECK[0] * k, g.DECK[2] * k, VIN_F, VIN_S, 2))
     o.append(t(X(g.DECK_X[0]) - 4, Y(g.DECK_Z[0]) - 4, "turntable", 9, "end", 600, VIN_S))
     d_ = ((g.SUB_POS["x"][1] - g.DECK_X[0]) ** 2 + (g.SUB_POS["z"][1] - g.DECK_Z[0]) ** 2) ** 0.5

@@ -27,7 +27,8 @@ SOURCES = {
     "legs": "Emuca: table legs Ø60 mm, 710 mm, height adjustable 710–730 mm, 50 kg per leg, screw-on mounting plate (set of 4)",
     "terje": "IKEA: TERJE folding chair, 43 W × 49 D × 78 H cm, seat height 48 cm, tested for 110 kg",
     "dining": "Book a Builder UK, small dining room ideas: 600 mm of table edge per diner; table edge to a wall 600 mm tight minimum, 750 mm to aim for, 1000–1100 mm to walk behind; dining height about 750 mm",
-    "sofa": "M&S: Easy Velvet left corner sofa, 247 W × 168 D × 80 H cm: a typical corner sofa, used until yours is measured",
+    "sofa": "Your photo of the sofa (18 Oct 2026): a black jumbo-cord L-sofa, the long side under the window ending in line with the breast's reveal, about 188 cm; the return's 168 is a typical corner-sofa size until measured",
+    "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
 }
 ORDER = list(SOURCES)
 
@@ -119,7 +120,7 @@ def zones():
         ]),
         ("The side wall: the ledge wraps the corner, the PC shelf", f"one oak line at {r1(g.LEDGE_TOP)}: ledge {r1(wrap_len)} long × 7, then a shelf {r1(pc_len)} × {r1(g.PC_SHELF_D)}", [
             ("Four more LPs on the wrap ledge", f"4 × {r1(g.LP)} + gaps = {r1(4 * g.LP + 3 * 1.4)}", ref("media"), f"{r1(wrap_len)} long", f"{r1(wrap_len - 4 * g.LP - 3 * 1.4 - 1.5)}", PASS),
-            ("The PC on its shelf", f"{r1(g.PC_CASE[0])} × {r1(g.PC_CASE[2])} × {r1(g.PC_CASE[1])} tall (a typical mid-tower; model to confirm)", "", f"{r1(g.PC_SHELF_D)} × {r1(pc_len)}", "2.5 off the wall, the cane screen and pad dock beyond it", CHECK),
+            ("The PC on its shelf", f"{r1(g.PC_CASE[0])} × {r1(g.PC_CASE[2])} × {r1(g.PC_CASE[1])} tall (an average gaming case, e.g. Corsair 4000D)", ref("case"), f"{r1(g.PC_SHELF_D)} × {r1(pc_len)}", "2.5 off the wall, the slatted screen and pad dock beyond it; height 46.6 under the 79.6 to the ceiling", PASS),
             ("Air above the PC", f"top at {r1(g.PC_SHELF_TOP + g.PC_CASE[1])}", "", f"{r1(g.CEIL)} ceiling", f"{r1(g.CEIL - g.PC_SHELF_TOP - g.PC_CASE[1])} for the top exhaust", PASS),
             ("Shelf over the end of the sofa", f"underside {r1(under)}", ref("sofa"), f"sofa back {r1(g.SOFA_H)}", f"{r1(under - g.SOFA_H)}; the shelf covers only the 28 cm nearest the wall", PASS),
             ("Keyboard tray under the PC shelf (v6.1)", f"{r1(g.KB_TRAY['h'])} cm housing, tray rolls {r1(g.KB_TRAY['out'])} out on {r1(g.KB_TRAY['runners'] * 10)} mm runners", ref("runners"), f"sofa back {r1(g.SOFA_H)}", f"{r1(under - g.KB_TRAY['h'] - g.SOFA_H)} over the sofa's back; pulled out, its front edge is {r1(g.PC_SHELF_D + g.KB_TRAY['out'])} from the wall, still over the return's seat", PASS),
@@ -132,13 +133,13 @@ def zones():
             ("Three lift-off hinges on the backboard", "100 × 88, rated for a 120 kg door", ref("liftoff"), f"a {weight:.0f} kg top", "slide it 5 cm sideways to lift it off", PASS),
             ("Four at the wall: two on the room side", f"{r1(tw)} of edge", ref("dining"), f"{r1(g.DINE_W)} each recommended", f"{r1(tw / 2)} each", TIGHT),
             ("Four at the wall: room to the sofa", f"table edge {r1(-g.TABLE_Z[1])} out", ref("dining", "sofa"), "sofa front", f"{r1(four_sofa)} (walk behind: 100+)", PASS),
-            ("The west end chair and the door", f"chair {r1(g.CHAIR[0])} × {r1(g.CHAIR[1])}", ref("terje"), "the door's swing, if it opens in", "they overlap: keep the door shut while you eat, or confirm it opens outwards", CHECK),
+            ("The door and the dining chairs", "door 83 wide, hinged on the breast side, opens in (you confirmed)", ref("room"), "its swing reaches about 44 out from the recess wall", "the west-end chair (four) and the breast-side chairs (six, eight) sit in its swing: keep it shut while you eat, or have it rehung to open into the hall", TIGHT),
             ("Six: lifted off onto four legs", f"top at {r1(g.LEG_H + tt)}–{r1(73 + tt)}", ref("legs"), f"dining height about {r1(75)}", "within 1.3", PASS),
             ("Six: two a side", f"{r1(tw)} long", ref("dining"), f"{r1(g.DINE_W)} each", f"{r1(six_edge)} each", TIGHT),
             ("Six and eight: to the breast and the window", f"table {r1(free_breast)}–{r1(-g.FREE_Z[1])} out", ref("dining"), f"{r1(g.CLEAR_MIN)} minimum", f"{r1(free_breast)} to the breast (tight minimum); {r1(free_window)} to the window", TIGHT),
             ("Six: the west end", f"table end at {r1(g.SIX_X[1])}", ref("dining"), f"west wall at {r1(g.ROOM_W)}", f"{r1(six_wall)}", PASS),
             ("Eight: with the 60 × 80 leaf", f"{r1(tw + g.LEAF[0])} long, three a side", ref("dining", "legs"), f"{r1(g.DINE_W)} each", f"{r1(eight_edge)} each", TIGHT),
-            ("Eight: the west end and the sofa", f"table {r1(g.EIGHT_X[0])}–{r1(g.EIGHT_X[1])}", ref("dining", "sofa"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(eight_wall)} to the wall; {r1(eight_sofa)} to the sofa's front at the east end", TIGHT),
+            ("Eight: the west end and the sofa", f"table {r1(g.EIGHT_X[0])}–{r1(g.EIGHT_X[1])}", ref("dining", "sofa"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(eight_wall)} to the wall; the sofa ends at {r1(g.SOFA_X[1])}, so the east end chair sits clear of it ({r1(eight_sofa)} to the sofa's front line)", TIGHT if eight_wall < g.CLEAR_OK else PASS),
             ("Six: the breast-side chairs and the sub's box", f"chairs {r1(cw)} wide at the table's edge, backs at {r1(-(g.FREE_Z[0] + cd))} from the breast", ref("terje"), f"box at x {r1(g.SUB_BOX['x'][0])}–{r1(g.SUB_BOX['x'][1])}, {r1(-g.SUB_BOX['z'][0])} out", f"{r1(six_sub_gap)} beside it: pushed back, a chair passes the box instead of hitting it", TIGHT),
             ("Eight: the breast-side end chair and the sub's box", f"chair at x {r1(e_first - cw / 2)}–{r1(e_first + cw / 2)}, back at {r1(-e_back)} from the breast", ref("terje"), f"box {r1(-g.SUB_BOX['z'][0])} out from the breast", f"they overlap {r1(e_overlap)} across: for eight, lift the box off and carry the sub to the end of the base (it's wireless; leave 1 m of slack in its lead)", CHECK),
             ("Sub in its slatted oak box, under the dining wall", f"{r1(g.SUB[2])} long × {r1(g.SUB[0])} out × {r1(g.SUB[1])} tall, on a 5 cm riser", ref("hisense"), f"box {r1(g.SUB_BOX['x'][1] - g.SUB_BOX['x'][0])} × {r1(-g.SUB_BOX['z'][0])} × {r1(g.SUB_BOX['h'])}, between the arms", f"driver {r1(g.SUB_POS['x'][0] - g.SUB_BOX['x'][0])} from the slats, rear port {r1(g.SUB_BOX['x'][1] - g.SUB_POS['x'][1])}; {r1(g.SUB_BOX['h'] - 2 - 5 - g.SUB[1])} over the sub; box {r1(g.SUB_BOX['x'][0] - g.HEBGO_X[0] - 1.4)} clear of the east arm", PASS),

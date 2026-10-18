@@ -386,7 +386,7 @@ def page(site=False):
     <div class="frame"><img src="{prefix}art/zz_seating.jpg" alt="Three small plans of the dining table: four at the wall, six and eight with the table lifted off and pulled into the room" width="2064" height="1200" loading="lazy"></div>
     <div class="frame"><img src="{prefix}art/zz_storage.jpg" alt="Storage options: every space in the wall drawn to scale with what fits and how many, and the overflow options" width="2160" height="2592" loading="lazy"></div>
     <div class="frame"><img src="{prefix}art/zz_house.jpg" alt="Three floor plans with the Decos, Cat6 runs, chimney breast, brick cupboard and sloped ceilings" width="2064" height="1488" loading="lazy"></div>
-    <p class="caption">The living room is drawn from your measurements; the L-sofa is drawn at a typical {G.SOFA_W:g} × {G.SOFA_D:g} cm until you measure yours. The house outline is traced from the agent's plans.</p>
+    <p class="caption">The living room is drawn from your measurements; the L-sofa from your photo: its long side ends in line with the breast's reveal (about {G.SOFA_W:g} cm), the return drawn at {G.SOFA_D:g}. The house outline is traced from the agent's plans.</p>
   </section>
 
   <section class="block" id="downloads">
