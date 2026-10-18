@@ -1,4 +1,4 @@
-"""v12 fit proof (v11 layout; v12 adds the six- and eight-seat checks against the sub): every item that goes in the wall, its size and where the size comes from, the space it goes
+"""v13 fit proof (v13: no slatted panel or sub box; the sub stands on its plain riser) (v11 layout; v12 adds the six- and eight-seat checks against the sub): every item that goes in the wall, its size and where the size comes from, the space it goes
 into, what's left, and a verdict. Spares are computed from geometry.py, so the tables can't drift from the
 renders and diagrams. build_doc.py turns ZONES into one table per zone and SOURCES into the numbered list."""
 import geometry as G
@@ -73,9 +73,11 @@ def zones():
     weight = tw * td * tt * 0.72 / 1000
     cw, cd = g.CHAIR[0], g.CHAIR[1]
     six_cx = sum(g.SIX_X) / 2
-    six_sub_gap = (six_cx - 27.5 - cw / 2) - g.SUB_BOX["x"][1]          # breast-side chair's east edge to the sub's west end
+    SB = g.SUB_RISER if g.PLAIN else g.SUB_BOX                          # v13: what stands under the table is the sub on its riser
+    six_sub_gap = (six_cx - 27.5 - cw / 2) - SB["x"][1]          # breast-side chair's east edge to the sub's west end
     e_first = g.EIGHT_X[0] + (g.EIGHT_X[1] - g.EIGHT_X[0]) / 6           # first breast-side chair's centre, three a side
-    e_overlap = min(e_first + cw / 2, g.SUB_BOX["x"][1]) - max(e_first - cw / 2, g.SUB_BOX["x"][0])
+    e_overlap = min(e_first + cw / 2, SB["x"][1]) - max(e_first - cw / 2, SB["x"][0])
+    panel = 0.0 if g.PLAIN else g.RZ_SLATS[2]
     e_back = g.FREE_Z[0] + cd                                            # its back, at the table's edge
     return [
         ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the left one now a corner post on the side wall; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
@@ -87,7 +89,7 @@ def zones():
         ]),
         ("The turntable zone, right of the TV", f"{r1(g.RZ_W)} wide × {r1(g.BASE_D)} deep, worktop {r1(g.WORKTOP)} to the Series X shelf's underside at {r1(g.LID_CLEAR_TO)}", [
             ("Turntable, AT-LP120X size (worst case)", f"{r1(g.DECK[0])} × {r1(g.DECK[2])} × {r1(g.DECK[1])} with its lid", ref("atlp120"), f"{r1(g.RZ_W)} wide", f"{r1(deck_side)} each side", TIGHT),
-            ("Its depth, with room behind for the lid's hinges", f"{r1(g.DECK[2])}, front 2 cm in from the worktop's edge", ref("atlp120"), f"{r1(g.BASE_D)} deep, less the {r1(g.RZ_SLATS[2])} slatted panel", f"{r1(g.ALC_D - g.RZ_SLATS[2] - g.DECK_Z[1])} behind it", TIGHT),
+            ("Its depth, with room behind for the lid's hinges", f"{r1(g.DECK[2])}, front 2 cm in from the worktop's edge", ref("atlp120"), f"{r1(g.BASE_D)} deep, to the painted wall" if g.PLAIN else f"{r1(g.BASE_D)} deep, less the {r1(panel)} slatted panel", f"{r1(g.ALC_D - panel - g.DECK_Z[1])} behind it", TIGHT if g.ALC_D - panel - g.DECK_Z[1] < 8 else PASS),
             ("Lid open", f"cover {r1(g.LID[0])} × {r1(g.LID[1])}; standing up, its top at about {r1(round(g.LID_TOP_OPEN))}", ref("lid"), f"shelf underside {r1(g.LID_CLEAR_TO)}", f"about {r1(round(g.LID_CLEAR_TO - g.LID_TOP_OPEN))}", PASS),
             ("Phono preamp, hung under the shelf at the back", f"about {r1(g.PREAMP[0])} × {r1(g.PREAMP[2])} × {r1(g.PREAMP[1])}", "", f"{r1(pre_bottom)}–{r1(g.LID_CLEAR_TO)}, at the back", f"{r1(pre_bottom - g.LID_TOP_OPEN)} over the open lid's edge; lift the lid gently", TIGHT),
             ("Series X fan stand on the shelf", f"{r1(fx)} × {r1(fz)} (assumed; model to confirm)", "", f"{r1(g.RZ_W)} × {r1(g.RZ_SHELF_D)} shelf", f"{r1(sx_side)} each side", PASS),
@@ -120,7 +122,7 @@ def zones():
         ]),
         ("The side wall: the ledge wraps the corner, the PC shelf", f"one oak line at {r1(g.LEDGE_TOP)}: ledge {r1(wrap_len)} long × 7, then a shelf {r1(pc_len)} × {r1(g.PC_SHELF_D)}", [
             ("Four more LPs on the wrap ledge", f"4 × {r1(g.LP)} + gaps = {r1(4 * g.LP + 3 * 1.4)}", ref("media"), f"{r1(wrap_len)} long", f"{r1(wrap_len - 4 * g.LP - 3 * 1.4 - 1.5)}", PASS),
-            ("The PC on its shelf", f"{r1(g.PC_CASE[0])} × {r1(g.PC_CASE[2])} × {r1(g.PC_CASE[1])} tall (an average gaming case, e.g. Corsair 4000D)", ref("case"), f"{r1(g.PC_SHELF_D)} × {r1(pc_len)}", "2.5 off the wall, the slatted screen and pad dock beyond it; height 46.6 under the 79.6 to the ceiling", PASS),
+            ("The PC on its shelf", f"{r1(g.PC_CASE[0])} × {r1(g.PC_CASE[2])} × {r1(g.PC_CASE[1])} tall (an average gaming case, e.g. Corsair 4000D)", ref("case"), f"{r1(g.PC_SHELF_D)} × {r1(pc_len)}", "2.5 off the wall, the brush grommet and pad dock beyond it; height 46.6 under the 79.6 to the ceiling", PASS),
             ("Air above the PC", f"top at {r1(g.PC_SHELF_TOP + g.PC_CASE[1])}", "", f"{r1(g.CEIL)} ceiling", f"{r1(g.CEIL - g.PC_SHELF_TOP - g.PC_CASE[1])} for the top exhaust", PASS),
             ("Shelf over the end of the sofa", f"underside {r1(under)}", ref("sofa"), f"sofa back {r1(g.SOFA_H)}", f"{r1(under - g.SOFA_H)}; the shelf covers only the 28 cm nearest the wall", PASS),
             ("Keyboard tray under the PC shelf (v6.1)", f"{r1(g.KB_TRAY['h'])} cm housing, tray rolls {r1(g.KB_TRAY['out'])} out on {r1(g.KB_TRAY['runners'] * 10)} mm runners", ref("runners"), f"sofa back {r1(g.SOFA_H)}", f"{r1(under - g.KB_TRAY['h'] - g.SOFA_H)} over the sofa's back; pulled out, its front edge is {r1(g.PC_SHELF_D + g.KB_TRAY['out'])} from the wall, still over the return's seat", PASS),
@@ -140,11 +142,15 @@ def zones():
             ("Six: the west end", f"table end at {r1(g.SIX_X[1])}", ref("dining"), f"west wall at {r1(g.ROOM_W)}", f"{r1(six_wall)}", PASS),
             ("Eight: with the 60 × 80 leaf", f"{r1(tw + g.LEAF[0])} long, three a side", ref("dining", "legs"), f"{r1(g.DINE_W)} each", f"{r1(eight_edge)} each", TIGHT),
             ("Eight: the west end and the sofa", f"table {r1(g.EIGHT_X[0])}–{r1(g.EIGHT_X[1])}", ref("dining", "sofa"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(eight_wall)} to the wall; the sofa ends at {r1(g.SOFA_X[1])}, so the east end chair sits clear of it ({r1(eight_sofa)} to the sofa's front line)", TIGHT if eight_wall < g.CLEAR_OK else PASS),
-            ("Six: the breast-side chairs and the sub's box", f"chairs {r1(cw)} wide at the table's edge, backs at {r1(-(g.FREE_Z[0] + cd))} from the breast", ref("terje"), f"box at x {r1(g.SUB_BOX['x'][0])}–{r1(g.SUB_BOX['x'][1])}, {r1(-g.SUB_BOX['z'][0])} out", f"{r1(six_sub_gap)} beside it: pushed back, a chair passes the box instead of hitting it", TIGHT),
-            ("Eight: the breast-side end chair and the sub's box", f"chair at x {r1(e_first - cw / 2)}–{r1(e_first + cw / 2)}, back at {r1(-e_back)} from the breast", ref("terje"), f"box {r1(-g.SUB_BOX['z'][0])} out from the breast", f"they overlap {r1(e_overlap)} across: for eight, lift the box off and carry the sub to the end of the base (it's wireless; leave 1 m of slack in its lead)", CHECK),
+            ("Six: the breast-side chairs and the sub", f"chairs {r1(cw)} wide at the table's edge, backs at {r1(-(g.FREE_Z[0] + cd))} from the breast", ref("terje"), f"sub and riser at x {r1(SB['x'][0])}–{r1(SB['x'][1])}, {r1(-SB['z'][0])} out", f"{r1(six_sub_gap)} beside it: pushed back, a chair passes the sub instead of hitting it", TIGHT if six_sub_gap < 10 else PASS),
+            ("Eight: the breast-side end chair and the sub", f"chair at x {r1(e_first - cw / 2)}–{r1(e_first + cw / 2)}, back at {r1(-e_back)} from the breast", ref("terje"), f"sub {r1(-SB['z'][0])} out from the breast", (f"they overlap {r1(e_overlap)} across: for eight, carry the sub on its riser to the end of the base (it's wireless; leave 1 m of slack in its lead)" if e_overlap > 0 else f"{r1(-e_overlap)} clear"), CHECK if e_overlap > 0 else PASS),
+        ] + ([
+            ("Sub on its plain oak riser, under the dining wall", f"{r1(g.SUB[2])} long × {r1(g.SUB[0])} out × {r1(g.SUB[1])} tall, on a {r1(g.SUB_RISER['h'])} cm riser {r1(SB['x'][1] - SB['x'][0])} × {r1(-SB['z'][0])}", ref("hisense"), f"between the folded arms, x {r1(g.HEBGO_X[0] + 1.4)}–{r1(g.HEBGO_X[1] - 1.4)}", f"{r1(SB['x'][0] - g.HEBGO_X[0] - 1.4)} clear of the east arm, {r1(g.HEBGO_X[1] - 1.4 - SB['x'][1])} of the west; rear port open to the room on its west end", PASS),
+        ] if g.PLAIN else [
             ("Sub in its slatted oak box, under the dining wall", f"{r1(g.SUB[2])} long × {r1(g.SUB[0])} out × {r1(g.SUB[1])} tall, on a 5 cm riser", ref("hisense"), f"box {r1(g.SUB_BOX['x'][1] - g.SUB_BOX['x'][0])} × {r1(-g.SUB_BOX['z'][0])} × {r1(g.SUB_BOX['h'])}, between the arms", f"driver {r1(g.SUB_POS['x'][0] - g.SUB_BOX['x'][0])} from the slats, rear port {r1(g.SUB_BOX['x'][1] - g.SUB_POS['x'][1])}; {r1(g.SUB_BOX['h'] - 2 - 5 - g.SUB[1])} over the sub; box {r1(g.SUB_BOX['x'][0] - g.HEBGO_X[0] - 1.4)} clear of the east arm", PASS),
             ("The box's slats: open enough for the sound", f"slats {r1(g.SUB_BOX_SLAT[0])} wide, {r1(g.SUB_BOX_SLAT[1])} apart on the front and both ends", "", "the driver and the rear port", f"about {round(100 * g.SUB_BOX_SLAT[1] / (g.SUB_BOX_SLAT[0] + g.SUB_BOX_SLAT[1]))}% open on three sides, solid top; bass passes slats easily, and fingers and toes can't reach the cone", PASS),
-            ("Feet under the table, four at the wall", f"sub's box {r1(-g.SUB_BOX['z'][0])} out from the breast", ref("terje"), f"table {r1(td)} deep", f"{r1(td + g.RAIL[2] + g.SUB_BOX['z'][0])} of legroom in front of it on the room side; the end seats are clear", PASS),
+        ]) + [
+            ("Feet under the table, four at the wall", f"the sub {r1(-SB['z'][0])} out from the breast", ref("terje"), f"table {r1(td)} deep", f"{r1(td + g.RAIL[2] + SB['z'][0])} of legroom in front of it on the room side; the end seats are clear", PASS),
             ("Chairs at the table", f"seat {r1(g.CHAIR[3])}", ref("terje"), f"top {r1(g.TABLE_TOP)}", f"{r1(g.TABLE_TOP - g.CHAIR[3])} seat to top, the usual 25–30", PASS),
         ]),
         ("The room", f"{r1(g.ROOM_W)} × {r1(g.ROOM_D)}, ceiling {r1(g.CEIL)}", [

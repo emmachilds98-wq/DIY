@@ -1,14 +1,36 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Branch:** `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4 (draft; contains v10, v11 and v12;
+- **Branch:** `claude/eloquent-johnson-pgmnud` (v13, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
   supersedes PRs 1–3). `main` is still at v9 until it's merged.
 - **Viewer artifact (this account):** https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2. Update it in place: `python3 build_viewer.py`, then
   publish `src/media_wall_viewer.html` with the files map in `src/publish_files.json` (written by build_viewer). It declares
   db + user + assets + downloads. **Read the client's answers first:** ArtifactData `list` on `answers` (and `tracker` for buy ticks).
-  Read its comments too (ArtifactComments `read`): the stairwell thread is open with a question.
+  Read its comments too (ArtifactComments `read`): the stairwell thread is still open (answered in chat in round 7: the stairs go up;
+  it can't be replied to or resolved from a cross-org session).
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
+
+## Update 18 Oct 2026, round 7: v13 (less cladding, stairs up, drawer layouts)
+**Branch:** `claude/eloquent-johnson-pgmnud` (built on v12.1, `claude/sharp-franklin-lrray1`). Viewer artifact updated in place:
+https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (version 6). This session is an editor from outside the artifact's organisation: the
+publish **refuses PDFs and some large images** (and the db/answers can't be read from here), so `build_viewer.DOWNLOADS_ON_GITHUB = True`
+links every download to `media-wall/out/` on GitHub and `publish_files.json` holds only `art/*.jpg`. `art/zz_house.jpg` was refused as a
+"cpio archive" (false sniff) and left as v12's copy (unchanged drawing).
+
+Client, round 7: "less cladding all over the place, improve and upgrade design again. stairs also go up not down as i said. show the drawer layouts too".
+- `geometry.PLAIN = True` switches off every v12 slat: the PC's slatted screen, the slatted cable spine and its skirting trunking, the
+  slat panel behind the turntable (`rz_slats()`), the slatted sub box (sub now on `SUB_RISER`, plain oak, 5 cm) and the reeded table
+  (`FOLDED_D` drops 1 cm; plain oiled underside, brass leg inserts kept). PC leads: brush grommet in the shelf + 25 mm conduit chased into
+  the solid side wall (electrician, same visit). The slat-wall alternative is retired (no renders, no viewer button; appendix is now
+  "Options we set aside").
+- Stairs: `STAIRS_UP`, `STAIR_RISE`/`STAIR_GOING`; `west_end()` draws a flight rising away from the room (towards the hall) through an
+  opening in the ceiling, closed string and raking banister on the door side; the part beyond the recess wall is clipped to the
+  openings. **Direction is a guess**: question `stairs` now asks which way it runs (photo).
+- New `diagrams.drawer_layouts()`: base elevation with drawers A–D, then each drawer from above at 5 px/cm. In the plan (section 3), the
+  viewer (#drawers) and `out/Drawer layouts - ….png`.
+- Fit proof: 56 checks, 45 fit, 8 tight, 3 check, 0 fail. Outputs v13; v12's moved to `out/v12/`. Backups: `*_v12_backup.py`.
+- The open stairwell comment thread on the artifact can't be replied to from this session (cross-org); tell the client in chat.
 
 ## Update 18 Oct 2026, round 6b: v12.1, the client's answers
 - Sofa (photo `inputs/photo_sofa_window_wall.webp`): black jumbo-cord L-sofa; the long side under the window ends in line with the

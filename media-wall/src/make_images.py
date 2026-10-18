@@ -1,4 +1,4 @@
-"""Builds every render and diagram image the plan, the out/ folder and the viewer use (v12).
+"""Builds every render and diagram image the plan, the out/ folder and the viewer use (v13).
 python3 make_images.py          -> SVGs here, PNGs for the PDF here, HD PNGs in ../out, viewer JPGs in art/
 python3 make_images.py renders  -> the renders only (skips the plan diagrams)
 """
@@ -25,7 +25,7 @@ def svgs():
     return names
 
 
-PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space")]
+PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it")]
 
 
 def main(diagrams=True):
@@ -33,33 +33,29 @@ def main(diagrams=True):
     W, H, KW = R.W, R.H, R.W + R.KEYW
     jobs = [
         # for the PDF
-        ("v12_join_key.svg", "render_v12_join_key_scene.png", W, H, 1.1),
-        ("v12_join_clean.svg", "render_v12_join_clean.png", W, H, 1.1),
-        ("v12_dining_four.svg", "render_v12_dining_four.png", W, H, 1.1),
-        ("v12_dining_six.svg", "render_v12_dining_six.png", W, H, 1.1),
-        ("v12_slat_clean.svg", "render_v12_slat_clean.png", W, H, 0.9),
+        ("v13_join_key.svg", "render_v13_join_key_scene.png", W, H, 1.1),
+        ("v13_join_clean.svg", "render_v13_join_clean.png", W, H, 1.1),
+        ("v13_dining_four.svg", "render_v13_dining_four.png", W, H, 1.1),
+        ("v13_dining_six.svg", "render_v13_dining_six.png", W, H, 1.1),
         # HD, labelled, for the client
-        ("v12_join_clean.svg", OUT / "Media wall v12 - artisan oak - Card Room Green (HD).png", W, H, 2.0),
-        ("v12_join_key.svg", OUT / "Media wall v12 - artisan oak - numbered key (HD).png", KW, H, 2.0),
-        ("v12_join_dims.svg", OUT / "Media wall v12 - artisan oak - heights and widths (HD).png", W, H, 2.0),
-        ("v12_dining_four.svg", OUT / "Media wall v12 - dining wall set for four (HD).png", W, H, 2.0),
-        ("v12_dining_six.svg", OUT / "Media wall v12 - table set for six, both spot bars (HD).png", W, H, 2.0),
-        ("v12_side.svg", OUT / "Media wall v12 - the PC side wall (HD).png", W, H, 2.0),
-        ("v12_side.svg", "render_v12_side.png", W, H, 1.1),
-        ("v12_slat_key.svg", OUT / "Media wall v12 - slat wall alternative - numbered key.png", KW, H, 1.25),
-        ("v12_slat_clean.svg", OUT / "Media wall v12 - slat wall alternative.png", W, H, 1.25),
+        ("v13_join_clean.svg", OUT / "Media wall v13 - artisan oak - Card Room Green (HD).png", W, H, 2.0),
+        ("v13_join_key.svg", OUT / "Media wall v13 - artisan oak - numbered key (HD).png", KW, H, 2.0),
+        ("v13_join_dims.svg", OUT / "Media wall v13 - artisan oak - heights and widths (HD).png", W, H, 2.0),
+        ("v13_dining_four.svg", OUT / "Media wall v13 - dining wall set for four (HD).png", W, H, 2.0),
+        ("v13_dining_six.svg", OUT / "Media wall v13 - table set for six, both spot bars (HD).png", W, H, 2.0),
+        ("v13_side.svg", OUT / "Media wall v13 - the PC side wall (HD).png", W, H, 2.0),
+        ("v13_side.svg", "render_v13_side.png", W, H, 1.1),
     ]
     for k in ("card_room", "sage", "treron", "deep"):
-        jobs.append((f"v12_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
-        for st, tag in (("joinery", "join"), ("slats", "slats"), ("four", "four"), ("six", "six"), ("side", "side")):
-            jobs.append((f"v12_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
+        jobs.append((f"v13_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
+        for st, tag in (("joinery", "join"), ("four", "four"), ("six", "six"), ("side", "side")):
+            jobs.append((f"v13_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
     for k in R.SKIRT_OPTIONS:
-        jobs.append((f"v12_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
-    jobs.append(("v12_join_key.svg", "art_key_join.png", KW, H, 0.82))
-    jobs.append(("v12_slat_key.svg", "art_key_slats.png", KW, H, 0.82))
+        jobs.append((f"v13_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
+    jobs.append(("v13_join_key.svg", "art_key_join.png", KW, H, 0.82))
     # plan diagrams as images for out/ and the viewer
     for name, label in (PLANS if diagrams else []):
-        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage}[name]
+        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage, "drawers": D.drawer_layouts}[name]
         s = fn()
         vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', s)
         w, h = int(vb.group(1)), int(vb.group(2))
@@ -82,7 +78,7 @@ def main(diagrams=True):
     grid.save(OUT / "Paint options - four greens.png")
 
     # skirting options: the same corner of the room in three skirting colours
-    crop = (880, 1010, 1700, 1250)   # the breast and recess skirting, under the folded table (v12 camera)
+    crop = (880, 1010, 1700, 1250)   # the breast and recess skirting, under the folded table (v12/v13 camera)
     labs = {"card_room": "Card Room Green, Estate Eggshell (recommended)", "green_smoke": "Green Smoke (darker edge)", "off_white": "Soft off-white"}
     cw, ch = crop[2] - crop[0], crop[3] - crop[1]
     strip = Image.new("RGB", (3 * cw + 4 * gap, ch + 60 + 2 * gap), "#f4efe4")

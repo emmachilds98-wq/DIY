@@ -1,4 +1,4 @@
-"""Builds the interactive viewer page (v12): view × paint × key, plus the open questions (answers and photos saved for
+"""Builds the interactive viewer page (v13): view × paint × key, plus the open questions (answers and photos saved for
 both of you), a shared buy tracker, the fit proof and downloads. Images live in art/.
 python3 build_viewer.py  -> media_wall_viewer.html (published as the Claude artifact with art/ and files/ alongside it)
                             and ../../index.html, the same page for GitHub Pages (plain download links; answers and
@@ -11,7 +11,9 @@ from build_doc import TRACK, money, phase_totals
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "12"
+VERSION = "13"
+DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
+GITHUB_OUT = "https://github.com/emmachilds98-wq/DIY/blob/claude/eloquent-johnson-pgmnud/media-wall/out/"
 LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
 SINGLES = 2 * G.TRAY_SINGLES
 
@@ -45,8 +47,8 @@ QUESTIONS = [
      "If it's pipe boxing it stays; if not, it might go.", "A photo is quickest.", True),
     ("ports", "Wired ports for the projector (master) and the music room (bedroom 2)?",
      "Each is one more Cat6 run on the electrician's visit; cheaper now than later.", "Yes or no for each.", False),
-    ("stairs", "The stairwell by the door: do the stairs go up or down, and which way do they run?",
-     "The render now shows an open stairwell behind a wooden banister, stairs going down.", "A photo from the room, or a line: up or down, towards the window or the wall.", True),
+    ("stairs", "The stairs by the door go up (thanks). Which way does the flight run?",
+     "v13 draws them going up, rising away from the room towards the hall, behind the wooden banister.", "A photo from the room, or a line: rising towards the hall, or towards the window?", True),
     ("games", "Roughly how many PS2, Xbox 360 and Xbox One games? (from your v6.1 plan)",
      "The game drawer holds about 48, 12 of them face-out; more needs an overflow spot.", "A count of each is plenty.", False),
     ("surge", "Is the 10-gang surge-protected, and where are its two switches? (from v6.1)",
@@ -97,7 +99,7 @@ def downloads_list():
         items.append((p, f"{label}, v{VERSION}", "PDF"))
     for p in sorted(OUT.glob(f"Media wall v{VERSION} - *.png")):
         items.append((p, p.stem.replace(f"Media wall v{VERSION} - ", "").replace(" (HD)", "") + " (HD render)", "PNG"))
-    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")):
+    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")) + sorted(OUT.glob("Drawer layouts*.png")):
         items.append((p, p.stem, "PNG"))
     return items
 
@@ -225,7 +227,7 @@ table.fit sup { color: var(--muted); font-size: 10px; }
 
 def page(site=False):
     prefix = "media-wall/src/" if site else ""
-    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "slats", "four", "six", "side") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "key_slats"]}
+    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side") for p in ("card_room", "deep", "sage", "treron")] + ["key_join"]}
     rows = track_rows()
     _, lo_tot, hi_tot = phase_totals()
     phases = []
@@ -257,9 +259,13 @@ def page(site=False):
         dl_items = "".join(f'<li><span>{html.escape(lab)}</span><a href="media-wall/out/{urllib.parse.quote(p.name)}">{kind}</a></li>' for p, lab, kind in downloads_list())
         dl_note = "Straight from the project folder. This page and the Claude viewer update together each round."
     else:
-        dl_items = "".join(f'<li><span>{html.escape(lab)}</span><button class="btn get" type="button" data-file="{published_name(p)}" data-name="{html.escape(p.name)}">{kind}</button></li>'
+        # PDFs can't be published to the artifact by an editor outside its organisation: link them on GitHub instead
+        dl_items = "".join((f'<li><span>{html.escape(lab)}</span><a class="btn" href="{GITHUB_OUT}{urllib.parse.quote(p.name)}">{kind} on GitHub</a></li>'
+                            if DOWNLOADS_ON_GITHUB or kind == "PDF" else
+                            f'<li><span>{html.escape(lab)}</span><button class="btn get" type="button" data-file="{published_name(p)}" data-name="{html.escape(p.name)}">{kind}</button></li>')
                            for p, lab, kind in downloads_list())
-        dl_note = "Each one asks you where to save it. If the buttons don't respond here, the same files are in the project's GitHub folder, media-wall/out/."
+        dl_note = ("Each link opens the file in the project's GitHub folder, media-wall/out/, where the download button saves it." if DOWNLOADS_ON_GITHUB
+                   else "Each one asks you where to save it. If the buttons don't respond here, the same files are in the project's GitHub folder, media-wall/out/.")
     data = {"img": imgs, "q": qs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows]}
     return f"""<title>Portsmouth Close Media Wall</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -270,8 +276,8 @@ def page(site=False):
   <header>
     <h1>Media Wall v{VERSION}</h1>
     <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch views and greens, turn on the numbered key, answer the open questions, and tick off the buy list as you go.</p>
-    <p class="change"><b>What changed in v{VERSION}:</b> the layout is v11's, as you agreed it. The sub gets a slatted oak box, oak slats come in on the PC screen, its cable run and the turntable zone, the folded table gets a reeded underside, and your v6.1 upgrades are back where they fit. Two new views (six at the table, the PC side wall), a storage sheet to scale, and this page now takes your answers and photos and keeps a buy tracker you can both tick.</p>
-    <nav class="jump" aria-label="On this page"><a href="#next">New in v12</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
+    <p class="change"><b>What changed in v{VERSION}:</b> less cladding, as you asked. The slatted spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table are all gone; the PC's leads run in conduit chased into the solid wall, the sub stands on a plain oak riser and the folded table is a plain oak panel. The stairs now go up to the first floor. And the drawer layouts: every drawer to scale, with what goes in it.</p>
+    <nav class="jump" aria-label="On this page"><a href="#next">New in v13</a><a href="#drawers">Drawer layouts</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
   </header>
 
   <div class="viewer">
@@ -283,7 +289,6 @@ def page(site=False):
           <button id="s-four" data-style="four" aria-pressed="false">Dining, four at the wall</button>
           <button id="s-six" data-style="six" aria-pressed="false">Dining, six in the room</button>
           <button id="s-side" data-style="side" aria-pressed="false">PC side wall</button>
-          <button id="s-slats" data-style="slats" aria-pressed="false">Slat wall</button>
         </div></div>
       <div class="group"><span class="label" id="l-paint">Paint</span>
         <div class="seg" role="group" aria-labelledby="l-paint">
@@ -338,16 +343,21 @@ def page(site=False):
   </div>
 
   <section class="block" id="next">
-    <h2>New in v12</h2>
+    <h2>New in v13</h2>
     <ul class="plain">
-      <li><b>The sub in a slatted oak box</b>, 52 × 30 × 42: about 40% open on the front and both ends so the sound and the port's air get out; a solid top; hands and feet stay out. It lifts off for eight at the table.</li>
-      <li><b>Oak slats</b> on the PC screen (v6.1's: 1.2 cm gaps, open top for the exhaust), a slatted spine over the PC's cable drop, and a slatted panel behind the turntable zone.</li>
-      <li><b>The folded table</b> gets a reeded oak underside, so folded up it reads as a fluted oak panel, with small brass inserts for the legs instead of black plates.</li>
-      <li><b>Two new views</b>: the table set for six, and the PC side wall. The main view now shows the second spot bar and the open stairwell with its wooden banister.</li>
-      <li><b>A storage sheet</b> under the plans: every space drawn to scale with what fits and how many, plus the overflow options.</li>
-      <li><b>From your v6.1 plan</b>: the roll-out keyboard tray, a 2700K lamp by the sofa, a finger pull on the plinth drawer instead of push-to-open, an optional conduit to TV height, and four more questions below.</li>
+      <li><b>Less cladding.</b> Gone: the slatted cable spine on the side wall, the slatted PC screen, the slat panel behind the turntable, the slatted box round the sub and the reeded underside of the table. The slat-wall alternative is retired too.</li>
+      <li><b>Cables you can't see.</b> Your side wall is solid, so the electrician chases a 25 mm conduit into it on the same visit: the PC's leads drop through a brush grommet in the shelf, down inside the wall and behind the skirting to the base. No spine, no trunking.</li>
+      <li><b>Plain oak where it was slatted.</b> The sub stands on a low oak riser between the folded brackets; the folded table is plain oiled oak between its pegged breadboard ends, under the two framed LPs.</li>
+      <li><b>The stairs go up.</b> The flight beside the door now rises to the first floor behind the wooden banister, through an opening in the ceiling. Tell us which way it runs and we'll match it.</li>
+      <li><b>The drawer layouts</b>, below: where each of the four drawers sits in the base, and each one from above, to scale, with what goes in it and how many.</li>
       <li>Fit proof: {fc[fit.PASS]} of {nfit} checks fit outright, {fc[fit.TIGHT]} are tight, {fc[fit.CHECK]} need a check on site, none fail.</li>
     </ul>
+  </section>
+
+  <section class="block" id="drawers">
+    <h2>Drawer layouts</h2>
+    <p class="caption">A: the game drawer in bay 1. B: the hidden plinth drawer under bay 2. C and D: the two face-out record trays in bay 3. Top: where each drawer is in the base. Bottom: each one from above, front at the bottom, to scale.</p>
+    <div class="frame"><img src="{prefix}art/zz_drawers.jpg" alt="Drawer layouts: the alcove base from the front with the four drawers marked A to D, and each drawer from above to scale with its compartments and contents" width="2688" height="1968" loading="lazy"></div>
   </section>
 
   <section class="block" id="answers">
@@ -405,8 +415,8 @@ const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v
 
 /* ---------- the render viewer */
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
-const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table lifted off and set for six, with both spot bars", side: "The PC side wall, seen from the room", slats: "Slat wall alternative" }};
-const view = Object.assign({{ style: "join", paint: "card_room", key: false }}, store.get("mw12-view", {{}}));
+const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table lifted off and set for six, with both spot bars", side: "The PC side wall, seen from the room" }};
+const view = Object.assign({{ style: "join", paint: "card_room", key: false }}, store.get("mw13-view", {{}}));
 const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key");
 function draw() {{
   if (!VIEWS[view.style]) view.style = "join";
@@ -418,11 +428,11 @@ function draw() {{
   keyBtn.setAttribute("aria-pressed", String(view.key));
   keyBtn.disabled = view.style === "four" || view.style === "six" || view.style === "side";
   cap.textContent = view.key
-    ? (view.style === "slats" ? "Numbered key for the slat wall alternative, in Card Room Green. Game drawer and lower record tray pulled out 30 cm." : "Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
-    : view.style === "six" ? "The table lifted off onto four legs, 60 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stair box and door are drawn roughly until you confirm the west end."
-    : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC with its slatted screen and keyboard tray, the slatted cable spine, the sofa below, the media wall end-on at the right (the breast cut away)."
+    ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
+    : view.style === "six" ? "The table lifted off onto four legs, 60 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stairs go up beside the door; their direction is drawn roughly until you send a photo."
+    : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below, the media wall end-on at the right (the breast cut away)."
     : VIEWS[view.style] + ", shown in " + NAMES[view.paint] + ". Evening light, drawn to the measured room.";
-  store.set("mw12-view", view);
+  store.set("mw13-view", view);
 }}
 $$("[data-style]").forEach(b => b.addEventListener("click", () => {{ view.style = b.dataset.style; draw(); }}));
 $$("[data-paint]").forEach(b => b.addEventListener("click", () => {{ view.paint = b.dataset.paint; draw(); }}));
@@ -608,7 +618,7 @@ $$(".get").forEach(b => b.addEventListener("click", async () => {{
 (async () => {{
   const [d, u, a, dl] = await Promise.all([use("db"), use("user"), use("assets"), use("downloads")]);
   downloads = dl;
-  if (!SITE && !dl) {{ $$(".get").forEach(b => b.disabled = true); $("#dl-note").textContent = "Downloads aren't available in this view. The same files are in the project's GitHub folder, media-wall/out/."; }}
+  if (!SITE && !dl && $$(".get").length) {{ $$(".get").forEach(b => b.disabled = true); $("#dl-note").textContent = "Downloads aren't available in this view. The same files are in the project's GitHub folder, media-wall/out/."; }}
   user = u;
   if (!d) {{
     $("#q-local").hidden = false;
@@ -650,7 +660,8 @@ def site():
 def publish_files():
     """{published path: source} for the Artifact publish: the viewer images and the downloads."""
     files = {f"art/{p.name}": str(p) for p in sorted((HERE / "art").glob("*.jpg"))}
-    files.update({published_name(p): str(p) for p, _, _ in downloads_list()})
+    if not DOWNLOADS_ON_GITHUB:
+        files.update({published_name(p): str(p) for p, _, kind in downloads_list() if kind != "PDF"})
     return files
 
 

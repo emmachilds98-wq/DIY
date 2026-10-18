@@ -1,4 +1,4 @@
-"""v12: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
+"""v13: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
 
 Every number the renders, diagrams, fit-proof tables and plan text use comes from here, so a change
 in one place moves everything. Room measurements are from the client's hand-measured sketch
@@ -33,6 +33,8 @@ BREAST_D_WEST = 39.0                      # 390 on its west side
 RECESS_W = 104.5      # breast to the stair box, about (to confirm)
 STAIR_X = (BREAST_X[1] + RECESS_W, ROOM_W)  # 408 .. 467, the stair box in the south-west corner (to confirm)
 STAIR_D = 79.0        # from the alcove's back-wall line into the room (to confirm)
+STAIRS_UP = True      # v13, client: the stairs by the door go UP to the first floor (v12 drew them going down)
+STAIR_RISE, STAIR_GOING = 19.5, 22.0      # typical UK domestic stair (Approved Document K: rise up to 22, going at least 22)
 DOOR_X = (BREAST_X[1] + 12.0, BREAST_X[1] + 95.0)   # 315.5 .. 398.5 in the recess (drawn where the agent's plan shows it)
 DOOR_SWING = 83.0     # if it opens into the room
 WINDOW_Z = ALC_D - ROOM_D                 # -309: the window wall in render coordinates
@@ -122,7 +124,9 @@ PAD_DOCK = (18.0, 2.2, 9.0)
 PC_SCREEN_SLAT = (2.1, 1.2)                # v6.1's slatted screen: oak slats 2.1 wide, 1.2 gaps, open top
 KB_TRAY = dict(h=7.0, out=25.0, runners=30.0)   # v6.1's roll-out keyboard tray: 7 cm housing under the PC shelf, rolls 25 cm out
 SPINE = (6.0, 6.0)                          # slatted oak spine over the PC's cable drop: off the wall, along the wall
-RZ_SLATS = (2.5, 1.5, 2.2)                  # slatted oak panel behind the turntable zone: slat width, gap, depth with battens
+RZ_SLATS = (2.5, 1.5, 2.2)                  # v12's slatted panel behind the turntable zone (gone in v13: PLAIN)
+PLAIN = True                                # v13, client: "less cladding all over the place": no slatted spine, PC screen,
+                                            # turntable panel or sub box, no reeded table; cables chased into the solid walls
 
 # ---------------------------------------------------------------- the L-sofa (assumed until measured) and the sub
 SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 188.0, 168.0, 95.0, 80.0   # v12.1 client photo: the long side runs from the side wall to in line with the breast's reveal (about 188); the return along the side wall (168) still assumed
@@ -134,6 +138,7 @@ SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
 SUB_BOX = dict(x=(207.5, 259.5), z=(-30.0, 0.0), h=42.0)   # v12: slatted oak box over the sub and its riser, between the folded arms
+SUB_RISER = dict(x=(212.5, 247.0), z=(-25.4, 0.0), h=5.0)   # v13: no box, just the sub on its plain oak riser (PLAIN)
 SUB_BOX_SLAT = (2.0, 1.4, 1.5)             # slat width, gap, thickness: about 40% open on the front and both ends; solid oak top
 SUB_POS = dict(x=(214.5, 214.5 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # inside the box: driver east 7 cm from the slats, rear port 14.6 cm from them
 COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
@@ -149,7 +154,7 @@ RAIL_TOP = TABLE_TOP - TABLE[2]            # 73.3
 TABLE_Z = (-RAIL[2], -RAIL[2] - TABLE[1])  # -3 .. -83 when down at the wall
 FOLDED_TOP = RAIL_TOP + TABLE[1]           # 153.3: the folded table's top edge
 REED = (2.0, 1.0, 1.0)                     # v12: reeded underside, oak strips 2 wide, 1 apart, 1 thick, between the breadboard ends
-FOLDED_D = RAIL[2] + TABLE[2] + REED[2] + 0.3   # about 7 off the breast
+FOLDED_D = RAIL[2] + TABLE[2] + (0.0 if PLAIN else REED[2]) + 0.3   # about 6 off the breast (v13: flat underside)
 HEBGO = (58.0, 22.0)                       # Häfele Hebgo 287.43.428: arm 580, height 220; 500 kg a pair
 HEBGO_X = (TABLE_CX - 40.0, TABLE_CX + 40.0)   # 80 apart (Häfele: up to 800 between brackets)
 LEG_H = 71.0                               # Emuca steel legs, 710 (adjustable to 730), screw-in plates

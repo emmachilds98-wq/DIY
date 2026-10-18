@@ -764,50 +764,63 @@ def room():
 
 
 def west_end(sk):
-    """The stairwell in the south-west corner, next to the door: open, behind a wooden banister, so you see into it
-    (client, v12 comment), and the west wall. Sizes drawn roughly until the client confirms the west end."""
+    """The stairwell in the south-west corner, next to the door, behind a wooden banister so you see into it (client, v12
+    comment). v13, client: the stairs go UP to the first floor. Drawn rising away from the room, from the floor by the
+    banister's newel towards the hall and on up through an opening in the ceiling; the banister rakes up the open (door)
+    side. Direction and sizes drawn roughly until the client sends a photo of that end."""
     o = []
     sx0, sx1 = G.STAIR_X
-    sz = ALC_D - G.STAIR_D                      # the banister's line, about -41
-    zb = G.BREAST_D_WEST                        # the recess back wall
+    sz = ALC_D - G.STAIR_D                      # the stair's front edge, on the room side, about -41
+    zb = G.BREAST_D_WEST                        # the recess back wall line
     wx = G.ROOM_W
+    rise, going = G.STAIR_RISE, G.STAIR_GOING
     o.append(poly([P(wx, 0, sz), P(wx, CEIL, sz), P(wx, CEIL, -470), P(wx, 0, -470)], "url(#rightwall)"))
     o.append(poly([P(wx, 0, sz), P(wx, sh_ := G.SKIRT_H, sz), P(wx, sh_, -470), P(wx, 0, -470)], sk[3]))
-    # the well, seen only through the opening in the floor: the walls carry on down, treads step away down the stair
-    hole = [P(sx0, 0, sz), P(sx1, 0, sz), P(sx1, 0, zb), P(sx0, 0, zb)]
+    # beyond the recess wall line the flight is in the hall: seen only through the stairwell opening (the gap in the
+    # recess wall over the stair, and the opening in the ceiling above it), so that part is clipped to those openings
+    far_z = sz + 6 + 11 * going
+    hole = [P(sx0, 0, zb), P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx0, CEIL, zb)]
+    ceil_hole = [P(sx0, CEIL, zb - 10), P(sx1, CEIL, zb - 10), P(sx1, CEIL, far_z), P(sx0, CEIL, far_z)]
     cid = f"well{abs(hash((round(VX), round(S * 100), VIEW))) % 100000}"
-    o.append(f'<clipPath id="{cid}"><polygon points="{pts(*hole)}"/></clipPath><g clip-path="url(#{cid})">')
-    o.append(poly(hole, "#1a1714"))
-    o.append(quad_front(sx0, -260, zb - 0.1, sx1 - sx0, 260, "#1d3d30"))
-    o.append(poly([P(sx0, 0, sz), P(sx0, 0, zb), P(sx0, -260, zb), P(sx0, -260, sz)], "#21443a"))
-    n = 5
-    for i in range(n):
-        za = sz + i * (zb - sz) / n
-        yy = -19.0 * (i + 1)
-        o.append(poly([P(sx0, yy, za), P(sx1, yy, za), P(sx1, yy, za + (zb - sz) / n), P(sx0, yy, za + (zb - sz) / n)], ["#6a5643", "#5a4a3a", "#4c3f31", "#403529", "#352c22"][i]))
-        o.append(quad_front(sx0, yy, za, sx1 - sx0, 19.0, ["#4a3c2e", "#3f3327", "#352b21", "#2c241b", "#241e17"][i]))
-        o.append(_line(P(sx0, yy, za), P(sx1, yy, za), "#9a7d5d", 1.2, 'opacity="0.7"'))
-    o.append('</g>')
-    # the banister: newel posts, a handrail at 90, a base rail and spindles under 10 cm apart
+    o.append(f'<clipPath id="{cid}"><polygon points="{pts(*hole)}"/><polygon points="{pts(*ceil_hole)}"/></clipPath>')
+    near, far = [], []
+    far.append(quad_front(sx0, 0, far_z, sx1 - sx0, CEIL, "#1d3d30"))
+    far.append(poly([P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx1, CEIL, far_z), P(sx1, 0, far_z)], "#21443a"))
+    far.append(poly([P(sx0, 0, zb), P(sx0, CEIL, zb), P(sx0, CEIL, far_z), P(sx0, 0, far_z)], "#244a38"))
+    near.append(poly(ceil_hole, "#1a2f25"))
+    near.append(_line(P(sx0, CEIL, zb - 10), P(sx1, CEIL, zb - 10), "#264c3a", 1.4))
+    # the flight: oak treads on risers in the wall colour, the first riser 6 cm behind the stair's front edge
     WOOD, WOOD_T, WOOD_S = "#b07a46", "#c89060", "#8a5c33"
+    for i in reversed(range(11)):       # far, higher steps first
+        z0 = sz + 6 + i * going
+        y1 = (i + 1) * rise
+        tgt = far if z0 >= zb else near
+        tgt.append(box(sx0, 0, z0, sx1 - sx0, y1, going, "#2d5a46", "#c48c57", "#244a38"))
+        tgt.append(box(sx0, y1 - 2.2, z0 - 1.5, sx1 - sx0, 2.2, going + 1.5, WOOD, WOOD_T, WOOD_S))
+    # the closed string on the door side, raking up with the flight
+    za = sz + 6
+    ry = lambda z: max(rise, (z - za) / going * rise)
+    def string(z1, z2):
+        return poly([P(sx0 - 0.1, 0, z1), P(sx0 - 0.1, 0, z2), P(sx0 - 0.1, ry(z2), z2), P(sx0 - 0.1, ry(z1), z1)], "#9c6a3f")
+    far.append(string(zb, far_z))
+    near.append(string(za, zb))
+    # the banister: a newel at the bottom, a raking handrail 90 above the nosings, spindles under 10 cm apart
     rail_h, nw = 90.0, 8.0
-    posts = [(sx0, sz), (sx0, zb - nw)]
-    for (px, pz) in posts:
-        o.append(box(px, 0, pz, nw, rail_h + 12, nw, WOOD, WOOD_T, WOOD_S))
-        o.append(box(px - 0.8, rail_h + 12, pz - 0.8, nw + 1.6, 3, nw + 1.6, WOOD_T, WOOD_T, WOOD_S))
-    # east side (next to the door), running back to the recess wall
-    for k in range(1, 8):
-        zz = sz + nw + k * (zb - nw - sz - nw) / 8 - 1.5
-        o.append(box(sx0 + 2.5, 5, zz, 3, rail_h - 5, 3, "#c79a6b", "#d8ad80", "#a37a50"))
-    o.append(box(sx0 + 1.5, 0, sz + nw, 5, 5, zb - nw - sz - nw, WOOD, WOOD_T, WOOD_S))
-    o.append(box(sx0 + 1, rail_h - 5, sz + nw, 6, 5, zb - nw - sz - nw, WOOD, WOOD_T, WOOD_S))
-    # front, along the room, to the west wall
-    span = wx - sx0 - nw
-    for k in range(1, 6):
-        xx = sx0 + nw + k * span / 6 - 1.5
-        o.append(box(xx, 5, sz + 2.5, 3, rail_h - 5, 3, "#c79a6b", "#d8ad80", "#a37a50"))
-    o.append(box(sx0 + nw, 0, sz + 1.5, span, 5, 5, WOOD, WOOD_T, WOOD_S))
-    o.append(box(sx0 + nw, rail_h - 5, sz + 1, span, 5, 6, WOOD, WOOD_T, WOOD_S))
+    hy = lambda z: ry(z) + rail_h
+    def rail(z1, z2):
+        return poly([P(sx0 - 3, hy(z1) - 5, z1), P(sx0 - 3, hy(z2) - 5, z2), P(sx0 - 3, hy(z2) + 1, z2), P(sx0 - 3, hy(z1) + 1, z1)], WOOD)
+    zt, zend = za + nw, za + 9 * going
+    z = zt + 4
+    while z < zend - 2:
+        (far if z >= zb else near).append(box(sx0 - 2.5, ry(z), z, 3, hy(z) - ry(z) - 5, 3, "#c79a6b", "#d8ad80", "#a37a50"))
+        z += 11.0
+    far.append(rail(zb, zend))
+    near.append(rail(zt, zb))
+    o.append(f'<g clip-path="url(#{cid})">' + "\n".join(far) + '</g>')
+    o.extend(near)
+    o.append(box(sx0 - nw / 2, 0, sz, nw, rail_h + 25, nw, WOOD, WOOD_T, WOOD_S))
+    o.append(box(sx0 - nw / 2 - 0.8, rail_h + 25, sz - 0.8, nw + 1.6, 3, nw + 1.6, WOOD_T, WOOD_T, WOOD_S))
+    o.append(box(sx1 - nw, 0, sz, nw, rail_h + 12, nw, WOOD, WOOD_T, WOOD_S))
     return "\n".join(o)
 
 
@@ -896,8 +909,9 @@ def series_x(sx0, y0, sz0):
 
 
 def rz_slats():
-    """v12: a slatted oak panel on the back wall of the turntable zone, worktop to the high shelf, on battens."""
-    if STYLE != "joinery":
+    """v12: a slatted oak panel on the back wall of the turntable zone, worktop to the high shelf, on battens.
+    v13 (PLAIN): gone; the turntable zone is the painted wall, like the rest of the alcove."""
+    if STYLE != "joinery" or G.PLAIN:
         return ""
     sw, sg, sd = G.RZ_SLATS
     x1, x2 = RZ[0] + 0.3, ALC_W - 0.3
@@ -921,7 +935,7 @@ def rz_shelf():
         o.append(poly([P(x1 + 1, top - 34, ALC_D - 0.1), P(x2 - 1, top - 34, ALC_D - 0.1), P(x2 - 1, top - th, ALC_D - 0.1), P(x1 + 1, top - th, ALC_D - 0.1)], "url(#ledDown)"))
     o.append(box(x1, top - th, z0, x2 - x1, th, d, OAK, OAK_T, OAK_S, extra=GH))
     pw, ph, pd = G.PREAMP
-    zp = ALC_D - 1.5 - pd - (G.RZ_SLATS[2] if STYLE == "joinery" else 0.0)
+    zp = ALC_D - 1.5 - pd - (G.RZ_SLATS[2] if STYLE == "joinery" and not G.PLAIN else 0.0)
     o.append(box(x1 + 4, top - th - ph, zp, pw, ph, pd, "#26272a", "#35363a", "#1c1d1f"))
     o.append(box(x1 + 5, top - th - ph + 1.4, zp - 0.02, 0.9, 0.9, 0.05, "#5aa8ff"))
     o.append(series_x(G.SX_X[0], top, z0 + 4.0))
@@ -1068,7 +1082,7 @@ def wrap():
                 q.append(box(1.2 + k * 3.25, st, zsc - 0.2, 2.1, 48, 1.6, OAK, OAK_T, OAK_S))
         return "\n".join(q)
 
-    if VIEW == "side":       # from the side the screen is beyond the case: draw it first
+    if VIEW == "side" and not G.PLAIN:       # from the side the screen is beyond the case: draw it first
         o.append(screen())
     o.append(box(cx1, st, cz0, cw, ch, cd, "#121314", "#1d1f21", "#0d0e0f"))
     gx = cx1 + cw + 0.02
@@ -1082,8 +1096,10 @@ def wrap():
     o.append(f'<ellipse cx="{pc[0]:.1f}" cy="{pc[1]:.1f}" rx="{3.6 * S * k * squash:.1f}" ry="{4.2 * S * k:.1f}" fill="none" stroke="#8b7cf0" stroke-width="2.5"/>')
     o.append(_line(P(gx, st + 18, cz1 - 16), P(gx, st + 18, cz0 + 9), "#8b7cf0", 3))
     o.append(poly(side, "url(#glass)", 'stroke="#2c3b36" stroke-width="1.5"'))
-    if VIEW != "side":
+    if VIEW != "side" and not G.PLAIN:
         o.append(screen())
+    if G.PLAIN:   # v13: a brush grommet at the shelf's back corner; the leads drop straight into a chased conduit
+        o.append(ellipse_flat(3.4, st + 0.02, pb + 4.0, 2.4, 2.4, "#1d1e20"))
     # pad charging dock and two pads, beyond the screen
     dz = pb + 5.0
     o.append(box(4, st, dz, 9, 2.2, 18, "#2a2b2e", "#3a3b3f", "#1d1e20"))
@@ -1094,6 +1110,8 @@ def wrap():
     spx, spz = G.SPINE
     tz = pb + 1.0
     end = G.BASE_FRONT_Z
+    if G.PLAIN:   # v13: no spine and no trunking: the leads run in conduit chased into the solid wall, plastered and painted over
+        return "\n".join(o)
     o.append(box(0, sh, tz, spx, st - th - sh, spz, "#3a2a1c", "#3a2a1c", "#2c2016"))
     o.append(box(0, sh, tz, spx, st - th - sh, 1.0, OAK_D, OAK_T, OAK_S))
     o.append(box(0, sh, tz + spz - 1.0, spx, st - th - sh, 1.0, OAK_D, OAK_T, OAK_S))
@@ -1112,6 +1130,17 @@ def subwoofer():
     o = []
     xa, xb = G.SUB_POS["x"]
     za, zb = G.SUB_POS["z"]
+    if G.PLAIN:   # v13: no box, the sub stands on a plain oak riser between the folded arms
+        rx0, rx1 = G.SUB_RISER["x"]; rz0, rz1 = G.SUB_RISER["z"]; rh = G.SUB_RISER["h"]
+        o.append(poly([P(rx0 - 3, 0.05, rz0 - 3), P(rx1 + 4, 0.05, rz0 - 3), P(rx1 + 4, 0.05, rz1), P(rx0 - 3, 0.05, rz1)], "#000", 'opacity="0.22" filter="url(#soft)"'))
+        o.append(box(rx0, 0, rz0, rx1 - rx0, rh, rz1 - rz0, OAK_D, OAK_T, OAK_S, extra=GH))
+        for fx in (rx0 + 3, rx1 - 6):
+            o.append(box(fx, -0.01, rz0 + 1, 3, 0.6, 3, "#3a3a3a"))
+        o.append(box(xa, rh, za, xb - xa, G.SUB[1], zb - za, "#1a1a1b", "#2b2b2d", "#111112"))
+        zc, yc = (za + zb) / 2, rh + G.SUB[1] / 2
+        o.append(disc_x(xa - 0.03, yc, zc, 7.6, "#0c0c0c", 'stroke="#3a3a3c" stroke-width="2"'))
+        o.append(disc_x(xa - 0.05, yc, zc, 2.5, "#2a2a2c"))
+        return "\n".join(o)
     bx0, bx1 = G.SUB_BOX["x"]
     bz0, bz1 = G.SUB_BOX["z"]
     bh = G.SUB_BOX["h"]
@@ -1292,6 +1321,21 @@ def dining_wall():
         zt = -Dr - tt - 0.3
         o.append(box(x0, rt + 0.2, zt, tw, td, tt, OAK, OAK_T, OAK_S, extra=GH))
         bb = G.BREADBOARD
+        if G.PLAIN:       # v13: a plain oiled oak underside between the pegged breadboard ends: no reeds
+            o.append(_line(P(x0 + bb, rt + 0.4, zt - 0.02), P(x0 + bb, rt + td - 0.4, zt - 0.02), "#8f5e33", 1.2))
+            o.append(_line(P(x1 - bb, rt + 0.4, zt - 0.02), P(x1 - bb, rt + td - 0.4, zt - 0.02), "#8f5e33", 1.2))
+            for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):
+                for py in (rt + 14, rt + td / 2, rt + td - 14):
+                    c = P((ea + eb) / 2, py, zt - 0.04)
+                    o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="2.0" fill="#5e3d22"/>')
+                for py in (rt + 7, rt + td - 7):
+                    o.append(disc_z((ea + eb) / 2, py, zt - 0.05, 1.6, "#d4ac55", 'stroke="#8f6d26" stroke-width="0.8"'))
+            o.append(_line(P(x0, rt + 0.2, zt - 0.02), P(x1, rt + 0.2, zt - 0.02), "#5a3a20", 1.8))
+            o.append(_line(P(x0 + 1, rt + td - 0.6, zt - 0.06), P(x1 - 1, rt + td - 0.6, zt - 0.06), "#e9bd86", 1.2))
+            for bxx in (x0 + 16, x1 - 16):
+                o.append(box(bxx - 2.6, G.FOLDED_TOP + 0.4, -2.4, 5.2, 2.6, 2.2, OAK_D, OAK_T, OAK_S))
+            o.append(breast_frames())
+            return "\n".join(o)
         rw, rg, rd = G.REED
         zr = zt - rd
         # the reeded underside: oak strips between the breadboard ends, so folded it reads as a fluted oak panel
@@ -1688,7 +1732,6 @@ JOIN_KEY = [
     (6, (3.5, 172, -60), "The ledge wraps the corner: 4 more LPs face-out"),
     (7, (UP_R[0], 104, 22), "LED groove in each upright washes the wall"),
     (8, (RZ[0] + 12.6, 207, 31), "High shelf, right: the “now playing” 7-inch"),
-    (8, (ALC_W - 6, 110, ALC_D - 2), "Slatted oak panel behind the turntable zone"),
     (H_, "On the worktop"),
     (9, (40, 140, 26), f"LG OLED C6 55in · centre {G.TV_CENTRE:.1f} · now {G.TV_SHIFT:.0f} cm nearer the side wall"),
     (10, (G.TV_CX - 30, 79, -7), "Soundbar · eARC, optical and AUX inputs"),
@@ -1709,16 +1752,16 @@ JOIN_KEY = [
     (24, (93, 4.6, G.BASE_FRONT_Z - 0.1), "Hidden slim drawer in the plinth, finger pull"),
     (H_, "The dining wall on the chimney breast"),
     (25, (G.TABLE_X[0] + 9, G.RAIL_TOP - 11, -G.RAIL[2]), "Oak backboard: lift-off hinges on top, brackets below"),
-    (26, (G.TABLE_CX, 118, -7), "Oak table 110 × 80: folded, a reeded oak panel"),
+    (26, (G.TABLE_CX, 118, -7), "Oak table 110 × 80: folded, a plain oiled oak panel"),
     (27, (G.HEBGO_X[1], 40, -4), "Häfele Hebgo folding brackets, 500 kg a pair"),
     (28, (G.TABLE_X[0] + 16, G.FOLDED_TOP + 2, -3), "Turn buttons hold the folded table"),
     (29, (G.TABLE_CX + 21, G.FRAMES_Y + 17, -2.3), "Two framed LPs above"),
-    (34, (G.SUB_POS["x"][0], 22, (G.SUB_POS["z"][0] + G.SUB_POS["z"][1]) / 2), "Subwoofer in a slatted oak box, between the brackets"),
+    (34, (G.SUB_POS["x"][0], 22, (G.SUB_POS["z"][0] + G.SUB_POS["z"][1]) / 2), "Subwoofer on a plain oak riser, between the brackets"),
     (H_, "The side wall"),
     (30, (25.5, 182, -150), "PC on its oak shelf, above the end of the sofa (see the room plan)"),
-    (31, (14, 175, -184), "Slatted oak screen hides the PC's ports, open top"),
+    (31, (3.4, G.PC_SHELF_TOP + 3, G.PC_SHELF_Z[1] + 4), "Brush grommet: the PC's leads drop into the wall"),
     (32, (8, 160, -197), "Pad charging dock"),
-    (33, (3, 80, -208), "PC cables: down a slatted oak spine to the skirting"),
+    (33, (0.3, 120, -160), "PC cables chased into the wall: no spine, no trunking"),
     (33, (14, G.PC_SHELF_TOP - 8, -160), "Keyboard tray under the shelf, rolls out (v6.1)"),
     (H_, "Power, network and light"),
     (36, (ALC_W - 9.5, 203, 22), "Deco B: leads in the groove behind the right upright"),
@@ -1727,7 +1770,7 @@ JOIN_KEY = [
     (39, (95, CEIL - 0.6, ALC_D - 0.8), "LED strip round the ceiling edge (as now)"),
     (40, (G.PEND_X, 226, G.PEND_Z), "Spot bar on the existing rose, between TV and sofa"),
     (41, (G.BAR2_X, 222, G.BAR2_Z), "Second spot bar, existing point by the door"),
-    (41, (437, 95, -38), "Stairwell beside the door, wooden banister (to confirm)"),
+    (41, (G.STAIR_X[0] - 0.2, 45, 5), "Stairs UP to the first floor, beside the door (direction to confirm)"),
 ]
 
 def _numbered(items):
@@ -1848,7 +1891,7 @@ def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="j
     o.append('</svg>')
     if numbered:
         title = "Key: artisan oak media wall" if STYLE == "joinery" else "Key: slat wall alternative"
-        o.append(key_panel2(W, key, title, f"v12 · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
+        o.append(key_panel2(W, key, title, f"v13 · less cladding, stairs up · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
     o.append('</svg>')
     return repaint("\n".join(o))
 
@@ -1952,36 +1995,34 @@ def all_svgs():
     set_paint(PAINTS[MAIN_PAINT][0])
     sub = "Farrow & Ball Card Room Green No. 79 · drawn to the measured room, evening light"
     six_sub = "Lifted off onto four legs · both spot bars · the west end drawn roughly until you confirm it"
-    out["v12_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v12_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v12", sub))
-    out["v12_join_dims"] = build(with_dims=True, style="joinery")
-    out["v12_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("The dining wall, down and set for four · v12", "Fold-down oak table on the chimney breast · " + sub))
-    out["v12_dining_six"] = build(with_dims=False, style="joinery", dining="six",
-                                  label=("The table set for six, out in the room · v12", six_sub))
-    out["v12_side"] = build_side(label=("The PC side wall · v12", "The ledge round the corner, the PC on its shelf with the slatted screen and keyboard tray, the slatted cable spine, the sofa below"))
-    out["v12_slat_key"] = build(with_dims=True, numbered=True, style="slats", game_open=30, rec_open=30)
-    out["v12_slat_clean"] = build(with_dims=False, style="slats", label=("Slat wall · alternative, v12", sub))
+    out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v13", sub))
+    out["v13_join_dims"] = build(with_dims=True, style="joinery")
+    out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
+                                   label=("The dining wall, down and set for four · v13", "Fold-down oak table on the chimney breast · " + sub))
+    out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
+                                  label=("The table set for six, out in the room · v13", six_sub))
+    out["v13_side"] = build_side(label=("The PC side wall · v13", "The ledge round the corner, the PC on its shelf with the keyboard tray, cables chased into the wall, the sofa below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
         lab = name + (" · chosen" if k == MAIN_PAINT else "")
-        for st in ("joinery", "slats"):
-            out[f"v12_paint_{k}_{st}"] = build(with_dims=False, style=st, label=(lab,
+        for st in ("joinery",):
+            out[f"v13_paint_{k}_{st}"] = build(with_dims=False, style=st, label=(lab,
                                                ("Artisan oak" if st == "joinery" else "Slat wall") + " version · walls, ceiling and skirting in the one colour"))
-        out[f"v12_paint_{k}_four"] = build(with_dims=False, style="joinery", dining="four", label=(lab, "The dining wall set for four"))
-        out[f"v12_paint_{k}_six"] = build(with_dims=False, style="joinery", dining="six", label=(lab, "The table set for six, out in the room"))
-        out[f"v12_paint_{k}_side"] = build_side(label=(lab, "The PC side wall: the ledge, the PC shelf with its slatted screen and keyboard tray, the cable spine"))
+        out[f"v13_paint_{k}_four"] = build(with_dims=False, style="joinery", dining="four", label=(lab, "The dining wall set for four"))
+        out[f"v13_paint_{k}_six"] = build(with_dims=False, style="joinery", dining="six", label=(lab, "The table set for six, out in the room"))
+        out[f"v13_paint_{k}_side"] = build_side(label=(lab, "The PC side wall: the ledge, the PC shelf and keyboard tray, no trunking"))
     PAINT = "deep"
     deep = "Deep forest green · earlier colour, for comparison"
-    for st in ("joinery", "slats"):
-        out[f"v12_paint_deep_{st}"] = build(with_dims=False, style=st, label=(deep, "Artisan oak version" if st == "joinery" else "Slat wall version"))
-    out["v12_paint_deep_four"] = build(with_dims=False, style="joinery", dining="four", label=(deep, "The dining wall set for four"))
-    out["v12_paint_deep_six"] = build(with_dims=False, style="joinery", dining="six", label=(deep, "The table set for six, out in the room"))
-    out["v12_paint_deep_side"] = build_side(label=(deep, "The PC side wall"))
+    for st in ("joinery",):
+        out[f"v13_paint_deep_{st}"] = build(with_dims=False, style=st, label=(deep, "Artisan oak version" if st == "joinery" else "Slat wall version"))
+    out["v13_paint_deep_four"] = build(with_dims=False, style="joinery", dining="four", label=(deep, "The dining wall set for four"))
+    out["v13_paint_deep_six"] = build(with_dims=False, style="joinery", dining="six", label=(deep, "The table set for six, out in the room"))
+    out["v13_paint_deep_side"] = build_side(label=(deep, "The PC side wall"))
     set_paint(PAINTS[MAIN_PAINT][0])
     for k, sk in SKIRT_OPTIONS.items():
         SKIRT = sk
-        out[f"v12_skirt_{k}"] = build(with_dims=False, style="joinery")
+        out[f"v13_skirt_{k}"] = build(with_dims=False, style="joinery")
     SKIRT = None
     return out
 
