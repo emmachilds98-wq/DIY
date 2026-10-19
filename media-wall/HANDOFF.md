@@ -1,15 +1,35 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Branch:** `claude/eloquent-johnson-pgmnud` (v13.3, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
+- **Branch:** `claude/eloquent-johnson-pgmnud` (v13.6, PR #5, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
   supersedes PRs 1–3). `main` is still at v9 until it's merged.
-- **Viewer artifact (this account):** https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2. Update it in place: `python3 build_viewer.py`, then
-  publish `src/media_wall_viewer_inline.html` (images inlined; see round 7b) to that URL with no files map. It declares
-  db + user + assets + downloads. **Read the client's answers first:** ArtifactData `list` on `answers` (and `tracker` for buy ticks).
-  Read its comments too (ArtifactComments `read`): the stairwell thread is still open (answered in chat in round 7: the stairs go up;
-  it can't be replied to or resolved from a cross-org session).
+- **Viewer artifact (the deck), since v13.6:** https://claude.ai/artifact/QRfYUvbPVQpSHFgaDN4YMU (Emma's own account). Update it in place:
+  `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to that URL with no files map, omitting
+  `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData `list` on `answers`
+  (and `tracker`, `steps`). The old deck 71ffwf5PRLhoLj6G5KTvm2 reported "deleted or no write access" in round 7g: don't use it; its
+  answers/ticks didn't carry over (the new db started empty). Overwriting her older v11 deck (42PUQjJwfafV93mrjeFYX9) was refused as unrequested.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
+
+## Update 19 Oct 2026, round 7g: v13.6 (leg case in the leaf, electrics as your own job, part labels, one questions list)
+Redone from the brief after the previous session hit its limit before committing.
+- Client: "include legs on the table build or make it more easy to get out and assembled ... store them as a part of the tables build
+  maybe in a box"; "we will also be doing electrics ourselves other than maybe changing a view fixtures for lights and sockets. make the
+  build plan easy to tell how to find which part ie network/media wall/table etc"; "update what you still need from me too".
+- Legs: `geometry.LEAF_FRAME` (insets 3/1.5, rails 1.8 × 5.5 → outside 54 × 77, inside 50.4 × 73.4), `LEG` 4.5→3 oak, `LEG_BOLT`,
+  `LEG_CLIP` (RS PRO 45 mm, source `clip`), `LEG_PITCH` 6, `LEAF_LEG_IN` (7.5, 6.5). Oak legs only now (steel option dropped).
+  `render.free_table()` draws tapered oak legs and the frame; new `diagrams.leaf_case()` (A underside, B section, C steps) in section 5,
+  step 11 and its instructions. Fit proof 58: 44 fit, 11 tight, 3 check (two leaf rows: storage, knees 17.5 above the seat).
+- Electrics: phase "2 Electrician and cabling" renamed "2 Cables and power" (its tracker ids changed; the db was new anyway). No
+  electrician, no new socket behind the sofa (`SOCKET2` = an existing one IF there is one, drawn dashed), no fused spur (plug-in LED driver).
+  PC on the 10-gang (load ~1.55 kW) via its own 25 mm conduit beside a 38 mm data conduit. Steps 3 and 12 rewritten with the safe
+  routine and a stop list; section 9 "Electrics: your own job" cites GOV.UK Approved Document P + IET + Planning Portal. Tools and
+  a GS38 tester on the buy list. If there's no socket by the sofa, a 12-way strip (0–60) gives the rears a way.
+- Parts: `build_doc.PARTS`, `PHASE_PART`, `part_chip()`; every step has `part`; chips on step cards, the overview run list, buy phases,
+  PDF steps and phase tables; Build steps tab has a "Show one part" filter (remembered per device).
+- `src/questions.py`: the one list (15) for the PDF's "Still to confirm" and the viewer's Questions tab; new `electrics`, `retrotink`;
+  dropped door/walls/pc (answered) and the leaf/legs part of `chairs`.
+- Total £2,764–5,317 (was 2,589–4,897 plus an electrician). Backups `*_v13_5_backup.py`. Viewer: the new artifact above, version 1.
 
 ## Update 19 Oct 2026, round 7f: v13.5 (sub back in the media wall, every step in full, HD renders)
 - Client: "adjust the media wall unit to still include the sub somewhere; the consoles' battery packs can be stored behind near

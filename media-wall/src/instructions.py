@@ -26,10 +26,52 @@ def full():
             tools=["A phone with the Deco app", "A laptop for the hub's settings page"],
             draw=["network"]),
         3: dict(
-            parts=["Cat6 solid pure copper (not CCA), 2–4 runs", "25 mm oval conduit and a draw wire, about 4 m",
-                   "Two LED-compatible dimmers", "Both spot bars and their bulbs (from the lighting phase, so the electrician can hang them)"],
-            tools=["Nothing: it's the electrician's visit. Have the wall marks and this plan ready"],
-            draw=["power", "routes"]),
+            parts=["Cat6 solid pure copper (not CCA), 2–4 runs", "RJ45 keystones and two surface boxes, or RJ45 plugs",
+                   "A double socket in the same finish, and a deeper back box if the old one is shallow",
+                   "Conduit: 38 mm and 25 mm oval, about 4 m each, two draw wires", "A 5 m C13 lead with a rewireable 13 A plug, for the PC", "One-coat filler"],
+            hardware=["Cable clips for the Cat6 in the loft space or under the boards", "Brown wall plugs and 4 × 30 screws for the conduit clips"],
+            tools=["Two-pole voltage tester (GS38) and its proving unit", "MCB lock-off and padlock", "Plug-in socket tester", "Insulated screwdrivers, wire strippers, side cutters",
+                   "Cat6 punch-down tool (or crimper) and a cable tester", "Draw rods", "Wall chaser with dust extraction, or a bolster and club hammer",
+                   "Cable and pipe detector", "SDS drill", "Safety glasses, ear defenders, FFP2 masks", "A helper"],
+            draw=["power", "routes"],
+            parts_full=[
+                ("Before you start: the stop list", [
+                    "Stop and call an electrician if: the tester shows anything live after you've isolated; the wiring is old (rubber or fabric sheath, or red and black with no earth); there are more wires than you can match to your photo; there are scorch marks or the old socket is loose or hot; the consumer unit has rewireable fuses or no RCD; or the job grows into a new circuit.",
+                    "Nothing in this step is notifiable in England: the socket is a like-for-like swap on an existing circuit, outside a bathroom. It must still be done to the wiring regulations, which is what this routine is for.",
+                ]),
+                ("The Cat6 runs (low voltage: no isolation needed)", [
+                    "Measure each route on the house plan and add 2–3 m: bedroom 3, across the landing, down through the airing cupboard.",
+                    "Lift a floorboard in the airing cupboard. Drill a 20 mm hole through the plate below (detector first), and feed a draw rod down to the alcove's right corner. Tape both Cat6 cables and a spare to it and pull them through. Pull the kitchen run on down the same way, past the right upright's groove.",
+                    "Keep the Cat6 away from mains: cross at right angles, never run alongside in the same hole. Clip it every 30 cm; never staple through it or kink it.",
+                    "Punch each end down onto a keystone in a surface box (or crimp a plug), to the T568B colours on both ends. Label both ends.",
+                    "Test each run with the cable tester: all eight lights in order. Re-terminate any that don't.",
+                ]),
+                ("Isolate the socket circuit", [
+                    "Tell everyone in the house you're working on the electrics.",
+                    "At the consumer unit, switch off the breaker for the side-wall socket's circuit (usually a ring marked \"sockets\"). If the labels aren't clear, switch off the main switch instead.",
+                    "Fit the MCB lock-off and padlock to that breaker, keep the key in your pocket, and tape a note on the board: \"Working on this circuit, do not switch on\".",
+                    "Prove your voltage tester on its proving unit: it must light.",
+                    "At the socket, with it pulled forward on its cables, test between every pair: live and neutral, live and earth, neutral and earth. No reading on any of them.",
+                    "Prove the tester on the proving unit again. Only now is it safe to touch.",
+                ]),
+                ("Swap the single socket for a double", [
+                    "Unscrew the old socket and ease it out. Photograph the wiring before you undo anything.",
+                    "Check the stop list against what you see: an earth (green-and-yellow) wire present and sleeved, no scorching, the cable sheath into the box.",
+                    "If the double needs a bigger box, chop the plaster out round the old box to the new box's outline and fit the new box with plugs and screws, the cables through its grommets.",
+                    "Connect wire for wire: brown (or red) to L, blue (or black) to N, green-and-yellow to the earth terminal. Two cables in the old box go into the same terminals together. Strip only enough so no copper shows outside a terminal, and tighten every screw firmly.",
+                    "Fold the cables in neatly without trapping them, and screw the socket on level.",
+                    "Remove the lock-off, switch on, and plug the socket tester into each outlet: it should show correct wiring on both.",
+                ]),
+                ("The PC's two conduits in the side wall", [
+                    "Mark the route from behind the PC shelf's back corner straight down to skirting height, then along behind the skirting to the base's plinth. Run the detector along it: move it if anything shows. Never chase near the socket's cables, which run straight up, down or across from it.",
+                    "Chase two channels side by side, 5 cm apart: one for the 38 mm oval conduit (data: HDMI and Cat6), one for the 25 mm (the PC's mains lead). Vertical only on the wall, no deeper than the conduit needs. Wear the mask: the dust is silica.",
+                    "Take the skirting off along the route, fix both conduits with a draw wire inside each, and refit the skirting over them.",
+                    "Fill the chase with one-coat filler, sand flush, and photograph the route with a tape measure in the shot before you paint.",
+                ]),
+                ("Finish", [
+                    "Mark every route on the plan, and keep the photos with it.",
+                ]),
+            ]),
         4: dict(
             parts=["Card Room Green emulsion and eggshell, primer and undercoat", "Sugar soap, sanding pads, woodwork primer"],
             tools=["Roller, tray and extension pole", "25 and 50 mm brushes", "Dust sheets, masking tape", "Step ladder"],
@@ -64,7 +106,7 @@ def full():
                 ]),
                 ("Check for cables", [
                     "Run the detector along every line where you'll drill: the cleats, the spacer blocks, the upright brackets, the backboard and the PC shelf.",
-                    "Mark anything it finds in red, and compare with the electrician's photos from step 3. Move a fixing 5 cm rather than drill near a cable.",
+                    "Mark anything it finds in red, and compare with your own photos from step 3. Move a fixing 5 cm rather than drill near a cable.",
                 ]),
             ]),
         6: dict(
@@ -255,18 +297,20 @@ def full():
                     "Slide the shelf onto its brackets and down onto the cleat. Lean on it: it shouldn't move.",
                 ]),
                 ("The PC's leads", [
-                    "Fit the brush grommet. Pull the HDMI (active optical: the end marked \"source\" at the PC), the Cat6 and the power lead down the conduit with the draw wire.",
-                    "At the bottom, they run behind the skirting into the plinth's notch and the channel.",
+                    "Fit the brush grommet. Pull the HDMI (active optical: the end marked \"source\" at the PC) and the Cat6 down the 38 mm conduit with its draw wire.",
+                    "Take the plug off the C13 lead, feed its bare end down the 25 mm conduit, and at the bottom fit the rewireable plug: brown to L, blue to N, green-and-yellow to E, the cord grip on the outer sheath, a 13 A fuse.",
+                    "At the bottom, all three run behind the skirting into the plinth's notch and the channel; the mains lead goes on to the 10-gang behind the TV.",
                 ]),
             ]),
         11: dict(
             parts=["Solid oak: table centre 101 × 80 × 2.7 (edge-glued staves), two breadboard ends 80 × 7 × 2.7, the leaf 60 × 80 × 2.7, the backboard 110 × 22 × 3 (from step 7), two turn buttons 6 × 2.5 × 2.2",
-                   "Eight legs: tapered oak 71 × 4.5 to 3 on M8 hanger bolts, or Emuca 710 mm steel legs"],
+                   "Eight tapered oak legs, 71 × 4.5 to 3, each with an M8 hanger bolt",
+                   f"The leaf's frame: two long rails {n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])} and two side rails {n(g.LEAF_FRAME_IN[0])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}, oak"],
             hardware=["Two Häfele Hebgo 287.43.428 folding brackets", "Union PowerLoad 100 × 88 lift-off hinges, one 3-pack, all the same hand", "Eight brass M8 threaded inserts",
-                      "Two leaf-alignment dowels and two table clips", "A magnetic catch", "5 × 70 mm screws and brown plugs", "Felt pads", "Hardwax oil, glue, 10 mm oak dowel for pegs"],
+                      "Two leaf-alignment dowels and two table clips", "A magnetic catch", "Eight RS PRO 45 mm spring clips and their screws (4 × 16)", "5 × 70 mm screws and brown plugs", "Felt pads", "Hardwax oil, glue, 10 mm oak dowel for pegs"],
             tools=["Router with a straight bit and a guide", "Drill with a 10 mm brad-point bit, and the inserts' bit with a depth stop", "Jigsaw and sander", "Chisels",
                    "SDS drill", "Spirit level", "Clamps", "A helper"],
-            draw=["dining_section", "seating"],
+            draw=["dining_section", "leaf_case", "seating"],
             parts_full=[
                 ("Order the oak", [
                     "Ask the timber merchant for the centre panel as edge-glued staves, 101 × 80 × 2.7: 96 between the shoulders plus a 2.5 tongue at each end. Most will also cut the breadboard ends and the leaf, and radius the corners.",
@@ -285,10 +329,10 @@ def full():
                     "Sand both to 180. Oil both faces equally, every edge too: a top oiled on one side cups.",
                 ]),
                 ("Inserts and legs", [
-                    "Mark the leg positions on the underside: centred in each breadboard end's 7 cm width, 6 cm in from the long edges. On the leaf, 6 cm in from each edge at its four corners.",
+                    f"Mark the leg positions on the underside: centred in each breadboard end's 7 cm width, 6 cm in from the long edges. On the leaf, {n(g.LEAF_LEG_IN[0])} in from the joint edge and the far end, {n(g.LEAF_LEG_IN[1])} in from its sides: just inside the frame's corners.",
                     "Drill each insert's hole to the maker's size with a depth stop, never deeper than 1.8 cm: the top is only 2.7 thick.",
                     "Wind the inserts in with a bolt and a locked nut, square to the surface.",
-                    "Screw in all eight legs and stand the table and leaf on the floor: the top at 73.7 on 710 legs. Check it's level, then take the legs out and store them with the leaf.",
+                    "Screw in all eight legs and stand the table and leaf on the floor: the top at 73.7. Check it's level (stick felt glides on the feet), then take the legs out.",
                 ]),
                 ("The backboard", [
                     f"Hold the backboard on its marks: centred on the breast, top at {n(g.RAIL_TOP)}, level.",
@@ -311,13 +355,56 @@ def full():
                 ]),
                 ("The leaf", [
                     "Drill two 10 mm holes in the leaf's edge and matching holes in the table's west breadboard end, and glue the alignment dowels into the leaf.",
-                    "Screw the two table clips under the joint so they pull the leaf to the table.",
+                    "Screw the two table clips under the joint so they pull the leaf to the table, clear of the leaf's frame.",
+                ]),
+                ("The leaf's leg case (v13.6)", [
+                    f"Lay the leaf face down on a blanket. Mark the frame's outline: the long rails {n(g.LEAF_FRAME['inset_x'])} cm in from the joint edge and the far end, the side rails {n(g.LEAF_FRAME['inset_z'])} cm in from the two sides.",
+                    f"In one side rail, drill eight 10 mm holes 1.5 deep, {n(g.LEG_PITCH)} cm apart, centred on the rail's length and {n(g.LEG[0] / 2)} cm from its top edge (the edge against the leaf): each leg's bolt sits in one.",
+                    "Glue and screw the side rails between the long rails at the corners (two 4 × 50 screws each, pilot holes), so the frame is square. Check the diagonals.",
+                    "Lay the frame on its marks. Screw it up into the leaf through the rails with 4 × 30 screws: glue only the middle 10 cm of each long rail, and elongate the other screw holes across the grain, so the leaf can move with the seasons.",
+                    f"Lay a leg in place with its bolt in the first hole. Mark where its foot sits, {n(g.LEG_CLIP_FROM_FOOT)} cm up from the end, and screw a spring clip to the leaf there. Repeat for all eight.",
+                    "Snap all eight legs in: bolt into its hole first, then press the foot into its clip. Lift the leaf and give it a shake: nothing should move. Felt the frame's bottom edges so it doesn't scratch the floor where it's stored.",
                 ]),
             ]),
         12: dict(
-            parts=["2700K LED strip, two aluminium channels and a driver", "6500K bias light for the TV", "Eight warm-white dimmable E14 bulbs, 6 W max", "A lamp and a 2700K bulb"],
-            tools=["Small screwdriver", "Step ladder"],
-            draw=[]),
+            parts=["Both Wolston-style spot bars and eight warm-white dimmable E14 bulbs, 6 W max", "Two LED-compatible dimmers (trailing edge), in your switches' finish",
+                   "2700K LED strip, two aluminium channels, a plug-in driver with an inline switch", "6500K bias light for the TV", "A lamp and a 2700K bulb"],
+            hardware=["Connector block or lever connectors (if the bar's flex needs them)", "Earth sleeving, insulating tape"],
+            tools=["Two-pole voltage tester (GS38) and its proving unit", "MCB lock-off and padlock", "Insulated screwdrivers, wire strippers", "Step ladder", "A helper to hold the bar"],
+            draw=[],
+            parts_full=[
+                ("Before you start", [
+                    "Check each dimmer's box: the new dimmer's depth against the back box, and its minimum load against your bulbs (four 6 W LEDs is 24 W a bar). Trailing-edge dimmers made for LEDs flicker least.",
+                    "The same stop list as step 3. Here, also stop if a ceiling point has no earth (the bars need one), or the rose has more wires than you can match to your photo.",
+                ]),
+                ("Isolate the lighting circuit", [
+                    "Tell everyone in the house you're working on the electrics.",
+                    "At the consumer unit, switch off the breaker for the lighting circuit (usually marked \"lights\", 6 A). If the labels aren't clear, switch off the main switch instead.",
+                    "Fit the MCB lock-off and padlock to that breaker, keep the key in your pocket, and tape a note on the board: \"Working on this circuit, do not switch on\".",
+                    "Prove your voltage tester on its proving unit: it must light.",
+                    "At each switch and each ceiling point, with the cover off, test between every pair: live and neutral, live and earth, neutral and earth. No reading on any of them.",
+                    "Prove the tester on the proving unit again. Only now is it safe to touch.",
+                ]),
+                ("Swap the two switches for dimmers", [
+                    "Unscrew each switch, photograph its wiring, and note which wire goes to which terminal (COM, L1, L2 on a two-way).",
+                    "Move each wire to the same terminal on the dimmer; the earth to the box's earth terminal, sleeved. If the switch is two-way and you can't match it, stop: that's an electrician's.",
+                    "Fold the wires in and screw the dimmer on level.",
+                ]),
+                ("Take down the old fittings, hang the bars", [
+                    "Unscrew each old fitting's cover. Prove dead again at its terminals. Photograph the wiring, mark the switched live (the wire from the switch) with tape, then disconnect and take the fitting down.",
+                    "Fix bar 1's mounting plate to the ceiling over the rose between the TV and the sofa, square to the media wall, with screws into the joist or the plate's fixings. Bar 2's goes on the point by the door.",
+                    "Connect earth first (green-and-yellow to the bar's earth), then neutral to N and the switched live to L, in the bar's terminal block; any loop wires go back together exactly as they were. Tighten, tuck, and fit the canopy.",
+                    "Fit the 2700K bulbs and aim the heads: the table in the Paint and light tab says which goes where. Never at the TV.",
+                ]),
+                ("Power on and test", [
+                    "Remove the lock-off and switch on. Run each dimmer from low to high: no flicker, no buzz. If it flickers at the low end, set the dimmer's minimum (most have a trim screw) or try a different bulb.",
+                ]),
+                ("The low-voltage lights (nothing to isolate)", [
+                    "Press the 2700K strip into each upright's groove in its aluminium channel; take its lead down the groove to the plug-in driver on the 10-gang.",
+                    "Clip the ceiling strip through its notches in the uprights; stick the bias light round the back of the TV on its USB port.",
+                    "Stand the lamp by the sofa's west end with a 2700K bulb.",
+                ]),
+            ]),
         13: dict(
             parts=["HDMI switch, RetroTINK, HDMI leads, optical and SCART cables, the active optical HDMI for the PC", "Stylus, preamp, RCA-to-3.5 mm lead, record brush", "Labels"],
             tools=["Phone with the Deco app", "Velcro ties"],

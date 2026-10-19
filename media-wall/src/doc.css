@@ -83,3 +83,7 @@ table.steps td:first-child { width: 14pt; text-align: center; font-weight: 650; 
 .need h5, .fstep h5 { font-size: 9pt; font-weight: 650; margin: 8pt 0 3pt; }
 .need ul { padding-left: 12pt; margin: 0; }
 .fstep h3 .note { font-weight: 400; }
+/* v13.6: part labels */
+.part { display: inline-block; font-size: 6.8pt; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.5pt 5pt; border-radius: 6pt;
+  color: #1f1f1f; background: color-mix(in srgb, var(--pc) 14%, white); border: 0.6pt solid color-mix(in srgb, var(--pc) 55%, white); margin-right: 3pt; vertical-align: 1pt; }
+.part::before { content: ""; display: inline-block; width: 5pt; height: 5pt; border-radius: 50%; background: var(--pc); margin-right: 3pt; vertical-align: 0.3pt; }

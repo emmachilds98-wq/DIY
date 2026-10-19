@@ -8,7 +8,7 @@ On claude.ai the page declares: db (answers/, tracker/), user (who saved what), 
 import hashlib, html, json, pathlib, re, urllib.parse
 import geometry as G
 import fit
-from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools, cuts_html, cuts_text, need_html, full_html, DIAGRAMS
+from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools, cuts_html, cuts_text, need_html, full_html, DIAGRAMS, PARTS, PHASE_PART, part_chip
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
@@ -20,43 +20,7 @@ SINGLES = 2 * G.TRAY_SINGLES
 
 # ---------------------------------------------------------------- the open questions, most consequential first
 # (id, question, why it matters, how to check, a photo helps)
-QUESTIONS = [
-    ("sofa", "Your L-sofa's size, and which way its return points",
-     f"The plan assumes {G.SOFA_W:g} × {G.SOFA_D:g} cm, {G.SOFA_H:g} high, with the return along the side wall. It sets the PC shelf, the walkway and the dining clearances.",
-     "Overall width, overall depth with the return, back height, seat depth.", False),
-    ("door", "The door to the hall: which side it hinges, and does it open into the room?",
-     "If it swings in, the west-end dining chair sits in its path.", "Stand in the room facing the door: hinges on the left or the right?", True),
-    ("westend", "The west end's sizes: which of 935, 1045, 660 and 820 are the recess, the door and the stair box?",
-     "The stair box and the door are drawn roughly until we know.", "A photo of that end of the room, or the sketch with each number pointed at.", True),
-    ("walls", "The side wall and the chimney breast: solid, or plasterboard?",
-     "The ledge, the PC shelf and the dining brackets fix to them; plasterboard needs different fixings.", "Knock: a hollow sound is plasterboard. Or look at an existing hole.", False),
-    ("records", "Roughly how many LPs and singles, and are most in thick outer sleeves?",
-     f"The wall holds about {LPS} LPs and {SINGLES} singles, all face-out. Thick sleeves need a wider trough.", "A rough count is fine.", False),
-    ("turntable", "The turntable's make and model, and does it have a PHONO/LINE switch?",
-     "The zone takes up to 45.2 × 35.2 cm; a switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
-    ("pc", "The PC case's make and model, and which side its glass panel is on",
-     f"The shelf allows {G.PC_CASE[0]:g} × {G.PC_CASE[2]:g} cm, {G.PC_CASE[1]:g} tall, with the glass facing the room.", "Or measure width, depth and height.", True),
-    ("fanstand", "The Series X fan stand's make and model",
-     "The shelf takes a footprint up to about 30 cm wide; the plan assumes 20.5 × 20.5.", "A photo of the stand is enough.", True),
-    ("tengang", "The 10-gang extension's length",
-     f"It lies flat on the worktop behind the TV; the plan allows {G.TEN_GANG[0]:g} cm.", "End to end, plug sockets only.", False),
-    ("point2", "The second ceiling point's exact spot",
-     "The plan puts it about 35 cm in from the west wall and 2.3 m from the window.", "Measure from the west wall, and from the window wall.", False),
-    ("chairs", "Dining chairs: ones you have, or four folding ones? And where would the leaf and legs live?",
-     "The plan draws IKEA TERJE (seat 48); any chair with a 45–48 cm seat works.", "Seat height of yours, and a spot for the leaf (the garage?).", False),
-    ("box", "The 23 × 22 cm box in the window's west corner: what is it?",
-     "If it's pipe boxing it stays; if not, it might go.", "A photo is quickest.", True),
-    ("ports", "Wired ports for the projector (master) and the music room (bedroom 2)?",
-     "Each is one more Cat6 run on the electrician's visit; cheaper now than later.", "Yes or no for each.", False),
-    ("stairs", "The stairs by the door go up (thanks). Which way does the flight run?",
-     "v13 draws them going up, rising away from the room towards the hall, behind the wooden banister.", "A photo from the room, or a line: rising towards the hall, or towards the window?", True),
-    ("games", "Roughly how many PS2, Xbox 360 and Xbox One games? (from your v6.1 plan)",
-     "The game drawer holds about 48, 12 of them face-out; more needs an overflow spot.", "A count of each is plenty.", False),
-    ("surge", "Is the 10-gang surge-protected, and where are its two switches? (from v6.1)",
-     "It feeds the TV and the modern consoles; if not, swap it for one that is.", "Look for 'surge' on the label.", False),
-    ("models", "Console model numbers, from the labels underneath (optional, from v6.1)",
-     "The rows assume the largest version of each console; real models may free up height.", "Photos of the labels are fine.", True),
-]
+from questions import QUESTIONS   # v13.6: one list, shared with the plan PDF
 
 
 def _plain(s):
@@ -67,7 +31,7 @@ def track_rows():
     rows = []
     for st, item, ph, q, lo, hi in TRACK:
         key = hashlib.sha1((ph + "|" + re.sub(r"\(changed[^)]*\)|\(new\)|\(moved[^)]*\)", "", _plain(item))).encode()).hexdigest()[:12]
-        est = money(lo, hi) if lo is not None else ("Quote" if "electrician" in item.lower() else "")
+        est = money(lo, hi) if lo is not None else ""
         rows.append({"id": "t" + key, "phase": ph, "item": item, "qty": q, "est": est, "lo": lo or 0, "hi": hi or 0, "done": st == "Done",
                      "kind": "job" if st == "To do" or st == "Done" and lo is None else "buy"})
     return rows
@@ -310,6 +274,20 @@ details.changes > .doc { padding: 4px 14px 2px; }
 .runlist .rn, .sn { font-family: var(--display); font-weight: 700; font-variant-numeric: tabular-nums; }
 .runlist .rn { color: var(--oak); min-width: 1.4rem; }
 .runlist .rm { font-size: 13.5px; color: var(--muted); padding-left: 2.0rem; }
+/* v13.6: part labels and the one-part filter */
+.part { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase;
+  line-height: 1.3; padding: 2px 8px; border-radius: 999px; color: var(--ink); white-space: nowrap; vertical-align: middle;
+  background: color-mix(in srgb, var(--pc) 13%, transparent); border: 1px solid color-mix(in srgb, var(--pc) 50%, transparent); margin-right: 4px; }
+.part::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--pc); flex: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .part::before { background: color-mix(in srgb, var(--pc) 60%, white); } }
+:root[data-theme="dark"] .part::before { background: color-mix(in srgb, var(--pc) 60%, white); }
+.sparts { margin: 0 0 3px; display: flex; flex-wrap: wrap; gap: 4px; }
+.runlist .rp { padding-left: 2.0rem; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.runlist li { align-content: start; }
+summary .part { font-weight: 400; }
+.pfilter { margin: 4px 0 14px; display: grid; gap: 6px; }
+.pfilter .seg { flex-wrap: wrap; }
+.step[hidden] { display: none; }
 /* build steps */
 .steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
@@ -419,7 +397,7 @@ def cost_chart(phases):
     pct = lambda v: f"{100 * v / top:.2f}%"
     rows = []
     for p in phases:
-        val = (f"£{money(p['lo'], p['hi'])}" if p["hi"] else "no cost") + (" + quote" if p["name"].startswith("2 ") else "")
+        val = f"£{money(p['lo'], p['hi'])}" if p["hi"] else "no cost"
         rows.append(
             f'<div class="crow" data-ph="{p["idx"]}"><a class="cl" href="#buy" data-go="buy" data-phase="{p["idx"]}">{html.escape(p["label"])}'
             f'<small>{"before step " + str(p["step"]) if p["step"] else ""}</small></a>'
@@ -479,7 +457,7 @@ def page(site=False):
             + "</li>" for r in items)
         when = f' · <a href="#build" data-go="build" data-step="{p["step"]}">before step {p["step"]}</a>' if p["step"] else ""
         cost = f"£{money(p['lo'], p['hi'])}" if p["hi"] else "jobs only"
-        ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{html.escape(p["name"])}</span>'
+        ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{part_chip(PHASE_PART[p["name"]])} {html.escape(p["name"])}</span>'
                        f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')
     step_cards = []
     for s in steps():
@@ -487,8 +465,8 @@ def page(site=False):
                       for p in phases if p["name"] in s["buy"])
         see = " · ".join(f'<a href="#{t}" data-go="{t}" data-find="{html.escape(lab)}">{html.escape(lab)}</a>' for t, lab in s["see"])
         step_cards.append(
-            f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}"><div class="shead"><span class="sn">{s["n"]}</span>'
-            f'<div><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
+            f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}" data-parts="{html.escape("|".join(s["part"]))}"><div class="shead"><span class="sn">{s["n"]}</span>'
+            f'<div><p class="sparts">{part_chip(s["part"])}</p><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
             f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label></div>'
             + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
             + need_html(s)
@@ -498,12 +476,14 @@ def page(site=False):
             f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
             f'<p class="ssee">Also see: {see}</p></li>')
     run_list = "".join(
-        f'<li><a href="#build" data-go="build" data-step="{s["n"]}"><span class="rn">{s["n"]}</span>{html.escape(s["title"])}</a>'
+        f'<li><a href="#build" data-go="build" data-step="{s["n"]}"><span class="rn">{s["n"]}</span>{html.escape(s["title"])}</a><span class="rp">{part_chip(s["part"])}</span>'
         f'<span class="rm">{html.escape(s["time"])}{"".join(" · " + html.escape(p["label"]) + (" £" + money(p["lo"], p["hi"]) if p["hi"] else "") for p in phases if p["name"] in s["buy"])}</span></li>'
         for s in steps())
     data = {"img": imgs, "q": qs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
             "phases": [{k: p[k] for k in ("name", "idx", "lo", "hi")} for p in phases], "top": 200 * -(-max(p["hi"] for p in phases) // 200),
             "steps": len(steps()), "tabs": [t for t, _ in TABS]}
+    used = [k for k in PARTS if any(k in st["part"] for st in steps())]
+    part_buttons = "".join(f'<button type="button" data-part="{html.escape(k)}" aria-pressed="false"><span class="dot" style="background:{PARTS[k]}"></span>{html.escape(k)}</button>' for k in used)
     tabs = "".join(f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
     files_line = (f'Print copies of this plan (PDF) and the HD renders are also kept in the project folder on '
                   f'<a href="{GITHUB_OUT}" target="_blank" rel="noopener">GitHub, media-wall/out/</a>; you don\'t need them to use this page.')
@@ -514,7 +494,7 @@ def page(site=False):
 {STYLE}
 <div class="wrap">
   <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.3</p>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.6</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
     <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table, the network and power, step-by-step build instructions and the buy list with what each phase costs. Ticks, amounts and answers save for both of you.</p>
   </header>
@@ -527,10 +507,10 @@ def page(site=False):
     </div>
     <div class="block">
       <div class="qhead"><h2>How the build runs</h2><a class="btn" href="#build" data-go="build">Open the build steps</a></div>
-      <p class="caption">Thirteen steps in order, with what to buy before each. Total about £{money(lo_tot, hi_tot)} plus the electrician; the cost of each phase is charted in the {_tablink("buy")}.</p>
+      <p class="caption">Thirteen steps in order, each labelled with its part of the house, with what to buy before each. Total about £{money(lo_tot, hi_tot)}, with no electrician on top: the electrics are your own job (steps 3 and 12). The cost of each phase is charted in the {_tablink("buy")}.</p>
       <ol class="runlist">{run_list}</ol>
     </div>
-    <details class="changes"><summary>What changed in v{VERSION}, 13.1, 13.2 and 13.3</summary><div class="doc">
+    <details class="changes"><summary>What changed, v{VERSION} to 13.6</summary><div class="doc">
       <p>{decision}</p>
       <p><b>On this page:</b> the plan, every drawing, the build steps and the buy list now live here in tabs, with the cost of each phase charted against what you've paid, so nothing needs downloading from GitHub.</p>
     </div></details>
@@ -621,6 +601,9 @@ def page(site=False):
     <div class="doc"><h2>Build steps, for a first-time builder</h2>{GUIDE_RULES}</div>
     <div class="qhead"><h2>The order of work</h2><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div></div>
     <p class="caption" id="s-note">Tick each step when it's done; it saves for both of you. "Buy first" opens that part of the buy list.</p>
+    <div class="group pfilter"><span class="label" id="l-part">Show one part</span>
+      <div class="seg" role="group" aria-labelledby="l-part" id="part-filter"><button type="button" data-part="" aria-pressed="true">All parts</button>{part_buttons}</div>
+      <p class="caption" id="pf-note" aria-live="polite"></p></div>
     <ol class="steps-list">{"".join(step_cards)}</ol>
     <div class="block" id="cuts">
       <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
@@ -633,7 +616,7 @@ def page(site=False):
   <section class="panel" id="buy" role="tabpanel" aria-labelledby="tb-buy" hidden>
     <h2 class="ptitle">Buy guide and costs</h2>
     <div class="tiles">
-      <div><strong>£{money(lo_tot, hi_tot)}</strong><span>the whole plan, plus the electrician's quote</span></div>
+      <div><strong>£{money(lo_tot, hi_tot)}</strong><span>the whole plan; no electrician on top</span></div>
       <div><strong id="t-left">£{money(lo_tot, hi_tot)}</strong><span>still to buy: the items not ticked yet</span></div>
       <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
       <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
@@ -1007,6 +990,30 @@ paintSteps();
     snap.docChanges().forEach(ch => {{ if (ch.type === "removed") delete sstate[ch.doc.id]; else sstate[ch.doc.id] = ch.doc.data(); }});
     paintSteps();
   }}, () => {{}});
+}})();
+(() => {{
+  // v13.6: show one part of the build at a time
+  const bar = document.getElementById("part-filter");
+  if (!bar) return;
+  const note = document.getElementById("pf-note");
+  const pick = part => {{
+    bar.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.part === part)));
+    let shown = 0;
+    document.querySelectorAll(".steps-list > li.step").forEach(li => {{
+      const on = !part || li.dataset.parts.split("|").includes(part);
+      li.hidden = !on; if (on) shown++;
+    }});
+    note.textContent = part ? ("Showing " + shown + " of " + DATA.steps + " steps: " + part + ".") : "";
+    try {{ localStorage.setItem("mw-part", part); }} catch (e) {{}}
+  }};
+  bar.addEventListener("click", e => {{ const b = e.target.closest("button[data-part]"); if (b) pick(b.dataset.part); }});
+  document.addEventListener("click", e => {{
+    const a = e.target.closest("[data-step]");
+    if (a) {{ const li = document.getElementById("step-" + a.dataset.step); if (li && li.hidden) pick(""); }}
+  }}, true);
+  let saved = "";
+  try {{ saved = localStorage.getItem("mw-part") || ""; }} catch (e) {{}}
+  if (saved && bar.querySelector('button[data-part="' + saved.replace(/"/g, "") + '"]')) pick(saved);
 }})();
 </script>
 """)

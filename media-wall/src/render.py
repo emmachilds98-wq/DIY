@@ -1530,7 +1530,7 @@ def dining_chairs():
 
 
 def free_table():
-    """Six (v13.1: with the leaf, 170 × 80) or eight: the top lifted off its hinges onto four Emuca legs, the leaf on four more,
+    """Six (v13.1: with the leaf, 170 × 80) or eight: the top lifted off its hinges onto four oak legs (v13.6), the leaf on four more,
     out in the room 75 cm off the breast; for six, two a side and one at each end. Breast-side chairs stand clear of the sub's box."""
     w, d, h, sh = G.CHAIR
     x0, x1 = G.SIX_X
@@ -1546,13 +1546,46 @@ def free_table():
     xs = [x0 + step * (j + 0.5) for j in range(n)]
     o += [chair(xc, zb + d / 2 - 8, "-z") for xc in xs]
     o += [chair(x0 - d / 2 + 8, zm, "+x"), chair(x1 + d / 2 - 8, zm, "-x")]
-    li = 5.0
-    legs = [(x0 + li, zb - li - 5), (xj - li - 5, zb - li - 5), (x0 + li, zf + li), (xj - li - 5, zf + li)]
+    # v13.6: tapered oak legs (4.5 to 3 on their two inside faces) on brass inserts, no plates. The table's four sit in its
+    # breadboard ends, 6 in from the long edges; the leaf's four sit inside the corners of its oak frame.
+    lw, lf = G.LEG
+    bbc = G.BREADBOARD / 2
+    legs = [(x0 + bbc, zb - 6, 1, -1), (xj - bbc, zb - 6, -1, -1), (x0 + bbc, zf + 6, 1, 1), (xj - bbc, zf + 6, -1, 1)]
     if G.SIX_LEAF:
-        legs += [(xj + li, zb - li - 5), (x1 - li - 5, zb - li - 5), (xj + li, zf + li), (x1 - li - 5, zf + li)]
-    for (lx, lz) in legs:
-        o.append(box(lx, 0, lz, 5, G.LEG_H, 5, STEEL, STEEL_T, STEEL_S))
-        o.append(box(lx - 2, G.LEG_H - 0.6, lz - 2, 9, 0.6, 9, STEEL_S))                               # mounting plate
+        ix, iz = G.LEAF_LEG_IN
+        legs += [(xj + ix, zb - iz, 1, -1), (x1 - ix, zb - iz, -1, -1), (xj + ix, zf + iz, 1, 1), (x1 - ix, zf + iz, -1, 1)]
+    def leg(cx, cz, sx, sz):
+        o = []
+        segs = 28
+        for k in range(segs):
+            y0, y1 = G.LEG_H * k / segs, G.LEG_H * (k + 1) / segs
+            wv = lf + (lw - lf) * (k + 0.5) / segs           # wider at the top
+            # outside faces stay flush with the top's corner: shrink towards the table's inside
+            ox = cx - sx * lw / 2                            # outside face x
+            oz = cz - sz * lw / 2
+            bx0 = ox if sx > 0 else ox - wv
+            bz0 = oz if sz > 0 else oz - wv
+            o.append(box(bx0, y0, bz0, wv, y1 - y0 + 0.02, wv, OAK, OAK_T, OAK_S))
+        o.append(box(cx - lw / 2, 0, cz - lw / 2, lf, 0.4, lf, "#2b2622"))                   # felt glide
+        return o
+    for L in legs:                                           # the breast side first: it's further from the camera
+        if L[3] < 0:
+            o += leg(*L)
+    front_rail = []
+    if G.SIX_LEAF:
+        fr = G.LEAF_FRAME
+        fx0, fx1 = xj + fr["inset_x"], x1 - fr["inset_x"]
+        fz0, fz1 = zf + fr["inset_z"], zb - fr["inset_z"]      # room side .. breast side
+        fy = G.LEG_H - fr["h"]
+        t = fr["t"]
+        o.append(box(fx0, fy, fz1 - t, fx1 - fx0, fr["h"], t, OAK_D, OAK_T, OAK_S))       # the breast-side rail
+        o.append(box(fx0, fy, fz0, t, fr["h"], fz1 - fz0, OAK_D, OAK_T, OAK_S))           # the end rails
+        o.append(box(fx1 - t, fy, fz0, t, fr["h"], fz1 - fz0, OAK_D, OAK_T, OAK_S))
+        front_rail.append(box(fx0, fy, fz0, fx1 - fx0, fr["h"], t, OAK_D, OAK_T, OAK_S))  # the room-side rail, in front of the leaf's legs
+    for L in legs:
+        if L[3] > 0:
+            o += leg(*L)
+    o += front_rail
     o.append(box(x0, G.LEG_H, zf, x1 - x0, tt, td, OAK, OAK_T, OAK_S, extra=GH))
     bb = G.BREADBOARD
     for (ea, eb) in ((x0, x0 + bb), (xj - bb, xj)) + (((x1 - bb, x1),) if G.SIX_LEAF else ()):

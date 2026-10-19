@@ -750,9 +750,9 @@ def living_plan():
     o.append(rect(X(0) - 7, Y(g.SOCKET["z"]) - 8, 7, 16, "#fff", "#d0573b", 1))
     o.append(t(X(0) + 10, Y(g.SOCKET["z"]) + 4, "double socket", 9, "start", 600, "#d0573b"))
     z2 = g.SOCKET2["z"]
-    o.append(rect(X(0) - 7, Y(z2) - 8, 7, 16, "#fff", "#d0573b", 1))
-    o.append(t(X(0) + 10, Y(z2) - 4, "new socket behind", 8.5, "start", 600, "#d0573b"))
-    o.append(t(X(0) + 10, Y(z2) + 7, "the sofa: PC, rears", 8.5, "start", 400, "#d0573b"))
+    o.append(rect(X(0) - 7, Y(z2) - 8, 7, 16, "none", "#d0573b", 1, 1.2, 'stroke-dasharray="3 2"'))
+    o.append(t(X(0) + 10, Y(z2) - 4, "socket by the sofa,", 8.5, "start", 600, "#d0573b"))
+    o.append(t(X(0) + 10, Y(z2) + 7, "if there is one: rears", 8.5, "start", 400, "#d0573b"))
     # the two spot bars
     for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1, existing rose"),
                                   (g.BAR2_X, g.BAR2_Z, [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "second bar, existing point")]:
@@ -963,8 +963,8 @@ def dining_section():
         o.append(t(hx + 6, Y(hgt) + 3.5, txt, 9, "start", 400, MUTED))
     notes = ["Everyday: folded flat, about 7 cm off the breast, held at the top by two turn buttons.",
              "For four: lift the top edge a little, turn the buttons, lower it onto the two brackets as they swing out and lock.",
-             f"For six or eight: with it down, slide it {5} cm sideways off the lift-off hinges' pins, screw in four legs (710–730 mm),",
-             f"and stand it in the room: the top is then {_fmt(g.LEG_H + g.TABLE[2])}–{_fmt(73 + g.TABLE[2])} cm. Two people lift it: about 18 kg."]
+             f"For six or eight: with it down, slide it {5} cm sideways off the lift-off hinges' pins, screw in four oak legs from the leaf's frame,",
+             f"and stand it in the room with the leaf: the top is then {_fmt(g.LEG_H + g.TABLE[2])} cm. Two people lift it: about 18 kg."]
     for i, n in enumerate(notes):
         o.append(t(0, 70 + i * 17, "• " + n, 9.8, "start", 400, INK))
     return svg(W, H, "\n".join(o), "The dining wall in section: folded, down, or off the wall",
@@ -1015,7 +1015,7 @@ def power():
     o.append(t(361, 82, "Your 10-gang, behind the TV", 12.5, "middle", 650))
     o.append(t(361, 97, "lying flat on the worktop · both sides left on", 10, "middle", 400, MUTED))
     items = ["LG C6 TV (standby: pixel refresh)", "Soundbar", "Subwoofer (lead along the channel)", "Xbox Series X (lead in the groove)",
-             "USB charger: fan stand, pad dock, bias light, HDMI switch", "Deco B (12 V lead in the groove)", "Switch 2", "Turntable", "Phono preamp", "Spare"]
+             "USB charger: fan stand, pad dock, bias light, HDMI switch", "Deco B (12 V lead in the groove)", "Switch 2", "Turntable", "Phono preamp", "PC (its lead in the side wall's conduit)"]
     for i, it in enumerate(items):
         y = 112 + i * 27
         o.append(rect(206, y, 310, 22, VIN_F if it in ("Turntable", "Phono preamp") else (SND_F if i < 3 else "#f4f3ef"), LINE, 4))
@@ -1032,15 +1032,15 @@ def power():
     o.append(wire([(160, 92), (178, 92), (178, 230), (196, 230)], VIN_S, 1.8))
     o.append(wire([(160, 106), (170, 106), (170, 404), (696, 404), (696, 390)], VIN_S, 1.8))
     o.append(t(430, 420, "one strip per socket, never one plugged into another", 10, "middle", 500, VIN_S))
-    notes = ["The socket on the side wall is a single today: the electrician swaps it for a double, at the same spot.",
+    notes = ["The socket on the side wall is a single today: you swap it for a double at the same spot (like for like, your own job: step 3).",
              "The retro switch moves to the wall: with the TV 2 cm from the left upright, the 10-gang's own switches can't be reached any more.",
-             "PC and rear speakers: a new double socket low on the side wall behind the sofa; the PC (500–850 W) stays off these strips.",
+             "Rear speakers: the socket by the sofa, if there is one. If not, a 12-way surge-protected strip in place of the 10-gang gives them a way.",
              ("The sub plugs into the 10-gang: its lead drops through the worktop's slot to the back of bay 2. Both spot bars use existing ceiling points." if G.SUB_IN_WALL else "The sub plugs into the 10-gang: its lead runs along the channel and the breast's skirting. Both spot bars use existing ceiling points."),
-             "Load check: the 10-gang about 0.7 kW with everything on, the 6-way up to about 0.8 kW with a launch PS3 running; each well under 13 A (3 kW).",
+             "Load check: the 10-gang about 1.55 kW with everything on, PC included (850 W at most); the 6-way up to 0.8 kW. Each under 13 A (3 kW).",
              "Check the 10-gang is surge-protected; if not, use a surge-protected one for the TV and consoles. Label both outlets."]
     for i, n in enumerate(notes):
         o.append(t(0, 460 + i * 24, "• " + n, 10.3, "start", 400, INK))
-    return svg(W, H, "\n".join(o), "Power map: your 10-gang plus a 6-way for the retro set",
+    return svg(W, H, "\n".join(o), "Power map: your 10-gang (now with the PC) plus a 6-way for the retro set",
                "Everything modern on the left outlet, always on; the five retro consoles and the RetroTINK on the right, switched at the wall")
 
 
@@ -1100,14 +1100,17 @@ def routes():
     o.append(rect(F(g.SOCKET["z"]) - 4, Y(34.3), 8 * s, 8.6 * s, "#fff", MAINS, 2))
     o.append(t(F(g.SOCKET["z"]), Y(34.3) - 4, "socket", 9, "middle", 600, MAINS))
     z2 = g.SOCKET2["z"]
-    o.append(rect(F(z2) - 4, Y(34.3), 8 * s, 8.6 * s, "#fff", MAINS, 2))
-    o.append(t(F(z2) + 8, Y(34.3) - 4, "new socket", 9, "middle", 600, MAINS))
+    o.append(rect(F(z2) - 4, Y(34.3), 8 * s, 8.6 * s, "none", MAINS, 2, 1.2, 'stroke-dasharray="3 2"'))
+    o.append(t(F(z2) + 8, Y(34.3) - 15, "socket by the sofa,", 8.5, "middle", 600, MAINS))
+    o.append(t(F(z2) + 8, Y(34.3) - 4, "if there is one: rears", 8.5, "middle", 400, MAINS))
     tz = g.PC_SHELF_Z[1] + 3
     o.append(wire([(F(tz), Y(g.PC_SHELF_TOP - 4)), (F(tz), Y(8)), (X(-1), Y(8)), (X(4), Y(5)), (X(110), Y(5)), (X(110), Y(76))], DATA, 2.2))
     o.append(t(F(tz) + 6, Y(100), "HDMI (active optical) + Cat6:", 9, "start", 500, DATA))
     o.append(t(F(tz) + 6, Y(100) + 11, "in conduit chased into the wall," if g.PLAIN else "trunking down to the skirting,", 9, "start", 400, MUTED))
     o.append(t(F(tz) + 6, Y(100) + 22, "behind the skirting into the plinth" if g.PLAIN else "along it into the plinth", 9, "start", 400, MUTED))
-    o.append(wire([(F(tz) - 3, Y(g.PC_SHELF_TOP - 4)), (F(tz) - 3, Y(30)), (F(z2), Y(30))], MAINS, 1.6))
+    o.append(wire([(F(tz) - 4, Y(g.PC_SHELF_TOP - 4)), (F(tz) - 4, Y(11)), (X(-1), Y(11)), (X(9), Y(11)), (X(9), Y(76))], MAINS, 1.6))
+    o.append(t(F(tz) - 8, Y(70), "PC mains lead: its own", 9, "end", 500, MAINS))
+    o.append(t(F(tz) - 8, Y(70) + 11, "conduit, to the 10-gang", 9, "end", 400, MUTED))
     gx = g.UP_R[0] + 2.25
     o.append(wire([(X(dxd), Y(g.HIGH_TOP + 2)), (X(gx), Y(g.HIGH_TOP + 2)), (X(gx), Y(76)), (X(40), Y(78))], DC, 2.2, "6 3"))
     o.append(wire([(X(g.SX_X[0]), Y(g.RZ_SHELF_TOP + 3)), (X(gx + 1), Y(g.RZ_SHELF_TOP + 3)), (X(gx + 1), Y(76)), (X(118), Y(70)), (X(118), Y(6))], DATA, 1.6))
@@ -1125,7 +1128,7 @@ def routes():
     for i, (c, lab, d) in enumerate([(DATA, "HDMI / Cat6", None), (MAINS, "mains leads", None), (DC, "12 V DC lead", "6 3"), (AUD, "vinyl audio", None)]):
         o.append(wire([(i * 210, 452), (i * 210 + 28, 452)], c, 2.2, d)); o.append(t(i * 210 + 36, 456, lab, 10.5, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "Cable routes: everything ends in the channel behind the base",
-               "Front view, schematic, with the side wall folded flat to the left so the PC's route shows; the sub sits under the dining wall")
+               "Front view, schematic, with the side wall folded flat to the left so the PC's route shows; the sub sits in bay 2")
 
 
 def pc_shelf():
@@ -1697,3 +1700,114 @@ def sub_box():
         o.append(t(0 if not n.startswith("    ") else 10, 380 + i * 17, ("• " + n) if not n.startswith("    ") else n.strip(), 9.6, "start", 400, INK))
     return svg(W, H, "\n".join(o), "The sub's oak cover: no sides, a solid top for spills, and it can't tip",
                "To scale, 5 px per cm. Left: from the east end. Right: from above with the cover lifted off")
+
+
+def leaf_case():
+    """v13.6: the leaf carries the legs. The leaf from underneath with all eight legs clipped inside its oak frame, a
+    section through the frame and the clips, and the steps from folded to six at the table."""
+    g = G
+    W, H = 860, 800
+    o = []
+    OAKF, OAKS, LEGF = "#f1e1c8", "#9c6a3f", "#d9a46c"
+    lw_, lf_ = g.LEG
+    fr = g.LEAF_FRAME
+    L80, L60 = g.LEAF[1], g.LEAF[0]
+    # ---------- A: from underneath (80 across, 60 down), 5 px/cm
+    s = 5.0
+    ax, ay = 24, 96
+    X = lambda cm: ax + cm * s            # along the leaf's 80 (the legs' length)
+    Y = lambda cm: ay + cm * s            # across its 60
+    o.append(t(ax, ay - 16, "A · The leaf from underneath, legs stored", 11.5, "start", 650))
+    o.append(rect(X(0), Y(0), L80 * s, L60 * s, OAKF, OAKS, 6, 1.4))
+    fx0, fy0 = fr["inset_z"], fr["inset_x"]
+    fo_z, fo_x = g.LEAF_FRAME_OUT[1], g.LEAF_FRAME_OUT[0]
+    tt_ = fr["t"]
+    o.append(rect(X(fx0), Y(fy0), fo_z * s, fo_x * s, "#c48c57", "#7a5130", 0, 1.2))
+    o.append(rect(X(fx0 + tt_), Y(fy0 + tt_), (fo_z - 2 * tt_) * s, (fo_x - 2 * tt_) * s, "#ead6b8", "#7a5130", 0, 1))
+    # the eight legs, heads (bolts) at the left end rail, feet in clips near the right
+    inner_x0 = fy0 + tt_
+    first = inner_x0 + (g.LEAF_FRAME_IN[0] - g.LEG_STORE_W) / 2 + g.LEG_CLIP[1] / 2
+    head = fx0 + tt_                       # the leg's top end face against the end rail
+    for k in range(8):
+        cy = first + k * g.LEG_PITCH
+        x0, x1 = X(head), X(head + g.LEG_H)
+        a, b = lw_ / 2 * s, lf_ / 2 * s
+        o.append(f'<path d="M{x0},{Y(cy) - a} L{x1},{Y(cy) - b} L{x1},{Y(cy) + b} L{x0},{Y(cy) + a} Z" fill="{LEGF}" stroke="{OAKS}" stroke-width="1"/>')
+        o.append(f'<line x1="{X(head - g.LEG_BOLT)}" y1="{Y(cy)}" x2="{x0}" y2="{Y(cy)}" stroke="#55585b" stroke-width="3"/>')   # bolt in the rail
+        cx_ = head + g.LEG_H - g.LEG_CLIP_FROM_FOOT
+        o.append(rect(X(cx_ - g.LEG_CLIP[2] / 2), Y(cy - g.LEG_CLIP[1] / 2), g.LEG_CLIP[2] * s, g.LEG_CLIP[1] * s, "#9a9c9f", "#55585b", 1, 1))
+    # the leaf's own four inserts (its legs when it's in use), inside the frame's corners
+    ix, iz = g.LEAF_LEG_IN
+    for (zz, xx) in ((iz, ix), (L80 - iz, ix), (iz, L60 - ix), (L80 - iz, L60 - ix)):
+        o.append(f'<circle cx="{X(zz)}" cy="{Y(xx)}" r="5" fill="#d8b04a" stroke="#7a5a12" stroke-width="1.2"/>')
+    # labels, all outside the leaf so nothing sits under the legs
+    lx = X(L80) + 14
+    def lab(px, py, ty, txt, sub=None, via=None):
+        if via is None:
+            o.append(f'<path d="M{px},{py} L{lx - 4},{ty}" stroke="#9a958b" fill="none"/>')
+        else:                              # an elbow: along a clear band of the leaf, then out to the label
+            o.append(f'<path d="M{px},{py} L{px},{via} L{X(L80) + 4},{via} L{lx - 4},{ty}" stroke="#9a958b" fill="none"/>')
+        o.append(t(lx, ty + 4, txt, 9.8, "start", 600))
+        if sub:
+            o.append(t(lx, ty + 16, sub, 9, "start", 400, MUTED))
+    lab(X(L80 - iz), Y(ix), Y(3), "Brass inserts for the leaf's own legs", f"{_fmt(ix)} in from the joint and the end, {_fmt(iz)} from the sides")
+    lab(X(L80 - fx0 - tt_ / 2), Y(27), Y(27), f"Oak frame, {_fmt(fo_z)} × {_fmt(fo_x)}", f"rails {_fmt(fr['h'])} deep × {_fmt(tt_)}; it stiffens the leaf too")
+    clip_x = X(head + g.LEG_H - g.LEG_CLIP_FROM_FOOT)
+    lab(clip_x, Y(first - g.LEG_CLIP[1] / 2), Y(14), "Sprung clip at each foot",
+        f"45 mm steel clip, {_fmt(g.LEG_CLIP_FROM_FOOT)} cm up the leg", via=Y(1.2))
+    last = first + 7 * g.LEG_PITCH
+    lab(X(head + 30), Y(last), Y(44), f"Eight oak legs, {_fmt(g.LEG_H)} long", f"{_fmt(lw_)} tapering to {_fmt(lf_)}, at {_fmt(g.LEG_PITCH)} cm centres", via=Y(L60 - 2.1))
+    lab(X(head - g.LEG_BOLT / 2), Y(last), Y(57), "Each bolt sits in a hole in the end rail", "so a leg can't slide or rattle", via=Y(L60 - 0.8))
+    # dimensions
+    o.append(f'<path d="M{X(0)},{Y(L60) + 14} L{X(L80)},{Y(L60) + 14}" stroke="{MUTED}"/>')
+    o.append(t(X(L80 / 2), Y(L60) + 28, f"leaf {_fmt(L80)} (the table's depth) × {_fmt(L60)}, {_fmt(g.LEAF[2])} thick", 9.5, "middle", 500, MUTED))
+    o.append(t(X(0), Y(L60) + 44, f"Inside the frame {_fmt(g.LEAF_FRAME_IN[1])} × {_fmt(g.LEAF_FRAME_IN[0])}: the legs take {_fmt(g.LEG_H + g.LEG_BOLT)} × {_fmt(g.LEG_STORE_W)}, and {_fmt(lw_)} of the {_fmt(fr['h'])} depth.", 9.5, "start", 400, INK))
+    # ---------- B: section across the legs, through the clips, 7 px/cm
+    s2 = 7.0
+    bx, by = 24, Y(L60) + 92
+    o.append(t(bx, by - 18, "B · Section through the frame and the clips (leaf upside down, as you unclip it)", 11.5, "start", 650))
+    BX = lambda cm: bx + cm * s2
+    BY = lambda cm: by + cm * s2
+    o.append(rect(BX(0), BY(0), L60 * s2, g.LEAF[2] * s2, OAKF, OAKS, 0, 1.2))
+    for xx in (fy0, fy0 + fo_x - tt_):
+        o.append(rect(BX(xx), BY(g.LEAF[2]), tt_ * s2, fr["h"] * s2, "#c48c57", "#7a5130", 0, 1))
+    leg_at = lf_ + (lw_ - lf_) * g.LEG_CLIP_FROM_FOOT / g.LEG_H
+    for k in range(8):
+        cy = first + k * g.LEG_PITCH
+        o.append(f'<path d="M{BX(cy - g.LEG_CLIP[1] / 2)},{BY(g.LEAF[2])} L{BX(cy - g.LEG_CLIP[1] / 2)},{BY(g.LEAF[2] + leg_at * 0.7)} '
+                 f'Q{BX(cy)},{BY(g.LEAF[2] + leg_at + 1.0)} {BX(cy + g.LEG_CLIP[1] / 2)},{BY(g.LEAF[2] + leg_at * 0.7)} L{BX(cy + g.LEG_CLIP[1] / 2)},{BY(g.LEAF[2])}" '
+                 f'fill="none" stroke="#55585b" stroke-width="1.6"/>')
+        o.append(rect(BX(cy - leg_at / 2), BY(g.LEAF[2] + 0.15), leg_at * s2, leg_at * s2, LEGF, OAKS, 0, 1))
+    # labels under the section, inside the drawing's width
+    yl = BY(g.LEAF[2] + fr["h"]) + 22
+    o.append(t(BX(0), yl, f"leaf {_fmt(g.LEAF[2])}", 9.5, "start", 500, MUTED))
+    o.append(t(BX(fy0), yl + 14, f"frame rail {_fmt(tt_)} × {_fmt(fr['h'])}", 9.5, "start", 500, MUTED))
+    o.append(t(BX(L60 / 2), yl, f"legs {_fmt(leg_at)} square at the clip, {_fmt(g.LEG_PITCH)} apart", 9.5, "middle", 500, MUTED))
+    o.append(t(BX(L60), yl + 14, f"{_fmt(fr['h'] - lw_)} cm to spare under the thickest part", 9.5, "end", 500, MUTED))
+    # ---------- C: the steps, on the right of B
+    cx0 = BX(L60) + 40
+    cy0 = by - 18
+    o.append(t(cx0, cy0, "C · From folded to six at the table", 11.5, "start", 650))
+    steps_ = [("Clear the table and fold it down onto its brackets.", ""),
+              ("Two of you slide it 5 cm sideways off the hinge pins,", "lift it off and lay it face down on a blanket."),
+              ("Turn the leaf over beside it and unclip the eight legs:", "pull each foot out of its clip, lift the bolt out."),
+              ("Screw four legs into the table's inserts and four into", "the leaf's, hand-tight. Stand both up."),
+              ("Butt the leaf to the table's west end on its two dowels,", "close the two clips underneath. 170 × 80."),
+              (f"Set it {_fmt(-g.FREE_Z[0])} cm off the breast, chairs round.", "Packing away is the same, backwards.")]
+    for i, (a, b) in enumerate(steps_):
+        yy = cy0 + 26 + i * 36
+        o.append(f'<circle cx="{cx0 + 10}" cy="{yy}" r="10" fill="{BLUE}"/>')
+        o.append(t(cx0 + 10, yy + 4, str(i + 1), 10.5, "middle", 700, "#fff"))
+        o.append(t(cx0 + 28, yy + 1, a, 9.8, "start", 500))
+        if b:
+            o.append(t(cx0 + 28, yy + 14, b, 9.8, "start", 400, MUTED))
+    # ---------- the why, along the bottom
+    yb = H - 58
+    notes = ["Why the leaf: the folded table stays a plain oak panel, nothing new stands in the room, and the leaf, with every leg inside it,",
+             f"goes wherever the chairs are kept. Leaf, frame and legs together weigh about {0.7 / 1000 * (L60 * L80 * g.LEAF[2] + 2 * tt_ * fr['h'] * (fo_x + g.LEAF_FRAME_IN[1]) + 8 * g.LEG_H * ((lw_ + lf_) / 2) ** 2):.0f} kg.",
+             f"Set aside: folding legs under the table (they'd show on the folded panel and stand it about 5 cm further off the wall), a box under",
+             "the dining wall (where the breast-side chairs push back with six seated), and the plinth drawer (too short for 71 cm legs)."]
+    for i, nn in enumerate(notes):
+        o.append(t(0, yb + i * 15, nn, 9.8, "start", 400, INK))
+    return svg(W, H, "\n".join(o), "The leaf carries the legs: a slim oak frame underneath holds all eight",
+               "To scale. A from underneath, B in section, C the steps from folded to six")

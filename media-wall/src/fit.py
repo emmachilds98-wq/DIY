@@ -24,7 +24,8 @@ SOURCES = {
     "lid": "Turntable Lab: Audio-Technica replacement dust cover for the AT-LP120XUSB (705-140XP-1815), 17.375 × 13.625 × 2.75 in (44.1 × 34.6 × 7.0 cm)",
     "hebgo": "Häfele UK, Technology catalogue 2023, p. 7.206: Hebgo heavy-duty folding bracket 287.43.428, arm 580 mm, height 220 mm, 500 kg per pair, locks automatically when raised; up to 800 mm between brackets (Häfele 287.43.419 listing)",
     "liftoff": "Screwfix: Union PowerLoad lift-off hinges, 100 × 88 mm, 3-pack (5938T), 120 kg maximum door weight",
-    "legs": "Emuca: table legs Ø60 mm, 710 mm, height adjustable 710–730 mm, 50 kg per leg, screw-on mounting plate (set of 4)",
+    "legs": "Emuca: table legs Ø60 mm, 710 mm, height adjustable 710–730 mm, 50 kg per leg (set of 4): 710 is the standard dining leg; the plan's oak legs are made to the same 71 cm",
+    "clip": "RS PRO 45 mm steel spring clip (RS 175-3588): 42.1 × 56 × 12.7 mm, packs of 10 (uk.rs-online.com)",
     "terje": "IKEA: TERJE folding chair, 43 W × 49 D × 78 H cm, seat height 48 cm, tested for 110 kg",
     "dining": "Book a Builder UK, small dining room ideas: 600 mm of table edge per diner; table edge to a wall 600 mm tight minimum, 750 mm to aim for, 1000–1100 mm to walk behind; dining height about 750 mm",
     "sofa": "Your photo of the sofa (18 Oct 2026): a black jumbo-cord L-sofa, the long side under the window ending in line with the breast's reveal, about 188 cm; the return's 168 is a typical corner-sofa size until measured",
@@ -75,6 +76,9 @@ def zones():
     eight_sofa = g.FREE_Z[1] - g.SOFA_FRONT_Z
     four_sofa = g.TABLE_Z[1] - g.SOFA_FRONT_Z
     weight = tw * td * tt * 0.72 / 1000
+    fi = g.LEAF_FRAME
+    kit_kg = 0.7 / 1000 * (g.LEAF[0] * g.LEAF[1] * g.LEAF[2] + 2 * fi["t"] * fi["h"] * (g.LEAF_FRAME_OUT[0] + g.LEAF_FRAME_IN[1])
+                           + 8 * g.LEG_H * ((g.LEG[0] + g.LEG[1]) / 2) ** 2)
     cw, cd = g.CHAIR[0], g.CHAIR[1]
     six_cx = sum(g.SIX_X) / 2
     SB = g.SUB_HOOD                                                      # v13.2: the sub's oak cover under the dining wall
@@ -172,7 +176,9 @@ def zones():
             ("Four at the wall: two on the room side", f"{r1(tw)} of edge", ref("dining"), f"{r1(g.DINE_W)} each recommended", f"{r1(tw / 2)} each", TIGHT),
             ("Four at the wall: room to the sofa", f"table edge {r1(-g.TABLE_Z[1])} out", ref("dining", "sofa"), "sofa front", f"{r1(four_sofa)} (walk behind: 100+)", PASS),
             ("The door and the dining chairs", "door 83 wide, hinged on the breast side, opens in (you confirmed)", ref("room"), "its swing reaches about 44 out from the recess wall", "the west-end chair (four) and the breast-side chairs (six, eight) sit in its swing: keep it shut while you eat, or have it rehung to open into the hall", TIGHT),
-            ("Six and eight: lifted off onto legs, with the leaf", f"table {r1(tw)} + leaf {r1(g.LEAF[0])} = {r1(six_len)} × {r1(td)}, top at {r1(g.LEG_H + tt)}–{r1(73 + tt)}", ref("legs"), f"dining height about {r1(75)}", "within 1.3; four legs under the table, four under the leaf, joined by two dowels and two clips", PASS),
+            ("Six and eight: lifted off onto legs, with the leaf", f"table {r1(tw)} + leaf {r1(g.LEAF[0])} = {r1(six_len)} × {r1(td)}, top at {r1(g.LEG_H + tt)} on the oak legs", ref("legs"), f"dining height about {r1(75)}", "within 1.3; felt glides take up an uneven floor; four legs under the table, four under the leaf, joined by two dowels and two clips", PASS),
+            ("The eight legs, stored in the leaf's frame (v13.6)", f"8 legs {r1(g.LEG[0])} square in clips {r1(g.LEG_CLIP[1])} wide at {r1(g.LEG_PITCH)} centres = {r1(g.LEG_STORE_W)} across; each {r1(g.LEG_H)} + {r1(g.LEG_BOLT)} bolt long", ref("clip", "legs"), f"inside the frame {r1(g.LEAF_FRAME_IN[0])} × {r1(g.LEAF_FRAME_IN[1])}, {r1(g.LEAF_FRAME['h'])} deep", f"{r1((g.LEAF_FRAME_IN[0] - g.LEG_STORE_W) / 2)} each side, {r1(g.LEAF_FRAME_IN[1] - g.LEG_H - g.LEG_BOLT)} along, {r1(g.LEAF_FRAME['h'] - g.LEG[0])} below the legs; leaf, frame and legs about {kit_kg:.0f} kg together", PASS),
+            ("Knees under the leaf's frame", f"frame underside at {r1(g.LEG_H - g.LEAF_FRAME['h'])} with the table on its legs", ref("terje"), f"chair seat {r1(g.CHAIR[3])}", f"{r1(g.LEG_H - g.LEAF_FRAME['h'] - g.CHAIR[3])} above the seat, like an ordinary table's apron; the 110 top has no frame ({r1(g.LEG_H - g.CHAIR[3])})", PASS),
             ("Six: two a side, one at each end", f"{r1(six_len)} of edge each long side, {r1(td)} at each end", ref("dining"), f"{r1(g.DINE_W)} each", f"{r1(six_edge)} each on the sides (25 spare); {r1(td)} at the ends", PASS),
             ("Eight: three a side, one at each end", f"{r1(tw + g.LEAF[0])} long", ref("dining", "legs"), f"{r1(g.DINE_W)} each", f"{r1(eight_edge)} each", TIGHT),
             ("Six and eight: to the breast and the window", f"table {r1(free_breast)}–{r1(-g.FREE_Z[1])} out", ref("dining"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(free_breast)} to the breast; {r1(free_window)} to the window", PASS if free_breast >= g.CLEAR_OK else TIGHT),

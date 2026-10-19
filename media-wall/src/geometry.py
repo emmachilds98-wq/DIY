@@ -184,8 +184,22 @@ REED = (2.0, 1.0, 1.0)                     # v12: reeded underside, oak strips 2
 FOLDED_D = RAIL[2] + TABLE[2] + (0.0 if PLAIN else REED[2]) + 0.3   # about 6 off the breast (v13: flat underside)
 HEBGO = (58.0, 22.0)                       # Häfele Hebgo 287.43.428: arm 580, height 220; 500 kg a pair
 HEBGO_X = (TABLE_CX - 40.0, TABLE_CX + 40.0)   # 80 apart (Häfele: up to 800 between brackets)
-LEG_H = 71.0                               # Emuca steel legs, 710 (adjustable to 730), screw-in plates
-LEAF = (60.0, 80.0, 2.7)                   # the extra leaf for eight, on four more legs
+LEG_H = 71.0                               # v13.6: tapered oak legs, 71 long (the standard 710 dining leg), on M8 hanger bolts into brass inserts
+LEG = (4.5, 3.0)                           # v13.6: oak legs, 4.5 square at the top tapering to 3 at the foot (two inside faces)
+LEG_BOLT = 1.5                             # the M8 hanger bolt's exposed length when the leg is off
+LEAF = (60.0, 80.0, 2.7)                   # the extra leaf for six and eight, on four more legs
+# v13.6, client: "include legs on the table build ... store them as a part of the table's build, maybe in a box". The leaf
+# carries all eight legs: a slim oak frame under it (it also stiffens the leaf), the legs lying side by side inside it, each
+# with its bolt in a hole in the frame's end rail and its foot in a sprung clip. Nothing extra on the folded table or in the room.
+LEAF_FRAME = dict(inset_x=3.0, inset_z=1.5, t=1.8, h=5.5)   # set in from the leaf's 60 and 80 edges; rails 1.8 thick, 5.5 deep
+LEAF_FRAME_OUT = (LEAF[0] - 2 * LEAF_FRAME["inset_x"], LEAF[1] - 2 * LEAF_FRAME["inset_z"])          # 54 × 77
+LEAF_FRAME_IN = (LEAF_FRAME_OUT[0] - 2 * LEAF_FRAME["t"], LEAF_FRAME_OUT[1] - 2 * LEAF_FRAME["t"])  # 50.4 × 73.4
+LEG_CLIP = (4.21, 5.6, 1.27)                # RS PRO 45 mm steel spring clip: 42.1 × 56 × 12.7 mm (grips the leg near its foot)
+LEG_CLIP_FROM_FOOT = 8.0                    # the leg is about 3.2 square there: diagonal 4.5, the clip's size
+LEG_PITCH = 6.0                             # the stored legs' centres across the frame
+LEG_STORE_W = 7 * LEG_PITCH + LEG_CLIP[1]   # 47.6 across, clips included
+LEAF_LEG_IN = (7.5, 6.5)                    # the leaf's own four inserts: in from its 60 and 80 edges, clear inside the frame's corners
+LEAF_KIT_KG = None                          # computed in fit.py
 CHAIR = (43.0, 49.0, 78.0, 48.0)           # IKEA TERJE folding chair: W, D, H, seat height
 DINE_W = 60.0                              # table edge per diner (UK guide)
 CLEAR_MIN, CLEAR_OK, CLEAR_WALK = 60.0, 75.0, 100.0   # table edge to wall: tight minimum, aim, walk behind
@@ -208,7 +222,7 @@ SCREEN_FROM_WINDOW = ROOM_D - (ALC_D - TV_PANEL_Z[0])   # 335
 VIEW_DIST = SCREEN_FROM_WINDOW - EYES_FROM_WINDOW        # 265
 CHAISE_EYES_Z = CHAISE_END_Z - 60.0        # sitting up at the chaise's end
 SOCKET = dict(x=0.0, z=-22.0, y=30.0)      # on the east wall, just in front of bay 1
-SOCKET2 = dict(x=0.0, z=-205.0, y=30.0)    # new: low on the east wall behind the sofa (PC, rear speakers)
+SOCKET2 = dict(x=0.0, z=-205.0, y=30.0)    # v13.6: an existing socket by the sofa, IF there is one (rears); no new socket
 
 
 def summary():
