@@ -11,6 +11,12 @@
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
 
+## Update 19 Oct 2026, round 7e: v13.4 (cutting list)
+- Viewer version 10. `cuts()` in build_doc.py: every made part grouped by stock (solid oak; birch ply 18, 12, 9, 6 mm;
+  hardware), from the section 3/5/7 cut lists and v6.1's game drawer. New size: record tray sides 8 cm tall. Shown in the Build
+  steps tab (with Copy as text) and at the end of the build guide PDF. Step 6 now starts with ordering from it.
+- Still offered, not done: daytime renders (needs relighting in render.py), lighting-scene buttons, furniture options.
+
 ## Update 19 Oct 2026, round 7d: v13.3 (the plan in tabs on the viewer, step-by-step build, cost by phase)
 - The client asked for the whole plan inside the viewer (no fetching PNGs or PDFs from GitHub), in tabs or pages, with a clear
   build plan, buy guide, cost by phase, the table, and the network/power plan (they sent their v6.1 PDF as the reference for

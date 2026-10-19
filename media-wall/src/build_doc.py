@@ -10,7 +10,7 @@ from diagrams import (sub_box, drawer_layouts, storage, network, front, drawer, 
 
 HERE = pathlib.Path(__file__).parent
 VERSION = "13"
-REVISION = "13.3: step-by-step build, cost by phase, the network and power in full"
+REVISION = "13.4: a cutting list for the timber merchant"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -271,14 +271,15 @@ def steps():
                  f"The dining wall's backboard at {n(g.RAIL_TOP - g.RAIL[1])}–{n(g.RAIL_TOP)}, centred on the breast.",
                  "Run the cable detector along every line you will drill, and mark anything it finds."],
              check="Every line level end to end, and the uprights' lines plumb."),
-        dict(n=6, title="Build the base", who="You", time="1 day", buy=["4 Base unit"], see=[("wall", "Drawer layouts")],
-             do=["Build the 9 cm plinth for bays 1–2, with the open bay for the hidden drawer under bay 2. Level it with shims.",
+        dict(n=6, title="Build the base", who="You", time="1 day", buy=["4 Base unit"], see=[("build", "Cutting list"), ("wall", "Drawer layouts")],
+             do=["Order the oak and ply from the cutting list (below the steps), a week or two ahead: most merchants cut to size for a small charge.",
+                 "Build the 9 cm plinth for bays 1–2, with the open bay for the hidden drawer under bay 2. Level it with shims.",
                  "Assemble the two BESTÅ frames with their back panels left off and stand them on the plinth.",
                  "Build bay 3 from 18 mm ply, 60 × 40 × 73, and bolt it to bay 2.",
                  "Screw the 4 cm spacer blocks to the wall, push the base against them and fit the anti-tip brackets.",
                  "Lay the flat two-compartment trunking in the channel behind (mains one side, data the other) and run the cables in."],
              check="The tops level within 1 mm across 186 cm, and nothing rocks."),
-        dict(n=7, title="Fit the worktop", who="You + a helper", time="½ day", buy=["5 Oak joinery"], see=[("wall", "Built to your alcove")],
+        dict(n=7, title="Fit the worktop", who="You + a helper", time="½ day", buy=["5 Oak joinery"], see=[("build", "Cutting list"), ("wall", "Built to your alcove")],
              do=["Cut the worktop and the dining wall's backboard from the one 300 × 62 oak board, using the template from step 1.",
                  "Scribe the ends to the walls; cut the TV slot over the channel and the grommet hole behind the deck.",
                  "Oil it on every face, undersides and cut ends included.",
@@ -379,9 +380,92 @@ GUIDE_PITFALLS = """<h3>Where beginners usually go wrong</h3>
 """
 
 
+def cuts():
+    """Every made part in one cutting list, grouped by what the timber merchant cuts it from (sizes in cm, L × W × T).
+    Rows: (part, size, qty, notes, where it goes). Drawn from the cut lists in sections 3, 5 and 7 and v6.1's game drawer."""
+    g = G
+    pc_len = g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]
+    return [
+        ("Solid oak, hardwax oil", "Ask for it planed all round; scribe the uprights and worktop on site", [
+            ("Uprights", f"{n(g.UPRIGHT_LEN)} × 30 × 4.5", "2", "Buy 165 long and scribe to the ceiling; housings, mortises, LED and cable grooves cut on the bench", "Media wall"),
+            ("High shelf, long length", "128.9 × 30 × 4", "1", "Housed 1.2 into both uprights and pegged", "Media wall"),
+            ("High shelf, short length", "51.7 × 30 × 4", "1", "Housed into the right upright; cleat on the reveal", "Media wall"),
+            ("Series X shelf", "55 × 30 × 4", "1", "Two through-tenons 6 × 2.4, wedged flush", "Media wall"),
+            ("Record ledge · wrap ledge", "128.9 × 7 × 2.4 · 134 × 7 × 2.4", "1 · 1", "Housed and pegged · on a cleat, dowelled to the left upright", "Media wall"),
+            ("Ledge lips", "128.9 × 1.5 × 0.9 · 134 × 1.5 × 0.9", "1 · 1", "Glued along the ledges' front edges", "Media wall"),
+            ("PC shelf", f"{n(pc_len)} × {n(g.PC_SHELF_D)} × 4", "1", "Oak cleat and two concealed brackets", "Media wall"),
+            ("Keyboard tray housing", "70 × 28 × 7, sides 7 × 2", "1", "Screwed under the PC shelf", "Media wall"),
+            ("Worktop", f"{n(g.ALC_W)} × {n(g.BASE_D)} × 3", "1", "From one 300 × 62 full-stave worktop; chamfered front", "Media wall"),
+            ("Dining backboard", f"{n(g.RAIL[0])} × {n(g.RAIL[1])} × {n(g.RAIL[2])}", "1", "From the same worktop's offcut", "Dining table"),
+            ("Face frame", "186 × 73 overall, 2 thick, stiles about 5 wide", "1 set", "End stiles scribed to the walls", "Media wall"),
+            ("Table top, centre", "96 × 80 × 2.7", "1", "Edge-glued staves, a tongue on each end", "Dining table"),
+            ("Breadboard ends", "80 × 7 × 2.7", "2", "Pegged with three 10 mm pegs each, in slotted holes", "Dining table"),
+            ("Leaf", f"{n(g.LEAF[0])} × {n(g.LEAF[1])} × {n(g.LEAF[2])}", "1", "Two alignment dowels and two table clips", "Dining table"),
+            ("Legs (oak option)", "71 × 4.5, tapering to 3", "8", "M8 hanger bolts; or buy the Emuca steel legs instead", "Dining table"),
+            ("Turn buttons", "6 × 2.5 × 2.2", "2", "On a single screw each", "Dining table"),
+            ("Sub cover: top · backboard", "37 × 26.4 × 2 · 35 × 37.4 × 1.5", "1 · 1", "Drip groove under the top; two keyhole hangers on the backboard", "Dining table"),
+            ("Sub cover: tray", "35 × 24 × 2, a 2 cm lip all round", "1", "Four rubber feet", "Dining table"),
+            ("Drawer fronts", "game drawer 56.8 × 6.5 × 2 · plinth drawer 54 × 6 × 2", "1 · 1", "Finger pull cut underneath", "Media wall"),
+            ("Record tray lips", "about 56 × 5 × 1.5", "2", "Cut to the face frame's opening, less 3 mm", "Media wall"),
+            ("Record tray dividers", "38.2 × 8 × 0.6", "2", "Between the LP and singles troughs", "Media wall"),
+            ("Follower blocks · Xbox One lift block", "19 × 12 × 2 · 15 × 12 × 2", "2 · 1", "Offcuts, felted underneath", "Media wall"),
+            ("Wedges · pegs · dowels", "6 × 3, tapering · 10 mm dowel, 5 long · 10 mm dowel", "2 + spares · 6 + 6 · 8", "Glued", "Media wall"),
+        ]),
+        ("Birch ply, 18 mm", "", [
+            ("Bay 3 sides", "73 × 40", "2", "The record carcass, standing on the floor", "Media wall"),
+            ("Bay 3 top and bottom", "56.4 × 40", "2", "Between the sides; back left open to the channel", "Media wall"),
+            ("Plinth rails", "120 × 9", "2", "Front and back of the ladder frame under bays 1–2", "Media wall"),
+            ("Plinth cross-pieces", "34.4 × 9", "3", "At both ends and under the bay 1–bay 2 joint, so the bay under bay 2 stays clear for the drawer", "Media wall"),
+        ]),
+        ("Birch ply, 12 mm", "", [
+            ("Game drawer sides", "35 × 15.5", "2", "", "Media wall"),
+            ("Game drawer back · front panel", "51.9 × 15.5 · 51.9 × 6", "1 · 1", "", "Media wall"),
+            ("Record tray bases", "53.9 × 40", "2", "The sides and ends stand on them", "Media wall"),
+            ("Plinth drawer sides · ends", "34 × 4.4 · 49.6 × 4.4", "2 · 2", "A 52 × 34 × 5 box", "Media wall"),
+            ("Keyboard tray", "54 × 26", "1", "Oak lip on its front edge", "Media wall"),
+        ]),
+        ("Birch ply, 9 mm", "", [
+            ("Game drawer base", "52.5 × 34.4", "1", "In a 6 mm groove", "Media wall"),
+            ("Record tray sides · ends", "40 × 8 · 52.1 × 8", "4 · 4", "Two of each per tray; new in v13.3: sides set at 8 cm tall, room for the runners", "Media wall"),
+        ]),
+        ("Birch ply, 6 mm", "", [
+            ("Game drawer cross divider", "51.9 × 9", "1", "13 cm back from the front", "Media wall"),
+            ("Game drawer bin walls · bin floors", "12.6 × 9 · 16 × 12.6", "2 · 2", "Floors raked so the cases lean about 13°", "Media wall"),
+            ("Plinth drawer base", "52 × 34", "1", "Screwed under the box", "Media wall"),
+        ]),
+        ("Hardware", "Runners are sold in pairs", [
+            ("Record tray runners", "400 mm full extension, 68–70 kg a pair", "2 pairs", "Screwed straight into bay 3's sides", "Media wall"),
+            ("Game drawer runners", "350 mm full extension, soft-close", "1 pair", "Accuride DZ3832EC or Screwfix 964VN", "Media wall"),
+            ("Plinth drawer and keyboard tray runners", "300 mm full extension · 300 mm light duty", "1 pair · 1 pair", "", "Media wall"),
+            ("Häfele Hebgo folding brackets", "287.43.428, 580 arm", "2", "500 kg a pair", "Dining table"),
+            ("Lift-off hinges", "Union PowerLoad 100 × 88, all the same hand", "3", "", "Dining table"),
+            ("Brass M8 threaded inserts · keyhole hangers · rubber feet", "—", "4 · 2 · 4", "Legs · sub cover · sub tray", "Dining table"),
+            ("Concealed brackets", "for the uprights; two for the PC shelf, 40 kg+ a pair", "1 set", "", "Media wall"),
+        ]),
+    ]
+
+
+def cuts_html():
+    out = ["<p>Every made part in one list, grouped by what it's cut from, for the timber merchant. Sizes are finished sizes in cm, length × width × thickness. The cut lists in the other sections say how each part joins; this list is for ordering.</p>"]
+    for grp, note, rows in cuts():
+        out.append(f"<h4>{grp}</h4>" + (f"<p class='note'>{note}</p>" if note else ""))
+        out.append("<table class='tight cuts'><tr><th>Part</th><th>Size (cm)</th><th>Qty</th><th>Notes</th><th>Section</th></tr>"
+                   + "".join(f"<tr><td>{a}</td><td class='num'>{b}</td><td class='num'>{c}</td><td>{d}</td><td>{e}</td></tr>" for a, b, c, d, e in rows)
+                   + "</table>")
+    return "\n".join(out)
+
+
+def cuts_text():
+    lines = ["Cutting list: media wall and dining wall (finished sizes in cm, length x width x thickness)"]
+    for grp, note, rows in cuts():
+        lines += ["", grp.upper() + (f" ({note})" if note else "")]
+        lines += [f"- {a}: {b}, qty {c}" + (f" ({d})" if d else "") for a, b, c, d, e in rows]
+    return "\n".join(lines)
+
+
 def guide_html():
     return (GUIDE_RULES + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html()
-            + GUIDE_TIME + GUIDE_PITFALLS)
+            + GUIDE_TIME + GUIDE_PITFALLS + "<h3>The cutting list</h3>" + cuts_html())
 
 
 def _plan(deck=False):

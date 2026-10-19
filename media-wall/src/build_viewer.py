@@ -8,7 +8,7 @@ On claude.ai the page declares: db (answers/, tracker/), user (who saved what), 
 import hashlib, html, json, pathlib, re, urllib.parse
 import geometry as G
 import fit
-from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools
+from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools, cuts_html, cuts_text
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
@@ -577,6 +577,11 @@ def page(site=False):
     <div class="qhead"><h2>The order of work</h2><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div></div>
     <p class="caption" id="s-note">Tick each step when it's done; it saves for both of you. "Buy first" opens that part of the buy list.</p>
     <ol class="steps-list">{"".join(step_cards)}</ol>
+    <div class="block" id="cuts">
+      <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
+      <textarea id="cuts-box" class="caption" rows="8" hidden readonly aria-label="The cutting list as text">{html.escape(cuts_text())}</textarea>
+      <div class="doc">{deck_section(cuts_html())}</div>
+    </div>
     <div class="doc">{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div>
   </section>
 
@@ -821,6 +826,12 @@ $("#copy-all").addEventListener("click", async () => {{
   const box = $("#copy-box"), st = $("#copy-st");
   try {{ await navigator.clipboard.writeText(text); st.textContent = "Copied. Paste it into a message."; box.hidden = true; }}
   catch (e) {{ box.value = text; box.hidden = false; box.focus(); box.select(); st.textContent = "Select the text below and copy it."; }}
+}});
+
+$("#copy-cuts").addEventListener("click", async () => {{
+  const box = $("#cuts-box"), st = $("#cuts-st");
+  try {{ await navigator.clipboard.writeText(box.value); st.textContent = "Copied. Paste it into an email to the timber merchant."; box.hidden = true; }}
+  catch (e) {{ box.hidden = false; box.focus(); box.select(); st.textContent = "Select the text below and copy it."; }}
 }});
 
 /* tracker and the cost chart */
