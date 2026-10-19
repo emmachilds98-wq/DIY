@@ -1,5 +1,87 @@
 # Handoff: Home Network & Media Wall Plan
 
+## Update 19 Oct 2026, round 6: IN PROGRESS. Next worker, start here
+**Client's latest ask (round 6, verbatim):** "Can you make the sub safer somehow, a box of some kind without restricting the
+sound quality. Just so it's safe with guests round without having to be moved. Also improve anything about the media wall now,
+give me a view looking at the pc side of the wall too and show various types of storage options with the sizes we have. Use the
+oak wood but with slat effect on things like the pc shelf. Then update artifact and repo"
+**Then:** "do you have the rest of the house upgrade info like network etc and can build this in". Yes: the network, AV,
+power and house plans are already in the PDF (sections 9 and 2: Hub 5 in modem mode, Deco A router + Switch 1 in bedroom 3,
+Cat6 riser through the airing cupboard, Deco B on the high shelf, Deco C in the kitchen, optional ports for the projector and
+music room; `diagrams.network()`, `house()`, `av()`, `power()`). Next: give them their own tab on the viewer and refresh them for v11 (see step 6).
+
+**Done this round (committed, NOT yet rebuilt into the PDF, renders or viewer):**
+- `geometry.py`: `SUB_BOX`, a slatted oak box round the sub, 53 × 30 × 40 (x 226.5–279.5, z −30–0). It has 2 cm slats with
+  2 cm gaps (half open) on all four sides, acoustic cloth behind the driver side, 15.3 cm of air behind the rear port, a solid
+  oak lid, and it screws to the dining backboard so it can't tip. Guests can sit at the table: it leaves 53 cm of legroom.
+- `render.py`:
+  - `subwoofer()` draws the slatted box.
+  - `wrap()` adds an oak slat screen over the PC's ports, a fluted front edge on the PC shelf and a slatted oak cable spine.
+  - `rz_slats()` adds an oak slat panel behind the turntable zone.
+  - **New side view** looking at the PC wall: `build_side()`, `room_side()`, `SIDE_KEY`, `VIEW="side"` in `P()`, with
+    generic face culling in `box()`. `all_svgs()` writes `v11_side_clean.svg` and `v11_side_key.svg`, plus the paints in
+    `v11_paint_{k}_side`. It was checked: it reads well (sofa in front, PC shelf and LPs on the wall, media wall end-on on the right).
+  - `plate()` now widens itself to fit the caption.
+- `diagrams.py`:
+  - `_subbox_plan()` / `_subbox_front()` helpers draw the box in `front`, `living_plan`, `seating`, `dining_section`,
+    `sound` and `routes`.
+  - `pc_shelf()` shows the slat screen, the fluted edge and the cable spine.
+  - The "cane screen" wording is now "oak slat screen". Backup: `diagrams_v11r1_backup.py`.
+- `fit.py`:
+  - The sub rows are rewritten for the box (54 checks: 41 fit, 9 tight, 4 check, 0 fail).
+  - New sources: `bestadrawer` (IKEA BESTÅ drawer frame 60 × 25 × 40, 10 kg), `tjena` (IKEA TJENA box with lid 25 × 35 × 20)
+    and `lpcount` (75–90 LPs per 33 cm cube, 3–4 mm a sleeve).
+
+**To do, in order**
+1. **`diagrams.storage_options()`** (new): storage options to scale for each space, with sizes and capacities. Cite the
+   sources above.
+   - **BESTÅ bay** (56.8 w × 60.8 h × 40 d inside), four options:
+     - open rows (now);
+     - two BESTÅ drawers 25 high (10 kg each: games and pads, not consoles);
+     - a 25 drawer under one console row;
+     - a slatted oak door (air and IR still get through).
+   - **Bay 3** (56.4 × 69.4 × 40), three options:
+     - two face-out trays (now): 90 LPs and 120 singles;
+     - two fixed spine-out LP rows (32.6 high each), about 130 LPs a row, so about 260;
+     - lower tray plus one spine-out row: about 175 LPs and 60 singles.
+   - **Plinth drawer** (52 × 34 × 5): remotes, manuals, spare leads.
+   - **Turntable zone above the Series X shelf** (50.5 × 58 × 30): keep it clear. The Xbox needs 10–15 cm each side.
+   - **PC shelf** (82 × 28): the PC and the pad dock. A slatted oak drawer under the shelf is an option.
+   - **High shelf** (186 × 30, 39 to the ceiling), three options:
+     - books up to 30 tall;
+     - five TJENA boxes 35 long × 25 deep × 20 tall;
+     - mixed.
+   - Register it in the `__main__` list at the bottom of `diagrams.py`, in `make_images.PLANS` (key `storage`, so the viewer
+     shows `zz_storage`), and as a figure in `build_doc.py`, section 3 or 4.
+2. **`make_images.py`**: add jobs for the side view.
+   - `render_v11_side_clean.png` for the PDF;
+   - HD outputs `../out/Media wall v11 - side wall (PC) (HD).png` and `... side wall (PC), numbered key (HD).png`;
+   - `art_side_{paint}.jpg` for each paint.
+   Copy how the `four` jobs are written.
+3. **`build_viewer.py`**: add a "Side wall (PC)" view button (images `art/art_side_{paint}.jpg`; key off for the side view, like
+   `four`). Add a "Storage" plan button and a "House network" plan button (`zz_house` exists; add `zz_network` from `network()`).
+4. **`build_doc.py`** text:
+   - The sub box: description, cut list (2 × 53 × 40 and 2 × 30 × 40 slatted sides, lid 53 × 30 × 1.8, slats 2 cm, gaps 2 cm,
+     acoustic cloth inside the driver side) and build-guide steps.
+   - In TRACK, swap "oak sub riser" for "slatted oak sub box".
+   - The PC shelf slats (screen, fluted edge, cable spine) instead of cane; fix the cane line in the tracker and buy list.
+   - The turntable-zone slat panel.
+   - Section 6 gets the side-view figure `render_v11_side_clean.png`.
+   - Add the storage options section and the new sources.
+5. Rebuild: `cd src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py`. Contact-sheet the PDF pages and
+   check them, especially the side view, the sub box in the front render, and the storage diagram.
+6. Network/house refresh (the client asked to "build this in"):
+   - Check that `network()`, `house()` and `av()` still match v11: Deco B now sits on the high shelf at x 171 above the turntable
+     zone; the PC moved to the side wall on the new socket behind the sofa, wired from Switch 2 through the trunking.
+   - Add a short "Whole-house network" summary page near the front of the PDF.
+7. Publish: Artifact tool, same file `src/media_wall_viewer.html`, files `art/*.jpg` (include the new `art_side_*`,
+   `zz_storage`, `zz_network`), update https://claude.ai/artifact/42PUQjJwfafV93mrjeFYX9 in place. Commit and push to
+   `claude/compassionate-wright-a150qf`, then update PR #2's description (https://github.com/emmachilds98-wq/DIY/pull/2).
+
+**Gotchas met this round:** module-level helpers in `diagrams.py` must use `G`, not `g` (`g = G` only exists inside functions).
+`render.build_side()` resets `VIEW`/`SOFA_MODE` in a `finally` block; anything else that sets `VIEW="side"` must do the same.
+The side view leaves out the dining wall and the sub (they're behind the camera).
+
 ## Update 18 Oct 2026, round 5: v11 delivered (turntable back in the alcove, dining wall, side-wall wrap)
 **Delivered:** `out/Home_Network_Plan_v11.pdf` (40 pages), `out/Build_Guide_v11.pdf` (8 pages, beginner-friendly, with tool list
 and shopping list), HD renders in `out/` (v10 outputs in `out/v10/`), the viewer artifact

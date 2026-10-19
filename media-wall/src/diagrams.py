@@ -591,10 +591,7 @@ def front():
     for bx in g.HEBGO_X:
         o.append(rect(X(bx - 1.4), Y(g.RAIL_TOP), 2.8 * s, g.HEBGO[0] * s, "#d6d8da", "#8a8c8f", 1))
     o.append(t(X(g.TABLE_CX), Y(46), "Hebgo brackets folded flat", 9, "middle", 600, MUTED))
-    sxx = g.SUB_POS["x"]
-    o.append(rect(X(sxx[0] - 2), Y(5), (sxx[1] - sxx[0] + 4) * s, 5 * s, "#e9dccb", "#b88a55", 1))
-    o.append(rect(X(sxx[0]), Y(5 + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
-    o.append(t(X((sxx[0] + sxx[1]) / 2), Y(20), "sub", 9.5, "middle", 600))
+    _subbox_front(o, X, Y, s)
     o.append(f'<rect x="{X(x0)}" y="{Y(g.TABLE_TOP)}" width="{g.TABLE[0]*s}" height="{g.TABLE[2]*s}" fill="none" stroke="{BLUE}" stroke-dasharray="5 3"/>')
     o.append(t(X(x0) + 4, Y(g.TABLE_TOP) - 4, "the top's height when down", 8.5, "start", 600, BLUE))
     cxc = g.TABLE_CX
@@ -616,6 +613,37 @@ def front():
 
 
 # ------------------------------------------------------------------ room plans (north, the window, at the top; east on the right)
+OAK_F, OAK_S = "#e3c9a3", "#a87a4a"
+
+def _subbox_plan(o, X, Y, k, label=None):
+    """The slatted oak sub box in plan, the sub (and its port side) inside."""
+    b = G.SUB_BOX
+    xa, xb = sorted((X(b["x"][0]), X(b["x"][1])))
+    ya, yb = sorted((Y(b["z"][0]), Y(b["z"][1])))
+    o.append(f'<rect x="{xa:.1f}" y="{ya:.1f}" width="{xb-xa:.1f}" height="{yb-ya:.1f}" fill="{OAK_F}" stroke="{OAK_S}" stroke-width="1.4" rx="1.5"/>')
+    sx, sz = G.SUB_POS["x"], G.SUB_POS["z"]
+    pa, pb = sorted((X(sx[0]), X(sx[1])))
+    qa, qb = sorted((Y(sz[0]), Y(sz[1])))
+    o.append(f'<rect x="{pa:.1f}" y="{qa:.1f}" width="{pb-pa:.1f}" height="{qb-qa:.1f}" fill="{SND_F}" stroke="{SND_S}" rx="2"/>')
+    if label:
+        o.append(t((xa + xb) / 2, ya - 5, label, 8.5, "middle", 600, OAK_S))
+
+def _subbox_front(o, X, Y, s, dashed=False, label=True):
+    """The slatted oak sub box seen from the front: vertical slats, a solid lid."""
+    b = G.SUB_BOX
+    xa, xb = sorted((X(b["x"][0]), X(b["x"][1])))
+    yt, yf = Y(b["y"][1]), Y(b["y"][0])
+    dash = ' stroke-dasharray="4 3"' if dashed else ""
+    o.append(f'<rect x="{xa:.1f}" y="{yt:.1f}" width="{xb-xa:.1f}" height="{yf-yt:.1f}" fill="#4a3a2c" stroke="{OAK_S}"{dash}/>')
+    p, x = (b["slat"] + b["gap"]) * s, xa + 1.8 * s
+    while x + b["slat"] * s <= xb - 1.8 * s + 0.1:
+        o.append(f'<rect x="{x:.1f}" y="{yt:.1f}" width="{b["slat"]*s:.1f}" height="{yf-yt:.1f}" fill="{OAK_F}" stroke="none"/>')
+        x += p
+    o.append(f'<rect x="{xa-2:.1f}" y="{yt-1.8*s:.1f}" width="{xb-xa+4:.1f}" height="{1.8*s:.1f}" fill="#c99b68" stroke="{OAK_S}"{dash}/>')
+    if label:
+        o.append(t((xa + xb) / 2, yt - 1.8 * s - 5, "sub in a slatted oak box", 9, "middle", 600, OAK_S))
+
+
 def _room(o, k, ox, oy, xmin=0.0, label_walls=True):
     """Draw the measured room outline and return X(x), Y(z): x in cm from the east wall, z in render coordinates."""
     g = G
@@ -697,9 +725,8 @@ def living_plan():
     cx, cz = g.COFFEE["x"], g.COFFEE["z"]
     o.append(rect(X(cx[1]), Y(cz[0]), (cx[1] - cx[0]) * k, (cz[1] - cz[0]) * k, "#f3efe6", "#c9c5bb", 6))
     o.append(t(X((cx[0] + cx[1]) / 2), Y((cz[0] + cz[1]) / 2) + 3, "coffee table", 8.5, "middle", 400, MUTED))
-    sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
-    o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
-    o.append(t(X(sx[1]) - 5, Y(sz[0]) - 4, "sub", 9, "end", 600, SND_S))
+    _subbox_plan(o, X, Y, k)
+    o.append(t(min(X(g.SUB_BOX["x"][0]), X(g.SUB_BOX["x"][1])) - 5, Y(g.SUB_BOX["z"][0]) - 4, "sub, boxed", 9, "end", 600, SND_S))
     o.append(rect(X(16), Y(-280), 14 * k, 15 * k, SND_F, SND_S, 3))
     o.append(rect(X(272), Y(-296), 15 * k, 14 * k, SND_F, SND_S, 3))
     o.append(t(X(265), Y(-296) - 4, "rear", 8, "middle", 400, MUTED))
@@ -795,8 +822,7 @@ def seating():
         o.append(f'<rect x="{X(x1s):.1f}" y="{Y(zb):.1f}" width="{(x1s - 120)*k:.1f}" height="{(zf - zb)*k:.1f}" fill="#ecebe6" stroke="#b9b4a8"/>')
         o.append(t((X(x1s) + X(120)) / 2, Y((zb + zf) / 2) + 3, "sofa", 9, "middle", 600, MUTED))
         o.append(f'<rect x="{X(g.TABLE_X[1]):.1f}" y="{Y(-g.RAIL[2]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.RAIL[2]*k:.1f}" fill="#d9b48a"/>')
-        sxx, szz = g.SUB_POS["x"], g.SUB_POS["z"]
-        o.append(f'<rect x="{X(sxx[1]):.1f}" y="{Y(szz[0]):.1f}" width="{(sxx[1]-sxx[0])*k:.1f}" height="{(szz[1]-szz[0])*k:.1f}" fill="{SND_F}" stroke="{SND_S}"/>')
+        _subbox_plan(o, X, Y, k)
         # the table and chairs
         if mode == "four":
             tx0, tx1 = g.TABLE_X
@@ -883,11 +909,12 @@ def dining_section():
     o.append(rect(Z(2.4), Y(g.FOLDED_TOP + 3), 2.4 * s, 3 * s, "#c48c57", "#7a5130", 0))
     # frames
     o.append(rect(Z(2.2), Y(g.FRAMES_Y + 34), 2 * s, 34 * s, "#333", "#111", 0))
-    # the sub on its riser, on its side to the breast, beyond the cut
+    # the sub in its slatted box, beyond the cut
+    bd = -g.SUB_BOX["z"][0]
+    o.append(rect(Z(bd), Y(g.SUB_BOX["y"][1]), bd * s, g.SUB_BOX["y"][1] * s, OAK_F, OAK_S, 0, 1.2, 'stroke-dasharray="4 3"'))
     sd_ = -g.SUB_POS["z"][0]
-    o.append(rect(Z(sd_ + 1), Y(5), (sd_ - 1) * s, 5 * s, "#e9dccb", "#b88a55", 0, 1, 'stroke-dasharray="4 3"'))
     o.append(rect(Z(sd_), Y(5 + g.SUB[1]), (sd_ - 2) * s, g.SUB[1] * s, SND_F, SND_S, 2, 1, 'stroke-dasharray="4 3"'))
-    o.append(t(Z(sd_ / 2 + 1), Y(22), "sub", 9, "middle", 600, SND_S))
+    o.append(t(Z(bd / 2), Y(g.SUB_BOX["y"][1]) - 5, "sub box", 9, "middle", 600, OAK_S))
     # a chair pulled up to the table, room side
     w, d, h, sh = g.CHAIR
     cz0 = Dr + td - 8                     # its front edge 8 under the table
@@ -934,10 +961,10 @@ def sound():
     o.append(rect(X(g.TV_CX + 46), Y(-7), 92 * k, 9 * k, SND_F, SND_S, 2))
     o.append(t(X(g.TV_CX), Y(-7) - 6, "soundbar under the TV", 9.5, "middle", 600, SND_S))
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
-    o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
+    _subbox_plan(o, X, Y, k)
     o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub on an oak riser under the dining wall,", 9.5, "middle", 600, SND_S))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, "on the front wall beside the TV, port 22 cm clear", 9, "middle", 400, MUTED))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(g.SUB_BOX["z"][0]) - 26, "sub in a slatted oak box under the dining wall,", 9.5, "middle", 600, SND_S))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(g.SUB_BOX["z"][0]) - 13, "half the sides open, port 15 cm clear inside, lid screwed down", 9, "middle", 400, MUTED))
     for (x, z, lab) in [(16, -280, "rear, on the side wall"), (272, -296, "rear, on a stand")]:
         o.append(rect(X(x), Y(z), 15 * k, 15 * k, SND_F, SND_S, 3))
         o.append(t(X(x) + (10 if x < 100 else -6), Y(z) + 30, lab, 9, "start" if x < 100 else "end", 600, SND_S))
@@ -948,7 +975,7 @@ def sound():
     d_ = ((g.SUB_POS["x"][1] - g.DECK_X[0]) ** 2 + (g.SUB_POS["z"][1] - g.DECK_Z[0]) ** 2) ** 0.5
     o.append(t(X(120), Y(-60), f"sub to deck about {d_/100:.1f} m, on separate furniture", 9, "middle", 400, MUTED))
     return svg(W, H, "\n".join(o), "Sound: the sub on the front wall with the TV, the rears behind the sofa",
-               "To scale, north at the top. The sub is wireless: on the front wall it blends with the soundbar, out of the way of feet")
+               "To scale, north at the top. The sub is wireless: on the front wall, in an open-slatted box, it stays put when guests are round")
 
 
 def power():
@@ -1034,9 +1061,8 @@ def routes():
     o.append(rect(F(g.PC_SHELF_Z[1]), Y(g.PC_SHELF_TOP), (g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]) * s, 4 * s, "#e9dccb", "#c9b79f", 1))
     o.append(rect(F(g.PC_Z[1]), Y(g.PC_SHELF_TOP + g.PC_CASE[1]), g.PC_CASE[2] * s, g.PC_CASE[1] * s, GAME_F, GAME_S, 3))
     o.append(t(F((g.PC_Z[0] + g.PC_Z[1]) / 2), Y(g.PC_SHELF_TOP + 22), "PC", 11, "middle", 650))
-    sxx = g.SUB_POS["x"]
-    o.append(rect(X(sxx[0]), Y(34.4), (sxx[1] - sxx[0]) * s, 34.4 * s, SND_F, SND_S, 2))
-    o.append(t(X((sxx[0] + sxx[1]) / 2), Y(36), "sub", 9, "middle", 600, SND_S))
+    _subbox_front(o, X, Y, s, label=False)
+    o.append(t(X((g.SUB_BOX["x"][0] + g.SUB_BOX["x"][1]) / 2), Y(44), "sub box", 9, "middle", 600, OAK_S))
     o.append(f'<rect x="{F(g.ALC_D - side_len)}" y="{Y(80)}" width="{(g.CHAISE_END_Z - g.ALC_D + side_len)*s}" height="{80*s}" fill="none" stroke="#c9c5bb" stroke-dasharray="3 3"/>')
     o.append(t(F(-170), Y(40), "sofa (beyond)", 9, "middle", 400, MUTED))
     DATA = BLUE; MAINS = VIN_S; DC = "#2fa47a"; AUD = "#b07a1f"
@@ -1064,7 +1090,7 @@ def routes():
     o.append(t(X(g.RZ[0] + 26), Y(116), "deck → preamp → soundbar AUX", 9, "middle", 500, AUD))
     o.append(wire([(F(g.SOCKET["z"]), Y(25.7)), (F(g.SOCKET["z"]), Y(3)), (X(14), Y(3)), (X(14), Y(76))], MAINS, 1.8))
     o.append(wire([(F(g.SOCKET["z"]) + 4, Y(25.7)), (F(g.SOCKET["z"]) + 4, Y(1.5)), (X(66), Y(1.5))], MAINS, 1.8))
-    o.append(wire([(X(20), Y(77)), (X(20), Y(4)), (X(g.ALC_W), Y(4)), (X(sxx[0]), Y(4)), (X(sxx[0]), Y(10))], MAINS, 1.4))
+    o.append(wire([(X(20), Y(77)), (X(20), Y(4)), (X(g.ALC_W), Y(4)), (X(G.SUB_POS["x"][0]), Y(4)), (X(G.SUB_POS["x"][0]), Y(10))], MAINS, 1.4))
     for i, (c, lab, d) in enumerate([(DATA, "HDMI / Cat6", None), (MAINS, "mains leads", None), (DC, "12 V DC lead", "6 3"), (AUD, "vinyl audio", None)]):
         o.append(wire([(i * 210, 452), (i * 210 + 28, 452)], c, 2.2, d)); o.append(t(i * 210 + 36, 456, lab, 10.5, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "Cable routes: everything ends in the channel behind the base",
@@ -1098,7 +1124,7 @@ def pc_shelf():
     o.append(f'<line x1="{Xp(25.5)}" y1="{Yp(g.PC_Z[0])}" x2="{Xp(25.5)}" y2="{Yp(g.PC_Z[1])}" stroke="#2fa47a" stroke-width="4"/>')
     o.append(t(Xp(30), Yp(-150), "glass to the room", 9.5, "start", 600, "#2fa47a"))
     o.append(rect(Xp(1), Yp(g.PC_Z[1] - 2.5), 26 * s, 2 * s, "#d9b48a", VIN_S, 1))
-    o.append(t(Xp(30), Yp(g.PC_Z[1] - 3) + 4, "cane screen over the ports", 9.5, "start", 500, VIN_S))
+    o.append(t(Xp(30), Yp(g.PC_Z[1] - 3) + 4, "oak slat screen over the ports", 9.5, "start", 500, VIN_S))
     o.append(rect(Xp(4), Yp(g.PC_SHELF_Z[1] + 23), 9 * s, 18 * s, "#e8e6e1", "#9a958b", 2))
     o.append(t(Xp(30), Yp(g.PC_SHELF_Z[1] + 14) + 4, "pad dock", 9.5, "start", 500, MUTED))
     o.append(t(Xp(60), Yp(-215), "the sofa's return", 10, "middle", 600, MUTED))
@@ -1118,6 +1144,13 @@ def pc_shelf():
         z1 = g.WRAP_Z[0] - 1.5 - i * (g.LP + 1.4)
         o.append(rect(E(z1 - g.LP), V(g.LEDGE_LP_TOP), g.LP * k, 31.1 * k, VIN_F, VIN_S, 0, 0.8))
     o.append(rect(E(g.PC_SHELF_Z[1]), V(g.PC_SHELF_TOP), (g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]) * k, 4 * k, "#e9dccb", "#b88a55", 0))
+    zf = g.PC_SHELF_Z[1] + 1.25
+    while zf < g.PC_SHELF_Z[0]:
+        o.append(f'<line x1="{E(zf):.1f}" y1="{V(g.PC_SHELF_TOP):.1f}" x2="{E(zf):.1f}" y2="{V(g.PC_SHELF_TOP - 4):.1f}" stroke="#b88a55" stroke-width="0.7"/>')
+        zf += 2.5
+    o.append(rect(E(g.PC_Z[1] - 5), V(g.PC_SHELF_TOP), 3 * k, (g.PC_SHELF_TOP - g.SOFA_H) * k, OAK_F, OAK_S, 0, 1))
+    o.append(t(E(g.PC_Z[1] - 5) - 4, V(g.SOFA_H + 22), "slatted cable spine", 8.5, "end", 500, OAK_S))
+    o.append(t(E((g.PC_SHELF_Z[0] + g.PC_SHELF_Z[1]) / 2), V(g.PC_SHELF_TOP - 4) + 12, "fluted oak edge", 8.5, "middle", 500, OAK_S))
     o.append(rect(E(g.PC_Z[1]), V(g.PC_SHELF_TOP + g.PC_CASE[1]), g.PC_CASE[2] * k, g.PC_CASE[1] * k, GAME_F, GAME_S, 2))
     o.append(t(E((g.PC_Z[0] + g.PC_Z[1]) / 2), V(180), "PC", 10.5, "middle", 650))
     # the sofa's return in side view: seat 45, back 80
@@ -1256,7 +1289,7 @@ def why_layout():
     o.append(t(X(g.TABLE_CX), 290, f"breast {_fmt(g.BREAST_W)}", 9.5, "middle", 400, MUTED))
     notes = [f"Moving the TV {_fmt(g.TV_SHIFT)} cm left joins the two {_fmt(25.25)} cm side gaps into one {_fmt(g.RZ_W)} cm zone: wide enough for a 45.2 cm turntable, with 2.65 cm each side.",
              "The Series X moves up onto a shelf over the deck, above the lid's swing, with 15 cm of air each side. The records sit in bay 3, right under the deck.",
-             "That frees the chimney breast for a fold-down dining table; the sub, which is wireless, moves to the floor by the side wall."]
+             "That frees the chimney breast for a fold-down dining table; the sub, which is wireless, moves under it in a slatted oak box."]
     for i, n in enumerate(notes):
         o.append(t(0, 326 + i * 20, "• " + n, 10, "start", 400, INK))
     return svg(W, H, "\n".join(o), "What moved in v11",

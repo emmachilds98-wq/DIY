@@ -128,6 +128,9 @@ SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
 SUB_POS = dict(x=(232.0, 232.0 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # under the dining wall, between the bracket arms, on its side to the breast: driver east, port 22 cm from the west arm
+SUB_BOX = dict(x=(SUB_POS["x"][0] - 5.5, SUB_POS["x"][1] + 17.1), z=(-30.0, 0.0), y=(0.0, 40.0), t=1.8, slat=2.0, gap=2.0)
+# a slatted oak box round the sub: 53 × 30 × 40, open slats (50%) on all four sides and acoustic cloth behind the driver side,
+# 15 cm inside for the rear port, a solid oak lid, screwed to the backboard so it can't tip. The sub sits on its riser inside.
 COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
 
 # ---------------------------------------------------------------- the dining wall on the chimney breast
