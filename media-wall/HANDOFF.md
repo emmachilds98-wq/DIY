@@ -1,7 +1,7 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Branch:** `claude/eloquent-johnson-pgmnud` (v13, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
+- **Branch:** `claude/eloquent-johnson-pgmnud` (v13.3, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
   supersedes PRs 1–3). `main` is still at v9 until it's merged.
 - **Viewer artifact (this account):** https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2. Update it in place: `python3 build_viewer.py`, then
   publish `src/media_wall_viewer_inline.html` (images inlined; see round 7b) to that URL with no files map. It declares
@@ -10,6 +10,20 @@
   it can't be replied to or resolved from a cross-org session).
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
+
+## Update 19 Oct 2026, round 7d: v13.3 (the plan in tabs on the viewer, step-by-step build, cost by phase)
+- The client asked for the whole plan inside the viewer (no fetching PNGs or PDFs from GitHub), in tabs or pages, with a clear
+  build plan, buy guide, cost by phase, the table, and the network/power plan (they sent their v6.1 PDF as the reference for
+  network and power: `Home_Network_Plan_v6_1.pdf`, its "What each part does" table and two setup stages are now in section 9).
+- Viewer version 9, ~5.5 MB inline. Tabs: overview, views, wall, dining, paint, network, build, buy, questions, checks (bare
+  `#token` deep links; last tab remembered per device).
+- `build_doc.py`: `_plan(deck=True)` renders the plan with images as `data-art` keys (`DECK_ART`) and markers around the fit tables
+  and the still-to-confirm list; `plan_sections()` splits it at the h2s; `build_viewer.deck_section()` turns "section N" into tab links,
+  wraps tables to scroll and puts SVGs on paper cards. Edit content in build_doc.py once; the PDF and the page both pick it up.
+- `steps()` in build_doc.py is the order of work (13 steps, each with substeps, a check, its time, and `buy`: the buy-list phases
+  needed before it). The PDF table and the page's step cards both come from it. Step ticks save to db `steps/s<n>`.
+- Buy tab: cost-by-phase range chart (one £ scale, 200 steps), paid per phase from the tracker, a still-to-buy total, filters.
+- `art/doc_paint.jpg`, `art/doc_skirt.jpg` are made by `build_viewer.doc_images()` from the two PNGs.
 
 ## Update 19 Oct 2026, round 7c: v13.2 (sub cover, drawers view, measurement overlays, stairwell opening, sofa)
 - Viewer version 8 (publish `src/media_wall_viewer_inline.html`, ~7 MB, images inlined).

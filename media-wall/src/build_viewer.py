@@ -1,5 +1,6 @@
-"""Builds the interactive viewer page (v13): view × paint × key, plus the open questions (answers and photos saved for
-both of you), a shared buy tracker, the fit proof and downloads. Images live in art/.
+"""Builds the plan page (v13.3): the whole plan in tabs (overview, 3D views, media wall, dining, paint and light, network and
+power, build steps, buy list with cost by phase, questions, checks), the sections borrowed from build_doc.py, with
+answers, photos, buy ticks and step ticks saved for both of you. Images live in art/.
 python3 build_viewer.py  -> media_wall_viewer.html (published as the Claude artifact with art/ and files/ alongside it)
                             and ../../index.html, the same page for GitHub Pages (plain download links; answers and
                             the tracker fall back to this device, with a copy-your-answers button)
@@ -7,7 +8,7 @@ On claude.ai the page declares: db (answers/, tracker/), user (who saved what), 
 import hashlib, html, json, pathlib, re, urllib.parse
 import geometry as G
 import fit
-from build_doc import TRACK, money, phase_totals
+from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
@@ -125,7 +126,7 @@ STYLE = """<style>
   --ok: #8fd3a2; --ok-bg: #1f3325; --tight: #e8c07a; --tight-bg: #3a2f1a; --check: #9cc4ec; --check-bg: #1c2b3a; --no: #f0a59c; --no-bg: #3d211e; color-scheme: dark }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
 .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; display: grid; gap: 32px; }
-header { display: grid; gap: 10px; }
+header { display: grid; gap: 10px; min-width: 0; }
 h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
 .lede { color: var(--muted); margin: 0; max-width: 64ch; }
 .change { margin: 0; max-width: 72ch; background: var(--note); border-left: 3px solid var(--oak); border-radius: 6px; padding: 10px 14px; }
@@ -225,21 +226,206 @@ table.fit sup { color: var(--muted); font-size: 10px; }
 .dl li span { min-width: 0; font-size: 15px; }
 .dl li small { color: var(--muted); font-family: var(--mono); font-size: 12px; }
 @media (prefers-reduced-motion: no-preference) { .frame img { transition: opacity .18s ease; } .meter .bar i { transition: width .3s ease; } }
+/* v13.3: the plan in tabs. A sticky tab bar under the title; each tab is one panel of the plan, drawings on paper cards. */
+:root { --paper: #fbfaf5; --paper-line: #e2ded2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #ebe8de; --paper-line: #c9c4b4; } }
+:root[data-theme="dark"] { --paper: #ebe8de; --paper-line: #c9c4b4; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.eyebrow { margin: 0; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.tabs { min-width: 0; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); margin-top: -12px; }
+.tabs .tl { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: thin; }
+.tabs button { font: inherit; font-size: 14.5px; white-space: nowrap; background: none; border: 0; border-radius: 999px; padding: 7px 13px; color: var(--muted); cursor: pointer; flex: none; }
+.tabs button:hover { color: var(--ink); background: var(--chip); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.tabs button:focus-visible { outline: 2px solid var(--oak); outline-offset: 2px; }
+.panel { display: grid; gap: 22px; min-width: 0; }
+.panel > * { min-width: 0; }
+.panel h2, .panel h3, .panel h4 { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
+.ptitle { margin: 0; }
+h2.ptitle { font-size: 1.6rem; font-weight: 700; }
+h3.ptitle { font-family: var(--display); font-size: 1.25rem; font-weight: 700; }
+.block { display: grid; gap: 12px; min-width: 0; }
+.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--chip); border: 0; border-radius: 999px; padding: 4px 11px; cursor: pointer; text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+.chip.h2 { background: var(--note); font-weight: 700; }
+a.chip:hover, button.chip:hover { box-shadow: inset 0 0 0 1px var(--oak); }
+/* plan text borrowed from the PDF */
+.doc { min-width: 0; max-width: 100%; }
+.doc > h2:first-child { margin-top: 0; }
+.doc h2 { font-family: var(--display); font-weight: 700; font-size: 1.6rem; margin: 34px 0 10px; text-wrap: balance; }
+.doc h3 { font-family: var(--display); font-weight: 700; font-size: 1.22rem; margin: 26px 0 8px; text-wrap: balance; }
+.doc h4 { font-size: 1rem; margin: 18px 0 6px; }
+.doc p, .doc ul, .doc ol { margin: 0 0 12px; max-width: 78ch; }
+.doc ul, .doc ol { padding-left: 1.3rem; }
+.doc li { margin-bottom: 5px; }
+.doc sup { color: var(--muted); font-size: 10.5px; margin-left: 1px; }
+.doc .note { color: var(--muted); font-size: 14.5px; }
+.doc .notice { margin-bottom: 14px; }
+.tscroll { overflow-x: auto; margin: 0 0 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.tscroll table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14.5px; }
+.tscroll th { text-align: left; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+.tscroll td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+.tscroll tr:last-child td { border-bottom: 0; }
+.tscroll td.num { white-space: nowrap; }
+.tscroll tr.total td { font-weight: 700; background: var(--note); }
+.tscroll tr.ph td, .tscroll td.kg { background: var(--chip); font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.tscroll td.kn { width: 2rem; text-align: center; font-weight: 700; background: var(--note); }
+.keycols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 16px; align-items: start; }
+.keycols .tscroll table { min-width: 0; }
+.doc figure { margin: 0 0 18px; }
+.doc figure img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); aspect-ratio: 1804 / 1148; object-fit: cover; }
+.doc figure.dia { background: var(--paper); border: 1px solid var(--paper-line); border-radius: 10px; padding: 12px; overflow-x: auto; }
+.doc figure.dia svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.doc figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 78ch; }
+.doc .decision, .doc .why, .doc .callout { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 0 0 16px; max-width: 78ch; }
+.doc .callout ul, .doc .why ul { margin: 8px 0 0; }
+.doc .confirm { background: var(--note); border-radius: 8px; padding: 10px 14px; font-size: 15px; }
+.doc ul.checks, .doc ul.agreed { list-style: none; padding-left: 0; }
+.doc ul.checks li, .doc ul.agreed li { padding-left: 1.5rem; position: relative; }
+.doc ul.agreed li::before { content: "✓"; position: absolute; left: 0; color: var(--ok); font-weight: 700; }
+.doc ol.sources { font-size: 14px; color: var(--muted); }
+.doc .hero { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 16px; align-items: start; margin-bottom: 16px; }
+.doc .hero figure { margin: 0; }
+.doc .summary { display: grid; gap: 10px; }
+.doc .summary div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.doc .summary b { display: block; font-family: var(--display); font-size: 1.45rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.doc .summary span { font-size: 13.5px; color: var(--muted); }
+@media (max-width: 720px) { .doc .hero { grid-template-columns: 1fr; } }
+details.changes { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.changes > summary { cursor: pointer; padding: 10px 14px; font-weight: 700; }
+details.changes > .doc { padding: 4px 14px 2px; }
+/* how the build runs */
+.runlist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.runlist li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; display: grid; gap: 2px; min-width: 0; }
+.runlist a { color: var(--ink); text-decoration: none; font-weight: 700; display: flex; gap: 10px; align-items: baseline; }
+.runlist a:hover { color: var(--oak); }
+.runlist .rn, .sn { font-family: var(--display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.runlist .rn { color: var(--oak); min-width: 1.4rem; }
+.runlist .rm { font-size: 13.5px; color: var(--muted); padding-left: 2.0rem; }
+/* build steps */
+.steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
+.step.done { border-color: var(--ok); }
+.shead { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.sn { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-size: 1.15rem; }
+.step.done .sn { background: var(--ok); color: var(--surface); }
+.shead h3 { margin: 0; font-family: var(--display); font-size: 1.2rem; font-weight: 700; }
+.smeta { font-size: 13.5px; color: var(--muted); }
+.sdone { display: inline-flex; gap: 6px; align-items: center; font-size: 14.5px; cursor: pointer; }
+.sdone input { width: 18px; height: 18px; accent-color: var(--ok); }
+.sbuy { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sbuy .label { margin-right: 4px; }
+.sbuy .chip { background: var(--tight-bg); }
+.sdo { margin: 0; padding-left: 1.3rem; display: grid; gap: 6px; max-width: 80ch; }
+.scheck { margin: 0; background: var(--ok-bg); border-radius: 8px; padding: 8px 12px; font-size: 15px; max-width: 80ch; }
+.ssee { margin: 0; font-size: 14px; color: var(--muted); }
+/* cost by phase */
+.chart { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.crow { display: grid; grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr) 9.5rem; gap: 4px 14px; align-items: center; }
+.cl { color: var(--ink); text-decoration: none; font-size: 14.5px; font-weight: 700; display: grid; line-height: 1.25; }
+.cl:hover { color: var(--oak); }
+.cl small, .cv small { font-weight: 400; font-size: 12.5px; color: var(--muted); display: block; }
+.ctrack { position: relative; height: 22px; background-image: linear-gradient(to right, var(--line) 1px, transparent 1px); background-size: calc(100% / var(--n)) 100%; border-right: 1px solid var(--line); }
+.clo, .chi { position: absolute; top: 2px; height: 13px; background: var(--oak); }
+.clo { left: 0; border-radius: 3px 0 0 3px; }
+.chi { opacity: 0.35; border-radius: 0 3px 3px 0; }
+.cpaid { position: absolute; left: 0; top: 17px; height: 4px; border-radius: 2px; background: var(--ok); }
+.cv { font-size: 14px; font-variant-numeric: tabular-nums; text-align: right; }
+.crow.axis { margin-top: -4px; }
+.caxis { position: relative; height: 16px; font-family: var(--mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.caxis span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.caxis span:first-child { transform: none; }
+.caxis span:last-child { transform: translateX(-100%); }
+.legend { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 18px; height: 10px; border-radius: 2px; background: var(--oak); display: inline-block; }
+.legend i.k-hi { opacity: 0.35; } .legend i.k-pd { background: var(--ok); height: 4px; }
+@media (max-width: 620px) {
+  .crow { grid-template-columns: minmax(0, 1fr) auto; }
+  .ctrack, .caxis { grid-column: 1 / -1; grid-row: 2; }
+  .crow.axis > span { display: none; }
+  .caxis span:nth-child(even) { display: none; }
+}
+#tracker { display: grid; gap: 10px; }
+#tracker.f-left li.done, #tracker.f-left li[data-kind="job"], #tracker.f-jobs li[data-kind="buy"] { display: none; }
+summary .pf a { color: var(--oak); }
 </style>"""
+
+
+TABS = [("overview", "Overview"), ("views", "3D views"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
+        ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
+TABNAME = dict(TABS)
+SEC_TAB = {"1": "overview", "2": "overview", "3": "wall", "4": "wall", "5": "dining", "6": "wall", "7": "wall", "8": "paint",
+           "9": "network", "10": "build", "11": "buy", "12": "checks"}
+
+
+def _tablink(tab):
+    return f'<a href="#{tab}" data-go="{tab}">{TABNAME[tab]}</a> tab'
+
+
+def deck_section(html_):
+    """A plan section made fit for a tab: cross-references become tab links, wide tables scroll, drawings sit on paper."""
+    html_ = re.sub(r"<!--fit-->.*?<!--/fit-->", f'<p class="notice">Every zone\'s checks, with a filter for the tight ones, are in the {_tablink("checks")}.</p>', html_, flags=re.S)
+    html_ = re.sub(r"<!--confirm-->.*?<!--/confirm-->", "", html_, flags=re.S)
+    html_ = html_.replace("Full-resolution renders come with this plan.", f"Switch views and greens in the {_tablink('views')}.")
+    html_ = html_.replace("need a check on site (section 3)", f"need a check on site ({_tablink('checks')})")
+    html_ = re.sub(r"\(section (\d+)\)", lambda m: "(" + _tablink(SEC_TAB[m.group(1)]) + ")", html_)
+    html_ = re.sub(r"\bsection (\d+)\b", lambda m: "the " + _tablink(SEC_TAB[m.group(1)]), html_)
+    html_ = html_.replace("<figure><svg", '<figure class="dia"><svg')
+    html_ = html_.replace("<table", '<div class="tscroll"><table').replace("</table>", "</table></div>")
+    return html_
+
+
+def phase_data(rows):
+    phases = []
+    for r in rows:
+        if r["phase"] not in [p["name"] for p in phases]:
+            phases.append({"name": r["phase"], "lo": 0, "hi": 0, "n": 0})
+        p = next(p for p in phases if p["name"] == r["phase"])
+        p["lo"] += r["lo"]; p["hi"] += r["hi"]; p["n"] += 1
+    first = {}
+    for s in steps():
+        for ph in s["buy"]:
+            first.setdefault(ph, s["n"])
+    run_lo = run_hi = 0
+    for i, p in enumerate(phases):
+        run_lo += p["lo"]; run_hi += p["hi"]
+        p.update(idx=i, step=first.get(p["name"]), run=(run_lo, run_hi), label=re.sub(r"^\d+ ", "", p["name"]))
+    return phases
+
+
+def cost_chart(phases):
+    step = 200
+    top = step * -(-max(p["hi"] for p in phases) // step)
+    pct = lambda v: f"{100 * v / top:.2f}%"
+    rows = []
+    for p in phases:
+        val = (f"£{money(p['lo'], p['hi'])}" if p["hi"] else "no cost") + (" + quote" if p["name"].startswith("2 ") else "")
+        rows.append(
+            f'<div class="crow" data-ph="{p["idx"]}"><a class="cl" href="#buy" data-go="buy" data-phase="{p["idx"]}">{html.escape(p["label"])}'
+            f'<small>{"before step " + str(p["step"]) if p["step"] else ""}</small></a>'
+            f'<div class="ctrack" style="--n:{top // step}"><span class="clo" style="width:{pct(p["lo"])}"></span>'
+            f'<span class="chi" style="left:{pct(p["lo"])};width:{pct(p["hi"] - p["lo"])}"></span><span class="cpaid" style="width:0"></span></div>'
+            f'<span class="cv">{val}<small class="cpv"></small></span></div>')
+    ticks = "".join(f'<span style="left:{pct(v)}">£{v:,}</span>' for v in range(0, top + 1, step))
+    return (f'<div class="chart" role="img" aria-label="Estimated cost of each build phase, low to high, on one scale from £0 to £{top:,}, with the amount paid so far">'
+            + "".join(rows) + f'<div class="crow axis" aria-hidden="true"><span></span><div class="caxis">{ticks}</div><span></span></div>'
+            '<p class="legend"><span><i class="k-lo"></i>Low estimate</span><span><i class="k-hi"></i>Up to the high estimate</span><span><i class="k-pd"></i>Paid so far</span></p></div>')
 
 
 def page(site=False):
     prefix = "media-wall/src/" if site else ""
-    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join"]}
+    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
     imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.png" for v in ("join", "four", "six", "drawers", "side")})
     rows = track_rows()
+    phases = phase_data(rows)
     _, lo_tot, hi_tot = phase_totals()
-    phases = []
-    for r in rows:
-        if r["phase"] not in phases:
-            phases.append(r["phase"])
     fit_head, fit_body, fc = fit_html()
     nfit = sum(fc.values())
+    sec = {k: deck_section(v) for k, v in plan_sections().items()}
+    pre = sec["pre"]
+    decision = re.search(r'<div class="decision">(.*?)</div>', pre, re.S).group(1)
+    s1 = re.sub(r"</div>\s*$", "", sec["1"].strip())
     qs = [{"id": i, "q": q, "why": w, "how": h, "photo": ph} for i, q, w, h, ph in QUESTIONS]
     q_items = "\n".join(
         f'<li class="q" id="q-{i}" data-q="{i}"><h3><span class="n">{n:02d}</span><span>{html.escape(q)}</span></h3>'
@@ -250,27 +436,40 @@ def page(site=False):
         f'<span class="st" aria-live="polite"></span></div><div class="photos"></div></li>'
         for n, (i, q, w, h, ph) in enumerate(QUESTIONS, 1))
     ph_html = []
-    for ph in phases:
-        items = [r for r in rows if r["phase"] == ph]
+    for p in phases:
+        items = [r for r in rows if r["phase"] == p["name"]]
         lis = "".join(
-            f'<li data-t="{r["id"]}"><input type="checkbox" id="c-{r["id"]}" aria-label="Done"><label class="txt" for="c-{r["id"]}">{r["item"]}'
+            f'<li data-t="{r["id"]}" data-kind="{r["kind"]}"><input type="checkbox" id="c-{r["id"]}" aria-label="Done"><label class="txt" for="c-{r["id"]}">{r["item"]}'
             f'<span class="meta">{"Qty " + html.escape(r["qty"]) + " · " if r["qty"] else ""}{"Estimate £" + r["est"] if r["est"] and r["est"] != "Quote" else ("Quote" if r["est"] else "Job")}</span></label>'
             + (f'<span class="paid"><label for="p-{r["id"]}">Paid £</label><input id="p-{r["id"]}" type="number" min="0" step="0.01" inputmode="decimal"></span>' if r["kind"] == "buy" or r["est"] == "Quote" else "<span></span>")
             + "</li>" for r in items)
-        ph_html.append(f'<details class="phase" data-ph="{html.escape(ph)}"{" open" if ph == phases[0] else ""}><summary><span>{html.escape(ph)}</span>'
-                       f'<span class="pf"><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')
-    if site:
-        dl_items = "".join(f'<li><span>{html.escape(lab)}</span><a href="media-wall/out/{urllib.parse.quote(p.name)}">{kind}</a></li>' for p, lab, kind in downloads_list())
-        dl_note = "Straight from the project folder. This page and the Claude viewer update together each round."
-    else:
-        # PDFs can't be published to the artifact by an editor outside its organisation: link them on GitHub instead
-        dl_items = "".join((f'<li><span>{html.escape(lab)}</span><a class="btn" href="{GITHUB_OUT}{urllib.parse.quote(p.name)}">{kind} on GitHub</a></li>'
-                            if DOWNLOADS_ON_GITHUB or kind == "PDF" else
-                            f'<li><span>{html.escape(lab)}</span><button class="btn get" type="button" data-file="{published_name(p)}" data-name="{html.escape(p.name)}">{kind}</button></li>')
-                           for p, lab, kind in downloads_list())
-        dl_note = ("Each link opens the file in the project's GitHub folder, media-wall/out/, where the download button saves it." if DOWNLOADS_ON_GITHUB
-                   else "Each one asks you where to save it. If the buttons don't respond here, the same files are in the project's GitHub folder, media-wall/out/.")
-    data = {"img": imgs, "q": qs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows]}
+        when = f' · <a href="#build" data-go="build" data-step="{p["step"]}">before step {p["step"]}</a>' if p["step"] else ""
+        cost = f"£{money(p['lo'], p['hi'])}" if p["hi"] else "jobs only"
+        ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{html.escape(p["name"])}</span>'
+                       f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')
+    step_cards = []
+    for s in steps():
+        buy = "".join(f'<a class="chip" href="#buy" data-go="buy" data-phase="{p["idx"]}">{html.escape(p["label"])} · {"£" + money(p["lo"], p["hi"]) if p["hi"] else "jobs"}</a>'
+                      for p in phases if p["name"] in s["buy"])
+        see = " · ".join(f'<a href="#{t}" data-go="{t}" data-find="{html.escape(lab)}">{html.escape(lab)}</a>' for t, lab in s["see"])
+        step_cards.append(
+            f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}"><div class="shead"><span class="sn">{s["n"]}</span>'
+            f'<div><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
+            f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label></div>'
+            + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
+            + "<ol class=\"sdo\">" + "".join(f"<li>{d}</li>" for d in s["do"]) + "</ol>"
+            f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
+            f'<p class="ssee">See: {see}</p></li>')
+    run_list = "".join(
+        f'<li><a href="#build" data-go="build" data-step="{s["n"]}"><span class="rn">{s["n"]}</span>{html.escape(s["title"])}</a>'
+        f'<span class="rm">{html.escape(s["time"])}{"".join(" · " + html.escape(p["label"]) + (" £" + money(p["lo"], p["hi"]) if p["hi"] else "") for p in phases if p["name"] in s["buy"])}</span></li>'
+        for s in steps())
+    data = {"img": imgs, "q": qs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
+            "phases": [{k: p[k] for k in ("name", "idx", "lo", "hi")} for p in phases], "top": 200 * -(-max(p["hi"] for p in phases) // 200),
+            "steps": len(steps()), "tabs": [t for t, _ in TABS]}
+    tabs = "".join(f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
+    files_line = (f'Print copies of this plan (PDF) and the HD renders are also kept in the project folder on '
+                  f'<a href="{GITHUB_OUT}" target="_blank" rel="noopener">GitHub, media-wall/out/</a>; you don\'t need them to use this page.')
     return f"""<title>Portsmouth Close Media Wall</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -278,12 +477,30 @@ def page(site=False):
 {STYLE}
 <div class="wrap">
   <header>
-    <h1>Media Wall v{VERSION}</h1>
-    <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch views and greens, turn on the numbered key, answer the open questions, and tick off the buy list as you go.</p>
-    <p class="change"><b>What changed in v{VERSION}:</b> less cladding, as you asked. The slatted spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table are all gone; the PC's leads run in conduit chased into the solid wall, the sub stands on a plain oak riser and the folded table is a plain oak panel. The stairs now go up to the first floor. And the drawer layouts: every drawer to scale, with what goes in it. <b>v13.1–13.2:</b> the sub under a plain oak cover with no sides (spills run off it, it can't tip), six at the table with its leaf (170 × 80, every clearance checked), the side view showing how deep the alcove is, a drawers-open view, measurements you can lay over any view, the stairwell opening from the door, and your sofa.</p>
-    <nav class="jump" aria-label="On this page"><a href="#next">New in v13</a><a href="#drawers">Drawer layouts</a><a href="#subbox">Sub cover</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.3</p>
+    <h1>Media Wall &amp; Home Network Plan</h1>
+    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table, the network and power, step-by-step build instructions and the buy list with what each phase costs. Ticks, amounts and answers save for both of you.</p>
   </header>
+  <nav class="tabs" aria-label="Plan sections"><div class="tl" role="tablist">{tabs}</div></nav>
 
+  <section class="panel" id="overview" role="tabpanel" aria-labelledby="tb-overview">
+    <div class="doc">
+      <h2>The plan on a page</h2>
+      {s1}
+    </div>
+    <div class="block">
+      <div class="qhead"><h2>How the build runs</h2><a class="btn" href="#build" data-go="build">Open the build steps</a></div>
+      <p class="caption">Thirteen steps in order, with what to buy before each. Total about £{money(lo_tot, hi_tot)} plus the electrician; the cost of each phase is charted in the {_tablink("buy")}.</p>
+      <ol class="runlist">{run_list}</ol>
+    </div>
+    <details class="changes"><summary>What changed in v{VERSION}, 13.1, 13.2 and 13.3</summary><div class="doc">
+      <p>{decision}</p>
+      <p><b>On this page:</b> the plan, every drawing, the build steps and the buy list now live here in tabs, with the cost of each phase charted against what you've paid, so nothing needs downloading from GitHub.</p>
+    </div></details>
+    <div class="doc"><h2>The room</h2>{sec["2"]}</div>
+  </section>
+
+  <section class="panel" id="views" role="tabpanel" aria-labelledby="tb-views" hidden>
   <div class="viewer">
     <div class="frame shotwrap"><img id="shot" alt="Render of the media wall" width="1804" height="1148"><img id="dims" class="dims" alt="" width="1804" height="1148" hidden></div>
     <div class="controls">
@@ -310,7 +527,6 @@ def page(site=False):
     </div>
     <p class="caption" id="cap"></p>
   </div>
-
   <div class="band">
     <section>
       <h2>Heights, from the floor</h2>
@@ -332,54 +548,61 @@ def page(site=False):
         <div><strong>~{SINGLES}</strong><span>singles, all face-out</span></div>
         <div><strong>4–8</strong><span>at the dining table</span></div>
       </div>
-      <ul class="plain">
-        <li>Alcove: the TV between two oak uprights, {G.TV_SHIFT:.0f} cm nearer the side wall; the turntable on the worktop to its right with the Series X on a shelf above; three 60 cm bays below for the Xbox consoles, the PlayStations and the two face-out record trays.</li>
-        <li>Side wall: the record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, with the pad dock beside it.</li>
-        <li>Chimney breast: a 110 × 80 cm solid oak table with pegged breadboard ends, folded flat every day, down on two steel brackets for four, lifted off onto legs for six or eight. The sub stands under it on an oak riser.</li>
-      </ul>
-    </section>
-    <section>
-      <h2>Lighting</h2>
-      <ul class="plain">
-        <li>The LED strip you have now, on the ceiling round the whole room, facing down.</li>
-        <li>Two four-head cone spotlight bars, Wolston style, both on your existing ceiling points. The first, on the rose between the TV and the sofa, lights the shelves, the ledge, the coffee table and the turntable. The second, between the door and the west wall, lights the table and the framed LPs: see it in the six-seat view.</li>
-        <li>LED grooves in the oak uprights and a bias light behind the TV. No spot ever points at the screen.</li>
-      </ul>
+      <p class="caption">The numbered key works on the main view. Measurements are rough, in pale yellow, for checking against the real room; the drawings in the other tabs are the exact ones.</p>
     </section>
   </div>
-
-  <section class="block" id="next">
-    <h2>New in v13</h2>
-    <ul class="plain">
-      <li><b>Less cladding.</b> Gone: the slatted cable spine on the side wall, the slatted PC screen, the slat panel behind the turntable, the slatted box round the sub and the reeded underside of the table. The slat-wall alternative is retired too.</li>
-      <li><b>Cables you can't see.</b> Your side wall is solid, so the electrician chases a 25 mm conduit into it on the same visit: the PC's leads drop through a brush grommet in the shelf, down inside the wall and behind the skirting to the base. No spine, no trunking.</li>
-      <li><b>Plain oak where it was slatted.</b> The sub stands on a low oak riser between the folded brackets; the folded table is plain oiled oak between its pegged breadboard ends, under the two framed LPs.</li>
-      <li><b>The stairs go up.</b> The flight beside the door now rises to the first floor behind the wooden banister, through an opening in the ceiling. Tell us which way it runs and we'll match it.</li>
-      <li><b>The drawer layouts</b>, below: where each of the four drawers sits in the base, and each one from above, to scale, with what goes in it and how many.</li>
-      <li><b>v13.2, the sub's cover.</b> No sides and no front any more: a solid oak cover on a backboard over the sub, with a drip groove so spills run off it, and a tray with a 2 cm lip. It sits 3 cm over the sub, so the sub can't tip (it would have to rise about 7 cm). Nothing is in front of the driver, the port or the room. Drawing below.</li>
-      <li><b>v13.2, drawers open.</b> A new view with the game drawer, the upper record tray and the plinth drawer pulled out, so you can see each layout in place.</li>
-      <li><b>v13.2, measurements on top.</b> "Show measurements" lays rough sizes in pale yellow over any view, to check against the real room: the alcove, TV, uprights, bays, shelf heights, table, sub cover, door, PC shelf, drawers.</li>
-      <li><b>v13.2, the stairwell and the sofa.</b> The opening to upstairs now starts just after the door, over the banister, with the LED strip following its edge; and the sofa in the side view is your black jumbo-cord L-sofa with its grey cushion.</li>
-      <li><b>v13.1, six at the table.</b> The 110 × 80 top alone gave six only 55 cm each. Six now use the leaf too: 170 × 80, {(G.TABLE[0] + G.LEAF[0]) / 2:.0f} cm a diner on the long sides, 80 at each end, {-G.FREE_Z[0]:.0f} cm off the breast, {G.ROOM_W - G.SIX_X[1]:.0f} to the west wall, the breast-side chairs clear of the sub's box.</li>
-      <li><b>v13.1, the side view</b> marks the alcove's depth round the wall: 38 of the 46 cm base sits inside it, 8 stands proud, the uprights and shelves are wholly inside.</li>
-      <li>Fit proof: {fc[fit.PASS]} of {nfit} checks fit outright, {fc[fit.TIGHT]} are tight, {fc[fit.CHECK]} need a check on site, none fail.</li>
-    </ul>
   </section>
 
-  <section class="block" id="drawers">
-    <h2>Drawer layouts</h2>
-    <p class="caption">A: the game drawer in bay 1. B: the hidden plinth drawer under bay 2. C and D: the two face-out record trays in bay 3. Top: where each drawer is in the base. Bottom: each one from above, front at the bottom, to scale.</p>
-    <div class="frame"><img src="{prefix}art/zz_drawers.jpg" alt="Drawer layouts: the alcove base from the front with the four drawers marked A to D, and each drawer from above to scale with its compartments and contents" width="2688" height="1968" loading="lazy"></div>
-    </section>
+  <section class="panel" id="wall" role="tabpanel" aria-labelledby="tb-wall" hidden>
+    <nav class="toc" aria-label="On this tab"></nav>
+    <div class="doc"><h2>The media wall</h2>{sec["3"]}<h2>The records and the turntable</h2>{sec["4"]}<h2>The side wall</h2>{sec["6"]}<h2>The oak joinery</h2>{sec["7"]}</div>
+  </section>
 
-  <section class="block" id="subbox">
-    <h2>The sub's cover</h2>
-    <p class="caption">No sides and no front: a solid oak cover on a backboard screwed to the chimney breast, 3 cm over the sub so it can't tip, with a drip groove for spills and a lipped tray. To scale.</p>
-    <div class="frame"><img src="{prefix}art/zz_subbox.jpg" alt="The sub's oak cover from the end and from above: no sides, a backboard, a lipped tray, the driver and port firing freely" width="2160" height="1128" loading="lazy"></div>
-</section>
+  <section class="panel" id="dining" role="tabpanel" aria-labelledby="tb-dining" hidden>
+    <nav class="toc" aria-label="On this tab"></nav>
+    <div class="doc"><h2>The dining wall</h2>{sec["5"]}</div>
+  </section>
 
-  <section class="block" id="answers">
-    <div class="qhead"><h2>What we still need from you</h2><div class="meter"><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
+  <section class="panel" id="paint" role="tabpanel" aria-labelledby="tb-paint" hidden>
+    <div class="doc"><h2>Paint and light</h2>{sec["8"]}</div>
+  </section>
+
+  <section class="panel" id="network" role="tabpanel" aria-labelledby="tb-network" hidden>
+    <nav class="toc" aria-label="On this tab"></nav>
+    <div class="doc"><h2>Power, cables and network</h2>{sec["9"]}</div>
+  </section>
+
+  <section class="panel" id="build" role="tabpanel" aria-labelledby="tb-build" hidden>
+    <div class="doc"><h2>Build steps, for a first-time builder</h2>{GUIDE_RULES}</div>
+    <div class="qhead"><h2>The order of work</h2><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div></div>
+    <p class="caption" id="s-note">Tick each step when it's done; it saves for both of you. "Buy first" opens that part of the buy list.</p>
+    <ol class="steps-list">{"".join(step_cards)}</ol>
+    <div class="doc">{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div>
+  </section>
+
+  <section class="panel" id="buy" role="tabpanel" aria-labelledby="tb-buy" hidden>
+    <h2 class="ptitle">Buy guide and costs</h2>
+    <div class="tiles">
+      <div><strong>£{money(lo_tot, hi_tot)}</strong><span>the whole plan, plus the electrician's quote</span></div>
+      <div><strong id="t-left">£{money(lo_tot, hi_tot)}</strong><span>still to buy: the items not ticked yet</span></div>
+      <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
+      <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
+    </div>
+    <h3 class="ptitle">Cost by phase</h3>
+    {cost_chart(phases)}
+    <div class="qhead"><h3 class="ptitle">The buy list, in build order</h3>
+      <div class="seg" role="group" aria-label="Show">
+        <button type="button" data-filter="all" aria-pressed="true">Everything</button>
+        <button type="button" data-filter="left" aria-pressed="false">Still to buy</button>
+        <button type="button" data-filter="jobs" aria-pressed="false">Jobs only</button>
+      </div></div>
+    <p class="caption" id="t-note">Each phase says which build step it's needed for. Tick each item off and write in what you paid; it saves for both of you.</p>
+    <div id="tracker">{"".join(ph_html)}</div>
+    <p class="notice">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles. Estimates are approximate UK prices.</p>
+  </section>
+
+  <section class="panel" id="questions" role="tabpanel" aria-labelledby="tb-questions" hidden>
+    <div class="qhead"><h2 class="ptitle">What we still need from you</h2><div class="meter"><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
     <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Answers saved here reach both of you and the next round of the plan. A photo is often quicker than words.</p>
     <p class="notice" id="q-local" hidden>Answers can't be saved for both of you from this view: they're kept on this device. When you're done, use Copy all answers and paste them into a message.</p>
     <p class="notice" id="q-ro" hidden>You can read the answers here but not change them. Ask Emma to give you Contributor access in the Share menu.</p>
@@ -390,37 +613,12 @@ def page(site=False):
     <textarea id="copy-box" class="caption" rows="6" hidden readonly aria-label="All answers as text"></textarea>
   </section>
 
-  <section class="block" id="tracker">
-    <h2>Buy list and tracker</h2>
-    <div class="tiles">
-      <div><strong>£{money(lo_tot, hi_tot)}</strong><span>estimate, plus the electrician's quote</span></div>
-      <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
-      <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
-    </div>
-    <p class="caption" id="t-note">In build order, as in section 11 of the plan. Tick each one off and write in what you paid; it saves for both of you.</p>
-    {"".join(ph_html)}
-  </section>
-
-  <section class="block" id="fit">
-    <h2>Fit proof</h2>
-    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the plan's Sources list.</p>
+  <section class="panel" id="checks" role="tabpanel" aria-labelledby="tb-checks" hidden>
+    <h2 class="ptitle">Fit proof</h2>
+    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
-  </section>
-
-  <section class="block plans" id="plans">
-    <h2>The living room, the dining layouts, storage and the house</h2>
-    <div class="frame"><img src="{prefix}art/zz_living.jpg" alt="Living room plan drawn from the measured sketch: media wall, side-wall shelf and PC over the L-sofa, the dining wall, both spotlight bars, socket and viewing distance" width="2064" height="1464" loading="lazy"></div>
-    <div class="frame"><img src="{prefix}art/zz_seating.jpg" alt="Three small plans of the dining table: four at the wall, six and eight with the table lifted off and pulled into the room" width="2064" height="1200" loading="lazy"></div>
-    <div class="frame"><img src="{prefix}art/zz_storage.jpg" alt="Storage options: every space in the wall drawn to scale with what fits and how many, and the overflow options" width="2160" height="2592" loading="lazy"></div>
-    <div class="frame"><img src="{prefix}art/zz_house.jpg" alt="Three floor plans with the Decos, Cat6 runs, chimney breast, brick cupboard and sloped ceilings" width="2064" height="1488" loading="lazy"></div>
-    <p class="caption">The living room is drawn from your measurements; the L-sofa from your photo: its long side ends in line with the breast's reveal (about {G.SOFA_W:g} cm), the return drawn at {G.SOFA_D:g}. The house outline is traced from the agent's plans.</p>
-  </section>
-
-  <section class="block" id="downloads">
-    <h2>Downloads</h2>
-    <ul class="dl">{dl_items}</ul>
-    <p class="caption" id="dl-note">{dl_note}</p>
+    <div class="doc"><p class="notice">Still to confirm: the open questions, with a box for each answer, are in the {_tablink("questions")}.</p>{sec["12"]}<h2>Options we set aside</h2>{sec["appendix"]}<p class="note">{files_line}</p></div>
   </section>
 </div>
 <script>
@@ -430,6 +628,49 @@ const use = n => (window.claude && window.claude.use) ? window.claude.use(n) : P
 const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }} catch (e) {{ return d; }} }},
                 set(k, v) {{ try {{ localStorage.setItem(k, JSON.stringify(v)); }} catch (e) {{}} }} }};
+
+/* ---------- pictures borrowed from the viewer's set (each embedded once) */
+$$("img[data-art]").forEach(im => {{ const u = DATA.img[im.dataset.art]; if (u) im.src = u; }});
+
+/* ---------- tabs */
+const tabBtns = $$('[role="tab"]');
+function showTab(id, focus) {{
+  if (!DATA.tabs.includes(id)) id = "overview";
+  tabBtns.forEach(b => {{ const on = b.getAttribute("aria-controls") === id; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); if (on) b.scrollIntoView({{ block: "nearest", inline: "nearest" }}); }});
+  DATA.tabs.forEach(t => {{ document.getElementById(t).hidden = t !== id; }});
+  store.set("mw13-tab", id);
+  try {{ history.replaceState(null, "", "#" + id); }} catch (e) {{}}
+}}
+tabBtns.forEach((b, i) => {{
+  b.addEventListener("click", () => {{ showTab(b.getAttribute("aria-controls")); window.scrollTo({{ top: 0 }}); }});
+  b.addEventListener("keydown", e => {{
+    const k = {{ ArrowRight: 1, ArrowLeft: -1 }}[e.key];
+    if (k) {{ e.preventDefault(); showTab(tabBtns[(i + k + tabBtns.length) % tabBtns.length].getAttribute("aria-controls"), true); }}
+  }});
+}});
+function jumpTo(el) {{ if (el) requestAnimationFrame(() => el.scrollIntoView({{ block: "start" }})); }}
+document.addEventListener("click", e => {{
+  const a = e.target.closest("[data-go]");
+  if (!a) return;
+  e.preventDefault();
+  const tab = a.dataset.go;
+  showTab(tab);
+  const panel = document.getElementById(tab);
+  if (a.dataset.step) {{ jumpTo(document.getElementById("step-" + a.dataset.step)); return; }}
+  if (a.dataset.phase) {{ const d = document.getElementById("ph-" + a.dataset.phase); d.open = true; jumpTo(d); return; }}
+  if (a.dataset.find) {{ const h = $$("h2, h3, h4", panel).find(h => h.textContent.includes(a.dataset.find)); if (h) {{ jumpTo(h); return; }} }}
+  window.scrollTo({{ top: 0 }});
+}});
+/* on-this-tab chips for the long tabs */
+$$(".toc").forEach(nav => {{
+  const hs = $$(".doc h2, .doc h3", nav.parentElement);
+  hs.forEach((h, i) => {{
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (h.tagName === "H2" ? " h2" : "");
+    b.textContent = h.textContent.replace(/:.*$/, ""); b.addEventListener("click", () => jumpTo(h));
+    nav.appendChild(b);
+  }});
+}});
+showTab((location.hash || "").slice(1) || store.get("mw13-tab", "overview"));
 
 /* ---------- the render viewer */
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
@@ -450,7 +691,7 @@ function draw() {{
   dimsBtn.setAttribute("aria-pressed", String(view.dims && !view.key));
   dimsBtn.disabled = view.key;
   cap.textContent = view.key
-    ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
+    ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains. The numbers are listed in the Media wall tab.")
     : view.style === "six" ? "The table and its leaf (170 × 80) on legs, 75 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stairs go up beside the door; their direction is drawn roughly until you send a photo."
     : view.style === "drawers" ? "Every drawer out, in " + NAMES[view.paint] + ": the game drawer and the upper record tray 30 cm out, the hidden plinth drawer 25 cm out. In use, open one record tray at a time."
     : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below; dashed, the chimney breast's outline and the alcove's depth: 38 of the 46 cm base inside it, 8 proud; the media wall end-on at the right (the breast cut away)."
@@ -471,10 +712,11 @@ $("#fit-only").addEventListener("click", e => {{
   $$("#fit-zones details.zone").forEach(d => {{ if (on && d.querySelector("tr.r-tight, tr.r-check")) d.open = true; }});
 }});
 
-/* ---------- shared state: answers, photos, tracker */
+/* ---------- shared state: answers, photos, tracker, build steps */
 let db = null, assets = null, user = null, myId = null, readOnly = false;
 const remote = {{}};            // answers/<id> bodies as saved
 const tstate = {{}};            // tracker/<id> bodies as saved
+const sstate = {{}};            // steps/<n> bodies as saved
 const chains = {{}};            // one write at a time per document
 const names = {{}};
 const fmtTime = iso => {{ try {{ return new Date(iso).toLocaleString(undefined, {{ day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }}); }} catch (e) {{ return ""; }} }};
@@ -487,7 +729,7 @@ function onWriteError(e, stEl) {{
   if (e && e.code === "invalid_argument") {{ readOnly = true; $("#q-ro").hidden = false; lockInputs(); }}
   if (stEl) {{ stEl.textContent = e && e.code === "quota_exceeded" ? "The page's storage is full; tell Claude." : "Couldn't save. Try again in a moment."; stEl.className = "st err"; }}
 }}
-function lockInputs() {{ $$(".q textarea, .q .save, .items input").forEach(el => el.disabled = true); $$(".upl").forEach(el => el.hidden = true); }}
+function lockInputs() {{ $$(".q textarea, .q .save, .items input, .sdone input").forEach(el => el.disabled = true); $$(".upl").forEach(el => el.hidden = true); }}
 async function nameOf(id) {{
   if (!id) return "";
   if (id === myId) return "you";
@@ -581,26 +823,33 @@ $("#copy-all").addEventListener("click", async () => {{
   catch (e) {{ box.value = text; box.hidden = false; box.focus(); box.select(); st.textContent = "Select the text below and copy it."; }}
 }});
 
-/* tracker */
+/* tracker and the cost chart */
 const local = store.get("mw12-tracker", {{}});
 const money = v => "£" + (Math.round(v * 100) / 100).toLocaleString(undefined, {{ minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }});
 function tget(id) {{ return (db ? tstate[id] : local[id]) || null; }}
 function paintTracker() {{
-  let done = 0, paid = 0;
+  let done = 0, paid = 0, leftLo = 0, leftHi = 0;
+  const phPaid = {{}};
   DATA.track.forEach(r => {{
     const s = tget(r.id), isDone = s ? !!s.done : r.done;
     const li = document.querySelector('[data-t="' + r.id + '"]'), cb = li.querySelector("input[type=checkbox]"), pd = li.querySelector("input[type=number]");
     cb.checked = isDone; li.classList.toggle("done", isDone);
     if (pd && document.activeElement !== pd) pd.value = s && typeof s.paid === "number" ? s.paid : "";
-    if (isDone) done++;
-    if (s && typeof s.paid === "number") paid += s.paid;
+    if (isDone) done++; else {{ leftLo += r.lo; leftHi += r.hi; }}
+    if (s && typeof s.paid === "number") {{ paid += s.paid; phPaid[r.phase] = (phPaid[r.phase] || 0) + s.paid; }}
   }});
   $$("details.phase").forEach(d => {{
     const lis = $$(".items li", d), n = lis.filter(li => li.classList.contains("done")).length;
     $(".pd", d).textContent = n + " of " + lis.length + " done";
   }});
+  DATA.phases.forEach(p => {{
+    const row = document.querySelector('.crow[data-ph="' + p.idx + '"]'), v = phPaid[p.name] || 0;
+    $(".cpaid", row).style.width = Math.min(100, 100 * v / DATA.top) + "%";
+    $(".cpv", row).textContent = v ? "paid " + money(v) : "";
+  }});
   $("#t-done").textContent = done + " of " + DATA.track.length;
   $("#t-paid").textContent = money(paid);
+  $("#t-left").textContent = leftHi ? money(leftLo) + "–" + money(leftHi).slice(1) : "£0";
 }}
 function saveTrack(id, patch) {{
   const r = DATA.track.find(x => x.id === id);
@@ -620,33 +869,47 @@ DATA.track.forEach(r => {{
     saveTrack(r.id, {{ paid: Number.isFinite(v) ? v : null }});
   }});
 }});
+$$("[data-filter]").forEach(b => b.addEventListener("click", () => {{
+  $$("[data-filter]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  const t = $("#tracker");
+  t.classList.toggle("f-left", b.dataset.filter === "left");
+  t.classList.toggle("f-jobs", b.dataset.filter === "jobs");
+  if (b.dataset.filter !== "all") $$("details.phase", t).forEach(d => d.open = true);
+}}));
 paintTracker();
 
-/* downloads (claude.ai): fetch the published file, then hand it to the viewer's save prompt */
-let downloads = null;
-$$(".get").forEach(b => b.addEventListener("click", async () => {{
-  const st = $("#dl-note"), label = b.textContent;
-  if (!downloads) {{ st.textContent = "Downloads aren't available in this view. The same files are in the project's GitHub folder, media-wall/out/."; return; }}
-  b.disabled = true; b.textContent = "…";
-  try {{
-    const res = await fetch(b.dataset.file);
-    if (!res.ok) throw {{ code: "fetch" }};
-    await downloads.save({{ filename: b.dataset.name, data: await res.blob() }});
-    st.textContent = "Saved " + b.dataset.name + ".";
-  }} catch (e) {{
-    st.textContent = e && e.code === "declined" ? "Not saved." : e && e.code === "rate_limited" ? "Another save is open; finish that one first." : "Couldn't fetch that file here. It's also in the project's GitHub folder, media-wall/out/.";
-  }} finally {{ b.disabled = false; b.textContent = label; }}
-}}));
+/* build steps */
+const slocal = store.get("mw13-steps", {{}});
+function sget(n) {{ return (db ? sstate["s" + n] : slocal["s" + n]) || null; }}
+function paintSteps() {{
+  let done = 0;
+  $$(".step").forEach(li => {{
+    const s = sget(li.dataset.s), on = !!(s && s.done), cb = $(".sdone input", li);
+    cb.checked = on; li.classList.toggle("done", on);
+    if (on) done++;
+  }});
+  $("#s-count").textContent = done + " of " + DATA.steps + " steps done";
+  $("#s-bar").style.width = (100 * done / DATA.steps) + "%";
+}}
+$$(".step").forEach(li => {{
+  $(".sdone input", li).addEventListener("change", e => {{
+    const body = {{ done: e.target.checked }};
+    if (!db) {{ slocal["s" + li.dataset.s] = body; store.set("mw13-steps", slocal); paintSteps(); return; }}
+    body.by = myId; body.at = new Date().toISOString();
+    sstate["s" + li.dataset.s] = body; paintSteps();
+    write("steps/s" + li.dataset.s, body).catch(err => onWriteError(err, null));
+  }});
+}});
+paintSteps();
 
 /* light up what this view can do */
 (async () => {{
-  const [d, u, a, dl] = await Promise.all([use("db"), use("user"), use("assets"), use("downloads")]);
-  downloads = dl;
-  if (!SITE && !dl && $$(".get").length) {{ $$(".get").forEach(b => b.disabled = true); $("#dl-note").textContent = "Downloads aren't available in this view. The same files are in the project's GitHub folder, media-wall/out/."; }}
+  const [d, u, a] = await Promise.all([use("db"), use("user"), use("assets")]);
   user = u;
   if (!d) {{
     $("#q-local").hidden = false;
-    $("#t-note").textContent = "In build order, as in section 11 of the plan. Ticks and amounts are kept on this device only from this view.";
+    $("#t-note").textContent = "Each phase says which build step it's needed for. Ticks and amounts are kept on this device only from this view.";
+    $("#s-note").textContent = "Tick each step when it's done; from this view the ticks are kept on this device only.";
     return;
   }}
   db = d;
@@ -666,6 +929,10 @@ $$(".get").forEach(b => b.addEventListener("click", async () => {{
   db.collection("tracker").onSnapshot(snap => {{
     snap.docChanges().forEach(ch => {{ if (ch.type === "removed") delete tstate[ch.doc.id]; else tstate[ch.doc.id] = ch.doc.data(); }});
     paintTracker();
+  }}, () => {{}});
+  db.collection("steps").onSnapshot(snap => {{
+    snap.docChanges().forEach(ch => {{ if (ch.type === "removed") delete sstate[ch.doc.id]; else sstate[ch.doc.id] = ch.doc.data(); }});
+    paintSteps();
   }}, () => {{}});
 }})();
 </script>
@@ -700,7 +967,18 @@ def inline_images(html_):
     return html_
 
 
+def doc_images():
+    """The two plan images that aren't renders, as JPEGs in art/ so the page carries each once."""
+    from PIL import Image
+    for src, key in (("paint_grid.png", "doc_paint"), ("skirting_options.png", "doc_skirt")):
+        im = Image.open(HERE / src).convert("RGB")
+        if im.width > 1800:
+            im = im.resize((1800, round(im.height * 1800 / im.width)))
+        im.save(HERE / "art" / f"{key}.jpg", quality=86)
+
+
 if __name__ == "__main__":
+    doc_images()
     (HERE / "media_wall_viewer.html").write_text(page())
     (HERE / "media_wall_viewer_inline.html").write_text(inline_images(page()))
     (HERE.parent.parent / "index.html").write_text(site())

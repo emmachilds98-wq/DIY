@@ -10,12 +10,21 @@ from diagrams import (sub_box, drawer_layouts, storage, network, front, drawer, 
 
 HERE = pathlib.Path(__file__).parent
 VERSION = "13"
-REVISION = "13.2: the sub's cover, every drawer out, measurements, the stairwell opening, the sofa"
+REVISION = "13.3: step-by-step build, cost by phase, the network and power in full"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
 
+DECK = False   # True while the plan page (build_viewer.py) borrows these sections: images become art/ keys
+DECK_ART = {"render_v13_join_clean.png": "art_join_card_room", "render_v13_join_key_scene.png": "key_join",
+            "render_v13_drawers.png": "art_drawers_card_room", "render_v13_dining_four.png": "art_four_card_room",
+            "render_v13_dining_six.png": "art_six_card_room", "render_v13_side.png": "art_side_card_room",
+            "paint_grid.png": "doc_paint", "skirting_options.png": "doc_skirt"}
+
+
 def img(name, alt=""):
+    if DECK:
+        return f'<img data-art="{DECK_ART[name]}" alt="{alt}" loading="lazy">'
     p = HERE / name
     mime = "jpeg" if p.suffix.lower() in (".jpg", ".jpeg") else "png"
     return f'<img src="data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}" alt="{alt}">'
@@ -222,9 +231,110 @@ def tools_html():
     return "\n".join(out)
 
 
-def guide_html():
+def steps():
+    """The order of work, one dict per step: used by the PDF's table and the plan page's step cards.
+    buy: the buy-list phases to have in before the step starts (each phase listed at the first step that needs it)."""
     g = G
-    return f"""
+    return [
+        dict(n=1, title="Measure and count", who="You", time="2 h", buy=[], see=[("overview", "The room")],
+             do=["The alcove's width at the floor, 76, 134, 155 and 196 cm and at the ceiling: cut everything to the smallest.",
+                 "The floor's level across the alcove, and the chimney breast's flatness with a long level.",
+                 "The door's swing, and the sofa: overall width, depth with the return, back height.",
+                 "Count the LPs, singles and games (PS2, Xbox 360, Xbox One), and measure ten cases of each.",
+                 "Make a cardboard template of the alcove at worktop height: walls are rarely square."],
+             check="Every figure within 1 cm of the plan. If not, send the numbers and the drawings are redone first."),
+        dict(n=2, title="Network, stage 1", who="You", time="2 h", buy=["1 Network, now"], see=[("network", "Network")],
+             do=["Unplug everything from the Hub 5. Log in at 192.168.0.1 with the password on its base, then Modem Mode → Enable Modem Mode → Apply. Its page moves to 192.168.100.1.",
+                 "Connect a hub port to Deco A in bedroom 3 and set it up in the Deco app, reusing the old Wi-Fi name and password. If it shows no internet, try another hub port and restart the hub.",
+                 "Plug the new 8-port Switch 1 into Deco A's other port, then the PCs into Switch 1.",
+                 "Add Deco B in the living room and Deco C in the kitchen. For now they link over Wi-Fi.",
+                 "Speed-test each room, and check the Xbox's network settings show NAT: Open."],
+             check="Internet in every room, and NAT: Open on the Xbox."),
+        dict(n=3, title="Electrician", who="Electrician", time="1–2 days (theirs)", buy=["2 Electrician and cabling"], see=[("network", "Power and cables")],
+             do=["Book one visit for all of it, and get a quote first.",
+                 "Two Cat6 runs from bedroom 3, across the landing and down through the airing cupboard: one to the alcove's right corner for Deco B, one on to the kitchen for Deco C. A spare pulled with each; the optional runs to the master and bedroom 2 if you want them.",
+                 "Swap the single socket on the side wall for a double at the same spot. Add a new double low on the side wall behind the sofa, for the PC and the rear speakers.",
+                 "Chase a 25 mm conduit into the side wall for the PC's leads, from behind the PC shelf to skirting height and behind the skirting to the base, with a draw wire left in it. Make good.",
+                 "LED-compatible dimmers for both ceiling points, both spot bars hung, and a fused spur for the LED drivers. Optional: a conduit to TV height for a future wall mount.",
+                 "Before they go, mark and photograph every cable route on the walls."],
+             check="The certificate, photos of every route, and both ends of each Cat6 run labelled."),
+        dict(n=4, title="Paint", who="You", time="2–3 days, then a week to cure", buy=["3 Paint"], see=[("paint", "Paint and light")],
+             do=["Paint an A4 board in Card Room Green and look at it by day and with the LED strip on.",
+                 "Wash the skirting and door with sugar soap, sand to a key, and prime them.",
+                 "Two coats of emulsion on the walls, ceiling, alcove and chimney breast.",
+                 "Two coats of eggshell in the same green on the skirting, door, frame and radiator.",
+                 "Leave it a week to cure before fixing anything to it."],
+             check="Two even coats, and no white showing at the edges or behind the radiator."),
+        dict(n=5, title="Mark the heights", who="You", time="1 h", buy=[], see=[("wall", "Front view")],
+             do=["With the laser level: 73 and 76 for the worktop, 130 and 134 for the Series X shelf, 153 and 155.4 for the ledges, 192 and 196 for the high shelf.",
+                 f"The uprights at {n(g.UP_L[0])}–{n(g.UP_L[1])} and {n(g.UP_R[0])}–{n(g.UP_R[1])} cm from the side wall.",
+                 f"The dining wall's backboard at {n(g.RAIL_TOP - g.RAIL[1])}–{n(g.RAIL_TOP)}, centred on the breast.",
+                 "Run the cable detector along every line you will drill, and mark anything it finds."],
+             check="Every line level end to end, and the uprights' lines plumb."),
+        dict(n=6, title="Build the base", who="You", time="1 day", buy=["4 Base unit"], see=[("wall", "Drawer layouts")],
+             do=["Build the 9 cm plinth for bays 1–2, with the open bay for the hidden drawer under bay 2. Level it with shims.",
+                 "Assemble the two BESTÅ frames with their back panels left off and stand them on the plinth.",
+                 "Build bay 3 from 18 mm ply, 60 × 40 × 73, and bolt it to bay 2.",
+                 "Screw the 4 cm spacer blocks to the wall, push the base against them and fit the anti-tip brackets.",
+                 "Lay the flat two-compartment trunking in the channel behind (mains one side, data the other) and run the cables in."],
+             check="The tops level within 1 mm across 186 cm, and nothing rocks."),
+        dict(n=7, title="Fit the worktop", who="You + a helper", time="½ day", buy=["5 Oak joinery"], see=[("wall", "Built to your alcove")],
+             do=["Cut the worktop and the dining wall's backboard from the one 300 × 62 oak board, using the template from step 1.",
+                 "Scribe the ends to the walls; cut the TV slot over the channel and the grommet hole behind the deck.",
+                 "Oil it on every face, undersides and cut ends included.",
+                 "Screw it up through the frame tops in slotted holes, so the oak can move."],
+             check="Tight to both walls, and the slot sits over the channel."),
+        dict(n=8, title="Fit out the base", who="You", time="1–2 days", buy=[], see=[("wall", "Drawer layouts"), ("wall", "The records")],
+             do=["Shelves on their pins at the fit-proof heights for the consoles.",
+                 "The game drawer in bay 1: runners on the frame's sides, then the box (cut list in the Media wall tab).",
+                 "The record trays in bay 3: runners at 2.3 and 37.0 cm, then each tray.",
+                 "The hidden plinth drawer under bay 2."],
+             check="Every drawer runs smoothly, and the two trays clear each other by 2 cm."),
+        dict(n=9, title="Uprights and shelves", who="You + a helper", time="2–3 days", buy=[], see=[("wall", "The oak joinery")],
+             do=["On the bench: cut the housings and the mortises in both uprights, and the LED groove and cable groove.",
+                 "Dry-fit each upright with its shelves before any glue.",
+                 "Lay Deco B's leads in the groove behind the right upright.",
+                 "Stand the uprights on their dowels and fix the concealed brackets to the back wall.",
+                 "Fit the high shelf and the ledge, then the Series X shelf: wedge its tenons, and peg the housings."],
+             check="Uprights plumb, shelves level, and the TV slides in with 2 cm each side."),
+        dict(n=10, title="Side wall and PC shelf", who="You", time="1 day", buy=[], see=[("wall", "The side wall")],
+             do=["Screw the oak cleat for the wrap ledge and the PC shelf to the side wall.",
+                 "Dowel the wrap ledge to the left upright's front edge.",
+                 "Fit the concealed PC shelf brackets, then the shelf.",
+                 "Screw the keyboard tray's housing under it and fit its runners.",
+                 "Fit the brush grommet and pull the PC's leads down the chased conduit with the draw wire."],
+             check="One level line with the ledge over the TV, and the PC shelf holds your weight leaning on it."),
+        dict(n=11, title="The dining wall", who="You + a helper", time="1 day", buy=["6 Dining wall"], see=[("dining", "The dining wall")],
+             do=["Screw the backboard to the breast, plugs every 20 cm.",
+                 "Fit the two Hebgo brackets on its face, 80 cm apart, arm tops level with its top.",
+                 "Screw the lift-off hinges to the backboard's top edge and the table's back edge, all the same hand.",
+                 "On the bench: oil the table's underside and set the four brass inserts for the legs.",
+                 "Hang the table and fit the two turn buttons above it.",
+                 "Hang the sub's cover on its two keyhole screws between the arms, and stand the sub on its tray sideways: grille to the east, port to the west."],
+             check="It folds up and down without binding, both brackets click and lock, and it doesn't move when you lean on it."),
+        dict(n=12, title="Lighting", who="You", time="½ day", buy=["7 Lighting"], see=[("paint", "Light")],
+             do=["LED strip into each upright's groove, wired to its driver on the fused spur.",
+                 "The ceiling strip through its notches in the uprights; the bias light on the back of the TV.",
+                 "Aim both spot bars (the table in the Paint and light tab says which head goes where).",
+                 "The lamp by the sofa, with a 2700K bulb."],
+             check="From the sofa, no spot head shows in the screen or shines in your eyes."),
+        dict(n=13, title="Connect and finish", who="You", time="1 day", buy=["8 TV, consoles and AV", "9 Vinyl kit", "10 Finishing"], see=[("network", "AV"), ("network", "Network")],
+             do=["TV inputs: HDMI 1 the PC, HDMI 2 the soundbar (eARC), HDMI 3 the Series X, HDMI 4 the HDMI switch (Xbox One, 360, PS3, RetroTINK).",
+                 "The PS2 by component into the RetroTINK and by optical to the soundbar; the PS1 by RGB SCART.",
+                 "The deck to the preamp, the preamp to the soundbar's AUX; set the tracking weight; soundbar in Music mode for vinyl.",
+                 "Network stage 2: plug each Cat6 run into its Deco, check Deco B and C show \"Ethernet\", and give the Series X and PC high priority.",
+                 "Label both outlets of the double socket and each HDMI switch input; set the sub and rear levels from the sofa."],
+             check="Everything on the network's \"done when\" list, and every source plays through the soundbar."),
+    ]
+
+
+def steps_table_html():
+    rows = "".join(f"<tr><td>{s['n']}</td><td>{s['title']}</td><td>{' '.join(s['do'])}</td><td>{s['check']}</td><td>{s['time']}</td></tr>" for s in steps())
+    return ("<table class=\"tight steps\"><tr><th>#</th><th>Stage</th><th>What to do</th><th>Check before moving on</th><th>Time</th></tr>"
+            + rows + "</table>")
+
+
+GUIDE_RULES = """
 <p>This guide assumes you've hung shelves and put flat-pack together, but haven't cut a joint before. Every step says what to do,
 what to check before moving on, and roughly how long it takes the first time. Where a step is a job for a professional, it says so.
 Sizes are finished sizes in centimetres.</p>
@@ -236,12 +346,16 @@ Sizes are finished sizes in centimetres.</p>
 <li><b>Mains wiring is the electrician's.</b> Swapping the socket, the new socket behind the sofa and the dimmers are all theirs. Adding to existing circuits like this isn't normally notifiable under Part P, but a registered electrician certifies it either way.</li>
 <li><b>Dry-fit everything</b> (assemble without glue or screws) before the final fix.</li>
 </ul></div>
+"""
 
-<h3>Tools</h3>
+
+def guide_tools():
+    return f"""<h3>Tools</h3>
 <p>You don't need a workshop. Hire the two big tools for a weekend (a track saw and an SDS drill), or ask the timber merchant to cut the oak and ply to the cut lists: most will, for a small charge, and that removes the hardest cuts.</p>
-{tools_html()}
+{tools_html()}"""
 
-<h3>Six techniques you'll use</h3>
+
+GUIDE_TECHNIQUES = """<h3>Six techniques you'll use</h3>
 <ol>
 <li><b>Fixing into brick.</b> Detect, mark, drill with the SDS on hammer setting, clear the dust, push in a brown (7 mm) wall plug and drive a 5 × 60 mm screw. In plasterboard, find a stud, or use heavy-duty plasterboard fixings rated for the load.</li>
 <li><b>Cutting oak cleanly.</b> Put masking tape over the cut line, score it with a knife, cut with the good face down (circular or track saw) or up (jigsaw). Clamp a straight edge as a guide.</li>
@@ -250,26 +364,11 @@ Sizes are finished sizes in centimetres.</p>
 <li><b>Dowelling.</b> Use a dowel jig to drill matching 10 mm holes 3 cm deep in both parts, glue the dowels, clamp.</li>
 <li><b>Oiling.</b> Sand to 180 grit, wipe off the dust, rub on a thin coat of hardwax oil, wipe off the excess after 15 minutes, let it dry overnight, give it a second coat. Do the undersides too, so the boards don't cup.</li>
 </ol>
+"""
 
-<h3>The order of work</h3>
-<table class="tight steps"><tr><th>#</th><th>Stage</th><th>What to do</th><th>Check before moving on</th><th>Time</th></tr>
-<tr><td>1</td><td>Measure</td><td>The alcove's width at six heights, the floor's level, the breast's flatness, the door's swing, the sofa's size; count your records and games.</td><td>Numbers within 1 cm of the plan, or tell me and I'll redraw.</td><td>2 h</td></tr>
-<tr><td>2</td><td>Network, stage 1</td><td>Hub in modem mode; Decos and switches over Wi-Fi.</td><td>Internet in every room.</td><td>2 h</td></tr>
-<tr><td>3</td><td>Electrician</td><td>Cat6 runs, the double socket, the socket behind the sofa, the second ceiling point and dimmer, the fused spur. Mark every cable route on the wall.</td><td>The certificate, and photos of where the cables run.</td><td>1–2 days (theirs)</td></tr>
-<tr><td>4</td><td>Paint</td><td>The whole room in Card Room Green; skirting and door in eggshell. Let it cure a week before fixing anything.</td><td>Two even coats; no white showing at the edges.</td><td>2–3 days</td></tr>
-<tr><td>5</td><td>Mark the heights</td><td>With the laser: 73 and 76 (worktop), 130 and 134 (Series X shelf), 153 and 155.4 (ledges), 192 and 196 (high shelf); the uprights at {n(g.UP_L[0])}–{n(g.UP_L[1])} and {n(g.UP_R[0])}–{n(g.UP_R[1])} from the side wall; the dining wall's backboard at {n(g.RAIL_TOP - g.RAIL[1])}–{n(g.RAIL_TOP)}, centred on the breast.</td><td>Lines level end to end; the uprights' lines plumb.</td><td>1 h</td></tr>
-<tr><td>6</td><td>Base</td><td>Build the plinth (with the drawer bay under bay 2), level it with shims, stand the two BESTÅ frames on it; build bay 3 from ply and bolt it on. Spacers to the wall, anti-tip brackets, trunking in the channel, cables run in.</td><td>The tops level within 1 mm across 186; nothing rocks.</td><td>1 day</td></tr>
-<tr><td>7</td><td>Worktop</td><td>Scribe the worktop to the walls, cut the TV slot and the grommet hole, oil all over, screw it up through the tops in slotted holes.</td><td>Tight to the walls; the slot over the channel.</td><td>½ day</td></tr>
-<tr><td>8</td><td>Inside the base</td><td>Shelves at the fit-proof heights; the game drawer; the record trays' runners at 2.3 and 37.0, then the trays; the plinth drawer.</td><td>Every drawer runs smoothly; trays clear each other by 2 cm.</td><td>1–2 days</td></tr>
-<tr><td>9</td><td>Uprights and shelves</td><td>Cut the housings and mortises on the bench. Dry-fit each upright with its shelves. Lay Deco B's leads in the groove behind the right upright. Stand the uprights on their dowels and fix the brackets. Then fit the high shelf, the ledge, the Series X shelf (wedge the tenons) and the pegs.</td><td>Uprights plumb; shelves level; the TV slides between with 2 cm each side.</td><td>2–3 days</td></tr>
-<tr><td>10</td><td>Side wall</td><td>The oak cleat for the wrap ledge and the PC shelf; dowel the wrap ledge to the left upright's front edge; the concealed PC brackets; screw the keyboard tray's housing under the shelf and fit its runners; the brush grommet; feed the PC's leads down the chased conduit (the electrician leaves a draw wire in it).</td><td>One level line with the ledge over the TV; the PC shelf takes your weight leaning on it.</td><td>1 day</td></tr>
-<tr><td>11</td><td>Dining wall</td><td>Screw the backboard to the breast (plugs every 20 cm). Fit the two Hebgo brackets on its face, 80 apart, arm tops level with its top. Screw the lift-off hinges to its top edge and the table's back edge. Oil the table's underside on the bench and set the four brass inserts. Hang the table, fit the turn buttons at the top. Hang the sub's cover on its two keyhole screws in the breast (plugs) between the arms, and stand the sub on its tray sideways: grille to the east, port to the west.</td><td>Folds up and down without binding; brackets lock both sides; it doesn't move when you lean on it.</td><td>1 day</td></tr>
-<tr><td>12</td><td>Lighting</td><td>LED in the upright grooves, the ceiling strip through its notches, the bias light; aim both spot bars; the lamp by the sofa.</td><td>No head shines at the screen or into your eyes from the sofa.</td><td>½ day</td></tr>
-<tr><td>13</td><td>Connect</td><td>TV, soundbar, consoles, deck, PC; network stage 2; label every plug and input.</td><td>The "done when" list in the network section.</td><td>1 day</td></tr>
-</table>
-<p>Roughly 12–15 working days spread over a few weekends, plus the electrician and the paint drying. Steps 6–11 can be split: the base and dining wall first, the oak joinery once you're confident.</p>
+GUIDE_TIME = "<p>Roughly 12–15 working days spread over a few weekends, plus the electrician and the paint drying. Steps 6–11 can be split: the base and dining wall first, the oak joinery once you're confident.</p>"
 
-<h3>Where beginners usually go wrong</h3>
+GUIDE_PITFALLS = """<h3>Where beginners usually go wrong</h3>
 <ul>
 <li><b>Cutting the worktop to the tape instead of to a template.</b> Make a cardboard template of the alcove first; walls are rarely square.</li>
 <li><b>Skipping the dry-fit.</b> Gluing a tenon that doesn't fit is the one mistake you can't undo.</li>
@@ -280,7 +379,15 @@ Sizes are finished sizes in centimetres.</p>
 """
 
 
-def build():
+def guide_html():
+    return (GUIDE_RULES + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html()
+            + GUIDE_TIME + GUIDE_PITFALLS)
+
+
+def _plan(deck=False):
+    """The plan as one HTML document. deck=True: images as art/ keys and markers kept, for the plan page's tabs."""
+    global DECK
+    DECK = deck
     ptot, tl, th = phase_totals()
     c = fit.counts()
     nfit = sum(c.values())
@@ -294,7 +401,7 @@ def build():
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.</div>
+<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -365,7 +472,7 @@ def build():
 
 <h3>The fit proof: every item against its published size</h3>
 <p>Each zone below lists what goes in it, its size and where that size comes from (numbered sources, section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail. {c[fit.TIGHT]} are tight: the deck's 2.65 cm sides, the preamp over the open lid, the dining seats at 55–57 cm each, and the clearances for six and eight. {c[fit.CHECK]} need a check on site: the TV's plugs by the corner post, the RetroTINK's size, the PC case, and the door's swing.</p>
-{fit.tables_html()}
+<!--fit-->{fit.tables_html()}<!--/fit-->
 
 <h3>Console sizes, every version</h3>
 <p>The bays are sized for the largest version of each console. The model number is on the label underneath; a smaller version just leaves more room.</p>
@@ -546,6 +653,15 @@ def build():
 <li><b>Retro 6-way:</b> in the channel behind bay 2: Xbox One, Xbox 360, PS3, PS2, PS1, RetroTINK.</li>
 <li><b>OLED care:</b> leave the TV in standby so it runs its pixel refresh.</li>
 </ul>
+<h4>Socket by socket</h4>
+<table class="tight"><tr><th>Socket</th><th>Feeds</th><th>On or off</th></tr>
+<tr><td>Side wall, double, left outlet</td><td>The 10-gang behind the TV: TV, soundbar, sub, Series X, USB charger (fan stand, pad dock, bias light, HDMI switch), Deco B, Switch 2, the turntable and the preamp</td><td>Always on: about 0.7 kW with everything running</td></tr>
+<tr><td>Side wall, double, right outlet</td><td>The retro 6-way in the channel: Xbox One, Xbox 360, PS3, PS2, PS1, the RetroTINK's USB plug</td><td>The wall switch is the retro switch: off between sessions; up to about 0.8 kW with a launch PS3</td></tr>
+<tr><td>Behind the sofa, new double</td><td>The PC (500–850 W) and the rear speakers</td><td>On</td></tr>
+<tr><td>Fused spur, behind the base</td><td>The LED drivers for the uprights' grooves</td><td>On a switch</td></tr>
+<tr><td>Ceiling points 1 and 2</td><td>The two spot bars, each on an LED-compatible dimmer</td><td>Dimmed</td></tr>
+</table>
+<p class="note">One strip per outlet, never one plugged into another, and each well under its 13 A (3 kW) limit.</p>
 <h3>Cable routes</h3>
 <figure>{routes()}</figure>
 <ul>
@@ -562,8 +678,31 @@ def build():
 <li><b>The route down:</b> across the landing to the airing cupboard, which sits over the alcove's corner, and down through its floor. Run 1 comes through the living room ceiling in the alcove's right corner to Deco B; run 2 follows the right upright's groove down and through the floor to the kitchen, where Deco C goes on the outside of the brick cupboard, up high.</li>
 <li><b>Sloped ceilings:</b> bedroom 2 and the bathroom slope down to the back wall; keep any Deco or desk in bedroom 2 on the high side.</li>
 </ul>
-<p><b>Stage 1, mesh up today:</b> unplug everything from the hub, log in at 192.168.0.1 and turn on Modem Mode (its page then moves to 192.168.100.1); set up Deco A with the old Wi-Fi name and password; Switch 1 into Deco A's other port and the PCs into Switch 1; add Deco B and Deco C over Wi-Fi for now; check the Xbox shows NAT: Open.</p>
-<p><b>Stage 2, after the cables:</b> plug each Cat6 run into its Deco, confirm Deco B and C show as "Ethernet" in the app, and give the Series X and PC high priority under QoS.</p>
+<h4>What each part does</h4>
+<table class="tight"><tr><th>Part</th><th>Where</th><th>Job</th><th>Why it's needed</th></tr>
+<tr><td>Virgin Hub 5, in modem mode</td><td>Bedroom 3</td><td>Brings the internet in, nothing else</td><td>Two routers fighting (double NAT) breaks Xbox online play; its Wi-Fi switches off</td></tr>
+<tr><td>Deco A (main)</td><td>Bedroom 3</td><td>The router: Wi-Fi, parental controls, HomeShield</td><td>HomeShield and parental controls only work when the Deco is the router</td></tr>
+<tr><td>Switch 1, 8-port</td><td>Bedroom 3</td><td>Turns Deco A's spare port into seven</td><td>The two PCs, both Cat6 runs down, and the optional projector and music-room runs</td></tr>
+<tr><td>Deco B</td><td>Living room, high shelf at {n(g.HIGH_TOP)}</td><td>Wi-Fi for the living room, and the wired point for the wall</td><td>Fixes the living room's weak 5 GHz side</td></tr>
+<tr><td>Switch 2, 8-port</td><td>Standing on edge in the channel behind the base</td><td>Turns Deco B's spare port into seven</td><td>The Series X, Xbox One, Xbox 360, PS3, PC and TV each get a cable, one port spare</td></tr>
+<tr><td>Deco C</td><td>Kitchen, high on the outside of the brick cupboard</td><td>Wi-Fi for the kitchen</td><td>The kitchen gets poor signal on every band today</td></tr>
+<tr><td>Cat6 runs 1 and 2</td><td>Bedroom 3 → airing cupboard → alcove corner, and on to the kitchen</td><td>The wired link between Decos ("Ethernet backhaul")</td><td>Without it the Decos relay each other over the 5 GHz band the phones use, losing speed at each hop</td></tr>
+</table>
+<h4>Stage 1: the mesh up today, before any cables</h4>
+<ol>
+<li>Unplug everything from the hub. Log in at 192.168.0.1 with the password on its base, then Modem Mode → Enable Modem Mode → Apply. Its settings page moves to 192.168.100.1.</li>
+<li>Connect a hub port to Deco A and set it up in the Deco app, reusing the old Wi-Fi name and password. If it shows no internet, try another port and restart the hub.</li>
+<li>Plug Switch 1 into Deco A's other port, then the PCs into Switch 1.</li>
+<li>Add Deco B in the living room and Deco C in the kitchen. For now they link over Wi-Fi.</li>
+<li>Check the Xbox's network settings show NAT: Open.</li>
+</ol>
+<h4>Stage 2: after the electrician's Cat6 runs</h4>
+<ol>
+<li>Plug run 1 into Deco B's free port (Switch 2 stays in the other) and run 2 into Deco C.</li>
+<li>In the Deco app, check Deco B and Deco C show as "Ethernet".</li>
+<li>Plug the Series X, Xbox One, Xbox 360, PS3, PC and TV into Switch 2.</li>
+<li>Under QoS, give the Series X and the PC high priority; turn on guest Wi-Fi and automatic firmware.</li>
+</ol>
 <div class="callout"><b>Cabling rules</b><ul>
 <li>Solid pure-copper Cat6, round; not CCA or flat cable for the long runs. Measure the real route and add 2–3 m.</li>
 <li>Cross mains at right angles; never staple through a cable; no kinks; label both ends. Never two cables between the same two devices.</li>
@@ -596,7 +735,7 @@ def build():
 {tracker_rows()}</tbody></table>
 
 <h2 class="pb">12 · Still to confirm, later ideas, sources</h2>
-<h3>Still to confirm</h3>
+<!--confirm--><h3>Still to confirm</h3>
 <ul class="checks">
 <li>The sofa's return: how far it runs along the side wall (the long side is about {n(g.SOFA_W)} from your photo; the return is drawn at {n(g.SOFA_D)}).</li>
 <li>The west end's sizes: which of 935, 1045, 660 and 820 are the recess, the door and the stair box.</li>
@@ -612,7 +751,7 @@ def build():
 <li>The stairs go up (thanks): which way does the flight run, away from the room towards the hall, or towards the window? A photo from the room settles it.</li>
 <li>The second ceiling point's exact spot (the plan puts it about 35 cm in from the west wall, 2.3 m from the window): measure it from the wall and the window.</li>
 </ul>
-<p class="note">Easiest way to answer: the viewer page has a box for each of these and takes photos; or reply in a message, a line each.</p>
+<p class="note">Easiest way to answer: the viewer page has a box for each of these and takes photos; or reply in a message, a line each.</p><!--/confirm-->
 <h3>Agreed so far</h3>
 <ul class="agreed">
 <li>From your v13 message: less cladding (done: no slats, spine, sub box or reeding; cables chased into the wall); the stairs go up; the drawer layouts drawn.</li>
@@ -643,6 +782,26 @@ def build():
 <tr><td>Bluetooth from the turntable</td><td>Compresses the sound; the AUX lead keeps full quality</td></tr>
 </table>
 </body></html>"""
+    DECK = False
+    return html, tl, th, c, css
+
+
+def plan_sections():
+    """The plan split at its h2s, for the plan page: {"pre": the title block, "1".."12", "appendix": html}."""
+    import re
+    html = _plan(deck=True)[0]
+    body = html.split("<body>", 1)[1].rsplit("</body>", 1)[0]
+    parts = re.split(r'(?=<h2[ >])', body)
+    out = {"pre": parts[0]}
+    for part in parts[1:]:
+        m = re.match(r'<h2[^>]*>(\d+|Appendix) · ([^<]+)</h2>', part)
+        key = m.group(1).lower() if m else "x"
+        out[key] = part[m.end():] if m else part
+    return out
+
+
+def build():
+    html, tl, th, c, css = _plan()
     (HERE / "plan.html").write_text(html)
     guide = f"""<!doctype html><html><head><meta charset="utf-8"><title>Build Guide</title><style>{css}</style></head><body>
 <h1>Media Wall &amp; Dining Wall: Build Guide</h1>
