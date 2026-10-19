@@ -4,12 +4,29 @@
 - **Branch:** `claude/eloquent-johnson-pgmnud` (v13, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
   supersedes PRs 1–3). `main` is still at v9 until it's merged.
 - **Viewer artifact (this account):** https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2. Update it in place: `python3 build_viewer.py`, then
-  publish `src/media_wall_viewer.html` with the files map in `src/publish_files.json` (written by build_viewer). It declares
+  publish `src/media_wall_viewer_inline.html` (images inlined; see round 7b) to that URL with no files map. It declares
   db + user + assets + downloads. **Read the client's answers first:** ArtifactData `list` on `answers` (and `tracker` for buy ticks).
   Read its comments too (ArtifactComments `read`): the stairwell thread is still open (answered in chat in round 7: the stairs go up;
   it can't be replied to or resolved from a cross-org session).
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
+
+## Update 19 Oct 2026, round 7b: v13.1 (sub safety box, six with the leaf, side view dimensioned)
+- **Publishing:** the artifact refuses some JPEG uploads from this (cross-org) session as "cpio archive" (false sniff, unpredictable),
+  so `build_viewer.py` also writes `src/media_wall_viewer_inline.html` (images as data URIs, ~6 MB, gitignored). Publish **that file**
+  to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 with no `files` (version 7). Downloads link to GitHub.
+- Client: "something that increases the safety of the sub… a box with an open front… not restrict sound… stop spills or knocking it
+  over". The AX5100G's driver fires out of its front, the port out of its back (Trusted/Expert Reviews), and it stands sideways under
+  the table, so `SUB_HOOD` (x 214–249, 28.2 out, 37.4 tall) is open at both ENDS, solid top (drip groove, 1 cm overhang) and front,
+  base tray with 2 cm lips, hung on a cleat. Port to the west arm 36.7 (15–30 advised: new source `subport`). `render.subwoofer()`,
+  new `diagrams.sub_box()` (plan, viewer #subbox, `out/Sub box - ….png`). Fit rows for sound, spills/knocks, chairs.
+- Client: "ensure measurements of the table are correct and would fit even when seating 6". 110 × 80 alone gave six 55 cm each
+  (< 60). Now `SIX_LEAF`: six use the leaf (170 × 80) at `SIX_X` 232–402, `FREE_Z` −75…−155 (75 to the breast, 154 to the window,
+  65 to the west wall), 85 a diner on the long sides; breast-side chairs 4 cm beside / 4.8 in front of the sub's box. Eight = same
+  table, three a side (56.7, tight); lift the box off for eight (CHECK). `free_table()` draws the leaf and eight legs.
+- Client: "in the side view of the pc wall ensure it's clear how much of the alcove covers the media wall". `side_alcove()` ghosts the
+  cut-away breast and dimensions: alcove 38, base 46 (38 inside, 8 proud in gold), uprights/shelves 30 all inside.
+- Fit proof: 58 checks, 46 fit, 9 tight, 3 check, 0 fail.
 
 ## Update 18 Oct 2026, round 7: v13 (less cladding, stairs up, drawer layouts)
 **Branch:** `claude/eloquent-johnson-pgmnud` (built on v12.1, `claude/sharp-franklin-lrray1`). Viewer artifact updated in place:

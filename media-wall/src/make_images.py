@@ -25,7 +25,7 @@ def svgs():
     return names
 
 
-PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it")]
+PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it"), ("subbox", "Sub box - open ends, solid top and front")]
 
 
 def main(diagrams=True):
@@ -55,7 +55,7 @@ def main(diagrams=True):
     jobs.append(("v13_join_key.svg", "art_key_join.png", KW, H, 0.82))
     # plan diagrams as images for out/ and the viewer
     for name, label in (PLANS if diagrams else []):
-        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage, "drawers": D.drawer_layouts}[name]
+        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage, "drawers": D.drawer_layouts, "subbox": D.sub_box}[name]
         s = fn()
         vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', s)
         w, h = int(vb.group(1)), int(vb.group(2))

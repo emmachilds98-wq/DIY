@@ -1,4 +1,4 @@
-"""v13: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
+"""v13.1: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
 
 Every number the renders, diagrams, fit-proof tables and plan text use comes from here, so a change
 in one place moves everything. Room measurements are from the client's hand-measured sketch
@@ -138,9 +138,15 @@ SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
 SUB_BOX = dict(x=(207.5, 259.5), z=(-30.0, 0.0), h=42.0)   # v12: slatted oak box over the sub and its riser, between the folded arms
-SUB_RISER = dict(x=(212.5, 247.0), z=(-25.4, 0.0), h=5.0)   # v13: no box, just the sub on its plain oak riser (PLAIN)
+SUB_RISER = dict(x=(212.5, 247.0), z=(-25.4, 0.0), h=5.0)   # v13: the sub on a plain oak riser (replaced in v13.1 by SUB_HOOD)
+# v13.1, client: "a box with an open front or something that won't restrict the sound but stops people spilling on it or knocking
+# it over". The AX5100G's driver fires out of its front and its port out of its back (Trusted/Expert Reviews), and it stands sideways
+# under the table, so the box is open at both ENDS (the driver and the port fire straight out), with a solid oak top (spill shield,
+# 1 cm overhang and a drip groove), a solid oak front (takes the kicks) and a base tray with a 2 cm lip; it hangs on a cleat on the breast.
+SUB_HOOD = dict(x=(214.0, 249.0), z=(-28.2, 0.0), h=37.4, top=2.0, front=1.8, base=2.0, feet=1.0, lip=2.0, over=1.0)
+SUB_PORT_MIN = 15.0                         # port to the nearest obstruction: 6–12 in (15–30 cm) for rear-ported subs (Klipsch guidance)
 SUB_BOX_SLAT = (2.0, 1.4, 1.5)             # slat width, gap, thickness: about 40% open on the front and both ends; solid oak top
-SUB_POS = dict(x=(214.5, 214.5 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # inside the box: driver east 7 cm from the slats, rear port 14.6 cm from them
+SUB_POS = dict(x=(216.3, 216.3 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # v13.1: standing sideways in its box, driver east, port west   # inside the box: driver east 7 cm from the slats, rear port 14.6 cm from them
 COFFEE = dict(x=(103.0, 193.0), z=(SOFA_FRONT_Z + 10.0, SOFA_FRONT_Z + 60.0))   # 90 × 50, 10 in front of the sofa
 
 # ---------------------------------------------------------------- the dining wall on the chimney breast
@@ -162,10 +168,11 @@ LEAF = (60.0, 80.0, 2.7)                   # the extra leaf for eight, on four m
 CHAIR = (43.0, 49.0, 78.0, 48.0)           # IKEA TERJE folding chair: W, D, H, seat height
 DINE_W = 60.0                              # table edge per diner (UK guide)
 CLEAR_MIN, CLEAR_OK, CLEAR_WALK = 60.0, 75.0, 100.0   # table edge to wall: tight minimum, aim, walk behind
-FREE_Z = (-60.0, -140.0)                   # where the table stands for six or eight: 60 off the breast
-SIX_X = (255.0, 365.0)
+FREE_Z = (-75.0, -155.0)                   # v13.1: where the table stands for six or eight: 75 off the breast (the figure to aim for)
+SIX_LEAF = True                            # v13.1: six use the leaf too (170 × 80): 85 of edge each on the long sides, 80 at each end
+SIX_X = (232.0, 402.0)                     # clear of the sub's box (x 217–252) on the breast side, 65 to the west wall
 SIX_CHAIR_BACK = CHAIR[1]                   # breast-side chairs at the table's edge: their backs reach 49 of the 60 cm to the breast
-EIGHT_X = (220.0, 390.0)
+EIGHT_X = SIX_X                            # eight: the same 170 × 80, three a side
 
 FRAMES_Y = 165.0                           # two framed LPs on the breast above the folded table
 

@@ -99,7 +99,7 @@ def downloads_list():
         items.append((p, f"{label}, v{VERSION}", "PDF"))
     for p in sorted(OUT.glob(f"Media wall v{VERSION} - *.png")):
         items.append((p, p.stem.replace(f"Media wall v{VERSION} - ", "").replace(" (HD)", "") + " (HD render)", "PNG"))
-    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")) + sorted(OUT.glob("Drawer layouts*.png")):
+    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")) + sorted(OUT.glob("Drawer layouts*.png")) + sorted(OUT.glob("Sub box*.png")):
         items.append((p, p.stem, "PNG"))
     return items
 
@@ -276,8 +276,8 @@ def page(site=False):
   <header>
     <h1>Media Wall v{VERSION}</h1>
     <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch views and greens, turn on the numbered key, answer the open questions, and tick off the buy list as you go.</p>
-    <p class="change"><b>What changed in v{VERSION}:</b> less cladding, as you asked. The slatted spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table are all gone; the PC's leads run in conduit chased into the solid wall, the sub stands on a plain oak riser and the folded table is a plain oak panel. The stairs now go up to the first floor. And the drawer layouts: every drawer to scale, with what goes in it.</p>
-    <nav class="jump" aria-label="On this page"><a href="#next">New in v13</a><a href="#drawers">Drawer layouts</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
+    <p class="change"><b>What changed in v{VERSION}:</b> less cladding, as you asked. The slatted spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table are all gone; the PC's leads run in conduit chased into the solid wall, the sub stands on a plain oak riser and the folded table is a plain oak panel. The stairs now go up to the first floor. And the drawer layouts: every drawer to scale, with what goes in it. <b>v13.1:</b> a safety box for the sub (open ends for the sound, a solid top and front for spills and knocks), six at the table with its leaf (170 × 80, every clearance checked), and the side view now shows how deep the alcove is round the wall.</p>
+    <nav class="jump" aria-label="On this page"><a href="#next">New in v13</a><a href="#drawers">Drawer layouts</a><a href="#subbox">Sub box</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
   </header>
 
   <div class="viewer">
@@ -350,6 +350,9 @@ def page(site=False):
       <li><b>Plain oak where it was slatted.</b> The sub stands on a low oak riser between the folded brackets; the folded table is plain oiled oak between its pegged breadboard ends, under the two framed LPs.</li>
       <li><b>The stairs go up.</b> The flight beside the door now rises to the first floor behind the wooden banister, through an opening in the ceiling. Tell us which way it runs and we'll match it.</li>
       <li><b>The drawer layouts</b>, below: where each of the four drawers sits in the base, and each one from above, to scale, with what goes in it and how many.</li>
+      <li><b>v13.1, the sub's box.</b> Its driver fires out of its front and its port out of its back, and it stands sideways, so the oak box is open at both ends: nothing in front of either, and the port has {G.HEBGO_X[1] - 1.4 - G.SUB_POS["x"][1]:.0f} cm of clear air (15–30 is advised). A solid top with a drip groove sheds spills; a solid front takes kicks; it hangs on a cleat on the breast so it can't tip. Drawing below.</li>
+      <li><b>v13.1, six at the table.</b> The 110 × 80 top alone gave six only 55 cm each. Six now use the leaf too: 170 × 80, {(G.TABLE[0] + G.LEAF[0]) / 2:.0f} cm a diner on the long sides, 80 at each end, {-G.FREE_Z[0]:.0f} cm off the breast, {G.ROOM_W - G.SIX_X[1]:.0f} to the west wall, the breast-side chairs clear of the sub's box.</li>
+      <li><b>v13.1, the side view</b> marks the alcove's depth round the wall: 38 of the 46 cm base sits inside it, 8 stands proud, the uprights and shelves are wholly inside.</li>
       <li>Fit proof: {fc[fit.PASS]} of {nfit} checks fit outright, {fc[fit.TIGHT]} are tight, {fc[fit.CHECK]} need a check on site, none fail.</li>
     </ul>
   </section>
@@ -358,7 +361,13 @@ def page(site=False):
     <h2>Drawer layouts</h2>
     <p class="caption">A: the game drawer in bay 1. B: the hidden plinth drawer under bay 2. C and D: the two face-out record trays in bay 3. Top: where each drawer is in the base. Bottom: each one from above, front at the bottom, to scale.</p>
     <div class="frame"><img src="{prefix}art/zz_drawers.jpg" alt="Drawer layouts: the alcove base from the front with the four drawers marked A to D, and each drawer from above to scale with its compartments and contents" width="2688" height="1968" loading="lazy"></div>
-  </section>
+    </section>
+
+  <section class="block" id="subbox">
+    <h2>The sub's box</h2>
+    <p class="caption">Open at both ends so the driver and the port fire straight out; a solid oak top and front against spills and knocks; hung on a cleat on the chimney breast so it can't tip. To scale.</p>
+    <div class="frame"><img src="{prefix}art/zz_subbox.jpg" alt="The sub's oak box from the east end and from above, with the driver and port firing out of its open ends" width="2160" height="1128" loading="lazy"></div>
+</section>
 
   <section class="block" id="answers">
     <div class="qhead"><h2>What we still need from you</h2><div class="meter"><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
@@ -415,7 +424,7 @@ const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v
 
 /* ---------- the render viewer */
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
-const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table lifted off and set for six, with both spot bars", side: "The PC side wall, seen from the room" }};
+const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table and its leaf set for six, with both spot bars", side: "The PC side wall, seen from the room" }};
 const view = Object.assign({{ style: "join", paint: "card_room", key: false }}, store.get("mw13-view", {{}}));
 const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key");
 function draw() {{
@@ -429,8 +438,8 @@ function draw() {{
   keyBtn.disabled = view.style === "four" || view.style === "six" || view.style === "side";
   cap.textContent = view.key
     ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
-    : view.style === "six" ? "The table lifted off onto four legs, 60 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stairs go up beside the door; their direction is drawn roughly until you send a photo."
-    : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below, the media wall end-on at the right (the breast cut away)."
+    : view.style === "six" ? "The table and its leaf (170 × 80) on legs, 75 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stairs go up beside the door; their direction is drawn roughly until you send a photo."
+    : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below; dashed, the chimney breast's outline and the alcove's depth: 38 of the 46 cm base inside it, 8 proud; the media wall end-on at the right (the breast cut away)."
     : VIEWS[view.style] + ", shown in " + NAMES[view.paint] + ". Evening light, drawn to the measured room.";
   store.set("mw13-view", view);
 }}
@@ -665,8 +674,19 @@ def publish_files():
     return files
 
 
+def inline_images(html_):
+    """The artifact refuses some image uploads from an editor outside its organisation (false "cpio archive" sniffs), so the
+    published copy carries its images as data URIs: media_wall_viewer_inline.html (gitignored), about 5 MB."""
+    import base64
+    for p in sorted((HERE / "art").glob("*.jpg")):
+        uri = "data:image/jpeg;base64," + base64.b64encode(p.read_bytes()).decode()
+        html_ = html_.replace(f"art/{p.name}", uri)
+    return html_
+
+
 if __name__ == "__main__":
     (HERE / "media_wall_viewer.html").write_text(page())
+    (HERE / "media_wall_viewer_inline.html").write_text(inline_images(page()))
     (HERE.parent.parent / "index.html").write_text(site())
     (HERE / "publish_files.json").write_text(json.dumps(publish_files(), indent=1))
     print("viewer ok", len(publish_files()), "files")

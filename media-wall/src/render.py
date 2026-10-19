@@ -1130,16 +1130,26 @@ def subwoofer():
     o = []
     xa, xb = G.SUB_POS["x"]
     za, zb = G.SUB_POS["z"]
-    if G.PLAIN:   # v13: no box, the sub stands on a plain oak riser between the folded arms
-        rx0, rx1 = G.SUB_RISER["x"]; rz0, rz1 = G.SUB_RISER["z"]; rh = G.SUB_RISER["h"]
-        o.append(poly([P(rx0 - 3, 0.05, rz0 - 3), P(rx1 + 4, 0.05, rz0 - 3), P(rx1 + 4, 0.05, rz1), P(rx0 - 3, 0.05, rz1)], "#000", 'opacity="0.22" filter="url(#soft)"'))
-        o.append(box(rx0, 0, rz0, rx1 - rx0, rh, rz1 - rz0, OAK_D, OAK_T, OAK_S, extra=GH))
-        for fx in (rx0 + 3, rx1 - 6):
-            o.append(box(fx, -0.01, rz0 + 1, 3, 0.6, 3, "#3a3a3a"))
-        o.append(box(xa, rh, za, xb - xa, G.SUB[1], zb - za, "#1a1a1b", "#2b2b2d", "#111112"))
-        zc, yc = (za + zb) / 2, rh + G.SUB[1] / 2
-        o.append(disc_x(xa - 0.03, yc, zc, 7.6, "#0c0c0c", 'stroke="#3a3a3c" stroke-width="2"'))
-        o.append(disc_x(xa - 0.05, yc, zc, 2.5, "#2a2a2c"))
+    if G.PLAIN:   # v13.1: the sub's oak box: open at both ends (driver east, port west), solid top and front, on a cleat
+        hb = G.SUB_HOOD
+        hx0, hx1 = hb["x"]; hz0, hz1 = hb["z"]
+        ft, bt, tp, fr, lip, ov = hb["feet"], hb["base"], hb["top"], hb["front"], hb["lip"], hb["over"]
+        yb = ft + bt                                  # the sub stands on the base tray
+        ytu = hb["h"] - tp                            # the top's underside
+        o.append(poly([P(hx0 - 3, 0.05, hz0 - 3), P(hx1 + 4, 0.05, hz0 - 3), P(hx1 + 4, 0.05, hz1), P(hx0 - 3, 0.05, hz1)], "#000", 'opacity="0.22" filter="url(#soft)"'))
+        for fx in (hx0 + 2, hx1 - 5):                 # rubber feet
+            o.append(box(fx, 0, hz0 + fr + 1, 3, ft, 3, "#2b2b2b"))
+        o.append(box(hx0, ft, hz0 + fr, hx1 - hx0, bt, hz1 - hz0 - fr, OAK_D, OAK_T, OAK_S, extra=GH))           # base tray
+        for lx in (hx0, hx1 - 1.5):                                                                            # end lips: the sub can't slide out
+            o.append(box(lx, ft + bt, hz0 + fr, 1.5, lip, hz1 - hz0 - fr - 2, OAK, OAK_T, OAK_S))
+        o.append(box(xa, yb, za, xb - xa, G.SUB[1], zb - za, "#1a1a1b", "#2b2b2d", "#111112"))                 # the sub, its grille to the east
+        zc, yc = (za + zb) / 2, yb + G.SUB[1] / 2
+        o.append(disc_x(xa - 0.03, yc, zc, 8.6, "#3a3b3e", 'stroke="#555" stroke-width="1"'))                  # perforated metal grille
+        o.append(disc_x(xa - 0.05, yc, zc, 7.6, "#0c0c0c"))
+        o.append(disc_x(xa - 0.07, yc, zc, 2.5, "#2a2a2c"))
+        o.append(box(hx0, ft, hz0, hx1 - hx0, ytu - ft, fr, OAK, OAK_T, OAK_S, extra=GH))                        # solid front: takes the kicks
+        o.append(box(hx0 - ov, ytu, hz0 - ov, hx1 - hx0 + 2 * ov, tp, hz1 - hz0 + ov, OAK, OAK_T, OAK_S, extra=GH))   # solid top: the spill shield
+        o.append(_line(P(hx0 - ov, ytu + 0.4, hz0 - ov - 0.02), P(hx1 + ov, ytu + 0.4, hz0 - ov - 0.02), "#8f5e33", 1.0))   # drip groove line
         return "\n".join(o)
     bx0, bx1 = G.SUB_BOX["x"]
     bz0, bz1 = G.SUB_BOX["z"]
@@ -1383,11 +1393,12 @@ def table_settings(x0=None, x1=None, zb=None, zf=None, y=None):
         zb, zf, y = G.TABLE_Z[0], G.TABLE_Z[1], G.TABLE_TOP
     y += 0.02
     cx, zm = (x0 + x1) / 2, (zb + zf) / 2
-    places = [(cx - 27.5, zf + 15), (cx + 27.5, zf + 15), (x0 + 15, zm), (x1 - 15, zm)]
-    glasses = [(cx - 13, zf + 30), (cx + 41, zf + 30), (x0 + 25, zm + 16), (x1 - 25, zm - 16)]
+    ha, hb_ = (cx - 27.5, cx + 27.5) if four else (x0 + (x1 - x0) / 4, x0 + 3 * (x1 - x0) / 4)   # v13.1: six spread along the 170
+    places = [(ha, zf + 15), (hb_, zf + 15), (x0 + 15, zm), (x1 - 15, zm)]
+    glasses = [(ha + 14.5, zf + 30), (hb_ + 13.5, zf + 30), (x0 + 25, zm + 16), (x1 - 25, zm - 16)]
     if not four:
-        places += [(cx - 27.5, zb - 15), (cx + 27.5, zb - 15)]
-        glasses += [(cx - 41, zb - 30), (cx + 13, zb - 30)]
+        places += [(ha, zb - 15), (hb_, zb - 15)]
+        glasses += [(ha - 13.5, zb - 30), (hb_ - 14.5, zb - 30)]
     for (px, pz) in places:
         o.append(ellipse_flat(px, y, pz, 12.5, 12.5, "#efe9df", 'stroke="#cfc6b6" stroke-width="0.8"'))
         o.append(ellipse_flat(px, y + 0.05, pz, 8.5, 8.5, "#e4dccd"))
@@ -1442,31 +1453,39 @@ def dining_chairs():
 
 
 def free_table():
-    """Six: the top lifted off its hinges onto four Emuca legs, out in the room 60 cm off the breast, two a side and one
-    at each end. The long-side chairs stand at the table's edge, clear of the legs; the sub sits east of them."""
+    """Six (v13.1: with the leaf, 170 × 80) or eight: the top lifted off its hinges onto four Emuca legs, the leaf on four more,
+    out in the room 75 cm off the breast; for six, two a side and one at each end. Breast-side chairs stand clear of the sub's box."""
     w, d, h, sh = G.CHAIR
     x0, x1 = G.SIX_X
     zb, zf = G.FREE_Z                    # breast side, room side
     tw, td, tt = G.TABLE
     top = G.LEG_H + tt
-    cx, zm = (x0 + x1) / 2, (zb + zf) / 2
+    zm = (zb + zf) / 2
+    xj = x0 + tw if G.SIX_LEAF else x1   # the joint between the table and the leaf
     o = []
     o.append(poly([P(x0 - 6, 0.05, zb + 6), P(x1 + 6, 0.05, zb + 6), P(x1 + 6, 0.05, zf - 6), P(x0 - 6, 0.05, zf - 6)], "#000", 'opacity="0.18" filter="url(#soft)"'))
-    tuck_b = zb + G.SIX_CHAIR_BACK - d / 2           # breast side: chair backs held clear of the sub
-    o += [chair(cx - 27.5, tuck_b, "-z"), chair(cx + 27.5, tuck_b, "-z")]
+    n = 2
+    step = (x1 - x0) / n
+    xs = [x0 + step * (j + 0.5) for j in range(n)]
+    o += [chair(xc, zb + d / 2 - 8, "-z") for xc in xs]
     o += [chair(x0 - d / 2 + 8, zm, "+x"), chair(x1 + d / 2 - 8, zm, "-x")]
     li = 5.0
-    for (lx, lz) in ((x0 + li, zb - li - 5), (x1 - li - 5, zb - li - 5), (x0 + li, zf + li), (x1 - li - 5, zf + li)):
+    legs = [(x0 + li, zb - li - 5), (xj - li - 5, zb - li - 5), (x0 + li, zf + li), (xj - li - 5, zf + li)]
+    if G.SIX_LEAF:
+        legs += [(xj + li, zb - li - 5), (x1 - li - 5, zb - li - 5), (xj + li, zf + li), (x1 - li - 5, zf + li)]
+    for (lx, lz) in legs:
         o.append(box(lx, 0, lz, 5, G.LEG_H, 5, STEEL, STEEL_T, STEEL_S))
         o.append(box(lx - 2, G.LEG_H - 0.6, lz - 2, 9, 0.6, 9, STEEL_S))                               # mounting plate
-    o.append(box(x0, G.LEG_H, zf, tw, tt, td, OAK, OAK_T, OAK_S, extra=GH))
+    o.append(box(x0, G.LEG_H, zf, x1 - x0, tt, td, OAK, OAK_T, OAK_S, extra=GH))
     bb = G.BREADBOARD
-    for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):
+    for (ea, eb) in ((x0, x0 + bb), (xj - bb, xj)) + (((x1 - bb, x1),) if G.SIX_LEAF else ()):
         o.append(poly([P(ea, top + 0.01, zf), P(eb, top + 0.01, zf), P(eb, top + 0.01, zb), P(ea, top + 0.01, zb)], OAK_D, GV))
         o.append(quad_front(ea, G.LEG_H, zf - 0.02, eb - ea, tt, OAK_S))
+    if G.SIX_LEAF:
+        o.append(_line(P(xj, top + 0.02, zf), P(xj, top + 0.02, zb), "#6b4527", 1.4))
     o.append(table_settings(x0, x1, zb, zf, top))
-    zn = zf - d / 2
-    o += [chair(cx - 27.5, zn, "+z"), chair(cx + 27.5, zn, "+z")]
+    zn = zf - d / 2 + 8
+    o += [chair(xc, zn, "+z") for xc in xs]
     return "\n".join(o)
 
 
@@ -1756,7 +1775,7 @@ JOIN_KEY = [
     (27, (G.HEBGO_X[1], 40, -4), "Häfele Hebgo folding brackets, 500 kg a pair"),
     (28, (G.TABLE_X[0] + 16, G.FOLDED_TOP + 2, -3), "Turn buttons hold the folded table"),
     (29, (G.TABLE_CX + 21, G.FRAMES_Y + 17, -2.3), "Two framed LPs above"),
-    (34, (G.SUB_POS["x"][0], 22, (G.SUB_POS["z"][0] + G.SUB_POS["z"][1]) / 2), "Subwoofer on a plain oak riser, between the brackets"),
+    (34, (G.SUB_HOOD["x"][0] + 12, 22, G.SUB_HOOD["z"][0]), "Sub in an oak box: open ends, solid top and front, on a cleat"),
     (H_, "The side wall"),
     (30, (25.5, 182, -150), "PC on its oak shelf, above the end of the sofa (see the room plan)"),
     (31, (3.4, G.PC_SHELF_TOP + 3, G.PC_SHELF_Z[1] + 4), "Brush grommet: the PC's leads drop into the wall"),
@@ -1967,9 +1986,35 @@ def media_end_on():
     return "\n".join(o)
 
 
+def side_alcove():
+    """v13.1, client: make it clear in the side view how much of the media wall the alcove takes in. The chimney breast is cut
+    away so the wall reads end-on; its outline is drawn as a ghost on the reveal plane, with the depths dimensioned: the alcove
+    is 38 deep, so the 46 cm base sits 38 inside it and 8 proud, and the 30 cm uprights and shelves sit wholly inside."""
+    o = []
+    x = ALC_W + 0.5
+    az, bf, uf = ALC_D, G.BASE_FRONT_Z, ALC_D - G.UP_D
+    ghost = [P(x, 0, 0), P(x, CEIL, 0), P(x, CEIL, az), P(x, 0, az)]
+    o.append(poly(ghost, "#c9a27a", 'opacity="0.16"'))
+    o.append(poly(ghost, "none", 'stroke="#f3e9d4" stroke-width="2" stroke-dasharray="9 6" opacity="0.9"'))
+    o.append(text(*P(x, CEIL - 10, az / 2), "chimney breast, cut away", size=15, anchor="middle"))
+    o.append(text(P(x, CEIL - 10, az / 2)[0], P(x, CEIL - 10, az / 2)[1] + 17, "(its face is the alcove's opening)", size=13, anchor="middle", op=0.85))
+    def zdim(y, za, zb_, lab, dy=-8, size=13):
+        a_, b_ = P(x, y, za), P(x, y, zb_)
+        o.append(dim_line(a_, b_, lab, ((a_[0] + b_[0]) / 2, a_[1] + dy), size=size))
+    zdim(G.CEIL - 40, 0, az, f"alcove {az:g} deep", size=15.5)
+    zdim(G.HIGH_TOP + 8, uf, az, f"uprights and shelves {G.UP_D:g}: all inside", dy=-8, size=14)
+    zdim(52, 0, az, f"{az:g} of the base inside", dy=-8, size=14.5)
+    zdim(52, bf, 0, f"{-bf:g} proud", dy=-8, size=14.5)
+    zdim(22, bf, az, f"base and worktop {G.BASE_D:g} deep", dy=-8, size=14.5)
+    # the 8 cm that stands proud of the breast, picked out on the base's end
+    pr = [P(x + 0.1, 0, bf), P(x + 0.1, WORKTOP, bf), P(x + 0.1, WORKTOP, 0), P(x + 0.1, 0, 0)]
+    o.append(poly(pr, "#ffd37a", 'opacity="0.28"'))
+    return "\n".join(o)
+
+
 def build_side(label=None):
-    """The PC side wall: the ledge wrapping the corner, the PC shelf with its slatted screen and keyboard tray, the
-    slatted cable spine, the sofa below, and the media wall end-on at the right (the dining wall left out)."""
+    """The PC side wall: the ledge wrapping the corner, the PC shelf and its keyboard tray, the sofa below, and the media wall
+    end-on at the right (the dining wall left out), with the alcove's depth dimensioned (v13.1)."""
     global VIEW, EYE_Y, STYLE, DINING
     old = (VIEW, EYE_Y, (EYE_X, X0, S, SHIFT))
     VIEW, EYE_Y, STYLE, DINING = "side", SIDE_EYE_Y, "joinery", "folded"
@@ -1977,7 +2022,7 @@ def build_side(label=None):
     try:
         o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">', defs(),
              f'<g transform="translate(0,{SHIFT})">', side_room(), wall_socket(), wrap(), media_end_on(),
-             sofa_solid(),
+             sofa_solid(), side_alcove(),
              spot_bar(G.PEND_X, G.PEND_Z, SPOT_HEADS), '</g>']
         if label:
             o.append(plate(*label))
@@ -1994,7 +2039,7 @@ def all_svgs():
     out = {}
     set_paint(PAINTS[MAIN_PAINT][0])
     sub = "Farrow & Ball Card Room Green No. 79 · drawn to the measured room, evening light"
-    six_sub = "Lifted off onto four legs · both spot bars · the west end drawn roughly until you confirm it"
+    six_sub = "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end"
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
     out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v13", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
@@ -2010,7 +2055,7 @@ def all_svgs():
             out[f"v13_paint_{k}_{st}"] = build(with_dims=False, style=st, label=(lab,
                                                ("Artisan oak" if st == "joinery" else "Slat wall") + " version · walls, ceiling and skirting in the one colour"))
         out[f"v13_paint_{k}_four"] = build(with_dims=False, style="joinery", dining="four", label=(lab, "The dining wall set for four"))
-        out[f"v13_paint_{k}_six"] = build(with_dims=False, style="joinery", dining="six", label=(lab, "The table set for six, out in the room"))
+        out[f"v13_paint_{k}_six"] = build(with_dims=False, style="joinery", dining="six", label=(lab, "The table and its leaf set for six, out in the room"))
         out[f"v13_paint_{k}_side"] = build_side(label=(lab, "The PC side wall: the ledge, the PC shelf and keyboard tray, no trunking"))
     PAINT = "deep"
     deep = "Deep forest green · earlier colour, for comparison"

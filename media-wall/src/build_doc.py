@@ -5,12 +5,12 @@ Numbers come from geometry.py and fit.py."""
 import base64, pathlib
 import geometry as G
 import fit
-from diagrams import (drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
+from diagrams import (sub_box, drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
                       living_plan, why_layout, seating, dining_section)
 
 HERE = pathlib.Path(__file__).parent
 VERSION = "13"
-REVISION = "13: less cladding, the stairs going up, the drawer layouts"
+REVISION = "13.1: the sub's safety box, the table for six with its leaf, the side view dimensioned"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -78,7 +78,7 @@ TRACK = [
     ("To buy", "Four folding chairs, IKEA TERJE or similar (skip if yours fit: seat about 45–48) <b>(new)</b>", "6 Dining wall", "4", 100, 160),
     ("To buy", "Two LP frames for the chimney breast, hung from 165 cm", "6 Dining wall", "2", 20, 40),
     ("To buy", "Four M8 brass threaded inserts for the legs, set into the underside instead of plates (the underside stays plain oiled oak) <b>(changed: no reeding)</b>", "6 Dining wall", "1", 8, 15),
-    ("To buy", "Oak riser for the sub, 34 × 25 × 5 cm, with felt or sorbothane feet (from the worktop offcut) <b>(changed: under the dining wall)</b>", "6 Dining wall", "1", 5, 15),
+    ("To buy", "Oak box for the sub, 35 × 28 × 37 cm: solid 2 cm top with a drip groove, solid 1.8 cm front, a base tray with 2 cm end lips, open at both ends; four rubber feet, a 1.5 cm oak cleat for the breast, hardwax oil <b>(new in v13.1: safety)</b>", "6 Dining wall", "1", 35, 70),
     ("To do", "Fix the backboard to the breast, hang the brackets and the top, check it folds and locks; set the legs to the right height", "6 Dining wall", "", None, None),
     ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, driver; 6500K bias light for the TV", "7 Lighting", "1", 40, 90),
     ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars (£49 each), plus eight warm-white (2700K) dimmable E14 LED bulbs, 6 W max <b>(changed: two)</b>", "7 Lighting", "2", 120, 160),
@@ -263,7 +263,7 @@ Sizes are finished sizes in centimetres.</p>
 <tr><td>8</td><td>Inside the base</td><td>Shelves at the fit-proof heights; the game drawer; the record trays' runners at 2.3 and 37.0, then the trays; the plinth drawer.</td><td>Every drawer runs smoothly; trays clear each other by 2 cm.</td><td>1–2 days</td></tr>
 <tr><td>9</td><td>Uprights and shelves</td><td>Cut the housings and mortises on the bench. Dry-fit each upright with its shelves. Lay Deco B's leads in the groove behind the right upright. Stand the uprights on their dowels and fix the brackets. Then fit the high shelf, the ledge, the Series X shelf (wedge the tenons) and the pegs.</td><td>Uprights plumb; shelves level; the TV slides between with 2 cm each side.</td><td>2–3 days</td></tr>
 <tr><td>10</td><td>Side wall</td><td>The oak cleat for the wrap ledge and the PC shelf; dowel the wrap ledge to the left upright's front edge; the concealed PC brackets; screw the keyboard tray's housing under the shelf and fit its runners; the brush grommet; feed the PC's leads down the chased conduit (the electrician leaves a draw wire in it).</td><td>One level line with the ledge over the TV; the PC shelf takes your weight leaning on it.</td><td>1 day</td></tr>
-<tr><td>11</td><td>Dining wall</td><td>Screw the backboard to the breast (plugs every 20 cm). Fit the two Hebgo brackets on its face, 80 apart, arm tops level with its top. Screw the lift-off hinges to its top edge and the table's back edge. Oil the table's underside on the bench and set the four brass inserts. Hang the table, fit the turn buttons at the top. Set the sub on its oak riser between the arms.</td><td>Folds up and down without binding; brackets lock both sides; it doesn't move when you lean on it.</td><td>1 day</td></tr>
+<tr><td>11</td><td>Dining wall</td><td>Screw the backboard to the breast (plugs every 20 cm). Fit the two Hebgo brackets on its face, 80 apart, arm tops level with its top. Screw the lift-off hinges to its top edge and the table's back edge. Oil the table's underside on the bench and set the four brass inserts. Hang the table, fit the turn buttons at the top. Screw the sub box's cleat to the breast (plugs), hang the box on it between the arms, and stand the sub in it sideways: grille to the east, port to the west.</td><td>Folds up and down without binding; brackets lock both sides; it doesn't move when you lean on it.</td><td>1 day</td></tr>
 <tr><td>12</td><td>Lighting</td><td>LED in the upright grooves, the ceiling strip through its notches, the bias light; aim both spot bars; the lamp by the sofa.</td><td>No head shines at the screen or into your eyes from the sofa.</td><td>½ day</td></tr>
 <tr><td>13</td><td>Connect</td><td>TV, soundbar, consoles, deck, PC; network stage 2; label every plug and input.</td><td>The "done when" list in the network section.</td><td>1 day</td></tr>
 </table>
@@ -294,7 +294,7 @@ def build():
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands on a <b>plain oak riser</b>; the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.</div>
+<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands in a <b>small oak box</b> (v13.1, below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1:</b> the sub gets a <b>safety box</b>, open at both ends so its driver and port fire freely, with a solid top and front against spills and knocks, hung on a cleat so it can't tip (section 5). <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -308,7 +308,7 @@ def build():
 <table><tr><th>Area</th><th>Decision</th></tr>
 <tr><td>Alcove</td><td>The TV between two oak uprights, the left one now a corner post on the side wall; on the right, the turntable on the worktop and the Series X on a shelf at {n(g.RZ_SHELF_TOP)}; below, three 60 cm bays: the Xbox consoles, the PlayStations and the two record trays.</td></tr>
 <tr><td>Side wall</td><td>The record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, clear of the TV's sightlines.</td></tr>
-<tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off onto legs for six, with a leaf for eight. The sub stands under it on an oak riser.</td></tr>
+<tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off onto legs for six, with a leaf for eight. The sub stands under it in a small oak box, open at both ends, safe from spills and kicks.</td></tr>
 <tr><td>Records</td><td>Every record face-out: about {LPS} LPs (180 in the trays, 8 on the two ledges) and {SINGLES} singles.</td></tr>
 <tr><td>Heights</td><td>Worktop and table {n(g.WORKTOP)} · TV centre 116.5 · Series X shelf {n(g.RZ_SHELF_TOP)} · ledges and PC shelf {n(g.LEDGE_TOP)} · high shelf {n(g.HIGH_TOP)}, {n(g.CEIL - g.HIGH_TOP)} under the {n(g.CEIL)} ceiling.</td></tr>
 <tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars on your two existing ceiling points: between the TV and the sofa, and between the door and the wall.</td></tr>
@@ -411,7 +411,7 @@ def build():
 <ul>
 <li><b>The deck:</b> on isolation feet, 2 cm back from the worktop's front edge, with {n(g.ALC_D - g.DECK_Z[1])} cm behind it for the lid's hinges. The zone takes a deck up to the size of an AT-LP120X (45.2 × 35.2 cm); most decks are smaller.</li>
 <li><b>The lid:</b> AT's cover is 44.1 × 34.6 cm<sup>{fit.ORDER.index("lid") + 1}</sup>, so standing open its top edge is at about {n(round(g.LID_TOP_OPEN))}; the shelf's underside is at {n(g.LID_CLEAR_TO)}.</li>
-<li><b>Bass:</b> the sub stands under the dining wall on its own plain oak riser, off the base the deck sits on; isolation feet under the deck take care of the rest.</li>
+<li><b>Bass:</b> the sub stands under the dining wall in its own oak box, off the base the deck sits on; isolation feet under the deck take care of the rest.</li>
 <li><b>Signal path:</b> turntable set to PHONO → the preamp under the shelf → a 2 m RCA-to-3.5 mm lead down the groove behind the right upright and along the back of the worktop to the soundbar's AUX. If the deck has no PHONO/LINE switch, plug it straight into the AUX.</li>
 <li><b>Soundbar:</b> Music mode, bass up, surround, night and dialogue modes off. Always the AUX cable, never Bluetooth.</li>
 </ul>
@@ -428,12 +428,15 @@ def build():
 <p>That's fewer than v10's cabinet held (it had a 50-LP browser and a singles drawer). If the collection is bigger than this, tell me the counts. The neatest overflow is a matching face-out tray unit under the window at the end of the sofa.</p>
 
 <h2 class="pb">5 · The dining wall</h2>
-<p>The chimney breast becomes the dining wall. A solid oak table, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard. Every day it stands folded flat against the breast, about {n(g.FOLDED_D)} cm deep. Down, it's a table for four at the same 76 cm as the alcove's worktop. Lifted off onto four legs, it seats six in the room, or eight with a matching leaf.</p>
+<p>The chimney breast becomes the dining wall. A solid oak table, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard. Every day it stands folded flat against the breast, about {n(g.FOLDED_D)} cm deep. Down, it's a table for four at the same 76 cm as the alcove's worktop. Lifted off onto its legs with a matching 60 cm leaf, it makes a 170 × 80 table in the room: six with room to spare, or eight at a squeeze.</p>
 <figure class="render">{img("render_v13_dining_four.png", "The dining wall down and set for four")}
 <figcaption>Down and set for four: two on the room side, one at each end, the sub tucked under the wall. The second spot bar, on the point by the door just out of view here, lights the table and the framed LPs.</figcaption></figure>
 <figure class="render">{img("render_v13_dining_six.png", "The table lifted off and set for six, with both spot bars")}
-<figcaption>Lifted off onto four legs and set for six, {n(-g.FREE_Z[0])} cm off the breast: two a side, one at each end. The camera stands back in line with the alcove's edge, so both spot bars show: bar 1 on the rose over the coffee table, bar 2 on the point by the door, two heads on the table. The backboard and the folded brackets stay on the breast; the sub sits just east of the chairs. The stair box and the door are drawn roughly until you confirm the west end.</figcaption></figure>
+<figcaption>Lifted off with its leaf (170 × 80, on eight legs) and set for six, {n(-g.FREE_Z[0])} cm off the breast: two a side with {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm each, one at each end. The camera stands back in line with the alcove's edge, so both spot bars show: bar 1 on the rose over the coffee table, bar 2 on the point by the door, two heads on the table. The backboard and the folded brackets stay on the breast; the sub's box sits just east of the breast-side chairs, clear of them. The stairs (going up) and the door are drawn roughly until you confirm the west end.</figcaption></figure>
 <figure>{dining_section()}</figure>
+<h3>The sub's box: safe from spills and knocks, nothing in the way of the sound</h3>
+<p>The Hisense sub's driver fires out of its front grille and its bass port out of its back<sup>{fit.ORDER.index("hisense") + 1}</sup>. It stands sideways under the dining wall, so those two faces point along the breast, and the box is <b>open at both ends</b>: the driver fires straight out of one, the port breathes out of the other with {n(round(g.HEBGO_X[1] - 1.4 - g.SUB_POS["x"][1]))} cm of clear air (15–30 cm is the usual advice for a rear port<sup>{fit.ORDER.index("subport") + 1}</sup>). The <b>top and the front are solid oak</b>, because neither faces the driver or the port: the top overhangs 1 cm with a drip groove underneath, so a drink knocked off the table runs off its edge instead of onto the amplifier on the sub's back, and the front takes a foot or a vacuum cleaner. The box <b>hangs on a cleat screwed to the breast</b> (it's solid), so it can't tip, and a 2 cm lip at each end of its tray keeps the sub from sliding out. For eight at the table, lift it off the cleat.</p>
+<figure>{sub_box()}</figure>
 <h3>How it works</h3>
 <ul>
 <li><b>The top:</b> solid oak with <b>pegged breadboard ends</b>, 7 cm oak strips across each end on a tongue, pinned with three oak pegs in slotted holes so the top can move. They stop it cupping when it lives upright, and they frame it like the uprights frame the TV. The corners are rounded to a 5 cm radius (kinder on hips by a door), and the underside edges are chamfered 1 cm so it reads slim.</li>
@@ -441,14 +444,14 @@ def build():
 <li><b>Brackets:</b> two Häfele Hebgo heavy-duty folding brackets (287.43.428: 580 mm arm, 500 kg a pair<sup>{fit.ORDER.index("hebgo") + 1}</sup>), {n(g.HEBGO_X[1] - g.HEBGO_X[0])} cm apart on the backboard's face. Raised, they lock on their own; a light lift on the arm releases them, and they fold flat down the breast.</li>
 <li><b>Hinges:</b> three 100 mm lift-off hinges<sup>{fit.ORDER.index("liftoff") + 1}</sup>, all the same hand, along the backboard's top edge. Slide the table 5 cm sideways and it comes off.</li>
 <li><b>Folded:</b> two oak turn buttons on the breast, plus a magnetic catch, hold the top edge at {n(g.FOLDED_TOP)}. The underside faces the room: plain oiled oak between the pegged breadboard ends, the same finish as the worktop, so folded up it reads as a calm oak panel under the two framed LPs (v13: no reeding). The legs screw into four small brass threaded inserts in the breadboard ends instead of black plates.</li>
-<li><b>For six or eight:</b> lift it off (two people, about 18 kg), screw four legs into the plates: tapered oak legs (4.5 cm to 3 cm, on M8 hanger bolts) to match the wall, or Emuca 710 mm steel legs<sup>{fit.ORDER.index("legs") + 1}</sup> (adjustable to 730) as the cheaper option, and stand it in the room. For eight, butt the 60 × 80 leaf, on its own four legs, against one end, joined by two alignment dowels and two table clips.</li>
+<li><b>For six or eight:</b> lift it off (two people, about 18 kg), screw four legs into the inserts: tapered oak legs (4.5 cm to 3 cm, on M8 hanger bolts) to match the wall, or Emuca 710 mm steel legs<sup>{fit.ORDER.index("legs") + 1}</sup> (adjustable to 730) as the cheaper option, and stand it in the room. Butt the 60 × 80 leaf, on its own four legs, against its west end, joined by two alignment dowels and two table clips: six and eight both use it (v13.1: 110 × 80 alone gives six only 55 cm each, under the 60 a diner needs).</li>
 <li><b>Chairs:</b> drawn at IKEA TERJE size (43 × 49, seat 48<sup>{fit.ORDER.index("terje") + 1}</sup>), which folds flat. Any dining chair with a 45–48 cm seat works.</li>
 </ul>
 <figure>{seating()}</figure>
 <table class="tight"><tr><th>Seats</th><th>Where the table stands</th><th>Per diner</th><th>Clearances</th></tr>
 <tr><td>Four</td><td>Down at the wall, on its brackets</td><td>55 on the room side (60 is ideal); the ends are 80 wide</td><td>{n(g.TABLE_Z[1] - g.SOFA_FRONT_Z)} to the sofa: room to walk behind</td></tr>
-<tr><td>Six</td><td>Lifted off, centred at about {n((g.SIX_X[0] + g.SIX_X[1]) / 2)} from the side wall, 60 off the breast</td><td>55, two a side</td><td>60 to the breast (the tight minimum), {n(g.FREE_Z[1] - g.WINDOW_Z)} to the window, {n(g.ROOM_W - g.SIX_X[1])} to the west wall</td></tr>
-<tr><td>Eight</td><td>Plus the leaf: 170 × 80</td><td>57, three a side</td><td>{n(g.ROOM_W - g.EIGHT_X[1])} to the west wall, {n(g.FREE_Z[1] - g.SOFA_FRONT_Z)} to the sofa at the east end: tight but fine for a dinner. Lift the sub out to the end of the base first: the breast-side end chair lands on it</td></tr>
+<tr><td>Six</td><td>Lifted off with the leaf: 170 × 80 at x {n(g.SIX_X[0])}–{n(g.SIX_X[1])}, {n(-g.FREE_Z[0])} off the breast</td><td>{n((g.TABLE[0] + g.LEAF[0]) / 2)}, two a side; 80 at each end</td><td>{n(-g.FREE_Z[0])} to the breast (the figure to aim for), {n(g.FREE_Z[1] - g.WINDOW_Z)} to the window, {n(g.ROOM_W - g.SIX_X[1])} to the west wall; the breast-side chairs clear the sub's box</td></tr>
+<tr><td>Eight</td><td>The same 170 × 80, in the same place</td><td>57, three a side</td><td>As for six; lift the sub's box off its cleat first and stand the sub at the end of the base: the breast-side end chair lands where the box is</td></tr>
 </table>
 <p>Clearances from a UK planning guide: 60 cm of table edge per diner, 60 cm from the table to a wall as a tight minimum, 75 to aim for, 100–110 to walk behind someone seated<sup>{fit.ORDER.index("dining") + 1}</sup>. For six or eight, slide the coffee table to the window first, and keep the door to the hall shut while you eat if it opens into the room: the chairs on that side sit in its swing.</p>
 <h3>Cut list and hardware</h3>
@@ -458,7 +461,7 @@ def build():
 <tr><td>Legs (oak option)</td><td>Solid oak, tapered on two inside faces</td><td>71 × 4.5 tapering to 3, M8 hanger bolt and angled plate</td><td>8</td></tr>
 <tr><td>Backboard</td><td>Solid oak, from the worktop offcut</td><td>110 × 22 × 3</td><td>1</td></tr>
 <tr><td>Turn buttons</td><td>Oak offcut</td><td>6 × 2.5 × 2.2, on a single screw</td><td>2</td></tr>
-<tr><td>Sub riser</td><td>Oak offcut, felt feet</td><td>34 × 25 × 5</td><td>1</td></tr>
+<tr><td>Sub box</td><td>Solid oak: top 37 × 29.2 × 2 with a drip groove, front 35 × 34.4 × 1.8, base tray 35 × 26.4 × 2 with two 2 cm end lips, cleat 33 × 5 × 1.5; open at both ends</td><td>35 × 28.2 × 37.4</td><td>1</td></tr>
 <tr><td>Leg inserts</td><td>Brass M8 threaded inserts, set into the breadboard ends</td><td>—</td><td>4</td></tr>
 <tr><td>Folding brackets</td><td>Häfele Hebgo 287.43.428</td><td>arm 58, height 22</td><td>2</td></tr>
 <tr><td>Lift-off hinges</td><td>Union PowerLoad, 100 × 88</td><td>one 3-pack, same hand</td><td>3</td></tr>
@@ -470,7 +473,7 @@ def build():
 <h2 class="pb">6 · The side wall</h2>
 <p>One oak line at {n(g.LEDGE_TOP)} cm runs from the ledge over the TV, round the corner on the left upright, and along the side wall: first a 7 cm record ledge with four more LPs face-out, then an oak shelf for the PC over the end of the sofa. It ties the alcove to the rest of the room and moves the PC out of the TV's sightlines.</p>
 <figure class="render">{img("render_v13_side.png", "The PC side wall")}
-<figcaption>The side wall from the room: the ledge round the corner with its four LPs, the PC on its shelf with the keyboard tray's housing underneath, and nothing else on the wall: the leads run inside it, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on.</figcaption></figure>
+<figcaption>The side wall from the room: the ledge round the corner with its four LPs, the PC on its shelf with the keyboard tray's housing underneath, and nothing else on the wall: the leads run inside it, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on; its outline is dashed, with the depths marked: the alcove is 38 deep, so 38 of the 46 cm base sits inside it and 8 stands proud (picked out in gold), and the 30 cm uprights and shelves sit wholly inside.</figcaption></figure>
 <figure>{pc_shelf()}</figure>
 <ul>
 <li><b>Wrap ledge:</b> 134 × 7 × 2.4 cm with a 1.5 cm lip, on an oak cleat screwed to the side wall, butt-jointed to the left upright's front edge on two 10 mm dowels.</li>
@@ -576,7 +579,7 @@ def build():
 <h3>Sound layout</h3>
 <figure>{sound()}</figure>
 <ul>
-<li><b>Sub:</b> wireless, on an oak riser under the dining wall, between the folded bracket arms, on its side to the breast with the driver towards the TV and the rear port {n(round(g.HEBGO_X[1] - 1.4 - g.SUB_POS["x"][1]))} cm clear. On the front wall, beside the soundbar, its bass blends with the bar instead of coming from behind you; it's out of the walkway, so nobody trips on it or its lead; and the folded table and the oak riser frame it. If the bass booms, turn it down rather than moving it.</li>
+<li><b>Sub:</b> wireless, under the dining wall between the folded bracket arms, standing sideways in its oak box: the driver fires out of the box's open east end towards the TV, the rear port out of its open west end with {n(round(g.HEBGO_X[1] - 1.4 - g.SUB_POS["x"][1]))} cm clear (15–30 is advised<sup>{fit.ORDER.index("subport") + 1}</sup>). On the front wall, beside the soundbar, its bass blends with the bar instead of coming from behind you; it's out of the walkway, so nobody trips on it or its lead; and its box keeps spills and feet off it. If the bass booms, turn it down rather than moving it.</li>
 <li><b>Rears:</b> one on the side wall at seated ear height behind the sofa's corner, one on a stand past the sofa's west end; linked by a cable behind the sofa, powered from the new socket.</li>
 </ul>
 

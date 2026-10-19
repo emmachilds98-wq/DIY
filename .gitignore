@@ -16,3 +16,4 @@ media-wall/src/plan.html
 .DS_Store
 media-wall/src/guide.html
 media-wall/src/publish_files.json
+media-wall/src/media_wall_viewer_inline.html
