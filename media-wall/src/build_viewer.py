@@ -288,6 +288,12 @@ summary .part { font-weight: 400; }
 .pfilter { margin: 4px 0 14px; display: grid; gap: 6px; }
 .pfilter .seg { flex-wrap: wrap; }
 .step[hidden] { display: none; }
+/* v13.7: lighting scenes */
+.scenes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 8px 0 18px; }
+.scenes > * { min-width: 0; }
+.scenes .seg { flex-wrap: wrap; }
+.scene[hidden] { display: none; }
+.scene ul { margin: 6px 0 0; }
 /* build steps */
 .steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
@@ -360,10 +366,23 @@ def _tablink(tab):
     return f'<a href="#{tab}" data-go="{tab}">{TABNAME[tab]}</a> tab'
 
 
+def scenes_block():
+    """v13.7: the lighting scenes as buttons: one scene's drawing and notes at a time."""
+    import scenes as SC
+    import diagrams as D
+    btns = "".join(f'<button type="button" data-scene="{k}" aria-pressed="{"true" if i == 0 else "false"}">{html.escape(name)}</button>'
+                   for i, (k, name, *_r) in enumerate(SC.SCENES))
+    panes = "".join(f'<div class="scene" data-sc="{k}"{"" if i == 0 else " hidden"}><figure><svg-placeholder/>{D.light_scene(k)}</figure>'
+                    f'<ul>{"".join(f"<li>{x}</li>" for x in notes)}</ul></div>'
+                    for i, (k, name, desc, lv, notes) in enumerate(SC.SCENES))
+    return (f'<div class="scenes"><div class="seg" role="group" aria-label="Lighting scene" id="scene-btns">{btns}</div>{panes}</div>').replace("<svg-placeholder/>", "")
+
+
 def deck_section(html_):
     """A plan section made fit for a tab: cross-references become tab links, wide tables scroll, drawings sit on paper."""
     html_ = re.sub(r"<!--fit-->.*?<!--/fit-->", f'<p class="notice">Every zone\'s checks, with a filter for the tight ones, are in the {_tablink("checks")}.</p>', html_, flags=re.S)
     html_ = re.sub(r"<!--confirm-->.*?<!--/confirm-->", "", html_, flags=re.S)
+    html_ = re.sub(r"<!--scenes-->.*?<!--/scenes-->", lambda m: scenes_block(), html_, flags=re.S)
     html_ = html_.replace("Full-resolution renders come with this plan.", f"Switch views and greens in the {_tablink('views')}.")
     html_ = html_.replace("need a check on site (section 3)", f"need a check on site ({_tablink('checks')})")
     html_ = re.sub(r"\(section (\d+)\)", lambda m: "(" + _tablink(SEC_TAB[m.group(1)]) + ")", html_)
@@ -494,7 +513,7 @@ def page(site=False):
 {STYLE}
 <div class="wrap">
   <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.6</p>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.7</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
     <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table, the network and power, step-by-step build instructions and the buy list with what each phase costs. Ticks, amounts and answers save for both of you.</p>
   </header>
@@ -510,7 +529,7 @@ def page(site=False):
       <p class="caption">Thirteen steps in order, each labelled with its part of the house, with what to buy before each. Total about £{money(lo_tot, hi_tot)}, with no electrician on top: the electrics are your own job (steps 3 and 12). The cost of each phase is charted in the {_tablink("buy")}.</p>
       <ol class="runlist">{run_list}</ol>
     </div>
-    <details class="changes"><summary>What changed, v{VERSION} to 13.6</summary><div class="doc">
+    <details class="changes"><summary>What changed, v{VERSION} to 13.7</summary><div class="doc">
       <p>{decision}</p>
       <p><b>On this page:</b> the plan, every drawing, the build steps and the buy list now live here in tabs, with the cost of each phase charted against what you've paid, so nothing needs downloading from GitHub.</p>
     </div></details>
@@ -990,6 +1009,16 @@ paintSteps();
     snap.docChanges().forEach(ch => {{ if (ch.type === "removed") delete sstate[ch.doc.id]; else sstate[ch.doc.id] = ch.doc.data(); }});
     paintSteps();
   }}, () => {{}});
+}})();
+(() => {{
+  // v13.7: lighting scene buttons
+  const sb = document.getElementById("scene-btns");
+  if (!sb) return;
+  sb.addEventListener("click", e => {{
+    const b = e.target.closest("button[data-scene]"); if (!b) return;
+    sb.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    document.querySelectorAll(".scene").forEach(d => {{ d.hidden = d.dataset.sc !== b.dataset.scene; }});
+  }});
 }})();
 (() => {{
   // v13.6: show one part of the build at a time

@@ -368,7 +368,7 @@ def full():
             ]),
         12: dict(
             parts=["Both Wolston-style spot bars and eight warm-white dimmable E14 bulbs, 6 W max", "Two LED-compatible dimmers (trailing edge), in your switches' finish",
-                   "2700K LED strip, two aluminium channels, a plug-in driver with an inline switch", "6500K bias light for the TV", "A lamp and a 2700K bulb"],
+                   "2700K LED strip, two aluminium channels, a plug-in driver with an inline dimmer", "6500K bias light for the TV", "A lamp and a 2700K bulb"],
             hardware=["Connector block or lever connectors (if the bar's flex needs them)", "Earth sleeving, insulating tape"],
             tools=["Two-pole voltage tester (GS38) and its proving unit", "MCB lock-off and padlock", "Insulated screwdrivers, wire strippers", "Step ladder", "A helper to hold the bar"],
             draw=[],

@@ -1811,3 +1811,72 @@ def leaf_case():
         o.append(t(0, yb + i * 15, nn, 9.8, "start", 400, INK))
     return svg(W, H, "\n".join(o), "The leaf carries the legs: a slim oak frame underneath holds all eight",
                "To scale. A from underneath, B in section, C the steps from folded to six")
+
+
+def light_scene(key):
+    """v13.7: one lighting scene on the room plan, from above: every light layer drawn at the scene's level (glow size and
+    strength), the room dimmed by how much light there is overall. Levels from scenes.py."""
+    import scenes as SC
+    g = G
+    sc = next(s for s in SC.SCENES if s[0] == key)
+    lv = {k: v / 100 for k, v in sc[3].items()}
+    W, H = 860, 560
+    k = 1.25
+    o = []
+    X, Y = _room(o, k, 16, 74)
+    _sofa(o, X, Y, k, label=False)
+    _side_wall(o, X, Y, k)
+    if key == "dinner":   # the table set for four at the wall
+        x0, x1 = g.TABLE_X
+        o.append(f'<rect x="{X(x1):.1f}" y="{Y(g.TABLE_Z[1]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.TABLE[1]*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
+    # dim the room by the scene's overall light
+    total = (lv["strip"] * 1.0 + lv["bar1"] * 0.8 + lv["bar2"] * 0.6 + lv["uprights"] * 0.4 + lv["lamp"] * 0.3) / 3.1
+    dark = 0.62 * (1 - total)
+    o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(g.WINDOW_Z):.1f}" width="{g.ROOM_W*k:.1f}" height="{g.ROOM_D*k:.1f}" fill="#0d1410" opacity="{dark:.2f}"/>')
+    o.append('<defs><radialGradient id="lglow"><stop offset="0" stop-color="#ffd27a" stop-opacity="0.95"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>'
+             '<radialGradient id="bglow"><stop offset="0" stop-color="#cfe3ff" stop-opacity="0.95"/><stop offset="1" stop-color="#cfe3ff" stop-opacity="0"/></radialGradient></defs>')
+    o.append(f'<clipPath id="roomclip"><rect x="{X(g.ROOM_W):.1f}" y="{Y(g.WINDOW_Z):.1f}" width="{g.ROOM_W*k:.1f}" height="{g.ROOM_D*k:.1f}"/></clipPath>')
+    def glow(x, z, r, v, grad="lglow"):
+        if v > 0:
+            o.append(f'<circle clip-path="url(#roomclip)" cx="{X(x):.1f}" cy="{Y(z):.1f}" r="{r * k * (0.45 + 0.55 * v):.1f}" fill="url(#{grad})" opacity="{0.25 + 0.75 * v:.2f}"/>')
+    # ceiling strip: round the room's edge, 4 in from the walls
+    if lv["strip"] > 0:
+        e = 4
+        sd = g.ALC_D - g.STAIR_D
+        pts_ = [(e, g.WINDOW_Z + e), (g.ROOM_W - e, g.WINDOW_Z + e), (g.ROOM_W - e, sd - e), (g.STAIR_X[0] - e, sd - e), (g.STAIR_X[0] - e, g.BREAST_D_WEST - e),
+                (g.BREAST_X[1] + e, g.BREAST_D_WEST - e), (g.BREAST_X[1] + e, -e), (g.ALC_W - e, -e), (g.ALC_W - e, g.ALC_D - e), (e, g.ALC_D - e)]
+        d = "M" + " L".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in pts_) + " Z"
+        o.append(f'<path d="{d}" fill="none" stroke="#ffd27a" stroke-width="{2 + 9 * lv["strip"]:.1f}" stroke-opacity="{0.25 + 0.6 * lv["strip"]:.2f}" stroke-linejoin="round"/>')
+    # the uprights' grooves, the bias light
+    for (a, b) in (g.UP_L, g.UP_R):
+        glow((a + b) / 2, g.ALC_D - g.UP_D / 2, 34, lv["uprights"])
+    if lv["bias"] > 0:
+        glow(g.TV_CX, g.TV_PANEL_Z[1] + 2, 60, lv["bias"], "bglow")
+    # the bars: beams to their aims, glows where they land
+    bars = [(g.PEND_X, g.PEND_Z, lv["bar1"], [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1"),
+            (g.BAR2_X, g.BAR2_Z, lv["bar2"], [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "bar 2")]
+    for bx, bz, v, heads, name in bars:
+        for dx, col, (ax, az) in heads:
+            if v > 0:
+                o.append(f'<line x1="{X(bx + dx):.1f}" y1="{Y(bz):.1f}" x2="{X(ax):.1f}" y2="{Y(az):.1f}" stroke="{col}" stroke-width="{1 + 3 * v:.1f}" stroke-opacity="{0.25 + 0.6 * v:.2f}"/>')
+                glow(ax, az, 26, v)
+        o.append(f'<rect x="{X(bx + 42):.1f}" y="{Y(bz) - 3:.1f}" width="{84 * k:.1f}" height="6" rx="3" fill="#f4f1ea" stroke="#8a857a"/>')
+        for dx, col, _ in heads:
+            o.append(f'<circle cx="{X(bx + dx):.1f}" cy="{Y(bz):.1f}" r="5.5" fill="{col}" stroke="#555" stroke-width="0.8" opacity="{1 if v > 0 else 0.45}"/>')
+    lx, lz = g.SOFA_X[1] + 16, g.SOFA_BACK_Z + 22
+    glow(lx, lz, 46, lv["lamp"])
+    o.append(f'<circle cx="{X(lx):.1f}" cy="{Y(lz):.1f}" r="6" fill="#f4f1ea" stroke="#8a857a"/>')
+    # level labels, outside the room on the left (west) side, one row per layer
+    lab_x = X(0) + 20
+    for i, (lk, name, ctl) in enumerate(SC.LAYERS):
+        y = 96 + i * 66
+        v = sc[3][lk]
+        o.append(t(lab_x, y, name.replace(", between the TV and the sofa", "").replace(", by the door", ""), 10.5, "start", 650))
+        o.append(t(lab_x, y + 15, SC.level_word(v) + " · " + ctl, 9.5, "start", 400, MUTED))
+        o.append(f'<rect x="{lab_x:.1f}" y="{y + 23:.1f}" width="200" height="6" rx="3" fill="#e6e2d8"/>')
+        if v:
+            o.append(f'<rect x="{lab_x:.1f}" y="{y + 23:.1f}" width="{2 * v:.0f}" height="6" rx="3" fill="#d9a032"/>')
+    o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 18, "media wall", 9, "middle", 650, "#7a5130"))
+    o.append(t(X(g.TABLE_CX), Y(0) + 22, "dining wall", 9, "middle", 650, "#8f5b45"))
+    o.append(t(X(g.ROOM_W), Y(g.ALC_D) + 34, "From above, to scale: the window at the top, the media wall bottom right. Glows show each light's level.", 9.5, "start", 400, MUTED))
+    return svg(W, H, "\n".join(o), f"Lighting scene: {sc[1]}", sc[2])

@@ -6,12 +6,12 @@ import base64, pathlib
 import geometry as G
 import fit
 import questions
-from diagrams import (leaf_case, sub_box, drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
+from diagrams import (light_scene, leaf_case, sub_box, drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
                       living_plan, why_layout, seating, dining_section)
 
 HERE = pathlib.Path(__file__).parent
 VERSION = "13"
-REVISION = "13.6: the legs in the leaf, the electrics as your own job, part labels"
+REVISION = "13.7: lighting scenes"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -100,7 +100,7 @@ TRACK = [
     ("To do", "Fix the backboard to the breast, hang the brackets and the top, check it folds and locks; set the legs to the right height", "6 Dining wall", "", None, None),
     ("To do", "Swap both ceiling fittings for the spot bars and both light switches for LED-compatible dimmers: like for like, your own job; step 12 has the safe way <b>(changed: no electrician)</b>", "7 Lighting", "", None, None),
     ("To buy", "Two LED-compatible dimmers (trailing edge), in your switches' finish, rated for the bars' LED load and your back boxes' depth <b>(new: on the buy list now)</b>", "7 Lighting", "2", 30, 60),
-    ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, a plug-in driver with an inline switch (on the 10-gang, so no fused spur); 6500K bias light for the TV <b>(changed)</b>", "7 Lighting", "1", 40, 90),
+    ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, a plug-in driver with an inline dimmer (on the 10-gang, so no fused spur); 6500K bias light for the TV <b>(changed)</b>", "7 Lighting", "1", 40, 90),
     ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars (£49 each), plus eight warm-white (2700K) dimmable E14 LED bulbs, 6 W max <b>(changed: two)</b>", "7 Lighting", "2", 120, 160),
     ("To buy", "A floor or table lamp by the sofa with a 2700K warm LED bulb: the low layer a green room needs <b>(new: from v6.1)</b>", "7 Lighting", "1", 30, 80),
     ("To buy", "Later: aluminium channel and opal diffuser for the existing ceiling LED strip (optional)", "7 Lighting", "1", 0, 80),
@@ -145,6 +145,19 @@ def part_chip(parts):
     if isinstance(parts, str):
         parts = [parts]
     return "".join(f'<span class="part" style="--pc:{PARTS[x]}">{x}</span>' for x in parts)
+
+
+def scenes_html():
+    """v13.7: the four lighting scenes: a table of every layer's setting, then each scene on the room plan. In the viewer the
+    figures become buttons (build_viewer replaces the part between the markers)."""
+    import scenes as SC
+    head = "<tr><th>Light</th><th>Control</th>" + "".join(f"<th>{s[1]}</th>" for s in SC.SCENES) + "</tr>"
+    rows = "".join(f"<tr><td>{name}</td><td>{ctl}</td>" + "".join(f"<td class='num'>{SC.level_word(s[3][k])}</td>" for s in SC.SCENES) + "</tr>"
+                   for k, name, ctl in SC.LAYERS)
+    figs = "".join(f"<figure>{light_scene(s[0])}</figure><ul>" + "".join(f"<li>{x}</li>" for x in s[4]) + "</ul>" for s in SC.SCENES)
+    return (f"<table class='tight'>{head}{rows}</table>"
+            "<p class='note'>Levels are roughly how far up each dimmer goes. One dimmer per bar, so its four heads stay aimed as in the table above; a scene changes how bright they are, not where they point.</p>"
+            f"<!--scenes-->{figs}<!--/scenes-->")
 
 
 def money(a, b):
@@ -354,7 +367,7 @@ def steps():
                  "Swap both light switches for the LED-compatible dimmers, wire for wire, and take down the two old fittings.",
                  "Hang bar 1 on the rose between the TV and the sofa and bar 2 on the point by the door, earth first; fit the 2700K bulbs and aim the heads (the table in the Paint and light tab).",
                  "The LED strips in the uprights' grooves on their plug-in driver (on the 10-gang), the ceiling strip through its notches, the bias light on the TV, the lamp by the sofa.",
-                 "Power back on: each dimmer runs smoothly from low to high with no flicker or buzz."],
+                 "Power back on: each dimmer runs smoothly from low to high with no flicker or buzz. Then try the four lighting scenes (Paint and light)."],
              check="No flicker at any dimmer setting, and from the sofa no spot head shows in the screen or shines in your eyes."),
         dict(n=13, part=["AV", "Network"], title="Connect and finish", who="You", time="1 day", buy=["8 TV, consoles and AV", "9 Vinyl kit", "10 Finishing"], see=[("network", "AV"), ("network", "Network")],
              do=["TV inputs: HDMI 1 the PC, HDMI 2 the soundbar (eARC), HDMI 3 the Series X, HDMI 4 the HDMI switch (Xbox One, 360, PS3, RetroTINK).",
@@ -573,7 +586,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 18, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).<br><b>v13.5:</b> the sub is back in the media wall. The two Xbox bricks lie flat at the back of their shelves by the power leads, the RetroTINK and the HDMI switch move into the space that frees in bay 1, and the sub takes the lower left of bay 2, under the TV, on an isolation riser beside the PS2 and PS1 (section 3). The dining wall has nothing under it now, so eight can sit down without moving anything.<br><b>v13.6:</b> the <b>leaf carries the legs</b>: a slim oak frame underneath holds all eight oak legs in clips, so the folded table stays a plain panel, nothing new stands in the room, and the leaf goes wherever the chairs are kept (section 5). <b>The electrics are your own job</b>: swapping the socket for a double, the two dimmers and the two spot bars are like-for-like and not notifiable in England, so there's no electrician's visit; there is a safe routine and a clear point to stop and call one (section 9). The PC now runs from the 10-gang. Every step and every buy-list phase carries a <b>coloured label</b> for its part (Network, Media wall, Dining table and so on), and one list says what we still need from you.</div>
+<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).<br><b>v13.5:</b> the sub is back in the media wall. The two Xbox bricks lie flat at the back of their shelves by the power leads, the RetroTINK and the HDMI switch move into the space that frees in bay 1, and the sub takes the lower left of bay 2, under the TV, on an isolation riser beside the PS2 and PS1 (section 3). The dining wall has nothing under it now, so eight can sit down without moving anything.<br><b>v13.7:</b> four <b>lighting scenes</b> (TV night, dinner, records, everyday evening), each drawn on the room plan with every light's level, so you know where to set each dimmer (section 8).<br><b>v13.6:</b> the <b>leaf carries the legs</b>: a slim oak frame underneath holds all eight oak legs in clips, so the folded table stays a plain panel, nothing new stands in the room, and the leaf goes wherever the chairs are kept (section 5). <b>The electrics are your own job</b>: swapping the socket for a double, the two dimmers and the two spot bars are like-for-like and not notifiable in England, so there's no electrician's visit; there is a safe routine and a clear point to stop and call one (section 9). The PC now runs from the 10-gang. Every step and every buy-list phase carries a <b>coloured label</b> for its part (Network, Media wall, Dining table and so on), and one list says what we still need from you.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -820,7 +833,7 @@ def _plan(deck=False):
 <h3>Light, in three warm layers</h3>
 <ul>
 <li><b>The LED strip on the ceiling</b> (as now): round the room's edge, into the alcove and across the breast; 2700K on a dimmer.</li>
-<li><b>Built into the oak:</b> a 2700K strip in each upright's groove, on a plug-in driver with an inline switch, on the 10-gang (no fused spur); a 6500K bias light on the back of the TV from its USB port.</li>
+<li><b>Built into the oak:</b> a 2700K strip in each upright's groove, on a plug-in driver with an inline dimmer, on the 10-gang (no fused spur); a 6500K bias light on the back of the TV from its USB port.</li>
 <li><b>A lamp by the sofa (from v6.1):</b> a floor or table lamp with a 2700K bulb at the sofa's west end. A deep green room needs a low, warm layer as well as the light from above; it's also the one to leave on for a film.</li>
 <li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>), parallel to the media wall, on your two existing ceiling points. Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa. Bar 2 hangs on the point between the door and the west wall, and its heads swing to the table. Each gets an LED-compatible dimmer in place of its switch: like-for-like swaps you do yourselves (step 12), with no new wiring. Bar 1 sits in front of the screen, so tilt its heads up and away: none should be visible in the screen from the sofa.</li>
 </ul>
@@ -831,6 +844,9 @@ def _plan(deck=False):
 <tr><td>Dusty pink</td><td>The turntable and the Series X</td><td>Down onto the way in, by the door</td></tr>
 </table>
 <p>Never point a head at the TV. For six or eight the table stands right under bar 2: point its blue and mustard heads straight down onto it. Use warm-white (2700K) dimmable E14 LED bulbs throughout.</p>
+<h3>Lighting scenes (v13.7)</h3>
+<p>Four ways to set the room with the controls it already has: the strip's controller, the inline dimmer on the uprights' LED driver, the two wall dimmers and the lamp's switch. No smart kit needed; if you add smart dimmers later, these are the scenes to save.</p>
+{scenes_html()}
 
 <h2 class="pb">9 · Power, cables and network</h2>
 <h3>Power</h3>

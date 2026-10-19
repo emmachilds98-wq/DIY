@@ -2,7 +2,7 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v13.6
+## Media wall and dining wall, v13.7
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with a fold-down oak dining table on the chimney breast. Everything below shows here on GitHub; nothing needs downloading.
@@ -15,6 +15,7 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - **Plain oak where it was slatted.** The sub stands on a low oak riser; the folded table is plain oiled oak between its pegged breadboard ends.
 - **The stairs go up** to the first floor beside the door, behind the wooden banister. Drawn rising away from the room: tell us if they run the other way.
 - **The drawer layouts:** every drawer in the base, to scale, with what goes in it (below).
+- **v13.7: lighting scenes.** TV night, dinner, records and everyday evening, each drawn on the room plan with where to set every dimmer (Paint & light tab, section 8 of the plan).
 - **v13.6: the leaf carries the legs.** A slim oak frame under the 60 × 80 leaf holds all eight tapered oak legs in clips, so the folded table stays plain and the leaf stores with the chairs.
 - **v13.6: the electrics are your own job.** The socket swapped for a double, the two dimmers and the two spot bars are like-for-like and not notifiable under Part P in England; steps 3 and 12 have the safe routine (isolate, lock off, prove dead) and a stop-and-call-an-electrician list. No new socket, no fused spur; the PC runs from the 10-gang. Total about £2,764–5,317, no electrician on top.
 - **v13.6: coloured part labels** (Prep, Network, Power & cables, Paint, Media wall, Dining table, Lighting, AV) on every step and buy-list phase, a "show one part" filter in the Build steps tab, and one shared list of open questions.

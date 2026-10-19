@@ -11,6 +11,19 @@
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
 
+## Update 19 Oct 2026, round 7h: v13.7 (lighting scenes)
+- Upgrade picked from the offered three: lighting scenes. Why: the client is now fitting the dimmers and bars themselves (step 12), so a
+  setting for each control per occasion is immediately usable, and it doesn't wait on an open question. (Furniture options wait on the
+  sofa return's length; daytime renders matter less now the paint is chosen and sampling is in step 4.)
+- `src/scenes.py` (LAYERS, SCENES: TV night, dinner, records, everyday evening), `diagrams.light_scene(key)` (room plan with each light's
+  glow and a level bar per layer), `build_doc.scenes_html()` in section 8 (table + four figures between `<!--scenes-->` markers),
+  `build_viewer.scenes_block()` turns them into buttons in the Paint & light tab. The uprights' LED driver now has an inline dimmer.
+- Found while drawing it: bar 2's point is assumed 35 cm from the west wall, but the 84 cm bar parallel to the media wall would reach
+  past it (433 + 42 = 475 > 467). Added to the `point2` question; if confirmed, hang it turned along the west wall.
+- **Deck conflict:** v13.6 was published as QRfYUvbPVQpSHFgaDN4YMU (version 1) at about 20:53Z; at 20:55Z another session or agent
+  published a different build to the same artifact (eyebrow v13.3, total £2,784–5,297, `.p-prep` part classes). v13.7 was NOT
+  published over it; the client was asked which to keep. Git was unaffected (branch head was this session's own commit).
+
 ## Update 19 Oct 2026, round 7g: v13.6 (leg case in the leaf, electrics as your own job, part labels, one questions list)
 Redone from the brief after the previous session hit its limit before committing.
 - Client: "include legs on the table build or make it more easy to get out and assembled ... store them as a part of the tables build

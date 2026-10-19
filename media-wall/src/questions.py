@@ -45,7 +45,7 @@ QUESTIONS = [
     ("models", "Console model numbers, from the labels underneath",
      "The rows assume the largest version of each console; real models may free up height.", "Photos of the labels are fine.", True),
     ("point2", "The second ceiling point's exact spot",
-     "The plan puts it about 35 cm in from the west wall and 2.3 m from the window.", "Measure from the west wall, and from the window wall.", False),
+     "The plan puts it about 35 cm in from the west wall and 2.3 m from the window. If it's really that close to the wall, the 84 cm bar can't hang parallel to the media wall (its end would hit the west wall): it would turn to run along the wall instead.", "Measure from the west wall, and from the window wall.", False),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
@@ -65,7 +65,7 @@ PDF_LINE = {
     "ports": "Wired ports for the projector (master) and the music room (bedroom 2)?",
     "surge": "The 10-gang: is it surge-protected, where are its two switches, and how long is it? It now feeds the PC too.",
     "models": "Console model numbers, from the labels underneath, to tighten the row heights; the plan assumes the largest version of each.",
-    "point2": "The second ceiling point's exact spot (the plan puts it about 35 cm in from the west wall, 2.3 m from the window).",
+    "point2": "The second ceiling point's exact spot (the plan puts it about 35 cm in from the west wall, 2.3 m from the window; that close, the 84 cm bar would have to turn along the wall).",
     "retrotink": "The RetroTINK-6X CE's size when it arrives (bay 1 allows 23 × 23 × 8).",
 }
 assert set(PDF_LINE) == {q[0] for q in QUESTIONS}
