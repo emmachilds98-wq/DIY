@@ -78,3 +78,8 @@ figure.render.small img { width: 78%; }
 table.tools tr.ph td { background: #eef0e8; font-weight: 650; font-size: 7.8pt; letter-spacing: 0.04em; text-transform: uppercase; color: #4a5040; }
 table.tools td:first-child { width: 30%; } table.tools td:last-child { width: 12%; }
 table.steps td:first-child { width: 14pt; text-align: center; font-weight: 650; } table.steps td:nth-child(2) { width: 16%; font-weight: 600; } table.steps td:last-child { width: 10%; }
+/* v13.5: steps in full */
+.need { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 12pt; font-size: 8.6pt; background: #f6f5f1; border: 1px solid #e6e3dc; border-radius: 6pt; padding: 6pt 10pt; margin: 4pt 0 8pt; break-inside: avoid; }
+.need h5, .fstep h5 { font-size: 9pt; font-weight: 650; margin: 8pt 0 3pt; }
+.need ul { padding-left: 12pt; margin: 0; }
+.fstep h3 .note { font-weight: 400; }

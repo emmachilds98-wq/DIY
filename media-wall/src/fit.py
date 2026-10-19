@@ -29,6 +29,8 @@ SOURCES = {
     "dining": "Book a Builder UK, small dining room ideas: 600 mm of table edge per diner; table edge to a wall 600 mm tight minimum, 750 mm to aim for, 1000–1100 mm to walk behind; dining height about 750 mm",
     "sofa": "Your photo of the sofa (18 Oct 2026): a black jumbo-cord L-sofa, the long side under the window ending in line with the breast's reveal, about 188 cm; the return's 168 is a typical corner-sofa size until measured",
     "subport": "Klipsch subwoofer placement guidance, as quoted by Cloudspress and TechYorker (2026): leave about 6–12 in (15–30 cm) between a rear-firing port and the nearest obstruction",
+    "psuplace": "Xbox Support (Microsoft), About the Xbox One power supply (archived): don't block its vents, don't put it in a confined space such as a bookcase, rack or stereo cabinet unless the space is well ventilated, don't stack devices on it, and lay it flat on its four rubber pads; the Xbox 360 brick's advice is the same",
+    "x360place": "Xbox Support (Microsoft), Xbox 360 placement tips, as quoted on Gaming Stack Exchange: an open, well-ventilated area, a hard surface, and away from high-vibrating sources such as subwoofers",
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
 }
 ORDER = list(SOURCES)
@@ -91,7 +93,40 @@ def zones():
     e_overlap = min(e_first + cw / 2, SB["x"][1]) - max(e_first - cw / 2, SB["x"][0])
     panel = 0.0 if g.PLAIN else g.RZ_SLATS[2]
     e_back = g.FREE_Z[0] + cd                                            # its back, at the table's edge
-    return [
+    sc = g.SUB_COL[1] - g.SUB_COL[0]
+    pc_ = g.PS_COL[1] - g.PS_COL[0]
+    if g.SUB_IN_WALL:   # v13.5: the bricks at the back of their rows; the sub in bay 2's lower left
+        bay1 = ("Bay 1, Xbox (BESTÅ frame on the 9 cm plinth)", "56.8 wide inside, 40 deep; the bricks lie at the back of their rows", [
+            ("Xbox One, original, + HDMI switch", "33.3 × 27.4 × 7.9; switch 12.7 × 5.9 × 2.5", ref("consoles", "ugreen"), "16 tall row", "8.1 above; the switch in the 23.5 beside it, at the front for its remote", PASS),
+            ("Xbox 360, original, + RetroTINK-6X CE", "30.9 × 25.8 × 8.3; RetroTINK allowed 23 × 23 × 8 (no size published)", ref("consoles", "rt6x"), "16 tall row", "7.7 above; 25.9 beside it for the RetroTINK: measure it when it arrives", CHECK),
+            ("Both bricks, flat at the back of their rows", "Xbox One 17 × 7.5 × 4.8; Xbox 360 allowed 21 × 10 × 6", ref("xb1psu", "x360psu", "psuplace"), "behind the switch and the RetroTINK, by the channel's power leads", "23 + 10 = 33 of the 40 depth for the RetroTINK and the 360's brick; on their rubber pads, nothing on top, open to the channel; 2 cm or more from the consoles' rear vents", PASS),
+            ("Game drawer", "box 54.3 × 35 on 350 mm runners; cases 19 × 13.5 × 1.4", ref("runners", "media"), "25.2 tall row, 40 deep", "about 3 above the leaning cases; 5 behind the box", PASS),
+            ("Depth with the leads", "console 27.4 + HDMI plug about 5", ref("consoles"), "40 deep, back open", "about 7.6, then the 4 cm channel", PASS),
+        ])
+        bay2 = ("Bay 2, PlayStation and the sub (BESTÅ frame on the plinth)", f"56.8 wide inside, 40 deep; under the PS3's shelf, the sub's column {r1(sc)} wide, a 12 mm ply divider, then {r1(pc_)} for the PS2 over the PS1", [
+            ("PS3, original, + controller basket", "32.5 × 27.4 × 9.8", ref("consoles"), "23.7 tall row, full width", "13.9 above; 24.3 beside for the basket", PASS),
+            ("The sub in its column", f"{r1(g.SUB[0])} × {r1(g.SUB[2])} × {r1(g.SUB[1])} tall, on a {r1(g.SUB_RISER_H)} isolation riser", ref("hisense"), f"{r1(sc)} wide × {r1(g.SUB_COL_TOP - g.SUB_COL_FLOOR)} tall", f"1 each side, {r1(g.SUB_COL_TOP - g.SUB_IN['y'][1])} above; it mustn't touch the divider or the frame", TIGHT),
+            ("The sub's driver and port", "front-firing driver, rear port; its front flush with the face frame", ref("hisense", "subport"), f"{r1(g.SUB_PORT_GAP)} from the port to the wall, through the open back and the channel", "inside the 15–30 advised for a rear port, at its low end: keep the channel behind bay 2 clear (Switch 2 and the retro 6-way go behind bay 1)", TIGHT),
+            ("PS2, original, over the PS1", "30.2 × 18.3 × 7.8 · 27 × 18.8 × 6", ref("consoles"), f"{r1(pc_)} wide; 16.5 and 17 rows on a part shelf", f"PS2 {r1((pc_ - 30.2) / 2)} each side, 8.7 above; PS1 {r1((pc_ - 27) / 2)} each side, 11 above; both open front and back", TIGHT),
+            ("Vibration: the consoles and the deck share the base with the sub", "Microsoft: keep the Xbox 360 away from high-vibrating sources such as subwoofers", ref("x360place"), "the sub on its riser, clear of the divider and the frame; the deck on isolation feet", "the 360 is a bay away, the PS2 and PS1 a divider away: play a disc game and a record at film volume; if anything skips, turn the sub down for that source, or put it back under the dining wall", CHECK),
+            ("Hidden slim drawer in the plinth", f"box {r1(g.PLINTH_DRAWER['box'][0])} × {r1(g.PLINTH_DRAWER['box'][1])} × {r1(g.PLINTH_DRAWER['box'][2])}, 300 mm full-extension runners, a finger-pull groove (no push-to-open at floor level)", ref("runners"), "9 cm plinth, 120 wide", "about 2 above and below the box; felt its runners, it's under the sub", PASS),
+            ("Switch 2 (TL-SG108) and the retro 6-way in the channel", "15.8 × 10.1 × 2.5; 6-way about 34 × 6 × 4", ref("sg108"), "4 cm channel, behind bay 1", "on their edges, clear of the sub's port", TIGHT),
+        ])
+    else:
+        bay1 = ("Bay 1, Xbox (BESTÅ frame on the 9 cm plinth)", "56.8 wide inside, 40 deep, rows as in v9", [
+            ("Xbox One, original, and its brick", "33.3 × 27.4 × 7.9; brick 17 × 7.5 × 4.8", ref("consoles", "xb1psu"), "16 tall row", "8.1 above; 21.5 beside the console for the brick", PASS),
+            ("Xbox 360, original, and its brick", "30.9 × 25.8 × 8.3; brick about 21 × 10 × 6", ref("consoles", "x360psu"), "16 tall row", "7.7 above; 25.9 beside for the brick", PASS),
+            ("Game drawer", "box 54.3 × 35 on 350 mm runners; cases 19 × 13.5 × 1.4", ref("runners", "media"), "25.2 tall row, 40 deep", "about 3 above the leaning cases; 5 behind the box", PASS),
+            ("Depth with the leads", "console 27.4 + HDMI plug about 5", ref("consoles"), "40 deep, back open", "about 7.6, then the 4 cm channel", PASS),
+        ])
+        bay2 = ("Bay 2, PlayStation (BESTÅ frame on the plinth)", "56.8 wide inside, 40 deep", [
+            ("PS3, original, + controller basket", "32.5 × 27.4 × 9.8", ref("consoles"), "23.7 tall row", "13.9 above; 24.3 beside for the basket", PASS),
+            ("PS2, original, + HDMI switch", "30.2 × 18.3 × 7.8; switch 12.7 × 5.9 × 2.5", ref("consoles", "ugreen"), "16.5 tall row", "8.7 above; 26.6 beside", PASS),
+            ("PS1, original, + RetroTINK-6X CE", "27 × 18.8 × 6; RetroTINK size not published", ref("consoles", "rt6x"), "17 tall row", "29.8 beside the PS1 reserved for it; measure it when it arrives", CHECK),
+            ("Hidden slim drawer in the plinth", f"box {r1(g.PLINTH_DRAWER['box'][0])} × {r1(g.PLINTH_DRAWER['box'][1])} × {r1(g.PLINTH_DRAWER['box'][2])}, 300 mm full-extension runners, a finger-pull groove (no push-to-open at floor level)", ref("runners"), "9 cm plinth, 120 wide", "about 2 above and below the box", PASS),
+            ("Switch 2 (TL-SG108) and the retro 6-way in the channel", "15.8 × 10.1 × 2.5; 6-way about 34 × 6 × 4", ref("sg108"), "4 cm channel", "on their edges", TIGHT),
+        ])
+    zs = [
         ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the left one now a corner post on the side wall; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
             ("LG OLED C6 55 in, on its stand", f"{r1(g.TV_W)} × {r1(g.TV_H)} × {r1(g.TV_D)} panel; {r1(g.TV_STAND_H)} tall on the stand", ref("lg"), f"{r1(g.TV_GAP)} wide", f"{r1(g.TV_CLEAR)} each side", PASS),
             ("Top of the screen", f"{r1(g.TV_TOP)} (bottom {r1(g.TV_BOTTOM)}, centre {r1(g.TV_CENTRE)})", ref("lg"), f"ledge at {r1(g.LEDGE_UNDER)}", f"{r1(g.LEDGE_UNDER - g.TV_TOP)}", PASS),
@@ -114,19 +149,8 @@ def zones():
             ("Books on the high shelf", "up to 30 tall", "", f"{r1(g.CEIL - g.HIGH_TOP)} to the ceiling", "9 over the tallest", PASS),
             ("Oak uprights", f"{r1(g.UPRIGHT_LEN)} long (worktop to ceiling)", ref("room"), f"{r1(g.CEIL)} ceiling", "buy 165 and scribe to the ceiling", PASS),
         ]),
-        ("Bay 1, Xbox (BESTÅ frame on the 9 cm plinth)", "56.8 wide inside, 40 deep, rows as in v9", [
-            ("Xbox One, original, and its brick", "33.3 × 27.4 × 7.9; brick 17 × 7.5 × 4.8", ref("consoles", "xb1psu"), "16 tall row", "8.1 above; 21.5 beside the console for the brick", PASS),
-            ("Xbox 360, original, and its brick", "30.9 × 25.8 × 8.3; brick about 21 × 10 × 6", ref("consoles", "x360psu"), "16 tall row", "7.7 above; 25.9 beside for the brick", PASS),
-            ("Game drawer", "box 54.3 × 35 on 350 mm runners; cases 19 × 13.5 × 1.4", ref("runners", "media"), "25.2 tall row, 40 deep", "about 3 above the leaning cases; 5 behind the box", PASS),
-            ("Depth with the leads", "console 27.4 + HDMI plug about 5", ref("consoles"), "40 deep, back open", "about 7.6, then the 4 cm channel", PASS),
-        ]),
-        ("Bay 2, PlayStation (BESTÅ frame on the plinth)", "56.8 wide inside, 40 deep", [
-            ("PS3, original, + controller basket", "32.5 × 27.4 × 9.8", ref("consoles"), "23.7 tall row", "13.9 above; 24.3 beside for the basket", PASS),
-            ("PS2, original, + HDMI switch", "30.2 × 18.3 × 7.8; switch 12.7 × 5.9 × 2.5", ref("consoles", "ugreen"), "16.5 tall row", "8.7 above; 26.6 beside", PASS),
-            ("PS1, original, + RetroTINK-6X CE", "27 × 18.8 × 6; RetroTINK size not published", ref("consoles", "rt6x"), "17 tall row", "29.8 beside the PS1 reserved for it; measure it when it arrives", CHECK),
-            ("Hidden slim drawer in the plinth", f"box {r1(g.PLINTH_DRAWER['box'][0])} × {r1(g.PLINTH_DRAWER['box'][1])} × {r1(g.PLINTH_DRAWER['box'][2])}, 300 mm full-extension runners, a finger-pull groove (no push-to-open at floor level)", ref("runners"), "9 cm plinth, 120 wide", "about 2 above and below the box", PASS),
-            ("Switch 2 (TL-SG108) and the retro 6-way in the channel", "15.8 × 10.1 × 2.5; 6-way about 34 × 6 × 4", ref("sg108"), "4 cm channel", "on their edges", TIGHT),
-        ]),
+        bay1,
+        bay2,
         ("Bay 3, the records (18 mm ply carcass from the floor)", "56.4 wide × 40 deep × 69.4 tall inside, under the turntable", [
             ("Two face-out record trays", "trays 53.9 × 40 on 400 mm runners, 68–70 kg pairs", ref("runners", "media"), "56.4 inside", "exact: 53.9 + 2 × 1.25 runner allowance = 56.4", PASS),
             ("Tray heights", "lower sleeves to 34.4, upper to 69.1", ref("media"), "top panel underside 71.2", "2.6 and 2.1 finger room", PASS),
@@ -170,6 +194,14 @@ def zones():
             ("Both spotlight bars under the ceiling", f"{r1(g.BAR[2])} drop", ref("wolston"), f"{r1(g.CEIL)} ceiling", f"lowest shade at {r1(g.CEIL - g.BAR[2])}", PASS),
         ]),
     ]
+    if g.SUB_IN_WALL:   # v13.5: nothing under the dining wall now
+        gone = ("the sub's cover", "Sub under its oak cover", "The sound: no sides", "Spills", "Knocks: it can't", "Feet under the table")
+        for zi_, (title, space, rows) in enumerate(zs):
+            if title.startswith("The dining wall"):
+                rows = [r for r in rows if not any(k in r[0] for k in gone)]
+                rows.append(("Feet under the table, four at the wall", "nothing under it: the sub is in the alcove base", ref("terje"), f"table {r1(td)} deep", f"{r1(td)} of clear legroom along the breast; eight need no cover lifted off", PASS))
+                zs[zi_] = (title, space, rows)
+    return zs
 
 
 def status_class(s):

@@ -1143,6 +1143,8 @@ def subwoofer():
     """The Hisense sub under the dining wall on its oak riser, inside a slatted oak box that lifts off (v12): about 40%
     open on the front and both ends so the sound and the rear port's air get out, a solid top, hands and feet kept out."""
     o = []
+    if G.SUB_IN_WALL:   # v13.5: the sub stands in bay 2 (drawn with the bays); the dining wall keeps none
+        return ""
     xa, xb = G.SUB_POS["x"]
     za, zb = G.SUB_POS["z"]
     if G.PLAIN:   # v13.2: the sub's oak cover: no sides, no front; a backboard on the breast, a solid top over it, a lipped tray
@@ -1243,13 +1245,40 @@ def _unit():
             q.append(bay_interior(a, b, 1.6, 62.4))
             q.append(poly([P(a, 62.4, 2), P(b, 62.4, 2), P(b, 40, 2), P(a, 40, 2)], "url(#warmpool)", 'opacity="0.9"'))
         q.append(ply_shelf(1.6, 58.4, 26.8)); q.append(ply_shelf(1.6, 58.4, 44.6))
-        q.append(xbox360(5, 28.6, 6)); q.append(box(38.5, 28.6, 9, 18, 6.2, 10, "#262628", "#333336", "#1a1a1c"))
-        q.append(xboxone(5, 46.4, 6)); q.append(box(40.5, 46.4, 9, 16, 5.6, 9, "#262628", "#333336", "#1a1a1c"))
-        q.append(ply_shelf(61.6, 118.4, 18.6)); q.append(ply_shelf(61.6, 118.4, 36.9))
-        q.append(ps1(63.5, 1.6, 6))
-        q.append(box(93.5, 1.6, 8, 20, 4.5, 15, "#2a2b2e", "#3a3b3f", "#1a1b1d")); q.append(box(95, 3.4, 7.99, 1.6, 0.6, 0.1, "#79b8ff"))
-        q.append(ps2(63.5, 20.4, 6))
-        q.append(box(97, 20.4, 3, 13, 2.4, 7, "#1f1f22", "#303034")); q.append(box(98, 21.2, 2.99, 1, 0.5, 0.1, "#ff5a4a"))
+        if G.SUB_IN_WALL:
+            # v13.5: the bricks lie flat at the back of their rows, by the power leads; the RetroTINK and the HDMI
+            # switch take the fronts they free
+            q.append(box(36.5, 28.6, 27, 21, 6, 10, "#262628", "#333336", "#1a1a1c"))          # Xbox 360 brick, at the back
+            q.append(xbox360(5, 28.6, 6))
+            q.append(box(37.5, 28.6, 6, 20, 4.5, 15, "#2a2b2e", "#3a3b3f", "#1a1b1d")); q.append(box(39, 30.4, 5.99, 1.6, 0.6, 0.1, "#79b8ff"))
+            q.append(box(39.5, 46.4, 30, 17, 4.8, 7.5, "#262628", "#333336", "#1a1a1c"))       # Xbox One brick, at the back
+            q.append(xboxone(5, 46.4, 6))
+            q.append(box(41, 46.4, 4, 12.7, 2.5, 5.9, "#1f1f22", "#303034")); q.append(box(42, 47.2, 3.99, 1, 0.5, 0.1, "#ff5a4a"))
+        else:
+            q.append(xbox360(5, 28.6, 6)); q.append(box(38.5, 28.6, 9, 18, 6.2, 10, "#262628", "#333336", "#1a1a1c"))
+            q.append(xboxone(5, 46.4, 6)); q.append(box(40.5, 46.4, 9, 16, 5.6, 9, "#262628", "#333336", "#1a1a1c"))
+        if G.SUB_IN_WALL:
+            # v13.5: bay 2's lower part splits: the sub's column on the left (under the TV), a 12 mm ply divider,
+            # and the PS2 over the PS1 on a part shelf on the right
+            c0, c1 = G.SUB_COL[0] - G.FILLER, G.SUB_COL[1] - G.FILLER
+            p0, p1 = G.PS_COL[0] - G.FILLER, G.PS_COL[1] - G.FILLER
+            sx0, sx1 = G.SUB_IN["x"][0] - G.FILLER, G.SUB_IN["x"][1] - G.FILLER
+            ys, (sw, sh, sd) = 1.6 + G.SUB_RISER_H, G.SUB
+            q.append(box(c1, 1.6, 2, G.SUB_DIV_T, 35.3, 38, "#d8c39f", "#e6d2ae", "#b99e78"))   # the divider
+            q.append(ply_shelf(p0, p1, 18.6)); q.append(ply_shelf(61.6, 118.4, 36.9))
+            q.append(ps1(p0 + 2.6, 1.6, 6))
+            q.append(ps2(p0 + 1.0, 20.4, 6))
+            q.append(box(sx0 - 0.5, 1.6, 2, sw + 1, G.SUB_RISER_H, sd - 2, "#3a3d3a", "#4a4e4a", "#2c2f2c"))   # isolation riser
+            q.append(box(sx0, ys, 0.05, sw, sh, sd, "#1a1a1b", "#2b2b2d", "#111112"))           # the sub, driver to the room
+            q.append(disc_z(sx0 + sw / 2, ys + sh / 2, 0.0, 8.6, "#3a3b3e", 'stroke="#555" stroke-width="1"'))
+            q.append(disc_z(sx0 + sw / 2, ys + sh / 2, -0.02, 7.6, "#0c0c0c"))
+            q.append(disc_z(sx0 + sw / 2, ys + sh / 2, -0.04, 2.5, "#2a2a2c"))
+        else:
+            q.append(ply_shelf(61.6, 118.4, 18.6)); q.append(ply_shelf(61.6, 118.4, 36.9))
+            q.append(ps1(63.5, 1.6, 6))
+            q.append(box(93.5, 1.6, 8, 20, 4.5, 15, "#2a2b2e", "#3a3b3f", "#1a1b1d")); q.append(box(95, 3.4, 7.99, 1.6, 0.6, 0.1, "#79b8ff"))
+            q.append(ps2(63.5, 20.4, 6))
+            q.append(box(97, 20.4, 3, 13, 2.4, 7, "#1f1f22", "#303034")); q.append(box(98, 21.2, 2.99, 1, 0.5, 0.1, "#ff5a4a"))
         q.append(ps3(63.5, 38.7, 6))
         q.append(box(99, 38.7, 4, 17.5, 10, 16, "#c9a26a", "#d8b480", "#a98455"))
         for i in range(5):
@@ -1721,10 +1750,15 @@ def services(show_hidden):
     o.append(path([(1.5, 4, G.SOCKET["z"] - 2), (1.5, 4, bf - 0.5), (4, 4, bf + 20), (4, 4, 35), (14, 6, 35), (14, 77, 33), gang], CORAL, 2.0))
     o.append(path([(1.5, 3, G.SOCKET["z"] + 2), (1.5, 3, bf - 0.5), (6, 3, 36), (66, 3, 36)], CORAL, 2.0))
     # the sub's mains from the 10-gang: down the slot, along the channel to bay 3's end, out at the reveal, along the breast's skirting
-    sx = G.SUB_POS["x"][0] + 4
-    o.append(path([(20, 77, 34), (20, 4, 36), (182, 4, 36), (185, 4, -1), (sx, 4, -1)], CORAL, 1.8))
-    # the 10-gang lying behind the TV; the retro 6-way in the channel behind bay 2
-    for (xa, ya, xb, yb, z) in ((10, WORKTOP, 66, WORKTOP + 4.5, 34), (66, 1, 100, 5.5, 36)):
+    if G.SUB_IN_WALL:   # v13.5: the sub's lead from the 10-gang, down the slot to the back of bay 2
+        sx = (G.SUB_IN["x"][0] + G.SUB_IN["x"][1]) / 2
+        o.append(path([(20, 77, 34), (20, 4, 36), (sx, 4, 36), (sx, G.SUB_IN["y"][0] + 4, G.SUB_IN["z"][1] + 1)], CORAL, 1.8))
+    else:
+        sx = G.SUB_POS["x"][0] + 4
+        o.append(path([(20, 77, 34), (20, 4, 36), (182, 4, 36), (185, 4, -1), (sx, 4, -1)], CORAL, 1.8))
+    # the 10-gang lying behind the TV; the retro 6-way in the channel (behind bay 1 now: bay 2's back is the sub's port)
+    six = (10, 1, 44, 5.5, 36) if G.SUB_IN_WALL else (66, 1, 100, 5.5, 36)
+    for (xa, ya, xb, yb, z) in ((10, WORKTOP, 66, WORKTOP + 4.5, 34), six):
         p1, p2 = P(xa, ya, z), P(xb, yb, z)
         o.append(f'<rect x="{p1[0]:.1f}" y="{p2[1]:.1f}" width="{p2[0]-p1[0]:.1f}" height="{p1[1]-p2[1]:.1f}" fill="{GOLD}" fill-opacity="0.15" stroke="{GOLD}" stroke-width="2" stroke-dasharray="6 4"/>')
     return "\n".join(o)
@@ -1857,9 +1891,12 @@ def measure_layer(kind):
         x0, x1 = g.TABLE_X
         o.append(m3((x0, g.FOLDED_TOP + 2, -6), (x1, g.FOLDED_TOP + 2, -6), f"table {g.TABLE[0]:g} wide, folded", dy=-8))
         o.append(m3((x1 + 2, g.RAIL_TOP, -6), (x1 + 2, g.FOLDED_TOP, -6), f"{g.TABLE[1]:g}", dx=18, dy=0))
-        hb = g.SUB_HOOD
-        o.append(m3((hb["x"][0] - 1, hb["h"] + 2, hb["z"][0]), (hb["x"][1] + 1, hb["h"] + 2, hb["z"][0]), "sub cover 37", dy=-8, size=14))
-        o.append(m3((hb["x"][1] + 3, 0, hb["z"][0]), (hb["x"][1] + 3, hb["h"], hb["z"][0]), f"{hb['h']:g}", dx=18, dy=0, size=14))
+        if g.SUB_IN_WALL:
+            o.append(m3((g.SUB_COL[0], g.SUB_COL_TOP + 1, bf - 0.5), (g.SUB_COL[1], g.SUB_COL_TOP + 1, bf - 0.5), f"sub {g.SUB_COL[1] - g.SUB_COL[0]:g}", dy=-6, size=14))
+        else:
+            hb = g.SUB_HOOD
+            o.append(m3((hb["x"][0] - 1, hb["h"] + 2, hb["z"][0]), (hb["x"][1] + 1, hb["h"] + 2, hb["z"][0]), "sub cover 37", dy=-8, size=14))
+            o.append(m3((hb["x"][1] + 3, 0, hb["z"][0]), (hb["x"][1] + 3, hb["h"], hb["z"][0]), f"{hb['h']:g}", dx=18, dy=0, size=14))
         d0, d1 = g.DOOR_X
         o.append(m3((d0, 200, g.BREAST_D_WEST - 1), (d1, 200, g.BREAST_D_WEST - 1), f"door about {d1 - d0:g}", dy=-8, size=14))
         o.append(m3((d1 - 4, 0, g.BREAST_D_WEST - 1), (d1 - 4, 198, g.BREAST_D_WEST - 1), "198", dx=-20, dy=0, size=14))
@@ -1891,22 +1928,23 @@ JOIN_KEY = [
     (14, (180, 74.6, G.BASE_FRONT_Z), f"Solid oak worktop {G.ALC_W:g} × {G.BASE_D:g} × 3, top at 76"),
     (H_, "In the alcove base"),
     (15, (93, 5, G.BASE_FRONT_Z), "Oak face frame; its bottom rail hides the 9 cm plinth"),
-    (16, (23, 59.4, G.BASE_FRONT_Z + 6), "Xbox One + power brick · bay 1 top row"),
-    (17, (23, 41.6, G.BASE_FRONT_Z + 6), "Xbox 360 + power brick · bay 1 middle row"),
+    (16, (23, 59.4, G.BASE_FRONT_Z + 6), "Xbox One + HDMI switch · its brick flat at the back" if G.SUB_IN_WALL else "Xbox One + power brick · bay 1 top row"),
+    (17, (23, 41.6, G.BASE_FRONT_Z + 6), "Xbox 360 + RetroTINK · its brick flat at the back" if G.SUB_IN_WALL else "Xbox 360 + power brick · bay 1 middle row"),
     (18, (15, 24, "drawer"), "Game drawer: 2 face-out bins, spine-up rows behind"),
     (19, (83, 52.5, G.BASE_FRONT_Z + 6), "PS3 + controller basket · bay 2 top row"),
-    (20, (83, 33.3, G.BASE_FRONT_Z + 6), "PS2 + HDMI switch · bay 2 middle row"),
-    (21, (78, 15.5, G.BASE_FRONT_Z + 6), "PS1 + RetroTINK · bay 2 bottom row"),
+    (20, (106, 33.3, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (83, 33.3, G.BASE_FRONT_Z + 6), "PS2 · bay 2, beside the sub" if G.SUB_IN_WALL else "PS2 + HDMI switch · bay 2 middle row"),
+    (21, (106, 15.5, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (78, 15.5, G.BASE_FRONT_Z + 6), "PS1 · under the PS2" if G.SUB_IN_WALL else "PS1 + RetroTINK · bay 2 bottom row"),
     (22, (153, 56, G.BASE_FRONT_Z + 1), "Upper record tray: ~90 LPs + ~120 singles · bay 3"),
     (23, (153, 22, "tray"), "Lower record tray: the same, shown pulled out"),
     (24, (93, 4.6, G.BASE_FRONT_Z - 0.1), "Hidden slim drawer in the plinth, finger pull"),
+    *([(34, ((G.SUB_IN["x"][0] + G.SUB_IN["x"][1]) / 2, 36, G.SUB_IN["z"][0]), "Sub · bay 2, under the TV, on an isolation riser")] if G.SUB_IN_WALL else []),
     (H_, "The dining wall on the chimney breast"),
     (25, (G.TABLE_X[0] + 9, G.RAIL_TOP - 11, -G.RAIL[2]), "Oak backboard: lift-off hinges on top, brackets below"),
     (26, (G.TABLE_CX, 118, -7), "Oak table 110 × 80: folded, a plain oiled oak panel"),
     (27, (G.HEBGO_X[1], 40, -4), "Häfele Hebgo folding brackets, 500 kg a pair"),
     (28, (G.TABLE_X[0] + 16, G.FOLDED_TOP + 2, -3), "Turn buttons hold the folded table"),
     (29, (G.TABLE_CX + 21, G.FRAMES_Y + 17, -2.3), "Two framed LPs above"),
-    (34, (G.SUB_HOOD["x"][0] + 12, 22, G.SUB_HOOD["z"][0]), "Sub under an oak cover: no sides, a lipped tray, on the breast"),
+    *([] if G.SUB_IN_WALL else [(34, (G.SUB_HOOD["x"][0] + 12, 22, G.SUB_HOOD["z"][0]), "Sub under an oak cover: no sides, a lipped tray, on the breast")]),
     (H_, "The side wall"),
     (30, (25.5, 182, -150), "PC on its oak shelf, above the end of the sofa (see the room plan)"),
     (31, (3.4, G.PC_SHELF_TOP + 3, G.PC_SHELF_Z[1] + 4), "Brush grommet: the PC's leads drop into the wall"),
@@ -2237,7 +2275,7 @@ def all_svgs():
     sub = "Farrow & Ball Card Room Green No. 79 · drawn to the measured room, evening light"
     six_sub = "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end"
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v13", sub))
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v13.5: the sub in bay 2", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
     out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
                                    label=("The dining wall, down and set for four · v13", "Fold-down oak table on the chimney breast · " + sub))

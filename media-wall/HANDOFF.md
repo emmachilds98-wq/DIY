@@ -11,6 +11,24 @@
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
 
+## Update 19 Oct 2026, round 7f: v13.5 (sub back in the media wall, every step in full, HD renders)
+- Client: "adjust the media wall unit to still include the sub somewhere; the consoles' battery packs can be stored behind near
+  power cables. Re-assess, research, validate sizing"; "full build instructions step by step for the wall and the dining table";
+  "integrated in the one deck we are using, we should not be splitting info apart"; "improve the renders to HD".
+- `geometry.SUB_IN_WALL = True`: the Xbox bricks lie flat at the back of their rows (Microsoft PSU guidance, source `psuplace`);
+  the RetroTINK and HDMI switch move to bay 1's fronts; bay 2 below the PS3 shelf = sub column 23.4 wide (`SUB_COL`), 12 mm
+  divider, PS2 over PS1 in 32.2 (`PS_COL`). Sub on a 3 cm isolation riser, front flush with the face frame, port 15.6 cm from the
+  wall (`SUB_PORT_GAP`; Klipsch 15–30). The retro 6-way and Switch 2 move behind bay 1. `SUB_POS` follows the sub, so the plans
+  move with it; the dining wall's cover is gone (the old code paths are kept behind `not SUB_IN_WALL`).
+- Fit proof: 56 checks, 42 fit, 11 tight, 3 check (TV plugs, RetroTINK size, vibration: Microsoft says keep the 360 away from
+  subwoofers, source `x360place`; test on site, fallback is the dining wall). 
+- `src/instructions.py`: full instructions per step (parts, hardware, tools, drawings, numbered sub-assemblies); merged into
+  `build_doc.steps()`; the page's step cards show them with their drawings inline; the build guide PDF prints them in full.
+  Fixes on the way: table centre panel ordered 101 long (2.5 tongues), 8 leg inserts (the leaf has four), bay 2 divider/part shelf/riser.
+- HD: page images are WebP at 1.5 × (3300 wide, `make_images.ART_SCALE`), overlays WebP with alpha, a "View full size" lightbox.
+  Inline page ~5 MB. `build_viewer.uniq_svgs()` prefixes ids per inline drawing (patterns in hidden tabs don't paint).
+- Viewer version 11.
+
 ## Update 19 Oct 2026, round 7e: v13.4 (cutting list)
 - Viewer version 10. `cuts()` in build_doc.py: every made part grouped by stock (solid oak; birch ply 18, 12, 9, 6 mm;
   hardware), from the section 3/5/7 cut lists and v6.1's game drawer. New size: record tray sides 8 cm tall. Shown in the Build

@@ -8,7 +8,7 @@ On claude.ai the page declares: db (answers/, tracker/), user (who saved what), 
 import hashlib, html, json, pathlib, re, urllib.parse
 import geometry as G
 import fit
-from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools, cuts_html, cuts_text
+from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RULES, GUIDE_TIME, GUIDE_TECHNIQUES, GUIDE_PITFALLS, guide_tools, cuts_html, cuts_text, need_html, full_html, DIAGRAMS
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
@@ -273,7 +273,15 @@ a.chip:hover, button.chip:hover { box-shadow: inset 0 0 0 1px var(--oak); }
 .keycols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 16px; align-items: start; }
 .keycols .tscroll table { min-width: 0; }
 .doc figure { margin: 0 0 18px; }
-.doc figure img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); aspect-ratio: 1804 / 1148; object-fit: cover; }
+.doc figure img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); }
+.lightbox { position: fixed; inset: 0; z-index: 20; background: var(--bg); display: grid; grid-template-rows: auto 1fr;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.lbbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); }
+.lbscroll { overflow: auto; cursor: grab; touch-action: pan-x pan-y pinch-zoom; }
+.lbscroll:active { cursor: grabbing; }
+.lbwrap { position: relative; width: 1650px; max-width: none; }
+.lbwrap img { display: block; width: 1650px; max-width: none; height: auto; user-select: none; -webkit-user-drag: none; }
+.lbwrap #lb-dims { position: absolute; inset: 0; }
 .doc figure.dia { background: var(--paper); border: 1px solid var(--paper-line); border-radius: 10px; padding: 12px; overflow-x: auto; }
 .doc figure.dia svg { display: block; width: 100%; min-width: 640px; height: auto; }
 .doc figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; max-width: 78ch; }
@@ -305,6 +313,7 @@ details.changes > .doc { padding: 4px 14px 2px; }
 /* build steps */
 .steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
+.step > * { min-width: 0; }
 .step.done { border-color: var(--ok); }
 .shead { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 12px; align-items: center; }
 .sn { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-size: 1.15rem; }
@@ -319,6 +328,16 @@ details.changes > .doc { padding: 4px 14px 2px; }
 .sdo { margin: 0; padding-left: 1.3rem; display: grid; gap: 6px; max-width: 80ch; }
 .scheck { margin: 0; background: var(--ok-bg); border-radius: 8px; padding: 8px 12px; font-size: 15px; max-width: 80ch; }
 .ssee { margin: 0; font-size: 14px; color: var(--muted); }
+.need { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 18px; background: var(--note); border-radius: 8px; padding: 10px 14px; }
+.need h5 { margin: 0 0 4px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.need ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 3px; font-size: 14.5px; }
+details.sdraw > summary { cursor: pointer; font-size: 14px; color: var(--oak); font-weight: 700; padding: 2px 0; }
+details.sdraw figure.dia { margin: 8px 0 0; background: var(--paper); border: 1px solid var(--paper-line); border-radius: 10px; padding: 10px; overflow-x: auto; }
+details.sdraw figure.dia svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.sfull { display: grid; gap: 4px; max-width: 80ch; }
+.sfull h5 { margin: 10px 0 2px; font-family: var(--display); font-size: 1.02rem; font-weight: 700; }
+.sfull ol { margin: 0; padding-left: 1.6rem; display: grid; gap: 6px; }
+.sfull li::marker { font-variant-numeric: tabular-nums; color: var(--muted); }
 /* cost by phase */
 .chart { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
 .crow { display: grid; grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr) 9.5rem; gap: 4px 14px; align-items: center; }
@@ -413,10 +432,25 @@ def cost_chart(phases):
             '<p class="legend"><span><i class="k-lo"></i>Low estimate</span><span><i class="k-hi"></i>Up to the high estimate</span><span><i class="k-pd"></i>Paid so far</span></p></div>')
 
 
+def uniq_svgs(html_):
+    """Give every inline drawing its own ids: the same drawing can appear twice (in its tab and in a build step), and a
+    pattern or gradient defined in a hidden tab doesn't paint in a visible one."""
+    count = [0]
+    def one(m):
+        count[0] += 1
+        svg, tag = m.group(0), f"d{count[0]}"
+        for i in set(re.findall(r'id="([^"]+)"', svg)):
+            svg = (svg.replace(f'id="{i}"', f'id="{tag}-{i}"').replace(f"url(#{i})", f"url(#{tag}-{i})")
+                   .replace(f'href="#{i}"', f'href="#{tag}-{i}"'))
+        return svg
+    return re.sub(r"<svg\b.*?</svg>", one, html_, flags=re.S)
+
+
 def page(site=False):
+    import diagrams as D
     prefix = "media-wall/src/" if site else ""
-    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
-    imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.png" for v in ("join", "four", "six", "drawers", "side")})
+    imgs = {k: f"{prefix}art/{k}.webp" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
+    imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.webp" for v in ("join", "four", "six", "drawers", "side")})
     rows = track_rows()
     phases = phase_data(rows)
     _, lo_tot, hi_tot = phase_totals()
@@ -457,9 +491,12 @@ def page(site=False):
             f'<div><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
             f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label></div>'
             + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
-            + "<ol class=\"sdo\">" + "".join(f"<li>{d}</li>" for d in s["do"]) + "</ol>"
+            + need_html(s)
+            + ("<details class=\"sdraw\" open><summary>" + ("Drawing" if len(s.get("draw", [])) == 1 else "Drawings") + " for this step</summary>"
+               + "".join(f'<figure class="dia">{getattr(D, DIAGRAMS[d])()}</figure>' for d in s["draw"]) + "</details>" if s.get("draw") else "")
+            + f'<div class="sfull">{full_html(s)}</div>'
             f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
-            f'<p class="ssee">See: {see}</p></li>')
+            f'<p class="ssee">Also see: {see}</p></li>')
     run_list = "".join(
         f'<li><a href="#build" data-go="build" data-step="{s["n"]}"><span class="rn">{s["n"]}</span>{html.escape(s["title"])}</a>'
         f'<span class="rm">{html.escape(s["time"])}{"".join(" · " + html.escape(p["label"]) + (" £" + money(p["lo"], p["hi"]) if p["hi"] else "") for p in phases if p["name"] in s["buy"])}</span></li>'
@@ -470,7 +507,7 @@ def page(site=False):
     tabs = "".join(f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
     files_line = (f'Print copies of this plan (PDF) and the HD renders are also kept in the project folder on '
                   f'<a href="{GITHUB_OUT}" target="_blank" rel="noopener">GitHub, media-wall/out/</a>; you don\'t need them to use this page.')
-    return f"""<title>Portsmouth Close Media Wall</title>
+    return uniq_svgs(f"""<title>Portsmouth Close Media Wall</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -502,7 +539,7 @@ def page(site=False):
 
   <section class="panel" id="views" role="tabpanel" aria-labelledby="tb-views" hidden>
   <div class="viewer">
-    <div class="frame shotwrap"><img id="shot" alt="Render of the media wall" width="1804" height="1148"><img id="dims" class="dims" alt="" width="1804" height="1148" hidden></div>
+    <div class="frame shotwrap"><img id="shot" alt="Render of the media wall" width="3300" height="2100"><img id="dims" class="dims" alt="" width="3300" height="2100" hidden></div>
     <div class="controls">
       <div class="group"><span class="label" id="l-style">View</span>
         <div class="seg" role="group" aria-labelledby="l-style">
@@ -524,8 +561,16 @@ def page(site=False):
           <button id="k-key" aria-pressed="false">Show numbered key</button>
           <button id="k-dims" aria-pressed="false">Show measurements</button>
         </div></div>
+      <div class="group"><span class="label" id="l-zoom">HD</span>
+        <div class="seg" role="group" aria-labelledby="l-zoom">
+          <button id="k-full" type="button">View full size</button>
+        </div></div>
     </div>
     <p class="caption" id="cap"></p>
+  </div>
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="The render at full size">
+    <div class="lbbar"><span class="caption" id="lb-cap">Full size: drag or scroll to look round. Pinch to zoom on a phone.</span><button class="btn" id="lb-close" type="button">Close</button></div>
+    <div class="lbscroll" id="lb-scroll"><div class="lbwrap"><img id="lb-img" alt=""><img id="lb-dims" alt="" hidden></div></div>
   </div>
   <div class="band">
     <section>
@@ -708,6 +753,23 @@ $$("[data-paint]").forEach(b => b.addEventListener("click", () => {{ view.paint 
 keyBtn.addEventListener("click", () => {{ view.key = !view.key; draw(); }});
 dimsBtn.addEventListener("click", () => {{ view.dims = !view.dims; draw(); }});
 draw();
+
+/* ---------- full size (HD) */
+const lb = $("#lightbox"), lbImg = $("#lb-img"), lbDims = $("#lb-dims"), lbScroll = $("#lb-scroll");
+$("#k-full").addEventListener("click", () => {{
+  lbImg.src = shot.src; lbImg.alt = shot.alt;
+  lbDims.src = dims.src; lbDims.hidden = dims.hidden;
+  lb.hidden = false; document.body.style.overflow = "hidden";
+  requestAnimationFrame(() => {{ lbScroll.scrollLeft = (lbScroll.scrollWidth - lbScroll.clientWidth) / 2; lbScroll.scrollTop = (lbScroll.scrollHeight - lbScroll.clientHeight) / 2; }});
+  $("#lb-close").focus();
+}});
+function closeLb() {{ lb.hidden = true; document.body.style.overflow = ""; $("#k-full").focus(); }}
+$("#lb-close").addEventListener("click", closeLb);
+document.addEventListener("keydown", e => {{ if (e.key === "Escape" && !lb.hidden) closeLb(); }});
+let drag = null;
+lbScroll.addEventListener("pointerdown", e => {{ if (e.pointerType === "mouse") {{ drag = {{ x: e.clientX, y: e.clientY, l: lbScroll.scrollLeft, t: lbScroll.scrollTop }}; lbScroll.setPointerCapture(e.pointerId); }} }});
+lbScroll.addEventListener("pointermove", e => {{ if (drag) {{ lbScroll.scrollLeft = drag.l - (e.clientX - drag.x); lbScroll.scrollTop = drag.t - (e.clientY - drag.y); }} }});
+lbScroll.addEventListener("pointerup", () => {{ drag = null; }});
 
 /* ---------- fit proof filter */
 $("#fit-only").addEventListener("click", e => {{
@@ -947,7 +1009,7 @@ paintSteps();
   }}, () => {{}});
 }})();
 </script>
-"""
+""")
 
 
 def site():
@@ -961,7 +1023,7 @@ def site():
 
 def publish_files():
     """{published path: source} for the Artifact publish: the viewer images and the downloads."""
-    files = {f"art/{p.name}": str(p) for p in sorted((HERE / "art").glob("*.jpg"))}
+    files = {f"art/{p.name}": str(p) for p in sorted((HERE / "art").glob("*.webp"))}
     if not DOWNLOADS_ON_GITHUB:
         files.update({published_name(p): str(p) for p, _, kind in downloads_list() if kind != "PDF"})
     return files
@@ -971,8 +1033,8 @@ def inline_images(html_):
     """The artifact refuses some image uploads from an editor outside its organisation (false "cpio archive" sniffs), so the
     published copy carries its images as data URIs: media_wall_viewer_inline.html (gitignored), about 5 MB."""
     import base64
-    for p in sorted((HERE / "art").glob("*.jpg")) + sorted((HERE / "art").glob("*.png")):
-        mime = "png" if p.suffix == ".png" else "jpeg"
+    for p in sorted((HERE / "art").glob("*.webp")):
+        mime = "webp"
         uri = f"data:image/{mime};base64," + base64.b64encode(p.read_bytes()).decode()
         html_ = html_.replace(f"art/{p.name}", uri)
     return html_
@@ -983,9 +1045,9 @@ def doc_images():
     from PIL import Image
     for src, key in (("paint_grid.png", "doc_paint"), ("skirting_options.png", "doc_skirt")):
         im = Image.open(HERE / src).convert("RGB")
-        if im.width > 1800:
-            im = im.resize((1800, round(im.height * 1800 / im.width)))
-        im.save(HERE / "art" / f"{key}.jpg", quality=86)
+        if im.width > 2400:
+            im = im.resize((2400, round(im.height * 2400 / im.width)))
+        im.save(HERE / "art" / f"{key}.webp", "WEBP", quality=86, method=6)
 
 
 if __name__ == "__main__":

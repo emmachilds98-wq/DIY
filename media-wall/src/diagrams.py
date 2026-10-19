@@ -566,13 +566,23 @@ def front():
     o.append(rect(X(pxa), Y(g.PLINTH_DRAWER["y"][1]), (pxb - pxa) * s, 6 * s, "#f6f5f2", "#9a958b", 1, 1, 'stroke-dasharray="3 2"'))
     o.append(t(X((pxa + pxb) / 2), Y(1.2), "hidden drawer", 8, "middle", 500, MUTED))
     i1, i2 = b1a + 1.6, b1b - 1.6
-    cell(i1, i2, P_ + 46.4, P_ + 62.4, "Xbox One + brick", "16 row", "g")
-    cell(i1, i2, P_ + 28.6, P_ + 44.6, "Xbox 360 + brick", "16 row", "g")
+    inw = g.SUB_IN_WALL
+    cell(i1, i2, P_ + 46.4, P_ + 62.4, "Xbox One + HDMI switch" if inw else "Xbox One + brick", "16 row · brick at the back" if inw else "16 row", "g")
+    cell(i1, i2, P_ + 28.6, P_ + 44.6, "Xbox 360 + RetroTINK" if inw else "Xbox 360 + brick", "16 row · brick at the back" if inw else "16 row", "g")
     cell(i1, i2, P_ + 1.6, P_ + 26.8, "Game drawer", "~48 games", "g")
     i1, i2 = b2a + 1.6, b2b - 1.6
     cell(i1, i2, P_ + 38.7, P_ + 62.4, "PS3 + controllers", "23.7 row", "g")
-    cell(i1, i2, P_ + 20.4, P_ + 36.9, "PS2 + HDMI switch", "16.5 row", "g")
-    cell(i1, i2, P_ + 1.6, P_ + 18.6, "PS1 + RetroTINK", "17 row", "g")
+    if inw:   # v13.5: the sub's column on the left, the PS2 over the PS1 on the right
+        cell(g.SUB_COL[0], g.SUB_COL[1], g.SUB_COL_FLOOR, g.SUB_COL_TOP, "", "", "s")
+        o.append(rect(X(g.SUB_IN["x"][0]), Y(g.SUB_IN["y"][1]), g.SUB[0] * s, g.SUB[1] * s, SND_F, SND_S, 2))
+        o.append(f'<circle cx="{X((g.SUB_IN["x"][0] + g.SUB_IN["x"][1]) / 2):.1f}" cy="{Y((g.SUB_IN["y"][0] + g.SUB_IN["y"][1]) / 2):.1f}" r="{8.25 * s:.1f}" fill="none" stroke="{SND_S}" stroke-width="1.2"/>')
+        o.append(t(X((g.SUB_COL[0] + g.SUB_COL[1]) / 2), Y(g.SUB_IN["y"][1]) + 11, "sub", 10, "middle", 650, SND_S))
+        o.append(t(X((g.SUB_COL[0] + g.SUB_COL[1]) / 2), Y(g.SUB_COL_FLOOR) - 3, "3 cm riser", 8, "middle", 400, MUTED))
+        cell(g.PS_COL[0], g.PS_COL[1], P_ + 20.4, P_ + 36.9, "PS2", "16.5 row", "g")
+        cell(g.PS_COL[0], g.PS_COL[1], P_ + 1.6, P_ + 18.6, "PS1", "17 row", "g")
+    else:
+        cell(i1, i2, P_ + 20.4, P_ + 36.9, "PS2 + HDMI switch", "16.5 row", "g")
+        cell(i1, i2, P_ + 1.6, P_ + 18.6, "PS1 + RetroTINK", "17 row", "g")
     i1, i2 = b3a + 1.8, b3b - 1.8
     cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "Upper record tray", "~90 LPs + ~120 singles", "v")
     cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "Lower record tray", "~90 LPs + ~120 singles", "v")
@@ -592,7 +602,9 @@ def front():
         o.append(rect(X(bx - 1.4), Y(g.RAIL_TOP), 2.8 * s, g.HEBGO[0] * s, "#d6d8da", "#8a8c8f", 1))
     o.append(t(X(g.TABLE_CX), Y(46), "Hebgo brackets folded flat", 9, "middle", 600, MUTED))
     sxx = g.SUB_POS["x"]
-    if g.PLAIN:   # v13.2: the sub under its oak cover, seen from the room: backboard behind, the cover over it, the tray's lip
+    if g.SUB_IN_WALL:
+        pass      # v13.5: the sub is in bay 2 (drawn with the bays)
+    elif g.PLAIN:   # v13.2: the sub under its oak cover, seen from the room: backboard behind, the cover over it, the tray's lip
         hb = g.SUB_HOOD
         hx_ = hb["x"]
         o.append(rect(X(hx_[0]), Y(hb["h"] - hb["top"]), (hx_[1] - hx_[0]) * s, (hb["h"] - hb["top"]) * s, "#f1e4d0", "#c9a77a", 1, 1))
@@ -605,7 +617,7 @@ def front():
         o.append(rect(X(sxx[0] - 2), Y(5), (sxx[1] - sxx[0] + 4) * s, 5 * s, "#e9dccb", "#b88a55", 1))
         o.append(rect(X(sxx[0]), Y(5 + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
         o.append(t(X((sxx[0] + sxx[1]) / 2), Y(20), "sub", 9.5, "middle", 600))
-    if g.PLAIN:
+    if g.PLAIN or g.SUB_IN_WALL:
         pass
     else:
         bx_, bh_ = g.SUB_BOX["x"], g.SUB_BOX["h"]
@@ -727,8 +739,9 @@ def living_plan():
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
     o.append(t(X(sx[1]) - 5, Y(sz[0]) - 4, "sub", 9, "end", 600, SND_S))
-    bxx_, bzz_ = (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["x"], (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["z"]
-    o.append(rect(X(bxx_[1]), Y(bzz_[0]), (bxx_[1] - bxx_[0]) * k, (bzz_[1] - bzz_[0]) * k, "none", "#b88a55", 1, 1.4, 'stroke-dasharray="3 2"'))
+    if not g.SUB_IN_WALL:
+        bxx_, bzz_ = (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["x"], (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["z"]
+        o.append(rect(X(bxx_[1]), Y(bzz_[0]), (bxx_[1] - bxx_[0]) * k, (bzz_[1] - bzz_[0]) * k, "none", "#b88a55", 1, 1.4, 'stroke-dasharray="3 2"'))
     o.append(rect(X(16), Y(-280), 14 * k, 15 * k, SND_F, SND_S, 3))
     o.append(rect(X(g.SOFA_X[1] + 14), Y(-296), 15 * k, 14 * k, SND_F, SND_S, 3))
     o.append(t(X(g.SOFA_X[1] + 7), Y(-296) - 4, "rear", 8, "middle", 400, MUTED))
@@ -824,10 +837,11 @@ def seating():
         o.append(f'<rect x="{X(x1s):.1f}" y="{Y(zb):.1f}" width="{(x1s - 120)*k:.1f}" height="{(zf - zb)*k:.1f}" fill="#ecebe6" stroke="#b9b4a8"/>')
         o.append(t((X(x1s) + X(120)) / 2, Y((zb + zf) / 2) + 3, "sofa", 9, "middle", 600, MUTED))
         o.append(f'<rect x="{X(g.TABLE_X[1]):.1f}" y="{Y(-g.RAIL[2]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.RAIL[2]*k:.1f}" fill="#d9b48a"/>')
-        sxx, szz = g.SUB_POS["x"], g.SUB_POS["z"]
-        o.append(f'<rect x="{X(sxx[1]):.1f}" y="{Y(szz[0]):.1f}" width="{(sxx[1]-sxx[0])*k:.1f}" height="{(szz[1]-szz[0])*k:.1f}" fill="{SND_F}" stroke="{SND_S}"/>')
-        bxx_, bzz_ = (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["x"], (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["z"]
-        o.append(f'<rect x="{X(bxx_[1]):.1f}" y="{Y(bzz_[0]):.1f}" width="{(bxx_[1]-bxx_[0])*k:.1f}" height="{(bzz_[1]-bzz_[0])*k:.1f}" fill="none" stroke="#b88a55" stroke-width="1.3" stroke-dasharray="3 2"/>')
+        if not g.SUB_IN_WALL:   # v13.5: the sub is in the alcove base now, out of the dining area
+            sxx, szz = g.SUB_POS["x"], g.SUB_POS["z"]
+            o.append(f'<rect x="{X(sxx[1]):.1f}" y="{Y(szz[0]):.1f}" width="{(sxx[1]-sxx[0])*k:.1f}" height="{(szz[1]-szz[0])*k:.1f}" fill="{SND_F}" stroke="{SND_S}"/>')
+            bxx_, bzz_ = (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["x"], (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["z"]
+            o.append(f'<rect x="{X(bxx_[1]):.1f}" y="{Y(bzz_[0]):.1f}" width="{(bxx_[1]-bxx_[0])*k:.1f}" height="{(bzz_[1]-bzz_[0])*k:.1f}" fill="none" stroke="#b88a55" stroke-width="1.3" stroke-dasharray="3 2"/>')
         # the table and chairs
         if mode == "four":
             tx0, tx1 = g.TABLE_X
@@ -915,13 +929,14 @@ def dining_section():
     # frames
     o.append(rect(Z(2.2), Y(g.FRAMES_Y + 34), 2 * s, 34 * s, "#333", "#111", 0))
     # the sub on its riser, on its side to the breast, beyond the cut
-    sd_ = -g.SUB_POS["z"][0]
-    ys_ = g.SUB_HOOD["feet"] + g.SUB_HOOD["base"] if g.PLAIN else 5
-    o.append(rect(Z(sd_), Y(ys_ + g.SUB[1]), (sd_ - 2) * s, g.SUB[1] * s, SND_F, SND_S, 2, 1, 'stroke-dasharray="4 3"'))
-    o.append(t(Z(sd_ / 2 + 1), Y(22), "sub", 9, "middle", 600, SND_S))
-    bd_, bh_ = (-g.SUB_HOOD["z"][0], g.SUB_HOOD["h"]) if g.PLAIN else (-g.SUB_BOX["z"][0], g.SUB_BOX["h"])
-    o.append(rect(Z(bd_), Y(bh_), bd_ * s, bh_ * s, "none", "#b88a55", 1, 1.3, 'stroke-dasharray="4 3"'))
-    o.append(t(Z(bd_) - 4, Y(bh_ / 2), "oak cover" if g.PLAIN else "slatted box", 8.5, "end", 600, "#8a5a32"))
+    if not g.SUB_IN_WALL:   # v13.5: nothing under the table now; the sub is in the alcove base
+        sd_ = -g.SUB_POS["z"][0]
+        ys_ = g.SUB_HOOD["feet"] + g.SUB_HOOD["base"] if g.PLAIN else 5
+        o.append(rect(Z(sd_), Y(ys_ + g.SUB[1]), (sd_ - 2) * s, g.SUB[1] * s, SND_F, SND_S, 2, 1, 'stroke-dasharray="4 3"'))
+        o.append(t(Z(sd_ / 2 + 1), Y(22), "sub", 9, "middle", 600, SND_S))
+        bd_, bh_ = (-g.SUB_HOOD["z"][0], g.SUB_HOOD["h"]) if g.PLAIN else (-g.SUB_BOX["z"][0], g.SUB_BOX["h"])
+        o.append(rect(Z(bd_), Y(bh_), bd_ * s, bh_ * s, "none", "#b88a55", 1, 1.3, 'stroke-dasharray="4 3"'))
+        o.append(t(Z(bd_) - 4, Y(bh_ / 2), "oak cover" if g.PLAIN else "slatted box", 8.5, "end", 600, "#8a5a32"))
     # a chair pulled up to the table, room side
     w, d, h, sh = g.CHAIR
     cz0 = Dr + td - 8                     # its front edge 8 under the table
@@ -969,9 +984,15 @@ def sound():
     o.append(t(X(g.TV_CX), Y(-7) - 6, "soundbar under the TV", 9.5, "middle", 600, SND_S))
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
-    o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub under an oak cover on the dining wall," if g.PLAIN else "sub in a slatted oak box under the dining wall,", 9.5, "middle", 600, SND_S))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, (f"no sides: driver and port fire freely; port {g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1]:.0f} cm clear" if g.PLAIN else f"port {g.SUB_BOX['x'][1] - g.SUB_POS['x'][1]:.0f} cm from its slats"), 9, "middle", 400, MUTED))
+    if g.SUB_IN_WALL:   # v13.5: in bay 2, under the TV, the driver facing the room
+        xm = (sx[0] + sx[1]) / 2
+        o.append(arrow(X(xm), Y(sz[0]), X(xm), Y(sz[0] - 55), SND_S, 2))
+        o.append(t(X(xm) - 14, Y(sz[0] - 30), "sub in bay 2, under the TV,", 9.5, "end", 600, SND_S))
+        o.append(t(X(xm) - 14, Y(sz[0] - 30) + 13, f"facing the room; port {g.SUB_PORT_GAP:.1f} cm from the wall", 9, "end", 400, MUTED))
+    else:
+        o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
+        o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub under an oak cover on the dining wall," if g.PLAIN else "sub in a slatted oak box under the dining wall,", 9.5, "middle", 600, SND_S))
+        o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, (f"no sides: driver and port fire freely; port {g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1]:.0f} cm clear" if g.PLAIN else f"port {g.SUB_BOX['x'][1] - g.SUB_POS['x'][1]:.0f} cm from its slats"), 9, "middle", 400, MUTED))
     for (x, z, lab) in [(16, -280, "rear, on the side wall"), (g.SOFA_X[1] + 14, -296, "rear, on a stand")]:
         o.append(rect(X(x), Y(z), 15 * k, 15 * k, SND_F, SND_S, 3))
         o.append(t(X(x) + (10 if x < 100 else -6), Y(z) + 30, lab, 9, "start" if x < 100 else "end", 600, SND_S))
@@ -980,7 +1001,7 @@ def sound():
     o.append(rect(X(g.DECK_X[1]), Y(g.DECK_Z[0]), g.DECK[0] * k, g.DECK[2] * k, VIN_F, VIN_S, 2))
     o.append(t(X(g.DECK_X[0]) - 4, Y(g.DECK_Z[0]) - 4, "turntable", 9, "end", 600, VIN_S))
     d_ = ((g.SUB_POS["x"][1] - g.DECK_X[0]) ** 2 + (g.SUB_POS["z"][1] - g.DECK_Z[0]) ** 2) ** 0.5
-    o.append(t(X(120), Y(-60), f"sub to deck about {d_/100:.1f} m, on separate furniture", 9, "middle", 400, MUTED))
+    o.append(t(X(120), Y(-60), (f"sub to deck about {d_/100:.1f} m, in the same base: riser under the sub, feet under the deck" if g.SUB_IN_WALL else f"sub to deck about {d_/100:.1f} m, on separate furniture"), 9, "middle", 400, MUTED))
     return svg(W, H, "\n".join(o), "Sound: the sub on the front wall with the TV, the rears behind the sofa",
                "To scale, north at the top. The sub is wireless: on the front wall it blends with the soundbar, out of the way of feet")
 
@@ -1001,7 +1022,7 @@ def power():
         o.append(t(216, y + 15, it, 10.2, "start", 500 if it != "Spare" else 400, INK if it != "Spare" else MUTED))
     o.append(rect(546, 60, 300, 330, "#fbfaf7", LINE, 8))
     o.append(t(696, 82, "6-way for the retro set", 12.5, "middle", 650))
-    o.append(t(696, 97, "in the channel behind bay 2", 10, "middle", 400, MUTED))
+    o.append(t(696, 97, "in the channel behind bay 1" if G.SUB_IN_WALL else "in the channel behind bay 2", 10, "middle", 400, MUTED))
     for i, it in enumerate(["Xbox One", "Xbox 360", "PS3", "PS2", "PS1", "RetroTINK USB plug (5 V 2 A)"]):
         y = 112 + i * 36
         o.append(rect(558, y, 276, 28, GAME_F, LINE, 4))
@@ -1014,7 +1035,7 @@ def power():
     notes = ["The socket on the side wall is a single today: the electrician swaps it for a double, at the same spot.",
              "The retro switch moves to the wall: with the TV 2 cm from the left upright, the 10-gang's own switches can't be reached any more.",
              "PC and rear speakers: a new double socket low on the side wall behind the sofa; the PC (500–850 W) stays off these strips.",
-             "The sub plugs into the 10-gang: its lead runs along the channel and the breast's skirting. Both spot bars use existing ceiling points.",
+             ("The sub plugs into the 10-gang: its lead drops through the worktop's slot to the back of bay 2. Both spot bars use existing ceiling points." if G.SUB_IN_WALL else "The sub plugs into the 10-gang: its lead runs along the channel and the breast's skirting. Both spot bars use existing ceiling points."),
              "Load check: the 10-gang about 0.7 kW with everything on, the 6-way up to about 0.8 kW with a launch PS3 running; each well under 13 A (3 kW).",
              "Check the 10-gang is surge-protected; if not, use a surge-protected one for the TV and consoles. Label both outlets."]
     for i, n in enumerate(notes):
@@ -1061,16 +1082,18 @@ def routes():
     o.append(t(X(g.DECK_X[0] + 22), Y(90.2) - 4, "deck", 9.5, "middle", 600, VIN_S))
     o.append(rect(X(10), Y(80.5), 56 * s, 4.5 * s, VIN_F, VIN_S, 2))
     o.append(t(X(38), Y(73) + 14, "10-gang", 9.5, "middle", 600, VIN_S))
-    o.append(rect(X(66), Y(5.5), 34 * s, 4.5 * s, GAME_F, GAME_S, 2))
-    o.append(t(X(83), Y(5.5) - 4, "retro 6-way", 9, "middle", 600, GAME_S))
+    rx6 = 10 if g.SUB_IN_WALL else 66
+    o.append(rect(X(rx6), Y(5.5), 34 * s, 4.5 * s, GAME_F, GAME_S, 2))
+    o.append(t(X(rx6 + 17), Y(5.5) - 4, "retro 6-way", 9, "middle", 600, GAME_S))
     # the side wall: ledge, PC shelf and PC, sub on the floor, sockets
     o.append(rect(F(g.WRAP_Z[1]), Y(g.LEDGE_TOP), (g.WRAP_Z[0] - g.WRAP_Z[1]) * s, 2.4 * s, "#e9dccb", "#c9b79f", 1))
     o.append(rect(F(g.PC_SHELF_Z[1]), Y(g.PC_SHELF_TOP), (g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]) * s, 4 * s, "#e9dccb", "#c9b79f", 1))
     o.append(rect(F(g.PC_Z[1]), Y(g.PC_SHELF_TOP + g.PC_CASE[1]), g.PC_CASE[2] * s, g.PC_CASE[1] * s, GAME_F, GAME_S, 3))
     o.append(t(F((g.PC_Z[0] + g.PC_Z[1]) / 2), Y(g.PC_SHELF_TOP + 22), "PC", 11, "middle", 650))
     sxx = g.SUB_POS["x"]
-    o.append(rect(X(sxx[0]), Y(34.4), (sxx[1] - sxx[0]) * s, 34.4 * s, SND_F, SND_S, 2))
-    o.append(t(X((sxx[0] + sxx[1]) / 2), Y(36), "sub", 9, "middle", 600, SND_S))
+    sy0, sy1 = (g.SUB_IN["y"][0], g.SUB_IN["y"][1]) if g.SUB_IN_WALL else (0, 34.4)
+    o.append(rect(X(sxx[0]), Y(sy1), (sxx[1] - sxx[0]) * s, (sy1 - sy0) * s, SND_F, SND_S, 2))
+    o.append(t(X((sxx[0] + sxx[1]) / 2), Y(sy1) - 3, "sub", 9, "middle", 600, SND_S))
     o.append(f'<rect x="{F(g.ALC_D - side_len)}" y="{Y(80)}" width="{(g.CHAISE_END_Z - g.ALC_D + side_len)*s}" height="{80*s}" fill="none" stroke="#c9c5bb" stroke-dasharray="3 3"/>')
     o.append(t(F(-170), Y(40), "sofa (beyond)", 9, "middle", 400, MUTED))
     DATA = BLUE; MAINS = VIN_S; DC = "#2fa47a"; AUD = "#b07a1f"
@@ -1338,12 +1361,21 @@ def storage():
     # A · bays 1 and 2, front view inside each frame
     x0, y0 = 0, 56
     panel(x0, y0, 440, 250, "Bays 1 and 2: inside each BESTÅ frame", "56.8 wide × 40 deep inside; rows as planned, front view")
-    for b, (name, rows) in enumerate((("Bay 1 · Xbox", [(16, [(33.3, 7.9, DARK, "Xbox One"), (17, 4.8, "#55524c", "brick")]),
-                                                       (16, [(30.9, 8.3, "#e9e6df", "Xbox 360"), (21, 6, "#55524c", "brick")]),
-                                                       (25.2, [(54.3, 15, OAKF, "game drawer · ~48")])]),
-                                      ("Bay 2 · PlayStation", [(23.7, [(32.5, 9.8, DARK, "PS3"), (20, 12, "#c9b48e", "pads")]),
-                                                               (16.5, [(30.2, 7.8, DARK, "PS2"), (12.7, 2.5, "#55524c", "switch")]),
-                                                               (17, [(27, 6, "#d8d5ce", "PS1"), (23, 8, "#8a8a90", "RetroTINK")])]))):
+    if g.SUB_IN_WALL:   # v13.5: the bricks at the back of their rows (not seen from the front); the sub's column in bay 2
+        bays_ = (("Bay 1 · Xbox", [(16, [(33.3, 7.9, DARK, "Xbox One"), (12.7, 2.5, "#55524c", "switch")]),
+                                   (16, [(30.9, 8.3, "#e9e6df", "Xbox 360"), (20, 4.5, "#8a8a90", "RetroTINK")]),
+                                   (25.2, [(54.3, 15, OAKF, "game drawer · ~48")])]),
+                 ("Bay 2 · PlayStation + sub", [(23.7, [(32.5, 9.8, DARK, "PS3"), (20, 12, "#c9b48e", "pads")]),
+                                                (16.5, [(24.6, 0.01, "none", None), (30.2, 7.8, DARK, "PS2")]),
+                                                (17, [(24.6, 0.01, "none", None), (27, 6, "#d8d5ce", "PS1")])]))
+    else:
+        bays_ = (("Bay 1 · Xbox", [(16, [(33.3, 7.9, DARK, "Xbox One"), (17, 4.8, "#55524c", "brick")]),
+                                   (16, [(30.9, 8.3, "#e9e6df", "Xbox 360"), (21, 6, "#55524c", "brick")]),
+                                   (25.2, [(54.3, 15, OAKF, "game drawer · ~48")])]),
+                 ("Bay 2 · PlayStation", [(23.7, [(32.5, 9.8, DARK, "PS3"), (20, 12, "#c9b48e", "pads")]),
+                                          (16.5, [(30.2, 7.8, DARK, "PS2"), (12.7, 2.5, "#55524c", "switch")]),
+                                          (17, [(27, 6, "#d8d5ce", "PS1"), (23, 8, "#8a8a90", "RetroTINK")])]))
+    for b, (name, rows) in enumerate(bays_):
         bx, by = x0 + 22 + b * 208, y0 + 58
         space(bx, by, 56.8, 59.4, name)
         yy = by
@@ -1353,7 +1385,13 @@ def storage():
                 item(xx, yy + (rh - h_) * k, w_, h_, f_, lab, "#fff" if f_ in (DARK, "#55524c", "#8a8a90") else INK, 7.5)
                 xx += w_ * k + 3
             yy += rh * k
-            o.append(f'<line x1="{bx}" y1="{yy:.1f}" x2="{bx + 56.8 * k:.1f}" y2="{yy:.1f}" stroke="{OAKL}" stroke-width="1.2"/>')
+            part = g.SUB_IN_WALL and b == 1 and rh == 16.5        # the part shelf under the PS2 stops at the divider
+            o.append(f'<line x1="{bx + (24.6 * k if part else 0):.1f}" y1="{yy:.1f}" x2="{bx + 56.8 * k:.1f}" y2="{yy:.1f}" stroke="{OAKL}" stroke-width="1.2"/>')
+        if g.SUB_IN_WALL and b == 1:
+            sy = by + 23.7 * k
+            o.append(f'<line x1="{bx + 24 * k:.1f}" y1="{sy:.1f}" x2="{bx + 24 * k:.1f}" y2="{sy + 35.3 * k:.1f}" stroke="{OAKL}" stroke-width="1.6"/>')
+            item(bx + 1 * k, sy + (35.3 - 3 - 29.4) * k, 21.4, 29.4, "#3a3b3e", "sub", "#fff", 8)
+            item(bx + 0.5 * k, sy + (35.3 - 3) * k, 22.4, 3, "#8a8a90")
     o.append(t(x0 + 14, y0 + 236, "Swap any 16 cm row for two KUGGIS boxes, 26 × 35 × 15, side by side (52 of 56.8 wide).", 9.5, "start", 400, MUTED))
 
     # B · bay 3 tray, from above

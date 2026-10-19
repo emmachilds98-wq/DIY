@@ -15,6 +15,7 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - **Plain oak where it was slatted.** The sub stands on a low oak riser; the folded table is plain oiled oak between its pegged breadboard ends.
 - **The stairs go up** to the first floor beside the door, behind the wooden banister. Drawn rising away from the room: tell us if they run the other way.
 - **The drawer layouts:** every drawer in the base, to scale, with what goes in it (below).
+- **v13.5: the sub is back in the media wall**, in bay 2 under the TV on an isolation riser: the Xbox bricks lie flat at the back of their shelves, the RetroTINK and HDMI switch move to bay 1. Every build step now has its full instructions, parts, tools and drawings, and the renders are HD.
 - **v13.3: the whole plan in the viewer**, in tabs: drawings, step-by-step build steps (what to buy before each, what to check after), the buy list with the cost of each phase charted against what's paid, and the network and power plan in full.
 - **v13.2: the sub under a plain oak cover**, no sides and no front: spills run off it, it sits 3 cm over the sub so the sub can't tip, and nothing blocks the driver or port.
 - **v13.2: every drawer out** in a new render, and a **Show measurements** button in the viewer that lays rough sizes over any view.

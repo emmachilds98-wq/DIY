@@ -16,6 +16,7 @@ OUT = HERE.parent / "out"
 ART = HERE / "art"
 FONT = "/usr/share/fonts/opentype/inter/Inter-SemiBold.otf"
 FONT_R = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
+ART_SCALE = 1.5     # v13.5: the page's renders in HD, 3300 wide
 
 
 def svgs():
@@ -25,7 +26,7 @@ def svgs():
     return names
 
 
-PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it"), ("subbox", "Sub cover - no sides, a solid top")]
+PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it")]
 
 
 def main(diagrams=True):
@@ -51,15 +52,15 @@ def main(diagrams=True):
     for k in ("card_room", "sage", "treron", "deep"):
         jobs.append((f"v13_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
         for st, tag in (("joinery", "join"), ("four", "four"), ("six", "six"), ("side", "side"), ("drawers", "drawers")):
-            jobs.append((f"v13_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
+            jobs.append((f"v13_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, ART_SCALE))
     for k in R.SKIRT_OPTIONS:
         jobs.append((f"v13_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
-    jobs.append(("v13_join_key.svg", "art_key_join.png", KW, H, 0.82))
+    jobs.append(("v13_join_key.svg", "art_key_join.png", KW, H, ART_SCALE))
     for v in ("join", "four", "six", "drawers", "side"):      # v13.2: the light measurement overlays, transparent
-        jobs.append((f"v13_m_{v}.svg", ART / f"dims_{v}.png", W, H, 0.82, True))
+        jobs.append((f"v13_m_{v}.svg", f"dims_{v}.png", W, H, ART_SCALE, True))
     # plan diagrams as images for out/ and the viewer
     for name, label in (PLANS if diagrams else []):
-        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage, "drawers": D.drawer_layouts, "subbox": D.sub_box}[name]
+        fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage, "drawers": D.drawer_layouts}[name]
         s = fn()
         vb = re.search(r'viewBox="0 0 (\d+) (\d+)"', s)
         w, h = int(vb.group(1)), int(vb.group(2))
@@ -94,13 +95,14 @@ def main(diagrams=True):
     strip.save(HERE / "skirting_options.png")
     strip.save(OUT / "Skirting options with Card Room Green.png")
 
-    # viewer images
+    # viewer images, HD (v13.5): WebP at 1.5 x the render's 2200 width keeps each one near 100 KB
     ART.mkdir(exist_ok=True)
     for p in HERE.glob("art_*.png"):
-        Image.open(p).convert("RGB").save(ART / (p.stem.replace("art_key_", "key_") + ".jpg"), quality=86, optimize=True)
+        Image.open(p).convert("RGB").save(ART / (p.stem.replace("art_key_", "key_") + ".webp"), "WEBP", quality=86, method=6)
         p.unlink()
-    for name, label in (PLANS if diagrams else []):
-        Image.open(OUT / f"{label}.png").convert("RGB").save(ART / f"zz_{name}.jpg", quality=88, optimize=True)
+    for p in HERE.glob("dims_*.png"):
+        Image.open(p).convert("RGBA").save(ART / (p.stem + ".webp"), "WEBP", quality=90, method=6)
+        p.unlink()
     for p in list(HERE.glob("p_*.png")) + list(HERE.glob("skirt_*.png")):
         p.unlink()
     print("images ok")
