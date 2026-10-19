@@ -47,7 +47,6 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### The sub's cover
-![Sub cover](media-wall/out/Sub%20cover%20-%20no%20sides,%20a%20solid%20top.png)
 
 ### Every drawer out
 ![Every drawer out](media-wall/out/Media%20wall%20v13%20-%20every%20drawer%20out%20(HD).png)
