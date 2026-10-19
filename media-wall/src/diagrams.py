@@ -592,14 +592,15 @@ def front():
         o.append(rect(X(bx - 1.4), Y(g.RAIL_TOP), 2.8 * s, g.HEBGO[0] * s, "#d6d8da", "#8a8c8f", 1))
     o.append(t(X(g.TABLE_CX), Y(46), "Hebgo brackets folded flat", 9, "middle", 600, MUTED))
     sxx = g.SUB_POS["x"]
-    if g.PLAIN:   # v13.1: the sub in its oak box, seen from the room: the solid front, the top over it
+    if g.PLAIN:   # v13.2: the sub under its oak cover, seen from the room: backboard behind, the cover over it, the tray's lip
         hb = g.SUB_HOOD
         hx_ = hb["x"]
-        o.append(rect(X(hx_[0]), Y(hb["h"] - hb["top"]), (hx_[1] - hx_[0]) * s, (hb["h"] - hb["top"]) * s, "#e7cfae", "#b88a55", 1, 1.2))
+        o.append(rect(X(hx_[0]), Y(hb["h"] - hb["top"]), (hx_[1] - hx_[0]) * s, (hb["h"] - hb["top"]) * s, "#f1e4d0", "#c9a77a", 1, 1))
+        o.append(rect(X(sxx[0]), Y(hb["feet"] + hb["base"] + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
+        o.append(rect(X(hx_[0]), Y(hb["feet"] + hb["base"] + hb["lip"]), (hx_[1] - hx_[0]) * s, (hb["base"] + hb["lip"]) * s, "#e7cfae", "#b88a55", 0, 1.2))
         o.append(rect(X(hx_[0] - hb["over"]), Y(hb["h"]), (hx_[1] - hx_[0] + 2 * hb["over"]) * s, hb["top"] * s, "#d9b48a", "#9c6a3f", 0, 1.2))
-        o.append(rect(X(sxx[0]), Y(hb["feet"] + hb["base"] + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, "none", SND_S, 3, 1, 'stroke-dasharray="4 3"'))
         o.append(t(X((hx_[0] + hx_[1]) / 2), Y(20), "sub", 9.5, "middle", 600, SND_S))
-        o.append(t(X((hx_[0] + hx_[1]) / 2), Y(20) + 12, "in its box", 8.5, "middle", 400, MUTED))
+        o.append(t(X((hx_[0] + hx_[1]) / 2), Y(20) + 12, "under its cover", 8.5, "middle", 400, MUTED))
     else:
         o.append(rect(X(sxx[0] - 2), Y(5), (sxx[1] - sxx[0] + 4) * s, 5 * s, "#e9dccb", "#b88a55", 1))
         o.append(rect(X(sxx[0]), Y(5 + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
@@ -920,7 +921,7 @@ def dining_section():
     o.append(t(Z(sd_ / 2 + 1), Y(22), "sub", 9, "middle", 600, SND_S))
     bd_, bh_ = (-g.SUB_HOOD["z"][0], g.SUB_HOOD["h"]) if g.PLAIN else (-g.SUB_BOX["z"][0], g.SUB_BOX["h"])
     o.append(rect(Z(bd_), Y(bh_), bd_ * s, bh_ * s, "none", "#b88a55", 1, 1.3, 'stroke-dasharray="4 3"'))
-    o.append(t(Z(bd_) - 4, Y(bh_ / 2), "oak box" if g.PLAIN else "slatted box", 8.5, "end", 600, "#8a5a32"))
+    o.append(t(Z(bd_) - 4, Y(bh_ / 2), "oak cover" if g.PLAIN else "slatted box", 8.5, "end", 600, "#8a5a32"))
     # a chair pulled up to the table, room side
     w, d, h, sh = g.CHAIR
     cz0 = Dr + td - 8                     # its front edge 8 under the table
@@ -969,8 +970,8 @@ def sound():
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
     o.append(arrow(X(sx[0]), Y((sz[0] + sz[1]) / 2), X(sx[0] - 50), Y((sz[0] + sz[1]) / 2), SND_S, 2))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub in an open-ended oak box under the dining wall," if g.PLAIN else "sub in a slatted oak box under the dining wall,", 9.5, "middle", 600, SND_S))
-    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, (f"driver and port fire out of its open ends; port {g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1]:.0f} cm clear" if g.PLAIN else f"port {g.SUB_BOX['x'][1] - g.SUB_POS['x'][1]:.0f} cm from its slats"), 9, "middle", 400, MUTED))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 26, "sub under an oak cover on the dining wall," if g.PLAIN else "sub in a slatted oak box under the dining wall,", 9.5, "middle", 600, SND_S))
+    o.append(t(X((sx[0] + sx[1]) / 2), Y(sz[0]) - 13, (f"no sides: driver and port fire freely; port {g.HEBGO_X[1] - 1.4 - g.SUB_POS['x'][1]:.0f} cm clear" if g.PLAIN else f"port {g.SUB_BOX['x'][1] - g.SUB_POS['x'][1]:.0f} cm from its slats"), 9, "middle", 400, MUTED))
     for (x, z, lab) in [(16, -280, "rear, on the side wall"), (g.SOFA_X[1] + 14, -296, "rear, on a stand")]:
         o.append(rect(X(x), Y(z), 15 * k, 15 * k, SND_F, SND_S, 3))
         o.append(t(X(x) + (10 if x < 100 else -6), Y(z) + 30, lab, 9, "start" if x < 100 else "end", 600, SND_S))
@@ -1584,8 +1585,8 @@ def drawer_layouts():
 
 
 def sub_box():
-    """v13.1: the sub's oak box, to scale: from the room (front), from the end (the driver), and from above (the air paths).
-    Open at both ends so the driver and the rear port fire straight out; solid top and front for spills and knocks."""
+    """v13.2: the sub's oak cover, to scale: from the end and from above. No sides and no front: a backboard on the breast carries
+    a solid top over the sub (the spill shield) and a tray with a low lip; the top sits 3 cm over the sub, so it can't tip."""
     g = G
     hb = g.SUB_HOOD
     W, H = 900, 470
@@ -1594,6 +1595,7 @@ def sub_box():
     OAKF, OAKL = "#e7cfae", "#9c6a3f"
     x0, x1 = hb["x"]; z0 = hb["z"][0]
     ft, bt, tp, fr, lip, ov, hh = hb["feet"], hb["base"], hb["top"], hb["front"], hb["lip"], hb["over"], hb["h"]
+    bk = hb["back"]
     sx0, sx1 = g.SUB_POS["x"]; sz0, sz1 = g.SUB_POS["z"]
     L, D = x1 - x0, -z0
     def panel(px, title, sub):
@@ -1601,31 +1603,32 @@ def sub_box():
         o.append(t(px, 86, sub, 10, "start", 400, MUTED))
     # A · end view, from the east: the open end, the driver. Across: distance out from the breast (breast on the left).
     ox, oy = 40, 118 + (hh + 4) * k
-    panel(0, "From the east end: open", "the driver fires straight out of this end")
+    panel(0, "From the end: open all round", "no sides, no front; the cover is held by the backboard")
     E = lambda dd: ox + 10 + dd * k
     Y = lambda y: oy - y * k
     o.append(f'<rect x="{E(0) - 8}" y="{Y(hh + 3)}" width="8" height="{(hh + 3) * k}" fill="url(#brick4)" stroke="{WALL}"/>')
     o.append(f'<line x1="{E(0) - 14}" y1="{Y(0)}" x2="{E(D + ov) + 30}" y2="{Y(0)}" stroke="#9a958b" stroke-width="1.4"/>')
-    for fd in (1.0, D - fr - 4):
+    for fd in (2.0, D - 4):
         o.append(rect(E(fd), Y(ft), 3 * k, ft * k, "#333", "none", 0))
-    o.append(rect(E(0), Y(ft + bt), (D - fr) * k, bt * k, OAKF, OAKL, 0))                                           # base tray
-    o.append(rect(E(D - fr - 1.5), Y(ft + bt + lip), 1.5 * k, lip * k, OAKF, OAKL, 0))                              # its lip
+    o.append(rect(E(0), Y(hh), bk * k, (hh - ft) * k, "#c9a27a", OAKL, 0))                                          # backboard
+    o.append(rect(E(bk), Y(ft + bt), (D - bk) * k, bt * k, OAKF, OAKL, 0))                                           # base tray
+    o.append(rect(E(D - 1.2), Y(ft + bt + lip), 1.2 * k, lip * k, OAKF, OAKL, 0))                                   # its lip
     d0, d1 = -sz1, -sz0
     o.append(rect(E(d0), Y(ft + bt + g.SUB[1]), (d1 - d0) * k, g.SUB[1] * k, "#2b2b2d", "#111", 3))                  # the sub's grille face
     cx_, cy_ = (E(d0) + E(d1)) / 2, Y(ft + bt + g.SUB[1] / 2)
     o.append(f'<circle cx="{cx_}" cy="{cy_}" r="{8.25 * k}" fill="#3a3b3e" stroke="#666"/>')
     o.append(f'<circle cx="{cx_}" cy="{cy_}" r="{2.5 * k}" fill="#222"/>')
-    o.append(rect(E(D - fr), Y(hh - tp), fr * k, (hh - tp - ft) * k, OAKF, OAKL, 0))                                  # solid front
     o.append(rect(E(0), Y(hh), (D + ov) * k, tp * k, "#d9b48a", OAKL, 0))                                             # solid top
-    o.append(rect(E(0), Y(hh - tp), 1.5 * k, 5 * k, OAKL, "none", 0))                                                # cleat on the breast
     lx = E(D + ov) + 10
-    o.append(t(lx, Y(hh) + 8, f"top {_fmt(tp)}: spill shield, on a cleat", 9.5, "start", 600, OAKL))
-    o.append(t(lx, Y(hh / 2), f"front {_fmt(fr)}: solid, takes the kicks", 9.5, "start", 600, OAKL))
-    o.append(t(lx, Y(ft + bt + lip) + 2, f"tray, {_fmt(lip)} cm lip", 9.5, "start", 500, MUTED))
+    o.append(t(lx, Y(hh) + 8, f"cover {_fmt(tp)}: the spill shield, drip groove", 9.5, "start", 600, OAKL))
+    o.append(t(lx, Y(hh - tp) + 18, f"3 over the sub: it can't tip", 9.5, "start", 500, MUTED))
+    o.append(t(lx, Y(hh / 2), "open front: nothing to knock", 9.5, "start", 600, OAKL))
+    o.append(t(lx, Y(ft + bt + lip) + 2, f"tray, {_fmt(lip)} cm lip all round", 9.5, "start", 500, MUTED))
+    o.append(t(E(0) - 10, Y(hh / 2), "backboard", 9, "end", 600, OAKL))
     o.append(t((E(0) + E(D)) / 2, Y(0) + 18, f"breast on the left · {_fmt(D)} out · {_fmt(hh)} tall", 10, "middle", 500, MUTED))
     # B · plan, from above: the air paths
     px, py = 330, 112
-    panel(px, "From above, the top lifted off (seen from the room)", "both ends open: nothing in front of the driver or the port")
+    panel(px, "From above, the cover lifted off (seen from the room)", "nothing in front of the driver, the port or the room")
     X = lambda x: px + 130 + (x - x0) * k
     Zp = lambda z: py + 20 + (0 - z) * k
     o.append(f'<rect x="{X(x0 - 14)}" y="{Zp(0) - 8}" width="{(L + 28) * k}" height="8" fill="url(#brick4)" stroke="{WALL}"/>')
@@ -1633,7 +1636,8 @@ def sub_box():
     for ax in (g.HEBGO_X[0], g.HEBGO_X[1]):
         o.append(rect(X(ax - 1.4), Zp(-3), 2.8 * k, 3 * k, "#d6d8da", "#8a8c8f", 0))
     o.append(rect(X(x0 - ov), Zp(0), (L + 2 * ov) * k, (-z0 + ov) * k, "#fbf6ee", OAKL, 0, 1.2, 'stroke-dasharray="5 4"'))   # the top's outline
-    o.append(rect(X(x0), Zp(z0 + fr), L * k, fr * k, OAKF, OAKL, 0))                                                   # front
+    o.append(rect(X(x0), Zp(0), L * k, bk * k, "#c9a27a", OAKL, 0))                                                    # backboard
+    o.append(rect(X(x0), Zp(z0 + 1.2), L * k, 1.2 * k, OAKF, OAKL, 0))                                                 # front lip
     o.append(rect(X(sx0), Zp(sz1), (sx1 - sx0) * k, (sz1 - sz0) * k, "#2b2b2d", "#111", 2))
     o.append(t(X((sx0 + sx1) / 2), Zp((sz0 + sz1) / 2) + 4, "sub", 10, "middle", 650, "#fff"))
     zc = Zp((sz0 + sz1) / 2)
@@ -1643,16 +1647,15 @@ def sub_box():
     o.append(t(X(sx1) + 6, zc - 10, "port", 10, "start", 650, SND_S))
     o.append(t(X(sx1) + 6, zc + 22, f"{_fmt(g.HEBGO_X[1] - 1.4 - sx1)} clear (15+ advised)", 9.5, "start", 500, MUTED))
     o.append(t(X(sx0) - 6, zc + 22, f"{_fmt(sx0 - g.HEBGO_X[0] - 1.4)} to the arm", 9.5, "end", 500, MUTED))
-    o.append(t(X((x0 + x1) / 2), Zp(z0) + 26, f"box {_fmt(L)} long × {_fmt(D)} deep × {_fmt(hh)} tall, solid oak, hardwax oil", 10, "middle", 500))
+    o.append(t(X((x0 + x1) / 2), Zp(z0) + 26, f"cover {_fmt(L + 2 * ov)} × {_fmt(D + ov)} on a {_fmt(L)} × {_fmt(hh)} backboard, solid oak, hardwax oil", 10, "middle", 500))
     o.append(t(X((x0 + x1) / 2), Zp(z0) + 41, "the folded table's brackets either side; the room is below this plan", 9.5, "middle", 400, MUTED))
     o.append('<defs><pattern id="brick4" width="10" height="6" patternUnits="userSpaceOnUse"><rect width="10" height="6" fill="#d9a48a"/>'
              '<path d="M0,3 H10 M5,0 V3 M0,3 V6 M10,3 V6" stroke="#b5785e" stroke-width="0.8"/></pattern></defs>')
-    notes = ["The Hisense sub's 16.5 cm driver fires out of its front and its bass port out of its back. Standing sideways under the table,",
-             "    those face the box's two open ends, so the sound and the port's air go straight out.",
-             "Spills: the solid top overhangs 1 cm with a drip groove, so a drink knocked off the table runs off its edge, not onto the sub's amplifier.",
-             "Knocks: the front takes a foot or a vacuum; the box hangs on a cleat screwed to the solid breast, so it can't tip,",
-             "    and a 2 cm lip keeps the sub on its tray. For eight at the table, lift it off the cleat."]
+    notes = ["No sides and no front: the sub stands in the open, so nothing sits in front of its driver (east), its port (west) or the room.",
+             "Spills: the solid oak cover overhangs 1 cm with a drip groove, so a drink knocked off the table runs off its edge, not onto the sub.",
+             "Knocks: the cover sits 3 cm over the sub, and rocking it over its edge would lift it about 7 cm, so it can't fall over; the tray's",
+             "    2 cm lip stops it sliding. The backboard screws to the solid breast. For eight at the table, unscrew it and stand the sub by the base."]
     for i, n in enumerate(notes):
         o.append(t(0 if not n.startswith("    ") else 10, 380 + i * 17, ("• " + n) if not n.startswith("    ") else n.strip(), 9.6, "start", 400, INK))
-    return svg(W, H, "\n".join(o), "The sub's oak box: open ends for the sound, a solid top and front for spills and knocks",
-               "To scale, 5 px per cm. Left: from the east end. Right: from above with the top lifted off")
+    return svg(W, H, "\n".join(o), "The sub's oak cover: no sides, a solid top for spills, and it can't tip",
+               "To scale, 5 px per cm. Left: from the east end. Right: from above with the cover lifted off")

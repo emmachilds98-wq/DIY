@@ -25,7 +25,7 @@ def svgs():
     return names
 
 
-PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it"), ("subbox", "Sub box - open ends, solid top and front")]
+PLANS = [("house", "House plan - Decos and Cat6"), ("living", "Living room plan - L-sofa and dining"), ("seating", "Dining layouts - four, six and eight"), ("storage", "Storage options - what fits each space"), ("drawers", "Drawer layouts - where each drawer is and what goes in it"), ("subbox", "Sub cover - no sides, a solid top")]
 
 
 def main(diagrams=True):
@@ -45,14 +45,18 @@ def main(diagrams=True):
         ("v13_dining_six.svg", OUT / "Media wall v13 - table set for six, both spot bars (HD).png", W, H, 2.0),
         ("v13_side.svg", OUT / "Media wall v13 - the PC side wall (HD).png", W, H, 2.0),
         ("v13_side.svg", "render_v13_side.png", W, H, 1.1),
+        ("v13_drawers.svg", "render_v13_drawers.png", W, H, 1.1),
+        ("v13_drawers.svg", OUT / "Media wall v13 - every drawer out (HD).png", W, H, 2.0),
     ]
     for k in ("card_room", "sage", "treron", "deep"):
         jobs.append((f"v13_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))
-        for st, tag in (("joinery", "join"), ("four", "four"), ("six", "six"), ("side", "side")):
+        for st, tag in (("joinery", "join"), ("four", "four"), ("six", "six"), ("side", "side"), ("drawers", "drawers")):
             jobs.append((f"v13_paint_{k}_{st}.svg", f"art_{tag}_{k}.png", W, H, 0.82))
     for k in R.SKIRT_OPTIONS:
         jobs.append((f"v13_skirt_{k}.svg", f"skirt_{k}.png", W, H, 1.0))
     jobs.append(("v13_join_key.svg", "art_key_join.png", KW, H, 0.82))
+    for v in ("join", "four", "six", "drawers", "side"):      # v13.2: the light measurement overlays, transparent
+        jobs.append((f"v13_m_{v}.svg", ART / f"dims_{v}.png", W, H, 0.82, True))
     # plan diagrams as images for out/ and the viewer
     for name, label in (PLANS if diagrams else []):
         fn = {"house": D.house, "living": D.living_plan, "seating": D.seating, "storage": D.storage, "drawers": D.drawer_layouts, "subbox": D.sub_box}[name]
@@ -61,7 +65,7 @@ def main(diagrams=True):
         w, h = int(vb.group(1)), int(vb.group(2))
         (HERE / f"d_{name}.svg").write_text(s.replace('width="100%"', f'width="{w}"'))
         jobs.append((f"d_{name}.svg", OUT / f"{label}.png", w, h, 2.4))
-    shot.shots([(HERE / a if isinstance(a, str) else a, HERE / b if isinstance(b, str) else b, w, h, sc) for a, b, w, h, sc in jobs])
+    shot.shots([(HERE / j[0] if isinstance(j[0], str) else j[0], HERE / j[1] if isinstance(j[1], str) else j[1]) + tuple(j[2:]) for j in jobs])
 
     # paint grid: the oak version in four greens
     tiles = [("card_room", "Farrow & Ball Card Room Green No. 79 (chosen)"), ("sage", "Little Greene Sage Green No. 80"),

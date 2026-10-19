@@ -780,15 +780,30 @@ def west_end(sk):
     # recess wall over the stair, and the opening in the ceiling above it), so that part is clipped to those openings
     far_z = sz + 6 + 11 * going
     hole = [P(sx0, 0, zb), P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx0, CEIL, zb)]
-    ceil_hole = [P(sx0, CEIL, zb - 10), P(sx1, CEIL, zb - 10), P(sx1, CEIL, far_z), P(sx0, CEIL, far_z)]
+    # v13.2, client: the opening to upstairs starts just after the door, over the banister, and runs to the west wall
+    hx0 = G.DOOR_X[1] + 1.5
+    ceil_hole = [P(hx0, CEIL, sz), P(sx1, CEIL, sz), P(sx1, CEIL, far_z), P(hx0, CEIL, far_z)]
     cid = f"well{abs(hash((round(VX), round(S * 100), VIEW))) % 100000}"
     o.append(f'<clipPath id="{cid}"><polygon points="{pts(*hole)}"/><polygon points="{pts(*ceil_hole)}"/></clipPath>')
     near, far = [], []
     far.append(quad_front(sx0, 0, far_z, sx1 - sx0, CEIL, "#1d3d30"))
     far.append(poly([P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx1, CEIL, far_z), P(sx1, 0, far_z)], "#21443a"))
     far.append(poly([P(sx0, 0, zb), P(sx0, CEIL, zb), P(sx0, CEIL, far_z), P(sx0, 0, far_z)], "#244a38"))
-    near.append(poly(ceil_hole, "#1a2f25"))
-    near.append(_line(P(sx0, CEIL, zb - 10), P(sx1, CEIL, zb - 10), "#264c3a", 1.4))
+    # looking up through the opening: the stairwell's walls carry on up to the landing's ceiling
+    up = CEIL + 255.0
+    hcid = cid + "c"
+    near.append(f'<clipPath id="{hcid}"><polygon points="{pts(*ceil_hole)}"/></clipPath><g clip-path="url(#{hcid})">')
+    near.append(poly(ceil_hole, "#2b3530"))
+    near.append(poly([P(hx0, up, sz), P(sx1, up, sz), P(sx1, up, far_z), P(hx0, up, far_z)], "#59665d"))     # the landing's ceiling
+    near.append(poly([P(sx1, CEIL, sz), P(sx1, up, sz), P(sx1, up, far_z), P(sx1, CEIL, far_z)], "#3f4d45"))  # west wall, carrying on up
+    near.append(quad_front(hx0, CEIL, far_z, sx1 - hx0, up - CEIL, "#36433c"))                               # the far wall
+    for k_ in range(9):                                                                                       # landing balusters, seen from below
+        xx = hx0 + 4 + k_ * (sx1 - hx0 - 8) / 8
+        near.append(box(xx, CEIL + 22, sz + 2, 2.6, 88, 2.6, "#c79a6b", "#d8ad80", "#a37a50"))
+    near.append(box(hx0, CEIL + 108, sz + 1, sx1 - hx0, 5, 5, "#b07a46", "#c89060", "#8a5c33"))               # its handrail
+    near.append('</g>')
+    near.append(_line(ceil_hole[0], ceil_hole[1], "#1d3d30", 2.2))
+    near.append(_line(ceil_hole[0], ceil_hole[3], "#1d3d30", 1.6))
     # the flight: oak treads on risers in the wall colour, the first riser 6 cm behind the stair's front edge
     WOOD, WOOD_T, WOOD_S = "#b07a46", "#c89060", "#8a5c33"
     for i in reversed(range(11)):       # far, higher steps first
@@ -1130,25 +1145,26 @@ def subwoofer():
     o = []
     xa, xb = G.SUB_POS["x"]
     za, zb = G.SUB_POS["z"]
-    if G.PLAIN:   # v13.1: the sub's oak box: open at both ends (driver east, port west), solid top and front, on a cleat
+    if G.PLAIN:   # v13.2: the sub's oak cover: no sides, no front; a backboard on the breast, a solid top over it, a lipped tray
         hb = G.SUB_HOOD
         hx0, hx1 = hb["x"]; hz0, hz1 = hb["z"]
-        ft, bt, tp, fr, lip, ov = hb["feet"], hb["base"], hb["top"], hb["front"], hb["lip"], hb["over"]
+        ft, bt, tp, lip, ov, bk = hb["feet"], hb["base"], hb["top"], hb["lip"], hb["over"], hb["back"]
         yb = ft + bt                                  # the sub stands on the base tray
         ytu = hb["h"] - tp                            # the top's underside
         o.append(poly([P(hx0 - 3, 0.05, hz0 - 3), P(hx1 + 4, 0.05, hz0 - 3), P(hx1 + 4, 0.05, hz1), P(hx0 - 3, 0.05, hz1)], "#000", 'opacity="0.22" filter="url(#soft)"'))
+        o.append(box(hx0, 0, -bk, hx1 - hx0, hb["h"], bk, OAK_D, OAK_T, OAK_S, extra=GV))                       # backboard on the breast
         for fx in (hx0 + 2, hx1 - 5):                 # rubber feet
-            o.append(box(fx, 0, hz0 + fr + 1, 3, ft, 3, "#2b2b2b"))
-        o.append(box(hx0, ft, hz0 + fr, hx1 - hx0, bt, hz1 - hz0 - fr, OAK_D, OAK_T, OAK_S, extra=GH))           # base tray
-        for lx in (hx0, hx1 - 1.5):                                                                            # end lips: the sub can't slide out
-            o.append(box(lx, ft + bt, hz0 + fr, 1.5, lip, hz1 - hz0 - fr - 2, OAK, OAK_T, OAK_S))
+            o.append(box(fx, 0, hz0 + 1, 3, ft, 3, "#2b2b2b"))
+        o.append(box(hx0, ft, hz0, hx1 - hx0, bt, hz1 - hz0 - bk, OAK_D, OAK_T, OAK_S, extra=GH))               # base tray
+        for lx in (hx0, hx1 - 1.2):                                                                              # end lips
+            o.append(box(lx, ft + bt, hz0, 1.2, lip, hz1 - hz0 - bk, OAK, OAK_T, OAK_S))
         o.append(box(xa, yb, za, xb - xa, G.SUB[1], zb - za, "#1a1a1b", "#2b2b2d", "#111112"))                 # the sub, its grille to the east
         zc, yc = (za + zb) / 2, yb + G.SUB[1] / 2
         o.append(disc_x(xa - 0.03, yc, zc, 8.6, "#3a3b3e", 'stroke="#555" stroke-width="1"'))                  # perforated metal grille
         o.append(disc_x(xa - 0.05, yc, zc, 7.6, "#0c0c0c"))
         o.append(disc_x(xa - 0.07, yc, zc, 2.5, "#2a2a2c"))
-        o.append(box(hx0, ft, hz0, hx1 - hx0, ytu - ft, fr, OAK, OAK_T, OAK_S, extra=GH))                        # solid front: takes the kicks
-        o.append(box(hx0 - ov, ytu, hz0 - ov, hx1 - hx0 + 2 * ov, tp, hz1 - hz0 + ov, OAK, OAK_T, OAK_S, extra=GH))   # solid top: the spill shield
+        o.append(box(hx0, ft + bt, hz0, hx1 - hx0, lip, 1.2, OAK, OAK_T, OAK_S))                                  # front lip
+        o.append(box(hx0 - ov, ytu, hz0 - ov, hx1 - hx0 + 2 * ov, tp, hz1 - hz0 + ov, OAK, OAK_T, OAK_S, extra=GH))   # the cover: spill shield
         o.append(_line(P(hx0 - ov, ytu + 0.4, hz0 - ov - 0.02), P(hx1 + ov, ytu + 0.4, hz0 - ov - 0.02), "#8f5e33", 1.0))   # drip groove line
         return "\n".join(o)
     bx0, bx1 = G.SUB_BOX["x"]
@@ -1260,6 +1276,8 @@ def _unit():
     pxa, pxb = G.PLINTH_DRAWER["x"]
     pya, pyb = G.PLINTH_DRAWER["y"]
     o.append(quad_front(pxa, pya, -0.03, pxb - pxa, pyb - pya, "none", 'stroke="#000" stroke-opacity="0.32" stroke-width="1.2"'))
+    if PLINTH_OPEN > 0:
+        o.append(plinth_drawer(PLINTH_OPEN))
     o.append(place(G.FILLER, RAISE, 0, lambda: game_drawer(GAME_OPEN) if GAME_OPEN > 0 else game_drawer(0, "lip")))
     o.append(place(dx, 0, 0, lambda: record_tier(G.TRAY_UPPER[0], REC_OPEN_UP) if REC_OPEN_UP > 0 else record_tier(G.TRAY_UPPER[0], 0, "lip")))
     o.append(place(dx, 0, 0, lambda: record_tier(G.TRAY_LOWER[0], REC_OPEN) if REC_OPEN > 0 else record_tier(G.TRAY_LOWER[0], 0, "lip")))
@@ -1267,6 +1285,36 @@ def _unit():
     # brush-lined cable slot behind the TV, and a grommet behind the deck
     o.append(poly([P(14, 76.02, 41), P(120, 76.02, 41), P(120, 76.02, 44.5), P(14, 76.02, 44.5)], "#2a1f16", 'opacity="0.85"'))
     o.append(ellipse_flat(160.75, 76.02, 42.5, 3.0, 1.6, "#2a1f16", 'opacity="0.85"'))
+    return "\n".join(o)
+
+
+PLINTH_OPEN = 0.0
+
+
+def plinth_drawer(open_cm):
+    """v13.2: the hidden plinth drawer under bay 2, pulled out: a 12 mm ply box 52 x 34 x 5 inside with 32 PS1 games in
+    eight stacks of four, and its oak front with the finger pull underneath."""
+    o = []
+    pxa, pxb = G.PLINTH_DRAWER["x"]
+    pya, pyb = G.PLINTH_DRAWER["y"]
+    bw, bd, bh = G.PLINTH_DRAWER["box"]
+    zf = G.BASE_FRONT_Z - open_cm
+    bx0 = (pxa + pxb) / 2 - bw / 2 - 1.2
+    PLY, PLY_T, PLY_S = "#d9c09a", "#e8d3b0", "#b99e78"
+    o.append(poly([P(bx0, 0.05, zf), P(bx0 + bw + 2.4, 0.05, zf), P(bx0 + bw + 2.4, 0.05, zf + 30), P(bx0, 0.05, zf + 30)], "#000", 'opacity="0.2" filter="url(#soft)"'))
+    o.append(box(bx0, pya, zf + 1.2, bw + 2.4, bh + 1.2, 1.2, PLY, PLY_T, PLY_S))                            # back... far side drawn first
+    o.append(box(bx0, pya, zf + 1.2 + bd, bw + 2.4, bh + 1.2, 1.2, PLY, PLY_T, PLY_S))
+    o.append(box(bx0, pya, zf + 1.2, 1.2, bh + 1.2, bd + 1.2, PLY, PLY_T, PLY_S))
+    o.append(box(bx0 + 1.2, pya, zf + 1.2, bw, 1.2, bd, "#cdb38a", "#5a5148"))                              # base, felt
+    for i in range(4):
+        for j in range(2):
+            xx, zz = bx0 + 1.7 + i * 12.9, zf + 2.4 + j * 16.2
+            for kk in range(4):
+                o.append(box(xx, pya + 1.2 + kk * 1.0, zz, 12.5, 1.0, 14.2, "#cfd6dc" if kk % 2 else "#e4e8ec", "#f3f5f7", "#aab3bb"))
+            o.append(poly([P(xx + 1, pya + 5.21, zz + 1), P(xx + 11.5, pya + 5.21, zz + 1), P(xx + 11.5, pya + 5.21, zz + 13.2), P(xx + 1, pya + 5.21, zz + 13.2)],
+                          ["#1f3a52", "#c8452f", "#e0b43a", "#14806d", "#2f3e5c", "#d27a2e", "#6a8f5a", "#b3307a"][(i + j * 4) % 8]))
+    o.append(box(bx0 + bw + 1.2, pya, zf + 1.2, 1.2, bh + 1.2, bd + 1.2, PLY, PLY_T, PLY_S))
+    o.append(box(pxa - 1, pya, zf - 0.8, pxb - pxa + 2, pyb - pya, 2.0, OAK, OAK_T, OAK_S, extra=GH))      # the oak front
     return "\n".join(o)
 
 
@@ -1544,7 +1592,7 @@ def ceiling_leds():
     o = []
     y = CEIL - 0.6
     zr = G.BREAST_D_WEST
-    sx0, sz, wx = G.STAIR_X[0], ALC_D - G.STAIR_D, G.ROOM_W
+    sx0, sz, wx = G.DOOR_X[1] + 1.5, ALC_D - G.STAIR_D, G.ROOM_W   # v13.2: the strip follows the stairwell opening's edge
     runs = [((0.8, -260), (0.8, ALC_D - 0.8)), ((0.8, ALC_D - 0.8), (ALC_W - 0.8, ALC_D - 0.8)),
             ((ALC_W - 0.8, ALC_D - 0.8), (ALC_W - 0.8, -0.8)), ((ALC_W - 0.8, -0.8), (BX1 + 0.8, -0.8)),
             ((BX1 + 0.8, -0.8), (BX1 + 0.8, zr - 0.8)), ((BX1 + 0.8, zr - 0.8), (sx0 - 0.8, zr - 0.8)),
@@ -1691,9 +1739,9 @@ def dimensions():
     a, b = P(ALC_W, CEIL - 8, -1), P(BX1, CEIL - 8, -1)
     o.append(dim_line(a, b, f"chimney breast {G.BREAST_W:g} · the dining wall", ((a[0] + b[0]) / 2, a[1] + 20)))
     a, b = P(RZ[0], 224, 0), P(RZ[1], 224, 0)
-    o.append(dim_line(a, b, f"{G.RZ_W:g} · turntable zone", ((a[0] + b[0]) / 2, a[1] - 8), size=12))
+    o.append(dim_line(a, b, f"{G.RZ_W:g} · turntable zone", ((a[0] + b[0]) / 2, a[1] - 8), size=14))
     a, b = P(0, 224, 0), P(G.TV_CX, 224, 0)
-    o.append(dim_line(a, b, f"TV centre {G.TV_CX:g} from the side wall (was 93)", ((a[0] + b[0]) / 2, a[1] - 8), size=12))
+    o.append(dim_line(a, b, f"TV centre {G.TV_CX:g} from the side wall (was 93)", ((a[0] + b[0]) / 2, a[1] - 8), size=14))
     lx = BX1 + 2
     a, b = P(lx, 0, 0), P(lx, CEIL, 0)
     o.append(_line(a, b, LC, 1.2, 'stroke-opacity="0.6"'))
@@ -1707,7 +1755,7 @@ def dimensions():
         p = P(lx, hh, 0)
         o.append(f'<line x1="{p[0] - 5:.1f}" y1="{p[1]:.1f}" x2="{p[0] + 5:.1f}" y2="{p[1]:.1f}" stroke="{LC}" stroke-opacity="0.75" stroke-width="1.2"/>')
         dy = {G.TV_CENTRE: 6, G.FOLDED_TOP: 9, G.LEDGE_TOP + 3: -5}.get(h, 0)
-        o.append(text(p[0] + 10, p[1] + 4.5 + dy, lab, size=12.5))
+        o.append(text(p[0] + 10, p[1] + 4.5 + dy, lab, size=14.5))
     # bays along the floor in front of the base
     zf = bf - (max(GAME_OPEN, REC_OPEN) + 4 if max(GAME_OPEN, REC_OPEN) > 0 else 1)
     edges = [G.BAYS[0][0], G.BAYS[1][0], G.BAYS[2][0], G.BAYS[2][1]]
@@ -1723,7 +1771,7 @@ def dimensions():
     zt = (G.TABLE_Z[1] - 6) if DINING == "four" else -14.0
     x0, x1 = G.TABLE_X
     a, b = P(x0, 0, zt), P(x1, 0, zt)
-    o.append(dim_line(a, b, f"oak table {G.TABLE[0]:g} × {G.TABLE[1]:g}, folds up", ((a[0] + b[0]) / 2, a[1] + 20), size=12))
+    o.append(dim_line(a, b, f"oak table {G.TABLE[0]:g} × {G.TABLE[1]:g}, folds up", ((a[0] + b[0]) / 2, a[1] + 20), size=14))
     if GAME_OPEN > 0:
         x_ = G.FILLER + 58.4
         a, b = P(x_, 0.2, bf - 0.6), P(x_, 0.2, bf - GAME_OPEN - 0.6)
@@ -1735,6 +1783,89 @@ def dimensions():
     o.append(text((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2 + 4, "lid clearance to 130", size=11, anchor="middle", op=0.85))
     p = P(BX1 + 52, 214, G.BREAST_D_WEST)
     o.append(text(p[0], p[1], "door to the hall (to confirm)", size=11.5, anchor="middle", op=0.8))
+    o.append('</g>')
+    return "\n".join(o)
+
+
+# ------------------------------------------------------------- v13.2: light measurement overlays, one per view
+MC = "#fff1b0"     # the overlay's colour: a light, warm yellow with a dark halo so it reads on oak and on green
+
+
+def _m(a, b, label, lpos=None, size=15.5, tick=9):
+    out = [f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#10241b" stroke-opacity="0.45" stroke-width="4"/>',
+           f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="{MC}" stroke-width="1.8"/>']
+    ang = math.atan2(b[1] - a[1], b[0] - a[0]) + math.pi / 2
+    for p in (a, b):
+        dx, dy = math.cos(ang) * tick / 2, math.sin(ang) * tick / 2
+        out.append(f'<line x1="{p[0] - dx:.1f}" y1="{p[1] - dy:.1f}" x2="{p[0] + dx:.1f}" y2="{p[1] + dy:.1f}" stroke="{MC}" stroke-width="1.8"/>')
+    lx, ly = lpos if lpos else ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 8)
+    out.append(text(lx, ly, label, size=size, anchor="middle", weight=650, fill=MC))
+    return "\n".join(out)
+
+
+def m3(p, q, label, dx=0, dy=-8, size=15.5):
+    a, b = P(*p), P(*q)
+    return _m(a, b, label, ((a[0] + b[0]) / 2 + dx, (a[1] + b[1]) / 2 + dy), size)
+
+
+def measure_layer(kind):
+    """Rough sizes in cm, in a light colour, to lay over a render and check it against the real room."""
+    g = G
+    bf = g.BASE_FRONT_Z
+    o = ['<g id="measure">']
+    if kind == "drawers":
+        # the game drawer (bay 1), the upper record tray (bay 3), the plinth drawer (bay 2), as pulled out in this view
+        gx0 = g.FILLER + 2.87; gz = bf - GAME_OPEN
+        o.append(m3((gx0, g.PLINTH + 2.6 + 15.5, gz - 0.6), (gx0 + 54.3, g.PLINTH + 2.6 + 15.5, gz - 0.6), "game drawer 54 wide", dy=-10))
+        o.append(m3((gx0 - 1.5, g.PLINTH + 2.6, gz), (gx0 - 1.5, g.PLINTH + 2.6, gz + 35), "35 deep", dx=-40, dy=-4))
+        o.append(m3((gx0 - 1.5, 0.5, bf), (gx0 - 1.5, 0.5, gz), f"out {GAME_OPEN:g}", dx=-34, dy=8))
+        tx0 = g.BAYS[2][0] + 3.07; tz = bf - REC_OPEN_UP; ty = g.TRAY_UPPER[0] + 12
+        o.append(m3((tx0, g.TRAY_UPPER[0] - 0.5, tz - 0.6), (tx0 + 53.9, g.TRAY_UPPER[0] - 0.5, tz - 0.6), "record tray 54 wide", dy=20))
+        o.append(m3((tx0 + 53.9 + 1, g.TRAY_UPPER[0], tz), (tx0 + 53.9 + 1, g.TRAY_UPPER[0], tz + 40), "40 deep", dx=34, dy=4))
+        o.append(m3((tx0 + 53.9 + 1.5, 0.5, bf), (tx0 + 53.9 + 1.5, 0.5, tz), f"out {REC_OPEN_UP:g}", dx=34, dy=8))
+        o.append(m3((tx0 + 0.9, ty + 2, tz + 3), (tx0 + 33.5, ty + 2, tz + 3), "LPs 32.6", dy=-6, size=14))
+        o.append(m3((tx0 + 34.1, ty + 2, tz + 3), (tx0 + 53, ty + 2, tz + 3), "singles 18.9", dy=-6, size=14))
+        px0, px1 = g.PLINTH_DRAWER["x"]; pz = bf - PLINTH_OPEN
+        o.append(m3((px0, g.PLINTH_DRAWER["y"][1] + 0.5, pz - 0.8), (px1, g.PLINTH_DRAWER["y"][1] + 0.5, pz - 0.8), f"plinth drawer 52 × 34 × 5, out {PLINTH_OPEN:g}", dy=26))
+        o.append(m3((-1, g.PLINTH + 2.6, bf), (-1, g.PLINTH + 2.6 + 15.5, bf), "11.6–27 up", dx=-42, dy=4, size=14))
+        o.append(m3((g.BAYS[2][1] + 0.5, g.TRAY_LOWER[0], bf), (g.BAYS[2][1] + 0.5, g.TRAY_UPPER[0], bf), "trays at 2.3 and 37", dx=60, dy=4, size=14))
+    elif kind == "four":
+        x0, x1 = g.TABLE_X; zf = g.TABLE_Z[1]; top = g.TABLE_TOP
+        o.append(m3((x0, top + 1, zf), (x1, top + 1, zf), f"table {g.TABLE[0]:g} wide", dy=-12))
+        o.append(m3((x1 + 2, top, zf), (x1 + 2, top, -g.RAIL[2]), f"{g.TABLE[1]:g} deep", dx=36))
+        o.append(m3((x0 - 3, 0, zf), (x0 - 3, top, zf), f"top at {top:g}", dx=-40, dy=0))
+        o.append(m3((x1 + 22, 0, zf - 20), (x1 + 22, g.CHAIR[3], zf - 20), f"seat {g.CHAIR[3]:g}", dx=34, dy=0, size=14))
+    elif kind == "six":
+        x0, x1 = g.SIX_X; zb, zf = g.FREE_Z; top = g.LEG_H + g.TABLE[2]
+        o.append(m3((x0, top + 1, zf), (x1, top + 1, zf), f"{x1 - x0:g} × {g.TABLE[1]:g}: table {g.TABLE[0]:g} + leaf {g.LEAF[0]:g}", dy=-12))
+        o.append(m3((x1 + 3, 0, zf), (x1 + 3, top, zf), f"top at {top:.1f}", dx=46, dy=0))
+        o.append(m3((x1 - 8, 0.5, zb), (x1 - 8, 0.5, 0), f"{-zb:g} to the breast", dx=-60, dy=-4))
+        o.append(m3((x1, 0.5, (zb + zf) / 2), (g.ROOM_W, 0.5, (zb + zf) / 2), f"{g.ROOM_W - x1:g} to the wall", dy=-8))
+        o.append(m3((x0, 0.5, zf - 2), (x0 + (x1 - x0) / 2, 0.5, zf - 2), f"{(x1 - x0) / 2:g} a diner", dy=20, size=14))
+    else:   # the main view
+        o.append(m3((0, CEIL - 3, bf), (ALC_W, CEIL - 3, bf), f"alcove {g.ALC_W:g} wide", dy=18))
+        o.append(m3((ALC_W, CEIL - 10, -1), (BX1, CEIL - 10, -1), f"breast {g.BREAST_W:g}", dy=18))
+        o.append(m3((g.TV_X[0], g.TV_BOTTOM - 1.5, g.TV_PANEL_Z[0]), (g.TV_X[1], g.TV_BOTTOM - 1.5, g.TV_PANEL_Z[0]), f"TV {g.TV_W:g} wide", dy=-8))
+        o.append(m3((g.TV_X[1] - 6, g.TV_BOTTOM, g.TV_PANEL_Z[0]), (g.TV_X[1] - 6, g.TV_TOP, g.TV_PANEL_Z[0]), f"{g.TV_H:g} tall", dx=-34, dy=0))
+        o.append(m3((UP_L[1], g.LEDGE_UNDER - 2, 8), (UP_R[0], g.LEDGE_UNDER - 2, 8), f"{g.TV_GAP:g} between the uprights", dy=-8, size=14.5))
+        o.append(m3((RZ[0], g.WORKTOP + 0.5, bf), (RZ[1], g.WORKTOP + 0.5, bf), f"{g.RZ_W:g}", dy=16, size=14.5))
+        o.append(m3((RZ[1] - 2, g.WORKTOP, 12), (RZ[1] - 2, g.RZ_SHELF_TOP - g.RZ_SHELF_T, 12), f"{g.LID_CLEAR_TO - g.WORKTOP:g} lid room", dx=-40, dy=0, size=14))
+        o.append(m3((-1, 0, bf), (-1, g.WORKTOP, bf), f"{g.WORKTOP:g}", dx=-18, dy=0))
+        for i, (a_, b_) in enumerate(g.BAYS):
+            o.append(m3((a_, 1, bf - 1), (b_, 1, bf - 1), f"{b_ - a_:g}", dy=18, size=14.5))
+        o.append(m3((ALC_W + 2, g.HIGH_TOP, 8), (ALC_W + 2, CEIL, 8), f"{CEIL - g.HIGH_TOP:g} to ceiling", dx=-48, dy=0, size=14))
+        x0, x1 = g.TABLE_X
+        o.append(m3((x0, g.FOLDED_TOP + 2, -6), (x1, g.FOLDED_TOP + 2, -6), f"table {g.TABLE[0]:g} wide, folded", dy=-8))
+        o.append(m3((x1 + 2, g.RAIL_TOP, -6), (x1 + 2, g.FOLDED_TOP, -6), f"{g.TABLE[1]:g}", dx=18, dy=0))
+        hb = g.SUB_HOOD
+        o.append(m3((hb["x"][0] - 1, hb["h"] + 2, hb["z"][0]), (hb["x"][1] + 1, hb["h"] + 2, hb["z"][0]), "sub cover 37", dy=-8, size=14))
+        o.append(m3((hb["x"][1] + 3, 0, hb["z"][0]), (hb["x"][1] + 3, hb["h"], hb["z"][0]), f"{hb['h']:g}", dx=18, dy=0, size=14))
+        d0, d1 = g.DOOR_X
+        o.append(m3((d0, 200, g.BREAST_D_WEST - 1), (d1, 200, g.BREAST_D_WEST - 1), f"door about {d1 - d0:g}", dy=-8, size=14))
+        o.append(m3((d1 - 4, 0, g.BREAST_D_WEST - 1), (d1 - 4, 198, g.BREAST_D_WEST - 1), "198", dx=-20, dy=0, size=14))
+        o.append(m3((0.5, 0, -150), (0.5, g.PC_SHELF_TOP, -150), f"PC shelf {g.PC_SHELF_TOP:g}", dx=52, dy=0, size=14))
+        o.append(m3((g.PEND_X + 50, CEIL, g.PEND_Z), (g.PEND_X + 50, CEIL - g.BAR[2], g.PEND_Z), f"bar drop {g.BAR[2]:g}", dx=48, dy=0, size=14))
+    o.append(text(24, H - SHIFT - 112, "Rough sizes in cm, to check against the room · the plan's fit proof has the exact ones", size=14, weight=650, fill=MC))
     o.append('</g>')
     return "\n".join(o)
 
@@ -1775,7 +1906,7 @@ JOIN_KEY = [
     (27, (G.HEBGO_X[1], 40, -4), "Häfele Hebgo folding brackets, 500 kg a pair"),
     (28, (G.TABLE_X[0] + 16, G.FOLDED_TOP + 2, -3), "Turn buttons hold the folded table"),
     (29, (G.TABLE_CX + 21, G.FRAMES_Y + 17, -2.3), "Two framed LPs above"),
-    (34, (G.SUB_HOOD["x"][0] + 12, 22, G.SUB_HOOD["z"][0]), "Sub in an oak box: open ends, solid top and front, on a cleat"),
+    (34, (G.SUB_HOOD["x"][0] + 12, 22, G.SUB_HOOD["z"][0]), "Sub under an oak cover: no sides, a lipped tray, on the breast"),
     (H_, "The side wall"),
     (30, (25.5, 182, -150), "PC on its oak shelf, above the end of the sofa (see the room plan)"),
     (31, (3.4, G.PC_SHELF_TOP + 3, G.PC_SHELF_Z[1] + 4), "Brush grommet: the PC's leads drop into the wall"),
@@ -1855,11 +1986,14 @@ INSET_RECORD = (330, -127)
 CAM_SIX = (185.0, 180.0, 3.6, 120)   # the dining view: in line with the reveal, pulled back to show the west end
 
 
-def build(*a, dining="folded", **kw):
-    """One render. The dining view for six moves the camera, then puts it back."""
-    if dining != "six":
+CAM_DRAWERS = (93.0, 579.0, 5.6, 255)   # v13.2: in close on the base, every drawer out
+
+
+def build(*a, dining="folded", cam=None, **kw):
+    """One render. The dining view for six and the drawers view move the camera, then put it back."""
+    if dining != "six" and cam is None:
         return _build(*a, dining=dining, **kw)
-    camera(*CAM_SIX)
+    camera(*(cam or CAM_SIX))
     try:
         return _build(*a, dining=dining, **kw)
     finally:
@@ -1867,10 +2001,13 @@ def build(*a, dining="folded", **kw):
 
 
 def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="joinery", rec_open_up=0.0, label=None,
-           dining="folded", ghost=None):
-    global GAME_OPEN, REC_OPEN, STYLE, REC_OPEN_UP, DINING, SOFA_GHOST
-    REC_OPEN_UP, STYLE, GAME_OPEN, REC_OPEN, DINING = rec_open_up, style, game_open, rec_open, dining
+           dining="folded", ghost=None, plinth_open=0.0, measure=None):
+    global GAME_OPEN, REC_OPEN, STYLE, REC_OPEN_UP, DINING, SOFA_GHOST, PLINTH_OPEN
+    REC_OPEN_UP, STYLE, GAME_OPEN, REC_OPEN, DINING, PLINTH_OPEN = rec_open_up, style, game_open, rec_open, dining, plinth_open
     SOFA_GHOST = bool(ghost)
+    if measure:   # v13.2: only the light measurement layer, on a transparent page, to lay over the same view
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">' + defs()
+                + f'<g transform="translate(0,{SHIFT})">' + measure_layer(measure) + '</g></svg>')
     key = JOIN_KEY if STYLE == "joinery" else slat_key()
     kw = KEYW if numbered else 0
     width = W + kw
@@ -1922,19 +2059,58 @@ SOFA_COL = ("#8c8276", "#a0968a", "#776e63")
 
 
 def sofa_solid():
-    """The L-sofa drawn solid (long side about 188 from the client's photo, return 168 assumed): the return along the side wall under the PC shelf,
-    the long side against the window wall."""
-    c, t, sd = SOFA_COL
+    """v13.2: the client's sofa, from their photo: a black jumbo-cord L-sofa, the long side under the window (about 188, ending in
+    line with the breast's reveal), the return along the side wall (168 assumed). Plinth, seat bases, plump seat and back cushions
+    with the cord's channels, arms at both ends, and the grey faux-fur cushion from the photo."""
+    C, T, SD = "#2a2b30", "#383940", "#1f2024"          # cord: face, top, side
+    RIB = "#17181b"
     x0 = G.SOFA_X[0]
     zb, zf, ze = G.SOFA_BACK_Z, G.SOFA_FRONT_Z, G.CHAISE_END_Z
     cx1, mx1 = G.CHAISE_X[1], G.SOFA_X[1]
-    o = [box(x0, 0, zb, 22, G.SOFA_H, ze - zb, c, t, sd),                    # back along the side wall
-         box(x0, 0, zb, mx1 - x0, G.SOFA_H, 22, c, t, sd),                   # back along the window wall
-         box(x0 + 22, 0, zb + 22, mx1 - x0 - 22, 44, zf - zb - 22, c, t, sd),  # long seat
-         box(x0 + 22, 0, zf, cx1 - x0 - 22, 44, ze - zf - 20, c, t, sd),       # return seat
-         box(x0 + 22, 44, zb + 22, mx1 - x0 - 44, 8, zf - zb - 22, t, t, c),   # cushions
-         box(x0, 0, ze - 20, cx1 - x0, 62, 20, c, t, sd),                     # arm at the return's end
-         box(mx1 - 22, 0, zb, 22, 62, zf - zb, c, t, sd)]                     # arm at the long side's end
+    arm, bk, ph, sb, st, ah, bh = 20.0, 20.0, 8.0, 40.0, 52.0, 62.0, G.SOFA_H
+    o = []
+    def ribs_x(x, za, zb_, ya, yb_, step=5.5):           # cord channels on a face looking along +x
+        y = ya + step
+        while y < yb_ - 1:
+            o.append(_line(P(x + 0.05, y, za + 1), P(x + 0.05, y, zb_ - 1), RIB, 1.1, 'opacity="0.55"'))
+            y += step
+    def ribs_z(z, xa, xb_, ya, yb_, step=5.5):           # ... and on a face looking along +z
+        y = ya + step
+        while y < yb_ - 1:
+            o.append(_line(P(xa + 1, y, z + 0.05), P(xb_ - 1, y, z + 0.05), RIB, 1.1, 'opacity="0.55"'))
+            y += step
+    o.append(poly([P(x0, 0.05, zb), P(mx1 + 6, 0.05, zb), P(mx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, ze + 6), P(x0, 0.05, ze + 6)],
+                  "#000", 'opacity="0.25" filter="url(#soft)"'))
+    # the back along the side wall and along the window wall (frames), then the plinth
+    o.append(box(x0, ph, zb, bk, bh - ph, ze - zb, C, T, SD))
+    o.append(box(x0, ph, zb, mx1 - x0, bh - ph, bk, C, T, SD))
+    o.append(box(x0 + 3, 0, zb + 3, mx1 - x0 - 6, ph, zf - zb - 6, "#111214"))
+    o.append(box(x0 + 3, 0, zf - 3, cx1 - x0 - 6, ph, ze - zf, "#111214"))
+    # seat bases
+    o.append(box(x0 + bk, ph, zb + bk, mx1 - arm - x0 - bk, sb - ph, zf - zb - bk, C, T, SD))
+    o.append(box(x0 + bk, ph, zf, cx1 - x0 - bk, sb - ph, ze - arm - zf, C, T, SD))
+    ribs_z(zf, cx1, mx1 - arm, ph, sb)
+    ribs_x(cx1, zf, ze - arm, ph, sb)
+    # back cushions, plump, leaning on the frames: along the side wall, then along the window
+    for (za, zb2) in ((zf + 2, ze - arm - 1), (zb + bk + 32, zf + 1)):
+        o.append(box(x0 + bk, st - 2, za, 16, bh - st + 2, zb2 - za, C, T, SD))
+        ribs_x(x0 + bk + 16, za, zb2, st, bh - 2)
+    for (xa, xb) in ((x0 + bk + 16, 96.0), (96.0, mx1 - arm - 1)):
+        o.append(box(xa, st - 2, zb + bk, xb - xa, bh - st + 2, 16, C, T, SD))
+        ribs_z(zb + bk + 16, xa, xb, st, bh - 2)
+    # seat cushions: two on the long side, one on the return
+    for (xa, xb) in ((x0 + bk + 16, 96.0), (96.5, mx1 - arm - 0.5)):
+        o.append(box(xa, sb, zb + bk + 16, xb - xa, st - sb, zf - zb - bk - 16 + 1, C, T, SD))
+        ribs_z(zf + 1, xa, xb, sb, st, 4.0)
+    o.append(box(x0 + bk + 16, sb, zf + 1.5, cx1 - x0 - bk - 16, st - sb, ze - arm - zf - 2, C, T, SD))
+    ribs_x(cx1, zf + 1.5, ze - arm - 0.5, sb, st, 4.0)
+    # the grey faux-fur cushion in the corner, from the photo
+    o.append(box(x0 + bk + 18, st - 1, zb + bk + 17, 34, 30, 11, "#a19c95", "#b4afa8", "#8b867f"))
+    # arms: at the long side's end and at the return's end
+    o.append(box(mx1 - arm, ph, zb, arm, ah - ph, zf - zb, C, T, SD))
+    ribs_z(zf, mx1 - arm, mx1, ph, ah)
+    o.append(box(x0, ph, ze - arm, cx1 - x0, ah - ph, arm, C, T, SD))
+    ribs_x(cx1, ze - arm, ze, ph, ah)
     return "\n".join(o)
 
 
@@ -2012,7 +2188,24 @@ def side_alcove():
     return "\n".join(o)
 
 
-def build_side(label=None):
+def measure_side():
+    g = G
+    o = ['<g id="measure">']
+    pa, pb = g.PC_SHELF_Z
+    st = g.PC_SHELF_TOP
+    o.append(m3((g.PC_SHELF_D + 1, 0, pa + 4), (g.PC_SHELF_D + 1, st, pa + 4), f"PC shelf {st:g} up", dx=60, dy=0))
+    o.append(m3((g.PC_SHELF_D + 1, g.SOFA_H, pb + 8), (g.PC_SHELF_D + 1, st - g.PC_SHELF_T - g.KB_TRAY["h"], pb + 8), f"{st - g.PC_SHELF_T - g.KB_TRAY['h'] - g.SOFA_H:g} over the sofa back", dx=-92, dy=0))
+    o.append(m3((g.CHAISE_X[1] + 1, 0, g.CHAISE_END_Z), (g.CHAISE_X[1] + 1, g.SOFA_H, g.CHAISE_END_Z), f"sofa {g.SOFA_H:g} high", dx=-60, dy=0))
+    o.append(m3((2.5 + g.PC_CASE[0], st, g.PC_Z[0] + 2), (2.5 + g.PC_CASE[0], st + g.PC_CASE[1], g.PC_Z[0] + 2), f"PC {g.PC_CASE[1]:g}", dx=40, dy=0, size=14))
+    za, zb = g.WRAP_Z
+    o.append(m3((g.WRAP_D, g.LEDGE_TOP + 34, za), (g.WRAP_D, g.LEDGE_TOP + 34, zb), f"wrap ledge {za - zb:g} long, 4 LPs", dy=-8))
+    o.append(m3((0.5, 0, g.SOCKET["z"] - 12), (0.5, g.SOCKET["y"], g.SOCKET["z"] - 12), f"socket {g.SOCKET['y']:g} up", dx=-50, dy=0, size=14))
+    o.append(text(24, H - SHIFT - 112, "Rough sizes in cm, to check against the room · the plan's fit proof has the exact ones", size=14, weight=650, fill=MC))
+    o.append('</g>')
+    return "\n".join(o)
+
+
+def build_side(label=None, measure=False):
     """The PC side wall: the ledge wrapping the corner, the PC shelf and its keyboard tray, the sofa below, and the media wall
     end-on at the right (the dining wall left out), with the alcove's depth dimensioned (v13.1)."""
     global VIEW, EYE_Y, STYLE, DINING
@@ -2020,6 +2213,9 @@ def build_side(label=None):
     VIEW, EYE_Y, STYLE, DINING = "side", SIDE_EYE_Y, "joinery", "folded"
     camera(*CAM_SIDE)
     try:
+        if measure:
+            return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">' + defs()
+                    + f'<g transform="translate(0,{SHIFT})">' + measure_side() + '</g></svg>')
         o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">', defs(),
              f'<g transform="translate(0,{SHIFT})">', side_room(), wall_socket(), wrap(), media_end_on(),
              sofa_solid(), side_alcove(),
@@ -2047,6 +2243,13 @@ def all_svgs():
                                    label=("The dining wall, down and set for four · v13", "Fold-down oak table on the chimney breast · " + sub))
     out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
                                   label=("The table set for six, out in the room · v13", six_sub))
+    dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25)
+    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v13.2", "Game drawer 30 out, upper record tray 30 out, plinth drawer 25 out (open one tray at a time)"))
+    out["v13_m_join"] = build(with_dims=False, style="joinery", measure="join")
+    out["v13_m_four"] = build(with_dims=False, style="joinery", dining="four", measure="four")
+    out["v13_m_six"] = build(with_dims=False, style="joinery", dining="six", measure="six")
+    out["v13_m_drawers"] = build(**dkw, measure="drawers")
+    out["v13_m_side"] = build_side(measure=True)
     out["v13_side"] = build_side(label=("The PC side wall · v13", "The ledge round the corner, the PC on its shelf with the keyboard tray, cables chased into the wall, the sofa below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
@@ -2056,6 +2259,7 @@ def all_svgs():
                                                ("Artisan oak" if st == "joinery" else "Slat wall") + " version · walls, ceiling and skirting in the one colour"))
         out[f"v13_paint_{k}_four"] = build(with_dims=False, style="joinery", dining="four", label=(lab, "The dining wall set for four"))
         out[f"v13_paint_{k}_six"] = build(with_dims=False, style="joinery", dining="six", label=(lab, "The table and its leaf set for six, out in the room"))
+        out[f"v13_paint_{k}_drawers"] = build(**dkw, label=(lab, "Every drawer out: game drawer, upper record tray, plinth drawer"))
         out[f"v13_paint_{k}_side"] = build_side(label=(lab, "The PC side wall: the ledge, the PC shelf and keyboard tray, no trunking"))
     PAINT = "deep"
     deep = "Deep forest green · earlier colour, for comparison"
@@ -2063,6 +2267,7 @@ def all_svgs():
         out[f"v13_paint_deep_{st}"] = build(with_dims=False, style=st, label=(deep, "Artisan oak version" if st == "joinery" else "Slat wall version"))
     out["v13_paint_deep_four"] = build(with_dims=False, style="joinery", dining="four", label=(deep, "The dining wall set for four"))
     out["v13_paint_deep_six"] = build(with_dims=False, style="joinery", dining="six", label=(deep, "The table set for six, out in the room"))
+    out["v13_paint_deep_drawers"] = build(**dkw, label=(deep, "Every drawer out"))
     out["v13_paint_deep_side"] = build_side(label=(deep, "The PC side wall"))
     set_paint(PAINTS[MAIN_PAINT][0])
     for k, sk in SKIRT_OPTIONS.items():

@@ -15,10 +15,12 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - **Plain oak where it was slatted.** The sub stands on a low oak riser; the folded table is plain oiled oak between its pegged breadboard ends.
 - **The stairs go up** to the first floor beside the door, behind the wooden banister. Drawn rising away from the room: tell us if they run the other way.
 - **The drawer layouts:** every drawer in the base, to scale, with what goes in it (below).
-- **v13.1: a safety box for the sub.** Open at both ends so its driver and rear port fire freely; a solid oak top (with a drip groove) and front against spills and knocks; hung on a cleat on the breast so it can't tip.
+- **v13.2: the sub under a plain oak cover**, no sides and no front: spills run off it, it sits 3 cm over the sub so the sub can't tip, and nothing blocks the driver or port.
+- **v13.2: every drawer out** in a new render, and a **Show measurements** button in the viewer that lays rough sizes over any view.
+- **v13.2: the stairwell opening** starts just after the door, over the banister; the sofa is drawn as your black jumbo-cord L-sofa.
 - **v13.1: six at the table** now use the leaf too: 170 × 80, 85 cm a diner, 75 cm off the breast, every clearance checked.
 - **v13.1: the side view** marks how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud.
-- Fit proof: 58 checks, 46 fit, 9 tight, 3 to check on site, none fail.
+- Fit proof: 59 checks, 47 fit, 9 tight, 3 to check on site, none fail.
 - **Your answers (v12.1):** the sofa's long side ends in line with the breast's reveal (about 188 cm, from your photo); the door hinges on the breast side and opens in; the side wall and breast are solid; the PC is an average gaming case.
 
 | The table set for six, both spot bars | The PC side wall |
@@ -42,8 +44,11 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 ### The drawer layouts
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
-### The sub's box
-![Sub box](media-wall/out/Sub%20box%20-%20open%20ends,%20solid%20top%20and%20front.png)
+### The sub's cover
+![Sub cover](media-wall/out/Sub%20cover%20-%20no%20sides,%20a%20solid%20top.png)
+
+### Every drawer out
+![Every drawer out](media-wall/out/Media%20wall%20v13%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)

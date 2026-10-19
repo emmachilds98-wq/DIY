@@ -16,11 +16,13 @@ def _launch(p):
 def shots(jobs):
     with sync_playwright() as p:
         b = _launch(p)
-        for src, out, w, h, scale in jobs:
+        for job in jobs:
+            src, out, w, h, scale = job[:5]
+            clear = len(job) > 5 and job[5]       # a transparent overlay (v13.2)
             pg = b.new_page(viewport={"width": int(w), "height": int(h)}, device_scale_factor=float(scale))
             pg.goto(pathlib.Path(src).resolve().as_uri())
             pg.wait_for_timeout(300)
-            pg.screenshot(path=str(out), clip={"x": 0, "y": 0, "width": int(w), "height": int(h)})
+            pg.screenshot(path=str(out), clip={"x": 0, "y": 0, "width": int(w), "height": int(h)}, omit_background=bool(clear))
             pg.close()
             print(out)
         b.close()

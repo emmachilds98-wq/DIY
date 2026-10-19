@@ -11,6 +11,20 @@
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
 
+## Update 19 Oct 2026, round 7c: v13.2 (sub cover, drawers view, measurement overlays, stairwell opening, sofa)
+- Viewer version 8 (publish `src/media_wall_viewer_inline.html`, ~7 MB, images inlined).
+- Sub: `SUB_HOOD` is now a cover (no sides, no front): 1.5 backboard on two keyhole screws, 2 cm top with drip groove 3 cm over the
+  sub, tray with a 2 cm lip all round. Tip check in fit.py: the sub's corner would rise 7 cm to tip; the cover stops it 4 cm short.
+- New view "drawers" (`CAM_DRAWERS`, `plinth_drawer()`, `PLINTH_OPEN`): game drawer and upper tray 30 out, plinth drawer 25 out.
+- Measurement overlays: `measure_layer(kind)` / `measure_side()` draw rough sizes in pale yellow (`MC`); `build(..., measure=kind)`
+  returns only that layer; make_images renders them transparent (`shot.py` 6th job field) to `art/dims_<view>.png`; the viewer's
+  "Show measurements" button lays the one for the current view over the picture.
+- Stairwell: the ceiling opening now runs from just after the door (`DOOR_X[1]`) over the banister to the west wall, from the stair's
+  front edge back; seen through it, the stairwell walls and a landing balustrade; the LED strip follows the opening's edge.
+- Sofa (side view): `sofa_solid()` redrawn as the black jumbo-cord L-sofa: plinth, seat bases, plump seat and back cushions with cord
+  channels, arms, the grey faux-fur cushion.
+- Fit proof: 59 checks, 47 fit, 9 tight, 3 check, 0 fail.
+
 ## Update 19 Oct 2026, round 7b: v13.1 (sub safety box, six with the leaf, side view dimensioned)
 - **Publishing:** the artifact refuses some JPEG uploads from this (cross-org) session as "cpio archive" (false sniff, unpredictable),
   so `build_viewer.py` also writes `src/media_wall_viewer_inline.html` (images as data URIs, ~6 MB, gitignored). Publish **that file**

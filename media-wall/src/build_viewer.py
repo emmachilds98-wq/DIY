@@ -99,7 +99,7 @@ def downloads_list():
         items.append((p, f"{label}, v{VERSION}", "PDF"))
     for p in sorted(OUT.glob(f"Media wall v{VERSION} - *.png")):
         items.append((p, p.stem.replace(f"Media wall v{VERSION} - ", "").replace(" (HD)", "") + " (HD render)", "PNG"))
-    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")) + sorted(OUT.glob("Drawer layouts*.png")) + sorted(OUT.glob("Sub box*.png")):
+    for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")) + sorted(OUT.glob("Drawer layouts*.png")) + sorted(OUT.glob("Sub cover*.png")):
         items.append((p, p.stem, "PNG"))
     return items
 
@@ -135,6 +135,9 @@ a:focus-visible, summary:focus-visible, button:focus-visible, input:focus-visibl
 .viewer { display: grid; gap: 14px; }
 .frame { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .frame img { display: block; width: 100%; height: auto; }
+.shotwrap { position: relative; }
+[hidden] { display: none !important; }
+.shotwrap .dims { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .controls { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-start; }
 .group { display: grid; gap: 6px; min-width: 0; }
 .label { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -227,7 +230,8 @@ table.fit sup { color: var(--muted); font-size: 10px; }
 
 def page(site=False):
     prefix = "media-wall/src/" if site else ""
-    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side") for p in ("card_room", "deep", "sage", "treron")] + ["key_join"]}
+    imgs = {k: f"{prefix}art/{k}.jpg" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join"]}
+    imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.png" for v in ("join", "four", "six", "drawers", "side")})
     rows = track_rows()
     _, lo_tot, hi_tot = phase_totals()
     phases = []
@@ -276,12 +280,12 @@ def page(site=False):
   <header>
     <h1>Media Wall v{VERSION}</h1>
     <p class="lede">The artisan oak build in Farrow &amp; Ball Card Room Green, drawn to the room as you measured it. Switch views and greens, turn on the numbered key, answer the open questions, and tick off the buy list as you go.</p>
-    <p class="change"><b>What changed in v{VERSION}:</b> less cladding, as you asked. The slatted spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table are all gone; the PC's leads run in conduit chased into the solid wall, the sub stands on a plain oak riser and the folded table is a plain oak panel. The stairs now go up to the first floor. And the drawer layouts: every drawer to scale, with what goes in it. <b>v13.1:</b> a safety box for the sub (open ends for the sound, a solid top and front for spills and knocks), six at the table with its leaf (170 × 80, every clearance checked), and the side view now shows how deep the alcove is round the wall.</p>
-    <nav class="jump" aria-label="On this page"><a href="#next">New in v13</a><a href="#drawers">Drawer layouts</a><a href="#subbox">Sub box</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
+    <p class="change"><b>What changed in v{VERSION}:</b> less cladding, as you asked. The slatted spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table are all gone; the PC's leads run in conduit chased into the solid wall, the sub stands on a plain oak riser and the folded table is a plain oak panel. The stairs now go up to the first floor. And the drawer layouts: every drawer to scale, with what goes in it. <b>v13.1–13.2:</b> the sub under a plain oak cover with no sides (spills run off it, it can't tip), six at the table with its leaf (170 × 80, every clearance checked), the side view showing how deep the alcove is, a drawers-open view, measurements you can lay over any view, the stairwell opening from the door, and your sofa.</p>
+    <nav class="jump" aria-label="On this page"><a href="#next">New in v13</a><a href="#drawers">Drawer layouts</a><a href="#subbox">Sub cover</a><a href="#answers">What we need from you</a><a href="#tracker">Buy list and tracker</a><a href="#fit">Fit proof</a><a href="#plans">Plans</a><a href="#downloads">Downloads</a></nav>
   </header>
 
   <div class="viewer">
-    <div class="frame"><img id="shot" alt="Render of the media wall" width="1804" height="1148"></div>
+    <div class="frame shotwrap"><img id="shot" alt="Render of the media wall" width="1804" height="1148"><img id="dims" class="dims" alt="" width="1804" height="1148" hidden></div>
     <div class="controls">
       <div class="group"><span class="label" id="l-style">View</span>
         <div class="seg" role="group" aria-labelledby="l-style">
@@ -289,6 +293,7 @@ def page(site=False):
           <button id="s-four" data-style="four" aria-pressed="false">Dining, four at the wall</button>
           <button id="s-six" data-style="six" aria-pressed="false">Dining, six in the room</button>
           <button id="s-side" data-style="side" aria-pressed="false">PC side wall</button>
+          <button id="s-drawers" data-style="drawers" aria-pressed="false">Drawers open</button>
         </div></div>
       <div class="group"><span class="label" id="l-paint">Paint</span>
         <div class="seg" role="group" aria-labelledby="l-paint">
@@ -300,6 +305,7 @@ def page(site=False):
       <div class="group"><span class="label" id="l-key">Labels</span>
         <div class="seg" role="group" aria-labelledby="l-key">
           <button id="k-key" aria-pressed="false">Show numbered key</button>
+          <button id="k-dims" aria-pressed="false">Show measurements</button>
         </div></div>
     </div>
     <p class="caption" id="cap"></p>
@@ -350,7 +356,10 @@ def page(site=False):
       <li><b>Plain oak where it was slatted.</b> The sub stands on a low oak riser between the folded brackets; the folded table is plain oiled oak between its pegged breadboard ends, under the two framed LPs.</li>
       <li><b>The stairs go up.</b> The flight beside the door now rises to the first floor behind the wooden banister, through an opening in the ceiling. Tell us which way it runs and we'll match it.</li>
       <li><b>The drawer layouts</b>, below: where each of the four drawers sits in the base, and each one from above, to scale, with what goes in it and how many.</li>
-      <li><b>v13.1, the sub's box.</b> Its driver fires out of its front and its port out of its back, and it stands sideways, so the oak box is open at both ends: nothing in front of either, and the port has {G.HEBGO_X[1] - 1.4 - G.SUB_POS["x"][1]:.0f} cm of clear air (15–30 is advised). A solid top with a drip groove sheds spills; a solid front takes kicks; it hangs on a cleat on the breast so it can't tip. Drawing below.</li>
+      <li><b>v13.2, the sub's cover.</b> No sides and no front any more: a solid oak cover on a backboard over the sub, with a drip groove so spills run off it, and a tray with a 2 cm lip. It sits 3 cm over the sub, so the sub can't tip (it would have to rise about 7 cm). Nothing is in front of the driver, the port or the room. Drawing below.</li>
+      <li><b>v13.2, drawers open.</b> A new view with the game drawer, the upper record tray and the plinth drawer pulled out, so you can see each layout in place.</li>
+      <li><b>v13.2, measurements on top.</b> "Show measurements" lays rough sizes in pale yellow over any view, to check against the real room: the alcove, TV, uprights, bays, shelf heights, table, sub cover, door, PC shelf, drawers.</li>
+      <li><b>v13.2, the stairwell and the sofa.</b> The opening to upstairs now starts just after the door, over the banister, with the LED strip following its edge; and the sofa in the side view is your black jumbo-cord L-sofa with its grey cushion.</li>
       <li><b>v13.1, six at the table.</b> The 110 × 80 top alone gave six only 55 cm each. Six now use the leaf too: 170 × 80, {(G.TABLE[0] + G.LEAF[0]) / 2:.0f} cm a diner on the long sides, 80 at each end, {-G.FREE_Z[0]:.0f} cm off the breast, {G.ROOM_W - G.SIX_X[1]:.0f} to the west wall, the breast-side chairs clear of the sub's box.</li>
       <li><b>v13.1, the side view</b> marks the alcove's depth round the wall: 38 of the 46 cm base sits inside it, 8 stands proud, the uprights and shelves are wholly inside.</li>
       <li>Fit proof: {fc[fit.PASS]} of {nfit} checks fit outright, {fc[fit.TIGHT]} are tight, {fc[fit.CHECK]} need a check on site, none fail.</li>
@@ -364,9 +373,9 @@ def page(site=False):
     </section>
 
   <section class="block" id="subbox">
-    <h2>The sub's box</h2>
-    <p class="caption">Open at both ends so the driver and the port fire straight out; a solid oak top and front against spills and knocks; hung on a cleat on the chimney breast so it can't tip. To scale.</p>
-    <div class="frame"><img src="{prefix}art/zz_subbox.jpg" alt="The sub's oak box from the east end and from above, with the driver and port firing out of its open ends" width="2160" height="1128" loading="lazy"></div>
+    <h2>The sub's cover</h2>
+    <p class="caption">No sides and no front: a solid oak cover on a backboard screwed to the chimney breast, 3 cm over the sub so it can't tip, with a drip groove for spills and a lipped tray. To scale.</p>
+    <div class="frame"><img src="{prefix}art/zz_subbox.jpg" alt="The sub's oak cover from the end and from above: no sides, a backboard, a lipped tray, the driver and port firing freely" width="2160" height="1128" loading="lazy"></div>
 </section>
 
   <section class="block" id="answers">
@@ -424,21 +433,26 @@ const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v
 
 /* ---------- the render viewer */
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
-const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table and its leaf set for six, with both spot bars", side: "The PC side wall, seen from the room" }};
-const view = Object.assign({{ style: "join", paint: "card_room", key: false }}, store.get("mw13-view", {{}}));
-const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key");
+const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table and its leaf set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" }};
+const view = Object.assign({{ style: "join", paint: "card_room", key: false, dims: false }}, store.get("mw13-view", {{}}));
+const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key"), dims = $("#dims"), dimsBtn = $("#k-dims");
 function draw() {{
   if (!VIEWS[view.style]) view.style = "join";
-  if (view.style === "four" || view.style === "six" || view.style === "side") view.key = false;
+  if (view.style !== "join") view.key = false;
   shot.src = view.key ? DATA.img["key_" + view.style] : DATA.img["art_" + view.style + "_" + view.paint];
   shot.alt = VIEWS[view.style] + (view.key ? " with numbered key" : " in " + NAMES[view.paint]);
   $$("[data-style]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.style === view.style)));
   $$("[data-paint]").forEach(b => {{ b.setAttribute("aria-pressed", String(!view.key && b.dataset.paint === view.paint)); b.disabled = view.key; }});
   keyBtn.setAttribute("aria-pressed", String(view.key));
-  keyBtn.disabled = view.style === "four" || view.style === "six" || view.style === "side";
+  keyBtn.disabled = view.style !== "join";
+  dims.src = DATA.img["dims_" + view.style];
+  dims.hidden = !view.dims || view.key;
+  dimsBtn.setAttribute("aria-pressed", String(view.dims && !view.key));
+  dimsBtn.disabled = view.key;
   cap.textContent = view.key
     ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains.")
     : view.style === "six" ? "The table and its leaf (170 × 80) on legs, 75 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stairs go up beside the door; their direction is drawn roughly until you send a photo."
+    : view.style === "drawers" ? "Every drawer out, in " + NAMES[view.paint] + ": the game drawer and the upper record tray 30 cm out, the hidden plinth drawer 25 cm out. In use, open one record tray at a time."
     : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below; dashed, the chimney breast's outline and the alcove's depth: 38 of the 46 cm base inside it, 8 proud; the media wall end-on at the right (the breast cut away)."
     : VIEWS[view.style] + ", shown in " + NAMES[view.paint] + ". Evening light, drawn to the measured room.";
   store.set("mw13-view", view);
@@ -446,6 +460,7 @@ function draw() {{
 $$("[data-style]").forEach(b => b.addEventListener("click", () => {{ view.style = b.dataset.style; draw(); }}));
 $$("[data-paint]").forEach(b => b.addEventListener("click", () => {{ view.paint = b.dataset.paint; draw(); }}));
 keyBtn.addEventListener("click", () => {{ view.key = !view.key; draw(); }});
+dimsBtn.addEventListener("click", () => {{ view.dims = !view.dims; draw(); }});
 draw();
 
 /* ---------- fit proof filter */
@@ -678,8 +693,9 @@ def inline_images(html_):
     """The artifact refuses some image uploads from an editor outside its organisation (false "cpio archive" sniffs), so the
     published copy carries its images as data URIs: media_wall_viewer_inline.html (gitignored), about 5 MB."""
     import base64
-    for p in sorted((HERE / "art").glob("*.jpg")):
-        uri = "data:image/jpeg;base64," + base64.b64encode(p.read_bytes()).decode()
+    for p in sorted((HERE / "art").glob("*.jpg")) + sorted((HERE / "art").glob("*.png")):
+        mime = "png" if p.suffix == ".png" else "jpeg"
+        uri = f"data:image/{mime};base64," + base64.b64encode(p.read_bytes()).decode()
         html_ = html_.replace(f"art/{p.name}", uri)
     return html_
 

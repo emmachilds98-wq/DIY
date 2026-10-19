@@ -1,4 +1,4 @@
-"""v13.1: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
+"""v13.2: the one source of truth for the room, the media wall, the side wall and the dining wall, in cm.
 
 Every number the renders, diagrams, fit-proof tables and plan text use comes from here, so a change
 in one place moves everything. Room measurements are from the client's hand-measured sketch
@@ -143,7 +143,10 @@ SUB_RISER = dict(x=(212.5, 247.0), z=(-25.4, 0.0), h=5.0)   # v13: the sub on a 
 # it over". The AX5100G's driver fires out of its front and its port out of its back (Trusted/Expert Reviews), and it stands sideways
 # under the table, so the box is open at both ENDS (the driver and the port fire straight out), with a solid oak top (spill shield,
 # 1 cm overhang and a drip groove), a solid oak front (takes the kicks) and a base tray with a 2 cm lip; it hangs on a cleat on the breast.
-SUB_HOOD = dict(x=(214.0, 249.0), z=(-28.2, 0.0), h=37.4, top=2.0, front=1.8, base=2.0, feet=1.0, lip=2.0, over=1.0)
+SUB_HOOD = dict(x=(214.0, 249.0), z=(-25.4, 0.0), h=37.4, top=2.0, front=0.0, back=1.5, base=2.0, feet=1.0, lip=2.0, over=1.0)
+# v13.2, client: "a sub box that has no sides, just a cover encasing": no front and no ends. A 1.5 cm oak backboard screwed to the
+# breast carries a solid 2 cm oak top cantilevered over the sub (spill shield, drip groove) and a base tray with a 2 cm lip all round.
+# The top sits 3 cm over the sub, so the sub can't tip: rocking over its edge would lift its far corner about 7 cm, and the top stops it.
 SUB_PORT_MIN = 15.0                         # port to the nearest obstruction: 6–12 in (15–30 cm) for rear-ported subs (Klipsch guidance)
 SUB_BOX_SLAT = (2.0, 1.4, 1.5)             # slat width, gap, thickness: about 40% open on the front and both ends; solid oak top
 SUB_POS = dict(x=(216.3, 216.3 + SUB[2]), z=(-2.0 - SUB[0], -2.0))   # v13.1: standing sideways in its box, driver east, port west   # inside the box: driver east 7 cm from the slats, rear port 14.6 cm from them
