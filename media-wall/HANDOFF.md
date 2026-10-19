@@ -1,15 +1,29 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Branch:** `claude/eloquent-johnson-pgmnud` (v13.6, PR #5, on top of `claude/sharp-franklin-lrray1`, PR https://github.com/emmachilds98-wq/DIY/pull/4, which holds v10–v12;
-  supersedes PRs 1–3). `main` is still at v9 until it's merged.
-- **Viewer artifact (the deck), since v13.6:** https://claude.ai/artifact/QRfYUvbPVQpSHFgaDN4YMU (Emma's own account). Update it in place:
-  `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to that URL with no files map, omitting
-  `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData `list` on `answers`
-  (and `tracker`, `steps`). The old deck 71ffwf5PRLhoLj6G5KTvm2 reported "deleted or no write access" in round 7g: don't use it; its
-  answers/ticks didn't carry over (the new db started empty). Overwriting her older v11 deck (42PUQjJwfafV93mrjeFYX9) was refused as unrequested.
+- **Branch:** `claude/sharp-franklin-lrray1` (PR https://github.com/emmachilds98-wq/DIY/pull/4) now carries every round, v10 to v13.8: in round 7i
+  it was fast-forwarded to `claude/eloquent-johnson-pgmnud` (v13.7, PR #5, which was stacked on it). Keep working here. `main` is still at v9.
+- **Viewer artifact (the deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's sessions run
+  as), version 12 = v13.8. Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
+  that URL with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:**
+  ArtifactData `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck (v13.6) belongs to another account and isn't
+  readable from this one: don't use it. Rounds 7b–7h ran from a session outside the deck's org, which is why they reported "no write access";
+  from this account the deck, its db and its comments all work.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
-- **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size).
+- **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
+  (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 19 Oct 2026, round 7i: v13.8 (back on the deck, summaries that follow the data)
+- Client: "view this chat and continue … improve anything you need to and publish". That session wasn't visible from here, so it was picked
+  up from git (v13.7, `f5a48b3`) and its HANDOFF; full rebuild ran clean; phone (390) and desktop (1280) checked on every tab: no overflow,
+  no console errors.
+- Fixed: the overview's "To confirm" line still listed the PC case (answered v12.1); it's now `questions.summary_line()` (new `SHORT`
+  labels). The fit-proof intro named four "check on site" items (PC case, door) for three checks and an old tight list; it now names the
+  three real checks (TV plugs, RetroTINK size, sub vibration) and all eleven tight ones. README fit numbers (were v13.2's) corrected.
+- `GITHUB_OUT` now points at this branch (switch to `main` after PR #4 merges).
+- Published v13.8 to 71ff (version 12); the open stairwell comment thread was answered (stairs go up since v13) and resolved.
+- Backups: `build_doc_v13_7_backup.py`, `build_viewer_v13_7_backup.py`, `questions_v13_7_backup.py`.
+- Still offered, not done: daytime renders; furniture options (waits on the sofa's return). Bar 2's position waits on `point2`.
 
 ## Update 19 Oct 2026, round 7h: v13.7 (lighting scenes)
 - Upgrade picked from the offered three: lighting scenes. Why: the client is now fitting the dimmers and bars themselves (step 12), so a

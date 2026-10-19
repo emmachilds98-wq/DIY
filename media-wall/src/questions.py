@@ -73,3 +73,27 @@ assert set(PDF_LINE) == {q[0] for q in QUESTIONS}
 
 def pdf_items():
     return "\n".join(f"<li>{PDF_LINE[q[0]]}</li>" for q in QUESTIONS)
+
+# v13.8: a few words per question for the plan's one-page summary ("To confirm"), so it follows this list too
+SHORT = {
+    "electrics": "that you're swapping the light fittings yourselves",
+    "sofa": "the sofa's return length",
+    "westend": "the west end's sizes",
+    "stairs": "the stairs' direction",
+    "turntable": "the turntable's model",
+    "fanstand": "the fan stand's model",
+    "chairs": "chairs",
+    "box": "the 23 × 22 cm box by the window",
+    "records": "record counts",
+    "games": "game counts",
+    "ports": "extra wired ports",
+    "surge": "the 10-gang",
+    "models": "console model numbers",
+    "point2": "the second ceiling point",
+    "retrotink": "the RetroTINK's size",
+}
+assert set(SHORT) == {q[0] for q in QUESTIONS}
+
+
+def summary_line():
+    return " · ".join(SHORT[q[0]] for q in QUESTIONS)

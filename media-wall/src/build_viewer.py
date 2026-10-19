@@ -14,7 +14,7 @@ HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
 VERSION = "13"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
-GITHUB_OUT = "https://github.com/emmachilds98-wq/DIY/blob/claude/eloquent-johnson-pgmnud/media-wall/out/"
+GITHUB_OUT = "https://github.com/emmachilds98-wq/DIY/blob/claude/sharp-franklin-lrray1/media-wall/out/"  # v13.8: the branch that carries every round (PR #4); switch to main once it merges
 LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
 SINGLES = 2 * G.TRAY_SINGLES
 
@@ -513,7 +513,7 @@ def page(site=False):
 {STYLE}
 <div class="wrap">
   <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.7</p>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.8</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
     <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table, the network and power, step-by-step build instructions and the buy list with what each phase costs. Ticks, amounts and answers save for both of you.</p>
   </header>
@@ -529,7 +529,7 @@ def page(site=False):
       <p class="caption">Thirteen steps in order, each labelled with its part of the house, with what to buy before each. Total about £{money(lo_tot, hi_tot)}, with no electrician on top: the electrics are your own job (steps 3 and 12). The cost of each phase is charted in the {_tablink("buy")}.</p>
       <ol class="runlist">{run_list}</ol>
     </div>
-    <details class="changes"><summary>What changed, v{VERSION} to 13.7</summary><div class="doc">
+    <details class="changes"><summary>What changed, v{VERSION} to 13.8</summary><div class="doc">
       <p>{decision}</p>
       <p><b>On this page:</b> the plan, every drawing, the build steps and the buy list now live here in tabs, with the cost of each phase charted against what you've paid, so nothing needs downloading from GitHub.</p>
     </div></details>

@@ -2,7 +2,7 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v13.7
+## Media wall and dining wall, v13.8
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with a fold-down oak dining table on the chimney breast. Everything below shows here on GitHub; nothing needs downloading.
@@ -15,6 +15,7 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - **Plain oak where it was slatted.** The sub stands on a low oak riser; the folded table is plain oiled oak between its pegged breadboard ends.
 - **The stairs go up** to the first floor beside the door, behind the wooden banister. Drawn rising away from the room: tell us if they run the other way.
 - **The drawer layouts:** every drawer in the base, to scale, with what goes in it (below).
+- **v13.8: back on your own deck.** The viewer is published again to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your account, with your saved answers); the plan's summaries now follow the fit proof and the questions list.
 - **v13.7: lighting scenes.** TV night, dinner, records and everyday evening, each drawn on the room plan with where to set every dimmer (Paint & light tab, section 8 of the plan).
 - **v13.6: the leaf carries the legs.** A slim oak frame under the 60 × 80 leaf holds all eight tapered oak legs in clips, so the folded table stays plain and the leaf stores with the chairs.
 - **v13.6: the electrics are your own job.** The socket swapped for a double, the two dimmers and the two spot bars are like-for-like and not notifiable under Part P in England; steps 3 and 12 have the safe routine (isolate, lock off, prove dead) and a stop-and-call-an-electrician list. No new socket, no fused spur; the PC runs from the 10-gang. Total about £2,764–5,317, no electrician on top.
@@ -26,7 +27,7 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - **v13.2: the stairwell opening** starts just after the door, over the banister; the sofa is drawn as your black jumbo-cord L-sofa.
 - **v13.1: six at the table** now use the leaf too: 170 × 80, 85 cm a diner, 75 cm off the breast, every clearance checked.
 - **v13.1: the side view** marks how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud.
-- Fit proof: 59 checks, 47 fit, 9 tight, 3 to check on site, none fail.
+- Fit proof: 58 checks, 44 fit, 11 tight, 3 to check on site (the TV's plugs, the RetroTINK's size, the sub's vibration), none fail.
 - **Your answers (v12.1):** the sofa's long side ends in line with the breast's reveal (about 188 cm, from your photo); the door hinges on the breast side and opens in; the side wall and breast are solid; the PC is an average gaming case.
 
 | The table set for six, both spot bars | The PC side wall |
@@ -72,7 +73,7 @@ surge protection, switches and length · console model numbers · the second cei
 - **The full plan:** [`media-wall/out/Home_Network_Plan_v13.pdf`](media-wall/out/Home_Network_Plan_v13.pdf) (58 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
 - **The build guide:** [`media-wall/out/Build_Guide_v13.pdf`](media-wall/out/Build_Guide_v13.pdf) (tools, techniques, order of work, step by step)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v12/`)
-- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/QRfYUvbPVQpSHFgaDN4YMU (new link in v13.6: the old one, 71ffwf5PRLhoLj6G5KTvm2, can no longer be updated; views × paints × key, drawer layouts, answers and photos, a shared buy tracker, the fit proof). `index.html` at the root is the same page for GitHub Pages.
+- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v13.8 is published there with every round up to it: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 
 ### Rebuilding the plan and renders
