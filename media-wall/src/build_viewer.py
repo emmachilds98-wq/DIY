@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "25"
+VERSION = "26"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -551,8 +551,13 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
-         "3d_suggest": "Suggested furniture and decor, all twelve on (v21, v23): a floor plant, side table and knit throw at the sofa's open end, a pouffe, a print over the sofa, a clock over the door, a coffee-table tray, fairy lights and a hanging plant at the window, a trailing plant on the top shelf, a mushroom lamp on the PC shelf, a seagrass basket",
-         "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug"}
+         "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
+         "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug",
+         "3d_c_folded": "Option C, the dining cabinet, packed away: one oak cabinet under your shelf, the table standing up in its bay over a drawer, eight chairs behind the doors",
+         "3d_c_eight": "Option C open for eight: the table 225 long, four on the stair side, three on the window side, one at the end",
+         "3d_c_chairs": "Option C's chair bay open: eight folded chairs, two across and two deep, four on the floor and four on the shelf",
+         "3d_c_plan": "Bird\u2019s eye, option C open for eight",
+         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (option C packed away)"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
 IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
 IDEA_OPTS = {"cushions": {"decor": {"cushions": "rust"}}}   # v20: the cushions are a Decor choice, not an idea toggle
@@ -637,13 +642,14 @@ def chairs_card():
 
 
 def options_card():
-    """v14: the table's two places side by side, with a way into the 3D room for each."""
+    """v14: the table's two places side by side, with a way into the 3D room for each (v26: and option C, the dining cabinet)."""
     g = G
     south, north = g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0], g.TABLE_B_Z[1] - g.WINDOW_Z
     def btn(opts, lab):
         return f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
     a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "bright"}, "See A in 3D")
     b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "bright"}, "See B in 3D")
+    c = btn({"site": "C", "dining": "eight", "view": "dining", "scene": "bright"}, "See C in 3D")   # v26
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
     <div class="ob"><span class="label">Option B · up to seven · the default (v16)</span><h3>Under your shelf, by the stairs</h3>
@@ -653,6 +659,11 @@ def options_card():
     <div class="ob"><span class="label">Option A · up to six · the alternative</span><h3>On the chimney breast</h3>
     <ul><li>The flip-top opens towards the window: four with room, six elbows-in.</li><li>Solid breast: plugs and screws, no surprises.</li>
     <li class="minus">No seat at its end (the sofa); one chair in the door's swing.</li></ul>{a}</div></article>
+  <article class="opt"><img data-art="3d_c_eight" alt="{html.escape(CAP3D['3d_c_eight'])}" loading="lazy">
+    <div class="ob"><span class="label">Option C · up to eight · a second option</span><h3>The dining cabinet</h3>
+    <ul><li>One oak cabinet under the shelf: the table stands up in one bay, all {g.OPTC['chairs']} chairs fold into the other.</li>
+    <li>Opens to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}: eight at a squeeze, six in comfort.</li>
+    <li class="minus">Costs more than the flip-top and the chair cupboard; the ottoman moves aside while it's out.</li></ul>{c}</div></article>
 </div>"""
 
 
@@ -800,7 +811,8 @@ def chapter_facts(rows, fc, nfit):
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
         "dining": chips(f"Flip-top gate-leg, <b>{g.TABLE[0]:g} × {g.TABLE[1]:g}</b> opening to {g.TABLE[0]:g} × {2 * g.TABLE[1]:g}", "Four with room, six elbows-in, seven by the stairs",
                         "Häfele brackets, 500 kg a pair", f"Folds under the shelf, its top at {g.FOLDED_TOP:g}",
-                        f"Chair cupboard: four ({g.CHAIR_STORE['cupboard']['d']:g} deep) or six ({g.CHAIR_STORE['cupboard']['d6']:g} deep)", "Dining wall " + _ph(rows, "6 Dining wall")),
+                        f"Chair cupboard: four ({g.CHAIR_STORE['cupboard']['d']:g} deep) or six ({g.CHAIR_STORE['cupboard']['d6']:g} deep)", "Dining wall " + _ph(rows, "6 Dining wall"),
+                        f"<b>Option C</b>: one oak cabinet, a {g.OPTC['len']:g} × {g.OPTC['top'][0]:g} table and {g.OPTC['chairs']} chairs inside; up to eight"),   # v26
         "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])
                  + chips("Smart E14 bulbs in both bars, no dimmers", "Paint " + _ph(rows, "3 Paint"), "Lighting " + _ph(rows, "7 Lighting")),
         "network": chips("Virgin Hub 5 in modem mode", "Three Deco X1500s", "Two TL-SG108 switches", "Cat6 runs on step 3",
