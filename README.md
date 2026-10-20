@@ -5,13 +5,14 @@ Home projects for Emma and Dave's house (Portsmouth Close).
 ## Media wall and dining wall, v14
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
-with a fold-down oak dining table on the chimney breast, or (new option) on the stairs wall under your shelf. Everything below shows here on GitHub; nothing needs downloading. The plan page, with the room in 3D: https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2
+with a fold-down oak dining table on the chimney breast, or (new option) on the stairs wall under your shelf. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
 ![The media wall, main view](media-wall/out/Media%20wall%20v14%20-%20artisan%20oak%20-%20Card%20Room%20Green%20(HD).png)
 
 **New in v14** (you asked for the table on the stairs wall, realistic renders of your options from round the room, and a better page)
 - **A second place for the table:** on the wall going up the stairs, under your 2 m shelf, measured from your photos. Same table and build; it leaves 84 cm to the stair box and 74 to the window, folds 42 cm under the shelf, sits under the existing pendant (bar 2) and out of the door's swing. Its end chairs are tight and the wall's build needs a knock first. Both options are compared in section 5 and on the plan page.
 - **The room in 3D** on the plan page: walk round it, put the table on either wall (folded, for four or for six), change the lighting scene, the paint (or any colour), where the floor lamp stands, open the drawers, and save any view as a 3840 × 2160 picture. Twelve HD stills are below and in `media-wall/out/`.
+- **v14.1: a faster 3D room** (it builds when you open it, redraws shadows only when something changes, drops resolution while you drag, and picks Fast on phones or slower machines), with the record covers in the frames and on the ledges, and an upholstered sofa. The whole plan is now on GitHub Pages.
 - **The page reorganised:** tabs in four groups, a dashboard on the overview (steps done, what's bought and paid, answers), and the two table options side by side.
 - Fit proof: 66 checks, 49 fit, 13 tight, 4 to check on site, none fail. 17 questions, three new: which wall for the table, what the stairs wall is built of, and where the lamp stands.
 

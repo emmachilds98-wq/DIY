@@ -7,6 +7,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
 const root = document.getElementById("r3d");
 const SC = JSON.parse(document.getElementById("scene3d-data").textContent);
@@ -18,8 +19,9 @@ const msg = qs("#r3d-msg");
 
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const DEF = { site: "A", dining: "folded", scene: "everyday", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
-              quality: "hd", view: "window" };
+              quality: SMALL ? "fast" : "hd", view: "window" };
 const S = Object.assign({}, DEF, store.get("mw14-3d", {}));
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
 
@@ -32,7 +34,7 @@ if (!(S.scene in SCENES)) S.scene = DEF.scene;
 let canvas = qs("canvas");
 let gl;
 try {
-  gl = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" });
+  gl = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
 } catch (e) {
   root.classList.add("nogl");
   msg.innerHTML = 'Your browser can’t show the 3D room here (no WebGL). The <a href="#views" data-go="views">drawn views</a> show every option.';
@@ -40,7 +42,9 @@ try {
 }
 gl.outputColorSpace = THREE.SRGBColorSpace;
 gl.toneMapping = THREE.ACESFilmicToneMapping;
-gl.shadowMap.type = THREE.PCFSoftShadowMap;
+gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
+gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
+const reshadow = () => { gl.shadowMap.needsUpdate = true; };
 RectAreaLightUniformsLib.init();
 
 const scene = new THREE.Scene();
@@ -51,8 +55,6 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.09;
 controls.maxDistance = 16;
 controls.addEventListener("change", () => dirty());
-const pmrem = new THREE.PMREMGenerator(gl);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
 /* ---------------------------------------------------------------- textures, made here so nothing loads */
 function canvasTex(w, h, draw, srgb = true) {
@@ -176,6 +178,7 @@ function kindMat(kind) {
     oak: () => new THREE.MeshStandardMaterial({ vertexColors: true, map: OAK_TEX, bumpMap: OAK_BUMP, bumpScale: 0.35, roughness: 0.58 }),
     plain: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.72 }),
     dark: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0.05 }),
+    fabric: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, bumpMap: CARPET, bumpScale: 0.4 }),
     led: () => new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
     glass: () => new THREE.MeshPhysicalMaterial({ color: "#ffffff", roughness: 0.04, transmission: 0, transparent: true, opacity: 0.16, depthWrite: false }),
     art: () => new THREE.MeshStandardMaterial({ map: ART_TEX, roughness: 0.5 }),
@@ -187,8 +190,19 @@ function kindMat(kind) {
 /* ---------------------------------------------------------------- geometry from the plan's records */
 const GRAIN = 0.6;   // metres of oak per texture repeat
 function colAttr(geo, cols) { geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3)); }
+const SOFT = new Set(["#2a2b30", "#a19c95"]);   // v14.1: the sofa's cord and its cushion, upholstered rather than boxy
+function softGeo(b) {
+  const [, x, y, z, w, h, d, f] = b, r = Math.min(4, Math.min(w, h, d) / 2.6);
+  const g = new RoundedBoxGeometry(w * M, h * M, d * M, 3, r * M);
+  g.translate(-(x + w / 2) * M, (y + h / 2) * M, (z + d / 2) * M);
+  const c = new THREE.Color(f), cols = [];
+  for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
+  colAttr(g, cols);
+  return g;
+}
 function boxGeo(b) {
   const [, x, y, z, w, h, d, f, t, s] = b;
+  if (SOFT.has(f)) return softGeo(b);
   const g = new THREE.BoxGeometry(Math.max(w, 0.05) * M, Math.max(h, 0.05) * M, Math.max(d, 0.05) * M);
   g.translate(-(x + w / 2) * M, (y + h / 2) * M, (z + d / 2) * M);
   const uv = g.attributes.uv, span = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
@@ -243,7 +257,7 @@ function buildGroup(items, name) {
     if (it[0] === "f") { const m = frameMesh(it); shadow(m); grp.add(m); continue; }
     let geo, kind, fill = it[0] === "b" ? it[7] : it[2], flags = it[0] === "b" ? it[10] : it[3];
     if (fill === "screen" || fill === null) continue;
-    if (it[0] === "b") { kind = kindOf(fill, flags, Math.max(it[4], it[5], it[6])); geo = boxGeo(it); }
+    if (it[0] === "b") { kind = SOFT.has(fill) ? "fabric" : kindOf(fill, flags, Math.max(it[4], it[5], it[6])); geo = boxGeo(it); }
     else { kind = kindOf(fill, flags); geo = polyGeo(it); }
     const high = it[0] === "p" && Math.min(...it[1].filter((_, i) => i % 3 === 1)) >= R.CEIL - 0.5;
     if (kind === "paint") {
@@ -291,9 +305,18 @@ function wall(axis, c, u0, u1, y0, y1, normal, mat, holes = []) {
     }
   }
 }
+const BUCKET = new Map();   // v14.1: the shell's small parts, merged into one mesh per material
 function cube(x, y, z, w, h, d, mat, cast = true) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat);
-  m.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); shadow(m, cast); return m;
+  const g = new THREE.BoxGeometry(w * M, h * M, d * M);
+  g.translate(-(x + w / 2) * M, (y + h / 2) * M, (z + d / 2) * M);
+  const k = mat.uuid + (cast ? "c" : "");
+  if (!BUCKET.has(k)) BUCKET.set(k, { mat, cast, geos: [] });
+  BUCKET.get(k).geos.push(g);
+  return null;
+}
+function flushCubes(parent) {
+  for (const b of BUCKET.values()) parent.add(shadow(new THREE.Mesh(mergeGeometries(b.geos), b.mat), b.cast));
+  BUCKET.clear();
 }
 function buildShell() {
   const wallP = paintMat(lum("#2d5a46") / BASE_L), recP = paintMat(lum("#264c3a") / BASE_L), ceilP = paintMat(lum("#33604a") / BASE_L);
@@ -312,28 +335,39 @@ function buildShell() {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(Wd * M, (RZ - WZ) * M), reg(new THREE.MeshStandardMaterial({ map: CARPET, roughness: 1 })));
   floor.rotation.x = -Math.PI / 2; floor.position.copy(v3(Wd / 2, 0, (RZ + WZ) / 2)); floor.receiveShadow = true; shell.add(floor);
   const wx = R.WELL_X0, front = R.STAIR_FRONT;
+  ceilGlow = canvasTex(512, 512, (g, w, h) => {     // the strip's glow on the ceiling, brightest at the edges
+    g.fillStyle = "#2c261f"; g.fillRect(0, 0, w, h);    // the bounce over the whole ceiling, then the glow along each edge
+    const e = 150;
+    for (const [x0, y0, x1, y1, gx0, gy0, gx1, gy1] of [[0, 0, w, e, 0, 0, 0, e], [0, h - e, w, h, 0, h, 0, h - e], [0, 0, e, h, 0, 0, e, 0], [w - e, 0, w, h, w, 0, w - e, 0]]) {
+      const gr = g.createLinearGradient(gx0, gy0, gx1, gy1); gr.addColorStop(0, "rgba(255,226,190,0.9)"); gr.addColorStop(1, "rgba(255,226,190,0)");
+      g.globalCompositeOperation = "lighter"; g.fillStyle = gr; g.fillRect(x0, y0, x1 - x0, y1 - y0);
+    }
+  });
+  ceilGlow.wrapS = ceilGlow.wrapT = THREE.ClampToEdgeWrapping;
+  ceilMat = ceilP.clone(); ceilMat.emissiveMap = ceilGlow; ceilMat.emissive = new THREE.Color("#ffe2c0"); ceilMat.userData = { ratio: ceilP.userData.ratio };
+  paintMats.set("ceilglow", reg(ceilMat));
   for (const [xa, xb, za, zb] of [[0, wx, WZ, RZ], [wx, Wd, WZ, front]]) {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry((xb - xa) * M, (zb - za) * M), ceilP);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry((xb - xa) * M, (zb - za) * M), ceilMat);
     m.rotation.x = Math.PI / 2; m.position.copy(v3((xa + xb) / 2, C, (za + zb) / 2)); m.receiveShadow = true; shell.add(m);
   }
   // skirting, eggshell in the wall colour
   const sk = R.SKIRT_H, st = 2;
-  [[0, WZ, st, sk, AD - WZ], [B1, 0, st, sk, RZ]].forEach(([x, z, w, h, d]) => shell.add(cube(x, 0, z, w, h, d, egg, false)));
-  [[0, AD - st, A], [B0, -st, B1 - B0], [B1, RZ - st, dx0 - 6 - B1], [dx1 + 6, RZ - st, sx0 - dx1 - 6], [0, WZ, Wd]].forEach(([x, z, w]) => shell.add(cube(x, 0, z, w, sk, st, egg, false)));
-  shell.add(cube(Wd - st, 0, WZ, st, sk, R.STAIR_FRONT - WZ, egg, false));
+  [[0, WZ, st, sk, AD - WZ], [B1, 0, st, sk, RZ]].forEach(([x, z, w, h, d]) => cube(x, 0, z, w, h, d, egg, false));
+  [[0, AD - st, A], [B0, -st, B1 - B0], [B1, RZ - st, dx0 - 6 - B1], [dx1 + 6, RZ - st, sx0 - dx1 - 6], [0, WZ, Wd]].forEach(([x, z, w]) => cube(x, 0, z, w, sk, st, egg, false));
+  cube(Wd - st, 0, WZ, st, sk, R.STAIR_FRONT - WZ, egg, false);
   // the door, shut, with its frame and handle
-  shell.add(cube(dx0 - 6, 0, RZ - 1.5, 6, R.DOOR_H + 6, 2, egg)); shell.add(cube(dx1, 0, RZ - 1.5, 6, R.DOOR_H + 6, 2, egg));
-  shell.add(cube(dx0 - 6, R.DOOR_H, RZ - 1.5, dx1 - dx0 + 12, 6, 2, egg));
-  shell.add(cube(dx0, 0, RZ + 1, dx1 - dx0, R.DOOR_H, 4, doorP));
-  for (const [y0, y1] of [[14, 98], [112, 186]]) shell.add(cube(dx0 + 9, y0, RZ + 0.6, dx1 - dx0 - 18, y1 - y0, 0.5, doorP));
+  cube(dx0 - 6, 0, RZ - 1.5, 6, R.DOOR_H + 6, 2, egg); cube(dx1, 0, RZ - 1.5, 6, R.DOOR_H + 6, 2, egg);
+  cube(dx0 - 6, R.DOOR_H, RZ - 1.5, dx1 - dx0 + 12, 6, 2, egg);
+  cube(dx0, 0, RZ + 1, dx1 - dx0, R.DOOR_H, 4, doorP);
+  for (const [y0, y1] of [[14, 98], [112, 186]]) cube(dx0 + 9, y0, RZ + 0.6, dx1 - dx0 - 18, y1 - y0, 0.5, doorP);
   const brass = reg(new THREE.MeshStandardMaterial({ color: "#c9b58a", metalness: 0.9, roughness: 0.3 }));
-  shell.add(cube(dx1 - 12, 100, RZ - 1.6, 9, 1.4, 2.6, brass));
+  cube(dx1 - 12, 100, RZ - 1.6, 9, 1.4, 2.6, brass);
   // the window: white frame, glass, a sill, the view out
   const white = reg(new THREE.MeshStandardMaterial({ color: "#f1efe9", roughness: 0.45 }));
   const fw = 6, mid = (wx0 + wx1) / 2;
   [[wx0, wy0, fw, wy1 - wy0], [wx1 - fw, wy0, fw, wy1 - wy0], [wx0, wy0, wx1 - wx0, fw], [wx0, wy1 - fw, wx1 - wx0, fw], [mid - 3, wy0, 6, wy1 - wy0],
-   [wx0, wy0 + 0.68 * (wy1 - wy0), wx1 - wx0, 5]].forEach(([x, y, w, h]) => shell.add(cube(x, y, WZ - 4, w, h, 7, white)));
-  shell.add(cube(wx0 - 4, wy0 - 3, WZ, wx1 - wx0 + 8, 3, 9, white));
+   [wx0, wy0 + 0.68 * (wy1 - wy0), wx1 - wx0, 5]].forEach(([x, y, w, h]) => cube(x, y, WZ - 4, w, h, 7, white));
+  cube(wx0 - 4, wy0 - 3, WZ, wx1 - wx0 + 8, 3, 9, white);
   const glass = reg(new THREE.MeshPhysicalMaterial({ color: "#dfe8ee", roughness: 0.02, transparent: true, opacity: 0.12, depthWrite: false }));
   const pane = new THREE.Mesh(new THREE.PlaneGeometry((wx1 - wx0) * M, (wy1 - wy0) * M), glass);
   pane.position.copy(v3(mid, (wy0 + wy1) / 2, WZ - 1)); shell.add(pane);
@@ -341,34 +375,35 @@ function buildShell() {
   view.position.copy(v3(mid, 300, WZ - 900)); shell.add(view);
   // the radiator under the window, painted in
   const [rx0, rx1] = R.RADIATOR_X, [ry0, ry1] = R.RADIATOR_Y, radP = paintMat(lum("#3b6e56") / BASE_L, true);
-  for (let x = rx0; x < rx1 - 2; x += 5) shell.add(cube(x, ry0, WZ + 3, 3.4, ry1 - ry0, 7, radP));
+  for (let x = rx0; x < rx1 - 2; x += 5) cube(x, ry0, WZ + 3, 3.4, ry1 - ry0, 7, radP);
   // the coffee table (its footprint from the plan; drawn as a plain low table)
   const cof = R.COFFEE, cofM = reg(new THREE.MeshStandardMaterial({ color: "#2c2a28", roughness: 0.5 }));
-  shell.add(cube(cof.x[0], 38, cof.z[0], cof.x[1] - cof.x[0], 4, cof.z[1] - cof.z[0], cofM));
-  for (const [x, z] of [[cof.x[0] + 3, cof.z[0] + 3], [cof.x[1] - 7, cof.z[0] + 3], [cof.x[0] + 3, cof.z[1] - 7], [cof.x[1] - 7, cof.z[1] - 7]]) shell.add(cube(x, 0, z, 4, 38, 4, cofM));
+  cube(cof.x[0], 38, cof.z[0], cof.x[1] - cof.x[0], 4, cof.z[1] - cof.z[0], cofM);
+  for (const [x, z] of [[cof.x[0] + 3, cof.z[0] + 3], [cof.x[1] - 7, cof.z[0] + 3], [cof.x[0] + 3, cof.z[1] - 7], [cof.x[1] - 7, cof.z[1] - 7]]) cube(x, 0, z, 4, 38, 4, cofM);
   // a rug in front of the wall
   const rug = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 2.3), reg(new THREE.MeshStandardMaterial({ color: "#8f8374", roughness: 1, map: CARPET })));
   rug.rotation.x = -Math.PI / 2; rug.position.copy(v3(150, 0.3, -150)); rug.receiveShadow = true; shell.add(rug);
   // shelf B: the client's 2 m black floating shelf on the stairs wall, with the speaker box and the plant from the photo
   const sb = R.SHELF_B, black = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
-  shell.add(cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black));
-  shell.add(cube(Wd - 14, sb.top, sb.z[0] - 60, 12, 42, 56, black));
+  cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black);
+  cube(Wd - 14, sb.top, sb.z[0] - 60, 12, 42, 56, black);
   const pot = reg(new THREE.MeshStandardMaterial({ color: "#5d6b5a", roughness: 0.8 })), leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.7 }));
   const potM = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.12, 20), pot); potM.position.copy(v3(Wd - 12, sb.top + 6, sb.z[1] + 15)); shell.add(shadow(potM));
-  const trail = new THREE.Group();
-  const r = rnd(4);
+  const r = rnd(4), leaves = [];
   for (let i = 0; i < 70; i++) {
-    const l = new THREE.Mesh(new THREE.SphereGeometry(0.022 + r() * 0.012, 8, 6), leaf); l.scale.set(1, 0.55, 1.2);
-    const t = r(); l.position.copy(v3(Wd - 6 - r() * 10, sb.top + 12 - t * (t < 0.5 ? 20 : 150), sb.z[1] + 8 + r() * 14)); trail.add(shadow(l));
+    const g = new THREE.SphereGeometry(0.022 + r() * 0.012, 8, 6); g.scale(1, 0.55, 1.2);
+    const t = r(), q = v3(Wd - 6 - r() * 10, sb.top + 12 - t * (t < 0.5 ? 20 : 150), sb.z[1] + 8 + r() * 14);
+    g.translate(q.x, q.y, q.z); leaves.push(g);
   }
-  shell.add(trail);
+  shell.add(shadow(new THREE.Mesh(mergeGeometries(leaves), leaf)));
   // ceiling LED strip: an emissive line round the room's edge
   ledMat = new THREE.MeshBasicMaterial({ color: "#ffd9a8", toneMapped: false });
   const ly = R.LED_Y - 0.8;
-  [[0.5, WZ + 1, 1, AD - WZ - 2], [Wd - 1.5, WZ + 1, 1, front - WZ - 2]].forEach(([x, z, w, d]) => shell.add(cube(x, ly, z, w, 0.8, d, ledMat, false)));
-  [[1, WZ + 0.5, Wd - 2], [1, AD - 1.5, A - 2], [B0, -1.5, B1 - B0], [B1, RZ - 1.5, wx - B1]].forEach(([x, z, w]) => shell.add(cube(x, ly, z, w, 0.8, 1, ledMat, false)));
+  [[0.5, WZ + 1, 1, AD - WZ - 2], [Wd - 1.5, WZ + 1, 1, front - WZ - 2]].forEach(([x, z, w, d]) => cube(x, ly, z, w, 0.8, d, ledMat, false));
+  [[1, WZ + 0.5, Wd - 2], [1, AD - 1.5, A - 2], [B0, -1.5, B1 - B0], [B1, RZ - 1.5, wx - B1]].forEach(([x, z, w]) => cube(x, ly, z, w, 0.8, 1, ledMat, false));
+  flushCubes(shell);
 }
-let view, ledMat;
+let view, ledMat, ceilGlow, ceilMat;
 
 /* ---------------------------------------------------------------- lights */
 const lights = { strip: [], uprights: [], bias: [], bar1: [], bar2: [], lamp: [], tv: [] };
@@ -386,11 +421,6 @@ function buildLights() {
   lights.strip.push(area(warm, R.STAIR_FRONT - WZ, 6, [Wd - 4, C - 4, (R.STAIR_FRONT + WZ) / 2], [Wd - 4, 0, (R.STAIR_FRONT + WZ) / 2]));
   lights.strip.push(area(warm, R.WELL_X0, 6, [R.WELL_X0 / 2, C - 4, -4], [R.WELL_X0 / 2, 0, -4]));
   lights.strip.forEach(l => l.userData.k = 520);
-  // ... and lights the ceiling above it
-  for (const l of [...lights.strip]) {
-    const u = area("#ffe0bf", l.width / M, 6, [-l.position.x / M, C - 8, l.position.z / M], [-l.position.x / M, C + 50, l.position.z / M]);
-    u.userData.k = 220; lights.strip.push(u);
-  }
   // the uprights' grooves wash the wall either side of the TV
   for (const x of [2.25, 133.25]) { const l = area("#ffcf96", 2, 112, [x, 134, 22], [x, 134, 40]); l.userData.k = 3500; lights.uprights.push(l); }
   // bias light behind the TV, onto the wall
@@ -407,10 +437,12 @@ let win;
 const fixtures = new THREE.Group(); scene.add(fixtures);
 const white = new THREE.MeshStandardMaterial({ color: "#f2f0eb", roughness: 0.4 });
 const toppers = new THREE.MeshStandardMaterial({ color: "#d6a873", roughness: 0.5, map: OAK_TEX });
+const HEADS = {};
+function headMat(col) { return HEADS[col] || (HEADS[col] = reg(new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, side: THREE.DoubleSide }))); }
 function spotHead(group, apex, dir, col, lightList, kSpot) {
-  const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.075, 0.13, 28, 1, true), reg(new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, side: THREE.DoubleSide })));
+  const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.075, 0.13, 28, 1, true), headMat(col));
   const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.019, 0.038, 16), toppers);
-  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.06, 24), new THREE.MeshBasicMaterial({ color: "#fff3dc", toneMapped: false }));
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.06, 24), new THREE.MeshBasicMaterial({ color: "#fff3dc", toneMapped: false }));   // one each: it dims with its own light
   const head = new THREE.Group();
   shade.position.y = -0.065 - 0.038; cap.position.y = -0.019; glow.position.y = -0.155; glow.rotation.x = Math.PI / 2;
   head.add(shade, cap, glow); shadow(shade); shadow(cap, true);
@@ -431,18 +463,19 @@ function buildBar(spec, list) {
   const barM = new THREE.Mesh(new THREE.BoxGeometry(0.84, 0.013, 0.022), white); barM.position.copy(v3(spec.x, C - 3.2, spec.z)); g.add(shadow(barM));
   for (const h of spec.heads) {
     const apex = v3(spec.x + h.dx, C - 6.5, spec.z), tgt = v3(...h.tgt);
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 8), reg(new THREE.MeshStandardMaterial({ color: h.stem })));
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 8), headMat(h.stem));
     stem.position.copy(v3(spec.x + h.dx, C - 5, spec.z)); g.add(stem);
     spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 260);
   }
   fixtures.add(g); return g;
 }
 let lamp;
+const LAMP_BLACK = new THREE.MeshStandardMaterial({ color: "#151515", roughness: 0.35, metalness: 0.4 });
 function buildLamp() {   // three adjustable heads on a black pole, as in the photo; on/off only
-  if (lamp) { fixtures.remove(lamp); lights.lamp.forEach(l => scene.remove(l, l.target)); lights.lamp.length = 0; }
+  if (lamp) drop(lamp, lights.lamp);
   const spot = R.LAMP_SPOTS[S.lamp] || R.LAMP_SPOTS.corner;
   const g = new THREE.Group(); lamp = g;
-  const blk = reg(new THREE.MeshStandardMaterial({ color: "#151515", roughness: 0.35, metalness: 0.4 }));
+  const blk = LAMP_BLACK;
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.025, 32), blk); base.position.copy(v3(spot.x, 1.25, spot.z)); g.add(shadow(base));
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, R.LAMP.h * M, 12), blk); pole.position.copy(v3(spot.x, R.LAMP.h / 2, spot.z)); g.add(shadow(pole));
   const toward = new THREE.Vector3(...[233 - spot.x, 0, -135 - spot.z]).normalize();      // the room's middle, in room coords
@@ -470,12 +503,19 @@ function buildFurniture() {
 let bar1, bar2;
 
 /* ---------------------------------------------------------------- apply the options */
+function drop(group, list) {   // take a fixture and its lights out of the scene, freeing their GPU memory
+  fixtures.remove(group);
+  group.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+  list.forEach(l => { scene.remove(l, l.target); if (l.shadow && l.shadow.map) l.shadow.map.dispose(); });
+  list.length = 0;
+}
+let built = {};
 function applyState() {
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
-  if (bar2) { fixtures.remove(bar2); lights.bar2.forEach(l => scene.remove(l, l.target)); lights.bar2.length = 0; }
-  bar2 = buildBar(R.BAR2[`${S.site}_${S.dining}`], lights.bar2);
-  buildLamp();
+  const b2 = `${S.site}_${S.dining}`;
+  if (built.bar2 !== b2) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2); built.bar2 = b2; }
+  if (built.lamp !== S.lamp) { buildLamp(); built.lamp = S.lamp; }
   repaint();
   applyLight();
   updateCaption();
@@ -489,21 +529,23 @@ function applyLight() {
     l.visible = lv > 0;
     if (l.isSpotLight) { l.castShadow = hd && lv > 0; if (l.userData.glow) l.userData.glow.material.color.set(lv > 0 ? "#fff3dc" : "#3a3a3a"); }
   });
-  set(lights.strip, L.strip); set(lights.uprights, L.uprights); set(lights.bias, L.bias); set(lights.bar1, L.bar1); set(lights.bar2, L.bar2);
+  const area = hd ? 1 : 0;      // Fast leaves out the area lights (the most expensive) and lifts the fill to make up
+  set(lights.strip, L.strip * area); set(lights.uprights, L.uprights * area); set(lights.bias, L.bias * area); set(lights.bar1, L.bar1); set(lights.bar2, L.bar2);
   set(lights.lamp, L.lamp > 0 ? 100 : 0);                   // the lamp is on or off: no dimmer
-  set(lights.tv, L.bias > 0 ? 100 : 0);
+  set(lights.tv, L.bias > 0 && hd ? 100 : 0);
   ledMat.color.set(L.strip > 0 ? "#ffd9a8" : "#5a5248").multiplyScalar(L.strip > 0 ? 0.6 + L.strip / 100 * 1.4 : 1);
+  ceilMat.emissiveIntensity = 0.55 * Math.pow(L.strip / 100, 1.2);
   tvScreen.material = L.bias > 0 ? screenOn : screenOff;
   win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
   view.material.map = day ? SKY.day : SKY.night; view.material.needsUpdate = true;
   // bounce light: a real room's walls relight it; this stands in for that, in proportion to what's on
   const on = (L.strip * 1.0 + L.uprights * 0.25 + L.bar1 * 0.35 + L.bar2 * 0.35 + (L.lamp > 0 ? 30 : 0) + (L.bias > 0 ? 8 : 0)) / 100;
-  hemi.intensity = day ? 0.5 : 0.05 + on * 0.32;
+  hemi.intensity = day ? 0.5 + (hd ? 0 : 0.25) : 0.05 + on * 0.32 + (hd ? 0 : (L.strip * 0.0075 + L.uprights * 0.0015 + (L.bias > 0 ? 0.08 : 0)));
+  win.visible = hd || day;
   MATS.forEach(m => { if ("envMapIntensity" in m) m.envMapIntensity = day ? 0.25 : 0.12; });
   gl.toneMappingExposure = day ? 0.5 : 0.75;
-  gl.shadowMap.enabled = hd;
-  MATS.forEach(m => m.needsUpdate = true);
-  sizeRenderer();
+  if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); }
+  reshadow();
   dirty();
 }
 const screenOff = new THREE.MeshStandardMaterial({ color: "#050506", roughness: 0.12, metalness: 0.2 });
@@ -539,18 +581,24 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 }
 
 /* ---------------------------------------------------------------- render loop, only when something changed */
-let need = 2;
+let need = 2, moving = false, still_t = 0, lowRes = false;
 function dirty() { need = Math.max(need, 2); }
+function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 function sizeRenderer() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
-  gl.setPixelRatio(S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 2) : Math.min(window.devicePixelRatio || 1, 1));
+  if (!started) { start(); return; }
+  // v14.1: while you drag, the picture renders at a lower resolution; it sharpens again as soon as you stop
+  gl.setPixelRatio(lowRes ? Math.max(0.5, fullRatio() * 0.5) : fullRatio());
   gl.setSize(w, h, false);
   camera.aspect = w / h; camera.updateProjectionMatrix(); dirty();
 }
 new ResizeObserver(sizeRenderer).observe(canvas);
+controls.addEventListener("start", () => { moving = true; });
+controls.addEventListener("end", () => { moving = false; });
 function frame(now) {
   requestAnimationFrame(frame);
+  if (!canvas.clientWidth) return;
   if (tween) {
     const k = Math.min(1, (now - tween.t0) / 900), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
     camera.position.lerpVectors(tween.from.eye, tween.to.eye, e);
@@ -559,8 +607,25 @@ function frame(now) {
     if (k >= 1) tween = null;
     need = 2;
   }
-  if (controls.update()) need = 2;
-  if (need > 0 && canvas.clientWidth) { gl.render(scene, camera); need--; }
+  const changed = controls.update();
+  if (changed) need = 2;
+  const active = moving || changed || !!tween;
+  if (active) { still_t = now; if (!lowRes) { lowRes = true; sizeRenderer(); } }
+  else if (lowRes && now - still_t > 180) { lowRes = false; sizeRenderer(); }
+  if (need > 0) {
+    const t = probe > 0 && !lowRes ? performance.now() : 0;
+    gl.render(scene, camera); need--;
+    if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
+  }
+}
+// v14.1: if this device takes too long over a full HD frame, drop to Fast (unless you picked a quality yourself)
+let probe = 3; const probeT = [], PX = new Uint8Array(4);
+function autoQuality() {
+  const ms = probeT.sort((a, b) => a - b)[1];
+  if (ms > 70 && S.quality === "hd" && !S.picked) {
+    S.quality = "fast"; applyLight(); syncButtons();
+    qs("#r3d-savest").textContent = "Switched to Fast for this device; pick HD for shadows (saved pictures always have them).";
+  }
 }
 
 /* ---------------------------------------------------------------- caption and HD save */
@@ -572,14 +637,19 @@ function updateCaption() {
   qs("#r3d-cap").textContent = `${(VIEWS[S.view] || VIEWS.window).label} · ${site}, ${din} · ${sc.name} · ${paint}${S.drawers ? " · drawers out" : ""}`;
 }
 function still(w, h) {
+  if (!started) start();
   const pr = gl.getPixelRatio(), size = gl.getSize(new THREE.Vector2()), asp = camera.aspect;
   gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-  const was = gl.shadowMap.enabled; gl.shadowMap.enabled = true;
+  const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
+  if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(2048, 2048); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   MATS.forEach(m => m.needsUpdate = true);
+  reshadow();
   gl.render(scene, camera);
   const url = canvas.toDataURL("image/png");
+  gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
   gl.shadowMap.enabled = was;
+  MATS.forEach(m => m.needsUpdate = true);
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(1024, 1024); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   applyLight();
   gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.updateProjectionMatrix(); dirty();
@@ -621,7 +691,7 @@ root.addEventListener("click", e => {
   else if (d.paint) S.paint = d.paint, repaint(), updateCaption(), store.set("mw14-3d", S), dirty();
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
-  else if (d.quality) S.quality = d.quality, applyLight(), store.set("mw14-3d", S);
+  else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set("mw14-3d", S);
   else if (b.id === "r3d-full") { const st = qs(".r3d-stage"); (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
   else if (b.id === "r3d-reset") { setView(S.view); return; }
   else return;
@@ -629,19 +699,36 @@ root.addEventListener("click", e => {
 });
 qs("#r3d-custom").addEventListener("input", e => { S.custom = e.target.value; S.paint = "custom"; repaint(); syncButtons(); updateCaption(); store.set("mw14-3d", S); dirty(); });
 
-/* ---------------------------------------------------------------- go */
-buildShell(); buildLights(); buildFurniture();
-bar1 = buildBar(R.BAR1, lights.bar1);
-applyState();
-syncButtons();
-setView(S.view, true);
-msg.hidden = true;
-root.classList.add("ready");
-requestAnimationFrame(frame);
-// for the headless stills (shot3d.py): set the options and a view, then take a picture
-window.R3D = {
-  set(o) { Object.assign(S, o); applyState(); syncButtons(); if (o.view) setView(o.view, true); },
-  still, ready: true,
-};
-window.addEventListener("r3d-set", e => window.R3D.set(e.detail));
-if (window.__r3dPending) { window.R3D.set(window.__r3dPending); window.__r3dPending = null; }
+/* ---------------------------------------------------------------- go: built the first time the room is on screen (v14.1) */
+let started = false;
+function start() {
+  started = true;
+  const t0 = performance.now();
+  const pmrem = new THREE.PMREMGenerator(gl);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+  buildShell(); buildLights(); buildFurniture();
+  bar1 = buildBar(R.BAR1, lights.bar1);
+  gl.shadowMap.enabled = S.quality === "hd";
+  applyState();
+  syncButtons();
+  setView(S.view, true);
+  sizeRenderer();
+  gl.compile(scene, camera);
+  msg.hidden = true;
+  root.classList.add("ready");
+  requestAnimationFrame(frame);
+  // for the headless stills (shot3d.py): set the options and a view, then take a picture
+  window.R3D = {
+    set(o) { Object.assign(S, o); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE },
+    bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
+      const t = performance.now();
+      for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }
+      const px = new Uint8Array(4); const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, px);
+      return (performance.now() - t) / n;
+    },
+  };
+  if (window.__r3dPending) { window.R3D.set(window.__r3dPending); window.__r3dPending = null; }
+}
+window.addEventListener("r3d-set", e => { if (window.R3D) window.R3D.set(e.detail); else window.__r3dPending = e.detail; });

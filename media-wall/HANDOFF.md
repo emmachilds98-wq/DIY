@@ -4,17 +4,33 @@
 - **Branch:** `claude/sharp-franklin-lrray1` (PR https://github.com/emmachilds98-wq/DIY/pull/4) now carries every round, v10 to v13.8: in round 7i
   it was fast-forwarded to `claude/eloquent-johnson-pgmnud` (v13.7, PR #5, which was stacked on it). Keep working here. `main` is still at v9.
 - **Viewer artifact (the deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's sessions run
-  as), version 13 = v14 (published 20 Oct 2026; v12 was v13.8). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
+  as), version 14 = v14.1 (published 20 Oct 2026; v13 was v14, v12 was v13.8). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
   that URL with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:**
   ArtifactData `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck (v13.6) belongs to another account and isn't
   readable from this one: don't use it. Rounds 7b–7h ran from a session outside the deck's org, which is why they reported "no write access";
   from this account the deck, its db and its comments all work.
-- **v14 (round 8)** is on `claude/eloquent-johnson-pgmnud`, reset onto v13.8 (`3c5168f`) and opened as a new draft PR into
-  `claude/sharp-franklin-lrray1`; merge it there, then carry on from that branch.
+- **`main` now carries everything (v14.1) and is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root
+  `index.html` is `build_viewer.site()`; `.nojekyll` skips Jekyll). The client asked for the latest version on main so they can view it there:
+  work on a branch, open a PR into `main`, and merge it once checked so Pages stays current. The Claude deck (below) is the shared copy.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
   (shot3d renders 12 stills headless in SwiftShader WebGL: about 10 minutes; `python3 shot3d.py test <name>` makes quick 1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 8b: v14.1 (a faster 3D room, GitHub Pages)
+- Client: "ive activated pages on github, do another full upgrade wherever necessary. it runs very slow on the renders but it looks great so
+  far. improve everything wherever possible"; then "put the latest version on main where i can view it via the pages link". PRs #6 and #4
+  merged, so main = v14.1.
+- 3D speed (`room3d.js`, backup `room3d_v14_backup.js`): built only when the Room tab first opens; shadow maps redrawn only when the room
+  changes (`shadowMap.autoUpdate = false`, `reshadow()`); half resolution while dragging, full again 180 ms after; PCF shadows interactively,
+  PCF-soft for saved pictures; HD pixel ratio capped at 1.5; the shell's small parts merged per material; the 4 upward strip area lights
+  replaced by an emissive glow map on the ceiling; Fast mode drops all area lights (the costliest) and lifts the fill; phones start on Fast
+  and any device that takes >70 ms over a full HD frame drops to Fast unless you picked. SwiftShader bench: HD 2.8 s → 1.56 s a frame,
+  Fast 1.8 s → 0.70 s, before the 4× saving while moving. `R3D.bench(n)` and `R3D._dbg` are there for tuning.
+- Realism: `render.art_on()` now records sleeve art in 3D, so the framed LPs, the ledges and the trays show their covers; the sofa is
+  upholstered (RoundedBoxGeometry, matte fabric).
+- Page: pictures load per tab; header buttons for the 3D room and both PDFs; a Downloads list (Checks tab) that links straight into
+  `media-wall/out/` on Pages; the Pages copy says its ticks stay on the device and links the deck; dashboard 2-up on phones.
 
 ## Update 20 Oct 2026, round 8: v14 (the table by the stairs, the room in 3D, the page reorganised)
 - Client (with two photos of the west wall): "see all the latest work … merge any not in your version … full review of the format and layout

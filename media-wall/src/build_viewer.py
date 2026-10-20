@@ -14,7 +14,9 @@ HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
 VERSION = "14"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
-GITHUB_OUT = "https://github.com/emmachilds98-wq/DIY/blob/claude/sharp-franklin-lrray1/media-wall/out/"  # v13.8: the branch that carries every round (PR #4); switch to main once it merges
+PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
+GITHUB_OUT = PAGES + "media-wall/out/"
+DECK_URL = "https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2"
 LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
 SINGLES = 2 * G.TRAY_SINGLES
 
@@ -64,11 +66,20 @@ def downloads_list():
     for p in sorted(OUT.glob(f"Home_Network_Plan_v{VERSION}.pdf")) + sorted(OUT.glob(f"Build_Guide_v{VERSION}.pdf")):
         label = "The full plan" if p.name.startswith("Home") else "The build guide"
         items.append((p, f"{label}, v{VERSION}", "PDF"))
-    for p in sorted(OUT.glob(f"Media wall v{VERSION} - *.png")):
-        items.append((p, p.stem.replace(f"Media wall v{VERSION} - ", "").replace(" (HD)", "") + " (HD render)", "PNG"))
+    for p in sorted(OUT.glob(f"Media wall v{VERSION} - *.png"), key=lambda p: (" - 3D - " not in p.name, p.name)):
+        lab = p.stem.replace(f"Media wall v{VERSION} - ", "").replace(" (HD)", "")
+        items.append((p, (lab.replace("3D - ", "") + " (3D, HD)") if lab.startswith("3D - ") else lab + " (drawn, HD)", "PNG"))
     for p in sorted(OUT.glob("*plan*.png")) + sorted(OUT.glob("Dining layouts*.png")) + sorted(OUT.glob("Storage options*.png")) + sorted(OUT.glob("Drawer layouts*.png")) + sorted(OUT.glob("Sub cover*.png")):
         items.append((p, p.stem, "PNG"))
     return items
+
+
+def downloads_html(site):
+    """v14.1: the PDFs and HD pictures as a list of links: straight to the files on GitHub Pages, to GitHub from the deck."""
+    base = "media-wall/out/" if site else GITHUB_OUT
+    lis = "".join(f'<li><a href="{base}{urllib.parse.quote(p.name)}" target="_blank" rel="noopener">{html.escape(label)}</a><small>{kind}</small></li>'
+                  for p, label, kind in downloads_list())
+    return f'<ul class="dl">{lis}</ul>'
 
 
 def published_name(p):
@@ -355,6 +366,9 @@ details.sdraw figure.dia svg { display: block; width: 100%; min-width: 640px; he
 #tracker.f-left li.done, #tracker.f-left li[data-kind="job"], #tracker.f-jobs li[data-kind="buy"] { display: none; }
 summary .pf a { color: var(--oak); }
 /* v14: tab groups, the overview's dashboard, the table's two options, the 3D room and its gallery */
+.hlinks { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; }
+.hlinks a.btn { text-decoration: none; }
+.hlinks a.btn:first-child { background: var(--oak); color: var(--surface); }
 .tabs .tg { flex: none; align-self: center; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
   padding: 0 4px 0 12px; margin-left: 6px; border-left: 1px solid var(--line); }
 .tabs .tg:first-child { border-left: 0; margin-left: 0; padding-left: 2px; }
@@ -370,8 +384,9 @@ summary .pf a { color: var(--oak); }
 .d3d span { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 10px; font-family: var(--display); font-weight: 700; font-size: 1.15rem;
   background: linear-gradient(transparent, rgba(0,0,0,0.72)); }
 .d3d:hover span { text-decoration: underline; }
-@media (max-width: 860px) { .dash { grid-template-columns: repeat(3, minmax(0, 1fr)); } .d3d { grid-column: 1 / -1; aspect-ratio: 16 / 7; } }
-@media (max-width: 520px) { .dash { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 860px) { .dash { grid-template-columns: repeat(3, minmax(0, 1fr)); } .d3d { grid-column: 1 / -1; aspect-ratio: 16 / 7; min-height: 0; } }
+@media (max-width: 520px) { .dash { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .dcard { padding: 10px 12px; } .dcard strong { font-size: 1.2rem; }
+  .dash .dcard:last-child { grid-column: 1 / -1; } }
 .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
 .opt { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
 .opt img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #0d100e; }
@@ -581,8 +596,10 @@ def page(site=False):
     part_buttons = "".join(f'<button type="button" data-part="{html.escape(k)}" aria-pressed="false"><span class="dot" style="background:{PARTS[k]}"></span>{html.escape(k)}</button>' for k in used)
     tabs = "".join((f'<span class="tg" aria-hidden="true">{TAB_GROUPS[t]}</span>' if t in TAB_GROUPS else "")
                    + f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
-    files_line = (f'Print copies of this plan (PDF) and the HD renders are also kept in the project folder on '
-                  f'<a href="{GITHUB_OUT}" target="_blank" rel="noopener">GitHub, media-wall/out/</a>; you don\'t need them to use this page.')
+    base = "media-wall/out/" if site else GITHUB_OUT
+    pdfs = (f'<p class="hlinks"><a class="btn" href="#room" data-go="room">Walk round it in 3D</a>'
+            f'<a class="btn" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a>'
+            f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>')
     return uniq_svgs(f"""<title>Portsmouth Close Media Wall</title>
 {room3d_page.IMPORTMAP}
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -591,9 +608,12 @@ def page(site=False):
 {STYLE}
 <div class="wrap">
   <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.1 · 20 Oct 2026</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
-    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table (now with a second place to put it), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. Ticks, amounts and answers save for both of you.</p>
+    {('<p class="notice">This is the copy on GitHub Pages: your ticks, amounts and answers are kept on this device only. To share them with each other, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
+    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table (now with a second place to put it), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. {"Ticks, amounts and answers save for both of you." if not site else ""}</p>
+    {pdfs}
+    {"" if site else '<p class="caption">This page is also on <a href="' + PAGES + '" target="_blank" rel="noopener">your GitHub Pages site</a> (ticks there stay on that device).</p>'}
   </header>
   <nav class="tabs" aria-label="Plan sections"><div class="tl" role="tablist">{tabs}</div></nav>
 
@@ -767,7 +787,8 @@ def page(site=False):
     <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
-    <div class="doc"><p class="notice">Still to confirm: the open questions, with a box for each answer, are in the {_tablink("questions")}.</p>{sec["12"]}<h2>Options we set aside</h2>{sec["appendix"]}<p class="note">{files_line}</p></div>
+    <div class="doc"><p class="notice">Still to confirm: the open questions, with a box for each answer, are in the {_tablink("questions")}.</p>{sec["12"]}<h2>Options we set aside</h2>{sec["appendix"]}</div>
+    <div class="block"><h2 class="ptitle">Downloads</h2><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn. {"" if site else "They open from your GitHub Pages site."}</p>{downloads_html(site)}</div>
   </section>
 </div>
 <script>
@@ -779,7 +800,8 @@ const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v
                 set(k, v) {{ try {{ localStorage.setItem(k, JSON.stringify(v)); }} catch (e) {{}} }} }};
 
 /* ---------- pictures borrowed from the viewer's set (each embedded once) */
-$$("img[data-art]").forEach(im => {{ const u = DATA.img[im.dataset.art]; if (u) im.src = u; }});
+function arts(el) {{ $$("img[data-art]:not([src])", el).forEach(im => {{ const u = DATA.img[im.dataset.art]; if (u) im.src = u; }}); }}   // v14.1: each tab's pictures load when it opens
+arts($("header")); arts(document.getElementById("overview"));
 
 /* ---------- tabs */
 const tabBtns = $$('[role="tab"]');
@@ -787,6 +809,7 @@ function showTab(id, focus) {{
   if (!DATA.tabs.includes(id)) id = "overview";
   tabBtns.forEach(b => {{ const on = b.getAttribute("aria-controls") === id; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); if (on) b.scrollIntoView({{ block: "nearest", inline: "nearest" }}); }});
   DATA.tabs.forEach(t => {{ document.getElementById(t).hidden = t !== id; }});
+  arts(document.getElementById(id));
   store.set("mw13-tab", id);
   try {{ history.replaceState(null, "", "#" + id); }} catch (e) {{}}
 }}
@@ -1188,6 +1211,7 @@ def site():
     head, rest = body.split("</style>", 1)
     return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%239a6634%22/%3E%3C/svg%3E">\n'
             + head + "</style>\n</head>\n<body>" + rest + "</body>\n</html>\n")
 
 

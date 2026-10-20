@@ -11,7 +11,7 @@ from diagrams import (light_scene, leaf_case, sub_box, drawer_layouts, storage, 
 
 HERE = pathlib.Path(__file__).parent
 VERSION = "14"
-REVISION = "14: the stairs-wall table option and the 3D room"
+REVISION = "14.1: a faster 3D room, on GitHub Pages"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 

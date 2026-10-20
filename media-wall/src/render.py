@@ -152,6 +152,15 @@ def art_on(q, blocks):
         bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
         tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
         return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
+    if REC is not None and all(isinstance(p_, P3) for p_ in q):   # v14.1: the 3D export gets the sleeve art too
+        bl, br, tr, tl = (p_.w for p_ in q)
+        nx = [(br[i] - bl[i]) for i in range(3)]; ny = [(tl[i] - bl[i]) for i in range(3)]
+        nrm = [nx[1] * ny[2] - nx[2] * ny[1], nx[2] * ny[0] - nx[0] * ny[2], nx[0] * ny[1] - nx[1] * ny[0]]
+        ln = math.sqrt(sum(c * c for c in nrm)) or 1.0
+        def L3(u, v, k):   # bilinear on the quad, lifted off it (towards the viewer) a little more for each layer
+            pt = [bl[i] + nx[i] * u + ny[i] * v + (tr[i] - br[i] - ny[i]) * u * v - nrm[i] / ln * 0.06 * (k + 1) for i in range(3)]
+            q_ = P3(L(u, v)); q_.w = tuple(round(c, 3) for c in pt); return q_
+        return "\n".join(poly([L3(u1, v1, k), L3(u2, v1, k), L3(u2, v2, k), L3(u1, v2, k)], c) for k, (c, u1, u2, v1, v2) in enumerate(blocks))
     return "\n".join(poly([L(u1, v1), L(u2, v1), L(u2, v2), L(u1, v2)], c) for (c, u1, u2, v1, v2) in blocks)
 
 # ---------------------------------------------------------------- shared with v9 (unchanged drawings)

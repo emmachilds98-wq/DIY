@@ -24,6 +24,7 @@ CSS = """
 .r3d-stage canvas:active { cursor: grabbing; }
 .r3d-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #e7ebe3; font-size: 15px; }
 .r3d-msg a { color: #d9a46c; }
+.r3d-msg[hidden] { display: none; }
 .r3d-cap { position: absolute; left: 10px; bottom: 10px; right: 96px; margin: 0; color: #f3efe6; font-size: 12.5px; line-height: 1.35;
   text-shadow: 0 1px 3px #000c; pointer-events: none; }
 .r3d-tools { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 6px; }
@@ -82,7 +83,7 @@ def section():
 def standalone(path=HERE / "room3d_test.html"):
     css = ":root{--line:#d4d9cd;--muted:#5b6457}body{margin:0;background:#eef0ea;font:15px system-ui}.wrap{max-width:1600px;margin:auto;padding:12px}" \
           ".seg{display:flex;gap:6px}.btn,.seg button,.chip{border:1px solid #ccc;background:#fff;border-radius:8px;padding:6px 10px;font:inherit}" \
-          "[aria-pressed=true]{background:#2f4f3a;color:#fff}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}.label{font-weight:700;font-size:12px}"
+          ".seg button[aria-pressed=true],.chip[aria-pressed=true]{background:#2f4f3a;color:#fff}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}.label{font-weight:700;font-size:12px}"
     path.write_text(f'<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
                     f'<title>Room in 3D</title>{IMPORTMAP}<style>{css}{CSS}</style></head><body><div class="wrap">{section()}</div></body></html>')
     return path
