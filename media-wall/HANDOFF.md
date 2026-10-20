@@ -1,12 +1,11 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v19.md`** (chair storage first). v18.1 is built and merged (rounds 12 and 12b, below).
-- **Chair storage (the client asked for it "in next run"):**
-  somewhere to keep the dining chairs, "optional not essential unless easily done to the original table without many changes" (e.g.
-  folding chairs on wall hooks by the stairs, or stored in the garage; don't redesign the flip-top for it). The open questions are in
-  `src/questions.py` (new: the plant stand's and the record shelf's sizes).
-- **Branch:** `claude/sharp-franklin-lrray1`, restarted from `main` (v14.1) in round 9 after PR #4 merged; work there and open a PR into `main`.
+- **Next agent: `media-wall/UPGRADE_PLAN_v20.md`.** v19 is built and merged (round 13, below). It mostly waits on the client's answers
+  (the chairs and a photo of the side of the stairs, the window corner's taped gap, whether HD still crashes and on which phone).
+- **The shared deck works from this account again (round 13):** publishing to 71ff succeeded (v16 → v19). Its db (the saved answers)
+  still can't be read from Claude Code ("shared with you from another organization"), so ask the client to paste answers if you need them.
+- **Branch:** round 13 ran on `claude/eloquent-johnson-pgmnud`, restarted from `main`; any session's branch works: restart it from `main` and open a PR into `main`.
 - **`main` is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root `index.html` is `build_viewer.site()`; `.nojekyll`
   skips Jekyll). The client wants the latest version on main so they can view it there: work on the branch, open a PR into `main`, merge it
   once checked so Pages stays current.
@@ -19,6 +18,26 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 13: v19 (chair storage, every LP counted, edit mode follow-ups)
+- Client: the v19 plan (`UPGRADE_PLAN_v19.md`) and "you are the new agent, please start the upgrades and add improvements as you see fit".
+  Branch `claude/eloquent-johnson-pgmnud` restarted from main (4db10ee).
+- **Chairs:** IKEA FRÖSVI (TERJE's UK successor, same 43 × 49 × 78; flat-packed 89 × 43 × 9 = the folded size) and the BJÄRNUM folding
+  hook (3 × 8 × 8, 3-pack) cited as `frosvi` and `bjarnum` (appended to `fit.SOURCES`/`ORDER`, so earlier numbers don't shift).
+  geometry `CHAIR_FOLDED`, `HOOK`, `CHAIR_STORE` (hooks: z −235 … −286, two chairs at 3–92 and 96–185, hooks at 86 and 179, 6 under the
+  shelf; the stair gap −84 … −125 = 41, 2 too narrow; under the stairs about 78 high in the room). `fit.chairs_zone()` (7 rows: 94 checks,
+  63 fit, 22 tight, 9 check). `diagrams.chair_storage()` (the stairs wall in elevation) and a "Keeping the chairs" subsection in plan
+  section 5; buy rows (hooks £8–15, a To do) and the chairs row now FRÖSVI. 3D: `buildChairStore()` (hidden when the table is open or
+  `S.chairs = "away"`), a "Spare chairs" control, a "The chairs on hooks" camera, the `3d_chairs` still, a chairs card on the Dining tab.
+- **LPs:** geometry `WALL_LPS` 191, `STAND_LPS` 100, `ALL_LPS` 291; the overview, the records table (a vinyl stand row), the counts, the
+  questions and the README use them (face-out in the wall and the stand's top, spine-up between its wires).
+- **Questions (16):** `chairs` rewritten (how many, folding, a photo under the stairs), new `cornergap` (tape the window corner) and
+  `hdcrash` (does HD still crash, which phone).
+- **Edit mode (room3d.js):** undo (the last 10 layout changes, `UNDO`, ↶ button and Ctrl/Cmd+Z), snap flush to a wall within 5 cm
+  (`SNAP` in `clampItem`), Copy for added things, each thing's footprint in the panel (`#r3d-selsize`), the sofa movable (export3d puts
+  `sofa_solid` in its own `sofa` group; buildFurniture recentres it and calls `movable`), and **Save for both of you / Use the shared
+  layout**: the doc `layouts/shared` in the page's db (only where `claude.use("db")` resolves, i.e. the Claude deck; hidden on Pages).
+- Version 19 everywhere (renders, stills `render_v19_3d_*`, `Media wall v19 - …`); v18 outputs moved to `out/v18/`. Backups `*_v18_1_backup.*`.
 
 ## Update 20 Oct 2026, round 12b: v18.1 (the plant stand and the vinyl stand from the client's listings)
 - PR #10 (v18) was merged by the client. The branch was restarted from main for this follow-up.

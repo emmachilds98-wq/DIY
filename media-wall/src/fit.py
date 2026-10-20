@@ -427,6 +427,45 @@ def zones():
     return _zones_v17() + [plants_zone()]
 
 
+# v19: somewhere to keep the dining chairs, without changing the table
+SOURCES["frosvi"] = ("IKEA UK: FRÖSVI folding chair (TERJE's successor, the same 43 W × 49 D × 78 H, seat 48, tested for 110 kg); the hole in the back "
+                     "is made to hang it on a wall hook, hooks not included; flat-packed (folded) 89 × 43 × 9 cm (ikea.com/gb, ikea.com.tw product pages)")
+SOURCES["bjarnum"] = "IKEA: BJÄRNUM folding hook, aluminium, 3 W × 8 D × 8 H cm, 3-pack; it folds flat against the wall when nothing hangs on it"
+ORDER.extend(["frosvi", "bjarnum"])
+_zones_v18 = zones
+
+
+def chairs_zone():
+    g = G
+    cw, cdep, ch = g.CHAIR_FOLDED
+    H = g.CHAIR_STORE["hooks"]
+    gap = H["z"][0] - H["z"][1]
+    (lo0, lo1), (up0, up1) = H["chair_y"]
+    sg = g.CHAIR_STORE["stair_gap"]
+    sgap = sg[0] - sg[1]
+    U = g.CHAIR_STORE["under_stairs"]
+    out = max(cdep, g.HOOK[1]) + 1.0                           # the hook goes through the hole in the chair's back: about 10 off the wall
+    return ("Keeping the dining chairs (v19)", f"the stairs wall either side of the table; under the stairs; the garage. Folded chairs {r1(cw)} × {r1(cdep)} × {r1(ch)}", [
+        ("Two chairs on hooks at the table's window end (recommended)", f"folded {r1(cw)} wide", ref("frosvi", "bjarnum"),
+         f"{r1(gap)} between the table's end (z {r1(H['z'][0])}) and the pipe boxing (z {r1(H['z'][1])})", f"{r1((gap - cw) / 2)} each side", PASS),
+        ("One above the other", f"each {r1(ch)} tall; hooks at {r1(H['hook_y'][0])} and {r1(H['hook_y'][1])}", ref("frosvi", "bjarnum", "photo20"),
+         f"the shelf's underside at {r1(H['under_shelf'])}", f"lower chair {r1(lo0)}–{r1(lo1)} off the floor, upper {r1(up0)}–{r1(up1)}: {r1(H['under_shelf'] - up1)} under the shelf; the top hook is at head height, so lift that chair on from the side", PASS),
+        ("How far they stand out", f"{r1(cdep)} folded, on an {r1(g.HOOK[1])} hook", ref("frosvi", "bjarnum"), f"the folded table stands {r1(g.FOLDED_D)} off the wall",
+         f"about {r1(out)} out: no further than the folded table, so the walk past is unchanged; empty, the hooks fold flat", PASS if out <= g.FOLDED_D else TIGHT),
+        ("When the table's open", "the window side's chairs sit in front of the hooks", ref("frosvi"), "the hooks are behind the window-side diners",
+         "they're the chairs you're sitting on, so the hooks are empty at dinner: take both down before opening the table", TIGHT),
+        ("At the stair end instead", f"folded {r1(cw)} wide", ref("frosvi", "photo20"), f"{r1(sgap)} between the shelf's start (z {r1(sg[0])}) and the table (z {r1(sg[1])}); nearer the stairs the foot of the flight must stay clear",
+         f"{r1(cw - sgap)} short: too narrow for this chair; fine for one under {r1(sgap - 2)} wide", CHECK),
+        ("Under the stairs", f"{r1(ch)} × {r1(cw)} lying flat, {r1(cdep)} each", ref("room", "frosvi"), f"inside the room the flight is only about {r1(U['h'])} high at the door wall, {r1(U['x'][1] - U['x'][0])} wide",
+         f"four chairs lying flat make a stack about {r1(4 * cdep)} high: it fits only if the side by the door is open; a photo of it will say", CHECK),
+        ("In the garage", "any number", ref("room"), "nothing changes in the room", "carry them through the house for each meal; fine for guests' chairs, a chore for everyday ones", PASS),
+    ])
+
+
+def zones():
+    return _zones_v18() + [chairs_zone()]
+
+
 if __name__ == "__main__":
     for title, space, rows in zones():
         print("==", title, "|", space)

@@ -19,6 +19,7 @@ SHOTS = [
     ("3d_wall_drawers", dict(view="wall", site="B", dining="folded", scene="records", drawers=True), "the media wall - every drawer out - records"),
     ("3d_sofa_records", dict(view="sofa", site="B", dining="folded", scene="records"), "from the sofa - records"),
     ("3d_B_folded", dict(view="dining", site="B", dining="folded", scene="everyday"), "the stairs wall - table folded under the shelf - everyday evening"),
+    ("3d_chairs", dict(view="chairs", site="B", dining="folded", scene="everyday", chairs="hooks"), "two folded chairs on hooks at the table's window end - everyday evening"),
     ("3d_stairs_A_four", dict(view="stairs", site="A", dining="four", scene="dinner"), "from the stairs - table on the breast, down for four - dinner"),
     ("3d_dining_A_four", dict(view="dining", site="A", dining="four", scene="dinner"), "the dining table on the breast, down for four - dinner"),
     ("3d_dining_B_four", dict(view="dining", site="B", dining="four", scene="dinner"), "the dining table by the stairs, down for four - dinner"),
@@ -69,9 +70,9 @@ def run(test=False, only=None):
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v18 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v19 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v18_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v19_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])

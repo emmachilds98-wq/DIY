@@ -11,7 +11,7 @@ IMPORTMAP = ('<script type="importmap">' + json.dumps({"imports": {"three": THRE
                                                                    "three/addons/": THREE + "examples/jsm/"}}) + "</script>")
 
 VIEWS = [("window", "From the window"), ("wall", "The media wall"), ("sofa", "From the sofa"), ("door", "From the door"),
-         ("stairs", "From the stairs"), ("dining", "The dining table"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"),
+         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "The chairs on hooks"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"),
          ("doll", "Dolls’ house")]
 
 CSS = """
@@ -25,6 +25,7 @@ CSS = """
 .r3d-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #e7ebe3; font-size: 15px; }
 .r3d-msg a { color: #d9a46c; }
 .r3d-msg[hidden] { display: none; }
+.r3d-size { font-size: 12px; color: #e9e4da; margin: 0 6px; font-variant-numeric: tabular-nums; }
 .r3d-cap { position: absolute; left: 10px; bottom: 10px; right: 96px; margin: 0; color: #f3efe6; font-size: 12.5px; line-height: 1.35;
   text-shadow: 0 1px 3px #000c; pointer-events: none; }
 .r3d-tools { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 6px; }
@@ -120,6 +121,7 @@ def controls():
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
+        seg("chairs", [("hooks", "Two on hooks by the table"), ("away", "In the garage")], "Spare chairs (v19)"),
         # v18: your plant stand and record shelf, two layouts; the lamp, the ceiling and the skirting menus went: in "Edit room" you
         # drag the lamp, and tap the ceiling or the skirting to paint it
         seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and vinyl stand"),
@@ -137,12 +139,13 @@ def section():
   <div class="r3d-views" role="group" aria-label="Camera">{views}</div>
   <div class="r3d-stage"><canvas tabindex="0" aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom; WASD or the arrow keys walk, Q and E turn"></canvas>
     <div class="r3d-edit"><button type="button" id="r3d-editbtn" aria-pressed="false" title="Move, turn, recolour, remove and add things; tap a wall to paint it">✎ Edit room</button>
-      <div class="r3d-editbar" id="r3d-editbar" hidden><button type="button" id="r3d-add">+ Add</button><button type="button" id="r3d-layreset">Reset layout</button>
-        <span class="r3d-hint">Drag a thing to move it; tap it to turn, recolour or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
+      <div class="r3d-editbar" id="r3d-editbar" hidden><button type="button" id="r3d-add">+ Add</button><button type="button" id="r3d-undo" disabled title="Undo (Ctrl+Z)">↶ Undo</button><button type="button" id="r3d-layreset">Reset layout</button>
+        <button type="button" class="r3d-share" id="r3d-share" hidden title="Save this layout so Emma and Dave both see it">Save for both of you</button><button type="button" class="r3d-share" id="r3d-useshared" hidden>Use the shared layout</button><span class="r3d-hint" id="r3d-sharest" aria-live="polite"></span>
+        <span class="r3d-hint">Drag a thing to move it (it snaps to a wall within 5 cm); tap it to turn, recolour, copy or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
       <div class="r3d-addlist" id="r3d-addlist" hidden></div>
-      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><button type="button" data-sel="turn">⟳ Turn</button>
+      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn">⟳ Turn</button>
         <label>Colour <input type="color" id="r3d-selcol" value="#888888"></label><span id="r3d-swatches" hidden></span>
-        <button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
+        <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
     <div class="r3d-pad" role="group" aria-label="Walk"><button type="button" data-walk="tl" title="Turn left (Q)" aria-label="Turn left">↺</button><button type="button" data-walk="f" title="Forward (W)" aria-label="Forward">▲</button><button type="button" data-walk="tr" title="Turn right (E)" aria-label="Turn right">↻</button><button type="button" data-walk="l" title="Step left (A)" aria-label="Step left">◀</button><button type="button" data-walk="b" title="Back (S)" aria-label="Back">▼</button><button type="button" data-walk="r" title="Step right (D)" aria-label="Step right">▶</button></div>
     <div class="r3d-msg" id="r3d-msg">Loading the 3D room…</div>
     <p class="r3d-cap" id="r3d-cap"></p>
