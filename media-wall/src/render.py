@@ -836,10 +836,11 @@ def room():
     o.append(quad_front(BX1, 0, zr, RW, CEIL, G_RECESS))
     o.append(poly([P(BX1, 0, 0), P(far, 0, 0), P(far, 0, zr), P(BX1, 0, zr)], "#77797c"))
     dx1, dx2, dh = G.DOOR_X[0], G.DOOR_X[1], 198
-    o.append(quad_front(dx1 - 6, 0, zr - 0.2, (dx2 - dx1) + 12, dh + 6, "#2d5a46"))
-    o.append(quad_front(dx1, 0, zr - 0.4, dx2 - dx1, dh, "#2a5340"))
+    # v20, client: "door of room is also white": the door and its frame stay white (not drenched in the wall colour), in the recess's shade
+    o.append(quad_front(dx1 - 6, 0, zr - 0.2, (dx2 - dx1) + 12, dh + 6, "#dedbd3"))
+    o.append(quad_front(dx1, 0, zr - 0.4, dx2 - dx1, dh, "#d3cfc6"))
     for (py1, py2) in ((112, 186), (14, 98)):
-        o.append(quad_front(dx1 + 9, py1, zr - 0.5, dx2 - dx1 - 18, py2 - py1, "none", 'stroke="#21443a" stroke-width="1.6"'))
+        o.append(quad_front(dx1 + 9, py1, zr - 0.5, dx2 - dx1 - 18, py2 - py1, "none", 'stroke="#b3ada2" stroke-width="1.6"'))
     o.append(box(dx2 - 9, 100, zr - 2.5, 7, 1.2, 2, "#c9c4b8", "#e2ddd2", "#a9a49a"))
     # the alcove: back wall, reveal (the breast's east side) and floor
     o.append(quad_front(0, 0, ALC_D, ALC_W, CEIL, "#244a39"))
@@ -2758,20 +2759,20 @@ def all_svgs():
     six_sub = ("The flip-top open on its gate leg, 110 × 160, still on the wall · both spot bars · three a side" if G.TABLE_STYLE == "fliptop" else
                "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end")
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v19, the table by the stairs", sub))
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v20, the table by the stairs", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
     out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("Option A: the flip-top on the chimney breast, set for four · v19", "Flip-top gate-leg oak table, still on the wall · " + sub))
+                                   label=("Option A: the flip-top on the chimney breast, set for four · v20", "Flip-top gate-leg oak table, still on the wall · " + sub))
     out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
-                                  label=("Option A: the flip-top on the breast, set for six · v19", six_sub))
+                                  label=("Option A: the flip-top on the breast, set for six · v20", six_sub))
     dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25, slim_open=30)
-    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v19", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
+    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v20", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
     out["v13_m_join"] = build(with_dims=False, style="joinery", measure="join")
     out["v13_m_four"] = build(with_dims=False, style="joinery", dining="four", measure="four")
     out["v13_m_six"] = build(with_dims=False, style="joinery", dining="six", measure="six")
     out["v13_m_drawers"] = build(**dkw, measure="drawers")
     out["v13_m_side"] = build_side(measure=True)
-    out["v13_side"] = build_side(label=("The PC side wall · v19", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
+    out["v13_side"] = build_side(label=("The PC side wall · v20", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
         lab = name + (" · chosen" if k == MAIN_PAINT else "")

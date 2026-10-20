@@ -11,7 +11,7 @@ IMPORTMAP = ('<script type="importmap">' + json.dumps({"imports": {"three": THRE
                                                                    "three/addons/": THREE + "examples/jsm/"}}) + "</script>")
 
 VIEWS = [("window", "From the window"), ("wall", "The media wall"), ("sofa", "From the sofa"), ("door", "From the door"),
-         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "The chairs on hooks"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"),
+         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "The chair cupboard"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"),
          ("doll", "Dolls’ house")]
 
 CSS = """
@@ -63,6 +63,9 @@ details.r3d-more[open] > summary { margin-bottom: 8px; }
 .r3d-save { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .r3d.nogl .r3d-ui, .r3d.nogl .r3d-views { display: none; }
 .r3d-wide { grid-column: 1 / -1; display: grid; gap: 10px; }
+.r3d-decrow { display: grid; grid-template-columns: 9.5em 1fr; gap: 8px; align-items: center; }
+.r3d-decrow > span { font-size: 13px; opacity: .8; }
+@media (max-width: 560px) { .r3d-decrow { grid-template-columns: 1fr; gap: 4px; } }
 .r3d-lvs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 8px 22px; }
 .r3d-lv { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "lab out" "range range" "cols cols"; gap: 2px 10px; align-items: center; min-width: 0; }
 .r3d-lv label { grid-area: lab; font-size: 14px; }
@@ -85,6 +88,12 @@ LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves an
           ("lamp", "Red lamp: top, middle, bottom", "lamp")]
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
+# v20: decor to try in the 3D room (room3d.js S.decor; the keys match its RUG_LOOKS, CUSHION_COLS, CURTAIN_COLS, the case's PRESETS, CASE_FRAMES)
+DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatweave"), ("blue", "Deep blue"), ("stripes", "Sage stripes"), ("none", "No rug")]),
+         ("cushions", "Sofa cushions", [("none", "None"), ("rust", "Rust and ochre"), ("blues", "Blues"), ("sage", "Sage and cream")]),
+         ("curtains", "Curtains", [("hessian", "Your hessian"), ("linen", "White linen"), ("sage", "Sage"), ("blue", "Deep blue"), ("rust", "Rust")]),
+         ("fill", "In the glass case", [("collect", "Collectibles"), ("games", "Retro games"), ("singles", "7-inch singles and tapes"), ("plants", "Plants and ceramics"), ("mixed", "A bit of each")]),
+         ("frame", "The case's frame", [("oak", "Oak"), ("black", "Black"), ("white", "White")])]
 
 
 def controls():
@@ -117,11 +126,16 @@ def controls():
               '<div class="grp"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
               '<button type="button" data-idea="glass" aria-pressed="false">Glass plant shelves</button>'
-              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>''</div></div>')
+              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>''</div></div>'
+              # v20, client: "give more decor variation and options": the rug, cushions, curtains, the glass case's fill and frame
+              '<div class="grp r3d-wide r3d-decor"><span class="label">Decor: try a look (only the case and cushions are in the ideas, not the plan)</span>'
+              + "".join(f'<div class="r3d-decrow"><span>{html.escape(lab)}</span><div class="seg" role="group" aria-label="{html.escape(lab)}">'
+                        + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in opts) + '</div></div>'
+                        for k, lab, opts in DECOR) + '</div>')
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
-        seg("chairs", [("hooks", "Two on hooks by the table"), ("away", "In the garage")], "Spare chairs (v19)"),
+        seg("chairs", [("cupboard", "Chair cupboard, shut"), ("open", "Chair cupboard, open"), ("hooks", "Open hooks instead"), ("away", "In the garage")], "Chairs, with the table folded"),
         # v18: your plant stand and record shelf, two layouts; the lamp, the ceiling and the skirting menus went: in "Edit room" you
         # drag the lamp, and tap the ceiling or the skirting to paint it
         seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and vinyl stand"),

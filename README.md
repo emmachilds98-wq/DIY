@@ -2,20 +2,31 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v19
+## Media wall and dining wall, v20
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the flip-top oak dining table on the stairs wall under your shelf (the default since v16) or on the chimney breast. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v19%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v20%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v19** (somewhere for the dining chairs, every LP counted, a better edit mode)
+**New in v20** (the table packs away with its chairs, a taller glass case, decor to try, the door white)
+- **A chair cupboard built in beside the table:** oak, 51 wide × 22 deep × 189 tall, in the gap at the table's window end, flush with the pipe boxing and under your shelf. Four folded chairs go inside (two on its floor, two on its shelf) behind two doors on push latches, about £120–240. Fold the table, shut the doors, and the whole wall is packed away. Built 31 deep it takes six (9 cm proud of the boxing); otherwise chairs five and six live in the garage. The open hooks stay as the cheap way.
+- **The window ledge's 25 cm** matches the drawing (22 into the reveal, 3 of nose). **No HD crashes**, so that question is gone. **The door and its frame are white.**
+- **The glass display case** (an idea) is now **85 tall** with three glass shelves. In the 3D room, a new **Decor** group tries what goes in it (collectibles, retro games, 7-inch singles and tapes, plants and ceramics, a bit of each) and its frame (oak, black, white), plus four rugs, three cushion colourways for the sofa and five curtain colours. Edit room's Add list has a floor vase, a pouffe, a seagrass basket, a floor mirror and a lantern.
+
+![The chair cupboard beside the folded table, doors open](media-wall/out/Media%20wall%20v20%20-%203D%20-%20the%20chair%20cupboard%20beside%20the%20table,%20doors%20open,%20four%20chairs%20inside%20(plant%20stand%20and%20lamp%20hidden)%20-%20everyday%20evening%20(HD).png)
+
+| ![Packed away](media-wall/out/Media%20wall%20v20%20-%203D%20-%20the%20stairs%20wall%20packed%20away%20-%20the%20table%20folded%20and%20the%20chair%20cupboard%20shut%20-%20everyday%20evening%20(HD).png) | ![Decor to try](media-wall/out/Media%20wall%20v20%20-%203D%20-%20DECOR%20to%20try%20-%20sage-stripe%20rug,%20rust%20and%20ochre%20cushions,%20white%20linen%20curtains%20-%20everyday%20evening%20(HD).png) |
+|---|---|
+| Packed away: the table folded, the cupboard shut | Decor to try: sage-stripe rug, rust and ochre cushions, white linen curtains |
+
+**v19** (somewhere for the dining chairs, every LP counted, a better edit mode)
 - **Two folded chairs on hooks** in the 51 cm gap at the table's window end, one above the other under your shelf: IKEA FRÖSVI (TERJE's successor, the same size, with a hole in the back for a hook) on two BJÄRNUM folding hooks, about £8–15. The table doesn't change. The stair end's 41 cm is 2 cm too narrow; under the stairs (send a photo of the side by the door) and the garage are the other options. Drawn in the plan, checked in the fit proof and in the 3D room ("The chairs on hooks").
 - **About 291 LPs** now counted: 191 in the wall, all face-out, and 100 in your vinyl stand (50 face-out on top, 50 spine-up between its wires).
 - **Edit room:** undo (the last ten changes, or Ctrl+Z), things snap flush to a wall within 5 cm, copy what you've added, each thing shows its size, the sofa moves too, and on the shared plan page you can save one layout for both of you.
 - **Three questions:** how many chairs (and a photo under the stairs), tape the window corner's gap at floor level, and whether HD still crashes and on which phone.
 
-![Two folded chairs on hooks by the table](media-wall/out/Media%20wall%20v19%20-%203D%20-%20two%20folded%20chairs%20on%20hooks%20at%20the%20table's%20window%20end%20-%20everyday%20evening%20(HD).png)
+![Two folded chairs on hooks by the table](media-wall/out/v19/Media%20wall%20v19%20-%203D%20-%20two%20folded%20chairs%20on%20hooks%20at%20the%20table's%20window%20end%20-%20everyday%20evening%20(HD).png)
 
 **v18** (your plant stand, your vinyl stand, and a room you can rearrange)
 - **Your plant stand (98 × 29.5 × 158) and your vinyl stand (70 × 32 × 78)**, at the sizes on the listings you sent (v18.1), in two layouts. **A (recommended):** the plant stand in the window's west corner, with daylight beside it (4.5 cm each side between the curtains and the pipe boxing: measure first); the vinyl stand on the chimney breast under the “now playing” ledge, a step from the turntable (about 100 more LPs). **B:** the other way round; the frames go up 30. Your red lamp moves to the sofa's end.
@@ -27,7 +38,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Layout A: your plant stand in the window corner | Layout A: your vinyl stand on the breast |
 |---|---|
-| ![Plant stand](media-wall/out/Media%20wall%20v19%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v19%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
+| ![Plant stand](media-wall/out/Media%20wall%20v20%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v20%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
 
 **New in v17** (the room finished round your notes)
 - **The sofa's open end** is a proper ottoman end: the seat wraps round to the back, the back stops 20 cm short, and the sofa stands 13 cm off the window wall, clear of the curtains.
@@ -116,9 +127,9 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Option A: the flip-top on the breast, set for six | The PC side wall |
 |---|---|
-| ![Six at the table](media-wall/out/Media%20wall%20v19%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v19%20-%20the%20PC%20side%20wall%20(HD).png) |
+| ![Six at the table](media-wall/out/Media%20wall%20v20%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v20%20-%20the%20PC%20side%20wall%20(HD).png) |
 
-![Numbered key](media-wall/out/Media%20wall%20v19%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
+![Numbered key](media-wall/out/Media%20wall%20v20%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -137,7 +148,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v19%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v20%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)

@@ -431,14 +431,21 @@ ALL_LPS = WALL_LPS + STAND_LPS                                    # 291
 # table without many changes". The table isn't changed. The chairs are IKEA FRÖSVI (TERJE's UK successor, the same 43 x 49 x 78), which
 # fold flat and have a hole in the back made to hang on a hook; folded they're about 43 W x 9 D x 89 H (their flat-pack size).
 CHAIR_FOLDED = (43.0, 9.0, 89.0)
-HOOK = (3.0, 8.0, 8.0)                       # IKEA BJÄRNUM folding hook (3-pack): W x D x H; it folds flat against the wall when empty
+HOOK = (3.0, 20.0, 20.0)                     # v20: a 200 x 200 mm steel storage hook (Smith & Locke, Screwfix 8882J, 60 kg): two chairs on each
 _hook_top = SHELF_B["top"] - SHELF_B["t"]    # the shelf's underside, 191
 CHAIR_STORE = dict(
     # the window end of the stairs wall: from the table's end (z -235) to the pipe boxing's face (z -286), two chairs one above the other
-    hooks=dict(z=(TABLE_B_Z[1], PIPE_BOX["z"][1]), x=ROOM_W, chairs=2,
+    # v20, client: "ideally 6 folding chairs but 4 is fine": two chairs on each hook, one behind the other, so four hang here
+    hooks=dict(z=(TABLE_B_Z[1], PIPE_BOX["z"][1]), x=ROOM_W, chairs=4, per_hook=2,
                chair_y=((3.0, 3.0 + CHAIR_FOLDED[2]), (96.0, 96.0 + CHAIR_FOLDED[2])), hook_y=(86.0, 179.0), under_shelf=_hook_top),
     # the stair end: from the shelf's start (z -84, past it the stair's foot has to stay clear) to the table's other end (z -125)
     stair_gap=(SHELF_B["z"][0], TABLE_B_Z[0]),
     # under the stairs, inside the room: the flight rises from z -35 to the door wall at z 39, so it's only about 78 tall there
+    owned=(4, 6),                            # four on the wall; a fifth and sixth (for six at the table) in the garage, or under the stairs
+    # v20, client: "is it not possible to build the chair storage into the table setup. i want it to be a fully pack away setup": an oak
+    # chair cupboard built in beside the table, in the same window-end gap, flush with the pipe boxing's face; the chairs hang inside it on
+    # the two hooks, two deep; a door on the table's side closes it. The 31-deep version takes three deep: six chairs.
+    cupboard=dict(z=(TABLE_B_Z[1], PIPE_BOX["z"][1]), d=PIPE_BOX["x"][1] - PIPE_BOX["x"][0], d6=31.0, h=SHELF_B["top"] - SHELF_B["t"] - 2.0,
+                  t=1.8, door=1.8, back=0.6, plinth=3.0, shelf_y=93.0, lip=3.0, hinge="table"),
     under_stairs=dict(x=STAIR_X, z=(ALC_D - STAIR_D + 6.0, BREAST_D_WEST), h=round((BREAST_D_WEST - (ALC_D - STAIR_D + 6.0)) // STAIR_GOING + 1) * STAIR_RISE),
 )

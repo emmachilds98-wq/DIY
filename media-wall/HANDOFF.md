@@ -1,8 +1,8 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v20.md`.** v19 is built and merged (round 13, below). It mostly waits on the client's answers
-  (the chairs and a photo of the side of the stairs, the window corner's taped gap, whether HD still crashes and on which phone).
+- **Next agent: `media-wall/UPGRADE_PLAN_v21.md`.** v20 is built and merged (round 14, below). It waits on the client's answers
+  (the chair cupboard: four at 22 deep or six at 31; the window corner's gap at floor level; a photo of the side of the stairs by the door).
 - **The shared deck works from this account again (round 13):** publishing to 71ff succeeded (v16 → v19). Its db (the saved answers)
   still can't be read from Claude Code ("shared with you from another organization"), so ask the client to paste answers if you need them.
 - **Branch:** round 13 ran on `claude/eloquent-johnson-pgmnud`, restarted from `main`; any session's branch works: restart it from `main` and open a PR into `main`.
@@ -14,10 +14,34 @@
   with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 21 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 25 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 14: v20 (a chair cupboard so it all packs away, a taller glass case, decor to try, the door white)
+- Client: "ideally 6 folding chairs but 4 is fine. 25cm on window ledge and no crashes. make glass display cabinet on wall taller and
+  give more decor variation and options", then "door of room is also white." and "is it not possible to build the chair storage into the
+  table setup. i want it to be a fully pack away setup".
+- **The chair cupboard (the plan now):** geometry `CHAIR_STORE["cupboard"]` (z −235 … −286 = 51 wide, 22 deep = the pipe boxing, 189
+  tall under the shelf, shelf at 93, two doors hinged on the table's side, 165°; `d6` 31 for six). Four FRÖSVI folded inside, two deep
+  on its floor and two on its shelf. The hooks stay as the cheap alternative (BJÄRNUM replaced by the Smith & Locke 200 × 200 storage hook,
+  Screwfix 8882J, source `slhook`, appended). `fit.chairs_zone()` rewritten (10 rows; 97 checks: 62 fit, 26 tight, 9 check). Buy row
+  £120–240, three cut-list rows, a To do, `diagrams.chair_storage()` redrawn, section 5 rewritten. 3D: `buildChairStore()` now builds the
+  cupboard (`chairCab`, `chairDoors`, `chairsIn`) and the hooks (`chairsHook`); `S.chairs` = cupboard / open / hooks / away; views
+  "The chair cupboard"; stills `3d_chairs` (open, plant stand and lamp hidden for the view) and `3d_chairs_shut`. Viewer `chairs_card()`
+  rewritten.
+- **"25cm on window ledge":** read as the sill's depth, which is what's drawn (22 reveal + 3 nose). The floor-level corner gap is still
+  asked (`cornergap`). **"no crashes":** `hdcrash` dropped, HD unchanged. 15 questions; `chairs` now asks four or six.
+- **The door is white:** render.py door/frame colours, room3d.js `doorW`/`frameW`, the paint text (Estate Eggshell for skirting and
+  radiator only).
+- **The glass case (an idea):** `ideas.CASE` y 137–222 (85 tall, was 50) with `shelves` 158/179/200; £90–170. room3d.js rebuilds it with
+  `caseFrameM` and five fills in `CASE_FILLS` (collect, games, singles, plants, mixed: tier builders `TIER`, presets `PRESETS`).
+- **Decor (room3d.js `S.decor`, `applyDecor()`, room3d_page `DECOR`):** rug (`RUG_LOOKS`: yours, jute, blue, stripes, none), sofa
+  cushions (`buildCushions()` into the sofa's group; `CUSHION_COLS`), curtains (`CURTAIN_COLS` on `curtCloth`), the case's fill and
+  frame (`CASE_FRAMES`; picking either turns the case on and moves the table to the stairs). Five more Add items (vase, pouffe, basket,
+  mirror, lantern). New stills `3d_case_mixed`, `3d_case_singles`, `3d_decor` (in the Ideas tab and the PDF appendix, not the gallery).
+- Version 20 everywhere; v19 outputs moved to `out/v19/`. Backups `*_v19_backup.*`.
 
 ## Update 20 Oct 2026, round 13: v19 (chair storage, every LP counted, edit mode follow-ups)
 - Client: the v19 plan (`UPGRADE_PLAN_v19.md`) and "you are the new agent, please start the upgrades and add improvements as you see fit".

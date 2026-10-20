@@ -2122,7 +2122,7 @@ def fliptop():
 
 
 def chair_storage():
-    """v19: the stairs wall seen from the room, to scale: the table folded under your shelf, two folded chairs on hooks in the gap at its
+    """v19: the stairs wall seen from the room, to scale: the table folded under your shelf; v20: four folded chairs, two on each hook, in the gap at its
     window end, and why the gap at the stair end and the space under the stairs are only maybes."""
     g = G
     W, H = 900, 850
@@ -2163,17 +2163,23 @@ def chair_storage():
     o.append(f'<rect x="{X(tz0)}" y="{Y(g.FOLDED_TOP)}" width="{(tz0 - tz1) * k}" height="{(g.FOLDED_TOP - g.RAIL_TOP + g.RAIL[1]) * k}" fill="#e9d3b4" stroke="#b88a55" stroke-width="1.4"/>')
     o.append(t(X((tz0 + tz1) / 2), Y(115), "the flip-top, folded", 11, "middle", 650, "#5a3a20"))
     o.append(t(X((tz0 + tz1) / 2), Y(115) + 14, f"{_fmt(g.FOLDED_D)} off the wall", 9.5, "middle", 400, "#5a3a20"))
-    # the two chairs on hooks
+    # v20: the chair cupboard in the gap, its doors drawn see-through so the four chairs inside show
+    CB = CS["cupboard"]
     cz = (hz0 + hz1) / 2
-    for (ya, yb), hy in zip(CS["hooks"]["chair_y"], CS["hooks"]["hook_y"]):
+    o.append(f'<rect x="{X(hz0)}" y="{Y(CB["h"])}" width="{(hz0 - hz1) * k}" height="{CB["h"] * k}" fill="#e9d3b4" fill-opacity="0.55" stroke="#9c6a3f" stroke-width="2"/>')
+    o.append(f'<rect x="{X(hz0)}" y="{Y(CB["shelf_y"] + CB["t"])}" width="{(hz0 - hz1) * k}" height="{CB["t"] * k}" fill="#b88a55"/>')                      # the shelf
+    o.append(f'<line x1="{X(hz0)}" y1="{Y(CB["shelf_y"])}" x2="{X(hz1)}" y2="{Y(CB["shelf_y"])}" stroke="#9c6a3f" stroke-width="1.4"/>')                       # the doors' meeting line
+    for y0_ in (CB["plinth"], CB["shelf_y"] + CB["t"]):
+        ya, yb = y0_, y0_ + ch
         xa, xb = X(cz + cw / 2), X(cz - cw / 2)
-        o.append(f'<rect x="{xa}" y="{Y(yb)}" width="{cw * k}" height="{ch * k}" rx="4" fill="#efe2cc" stroke="#9c6a3f" stroke-width="1.4"/>')
-        o.append(f'<rect x="{xa + 5 * k}" y="{Y(yb - 6)}" width="{(cw - 10) * k}" height="{24 * k}" rx="3" fill="#e2cfae" stroke="#b88a55"/>')   # the back
-        o.append(f'<ellipse cx="{(xa + xb) / 2}" cy="{Y(hy)}" rx="{6 * k}" ry="{2.2 * k}" fill="#f4f1ea" stroke="#9c6a3f"/>')                # its hole
-        o.append(f'<rect x="{(xa + xb) / 2 - 1.5 * k}" y="{Y(hy + 4)}" width="{3 * k}" height="{8 * k}" fill="#8a8c8f"/>')                  # the hook
-        o.append(f'<line x1="{xa + 4 * k}" y1="{Y((ya + yb) / 2)}" x2="{xb - 4 * k}" y2="{Y((ya + yb) / 2)}" stroke="#b88a55"/>')           # the folded seat
-    o.append(t(X(hz0) - 6, Y(165), "two folded chairs →", 10.5, "end", 700, "#2f7a4a"))
-    o.append(t(X(hz0) - 6, Y(165) + 12, "on folding hooks", 9.5, "end", 500, "#2f7a4a"))
+        o.append(f'<rect x="{xa}" y="{Y(yb)}" width="{cw * k}" height="{ch * k}" rx="4" fill="none" stroke="#9c6a3f" stroke-dasharray="5 3"/>')
+        o.append(f'<rect x="{xa + 5 * k}" y="{Y(yb - 6)}" width="{(cw - 10) * k}" height="{24 * k}" rx="3" fill="none" stroke="#b88a55" stroke-dasharray="3 3"/>')
+        o.append(t((xa + xb) / 2, Y((ya + yb) / 2) + 4, "2 chairs", 11, "middle", 700, "#5a3a20"))
+        o.append(t((xa + xb) / 2, Y((ya + yb) / 2) + 17, "one behind the other", 8.5, "middle", 500, "#5a3a20"))
+    for yk in (CB["shelf_y"] * 0.55, CB["shelf_y"] + (CB["h"] - CB["shelf_y"]) * 0.55):
+        o.append(f'<circle cx="{X(hz0) + 6}" cy="{Y(yk)}" r="2.6" fill="#5a3a20"/>')                                                                       # push latches
+    o.append(t(X(hz0) - 6, Y(165), "the chair cupboard →", 10.5, "end", 700, "#2f7a4a"))
+    o.append(t(X(hz0) - 6, Y(165) + 12, f"{_fmt(hz0 - hz1)} × {_fmt(CB['d'])} × {_fmt(CB['h'])}, two doors", 9.5, "end", 500, "#2f7a4a"))
     # dimensions
     def dz(za, zb, y, lab, col=BLUE, dy=-5):
         o.append(f'<line x1="{X(za)}" y1="{Y(y)}" x2="{X(zb)}" y2="{Y(y)}" stroke="{col}" stroke-width="1.3"/>')
@@ -2185,16 +2191,15 @@ def chair_storage():
         o.append(t(X(z) + 5, (Y(ya) + Y(yb)) / 2 + 4, lab, 9.5, "start", 700, col))
     dz(hz0, hz1, -6, f"{_fmt(hz0 - hz1)} gap · chairs {_fmt(cw)} wide", dy=14)
     dz(sg0, sg1, -6, f"{_fmt(sg0 - sg1)}: {_fmt(cw - (sg0 - sg1))} too narrow", "#a3352b", dy=14)
-    dy_(hz1 + 3, CS["hooks"]["chair_y"][1][1], sb["top"] - sb["t"], f"{_fmt(sb['top'] - sb['t'] - CS['hooks']['chair_y'][1][1])}")
-    for hy in CS["hooks"]["hook_y"]:
-        o.append(t(X(hz0) - 6, Y(hy) + 4, f"hook at {_fmt(hy)} →", 9, "end", 600, BLUE))
+    dy_(hz1 + 3, CS["cupboard"]["h"], sb["top"] - sb["t"], f"{_fmt(sb['top'] - sb['t'] - CS['cupboard']['h'])}")
+    o.append(t(X(hz0) - 6, Y(CS["cupboard"]["shelf_y"]) + 4, f"shelf at {_fmt(CS['cupboard']['shelf_y'])} →", 9, "end", 600, BLUE))
     o.append(f'<line x1="{X(z0) - 8}" y1="{Y(0)}" x2="{X(z1) + 8}" y2="{Y(0)}" stroke="{WALL}" stroke-width="2.4"/>')
     o.append(t(X(z0), Y(0) + 40, "← door wall (south)", 9.5, "start", 500, MUTED))
     o.append(t(X(z1), Y(0) + 40, "window wall (north) →", 9.5, "end", 500, MUTED))
-    notes = ["1 · On hooks by the table (the plan): two chairs, £8–15 of hooks; empty, the hooks fold flat. Take both down before you open the table.",
-             f"2 · Under the stairs: inside the room the flight is only about {_fmt(CS['under_stairs']['h'])} high; four chairs lying flat stack about {_fmt(4 * cdep)}. Send a photo of the side by the door.",
-             "3 · The garage: no change in the room, any number of chairs; a carry through the house for every meal."]
+    notes = [f"1 · The chair cupboard (the plan): four folded chairs packed away beside the table, {_fmt(CS['cupboard']['d'])} deep like the pipe boxing; about £120–240.",
+             f"2 · All six inside: build it {_fmt(CS['cupboard']['d6'])} deep, three chairs deep ({_fmt(CS['cupboard']['d6'] - CS['cupboard']['d'])} proud of the boxing). Or keep chairs five and six in the garage.",
+             "3 · Cheaper: two 200 mm storage hooks in the same gap hold the same four on show, £8–15."]
     for i, n_ in enumerate(notes):
         o.append(t(0, Y(0) + 68 + i * 17, n_, 10.2, "start", 500 if i else 650, INK if i else "#2f7a4a"))
-    return svg(W, H, "\n".join(o), "Keeping the dining chairs: the stairs wall from the room",
-               f"To scale (1 cm = {k} px). The table and its build don't change; folded FRÖSVI chairs ({_fmt(cw)} × {_fmt(cdep)} × {_fmt(ch)}) hang in the gap at its window end.")
+    return svg(W, H, "\n".join(o), "Keeping the dining chairs: the stairs wall from the room, all packed away",
+               f"To scale (1 cm = {k} px). The table doesn't change or move; an oak cupboard beside it holds four folded chairs ({_fmt(cw)} × {_fmt(cdep)} × {_fmt(ch)}); doors drawn see-through.")

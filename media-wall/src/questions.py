@@ -1,4 +1,5 @@
-"""v18.1: answered by the listings the client sent and dropped: the plant stand (98 × 29.5 × 158) and the vinyl stand (70 × 32 × 78).
+"""v20: answered and dropped: hdcrash ("no crashes"); chairs now six ideally, four fine; the ledge is 25 (as drawn).
+v18.1: answered by the listings the client sent and dropped: the plant stand (98 × 29.5 × 158) and the vinyl stand (70 × 32 × 78).
 v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
 New: hat, lightbox. The curtains and the carpet came with the client's photo the same day (asked and answered).
 v14: answered by the client's photos (20 Oct) and dropped: the stairs' direction (a straight flight rising towards the door).
@@ -35,9 +36,9 @@ QUESTIONS = [
      "The zone takes up to 45.2 × 35.2 cm; the switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
     ("fanstand", "The Series X fan stand's make and model",
      f"The shelf takes a footprint up to about 30 cm wide; the plan assumes {_n(G.FAN_STAND[0])} × {_n(G.FAN_STAND[2])}.", "A photo of the stand is enough.", True),
-    ("chairs", "Dining chairs: how many, folding or not, and is the space under the stairs open?",
-     f"v19: two folded chairs (IKEA FRÖSVI, TERJE's successor) hang on hooks at the table's window end, one above the other; the flip-top seats up to seven by the stairs. Chairs that don't fold won't hang: they'd go under the stairs (inside the room the flight is only about {_n(G.CHAIR_STORE['under_stairs']['h'])} cm high) or the garage.",
-     "How many you want to own, whether they fold, their seat height, and a photo of the side of the stairs by the door.", True),
+    ("chairs", "The chair cupboard: four chairs (22 deep, flush) or six (31 deep)?",
+     f"v20: the chair cupboard beside the table holds four folded chairs at {_n(G.CHAIR_STORE['cupboard']['d'])} deep, flush with the pipe boxing, or six at {_n(G.CHAIR_STORE['cupboard']['d6'])} deep, standing {_n(G.CHAIR_STORE['cupboard']['d6'] - G.CHAIR_STORE['cupboard']['d'])} cm proud of it. With four inside, chairs five and six go in the garage, or under the stairs if the side by the door is open (inside the room the flight is only about {_n(G.CHAIR_STORE['under_stairs']['h'])} cm high).",
+     "Four or six, and a photo of the side of the stairs by the door if five and six might go under them.", True),
     ("records", "Roughly how many LPs?",
      f"About {LPS} in all (v19): {G.WALL_LPS} in the wall, all face-out (two snug LP crates in bay 3 since v16), and {G.STAND_LPS} in your vinyl stand ({G.RECORD_SHELF['lps_top']} face-out on top, {G.RECORD_SHELF['lps_bottom']} spine-up between the wires). If there are more, the neatest overflow is another LP column like bay 3's.", "A rough count is fine.", False),
     ("games", "Roughly how many PS2, Xbox 360 and Xbox One games?",
@@ -52,12 +53,9 @@ QUESTIONS = [
     ("point2", "The pendant point by the stairs wall: its exact spot",
      "From your photo it hangs about 55 cm out from the stairs wall, a quarter of the way along the shelf from the stair end. Bar 2 goes on it, over the table if you choose that spot.",
      "Measure from the stairs wall and from the window wall.", False),
-    ("cornergap", "The window corner: tape the gap at floor level",
-     f"v19: your plant stand ({_n(G.PLANT_STAND['w'])} wide) is drawn with only {_n((G.PIPE_BOX['x'][0] - G.WINDOW_X[1] - G.CURTAIN['ext'] - G.PLANT_STAND['w']) / 2)} cm a side between the curtains' stack and the pipe boxing. If the gap is short, the curtain pole's west end can come in, or swap to layout B (the vinyl stand there, the plants on the breast).",
-     "Measure from the pipe boxing to where the curtains bunch when they're open, at floor level.", True),
-    ("hdcrash", "Does HD in the 3D room still crash, and on which phone?",
-     "v18 capped the shadows and saves phone pictures smaller. If it still crashes, the next step is to turn off the area lights (the costliest) in HD on phones.",
-     "The phone's model, and whether it was looking round or saving a picture.", False),
+    ("cornergap", "The window corner at floor level: from the pipe boxing to the curtains",
+     f"Thanks for the 25 cm: that's the window ledge, and it's drawn 25 deep (a 22 cm reveal and a 3 cm nose). The one still needed is lower down: your plant stand ({_n(G.PLANT_STAND['w'])} wide) is drawn with only {_n((G.PIPE_BOX['x'][0] - G.WINDOW_X[1] - G.CURTAIN['ext'] - G.PLANT_STAND['w']) / 2)} cm a side between the pipe boxing and the curtains when they're open. If it's short, the curtain pole's west end can come in, or swap to layout B.",
+     "Tape along the window wall at the floor, from the pipe boxing's face to where the curtains bunch when they're open.", True),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
@@ -70,9 +68,8 @@ PDF_LINE = {
     "westend": "The stairs wall's length and your shelf's height (drawn at 196: the OBEGRÄNSAD needs 198 or lower to stand on it).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
     "fanstand": "The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.",
-    "chairs": "Dining chairs: how many, and do they fold? Two folded ones hang on hooks by the table (v19); a photo of the side of the stairs by the door says whether more fit under them.",
-    "cornergap": "The window corner: tape from the pipe boxing to the curtains' stack at floor level (the plant stand is drawn with 4.5 cm a side).",
-    "hdcrash": "The 3D room's HD: does it still crash, and on which phone?",
+    "chairs": "The chair cupboard by the table (v20): four chairs at 22 deep, flush with the pipe boxing, or six at 31 deep (9 proud)? And a photo of the side of the stairs by the door, if five and six might go there.",
+    "cornergap": "The window corner at floor level: from the pipe boxing to the curtains when open (the ledge's 25 cm is in; the plant stand is drawn with 4.5 cm a side).",
     "records": f"Records: roughly how many LPs (the wall and the vinyl stand hold about {LPS}: {G.WALL_LPS} in the wall, all face-out, and {G.STAND_LPS} in the stand)?",
     "games": f"Games: roughly how many PS2, Xbox 360 and Xbox One games? The drawers hold about {48 + G.SLIM_GAMES}.",
     "ports": "Wired ports for the projector (master) and the music room (bedroom 2)?",
@@ -95,9 +92,8 @@ SHORT = {
     "westend": "the shelf's height",
     "turntable": "the turntable's model",
     "fanstand": "the fan stand's model",
-    "chairs": "chairs (how many, under the stairs)",
-    "cornergap": "the window corner's gap",
-    "hdcrash": "whether HD still crashes",
+    "chairs": "the chair cupboard: four or six",
+    "cornergap": "the window corner at floor level",
     "records": "record counts",
     "games": "game counts",
     "ports": "extra wired ports",
