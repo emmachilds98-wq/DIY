@@ -26,6 +26,10 @@ CSS = """
 .r3d-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #e7ebe3; font-size: 15px; }
 .r3d-msg a { color: #d9a46c; }
 .r3d-msg[hidden] { display: none; }
+/* v22: the whole-room still under the "Loading" message, until the live room is ready */
+.r3d-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .6; pointer-events: none; }
+.r3d.ready .r3d-poster, .r3d-poster:not([src]) { display: none; }
+.r3d-msg { text-shadow: 0 1px 4px #000; }
 .r3d-size { font-size: 12px; color: #e9e4da; margin: 0 6px; font-variant-numeric: tabular-nums; }
 .r3d-cap { position: absolute; left: 10px; bottom: 10px; right: 96px; margin: 0; color: #f3efe6; font-size: 12.5px; line-height: 1.35;
   text-shadow: 0 1px 3px #000c; pointer-events: none; }
@@ -54,8 +58,19 @@ details.r3d-more[open] > summary { margin-bottom: 8px; }
 .r3d-pad button { background: #000a; color: #fff; border: 1px solid #fff4; border-radius: 8px; padding: 0; font: inherit; font-size: 15px; line-height: 1; cursor: pointer; touch-action: manipulation; }
 .r3d-pad button:active { background: #000d; }
 .r3d.nogl .r3d-pad { display: none; }
-.r3d-views { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
-.r3d-views button { flex: none; }
+.r3d-views { display: flex; gap: 6px; flex-wrap: wrap; }
+/* v22: the controls in five drawers under the picture, one open at a time; on a phone the picture stays in sight while you choose */
+.r3d-drawers { display: grid; gap: 12px; min-width: 0; }
+.r3d-dtabs { display: flex; gap: 4px; padding: 4px; background: var(--chip, #e3e7dd); border-radius: 12px; overflow-x: auto; scrollbar-width: none; }
+.r3d-dtabs button { flex: 1 0 auto; font: inherit; font-size: 14.5px; border: 0; background: none; color: var(--muted, #5b6457); border-radius: 9px; padding: 8px 12px; cursor: pointer; }
+.r3d-dtabs button[aria-selected=true] { background: var(--surface, #fff); color: var(--ink, #1d241e); font-weight: 700; box-shadow: 0 1px 2px #0002; }
+.r3d-dtabs button:focus-visible { outline: 2px solid var(--oak, #9a6634); outline-offset: 1px; }
+.r3d-dpanel[hidden] { display: none; }
+@media (max-width: 600px) { .r3d.drawer-open .r3d-stage { position: sticky; top: var(--r3d-top, 0px); z-index: 3; box-shadow: 0 6px 14px #0003; } }
+.r3d-picklist { margin: 0 0 8px; font-size: 14.5px; }
+.r3d-picklist b { font-weight: 700; }
+.r3d-cost { font-size: 13px; color: var(--muted, #5b6457); font-variant-numeric: tabular-nums; }
+.r3d-hint2 { font-size: 13px; color: var(--muted, #5b6457); align-self: center; }
 .r3d-ui { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 18px; }
 .r3d-ui .grp { min-width: 0; }
 .r3d-ui .label { display: block; margin-bottom: 6px; }
@@ -89,6 +104,21 @@ LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves an
           ("lamp", "Red lamp: top, middle, bottom", "lamp")]
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
+# v22: the five drawers under the 3D room
+DRAWERS = [("views", "Views"), ("layout", "Layout"), ("lights", "Lights"), ("look", "Look"), ("extras", "Extras")]
+DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return;
+  const K = "mw22-drawer", tabs = [...r.querySelectorAll("[data-drawer]")];
+  let cur = "layout"; try { cur = localStorage.getItem(K) ?? "layout"; } catch (e) {}
+  const show = k => { cur = k; tabs.forEach(t => { const on = t.dataset.drawer === k; t.setAttribute("aria-selected", String(on)); t.tabIndex = on || (!k && t === tabs[0]) ? 0 : -1;
+      document.getElementById("r3d-dp-" + t.dataset.drawer).hidden = !on; });
+    r.classList.toggle("drawer-open", !!k); try { localStorage.setItem(K, k); } catch (e) {} };
+  tabs.forEach((t, i) => { t.addEventListener("click", () => show(cur === t.dataset.drawer ? "" : t.dataset.drawer));
+    t.addEventListener("keydown", e => { const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
+      const n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); show(n.dataset.drawer); }); });
+  show(tabs.some(t => t.dataset.drawer === cur) ? cur : (cur === "" ? "" : "layout"));
+  const top = () => { const t = document.querySelector(".tabs"); r.style.setProperty("--r3d-top", (t ? t.getBoundingClientRect().height : 0) + "px"); };
+  top(); addEventListener("resize", top);
+})();"""
 SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table", "pouffe": "Knitted pouffe", "art": "Print over the sofa",
               "clock": "Clock over the door", "tray": "Coffee-table tray"}   # v21: the buttons' words for ideas.SUGGEST
 # v20: decor to try in the 3D room (room3d.js S.decor; the keys match its RUG_LOOKS, CUSHION_COLS, CURTAIN_COLS, the case's PRESETS, CASE_FRAMES)
@@ -124,41 +154,59 @@ def controls():
               '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
               '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
-              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>'
-              # v17: the ideas (ideas.py), all off by default: suggestions, not in the plan
-              '<div class="grp"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
+              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
+    # v17: the ideas (ideas.py), all off by default: suggestions, not in the plan
+    ideas_g = ('<div class="grp r3d-wide"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
               '<button type="button" data-idea="glass" aria-pressed="false">Glass plant shelves</button>'
-              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>''</div></div>'
-              # v20, client: "give more decor variation and options": the rug, cushions, curtains, the glass case's fill and frame
-              '<div class="grp r3d-wide r3d-decor"><span class="label">Decor: try a look (only the case and cushions are in the ideas, not the plan)</span>'
+              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>''</div></div>')
+    # v20, client: "give more decor variation and options": the rug, cushions, curtains, the glass case's fill and frame
+    decor_g = ('<div class="grp r3d-wide r3d-decor"><span class="label">Decor: try a look (only the case and cushions are in the ideas, not the plan)</span>'
               + "".join(f'<div class="r3d-decrow"><span>{html.escape(lab)}</span><div class="seg" role="group" aria-label="{html.escape(lab)}">'
                         + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in opts) + '</div></div>'
-                        for k, lab, opts in DECOR) + '</div>'
-              # v21: suggested furniture and decor (ideas.SUGGEST), each on or off, all off to start
-              '<div class="grp r3d-wide"><span class="label">Suggested furniture and decor: turn each on or off (not in the plan)</span>'
+                        for k, lab, opts in DECOR) + '</div>')
+    # v21: suggested furniture and decor (ideas.SUGGEST), each on or off, all off to start
+    sugg_g = ('<div class="grp r3d-wide"><span class="label">Suggested furniture and decor: turn each on or off (not in the plan)</span>'
               '<div class="seg" role="group" aria-label="Suggested furniture and decor">'
               + "".join(f'<button type="button" data-sugg="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(SUGG_SHORT[k])}</button>' for k, _t, size, *_ in ideas.SUGGEST)
               + '<button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>')
-    return "".join([
-        seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
-        seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
-        seg("chairs", [("cupboard", "Chair cupboard, shut"), ("open", "Chair cupboard, open"), ("hooks", "Open hooks instead"), ("away", "In the garage")], "Chairs, with the table folded"),
-        # v18: your plant stand and record shelf, two layouts; the lamp, the ceiling and the skirting menus went: in "Edit room" you
-        # drag the lamp, and tap the ceiling or the skirting to paint it
-        seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and vinyl stand"),
-        lights,
-        seg("paint", paints, "Wall paint (or tap a wall in Edit room)", picker("r3d-custom", "#899081", "Any colour")),
-        seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers"),
-        seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
-    ])
+    # v22: the controls in five drawers (DRAWERS), one open at a time, instead of one long panel
+    views = "".join(f'<button type="button" class="chip" data-view="{k}" aria-pressed="false">{v}</button>' for k, v in VIEWS)
+    picks = ('<div class="grp r3d-wide r3d-picks" id="r3d-picks"><span class="label">Your picks</span>'
+             '<p class="r3d-picklist" id="r3d-picklist" aria-live="polite">Nothing switched on yet: turn on an idea, a suggestion or a decor choice and it shows here.</p>'
+             '<div class="seg"><button type="button" class="chip" id="r3d-pickcopy">Copy as a note</button>'
+             '<button type="button" class="chip" id="r3d-picksave" hidden>Save for the next round</button><span class="r3d-hint2" id="r3d-pickst" aria-live="polite"></span></div></div>')
+    return {
+        "views": f'<div class="grp r3d-wide"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
+                 '<div class="grp r3d-wide r3d-save"><button class="btn primary" type="button" id="r3d-save">Save this view as an HD picture</button>'
+                 '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160 PNG, with shadows</span></div>',
+        "layout": "".join([
+            seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
+            seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
+            seg("chairs", [("cupboard", "Chair cupboard, shut"), ("open", "Chair cupboard, open"), ("hooks", "Open hooks instead"), ("away", "In the garage")], "Chairs, with the table folded"),
+            # v18: your plant stand and record shelf, two layouts; in "Edit room" you drag the lamp, and tap the ceiling or the skirting to paint it
+            seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and vinyl stand"),
+            seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers")]),
+        "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
+        "look": seg("paint", paints, "Wall paint (or tap a wall in Edit room)", picker("r3d-custom", "#899081", "Any colour")) + decor_g,
+        "extras": picks + ideas_g + sugg_g,
+    }
+
+
+def picks_json():
+    """v22: what "Your picks" needs to name and cost what's switched on (ideas.IDEAS and ideas.SUGGEST)."""
+    out = {"ideas": {k: [t, c[0], c[1]] for k, t, _s, c, *_ in ideas.IDEAS},
+           "sugg": {k: [t, c[0], c[1]] for k, t, _s, c, *_ in ideas.SUGGEST},
+           "decor": {k: [lab, dict(opts)] for k, lab, opts in DECOR}}
+    return json.dumps(out, separators=(",", ":"))
 
 
 def section():
-    views = "".join(f'<button type="button" class="chip" data-view="{k}" aria-pressed="false">{v}</button>' for k, v in VIEWS)
+    panels = controls()
+    tabs = "".join(f'<button type="button" role="tab" id="r3d-dt-{k}" aria-controls="r3d-dp-{k}" aria-selected="false" data-drawer="{k}">{html.escape(n)}</button>' for k, n in DRAWERS)
+    drawers = "".join(f'<div class="r3d-ui r3d-dpanel" role="tabpanel" id="r3d-dp-{k}" aria-labelledby="r3d-dt-{k}" hidden>{panels[k]}</div>' for k, _ in DRAWERS)
     data = json.dumps(json.loads((HERE / "scene3d.json").read_text()), separators=(",", ":"))
     return f"""<div class="r3d" id="r3d">
-  <div class="r3d-views" role="group" aria-label="Camera">{views}</div>
   <div class="r3d-stage"><canvas tabindex="0" aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom; WASD or the arrow keys walk, Q and E turn"></canvas>
     <div class="r3d-edit"><button type="button" id="r3d-editbtn" aria-pressed="false" title="Move, turn, recolour, remove and add things; tap a wall to paint it">✎ Edit room</button>
       <div class="r3d-editbar" id="r3d-editbar" hidden><button type="button" id="r3d-add">+ Add</button><button type="button" id="r3d-undo" disabled title="Undo (Ctrl+Z)">↶ Undo</button><button type="button" id="r3d-layreset">Reset layout</button>
@@ -169,15 +217,17 @@ def section():
         <label>Colour <input type="color" id="r3d-selcol" value="#888888"></label><span id="r3d-swatches" hidden></span>
         <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
     <div class="r3d-pad" role="group" aria-label="Walk"><button type="button" data-walk="tl" title="Turn left (Q)" aria-label="Turn left">↺</button><button type="button" data-walk="f" title="Forward (W)" aria-label="Forward">▲</button><button type="button" data-walk="tr" title="Turn right (E)" aria-label="Turn right">↻</button><button type="button" data-walk="l" title="Step left (A)" aria-label="Step left">◀</button><button type="button" data-walk="b" title="Back (S)" aria-label="Back">▼</button><button type="button" data-walk="r" title="Step right (D)" aria-label="Step right">▶</button></div>
+    <img class="r3d-poster" data-art="3d_room" alt="" aria-hidden="true">
     <div class="r3d-msg" id="r3d-msg">Loading the 3D room…</div>
     <p class="r3d-cap" id="r3d-cap"></p>
     <div class="r3d-tools"><button type="button" id="r3d-reset" title="Back to this view">Reset</button><button type="button" id="r3d-full" title="Full screen">Full screen</button></div></div>
-  <div class="r3d-ui">{controls()}</div>
-  <div class="r3d-save"><button class="btn primary" type="button" id="r3d-save">Save this view as an HD picture</button><span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160 PNG, with shadows</span></div>
+  <div class="r3d-drawers"><div class="r3d-dtabs" role="tablist" aria-label="3D room controls">{tabs}</div>{drawers}</div>
 </div>
+<script type="application/json" id="picks-data">{picks_json()}</script>
 <script type="application/json" id="scene3d-data">{data}</script>
 <script type="application/json" id="scenes-data">{scenes_json()}</script>
 <script type="module">{(HERE / "room3d.js").read_text()}</script>
+<script>{DRAWER_JS}</script>
 <script>setTimeout(() => {{ const r = document.getElementById("r3d"), m = document.getElementById("r3d-msg");
   if (r && !r.classList.contains("ready") && !r.classList.contains("nogl")) m.innerHTML = 'The 3D room needs a moment, or your connection blocked its 3D library. The <a href="#views" data-go="views">drawn views</a> show every option.'; }}, 20000);</script>"""
 

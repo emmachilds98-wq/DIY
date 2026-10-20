@@ -11,7 +11,7 @@ WZ = G.WINDOW_Z
 
 # (id, title, size, rough cost £, why it suits the room, where it goes, in 3D)
 IDEAS = [
-    ("case", "A tall glass display case on the chimney breast (v20: taller)",
+    ("case", "A tall glass display case on the chimney breast",
      "90 wide × 85 tall × 12 deep, three glass shelves", (90, 170),
      "For collectibles, boxed games, 7-inch singles, small plants or ceramics, lit from inside, without a cabinet on the floor: 12 deep, so it "
      "stands no further out than a picture ledge. Oak frame from the offcuts (or painted black or white), a 4 mm toughened glass front that "

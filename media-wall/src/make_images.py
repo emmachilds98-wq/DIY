@@ -39,15 +39,15 @@ def main(diagrams=True):
         ("v13_dining_four.svg", "render_v13_dining_four.png", W, H, 1.1),
         ("v13_dining_six.svg", "render_v13_dining_six.png", W, H, 1.1),
         # HD, labelled, for the client
-        ("v13_join_clean.svg", OUT / "Media wall v21 - artisan oak - Card Room Green, table by the stairs (HD).png", W, H, 2.0),
-        ("v13_join_key.svg", OUT / "Media wall v21 - artisan oak - numbered key (HD).png", KW, H, 2.0),
-        ("v13_join_dims.svg", OUT / "Media wall v21 - artisan oak - heights and widths (HD).png", W, H, 2.0),
-        ("v13_dining_four.svg", OUT / "Media wall v21 - option A, flip-top set for four (HD).png", W, H, 2.0),
-        ("v13_dining_six.svg", OUT / "Media wall v21 - option A, flip-top set for six (HD).png", W, H, 2.0),
-        ("v13_side.svg", OUT / "Media wall v21 - the PC side wall (HD).png", W, H, 2.0),
+        ("v13_join_clean.svg", OUT / "Media wall v22 - artisan oak - Card Room Green, table by the stairs (HD).png", W, H, 2.0),
+        ("v13_join_key.svg", OUT / "Media wall v22 - artisan oak - numbered key (HD).png", KW, H, 2.0),
+        ("v13_join_dims.svg", OUT / "Media wall v22 - artisan oak - heights and widths (HD).png", W, H, 2.0),
+        ("v13_dining_four.svg", OUT / "Media wall v22 - option A, flip-top set for four (HD).png", W, H, 2.0),
+        ("v13_dining_six.svg", OUT / "Media wall v22 - option A, flip-top set for six (HD).png", W, H, 2.0),
+        ("v13_side.svg", OUT / "Media wall v22 - the PC side wall (HD).png", W, H, 2.0),
         ("v13_side.svg", "render_v13_side.png", W, H, 1.1),
         ("v13_drawers.svg", "render_v13_drawers.png", W, H, 1.1),
-        ("v13_drawers.svg", OUT / "Media wall v21 - every drawer out (HD).png", W, H, 2.0),
+        ("v13_drawers.svg", OUT / "Media wall v22 - every drawer out (HD).png", W, H, 2.0),
     ]
     for k in ("card_room", "sage", "treron", "deep"):
         jobs.append((f"v13_paint_{k}_joinery.svg", f"p_{k}.png", W, H, 0.5))

@@ -537,9 +537,10 @@ function buildShell() {
   for (const xf of [wx0 - CU.ext - CU.finial / 2, wx1 + CU.ext + CU.finial / 2]) {
     const f = new THREE.Mesh(new THREE.SphereGeometry(CU.finial / 2 * M, 16, 12), wood); f.position.copy(v3(xf, CU.rail_y + CU.pole / 2, CU.z + 1)); shell.add(shadow(f));
   }
-  for (let x = wx0 - CU.ext + 3; x < wx1 + CU.ext - 2; x += 10) {          // rings, one every 10 cm
-    const r = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.0035, 6, 16), wood); r.position.copy(v3(x, CU.rail_y + CU.pole / 2, CU.z + 1)); r.rotation.y = Math.PI / 2; shell.add(r);
-  }
+  { const rings = [];                                                     // rings, one every 10 cm (v22: one mesh)
+    for (let x = wx0 - CU.ext + 3; x < wx1 + CU.ext - 2; x += 10) {
+      const g = new THREE.TorusGeometry(0.02, 0.0035, 6, 16); g.rotateY(Math.PI / 2); const q = v3(x, CU.rail_y + CU.pole / 2, CU.z + 1); g.translate(q.x, q.y, q.z); rings.push(g); }
+    shell.add(new THREE.Mesh(mergeGeometries(rings), wood)); }
   const panel = (x0, w, folds) => {
     const g = new THREE.PlaneGeometry(w * M, (CU.rail_y - CU.drop_to) * M, Math.round(folds * 8), 1), pos = g.attributes.position;
     for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * 0.026);
@@ -623,7 +624,7 @@ function buildShell() {
   pcLit();
   buildIdeas();
   buildPlantsAndRecords();
-  buildChairStore();
+  buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
   flushCubes(shell);
 }
 /* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
@@ -1113,6 +1114,8 @@ function applyLight() {
   });
   const area = hd ? 1 : 0;      // Fast leaves out the area lights (the most expensive) and lifts the fill to make up
   set(lights.strip, L.strip * area); set(lights.uprights, L.uprights * area); set(lights.bias, L.bias * area); set(lights.bar1, L.bar1); set(lights.bar2, L.bar2);
+  if (!hd) for (const bar of [lights.bar1, lights.bar2]) bar.forEach((l, i) => {   // v22: Fast lights each bar with two of its four heads, twice as bright
+    if (i % 2) l.visible = false; else l.intensity *= 2; });
   set(lights.lamp, (S.layout.lamp || {}).off ? 0 : L.lamp);  // v15: the lamp's colour bulbs dim in their app (v18: or it's been removed)
   capShadows(hd ? SHADOW_CAP : 0);                            // v18: never more shadowed spots than the graphics card can take
   if (growGlow) growGlow.forEach(m => m.visible = !!S.grow);
@@ -1155,7 +1158,28 @@ function lb(g, x, y, z, w, h, d, mat, cast = true) {      // a box in a movable'
   const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat);
   m.position.copy(v3(x, y + h / 2, z)); g.add(shadow(m, cast)); return m;
 }
+/* v22: fewer draws: a static group's direct child meshes become one mesh per material (your plant stand was 152 meshes, the vinyl stand 45).
+   Nested groups (the sofa's cushions, the coffee table's tray, the chair cupboard's doors) are left alone, so their own switches still work. */
+function mergeStatic(g) {
+  g.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), by = new Map();
+  for (const o of g.children) if (o.isMesh && !o.children.length && o.visible && !Array.isArray(o.material) && !o.isInstancedMesh && !o.isSkinnedMesh) {
+    const k = o.material.uuid + (o.castShadow ? "c" : "") + (o.receiveShadow ? "r" : "");
+    if (!by.has(k)) by.set(k, []); by.get(k).push(o);
+  }
+  for (const list of by.values()) {
+    if (list.length < 2) continue;
+    const geos = list.map(o => { const q = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone(); q.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld)); return q; });
+    const names = Object.keys(geos[0].attributes).sort().join();
+    if (!geos.every(q => Object.keys(q.attributes).sort().join() === names)) continue;
+    const merged = mergeGeometries(geos); if (!merged) continue;
+    const m = new THREE.Mesh(merged, list[0].material); m.castShadow = list[0].castShadow; m.receiveShadow = list[0].receiveShadow;
+    list.forEach(o => g.remove(o)); g.add(m);
+  }
+  return g;
+}
 function movable(id, label, g, def, w, d, mats, flat = false, extra = {}) {
+  if (!extra.added && id !== "lamp") mergeStatic(g);   // v22
   const pivot = new THREE.Group(); pivot.add(g); pivot.userData.movId = id;
   movers.add(pivot);
   MOV[id] = Object.assign({ id, label, pivot, def, w, d, mats, flat, base: mats.map(m => "#" + m.color.getHexString()) }, extra);
@@ -1528,6 +1552,7 @@ let ldb = null, sharedDoc = null, sharing = Promise.resolve();
   try { ldb = (window.claude && window.claude.use) ? await window.claude.use("db") : null; } catch (e) { ldb = null; }
   if (!ldb) return;
   qsa(".r3d-share").forEach(b => b.hidden = false);
+  if (qs("#r3d-picksave")) qs("#r3d-picksave").hidden = false;   // v22: picks can be saved for the next round
   ldb.doc("layouts/shared").onSnapshot(snap => { sharedDoc = snap.exists ? snap.data() : null; shareStatus(); }, () => { qsa(".r3d-share").forEach(b => b.hidden = true); });
 })();
 function shareStatus() {
@@ -1544,6 +1569,39 @@ function shareLayout() {
   sharing = sharing.then(() => ldb.doc("layouts/shared").set(body)).then(() => { st.textContent = "Saved: you'll both see this layout under “Use the shared layout”."; },
     e => { st.textContent = e && e.code === "invalid_argument" ? "This view can't save (read-only)." : "Couldn't save. Try again in a moment."; });
 }
+/* v22: "Your picks": the ideas, suggestions and decor switched on, their rough cost added up, copied or saved as a note */
+const PD = (() => { try { return JSON.parse(document.getElementById("picks-data").textContent); } catch (e) { return { ideas: {}, sugg: {}, decor: {} }; } })();
+function picks() {
+  const items = [];
+  for (const [k, on] of Object.entries(S.ideas)) if (on && PD.ideas[k]) items.push({ kind: "Idea", name: PD.ideas[k][0], lo: PD.ideas[k][1], hi: PD.ideas[k][2] });
+  for (const [k, on] of Object.entries(S.sugg)) if (on && PD.sugg[k]) items.push({ kind: "Suggestion", name: PD.sugg[k][0], lo: PD.sugg[k][1], hi: PD.sugg[k][2] });
+  for (const k of Object.keys(DEF.decor)) if (S.decor[k] !== DEF.decor[k] && PD.decor[k]) {
+    const [lab, names] = PD.decor[k], c = k === "cushions" && PD.ideas.cushions;
+    items.push({ kind: "Decor", name: `${lab}: ${names[S.decor[k]] || S.decor[k]}`, lo: c ? c[1] : 0, hi: c ? c[2] : 0 });
+  }
+  return items;
+}
+const pickText = items => items.map(i => `${i.kind}: ${i.name}${i.hi ? ` (about £${i.lo}–${i.hi})` : ""}`).join("\n");
+function updatePicks() {
+  const el = qs("#r3d-picklist"); if (!el) return;
+  const items = picks(), lo = items.reduce((a, i) => a + i.lo, 0), hi = items.reduce((a, i) => a + i.hi, 0);
+  el.innerHTML = items.length ? items.map(i => `<b>${i.name}</b>${i.hi ? ` <span class="r3d-cost">£${i.lo}–${i.hi}</span>` : ""}`).join(" · ")
+      + (hi ? `<br>About £${lo}–${hi} together, none of it in the plan's costs.` : "")
+    : "Nothing switched on yet: turn on an idea, a suggestion or a decor choice and it shows here.";
+  qs("#r3d-pickcopy").disabled = qs("#r3d-picksave").disabled = !items.length;
+}
+qs("#r3d-pickcopy")?.addEventListener("click", () => {
+  const items = picks(), st = qs("#r3d-pickst"), text = "Our picks from the 3D room:\n" + pickText(items);
+  const done = () => { st.textContent = "Copied: paste it into your next message."; };
+  try { navigator.clipboard.writeText(text).then(done, () => { qs("#r3d-picklist").textContent = text; st.textContent = "Select the list above to copy it."; }); }
+  catch (e) { qs("#r3d-picklist").textContent = text; st.textContent = "Select the list above to copy it."; }
+});
+qs("#r3d-picksave")?.addEventListener("click", () => {
+  if (!ldb) return;
+  const items = picks(), st = qs("#r3d-pickst"); st.textContent = "Saving…";
+  ldb.doc("layouts/picks").set(JSON.parse(JSON.stringify({ items, text: pickText(items), at: new Date().toISOString() })))
+    .then(() => { st.textContent = "Saved for the next round."; }, e => { st.textContent = e && e.code === "invalid_argument" ? "This view can't save (read-only)." : "Couldn't save. Try again in a moment."; });
+});
 /* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast */
 canvas.addEventListener("webglcontextlost", e => {
   e.preventDefault(); S.quality = "fast"; S.picked = true; store.set(KEY, S);
@@ -1697,6 +1755,7 @@ function autoQuality() {
 
 /* ---------------------------------------------------------------- caption and HD save */
 function updateCaption() {
+  try { updatePicks(); } catch (e) {}   // v22
   const sc = SCENES[S.scene];
   const site = S.site === "A" ? "Table on the chimney breast" : "Table under the shelf by the stairs";
   const din = { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
@@ -1728,7 +1787,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v21 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v22 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");

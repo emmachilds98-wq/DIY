@@ -1,9 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v22.md`** (it follows `media-wall/plans/optimisation_v21.html`, the client-facing optimisation
-  plan, also published as an artifact). v21 is built and merged (round 15, below). Still open with the client: the chair cupboard (four at 22
-  deep or six at 31), the window corner's gap at floor level, a photo of the side of the stairs by the door, and the plan's three questions.
+- **Next agent: `media-wall/UPGRADE_PLAN_v23.md`** (it follows `media-wall/plans/optimisation_v21.html`, the client-facing optimisation
+  plan, published at https://claude.ai/artifact/P7D81ZQuuVKBvh8hX2k5w6 and updated for v22). v22 is built and merged (round 16, below).
+  Still open with the client: the chair cupboard (four or six), the window corner's floor gap, the stairs photo, the plan's three questions.
 - **The shared deck works from this account again (round 13):** publishing to 71ff succeeded (v16 → v19). Its db (the saved answers)
   still can't be read from Claude Code ("shared with you from another organization"), so ask the client to paste answers if you need them.
 - **Branch:** round 13 ran on `claude/eloquent-johnson-pgmnud`, restarted from `main`; any session's branch works: restart it from `main` and open a PR into `main`.
@@ -12,13 +12,35 @@
   once checked so Pages stays current.
 - **Viewer artifact (the shared deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's
   sessions run as). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to that URL
-  with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData
+  with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **v22: first upload the pictures it doesn't
+  hold yet** (`src/deck_assets_todo.txt`, written by build_viewer) with the Artifact tool's `asset: true` and `file_paths` (25 a call)
+  to that url, record each `{name: {sha, url}}` in `src/deck_assets.json` (sha256 of the file), and run `python3 build_viewer.py`
+  again: the inline copy then links them (about 2 MB) and inlines only what's missing. **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
   (shot3d renders 27 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 16: v22 (the optimisation plan's first round)
+- Client: "continue and start the upgrades" (the v22 list in the optimisation plan).
+- **Drawers (room3d_page `controls()` now returns panels; `DRAWERS`, `DRAWER_JS`):** Views (camera chips, Save HD), Layout (site,
+  dining, chairs, plants, drawers), Lights (scenes, sliders, toggles, quality), Look (paint, decor), Extras (Your picks, ideas,
+  suggestions). One open at a time (`mw22-drawer` in localStorage, the same tab again closes it); on phones the stage is sticky under
+  the page's tab bar (`--r3d-top`) while a drawer is open. The page's own tab switcher now selects `.tabs [role="tab"]` only (it used
+  to pick up the drawers' tabs and hide the 3D tab).
+- **Your picks (room3d.js `picks()`, `updatePicks()` from `updateCaption`; `picks-data` JSON from `room3d_page.picks_json()`):** ideas,
+  suggestions and decor differing from `DEF.decor` (cushions costed from `ideas.IDEAS["cushions"]`), the total; Copy as a note
+  (clipboard, falls back to showing the text); Save for the next round where the deck's db resolves: doc `layouts/picks`.
+- **Build steps (build_viewer `STEP_JS`):** each `.step` has a `.sbody`; one open at a time (`mw22-step`), opening on the first not
+  done; "Next step" (`data-next`), head click and links to a step open it; "Show all steps open" (`mw22-steps-all`). Phone length
+  67.5 -> 19.4 screens.
+- **3D speed:** `mergeStatic(g)` merges a group's direct child meshes per material (movables except the lamp and added things, and the
+  chair cupboard groups; nested groups untouched), the curtain rings are one mesh: 425 -> 188 visible meshes, about 196 draws; Fast
+  lights each spot bar with heads 0 and 2 at double intensity; a poster (`3d_room` still) under "Loading" until `.ready`.
+- **Deck pictures (build_viewer `DECK_ASSETS`, `deck_assets_todo()`, `inline_images()`):** see START HERE.
+- Version 22 everywhere; v21 outputs in `out/v21/`. Backups `*_v21_backup.*`.
 
 ## Update 20 Oct 2026, round 15: v21 (the whole room first in 3D, every view re-aimed, suggestions on or off, the optimisation plan)
 - Client: "review all of it now and write a plan of how we can optimise the whole thing especially with the user flow and the 3D room
