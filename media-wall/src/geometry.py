@@ -529,8 +529,10 @@ del _o, _sz, _wz, _sl, _wl, _stair, _window
 
 # ---------------------------------------------------------------- v27 (20 Oct): your rear speakers, standing behind the sofa
 # client: "add my surround speakers to the build that exist standing behind the sofa ill send a photo". The AX5100G's rears
-# (90 × 144 × 109 mm, Hisense) on slim floor stands in the 13 cm gap behind the sofa's long side, one near each end, the speakers
-# a little above seated ear height. Provisional until the photo: the stands' size and the exact spots.
+# (90 × 144 × 109 mm, Hisense) on slim floor stands. v27.1, from your photos and your answer ("they are directly behind the sofa
+# on the left and right ends"): both stand in the 13 cm gap behind the sofa's long side, one at each end; the speakers sit just
+# above the sofa's back (scaled against the 80 cm back in your photo).
 REAR_SPK = (9.0, 14.4, 10.9)                   # W, H, D
 REAR_STAND = dict(base=(11.0, 11.0, 1.5), pole=2.5, top=96.0)   # a weighted base, a pole, the speaker on a plate at 96
-REAR_SPOTS = [(24.0, SOFA_BACK_Z - 6.5), (SOFA_X[1] - 24.0, SOFA_BACK_Z - 6.5)]   # x, z of each stand's centre
+REAR_SPOTS = [(SOFA_X[0] + REAR_STAND["base"][0] / 2, SOFA_BACK_Z - 6.5),    # left: behind the sofa's corner end, in the corner
+              (SOFA_X[1] - REAR_STAND["base"][0] / 2, SOFA_BACK_Z - 6.5)]    # right: behind the sofa's window end

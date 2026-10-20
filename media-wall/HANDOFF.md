@@ -1,9 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v27 is built (round 21, below): the dining cabinet is the plan, made for six with the chairs inside; step 11 is its full build;
-  your rear speakers; the stairs' brick painted; Edit room clips to walls and the flip-top's chair cupboard comes off.** Waiting on the
-  client's **photo of the rear speakers** (stands' size, height, spots): `geometry.REAR_STAND` / `REAR_SPOTS` and the question `rears`.
+- **v27.1 is built (round 21b, below): the rear speakers stand behind each end of the sofa**, from the client's two photos
+  (`inputs/room_photo_rears_20oct.jpg`, `inputs/room_photo_west_20oct.jpg`) and their answer. v27 (round 21): the dining cabinet is the
+  plan, made for six with the chairs inside; step 11 is its full build; the stairs' brick painted; Edit room clips to walls and the
+  flip-top's chair cupboard comes off.
 - v26 (round 20): option C (the dining cabinet, up to eight), the Tools panel fixed, more in Look and Extras.
   **Shipped (round 20b):** PR #20 merged into main (GitHub Pages is current) and the shared deck 71ff republished at v26
   (version 1792532174-e30e; all 32 new stills uploaded to its asset store and recorded in `src/deck_assets.json`). The plan PDF's
@@ -36,6 +37,18 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 21b: v27.1 (the rear speakers from the client's photos)
+- Two photos of the room (saved as `inputs/room_photo_rears_20oct.jpg`, from the breast end looking east, window on the left, TV on
+  the right; and `inputs/room_photo_west_20oct.jpg`, looking west at the stairs, the 2 m shelf and the corner unit). The first shows
+  the left rear in the far corner behind the sofa's corner, the speaker just above the sofa's back (scaled against the 80 cm back,
+  `REAR_STAND.top` 96 holds). Asked: they are the **soundbar's own rears** (the speaker set on the corner unit, a centre, two small
+  speakers and an amp, is separate), and "they are directly behind the sofa on the left and right ends".
+- `geometry.REAR_SPOTS`: (7.5, -302.5) and (262.5, -302.5), each stand's base flush with an end of the sofa's long side, in the 13 cm
+  gap. fit `rears_zone()` rewritten: gap 2 spare (tight), left clear of the curtains (30), right in the curtains' gap (check: closed
+  they muffle it, keep that end open), height, power. Fit 89 fit, 31 tight, 10 check, 0 don't fit.
+- The question `rears` dropped (answered): 15 questions. The plan's AV "Rears" line and the v27 decision box say where they stand.
+  REVISION "27.1" (file names stay v27).
 
 ## Update 20 Oct 2026, round 21: v27 (the dining cabinet is the plan, for six; rear speakers; easier Edit room)
 - Client: "use the cabinet version as our primary table model now and improve on its current design to have a seating of 6, i would
