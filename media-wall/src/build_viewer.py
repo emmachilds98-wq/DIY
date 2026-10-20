@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "23"
+VERSION = "24"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -443,6 +443,57 @@ summary .pf a { color: var(--oak); }
 .gallery img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .gallery figcaption { font-size: 13.5px; color: var(--muted); }
 """ + room3d_page.CSS + """
+
+/* v24, client: "give it a better overall design and ui": one card per long read, quieter headings with an oak rule, a floating
+   tab bar, tables that read as tables, a contents sidebar on wide screens, folded captions, a footer */
+:root { --tab-on: var(--hero); --tab-on-ink: var(--hero-ink); --shadow: 0 1px 2px #0000000a, 0 10px 28px -18px #00000040; }
+:root[data-skin="plain"] { --tab-on: var(--ink); --tab-on-ink: var(--bg); }
+.wrap { max-width: 1180px; gap: 28px; }
+.tabs { background: color-mix(in srgb, var(--bg) 82%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 0; margin-top: -8px; }
+.tabs .tl { padding: 5px; margin-block: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow); }
+.tabs button[aria-selected="true"] { background: var(--tab-on); color: var(--tab-on-ink); }
+.panel { gap: 24px; }
+.panel > .doc { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: clamp(18px, 3.2vw, 40px); box-shadow: var(--shadow); }
+.panel > .doc > h2:first-child { margin-top: 0; }
+.doc h2 { font-size: 1.55rem; letter-spacing: -0.005em; }
+.doc h2::before { content: ""; display: block; width: 34px; height: 3px; border-radius: 2px; background: var(--oak); margin-bottom: 12px; }
+.panel > .doc h2:not(:first-child) { margin-top: 48px; padding-top: 30px; border-top: 1px solid var(--line); }
+.doc h3 { font-size: 1.15rem; margin-top: 30px; }
+.doc p, .doc li { line-height: 1.62; }
+.doc figure { margin-bottom: 22px; }
+.doc figure img, .doc figure.dia { border-radius: 14px; }
+.doc .decision, .doc .why, .doc .callout { border-radius: 14px; }
+.ptitle::before { content: ""; display: block; width: 28px; height: 3px; border-radius: 2px; background: var(--oak); margin-bottom: 10px; }
+.qhead .ptitle::before { display: none; }
+.tscroll { border-radius: 14px; box-shadow: var(--shadow); }
+.tscroll th { background: var(--chip); position: sticky; top: 0; }
+.tscroll tr:nth-child(even) td { background: color-mix(in srgb, var(--chip) 38%, transparent); }
+.dcard, .opt, details.phase, details.zone, details.changes, .step { border-radius: 16px; box-shadow: var(--shadow); }
+.opt img { transition: transform .4s ease; }
+.opt:hover img { transform: scale(1.02); }
+@media (prefers-reduced-motion: reduce) { .opt img { transition: none; } .opt:hover img { transform: none; } }
+button.more { font: inherit; font-size: inherit; color: var(--oak); background: none; border: 0; padding: 0 1px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+button.more:focus-visible { outline: 2px solid var(--oak); outline-offset: 2px; }
+/* the contents: a sticky sidebar on wide screens, one scrolling row of section links on narrow ones */
+.toc { scrollbar-width: none; }
+@media (min-width: 1100px) {
+  .panel.has-toc { grid-template-columns: 200px minmax(0, 1fr); column-gap: 30px; align-items: start; }
+  .panel.has-toc > .toc { grid-column: 1; grid-row: 1 / span 40; position: sticky; top: calc(78px + env(safe-area-inset-top, 0px));
+    display: grid; gap: 1px; max-height: calc(100vh - 110px); overflow: auto; padding: 4px 2px 12px; }
+  .panel.has-toc > :not(.toc) { grid-column: 2; }
+  .toc .chip { background: none; border-radius: 8px; padding: 5px 10px; justify-content: flex-start; text-align: left; font-size: 13.5px; color: var(--muted); line-height: 1.3; }
+  .toc .chip.h2 { color: var(--ink); font-weight: 700; background: none; margin-top: 10px; }
+  .toc .chip.h2:first-child { margin-top: 0; }
+  .toc .chip.on { background: var(--chip); color: var(--ink); box-shadow: inset 2px 0 0 var(--oak); }
+}
+@media (max-width: 1099px) {
+  .toc { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+  .toc .chip { flex: none; }
+  .toc .chip:not(.h2) { display: none; }
+}
+footer.foot { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; align-items: center; color: var(--muted); font-size: 14px;
+  border-top: 1px solid var(--line); padding-top: 18px; }
+footer.foot a { color: var(--oak); }
 </style>"""
 
 
@@ -673,6 +724,12 @@ def uniq_svgs(html_):
 
 
 def page(site=False):
+    """v24: the page without round markers in its text (tidy.strip_versions) and with long captions folded (tidy.shorten_captions)."""
+    import tidy
+    return tidy.shorten_captions(tidy.strip_versions(_page(site)))
+
+
+def _page(site=False):
     import diagrams as D
     prefix = "media-wall/src/" if site else ""
     imgs = {k: f"{prefix}art/{k}.webp" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
@@ -756,11 +813,11 @@ def page(site=False):
   <header>
     <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
-    {('<p class="notice">This is the copy on GitHub Pages: your ticks, amounts and answers are kept on this device only. To share them with each other, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
-    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the flip-top dining table (by the stairs now, or on the breast), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. {"Ticks, amounts and answers save for both of you." if not site else ""}</p>
+    {('<p class="notice">Ticks and amounts here stay on this device. To share them, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
+    <p class="lede">The artisan oak media wall in Card Room Green, the fold-down dining table, the network and power, the build steps and the buy list.</p>
     {pdfs}
     <div class="skin" role="group" aria-label="Page look"><span>Page look</span>{SKIN_BTNS}<label for="big-text"><input type="checkbox" id="big-text"> Larger text</label></div>
-    {"" if site else '<p class="caption">This page is also on <a href="' + PAGES + '" target="_blank" rel="noopener">your GitHub Pages site</a> (ticks there stay on that device).</p>'}
+    {"" if site else '<p class="caption">Also on <a href="' + PAGES + '" target="_blank" rel="noopener">GitHub Pages</a>.</p>'}
   </header>
   <nav class="tabs" aria-label="Plan sections"><div class="tl" role="tablist">{tabs}</div></nav>
 
@@ -780,22 +837,21 @@ def page(site=False):
     </div>
     <div class="block">
       <div class="qhead"><h2>How the build runs</h2><a class="btn" href="#build" data-go="build">Open the build steps</a></div>
-      <p class="caption">Thirteen steps in order, each labelled with its part of the house, with what to buy before each. Total about £{money(lo_tot, hi_tot)}, with no electrician on top: the electrics are your own job (steps 3 and 12). The cost of each phase is charted in the {_tablink("buy")}.</p>
+      <p class="caption">Thirteen steps, about £{money(lo_tot, hi_tot)} in all; the electrics are your own job (steps 3 and 12).</p>
       <ol class="runlist">{run_list}</ol>
     </div>
-    <details class="changes"><summary>What changed: v{VERSION}, and every round before it</summary><div class="doc">
+    <!--keep--><details class="changes"><summary>What changed in v{VERSION}</summary><div class="doc">
       <p>{decision}</p>
-      <p><b>On this page:</b> the plan, every drawing, the build steps and the buy list now live here in tabs, with the cost of each phase charted against what you've paid, so nothing needs downloading from GitHub.</p>
-    </div></details>
+    </div></details><!--/keep-->
     <div class="doc"><h2>The room</h2>{sec["2"]}</div>
   </section>
 
   <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
-    <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · scroll or pinch to zoom · right-drag or two fingers to slide</span></div>
-    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Drag to look round; walk with the arrows (or WASD, Q and E). <b>Under the picture (v22):</b> <b>Views</b> (and saving an HD picture), <b>Layout</b> (the table, the chairs, the plant stand, the drawers), <b>Lights</b>, <b>Look</b> (paint and decor) and <b>Extras</b> (ideas, suggestions, and <b>Your picks</b>, which adds up what you've switched on). <b>Edit room</b> (top left of the picture) moves, turns, recolours, removes and adds things.</p>
+    <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · pinch or scroll to zoom · arrows to walk</span></div>
+    <p class="caption">Built to the plan's measurements. The controls are under the picture; <b>Edit room</b> (top left) moves, recolours and adds things.</p>
     {room3d_page.section()}
     <h3 class="ptitle">HD pictures from the 3D room</h3>
-    <p class="caption">Rendered at 2560 \u00d7 1440; tap one to see it full size. The same set is in the project folder.</p>
+    <p class="caption">2560 \u00d7 1440; tap one to see it full size.</p>
     {gallery3d()}
   </section>
 
@@ -940,9 +996,10 @@ def page(site=False):
     <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
-    <div class="doc"><p class="notice">Still to confirm: the open questions, with a box for each answer, are in the {_tablink("questions")}.</p>{sec["12"]}<h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details></div>
+    <div class="doc"><p class="notice">The open questions are in the {_tablink("questions")}.</p>{sec["12"]}<!--keep--><h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details><!--/keep--></div>
     <div class="block"><h2 class="ptitle">Downloads</h2><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn. {"" if site else "They open from your GitHub Pages site."}</p>{downloads_html(site)}</div>
   </section>
+  <footer class="foot"><span>Portsmouth Close · living room · v{VERSION}</span><span><a href="{("media-wall/out/" if site else GITHUB_OUT)}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> · <a href="{("media-wall/out/" if site else GITHUB_OUT)}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a> · <a href="#room" data-go="room">The 3D room</a></span></footer>
 </div>
 <script>
 const DATA = {json.dumps(data)};
@@ -988,12 +1045,18 @@ document.addEventListener("click", e => {{
 }});
 /* on-this-tab chips for the long tabs */
 $$(".toc").forEach(nav => {{
-  const hs = $$(".doc h2, .doc h3", nav.parentElement);
+  const hs = $$(".doc h2, .doc h3, .block > h2.ptitle, .block > .qhead > h2.ptitle", nav.parentElement), bs = [];
+  nav.parentElement.classList.add("has-toc");                  // v24: a sticky sidebar on wide screens
   hs.forEach((h, i) => {{
     const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (h.tagName === "H2" ? " h2" : "");
     b.textContent = h.textContent.replace(/:.*$/, ""); b.addEventListener("click", () => jumpTo(h));
-    nav.appendChild(b);
+    nav.appendChild(b); bs.push(b);
   }});
+  if ("IntersectionObserver" in window) {{                     // the section you're reading is marked
+    const io = new IntersectionObserver(es => {{ es.forEach(e => {{ if (e.isIntersecting) {{ const k = hs.indexOf(e.target); bs.forEach((b, j) => b.classList.toggle("on", j === k)); }} }}); }},
+      {{ rootMargin: "-80px 0px -70% 0px" }});
+    hs.forEach(h => io.observe(h));
+  }}
 }});
 showTab((location.hash || "").slice(1) || store.get("mw13-tab", "overview"));
 
@@ -1357,6 +1420,7 @@ paintSteps();
 </script>
 <script>""" + STEP_JS + """</script>
 <script>""" + SKIN_JS + """</script>
+<script>""" + __import__("tidy").MORE_JS + """</script>
 """)
 
 
