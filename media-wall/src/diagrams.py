@@ -1880,3 +1880,94 @@ def light_scene(key):
     o.append(t(X(g.TABLE_CX), Y(0) + 22, "dining wall", 9, "middle", 650, "#8f5b45"))
     o.append(t(X(g.ROOM_W), Y(g.ALC_D) + 34, "From above, to scale: the window at the top, the media wall bottom right. Glows show each light's level.", 9.5, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), f"Lighting scene: {sc[1]}", sc[2])
+
+
+def dining_sites():
+    """v14: the two places the fold-down table can live, side by side, each set for four at the wall, to scale."""
+    W, H = 900, 600
+    g = G
+    k = 1.05
+    o = []
+    cw, cd = g.CHAIR[0], g.CHAIR[1]
+    TAB, TABS = "#d9b48a", "#9c6a3f"
+    for i, site in enumerate(("breast", "stairs")):
+        ox, oy = 10 + i * 452, 110
+        X = lambda x, ox=ox: ox + (g.ROOM_W - x) * k
+        Y = lambda z, oy=oy: oy + (z - g.WINDOW_Z) * k
+        sd = g.ALC_D - g.STAIR_D
+        pts_ = [(130, g.WINDOW_Z), (g.ROOM_W, g.WINDOW_Z), (g.ROOM_W, sd), (g.STAIR_X[0], sd), (g.STAIR_X[0], g.BREAST_D_WEST), (g.BREAST_X[1], g.BREAST_D_WEST),
+                (g.BREAST_X[1], 0), (g.ALC_W, 0), (g.ALC_W, g.ALC_D), (130, g.ALC_D)]
+        o.append('<polyline points="' + " ".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in pts_) + f'" fill="#fbfaf6" stroke="{WALL}" stroke-width="2.4"/>')
+        o.append(f'<rect x="{X(g.BREAST_X[1]):.1f}" y="{Y(0):.1f}" width="{g.BREAST_W*k:.1f}" height="{g.ALC_D*k:.1f}" fill="#e2b9a4" stroke="{WALL}" stroke-width="1.6"/>')
+        o.append(t(X(g.TABLE_CX), Y(g.ALC_D / 2) + 4, "chimney breast", 8.5, "middle", 600, "#8f5b45"))
+        o.append(f'<rect x="{X(g.ALC_W):.1f}" y="{Y(g.BASE_FRONT_Z):.1f}" width="{(g.ALC_W - 130)*k:.1f}" height="{g.BASE_D*k:.1f}" fill="#e9d3b4" stroke="#b88a55"/>')
+        o.append(t(X((g.ALC_W + 130) / 2), Y(g.BASE_FRONT_Z) + 18, "media wall", 8.5, "middle", 600, "#8a5a32"))
+        o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(sd):.1f}" width="{(g.ROOM_W - g.STAIR_X[0])*k:.1f}" height="{(g.ALC_D - sd)*k:.1f}" fill="#eeeae1" stroke="#9a958b"/>')
+        o.append(t(X((g.ROOM_W + g.STAIR_X[0]) / 2), Y(sd) + 16, "stairs", 8.5, "middle", 600, MUTED))
+        o.append(t(X((g.ROOM_W + g.STAIR_X[0]) / 2), Y(sd) + 27, "up ↓", 8, "middle", 400, MUTED))
+        hx, r = g.DOOR_X[0], g.DOOR_SWING
+        o.append(f'<path d="M{X(hx + r):.1f},{Y(g.BREAST_D_WEST):.1f} A{r*k:.1f},{r*k:.1f} 0 0 1 {X(hx):.1f},{Y(g.BREAST_D_WEST - r):.1f} L{X(hx):.1f},{Y(g.BREAST_D_WEST):.1f}" fill="#fbe7e1" fill-opacity="0.6" stroke="#d0573b" stroke-dasharray="3 2"/>')
+        o.append(t(X(hx + r / 2), Y(g.BREAST_D_WEST - r / 2) + 4, "door swing", 8, "middle", 600, "#d0573b"))
+        x1s, zf, zb = g.SOFA_X[1], g.SOFA_FRONT_Z, g.SOFA_BACK_Z
+        o.append(f'<rect x="{X(x1s):.1f}" y="{Y(zb):.1f}" width="{(x1s - 130)*k:.1f}" height="{(zf - zb)*k:.1f}" fill="#ecebe6" stroke="#b9b4a8"/>')
+        o.append(t((X(x1s) + X(130)) / 2, Y((zb + zf) / 2) + 3, "sofa", 9, "middle", 600, MUTED))
+        # the stairs wall's shelf (high), and the pendant point
+        s0, s1 = g.SHELF_B["z"]
+        o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(s1):.1f}" width="{g.SHELF_B["d"]*k:.1f}" height="{(s0 - s1)*k:.1f}" fill="none" stroke="#33302b" stroke-width="1.3" stroke-dasharray="6 3"/>')
+        def pendant():
+            o.append(f'<circle cx="{X(g.BAR2_X):.1f}" cy="{Y(g.BAR2_Z):.1f}" r="5" fill="#f0c24b" stroke="#9a7404"/>')
+            o.append(t(X(g.BAR2_X) + 8, Y(g.BAR2_Z) + 3, "pendant point", 8, "start", 700, "#9a7404"))
+        def chair(cx, cz, face):
+            if face in ("+z", "-z"):
+                x0, z0, w_, d_ = cx - cw / 2, cz - cd / 2, cw, cd
+            else:
+                x0, z0, w_, d_ = cx - cd / 2, cz - cw / 2, cd, cw
+            o.append(f'<rect x="{X(x0 + w_):.1f}" y="{Y(z0):.1f}" width="{w_*k:.1f}" height="{d_*k:.1f}" rx="3" fill="#f1e1c8" stroke="#b88a55"/>')
+        def dim(a, b, lab, col=BLUE, anchor="middle", dx=0, dy=-4):
+            o.append(f'<line x1="{X(a[0]):.1f}" y1="{Y(a[1]):.1f}" x2="{X(b[0]):.1f}" y2="{Y(b[1]):.1f}" stroke="{col}" stroke-width="1.2"/>')
+            o.append(t((X(a[0]) + X(b[0])) / 2 + dx, (Y(a[1]) + Y(b[1])) / 2 + dy, lab, 8.5, anchor, 650, col))
+        if site == "breast":
+            tx0, tx1 = g.TABLE_X
+            tz0, tz1 = g.TABLE_Z[1], g.TABLE_Z[0]
+            zm = (tz0 + tz1) / 2
+            for c in [(tx0 - cd / 2 + 8, zm, "+x"), (tx1 + cd / 2 - 8, zm, "-x"), (g.TABLE_CX - 27.5, tz0 - cd / 2 + 8, "+z"), (g.TABLE_CX + 27.5, tz0 - cd / 2 + 8, "+z")]:
+                chair(*c)
+            o.append(f'<rect x="{X(tx1):.1f}" y="{Y(tz0):.1f}" width="{(tx1-tx0)*k:.1f}" height="{(tz1-tz0)*k:.1f}" fill="{TAB}" stroke="{TABS}" stroke-width="1.4"/>')
+            o.append(t(X(g.TABLE_CX), Y(zm) + 4, "110 × 80", 9, "middle", 650, "#5a3a20"))
+            o.append(t(X(tx1 + cd / 2), Y(zm) + 44, "this chair is in", 8, "middle", 600, "#d0573b"))
+            o.append(t(X(tx1 + cd / 2), Y(zm) + 54, "the door's swing", 8, "middle", 600, "#d0573b"))
+            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2), "your 2 m shelf (high),", 8.5, "start", 600, "#33302b"))
+            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2) + 11, "the dresser and lamp stay", 8.5, "start", 400, MUTED))
+            pendant()
+            dim((g.TABLE_CX, tz0), (g.TABLE_CX, g.SOFA_FRONT_Z), f"{_fmt(g.TABLE_Z[1] - g.SOFA_FRONT_Z)} to the sofa", dx=4, anchor="start", dy=4)
+            title, sub = "A · On the chimney breast", "the plan so far: down at 76 for four, folded flat every day"
+            notes = ["+ in line with the worktop at 76; next to the media wall",
+                     "+ the stairs wall keeps your shelf, dresser and lamp",
+                     "− the west end's chair sits in the door's swing",
+                     "− the breast's framed LPs sit above a busy wall"]
+        else:
+            tz0, tz1 = g.TABLE_B_Z[1], g.TABLE_B_Z[0]
+            tx0, tx1 = g.TABLE_B_X
+            zm = (tz0 + tz1) / 2
+            for c in [(tx0 - cd / 2 + 8, zm - 27.5, "+x"), (tx0 - cd / 2 + 8, zm + 27.5, "+x"),
+                      ((tx0 + tx1) / 2, tz1 + cd / 2 - 8, "-z"), ((tx0 + tx1) / 2, tz0 - cd / 2 + 8, "+z")]:
+                chair(*c)
+            o.append(f'<rect x="{X(tx1):.1f}" y="{Y(tz0):.1f}" width="{(tx1-tx0)*k:.1f}" height="{(tz1-tz0)*k:.1f}" fill="{TAB}" stroke="{TABS}" stroke-width="1.4"/>')
+            o.append(t(X((tx0 + tx1) / 2), Y(zm) + 4, "110 × 80", 9, "middle", 650, "#5a3a20"))
+            pendant()
+            dx_ = tx0 - 4
+            dim((dx_, g.STAIRS_WALL_Z[0]), (dx_, tz1), f"{_fmt(g.STAIRS_WALL_Z[0] - tz1)} to the stairs", anchor="start", dx=6, dy=4)
+            dim((dx_, tz0), (dx_, g.WINDOW_Z), f"{_fmt(tz0 - g.WINDOW_Z)} to the window", anchor="start", dx=6, dy=4)
+            dim((tx0 - cd, zm), (g.SOFA_X[1], zm), f"{_fmt(tx0 - cd - g.SOFA_X[1])} to walk behind", dy=-5)
+            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y(s1) + 10, "your 2 m shelf above it", 8.5, "start", 600, "#33302b"))
+            title, sub = "B · Under your shelf, by the stairs", "the same table and brackets on the stairs wall; the dresser moves out"
+            notes = ["+ right under the pendant point; out of the door's swing",
+                     "+ frees the chimney breast (frames, the lamp or a bench)",
+                     "− the end chairs are tight: 35 to the stairs' foot, 25 to the window",
+                     "− the wall's build is unknown: check it before fixing 500 kg brackets"]
+        o.append(t(ox, 70, title, 13, "start", 700))
+        o.append(t(ox, 86, sub, 9.5, "start", 400, MUTED))
+        for j, n_ in enumerate(notes):
+            o.append(t(ox, oy + (g.ALC_D - g.WINDOW_Z) * k + 22 + j * 15, n_, 9.5, "start", 500, "#2f7a4a" if n_.startswith("+") else "#a3352b"))
+    return svg(W, H, "\n".join(o), "Where the dining table can live: the chimney breast or the stairs wall",
+               "Both to scale, set for four at the wall, the west half of the room from above (window at the top). Six and eight lift it off onto legs in the same spot either way.")

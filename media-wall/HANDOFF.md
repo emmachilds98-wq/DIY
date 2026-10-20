@@ -4,14 +4,39 @@
 - **Branch:** `claude/sharp-franklin-lrray1` (PR https://github.com/emmachilds98-wq/DIY/pull/4) now carries every round, v10 to v13.8: in round 7i
   it was fast-forwarded to `claude/eloquent-johnson-pgmnud` (v13.7, PR #5, which was stacked on it). Keep working here. `main` is still at v9.
 - **Viewer artifact (the deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's sessions run
-  as), version 12 = v13.8. Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
+  as), version 13 = v14 (published 20 Oct 2026; v12 was v13.8). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
   that URL with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:**
   ArtifactData `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck (v13.6) belongs to another account and isn't
   readable from this one: don't use it. Rounds 7b–7h ran from a session outside the deck's org, which is why they reported "no write access";
   from this account the deck, its db and its comments all work.
-- **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 build_doc.py && python3 build_viewer.py` (about 2 minutes).
+- **v14 (round 8)** is on `claude/eloquent-johnson-pgmnud`, reset onto v13.8 (`3c5168f`) and opened as a new draft PR into
+  `claude/sharp-franklin-lrray1`; merge it there, then carry on from that branch.
+- **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
+  (shot3d renders 12 stills headless in SwiftShader WebGL: about 10 minutes; `python3 shot3d.py test <name>` makes quick 1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 8: v14 (the table by the stairs, the room in 3D, the page reorganised)
+- Client (with two photos of the west wall): "see all the latest work … merge any not in your version … full review of the format and layout
+  … full upgrade. I want customisable HD realistic renders to show my options as well as more views of around the room … what if the table
+  was on the wall going up the stairs under my shelf which is 2m long … all other furniture can move, the lamp is only 100% and we can still
+  shift location". Merge: this session's duplicate v13.6 work was dropped; v13.6–v13.8 (other sessions) are the base. Read "the lamp is
+  only 100%" as "the lamp definitely stays" (and it's drawn on/off only anyway); asked in the `lamp` question to be sure.
+- **Option B, the table on the stairs wall:** geometry `STAIRS_WALL_Z` (−41 … −309), `SHELF_B` (2 m black floating shelf, top ~200, 25 deep,
+  z −93 … −293, scaled from the photos at ~4.5 px/cm), `TABLE_B_*` (centred z −180: 84 to the stair box, 74 to the window), `DINING_SITE(S)`,
+  `FLOOR_LAMP(_SPOTS)`; `BAR2` moved to (412, −143), the existing pendant point in the photo. `fit.stairs_zone()` (8 rows: 2 tight end chairs,
+  1 check on the wall's build) → fit proof 66: 49 fit, 13 tight, 4 check. `diagrams.dining_sites()` (A vs B mini plans) and a "Two places for
+  the table" subsection in plan section 5. Questions now 17: new `site`, `westwall`, `lamp`; `westend` and `point2` rewritten from the photos.
+- **The room in 3D** (`src/room3d.js`, `room3d_page.py`, `export3d.py`, `shot3d.py`): render.py records every box, polygon and face frame
+  it draws (`REC`, `P3`), in room coordinates; export3d groups them by state (unit in/out, A/B × folded/four/six; B = A turned 90° onto the
+  west wall) into `scene3d.json`. The shell, shelf B, the lamp, the spot bars (real spotlights aimed as in `SPOT_HEADS`), the strip
+  (RectAreaLights), bias light and the TV picture are built in the browser. Three.js 0.160.0 from jsDelivr by importmap. Options: table
+  site and state, lighting scene (+ daytime), paint (+ any colour), lamp spot, drawers, quality; 9 cameras plus orbit; "Save HD"
+  (3840 × 2160 PNG via the downloads capability). Headless stills: 12 in `out/Media wall v14 - 3D - *.png`, art/3d_*.webp, and three in the PDF.
+- **Page:** tabs grouped (See it / The plan / Do it / Your input); new Room in 3D tab with a gallery; "3D views" renamed "Drawn views";
+  the overview opens with a dashboard (steps done and next step, bought and paid, answers) and an A-vs-B options card, also on the Dining tab;
+  buttons on each option open the 3D room set to it.
+- `out/`: v13 files moved to `out/v13/`; drawn HD renders renamed v14. Backups `*_v13_8_backup.py`, `build_viewer_v14_pre_layout_backup.py`.
 
 ## Update 19 Oct 2026, round 7i: v13.8 (back on the deck, summaries that follow the data)
 - Client: "view this chat and continue … improve anything you need to and publish". That session wasn't visible from here, so it was picked

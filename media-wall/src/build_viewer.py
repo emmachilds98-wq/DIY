@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "13"
+VERSION = "14"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 GITHUB_OUT = "https://github.com/emmachilds98-wq/DIY/blob/claude/sharp-franklin-lrray1/media-wall/out/"  # v13.8: the branch that carries every round (PR #4); switch to main once it merges
 LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
@@ -21,6 +21,8 @@ SINGLES = 2 * G.TRAY_SINGLES
 # ---------------------------------------------------------------- the open questions, most consequential first
 # (id, question, why it matters, how to check, a photo helps)
 from questions import QUESTIONS   # v13.6: one list, shared with the plan PDF
+import room3d_page                 # v14: the room in 3D
+from shot3d import SHOTS as SHOTS3D
 
 
 def _plain(s):
@@ -352,11 +354,84 @@ details.sdraw figure.dia svg { display: block; width: 100%; min-width: 640px; he
 #tracker { display: grid; gap: 10px; }
 #tracker.f-left li.done, #tracker.f-left li[data-kind="job"], #tracker.f-jobs li[data-kind="buy"] { display: none; }
 summary .pf a { color: var(--oak); }
+/* v14: tab groups, the overview's dashboard, the table's two options, the 3D room and its gallery */
+.tabs .tg { flex: none; align-self: center; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  padding: 0 4px 0 12px; margin-left: 6px; border-left: 1px solid var(--line); }
+.tabs .tg:first-child { border-left: 0; margin-left: 0; padding-left: 2px; }
+.dash { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: 12px; }
+.dcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.dcard strong { font-family: var(--display); font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.dcard a.caption { color: var(--oak); text-decoration: none; }
+.dcard a.caption:hover { text-decoration: underline; }
+.dbar { height: 8px; border-radius: 4px; background: var(--chip); overflow: hidden; }
+.dbar i { display: block; height: 100%; width: 0; background: var(--ok); }
+.d3d { position: relative; padding: 0; overflow: hidden; text-decoration: none; color: #fff; min-height: 150px; background: #0d100e; }
+.d3d img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.d3d span { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 14px 10px; font-family: var(--display); font-weight: 700; font-size: 1.15rem;
+  background: linear-gradient(transparent, rgba(0,0,0,0.72)); }
+.d3d:hover span { text-decoration: underline; }
+@media (max-width: 860px) { .dash { grid-template-columns: repeat(3, minmax(0, 1fr)); } .d3d { grid-column: 1 / -1; aspect-ratio: 16 / 7; } }
+@media (max-width: 520px) { .dash { grid-template-columns: minmax(0, 1fr); } }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.opt { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.opt img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #0d100e; }
+.opt .ob { padding: 12px 14px 14px; display: grid; gap: 8px; align-content: start; }
+.opt h3 { margin: 0; font-family: var(--display); font-size: 1.2rem; }
+.opt ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; font-size: 14.5px; }
+.opt li::marker { content: "+  "; color: var(--ok); font-weight: 700; }
+.opt li.minus::marker { content: "\u2212  "; color: var(--tight); }
+.opt .btn { justify-self: start; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.gallery figure { margin: 0; display: grid; gap: 6px; }
+.gallery button { padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: zoom-in; background: #0d100e; }
+.gallery img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.gallery figcaption { font-size: 13.5px; color: var(--muted); }
+""" + room3d_page.CSS + """
 </style>"""
 
 
-TABS = [("overview", "Overview"), ("views", "3D views"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
+TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
+TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
+CAP3D = {"3d_window_A_folded": "From the window, everyday evening: the table folded on the chimney breast",
+         "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
+         "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the lamp on",
+         "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the trays",
+         "3d_B_folded": "Option B folded: about 6 cm deep under your shelf, everyday evening",
+         "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
+         "3d_dining_A_four": "Option A: down for four on the chimney breast",
+         "3d_dining_B_four": "Option B: down for four under the shelf, bar 2 right over it",
+         "3d_six_day": "Out for six with the leaf, in daylight",
+         "3d_pc_day": "The PC side wall in daylight",
+         "3d_plan_B": "Bird\u2019s eye, option B set for four",
+         "3d_doll_A": "Dolls\u2019 house view, option A"}
+
+
+def options_card():
+    """v14: the table's two places side by side, with a way into the 3D room for each."""
+    g = G
+    south, north = g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0], g.TABLE_B_Z[1] - g.WINDOW_Z
+    def btn(opts, lab):
+        return f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
+    a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "dinner"}, "See A in 3D")
+    b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "dinner"}, "See B in 3D")
+    return f"""<div class="opts">
+  <article class="opt"><img data-art="3d_dining_A_four" alt="Option A in 3D: the table down for four on the chimney breast" loading="lazy">
+    <div class="ob"><span class="label">Option A · the plan so far</span><h3>On the chimney breast</h3>
+    <ul><li>Bar 1 and bar 2 already planned round it; the framed LPs over it.</li><li>Solid breast: plugs and screws, no surprises.</li>
+    <li class="minus">The west-end chair sits in the door's swing.</li></ul>{a}</div></article>
+  <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
+    <div class="ob"><span class="label">Option B · new in v14</span><h3>Under your shelf, by the stairs</h3>
+    <ul><li>Out of the door's swing; the pendant point is right over it.</li><li>Frees the breast; the dresser goes, the lamp moves.</li>
+    <li class="minus">End chairs tight: {south - g.CHAIR[1]:.0f} and {north - g.CHAIR[1]:.0f} cm behind them.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
+</div>"""
+
+
+def gallery3d():
+    figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D)
+    return f'<div class="gallery">{figs}</div>'
+
 TABNAME = dict(TABS)
 SEC_TAB = {"1": "overview", "2": "overview", "3": "wall", "4": "wall", "5": "dining", "6": "wall", "7": "wall", "8": "paint",
            "9": "network", "10": "build", "11": "buy", "12": "checks"}
@@ -448,6 +523,7 @@ def page(site=False):
     prefix = "media-wall/src/" if site else ""
     imgs = {k: f"{prefix}art/{k}.webp" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
     imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.webp" for v in ("join", "four", "six", "drawers", "side")})
+    imgs.update({k: f"{prefix}art/{k}.webp" for k, *_ in SHOTS3D})
     rows = track_rows()
     phases = phase_data(rows)
     _, lo_tot, hi_tot = phase_totals()
@@ -503,23 +579,34 @@ def page(site=False):
             "steps": len(steps()), "tabs": [t for t, _ in TABS]}
     used = [k for k in PARTS if any(k in st["part"] for st in steps())]
     part_buttons = "".join(f'<button type="button" data-part="{html.escape(k)}" aria-pressed="false"><span class="dot" style="background:{PARTS[k]}"></span>{html.escape(k)}</button>' for k in used)
-    tabs = "".join(f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
+    tabs = "".join((f'<span class="tg" aria-hidden="true">{TAB_GROUPS[t]}</span>' if t in TAB_GROUPS else "")
+                   + f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
     files_line = (f'Print copies of this plan (PDF) and the HD renders are also kept in the project folder on '
                   f'<a href="{GITHUB_OUT}" target="_blank" rel="noopener">GitHub, media-wall/out/</a>; you don\'t need them to use this page.')
     return uniq_svgs(f"""<title>Portsmouth Close Media Wall</title>
+{room3d_page.IMPORTMAP}
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {STYLE}
 <div class="wrap">
   <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.8</p>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
-    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table, the network and power, step-by-step build instructions and the buy list with what each phase costs. Ticks, amounts and answers save for both of you.</p>
+    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table (now with a second place to put it), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. Ticks, amounts and answers save for both of you.</p>
   </header>
   <nav class="tabs" aria-label="Plan sections"><div class="tl" role="tablist">{tabs}</div></nav>
 
   <section class="panel" id="overview" role="tabpanel" aria-labelledby="tb-overview">
+    <div class="dash">
+      <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_window_A_folded" alt="The room in 3D, from the window" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
+      <div class="dcard"><span class="label">Build</span><strong id="d-steps">0 of {len(steps())}</strong><span class="dbar"><i id="d-steps-bar"></i></span><a class="caption" id="d-next" href="#build" data-go="build">Start with step 1</a></div>
+      <div class="dcard"><span class="label">Buy list</span><strong id="d-buy">0 bought</strong><span class="dbar"><i id="d-buy-bar"></i></span><span class="caption" id="d-paid">\u00a30 paid so far, of about \u00a3{money(lo_tot, hi_tot)}</span></div>
+      <div class="dcard"><span class="label">Your answers</span><strong id="d-q">0 of {len(QUESTIONS)}</strong><span class="dbar"><i id="d-q-bar"></i></span><a class="caption" href="#questions" data-go="questions">Answer what we still need</a></div>
+    </div>
+    <div class="block"><div class="qhead"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
+      <p class="caption">Same table, same build: it hangs on the chimney breast (A) or on the wall going up the stairs, under your 2 m shelf (B). Everything else can move round it.</p>
+      {options_card()}</div>
     <div class="doc">
       <h2>The plan on a page</h2>
       {s1}
@@ -529,11 +616,20 @@ def page(site=False):
       <p class="caption">Thirteen steps in order, each labelled with its part of the house, with what to buy before each. Total about £{money(lo_tot, hi_tot)}, with no electrician on top: the electrics are your own job (steps 3 and 12). The cost of each phase is charted in the {_tablink("buy")}.</p>
       <ol class="runlist">{run_list}</ol>
     </div>
-    <details class="changes"><summary>What changed, v{VERSION} to 13.8</summary><div class="doc">
+    <details class="changes"><summary>What changed: v{VERSION}, and every round before it</summary><div class="doc">
       <p>{decision}</p>
       <p><b>On this page:</b> the plan, every drawing, the build steps and the buy list now live here in tabs, with the cost of each phase charted against what you've paid, so nothing needs downloading from GitHub.</p>
     </div></details>
     <div class="doc"><h2>The room</h2>{sec["2"]}</div>
+  </section>
+
+  <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
+    <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · scroll or pinch to zoom · right-drag or two fingers to slide</span></div>
+    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set, the lighting scene, the paint (or any colour), where the floor lamp stands (it stays; it's on or off) and whether the drawers are out, then pick a camera or move your own. Save any view as an HD picture.</p>
+    {room3d_page.section()}
+    <h3 class="ptitle">HD pictures from the 3D room</h3>
+    <p class="caption">Rendered at 2560 \u00d7 1440; tap one to see it full size. The same set is in the project folder.</p>
+    {gallery3d()}
   </section>
 
   <section class="panel" id="views" role="tabpanel" aria-labelledby="tb-views" hidden>
@@ -604,6 +700,7 @@ def page(site=False):
 
   <section class="panel" id="dining" role="tabpanel" aria-labelledby="tb-dining" hidden>
     <nav class="toc" aria-label="On this tab"></nav>
+    <div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>
     <div class="doc"><h2>The dining wall</h2>{sec["5"]}</div>
   </section>
 
@@ -780,6 +877,43 @@ $("#fit-only").addEventListener("click", e => {{
   $("#fit-zones").classList.toggle("fitonly", on);
   $$("#fit-zones details.zone").forEach(d => {{ if (on && d.querySelector("tr.r-tight, tr.r-check")) d.open = true; }});
 }});
+
+/* ---------- v14: the overview's dashboard, read from the page's own state */
+function dash() {{
+  const st = $$(".step"), sd = $$(".step.done"), next = st.find(x => !x.classList.contains("done"));
+  $("#d-steps").textContent = sd.length + " of " + st.length + " steps";
+  $("#d-steps-bar").style.width = (100 * sd.length / Math.max(1, st.length)) + "%";
+  const nx = $("#d-next");
+  if (next) {{ nx.textContent = "Next: " + next.dataset.s + ". " + $("h3", next).textContent; nx.dataset.step = next.dataset.s; }}
+  else {{ nx.textContent = "Every step done"; delete nx.dataset.step; }}
+  const bi = $$("#tracker li[data-kind=buy]"), bd = bi.filter(x => x.classList.contains("done"));
+  $("#d-buy").textContent = bd.length + " of " + bi.length + " bought";
+  $("#d-buy-bar").style.width = (100 * bd.length / Math.max(1, bi.length)) + "%";
+  const paid = $$("#tracker .paid input").reduce((a, i) => a + (parseFloat(i.value) || 0), 0);
+  $("#d-paid").textContent = "\u00a3" + Math.round(paid).toLocaleString("en-GB") + " paid so far";
+  const qa = $$(".q.answered").length;
+  $("#d-q").textContent = qa + " of " + DATA.q.length + " answered";
+  $("#d-q-bar").style.width = (100 * qa / Math.max(1, DATA.q.length)) + "%";
+}}
+let dashQ = false;
+const dashSoon = () => {{ if (!dashQ) {{ dashQ = true; requestAnimationFrame(() => {{ dashQ = false; dash(); }}); }} }};
+new MutationObserver(dashSoon).observe($(".wrap"), {{ subtree: true, attributes: true, attributeFilter: ["class"] }});
+document.addEventListener("input", dashSoon);
+dash();
+/* links into the 3D room with its options set */
+document.addEventListener("click", e => {{
+  const b = e.target.closest("[data-r3d]");
+  if (!b) return;
+  const o = JSON.parse(b.dataset.r3d);
+  showTab("room"); window.scrollTo({{ top: 0 }});
+  if (window.R3D) window.dispatchEvent(new CustomEvent("r3d-set", {{ detail: o }})); else window.__r3dPending = o;
+}});
+/* the 3D gallery opens in the full-size viewer */
+$$(".g3d").forEach(b => b.addEventListener("click", () => {{
+  const im = $("img", b);
+  lbImg.src = im.src; lbImg.alt = im.alt; lbDims.hidden = true;
+  lb.hidden = false; document.body.style.overflow = "hidden"; $("#lb-close").focus();
+}}));
 
 /* ---------- shared state: answers, photos, tracker, build steps */
 let db = null, assets = null, user = null, myId = null, readOnly = false;

@@ -215,7 +215,8 @@ FRAMES_Y = 165.0                           # two framed LPs on the breast above 
 PEND_X = ALC_W / 2                         # the existing rose: straight out from the TV unit...
 PEND_Z = (BASE_FRONT_Z + SOFA_FRONT_Z) / 2 # ...halfway to the sofa: -106
 BAR = (84.0, 16.0, 22.4)                   # Wolston-style bar: length, depth, drop
-BAR2_X, BAR2_Z = 433.0, -80.0              # the second bar: on the existing point between the door and the west wall (to confirm)
+BAR2_X, BAR2_Z = 412.0, -143.0             # v14: the existing pendant point, from the client's photo (20 Oct): about 55 out from the west wall,
+                                           # a quarter of the way along the 2 m shelf from its stair end (was 433, -80, assumed)
 EYES_FROM_WINDOW = 70.0
 EYE_HEIGHT = (105.0, 112.0)
 SCREEN_FROM_WINDOW = ROOM_D - (ALC_D - TV_PANEL_Z[0])   # 335
@@ -248,3 +249,21 @@ def summary():
 if __name__ == "__main__":
     for k, v in summary().items():
         print(f"{k:22} {v}")
+
+
+# ---------------------------------------------------------------- v14: the stairs wall, and the dining table's second site
+# Client, 20 Oct, with two photos: "what if the table was on the wall going up the stairs under my shelf which is 2m long ...
+# all other furniture can move". The west wall north of the stair box: their black floating shelf (2 m) high on it, the dresser,
+# the three-headed floor lamp and the record crate below. Scaled from the photo by the shelf's 2 m (about 4.5 px a cm on the wall):
+# the shelf starts about 41 cm past the stair box and stops about 16 cm short of the window corner, top about 200.
+STAIRS_WALL_Z = (ALC_D - STAIR_D, WINDOW_Z)        # -41 .. -309: the stair box's face to the window wall, 268 long
+SHELF_B = dict(z=(STAIRS_WALL_Z[0] - 52.0, STAIRS_WALL_Z[0] - 252.0), top=200.0, t=5.0, d=25.0)   # -93 .. -293
+DINING_SITES = {"breast": "On the chimney breast", "stairs": "Under the shelf, by the stairs"}
+DINING_SITE = "breast"                              # the plan's default; both are drawn, checked and costed
+TABLE_B_CZ = -180.0                                # the table's centre along the stairs wall: 84 to the stair box, 74 to the window
+TABLE_B_Z = (TABLE_B_CZ + TABLE[0] / 2, TABLE_B_CZ - TABLE[0] / 2)    # -125 .. -235
+TABLE_B_X = (ROOM_W - RAIL[2] - TABLE[1], ROOM_W - RAIL[2])          # 384 .. 464 when down
+FLOOR_LAMP = dict(h=165.0, base=28.0, heads=3)      # the client's three-headed floor lamp (keeps; it can move): drawn, not measured
+FLOOR_LAMP_SPOTS = {"corner": ("By the window, west corner", (ROOM_W - 22.0, WINDOW_Z + 30.0)),
+                    "sofa": ("At the sofa's west end", (SOFA_X[1] + 20.0, SOFA_BACK_Z + 20.0)),
+                    "breast": ("Beside the chimney breast", (BREAST_X[1] + 22.0, -22.0))}
