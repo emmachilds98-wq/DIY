@@ -1273,11 +1273,18 @@ def wrap():
 
     if VIEW == "side" and not G.PLAIN:       # from the side the screen is beyond the case: draw it first
         o.append(screen())
-    o.append(box(cx1, st, cz0, cw, ch, cd, "#121314", "#1d1f21", "#0d0e0f"))
+    # v18, client: "PC internals still not visible, there is a clear side panel": the case is drawn as its five steel panels (wall side,
+    # top, bottom, the alcove end with the front fans, the rear) and a clear glass side to the room, so the parts inside show
+    K = ("#121314", "#1d1f21", "#0d0e0f")
+    o.append(box(cx1, st, cz0, 0.8, ch, cd, *K))                       # the wall side
+    o.append(box(cx1, st, cz0, cw, 0.8, cd, *K))                       # the floor of the case
+    o.append(box(cx1, st, cz0, cw, ch, 0.8, *K))                       # the rear, by the window
+    o.append(box(cx1, st, cz1 - 1.5, cw, ch, 1.5, *K))                 # the front, towards the alcove
     o.append(pc_internals(cx1, st, cz0, cz1, cw, ch))
+    o.append(box(cx1, st + ch - 1.0, cz0, cw, 1.0, cd, *K))            # the top, drawn after the parts so it sits over them
     gx = cx1 + cw + 0.02
     side = [P(gx, st + 1, cz0 + 1), P(gx, st + 1, cz1 - 1), P(gx, st + ch - 1, cz1 - 1), P(gx, st + ch - 1, cz0 + 1)]
-    o.append(poly(side, "#0c1714"))
+    o.append(poly(side, "url(#glass)"))
     squash = 1.0 if VIEW == "side" else 0.42
     for (yy, zz) in [(st + 36, cz1 - 5.5), (st + 23.5, cz1 - 5.5), (st + 11, cz1 - 5.5)]:
         pc = P(gx, yy, zz); k = K(zz, gx)
