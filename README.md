@@ -2,21 +2,30 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v26: option C, the dining cabinet
+## Media wall and dining wall, v27: the dining cabinet, for six
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
-with the flip-top oak dining table on the stairs wall under your shelf (the default since v16) or on the chimney breast. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
+with the dining cabinet under your shelf by the stairs: the table and the six chairs in one oak cabinet (the flip-top is the alternative). Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v26%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v27%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
+**New in v27** (the dining cabinet is the plan, for six; your rear speakers; easier Edit room)
+- **The dining cabinet is now the plan:** one oak cabinet under your shelf with the table and all six chairs inside it. The table (two 90 × 90 oak halves) swings down out of its bay and opens to 180 × 90: **six in comfort**, three a side, with the coffee table left where it is. Four chairs stand on the chair bay's floor and two on its shelf, the seat pads beside them; a drawer under the table holds the mats and a lift-up linen flap over it holds the cloth.
+- **Clear build instructions:** step 11 of the build guide is the cabinet's build in sixteen stages, every size from the plan: marking out, the carcass, fixing it to the wall, the hinge rail, the two halves with their breadboard ends, aprons and folding legs, the flip-top hinges, hanging the table on its piano hinge, the catches, the drawer, the linen flap, the doors, levelling and loading the chairs. Two new drawings: the carcass from the front with every height, and the halves from underneath with every leg and hinge. The cutting list and the buy list carry the cabinet; the flip-top (by the stairs or on the breast) stays in section 5 as the alternative.
+- **Your rear speakers** stand behind the sofa in the 3D room and the plan (on slim stands behind its long side, one near each end), movable in Edit room. Drawn provisionally: your photo will fix the stands and the spots.
+- **The brick under the stairs is painted**, as it has a wall in front of it.
+- **Edit room:** the flip-top's chair cupboard can come off the wall (select it, Remove; + Add puts it back). Things clip to a wall from 15 cm away (was 5), a quarter turn keeps a piece against its wall, and **Back to the wall** turns a piece and pushes it flat against the nearest wall.
+
+![The dining cabinet open for six](media-wall/out/Media%20wall%20v27%20-%203D%20-%20THE%20DINING%20CABINET%20-%20open%20for%20six%20-%20bright,%20table%20rule%20(HD).png)
+
+**v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
 - **Option C, a second way to build the dining wall** (the flip-top stays the plan): one oak cabinet under your shelf. The table, 225 × 90 open, stands up in one bay; all eight folding chairs fold into the other, behind two doors. Packed away, nothing shows. In the 3D room: Tools, Layout, "C: the dining cabinet".
 - **How many can sit down:** eight at a squeeze with option C (four on the stair side, three on the window side, one at the end), six in comfort. That's the most this room takes: the flip-top seats seven. The plan's section 5 shows why a ninth won't fit, what C costs against the flip-top (it isn't in the totals) and its cut list.
 - **The Tools panel works properly:** its title and buttons stay put, every tab opens at the top, the HD pictures under Views show as a strip (they were a long column of broken images), and on a laptop it docks to the right with the room moved beside it. The labels never sit on top of each other, and **Hide labels** (top right) takes them off the room.
 - **More in Look:** the ceiling and the skirting and door colours, the oak's finish on every new piece (artisan, pale, smoked or walnut), the floor (your carpet, oatmeal, oak boards) and your shelf (black, oak, white).
 - **More in Extras:** six more suggestions (candles on the shelf, a table runner, floor cushions, a rattan lantern, an arched mirror, an LED strip under the shelf: eighteen in all), and "Add a piece of furniture" straight into Edit room.
 
-![Option C open for eight](media-wall/out/Media%20wall%20v26%20-%203D%20-%20OPTION%20C%20-%20the%20dining%20cabinet%20open%20for%20eight%20-%20bright,%20table%20rule%20(HD).png)
+![Option C open for eight](media-wall/out/v26/Media%20wall%20v26%20-%203D%20-%20OPTION%20C%20-%20the%20dining%20cabinet%20open%20for%20eight%20-%20bright,%20table%20rule%20(HD).png)
 
 **v25** (Demma Home Improvements: the plan page as an app)
 - **Your room is the home screen**, full screen, in bright pastels on warm cream. Six numbered stickers sit on it (the media wall, the PC side wall, the chimney breast, the dining table, the window and plants, the sofa and rug): tap one for its key facts, to open its chapter, or to fly there.
@@ -205,8 +214,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v26.pdf`](media-wall/out/Home_Network_Plan_v26.pdf) (90 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v26.pdf`](media-wall/out/Build_Guide_v26.pdf) (48 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v27.pdf`](media-wall/out/Home_Network_Plan_v27.pdf) (90 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v27.pdf`](media-wall/out/Build_Guide_v27.pdf) (52 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v15/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v16 is the last version published there: this session could not reach it with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)

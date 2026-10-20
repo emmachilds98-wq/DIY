@@ -12,7 +12,7 @@ IMPORTMAP = ('<script type="importmap">' + json.dumps({"imports": {"three": THRE
                                                                    "three/addons/": THREE + "examples/jsm/"}}) + "</script>")
 
 VIEWS = [("room", "The whole room"), ("window", "From the window"), ("wall", "The media wall"), ("sofa", "From the sofa"), ("door", "From the door"),
-         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "The chair cupboard"), ("breast", "The chimney breast"),
+         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "Where the chairs live"), ("breast", "The chimney breast"),
          ("windowwall", "The window wall"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"), ("doll", "Dolls’ house")]   # v21: the whole room first
 
 CSS = """
@@ -302,11 +302,11 @@ def controls(gallery=""):
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
                  + '<p class="caption">Drag to look round, pinch or scroll to zoom. On a keyboard: W A S D or the arrows walk, Q and E turn.</p>',
         "layout": "".join([
-            seg("site", [("B", "B: by the stairs (the plan)"), ("A", "A: on the chimney breast"), ("C", "C: the dining cabinet")], "The table: which option"),
-            seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six"), ("eight", "Open, eight (C)")], "Folded or open"),
-            seg("chairs", [("cupboard", "Cupboard, shut"), ("open", "Cupboard, open"), ("hooks", "Open hooks"), ("away", "In the garage")], "Chairs, with the table folded"),
+            seg("site", [("C", "The dining cabinet (the plan)"), ("B", "B: the flip-top by the stairs"), ("A", "A: the flip-top on the breast")], "The table: which option"),
+            seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six")], "Folded or open"),
+            seg("chairs", [("cupboard", "Doors shut"), ("open", "Doors open"), ("hooks", "Open hooks (B, A)"), ("away", "In the garage (B, A)")], "The chairs, with the table folded"),
             seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Plant stand and vinyl stand"),
-            seg("seat", [("off", "Not there"), ("up", "Folded"), ("down", "Down")], "Fold-down seat at the stair end"),
+            seg("seat", [("off", "Not there"), ("up", "Folded"), ("down", "Down")], "Fold-down seat at the stair end (B)"),
             seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers")]),
         "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
         "look": swatches + trims + decor_g,
@@ -346,8 +346,8 @@ def hotspots():
              facts=[f"PC shelf at {g.PC_SHELF_TOP:g}", "Leads inside the wall", "Warm LED strip underneath", "Step 10"]),
         dict(id="breast", n=3, name="Chimney breast", hue=345, at=[(g.BREAST_X[0] + g.BREAST_X[1]) / 2, 120, -6], nrm=[0, -1], cut="", view="breast", chapter="records",
              facts=[f"Vinyl stand, {g.STAND_LPS} LPs", f"“Now playing” ledge at {g.NOW_LEDGE['top']:g}", "Two framed LPs", "Vinyl kit " + ph("9 Vinyl kit")]),
-        dict(id="dining", n=4, name="Dining table", hue=50, at=[g.ROOM_W - 12, 110, g.TABLE_B_CZ], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
-             facts=["Flip-top, up to seven", "Chair cupboard", "Option C: a cabinet, up to eight", "Step 11", ph("6 Dining wall")]),
+        dict(id="dining", n=4, name="Dining cabinet", hue=50, at=[g.ROOM_W - 12, 110, g.OPTC["cz"]], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
+             facts=[f"Table {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}, six in comfort", "Six chairs inside it", "Step 11", ph("6 Dining wall")]),
         dict(id="window", n=5, name="Window & plants", hue=165, at=[pl[0], PS["h"] - 20, pl[1] + 8], nrm=[0, 1], cut="win", view="windowwall", chapter="c-room",
              facts=[f"Plant stand {PS['w']:g} × {PS['d']:g} × {PS['h']:g}", f"Window ledge {g.WINDOW_REVEAL + g.SILL['nose']:g} deep", "Hessian curtains"]),
         dict(id="sofa", n=6, name="Sofa & rug", hue=95, at=[(g.SOFA_X[0] + g.SOFA_X[1]) / 2, 70, g.SOFA_BACK_Z + 55], nrm=None, cut="", view="sofa", chapter="c-room",
@@ -377,9 +377,9 @@ def section(gallery=""):
     <div class="r3d-edit">
       <div class="r3d-editbar" id="r3d-editbar" hidden><button type="button" id="r3d-editdone" class="primary">✓ Done</button><button type="button" id="r3d-add">+ Add</button><button type="button" id="r3d-undo" disabled title="Undo (Ctrl+Z)">↶ Undo</button><button type="button" id="r3d-layreset">Reset layout</button>
         <button type="button" class="r3d-share" id="r3d-share" hidden title="Save this layout so Emma and Dave both see it">Save for both of you</button><button type="button" class="r3d-share" id="r3d-useshared" hidden>Use the shared layout</button><span class="r3d-hint" id="r3d-sharest" aria-live="polite"></span>
-        <span class="r3d-hint">Drag a thing to move it (it snaps to a wall within 5 cm); tap it to turn, recolour, copy or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
+        <span class="r3d-hint">Drag a thing to move it (it snaps to a wall within 15 cm); tap it to turn, recolour, copy or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
       <div class="r3d-addlist" id="r3d-addlist" hidden></div>
-      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn">⟳ Turn</button>
+      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn" title="A quarter turn; against a wall it stays against it">⟳ Turn</button><button type="button" data-sel="turn45" title="An eighth of a turn">45°</button><button type="button" data-sel="wall" title="Push it to the nearest wall, its back to the wall">⇥ Back to the wall</button>
         <label>Colour <input type="color" id="r3d-selcol" value="#888888"></label><span id="r3d-swatches" hidden></span>
         <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
   </div>

@@ -1,7 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v26 is built (round 20, below): option C (the dining cabinet, up to eight), the Tools panel fixed, more in Look and Extras.**
+- **v27 is built (round 21, below): the dining cabinet is the plan, made for six with the chairs inside; step 11 is its full build;
+  your rear speakers; the stairs' brick painted; Edit room clips to walls and the flip-top's chair cupboard comes off.** Waiting on the
+  client's **photo of the rear speakers** (stands' size, height, spots): `geometry.REAR_STAND` / `REAR_SPOTS` and the question `rears`.
+- v26 (round 20): option C (the dining cabinet, up to eight), the Tools panel fixed, more in Look and Extras.
   **Shipped (round 20b):** PR #20 merged into main (GitHub Pages is current) and the shared deck 71ff republished at v26
   (version 1792532174-e30e; all 32 new stills uploaded to its asset store and recorded in `src/deck_assets.json`). The plan PDF's
   option C costs: £961–1,650 against £666–1,265 for the flip-top rows it would replace (about £295–385 more); the money cells carry
@@ -33,6 +36,42 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 21: v27 (the dining cabinet is the plan, for six; rear speakers; easier Edit room)
+- Client: "use the cabinet version as our primary table model now and improve on its current design to have a seating of 6, i would
+  like the chairs to exist within the same thing the table is built into. ensure i can also take the chair cupboard that exists currently
+  off the wall when im customising. also add my surround speakers to the build that exist standing behind the sofa ill send a photo";
+  "remember to adjust the plan with very clear instructions on how to build the table and chair design"; "paint the bricking on the
+  stairs it has wall infront"; "make it easier to clip an item somewhere like a wall when it needs turning".
+- Backups: `*_v26_backup.*` (render, room3d.js, room3d_page, geometry, fit, diagrams, build_doc, instructions, questions, export3d, shot3d,
+  build_viewer, ideas).
+- **geometry.OPTC for six:** `top` (90, 90, 2.7): 180 × 90 open (v26: 225); `chairs` 6, `shelf_chairs` 2 (four on the floor two deep, two
+  on the shelf at the back, seat pads in front); `flap` (the linen space over the folded table, on its own floor); `leg_in` 8.25 and the
+  legs inside the apron corners; `seats` four/six only (eight dropped). `DINE_COMFORT` 58. fit `optc_seats()` counts comfort seats and an
+  end seat only if it clears the coffee table (it does: a seventh fits with a spare chair); `optc_zone` "The dining cabinet (the plan
+  since v27)" and `max_seats_zone` come before the flip-top zones (`zones()` inserts them); the flip-top's zones are labelled the alternative.
+- **The plan (build_doc):** `cabinet_html()` leads section 5 (what it is, using it, seats, the four drawings, renders, how it's built,
+  cost); the flip-top follows as "The alternative" (`FLIPTOP_ROWS`, out of TRACK, costed by `fliptop_cost()`). TRACK's dining rows are
+  the cabinet's (the Lee Valley hinge row kept word for word, so its id holds); `cabinet_rows()`. Step 11 is the cabinet: summary in
+  `steps()`, the full build in `instructions.full()[11]` (sixteen stages, every number from OPTC), drawings `optc_carcass`,
+  `optc_halves` (new: diagrams `option_c_carcass`, `option_c_halves`), `optc_section`, `optc_elevation`. Cutting list: an "Oak-faced
+  ply, 18 mm" group plus oak, 6 mm, 12 mm and hardware rows for the cabinet; the flip-top's and its cupboard's rows are gone from it.
+  Questions: `optc` and `chairs` dropped (decided), `rears` added. VERSION 27; v26 outputs in `out/v26/`.
+- **3D (room3d.js):** DEF.site "C"; `seen27` moves a saved "B" to "C" once; "eight" maps to "six"; the coffee table no longer moves.
+  The cabinet: the linen flap and its floor, six chairs inside with seat pads. The flip-top's chair cupboard is `MOV.chaircab`
+  (`fixed`: selectable, Remove / put back, no drag or turn; `placeAll` skips fixed pieces' placement). Rear speakers `rear1`/`rear2`
+  (movable, `R.REAR_*` from export3d). Edit room: `SNAP` 15, `halfOf`, `zmaxAt`, `turnItem` (Turn is 90°, 45° button; flush walls kept),
+  `backToWall` (a piece's back is its -z side). The decor handler shows the case unless the table is on the breast (site A).
+- **render.py:** the stairs' brick side wall is drawn in the wall paint (`url(#leftwall)`), so the 3D room paints it too.
+- **Stills:** general views now on the cabinet (site C); the flip-top stills (`3d_window_B_*`, `3d_B_folded`, `3d_chairs*`,
+  `3d_dining_B_four`, `3d_plan_B`, `3d_seat`) labelled "B, THE FLIP-TOP"; `3d_c_eight` → `3d_c_six`; new `3d_window_c_six`.
+- **Outputs:** version 27; v26 outputs in `out/v26/`; 37 stills; plan 90 pages, guide 52 (step 11 is pages 35 and 41–43); fit 88 fit,
+  31 tight, 10 check, 0 don't fit; total £3,438–6,733 (the cabinet's rows £881–1,535 with six chairs; the flip-top would be £666–1,265).
+  Stale stills (`3d_c_eight`, `3d_wall_tv`, `3d_sofa_records`, `3d_window_general`, `3d_window_A_folded`) and the v25/v26 renders removed.
+- **QA (Playwright, 1280 × 800 and 390 × 844):** a saved "B / eight" opens on the cabinet for six; Edit room (from the bird's eye view):
+  the flip-top's chair cupboard selects, comes off and goes back from + Add; Back to the wall and Turn keep pieces flush; both rear
+  speakers select; the dining chapter and #step-11 open; no horizontal overflow, no console errors. Deck 71ff republished
+  (version 1792535224-ee06) with all 42 changed pictures in its asset store.
 
 ## Update 20 Oct 2026, round 20: v26 (option C, the dining cabinet; the Tools panel fixed; more in Look and Extras)
 - Client: "tools have some bugs displaying, expand more into the look section as well as extras. exploire other table config that looks

@@ -553,11 +553,12 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
          "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
          "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug",
-         "3d_c_folded": "Option C, the dining cabinet, packed away: one oak cabinet under your shelf, the table standing up in its bay over a drawer, eight chairs behind the doors",
-         "3d_c_eight": "Option C open for eight: the table 225 long, four on the stair side, three on the window side, one at the end",
-         "3d_c_chairs": "Option C's chair bay open: eight folded chairs, two across and two deep, four on the floor and four on the shelf",
-         "3d_c_plan": "Bird\u2019s eye, option C open for eight",
-         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (option C packed away)"}
+         "3d_c_folded": "The dining cabinet packed away: one oak cabinet under your shelf, the table standing up in its bay over the drawer, the linen flap over it, the six chairs behind the doors",
+         "3d_c_six": "The dining cabinet open for six: the table 180 long, three a side, bar 2 over it",
+         "3d_window_c_six": "From the window, the dining cabinet open for six, the coffee table where it is",
+         "3d_c_chairs": "The chair bay open: four folded chairs on the floor, two on the shelf, the seat pads in front",
+         "3d_c_plan": "Bird\u2019s eye, the dining cabinet open for six",
+         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
 IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
 IDEA_OPTS = {"cushions": {"decor": {"cushions": "rust"}}}   # v20: the cushions are a Decor choice, not an idea toggle
@@ -642,28 +643,30 @@ def chairs_card():
 
 
 def options_card():
-    """v14: the table's two places side by side, with a way into the 3D room for each (v26: and option C, the dining cabinet)."""
+    """v14: the table's places side by side, with a way into the 3D room for each (v27: the dining cabinet first, the plan)."""
     g = G
     south, north = g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0], g.TABLE_B_Z[1] - g.WINDOW_Z
     def btn(opts, lab):
         return f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
     a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "bright"}, "See A in 3D")
     b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "bright"}, "See B in 3D")
-    c = btn({"site": "C", "dining": "eight", "view": "dining", "scene": "bright"}, "See C in 3D")   # v26
+    c = btn({"site": "C", "dining": "six", "view": "dining", "scene": "bright"}, "See it open in 3D")
+    c2 = btn({"site": "C", "dining": "folded", "chairs": "open", "view": "chairs", "scene": "bright"}, "The chairs inside")
     return f"""<div class="opts">
+  <article class="opt"><img data-art="3d_c_six" alt="{html.escape(CAP3D['3d_c_six'])}" loading="lazy">
+    <div class="ob"><span class="label">The plan · six in comfort</span><h3>The dining cabinet</h3>
+    <ul><li>One oak cabinet under the shelf: the table stands up in one bay, all {g.OPTC['chairs']} chairs fold into the other.</li>
+    <li>Opens to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}: three a side, the coffee table stays put.</li>
+    <li>A drawer for the mats under the table, a linen flap over it.</li>
+    <li class="minus">Push the ottoman to the sofa while it's out.</li></ul>{c} {c2}</div></article>
   <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
-    <div class="ob"><span class="label">Option B · up to seven · the default (v16)</span><h3>Under your shelf, by the stairs</h3>
+    <div class="ob"><span class="label">B · the flip-top · the alternative</span><h3>A flip-top under your shelf</h3>
     <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast for the “now playing” ledge.</li>
     <li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
   <article class="opt"><img data-art="3d_dining_A_four" alt="Option A in 3D: the table down for four on the chimney breast" loading="lazy">
-    <div class="ob"><span class="label">Option A · up to six · the alternative</span><h3>On the chimney breast</h3>
+    <div class="ob"><span class="label">A · the flip-top · the alternative</span><h3>A flip-top on the chimney breast</h3>
     <ul><li>The flip-top opens towards the window: four with room, six elbows-in.</li><li>Solid breast: plugs and screws, no surprises.</li>
     <li class="minus">No seat at its end (the sofa); one chair in the door's swing.</li></ul>{a}</div></article>
-  <article class="opt"><img data-art="3d_c_eight" alt="{html.escape(CAP3D['3d_c_eight'])}" loading="lazy">
-    <div class="ob"><span class="label">Option C · up to eight · a second option</span><h3>The dining cabinet</h3>
-    <ul><li>One oak cabinet under the shelf: the table stands up in one bay, all {g.OPTC['chairs']} chairs fold into the other.</li>
-    <li>Opens to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}: eight at a squeeze, six in comfort.</li>
-    <li class="minus">Costs more than the flip-top and the chair cupboard; the ottoman moves aside while it's out.</li></ul>{c}</div></article>
 </div>"""
 
 
@@ -809,10 +812,10 @@ def chapter_facts(rows, fc, nfit):
         "side": chips("One oak run sweeping out to the PC", f"PC shelf at <b>{g.LEDGE_TOP:g}</b>", "Leads through a brush grommet into conduit in the wall", "A warm LED strip underneath", "Step 10"),
         "joinery": chips("The cutting list (copy it for the timber merchant)", "Housings, mortises and pegs: the joints drawing", "Worktop: step 7", "Uprights: step 9",
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
-        "dining": chips(f"Flip-top gate-leg, <b>{g.TABLE[0]:g} × {g.TABLE[1]:g}</b> opening to {g.TABLE[0]:g} × {2 * g.TABLE[1]:g}", "Four with room, six elbows-in, seven by the stairs",
-                        "Häfele brackets, 500 kg a pair", f"Folds under the shelf, its top at {g.FOLDED_TOP:g}",
-                        f"Chair cupboard: four ({g.CHAIR_STORE['cupboard']['d']:g} deep) or six ({g.CHAIR_STORE['cupboard']['d6']:g} deep)", "Dining wall " + _ph(rows, "6 Dining wall"),
-                        f"<b>Option C</b>: one oak cabinet, a {g.OPTC['len']:g} × {g.OPTC['top'][0]:g} table and {g.OPTC['chairs']} chairs inside; up to eight"),   # v26
+        "dining": chips(f"The dining cabinet: <b>{g.OPTC['z'][0] - g.OPTC['z'][1]:g} × {g.OPTC['d']:g} × {g.OPTC['h']:g}</b> under your shelf",
+                        f"Table <b>{g.OPTC['len']:g} × {g.OPTC['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> chairs inside it, the seat pads too",
+                        "A drawer under the table, a linen flap over it", "Step 11 builds it, in sixteen stages", "Dining wall " + _ph(rows, "6 Dining wall"),
+                        "The flip-top (by the stairs or on the breast) is the alternative"),   # v27
         "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])
                  + chips("Smart E14 bulbs in both bars, no dimmers", "Paint " + _ph(rows, "3 Paint"), "Lighting " + _ph(rows, "7 Lighting")),
         "network": chips("Virgin Hub 5 in modem mode", "Three Deco X1500s", "Two TL-SG108 switches", "Cat6 runs on step 3",
@@ -956,7 +959,7 @@ def _page(site=False):
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
       <div class="sec-h"><h2>Chapters</h2></div>
       <div class="tilegrid">{tiles}</div>
-      <div class="sec-h"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
+      <div class="sec-h"><h2>The table: the dining cabinet</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
       {options_card()}
       <details class="fold"><summary>The plan on a page</summary><div class="doc">{s1}</div></details>
       <!--keep--><details class="fold changes"><summary>What changed in v{VERSION}</summary><div class="doc"><p>{decision}</p></div></details><!--/keep-->
@@ -967,8 +970,7 @@ def _page(site=False):
         chapter("records", more(f'<div class="doc">{sec["4"]}</div>')),
         chapter("side", more(f'<div class="doc">{sec["6"]}</div>')),
         chapter("joinery", '<p><a class="btn" href="#build" data-go="build" data-find="Cutting list">Open the cutting list (copy it as text)</a></p>' + more(f'<div class="doc">{sec["7"]}</div>')),
-        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>'
-                          f'<div class="block"><h2 class="ptitle">Keeping the chairs: a cupboard built in beside the table</h2><p class="caption">The table doesn\'t change. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Fit proof.</p>{chairs_card()}</div>'
+        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">The table: the dining cabinet, or the flip-top</h2>{options_card()}</div>'
                           + more(f'<div class="doc">{sec["5"]}</div>') + '</div>'),
         chapter("paint", f'<div class="panel" id="paint">{preset_cards()}' + more(f'<div class="doc">{sec["8"]}</div>') + '</div>'),
         chapter("network", more(f'<div class="panel" id="network"><nav class="toc" aria-label="In this chapter"></nav><div class="doc">{sec["9"]}</div></div>')),
