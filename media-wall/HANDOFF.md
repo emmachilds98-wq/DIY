@@ -1,7 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v25.md`.** v24 is built and merged (round 18, below). Still waiting on the client: which ways
+- **v25 is built (round 19, below): the page is "Demma Home Improvements", option 1c, from `media-wall/UPGRADE_PLAN_v25_UI.md`.** Still to
+  do from `UPGRADE_PLAN_v25.md` (the earlier plan): the guided tour and "copy link to this view", choices for each suggestion, re-render only
+  the stills that changed. v24 is in round 18. Still waiting on the client: which ways
   to keep the chairs (the cupboard for four or six; yes or no to four behind the folded top and to the fold-down seat), the ottoman's
   height, the window corner's floor gap, and the optimisation plan's three questions. The client-facing optimisation plan is
   `media-wall/plans/optimisation_v21.html` (https://claude.ai/artifact/P7D81ZQuuVKBvh8hX2k5w6).
@@ -26,6 +28,48 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 19: v25 (Demma Home Improvements, option 1c "Room as map"; three lighting presets)
+- Brief: `media-wall/UPGRADE_PLAN_v25_UI.md` (the client's design round; the reference designs `Demma Home.dc.html` 1c, `Room Tools.dc.html`,
+  `Plan Sheet.dc.html` live in their Claude design project, not in this repo: this build follows the plan's written spec).
+- Backups: `*_v24_backup.py` (build_viewer, room3d_page, scenes, diagrams, build_doc, shot3d, questions) and `room3d_v24_backup.js`.
+- **Lighting (scenes.py):** `SCENES` = bright, cosy, film (same tuple shape); `COLOURS`, `TABLE_BOOST` (bar 2 ≥ 80, bar 1 ≤ 15, bias off when the
+  table's open), `TOD`, `RULES`, `OLD_TO_NEW`, `boosted()`; the old five are `SCENES_V24` (appendix only, `build_doc.scenes_v24_html`).
+  room3d.js: `S.tod` (evening/day) replaces the `day` scene; `lvl()` applies the boost whenever `S.dining` isn't folded; saved old keys map
+  across (`oldScene`, also for `R3D.set` and data-r3d links); `data-tod`; tiles show "· adjusted"; `#r3d-litst`, `#r3d-boost`.
+  diagrams.light_scene(key, table=False) draws the presets (and the old five); the plan's section 8 has three preset pages, the table
+  drawing and a "Two rules" box; step 12 and its instructions set the three presets. shot3d: scene names mapped (daytime stills are
+  bright + tod day + master 0); stems renamed `3d_wall_film`, `3d_sofa_cosy`, `3d_window_bright`.
+- **The page (build_viewer):** `_page` rewritten. The 3D room (`room3d_page.section(gallery)`) is `<main id="room">`, full screen; the
+  brand pill; a rail (laptop, ≥ 900 px) or bottom bar (phone) with `data-nav`; five sheets `#sh-plan|build|buy|ideas|questions` (dialogs,
+  `inert` when closed). Every v24 panel id is inside them (overview is the Plan home; views, wall, dining, paint, network, checks sit in
+  Plan chapters; `CHAPTERS`, `chapter_facts()` build the key facts from geometry/fit/the buy list). Old tab ids live on the rail buttons
+  and chapter tiles; the dashboard bar ids on the progress rings. Script: `src/page.js` (v24's script, un-f-stringed, with rings, quick
+  taps, the toast and confetti) and `src/page_router.js` (sheets, hashes, Back, Esc, focus trap, swipe, `data-go/step/phase/find`, the
+  Ideas sheet's suggestion chips proxying the room's buttons). Styles: v24's STYLE without dark mode and page looks (`STYLE_V25`) plus
+  `src/page.css`. Fonts: Fredoka, Figtree, Material Symbols Rounded (Google Fonts). Build parts use page pastels (`PAGE_PART`).
+- **3D (room3d_page/room3d.js):** the stage is fixed full screen; the walk pad, caption strip and on-canvas buttons are gone (the caption
+  is `sr-only`; Reset view and Full screen are at the Tools panel's foot). `DRAWERS` are the Tools tabs (`DRAWER_JS` → `window.DemmaTools`;
+  `[data-tools-toggle]` opens it; `mw22-drawer` remembers the tab). `hotspots()` gives six stickers (anchor, wall normal, cutaway side,
+  view, chapter, facts); room3d.js projects them after each render, hides them off-screen, fades them behind a wall (dot product with
+  the wall's normal unless the cutaway opened it), and opens the popover (`demma-open` event → the Plan chapter; Fly here → setView).
+  Look: round swatches, Deep green via `data-paintcustom`. Edit room: the bar/add list/selection as cream pills; the Edit bubble is
+  `#r3d-editbtn`.
+- **Questions:** `questions.OPTS` (rows of choices per id; the PDF ignores it). The page writes the composed text through each card's
+  hidden textarea and Save, so `answers/<id>` and `mw12-drafts` are as before; "Add a photo" opens that card's upload. Old answers light
+  the matching chips.
+- Not done this round (the plan's step 9 text pass): Network's Part P note and the plant stand as short lists; the reference designs'
+  exact suggested question wording (`QS` in Plan Sheet.dc.html) wasn't available, so `questions.OPTS` is our own: check it with Emma.
+- **Kept:** localStorage keys (`mw13-view`, `mw22-*`, `mw23-*` untouched, `mw18-3d`, `mw12-*`, `mw13-steps`), tracker ids (one row's words
+  changed: `TRACK_KEEP_ID` keeps its old id), question ids, step numbers. Ids removed on purpose: `big-text`, `data-skin`, `data-theme`,
+  `data-walk` (the page looks, dark mode and the walk pad are gone).
+- **Outputs:** version 25 everywhere; v24 outputs moved to `out/v24/`. 29 stills (`render_v25_3d_*`, `Media wall v25 - 3D - …`), plan
+  82 pages, guide 48; fit 70 fit, 29 tight, 8 check, 0 don't fit; total £3,223–6,463.
+- **QA (Playwright, 390 × 844 and 1280 × 800):** every Tools tab and its controls, Edit room, all five sheets, all eleven chapters: no
+  horizontal overflow, no console errors. Old saved ticks and steps still show; Up next's Done ticks the step and cheers; quick taps
+  compose and save an answer (the badge drops, the toast shows); stickers open their chapter; deep links `#step-5`, `#q-chairs`,
+  `#views`, `#ph-3`, `#checks` work. Fixes found in QA: the ring ids sat inside an `<svg>` (renamed by `uniq_svgs`) so they're on the
+  `<a class="ring">`; the phone bar's Tools button was added after `DRAWER_JS` bound its buttons, so the toggle is now delegated.
 
 ## Update 20 Oct 2026, round 18: v24 (less to read, a cleaner page)
 - Client: "can you now take away uneeded explainer text across the doc and give it a better overall design and ui".

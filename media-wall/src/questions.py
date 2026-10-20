@@ -111,3 +111,28 @@ assert set(SHORT) == {q[0] for q in QUESTIONS}
 
 def summary_line():
     return " · ".join(SHORT[q[0]] for q in QUESTIONS)
+
+
+# v25: quick taps on the page (the Ask sheet). Each question's rows: (label or None, [choices]). "Add a photo" opens the photo
+# upload. The answer is saved as plain text in the same answers/<id> record, e.g. "Cupboard: For six, 31 deep · Behind the top: No".
+# The PDF ignores these. Check the wording with Emma when it's shown.
+OPTS = {
+    "westwall": [(None, ["Solid: it sounds solid", "Hollow: plasterboard", "Not sure yet", "Add a photo"])],
+    "electrics": [(None, ["All ours", "An electrician for the fittings", "Not sure yet"])],
+    "sofa": [("Return along the side wall", ["About 150", "About 160", f"About {_n(G.SOFA_D)} (as drawn)", "Longer"])],
+    "westend": [("Shelf top", ["198 or lower", "Higher than 198", "Not measured yet"]), (None, ["Add a photo"])],
+    "turntable": [("PHONO/LINE switch", ["Yes", "No", "Not sure"]), (None, ["Add a photo"])],
+    "fanstand": [("Its width", ["Under 25", "25 to 30", "Over 30"]), (None, ["Add a photo"])],
+    "chairs": [("Cupboard", [f"For four, {_n(G.CHAIR_STORE['cupboard']['d'])} deep", f"For six, {_n(G.CHAIR_STORE['cupboard']['d6'])} deep"]),
+               ("Behind the top", ["Yes", "No"]), ("Fold-down seat", ["Yes", "No"])],
+    "pouf": [("Height", ["About 40", f"About {_n(G.SOFA_POUF['h'])} (as drawn)", "About 48", "Taller"])],
+    "records": [(None, ["Under 200", "About 250", f"About {LPS}", "More"])],
+    "games": [(None, ["Under 50", "50 to 90", "90 to 150", "More"])],
+    "ports": [("Projector (master)", ["Yes", "No"]), ("Music room (bedroom 2)", ["Yes", "No"])],
+    "surge": [("Surge-protected", ["Yes", "No", "Not sure"]), (None, ["Add a photo"])],
+    "models": [(None, ["Add a photo", "I'll send them later"])],
+    "point2": [("Out from the stairs wall", ["About 50", "About 55 (as drawn)", "About 60", "Further"])],
+    "cornergap": [("At the floor", ["107 or more", "100 to 107", "Under 100"]), (None, ["Add a photo"])],
+    "retrotink": [(None, ["Not here yet", "Add a photo"])],
+}
+assert set(OPTS) == {q[0] for q in QUESTIONS}

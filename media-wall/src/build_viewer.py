@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "24"
+VERSION = "25"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -31,10 +31,15 @@ def _plain(s):
     return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip()
 
 
+# v25: rows whose words changed keep the id their old words made, so ticks and amounts saved against them still show
+TRACK_KEEP_ID = {"Set up the smart bulbs in their app": "tdd8f66e8a569"}
+
+
 def track_rows():
     rows = []
     for st, item, ph, q, lo, hi in TRACK:
         key = hashlib.sha1((ph + "|" + re.sub(r"\(changed[^)]*\)|\(new\)|\(moved[^)]*\)", "", _plain(item))).encode()).hexdigest()[:12]
+        key = next((v[1:] for k, v in TRACK_KEEP_ID.items() if _plain(item).startswith(k)), key)
         est = money(lo, hi) if lo is not None else ""
         rows.append({"id": "t" + key, "phase": ph, "item": item, "qty": q, "est": est, "lo": lo or 0, "hi": hi or 0, "done": st == "Done",
                      "kind": "job" if st == "To do" or st == "Done" and lo is None else "buy"})
@@ -497,15 +502,34 @@ footer.foot a { color: var(--oak); }
 </style>"""
 
 
+def _drop_blocks(css, head):
+    """Take every block that starts with head (and its nested braces) out of css."""
+    out, i = [], 0
+    while True:
+        j = css.find(head, i)
+        if j < 0:
+            out.append(css[i:]); return "".join(out)
+        out.append(css[i:j]); k, depth = css.index("{", j), 0
+        for m in range(k, len(css)):
+            depth += css[m] == "{"; depth -= css[m] == "}"
+            if depth == 0:
+                break
+        i = m + 1
+
+
+# v25: light only (no dark mode, no page looks); the v25 tokens and components go on the end
+STYLE_V25 = re.sub(r':root\[data-(?:theme="dark"|skin="[a-z]+")\][^{]*\{[^}]*\}', "", _drop_blocks(STYLE, "@media (prefers-color-scheme: dark)")).replace("</style>", (HERE / "page.css").read_text() + "</style>")
+
+
 TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("ideas", "Ideas"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
 CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above the window side with the window wall cut away, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture",
-         "3d_window_B_folded": "From the window, everyday evening: the table folded under your shelf by the stairs, the breast free",
+         "3d_window_B_folded": "From the window, the Bright preset: the table folded under your shelf by the stairs, the breast free",
          "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
-         "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the strips low",
-         "3d_wall_drawers": "Every drawer out, the records scene: the LP crates under the turntable, a slim game drawer beside them",
-         "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the LP crates",
+         "3d_wall_film": "The media wall with the Film preset: bias light on, bar 1 off, the strips low",
+         "3d_wall_drawers": "Every drawer out, the Cosy preset: the LP crates under the turntable, a slim game drawer beside them",
+         "3d_sofa_cosy": "From the sofa, the Cosy preset: light on the deck, the ledge and the LP crates",
          "3d_chairs": "The chair cupboard (v20) beside the folded table, doors open: four folded chairs inside, two on its floor and two on its shelf (plant stand and lamp hidden for the view)",
          "3d_chairs_shut": "The stairs wall packed away (v20): the table folded under your shelf and the oak chair cupboard shut beside it, flush with the pipe boxing",
          "3d_B_folded": "The stairs wall: your shelf with the black OBEGRÄNSAD panel, the laser (off) and the plant hanging at the end by the pipe boxing, the red lamp, the table folded under it",
@@ -516,8 +540,8 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
          "3d_plan_B": "Bird\u2019s eye, option B set for four",
          "3d_doll_A": "Dolls\u2019 house view, option A",
-         "3d_window_general": "General light (v17): every spot head straight down, evenly spread, the strips and the lamp at a middle setting",
-         "3d_pc_lit": "TV night with the PC lit: its fans and the RGB strip glowing behind the glass side",
+         "3d_window_bright": "The Bright preset: every spot head straight down, evenly spread, the strips and the lamp filling in",
+         "3d_pc_lit": "The Film preset with the PC lit: its fans and the RGB strip glowing behind the glass side",
          "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended): two towers of five tiers and a taller plant in the open middle",
          "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top, LPs between the wires below, under the \u201cnow playing\u201d ledge",
          "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up), the vinyl stand back in the window corner",
@@ -525,7 +549,7 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
          "3d_ideas_breast": "Idea, not in the plan: the tall glass display case (v20: 85 tall, three glass shelves) on the chimney breast, oak, with collectibles, above the \u201cnow playing\u201d ledge",
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
-         "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the records scene",
+         "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
          "3d_suggest": "Suggested furniture and decor, all twelve on (v21, v23): a floor plant, side table and knit throw at the sofa's open end, a pouffe, a print over the sofa, a clock over the door, a coffee-table tray, fairy lights and a hanging plant at the window, a trailing plant on the top shelf, a mushroom lamp on the PC shelf, a seagrass basket",
          "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug"}
@@ -589,8 +613,8 @@ def chairs_card():
     g = G
     CB = g.CHAIR_STORE["cupboard"]
     w = CB["z"][0] - CB["z"][1]
-    sh = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'cupboard', 'view': 'dining', 'scene': 'everyday'})
-    op = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'open', 'view': 'chairs', 'scene': 'everyday'})
+    sh = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'cupboard', 'view': 'dining', 'scene': 'bright'})
+    op = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'open', 'view': 'chairs', 'scene': 'bright'})
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_chairs_shut" alt="{html.escape(CAP3D['3d_chairs_shut'])}" loading="lazy">
     <div class="ob"><span class="label">1 · the plan (v20) · about £120–240</span><h3>A chair cupboard, built in beside the table</h3>
@@ -618,8 +642,8 @@ def options_card():
     south, north = g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0], g.TABLE_B_Z[1] - g.WINDOW_Z
     def btn(opts, lab):
         return f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
-    a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "dinner"}, "See A in 3D")
-    b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "dinner"}, "See B in 3D")
+    a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "bright"}, "See A in 3D")
+    b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "bright"}, "See B in 3D")
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
     <div class="ob"><span class="label">Option B · up to seven · the default (v16)</span><h3>Under your shelf, by the stairs</h3>
@@ -642,8 +666,12 @@ SEC_TAB = {"1": "overview", "2": "overview", "3": "wall", "4": "wall", "5": "din
            "9": "network", "10": "build", "11": "buy", "12": "checks"}
 
 
+LINKNAME = {"overview": "plan", "room": "3D room", "views": "Drawn views chapter", "ideas": "Ideas", "wall": "Media wall chapter", "dining": "Dining wall chapter",
+            "paint": "Paint & light chapter", "network": "Network & power chapter", "build": "Build steps", "buy": "Buy list", "questions": "Ask list", "checks": "Fit proof"}
+
+
 def _tablink(tab):
-    return f'<a href="#{tab}" data-go="{tab}">{TABNAME[tab]}</a> tab'
+    return f'<a href="#{tab}" data-go="{tab}">{LINKNAME[tab]}</a>'
 
 
 def scenes_block():
@@ -729,8 +757,87 @@ def page(site=False):
     return tidy.shorten_captions(tidy.strip_versions(_page(site)))
 
 
+def _ph(rows, *names):
+    """Low and high for buy-list phases, by name."""
+    lo = sum(r["lo"] for r in rows if r["phase"] in names); hi = sum(r["hi"] for r in rows if r["phase"] in names)
+    return f"£{money(lo, hi)}"
+
+
+# v25: the Plan sheet's chapters: (key, title, icon, hue, one line for the tile)
+CHAPTERS = [("c-room", "The room", "home", 50, "Sizes, the door, the stairs, the window"),
+            ("wall", "The media wall", "tv", 300, "Heights, the TV, the bays"),
+            ("records", "Records & turntable", "album", 345, "LPs, crates, the vinyl stand"),
+            ("side", "The side wall", "desktop_windows", 235, "One oak run out to the PC"),
+            ("joinery", "Oak joinery", "carpenter", 70, "Joints, the cutting list"),
+            ("dining", "The dining wall", "table_restaurant", 50, "The flip-top and the chairs"),
+            ("paint", "Paint & light", "palette", 165, "Card Room Green, three presets"),
+            ("network", "Network & power", "router", 25, "Decos, switches, the electrics"),
+            ("views", "Drawn views", "draw", 125, "Every view in four greens"),
+            ("fit", "Fit proof", "straighten", 95, "Every item against its size"),
+            ("downloads", "Downloads", "download", 165, "The PDFs and every HD picture")]
+PAGE_PART = {"Prep": 95, "Network": 235, "Power & cables": 25, "Paint": 165, "Media wall": 300, "Dining table": 70, "Lighting": 125, "AV": 345}
+
+
+def chapter_facts(rows, fc, nfit):
+    """v25: four to six key facts for each chapter, from geometry, fit, the buy list and ideas, so they follow the next round."""
+    import scenes as SC
+    import render as RR
+    g = G
+    chips = lambda *xs: '<ul class="facts">' + "".join(f"<li>{x}</li>" for x in xs) + "</ul>"
+    heights = [(g.CEIL, "Ceiling"), (g.HIGH_TOP, "High shelf"), (g.LEDGE_TOP, "Record ledges, the PC shelf"), (g.FOLDED_TOP, "The table, folded"),
+               (g.RZ_SHELF_TOP, "Series X shelf"), (116.5, "TV centre"), (g.NOW_LEDGE["top"], "“Now playing” ledge"), (g.WORKTOP, "Oak worktop"), (g.PLINTH, "Plinth")]
+    flist = '<ul class="flist">' + "".join(f"<li><b>{v:g}</b><span>{html.escape(t)}</span></li>" for v, t in sorted(heights, key=lambda x: -x[0])) + "</ul>"
+    paints = "".join(f'<li><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:{h};vertical-align:-2px;margin-right:6px"></span>{html.escape(n.replace("Farrow & Ball ", "").replace("Little Greene ", ""))}{" (chosen)" if k == "card_room" else ""}</li>'
+                     for k, (h, n) in RR.PAINTS.items())
+    return {
+        "c-room": chips(f"<b>{g.CEIL:g}</b> ceiling", f"<b>{g.ALC_W:g} × {g.ALC_D:g}</b> alcove", "Door hinged on the breast side, opens in",
+                        "A straight stair flight, rising towards the door", f"<b>{g.WINDOW_REVEAL + g.SILL['nose']:g}</b> window ledge ({g.WINDOW_REVEAL:g} reveal + {g.SILL['nose']:g} nose)", "Soft grey carpet"),
+        "wall": flist + chips('LG C6 55" on its stand', "Artisan oak in Card Room Green", "Steps 6–10", _ph(rows, "4 Base unit", "5 Oak joinery")),
+        "records": chips(f"<b>~{g.ALL_LPS}</b> LPs", f"<b>{g.WALL_LPS}</b> face-out in the wall", f"<b>{g.STAND_LPS}</b> in the vinyl stand (70 × 32 × 78)",
+                         "Two snug LP crates (33 cm trough) in bay 3", f"Game drawers: about <b>{48 + g.SLIM_GAMES}</b> games", f"Series X shelf at {g.RZ_SHELF_TOP:g}; the lid opens to {g.LID_CLEAR_TO:g}"),
+        "side": chips("One oak run sweeping out to the PC", f"PC shelf at <b>{g.LEDGE_TOP:g}</b>", "Leads through a brush grommet into conduit in the wall", "A warm LED strip underneath", "Step 10"),
+        "joinery": chips("The cutting list (copy it for the timber merchant)", "Housings, mortises and pegs: the joints drawing", "Worktop: step 7", "Uprights: step 9",
+                         "Oak joinery " + _ph(rows, "5 Oak joinery")),
+        "dining": chips(f"Flip-top gate-leg, <b>{g.TABLE[0]:g} × {g.TABLE[1]:g}</b> opening to {g.TABLE[0]:g} × {2 * g.TABLE[1]:g}", "Four with room, six elbows-in, seven by the stairs",
+                        "Häfele brackets, 500 kg a pair", f"Folds under the shelf, its top at {g.FOLDED_TOP:g}",
+                        f"Chair cupboard: four ({g.CHAIR_STORE['cupboard']['d']:g} deep) or six ({g.CHAIR_STORE['cupboard']['d6']:g} deep)", "Dining wall " + _ph(rows, "6 Dining wall")),
+        "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])
+                 + chips("Smart E14 bulbs in both bars, no dimmers", "Paint " + _ph(rows, "3 Paint"), "Lighting " + _ph(rows, "7 Lighting")),
+        "network": chips("Virgin Hub 5 in modem mode", "Three Deco X1500s", "Two TL-SG108 switches", "Cat6 runs on step 3",
+                         "The electrics are your own job: like for like, not notifiable under Part P, with the stop-and-call list", "The 10-gang feeds the PC"),
+        "views": chips("5 views × 4 greens", "A numbered key", "Measurements over any view", "Full size, to pan and zoom"),
+        "fit": chips(f"<b>{nfit}</b> checks", f"<b>{fc[fit.PASS]}</b> fit", f"<b>{fc[fit.TIGHT]}</b> tight", f"<b>{fc[fit.CHECK]}</b> to check on site", f"<b>{fc[fit.NO]}</b> don't fit"),
+        "downloads": chips(f"The plan, v{VERSION} (PDF)", f"The build guide, v{VERSION} (PDF)", "Every HD picture, 3D and drawn", "On GitHub Pages and the shared plan page"),
+    }
+
+
+def preset_cards():
+    """v25: the three lighting presets as cards (levels, colour, notes) and the two rules, for the Paint & light chapter."""
+    import scenes as SC
+    icons = {"bright": "light_mode", "cosy": "local_fire_department", "film": "movie"}
+    cards = "".join(
+        f'<article class="opt noimg" style="background:oklch(0.94 0.07 95) !important"><div class="ob"><span class="label"><span class="ms" aria-hidden="true">{icons[k]}</span> Preset</span><h3>{html.escape(n)}</h3>'
+        f'<p>{html.escape(d)}</p><p class="caption">{html.escape(SC.COLOURS[k])}</p>'
+        f'<ul class="facts" style="--h:95">' + "".join(f"<li>{html.escape(lab.split(',')[0].replace(' and the side shelf', ''))}: {SC.level_word(lv[lk])}</li>" for lk, lab, _c in SC.LAYERS) + "</ul>"
+        f'<ul>' + "".join(f"<li>{html.escape(x)}</li>" for x in notes) + '</ul>'
+        f"<button type='button' class='btn' data-r3d='{json.dumps({'scene': k, 'view': 'room'})}'>Try it in the room</button></div></article>"
+        for k, n, d, lv, notes in SC.SCENES)
+    rules = '<div class="notice"><b>Two rules</b><ul>' + "".join(f"<li>{html.escape(r)}</li>" for r in SC.RULES) + "</ul></div>"
+    return f'<div class="opts">{cards}</div>{rules}'
+
+
+def ring(key, hue, label, go):
+    k = "steps" if key == "build" else key
+    return (f'<a class="ring" id="d-{k}-bar" href="#{go}" data-go="{go}" style="--h:{hue}"><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="tr" cx="40" cy="40" r="34"/>'
+            f'<circle class="vl" cx="40" cy="40" r="34"/></svg><b id="d-{k}">0</b><span>{label}</span></a>')
+
+
 def _page(site=False):
+    """v25 (Demma Home Improvements, option 1c "Room as map"): the 3D room is the home screen; a rail (a bottom bar on phones) opens
+    the Plan, Build, Buy, Ideas and Ask sheets over it; the Tools button holds every 3D control. Every v24 panel id, data-* hook and
+    saved key is kept: the panels live inside the sheets now."""
     import diagrams as D
+    import questions as QM
     prefix = "media-wall/src/" if site else ""
     imgs = {k: f"{prefix}art/{k}.webp" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
     imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.webp" for v in ("join", "four", "six", "drawers", "side")})
@@ -744,16 +851,26 @@ def _page(site=False):
     pre = sec["pre"]
     decision = re.search(r'<div class="decision">(.*?)</div>', pre, re.S).group(1)
     s1 = re.sub(r"</div>\s*$", "", sec["1"].strip())
+    facts = chapter_facts(rows, fc, nfit)
     qs = [{"id": i, "q": q, "why": w, "how": h, "photo": ph} for i, q, w, h, ph in QUESTIONS]
+    QH = [235, 300, 50, 165, 345, 95, 70, 125, 25]
+    def qrows(i):
+        out = []
+        for lab, choices in QM.OPTS.get(i, []):
+            bs = "".join((f'<button type="button" class="qc" data-photo="1"><span class="ms" aria-hidden="true">photo_camera</span>{html.escape(c)}</button>' if c.startswith("Add a photo")
+                          else f'<button type="button" class="qc" data-v="{html.escape(c)}" aria-pressed="false">{html.escape(c)}</button>') for c in choices)
+            out.append(f'<div class="qrow" data-label="{html.escape(lab or "")}">' + (f'<span class="label">{html.escape(lab)}</span>' if lab else "")
+                       + f'<div class="qchips" role="group" aria-label="{html.escape(lab or "Your answer")}">{bs}</div></div>')
+        return "".join(out)
     q_items = "\n".join(
-        f'<li class="q" id="q-{i}" data-q="{i}"><h3><span class="n">{n:02d}</span><span>{html.escape(q)}</span></h3>'
-        f'<p>{html.escape(w)}</p><p><b>How:</b> {html.escape(h)}</p>'
-        # v23, client: "take off the questions input area for me": the answer box, Save and photo upload are hidden (the page's
-        # script still finds them, so saved answers and the deck's db stay as they were); answers come in a message instead
+        f'<li class="q" id="q-{i}" data-q="{i}" style="--h:{QH[n % len(QH)]}"><h3><span class="n">{n:02d}</span><span>{html.escape(q)}</span></h3>'
+        f'{qrows(i)}<p class="qans" aria-live="polite"></p>'
+        f'<details class="qwhy"><summary>Why we ask</summary><p>{html.escape(w)}</p><p><b>How:</b> {html.escape(h)}</p></details>'
+        # the answer box and Save stay (hidden): the quick taps write through them, so answers/<id> and the drafts on this device are as before
         f'<div class="qin" hidden><label class="label" for="a-{i}">Your answer</label><textarea id="a-{i}" rows="2" placeholder="Type here"></textarea>'
-        f'<div class="row"><button class="btn primary save" type="button" data-q="{i}">Save</button>'
-        f'<label class="upl" hidden>Add a photo<input type="file" accept="image/*" multiple data-q="{i}" id="f-{i}"></label>'
-        f'<span class="st" aria-live="polite"></span></div><div class="photos"></div></div></li>'
+        f'<button class="btn primary save" type="button" data-q="{i}">Save</button></div>'
+        f'<div class="row"><label class="upl btn" hidden>Add a photo<input type="file" accept="image/*" multiple data-q="{i}" id="f-{i}"></label>'
+        f'<span class="st" aria-live="polite"></span></div><div class="photos"></div></li>'
         for n, (i, q, w, h, ph) in enumerate(QUESTIONS, 1))
     ph_html = []
     for p in phases:
@@ -777,86 +894,73 @@ def _page(site=False):
             f'<div><p class="sparts">{part_chip(s["part"])}</p><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
             f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label>'
             f'<button type="button" class="sopen" aria-expanded="true" aria-controls="sb-{s["n"]}">Close</button></div>'
-            f'<div class="sbody" id="sb-{s["n"]}">'   # v22: each step folds to its head; one open at a time (STEP_JS)
+            f'<div class="sbody" id="sb-{s["n"]}">'
             + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
             + need_html(s)
             + ("<details class=\"sdraw\" open><summary>" + ("Drawing" if len(s.get("draw", [])) == 1 else "Drawings") + " for this step</summary>"
                + "".join(f'<figure class="dia">{getattr(D, DIAGRAMS[d])()}</figure>' for d in s["draw"]) + "</details>" if s.get("draw") else "")
-            + f'<div class="sfull">{full_html(s)}</div>'
+            + f'<details class="readmore sfullwrap" style="--h:50"><summary>Read the full step <span class="ms" aria-hidden="true">expand_more</span></summary><div class="sfull">{full_html(s)}</div></details>'
             f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
             f'<p class="ssee">Also see: {see}</p>'
-            f'<p class="snext"><button type="button" class="btn" data-next="{s["n"]}">Next step \u2192</button></p></div></li>')
-    run_list = "".join(
-        f'<li><a href="#build" data-go="build" data-step="{s["n"]}"><span class="rn">{s["n"]}</span>{html.escape(s["title"])}</a><span class="rp">{part_chip(s["part"])}</span>'
-        f'<span class="rm">{html.escape(s["time"])}{"".join(" · " + html.escape(p["label"]) + (" £" + money(p["lo"], p["hi"]) if p["hi"] else "") for p in phases if p["name"] in s["buy"])}</span></li>'
-        for s in steps())
+            f'<p class="snext"><button type="button" class="btn" data-next="{s["n"]}">Next step →</button></p></div></li>')
     data = {"img": imgs, "q": qs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
             "phases": [{k: p[k] for k in ("name", "idx", "lo", "hi")} for p in phases], "top": 200 * -(-max(p["hi"] for p in phases) // 200),
             "steps": len(steps()), "tabs": [t for t, _ in TABS]}
     used = [k for k in PARTS if any(k in st["part"] for st in steps())]
     part_buttons = "".join(f'<button type="button" data-part="{html.escape(k)}" aria-pressed="false"><span class="dot" style="background:{PARTS[k]}"></span>{html.escape(k)}</button>' for k in used)
-    tabs = "".join((f'<span class="tg" aria-hidden="true">{TAB_GROUPS[t]}</span>' if t in TAB_GROUPS else "")
-                   + f'<button type="button" role="tab" id="tb-{t}" aria-controls="{t}" aria-selected="{"true" if t == "overview" else "false"}"{"" if t == "overview" else " tabindex=\"-1\""}>{lab}</button>' for t, lab in TABS)
+    segbar = "".join(f'<i data-s="{s["n"]}" style="--pc:{PARTS[s["part"][0]]}" title="{s["n"]}. {html.escape(s["title"])}"></i>' for s in steps())
     base = "media-wall/out/" if site else GITHUB_OUT
-    pdfs = (f'<p class="hlinks"><a class="btn" href="#room" data-go="room">Walk round it in 3D</a>'
-            f'<a class="btn" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a>'
-            f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>')
-    return uniq_svgs(f"""<title>Portsmouth Close Media Wall</title>
-{room3d_page.IMPORTMAP}
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-{STYLE}
-<script>(() => {{ try {{ const d = document.documentElement, k = localStorage.getItem("mw23-skin"); d.dataset.skin = k || "card";
-  if (localStorage.getItem("mw23-big") === "1") d.classList.add("bigtext"); }} catch (e) {{ document.documentElement.dataset.skin = "card"; }} }})();</script>
-<div class="wrap">
-  <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
-    <h1>Media Wall &amp; Home Network Plan</h1>
-    {('<p class="notice">Ticks and amounts here stay on this device. To share them, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
-    <p class="lede">The artisan oak media wall in Card Room Green, the fold-down dining table, the network and power, the build steps and the buy list.</p>
-    {pdfs}
-    <div class="skin" role="group" aria-label="Page look"><span>Page look</span>{SKIN_BTNS}<label for="big-text"><input type="checkbox" id="big-text"> Larger text</label></div>
-    {"" if site else '<p class="caption">Also on <a href="' + PAGES + '" target="_blank" rel="noopener">GitHub Pages</a>.</p>'}
-  </header>
-  <nav class="tabs" aria-label="Plan sections"><div class="tl" role="tablist">{tabs}</div></nav>
+    TILE_ID = {"views": "tb-views", "wall": "tb-wall", "dining": "tb-dining", "paint": "tb-paint", "network": "tb-network", "fit": "tb-checks"}
+    tiles = "".join(f'<button type="button" class="ctile"{(" id=" + chr(34) + TILE_ID[k] + chr(34)) if k in TILE_ID else ""} data-go="{k}" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i><span>{html.escape(t)}<br><small>{html.escape(sub)}</small></span></button>'
+                    for k, t, ic, h, sub in CHAPTERS)
+    def chapter(k, inner):
+        _k, t, ic, h, _s = next(c for c in CHAPTERS if c[0] == k)
+        return (f'<section class="chapter" id="ch-{k}" data-ch="{k}" style="--h:{h}" hidden><button type="button" class="chback" data-go="overview"><span class="ms" aria-hidden="true">arrow_back</span>All chapters</button>'
+                f'<div class="chhead"><i class="ms" aria-hidden="true">{ic}</i><h2>{html.escape(t)}</h2></div>{facts[k]}{inner}</section>')
+    more = lambda body, lab="Read the full chapter": f'<details class="readmore"><summary>{lab} <span class="ms" aria-hidden="true">expand_more</span></summary>{body}</details>'
+    nav = [("plan", "Plan", "map", 300), ("build", "Build", "construction", 50), ("buy", "Buy", "shopping_bag", 165), ("ideas", "Ideas", "lightbulb", 95), ("questions", "Ask", "forum", 235)]
+    badge = f'<span class="badge ask-badge">{len(QUESTIONS)}</span>'
+    rail = (f'<nav class="rail" aria-label="Sections"><button type="button" id="tb-room" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
+            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}{badge if k == "questions" else ""}</button>' for k, n, ic, h in nav) + '</nav>')
+    bbar = (f'<nav class="bbar" aria-label="Sections"><button type="button" class="toolsb" data-tools-toggle aria-expanded="false" aria-controls="r3d-panel"><i class="ms" aria-hidden="true">tune</i>Tools</button>'
+            + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}{badge if k == "questions" else ""}</button>' for k, n, ic, h in nav) + '</nav>')
+    def sheet(k, title, ic, h, body):
+        return (f'<div class="sheet" id="sh-{k}" role="dialog" aria-modal="true" aria-labelledby="sh-{k}-h" aria-hidden="true" style="--h:{h}">'
+                f'<div class="shd"><span class="grab" aria-hidden="true"></span><h2 id="sh-{k}-h"><i class="ms" aria-hidden="true">{ic}</i><span>{title}</span></h2>'
+                f'<button type="button" class="close" data-close aria-label="Close {title}"><span class="ms" aria-hidden="true">close</span></button></div>'
+                f'<div class="sbd">{body}</div></div>')
+    sugg_chips = ('<div class="seg" role="group" aria-label="Suggestions in the room">'
+                  + "".join(f'<button type="button" data-sproxy="{k}" aria-pressed="false">{html.escape(room3d_page.SUGG_SHORT[k])}</button>' for k, *_ in __import__("ideas").SUGGEST)
+                  + '<button type="button" class="chip" data-sproxyall="on">All on</button><button type="button" class="chip" data-sproxyall="off">All off</button></div>')
+    notice = (f'<p class="notice">Ticks and amounts on this page stay on this device. To share them, use <a href="{DECK_URL}" target="_blank" rel="noopener">the plan page on Claude</a>.</p>' if site
+              else f'<p class="caption">Also on <a href="{PAGES}" target="_blank" rel="noopener">GitHub Pages</a>.</p>')
 
-  <section class="panel" id="overview" role="tabpanel" aria-labelledby="tb-overview">
-    <div class="dash">
-      <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_room" alt="The whole room in 3D, from above the window side, cut away" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
-      <div class="dcard"><span class="label">Build</span><strong id="d-steps">0 of {len(steps())}</strong><span class="dbar"><i id="d-steps-bar"></i></span><a class="caption" id="d-next" href="#build" data-go="build">Start with step 1</a></div>
-      <div class="dcard"><span class="label">Buy list</span><strong id="d-buy">0 bought</strong><span class="dbar"><i id="d-buy-bar"></i></span><span class="caption" id="d-paid">\u00a30 paid so far, of about \u00a3{money(lo_tot, hi_tot)}</span></div>
-      <div class="dcard"><span class="label">Still to tell us</span><strong id="d-q">{len(QUESTIONS)} questions</strong><span class="dbar" hidden><i id="d-q-bar"></i></span><a class="caption" href="#questions" data-go="questions">See what we still need</a></div>
-    </div>
-    <div class="block"><div class="qhead"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
-      <p class="caption">Same table, same build. Since v16 it lives on the wall going up the stairs, under your 2 m shelf (B, the default); the chimney breast (A) is the alternative.</p>
-      {options_card()}</div>
-    <div class="doc">
-      <h2>The plan on a page</h2>
-      {s1}
-    </div>
-    <div class="block">
-      <div class="qhead"><h2>How the build runs</h2><a class="btn" href="#build" data-go="build">Open the build steps</a></div>
-      <p class="caption">Thirteen steps, about £{money(lo_tot, hi_tot)} in all; the electrics are your own job (steps 3 and 12).</p>
-      <ol class="runlist">{run_list}</ol>
-    </div>
-    <!--keep--><details class="changes"><summary>What changed in v{VERSION}</summary><div class="doc">
-      <p>{decision}</p>
-    </div></details><!--/keep-->
-    <div class="doc"><h2>The room</h2>{sec["2"]}</div>
-  </section>
-
-  <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
-    <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · pinch or scroll to zoom · arrows to walk</span></div>
-    <p class="caption">Built to the plan's measurements. The controls are under the picture; <b>Edit room</b> (top left) moves, recolours and adds things.</p>
-    {room3d_page.section()}
-    <h3 class="ptitle">HD pictures from the 3D room</h3>
-    <p class="caption">2560 \u00d7 1440; tap one to see it full size.</p>
-    {gallery3d()}
-  </section>
-
-  <section class="panel" id="views" role="tabpanel" aria-labelledby="tb-views" hidden>
-  <div class="viewer">
+    plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
+      <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the fold-down table, the network and power: about £{money(lo_tot, hi_tot)} in all.</p></div>
+      <div class="rings">{ring("build", 50, "build steps", "build")}{ring("buy", 165, "bought", "buy")}{ring("q", 235, "answered", "questions")}</div>
+      <p class="caption" id="d-paid">£0 paid so far</p>
+      <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
+        <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
+        <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
+      <div class="sec-h"><h2>Chapters</h2></div>
+      <div class="tilegrid">{tiles}</div>
+      <div class="sec-h"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
+      {options_card()}
+      <details class="fold"><summary>The plan on a page</summary><div class="doc">{s1}</div></details>
+      <!--keep--><details class="fold changes"><summary>What changed in v{VERSION}</summary><div class="doc"><p>{decision}</p></div></details><!--/keep-->
+    </div></div>"""
+    chapters = "".join([
+        chapter("c-room", more(f'<div class="doc">{sec["2"]}</div>')),
+        chapter("wall", more(f'<div class="panel" id="wall"><nav class="toc" aria-label="In this chapter"></nav><div class="doc">{sec["3"]}</div></div>')),
+        chapter("records", more(f'<div class="doc">{sec["4"]}</div>')),
+        chapter("side", more(f'<div class="doc">{sec["6"]}</div>')),
+        chapter("joinery", '<p><a class="btn" href="#build" data-go="build" data-find="Cutting list">Open the cutting list (copy it as text)</a></p>' + more(f'<div class="doc">{sec["7"]}</div>')),
+        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>'
+                          f'<div class="block"><h2 class="ptitle">Keeping the chairs: a cupboard built in beside the table</h2><p class="caption">The table doesn\'t change. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Fit proof.</p>{chairs_card()}</div>'
+                          + more(f'<div class="doc">{sec["5"]}</div>') + '</div>'),
+        chapter("paint", f'<div class="panel" id="paint">{preset_cards()}' + more(f'<div class="doc">{sec["8"]}</div>') + '</div>'),
+        chapter("network", more(f'<div class="panel" id="network"><nav class="toc" aria-label="In this chapter"></nav><div class="doc">{sec["9"]}</div></div>')),
+        chapter("views", f"""<div class="panel" id="views"><div class="viewer">
     <div class="frame shotwrap"><img id="shot" alt="Render of the media wall" width="3300" height="2100"><img id="dims" class="dims" alt="" width="3300" height="2100" hidden></div>
     <div class="controls">
       <div class="group"><span class="label" id="l-style">View</span>
@@ -880,19 +984,12 @@ def _page(site=False):
           <button id="k-dims" aria-pressed="false">Show measurements</button>
         </div></div>
       <div class="group"><span class="label" id="l-zoom">HD</span>
-        <div class="seg" role="group" aria-labelledby="l-zoom">
-          <button id="k-full" type="button">View full size</button>
-        </div></div>
+        <div class="seg" role="group" aria-labelledby="l-zoom"><button id="k-full" type="button">View full size</button></div></div>
     </div>
     <p class="caption" id="cap"></p>
   </div>
-  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="The render at full size">
-    <div class="lbbar"><span class="caption" id="lb-cap">Full size: drag or scroll to look round. Pinch to zoom on a phone.</span><button class="btn" id="lb-close" type="button">Close</button></div>
-    <div class="lbscroll" id="lb-scroll"><div class="lbwrap"><img id="lb-img" alt=""><img id="lb-dims" alt="" hidden></div></div>
-  </div>
   <div class="band">
-    <section>
-      <h2>Heights, from the floor</h2>
+    <section><h2>Heights, from the floor</h2>
       <ul class="heights">
         <li><b>{G.CEIL:g}</b><span>Ceiling, as measured</span></li>
         <li><b>{G.HIGH_TOP:g}</b><span>High shelf: books, a box, a print, the “now playing” single, Deco B</span></li>
@@ -902,72 +999,48 @@ def _page(site=False):
         <li><b>116.5</b><span>TV centre, LG C6 55in on its stand</span></li>
         <li><b>{G.WORKTOP:g}</b><span>Oak worktop, and the dining table when it's down</span></li>
         <li><b>{G.PLINTH:g}</b><span>Plinth under the two BESTÅ bays, with a hidden drawer</span></li>
-      </ul>
-    </section>
-    <section>
-      <h2>In the wall</h2>
+      </ul></section>
+    <section><h2>In the wall</h2>
       <div class="counts">
         <div><strong>~{LPS}</strong><span>LPs: {G.WALL_LPS} face-out in the wall, {G.STAND_LPS} in your vinyl stand</span></div>
         <div><strong>LPs</strong><span>only, in the trays: room to flip</span></div>
         <div><strong>4–7</strong><span>at the dining table; two spare chairs hang by it</span></div>
       </div>
-      <p class="caption">The numbered key works on the main view. Measurements are rough, in pale yellow, for checking against the real room; the drawings in the other tabs are the exact ones.</p>
-    </section>
-  </div>
-  </section>
-
-  <section class="panel" id="ideas" role="tabpanel" aria-labelledby="tb-ideas" hidden>
-    {ideas_panel()}
-  </section>
-
-  <section class="panel" id="wall" role="tabpanel" aria-labelledby="tb-wall" hidden>
-    <nav class="toc" aria-label="On this tab"></nav>
-    <div class="doc"><h2>The media wall</h2>{sec["3"]}<h2>The records and the turntable</h2>{sec["4"]}<h2>The side wall</h2>{sec["6"]}<h2>The oak joinery</h2>{sec["7"]}</div>
-  </section>
-
-  <section class="panel" id="dining" role="tabpanel" aria-labelledby="tb-dining" hidden>
-    <nav class="toc" aria-label="On this tab"></nav>
-    <div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>
-    <div class="block"><h2 class="ptitle">Keeping the chairs: a cupboard built in beside the table, so it all packs away</h2><p class="caption">The table doesn't change. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Checks tab.</p>{chairs_card()}</div>
-    <div class="doc"><h2>The dining wall</h2>{sec["5"]}</div>
-  </section>
-
-  <section class="panel" id="paint" role="tabpanel" aria-labelledby="tb-paint" hidden>
-    <div class="doc"><h2>Paint and light</h2>{sec["8"]}</div>
-  </section>
-
-  <section class="panel" id="network" role="tabpanel" aria-labelledby="tb-network" hidden>
-    <nav class="toc" aria-label="On this tab"></nav>
-    <div class="doc"><h2>Power, cables and network</h2>{sec["9"]}</div>
-  </section>
-
-  <section class="panel" id="build" role="tabpanel" aria-labelledby="tb-build" hidden>
-    <div class="doc"><h2>Build steps, for a first-time builder</h2>{GUIDE_RULES}</div>
-    <div class="qhead"><h2>The order of work</h2><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div></div>
+      <p class="caption">The numbered key works on the main view. Measurements are rough, in pale yellow, for checking against the real room; the drawings in the chapters are the exact ones.</p></section>
+  </div></div>"""),
+        chapter("fit", f"""<div class="panel" id="checks">
+    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
+    <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
+    <div id="fit-zones">{fit_body}</div>
+    <div class="doc">{sec["12"]}<!--keep--><h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details><!--/keep--></div></div>"""),
+        chapter("downloads", f'<div class="block"><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn.</p>'
+                             f'<p><a class="btn primary" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> '
+                             f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>{downloads_html(site)}{notice}'
+                             f'<p class="caption">Demma Home Improvements · Portsmouth Close · living room · v{VERSION}</p></div>'),
+    ])
+    build_body = f"""<section class="panel" id="build">
+    <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div></div>
+    <div class="segbar" id="segbar" style="--n:{len(steps())}" aria-hidden="true">{segbar}</div>
     <p class="caption" id="s-note">Tick each step when it's done; it saves for both of you. "Buy first" opens that part of the buy list.</p>
     <div class="group pfilter"><span class="label" id="l-part">Show one part</span>
       <div class="seg" role="group" aria-labelledby="l-part" id="part-filter"><button type="button" data-part="" aria-pressed="true">All parts</button>{part_buttons}</div>
       <p class="caption" id="pf-note" aria-live="polite"></p></div>
     <div class="row sall"><label class="sdone" for="s-all"><input type="checkbox" id="s-all"> Show all steps open</label><span class="caption">One step at a time otherwise: it opens on the first one not done.</span></div>
-    <ol class="steps-list">{"".join(step_cards)}</ol>
+    <ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol>
     <div class="block" id="cuts">
       <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
       <textarea id="cuts-box" class="caption" rows="8" hidden readonly aria-label="The cutting list as text">{html.escape(cuts_text())}</textarea>
       <div class="doc">{deck_section(cuts_html())}</div>
     </div>
-    <div class="doc">{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div>
-  </section>
-
-  <section class="panel" id="buy" role="tabpanel" aria-labelledby="tb-buy" hidden>
-    <h2 class="ptitle">Buy guide and costs</h2>
+    <details class="fold"><summary>Before you start: how the guide works, time, tools, techniques and pitfalls</summary><div class="doc">{GUIDE_RULES}{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div></details>
+  </section>"""
+    buy_body = f"""<section class="panel" id="buy">
     <div class="tiles">
       <div><strong>£{money(lo_tot, hi_tot)}</strong><span>the whole plan; no electrician on top</span></div>
       <div><strong id="t-left">£{money(lo_tot, hi_tot)}</strong><span>still to buy: the items not ticked yet</span></div>
       <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
       <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
     </div>
-    <h3 class="ptitle">Cost by phase</h3>
-    {cost_chart(phases)}
     <div class="qhead"><h3 class="ptitle">The buy list, in build order</h3>
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-filter="all" aria-pressed="true">Everything</button>
@@ -976,452 +1049,61 @@ def _page(site=False):
       </div></div>
     <p class="caption" id="t-note">Each phase says which build step it's needed for. Tick each item off and write in what you paid; it saves for both of you.</p>
     <div id="tracker">{"".join(ph_html)}</div>
+    <details class="fold"><summary>Cost by phase, low to high</summary>{cost_chart(phases)}</details>
     <p class="notice">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles. Estimates are approximate UK prices.</p>
-  </section>
-
-  <section class="panel" id="questions" role="tabpanel" aria-labelledby="tb-questions" hidden>
-    <div class="qhead"><h2 class="ptitle">What we still need from you</h2><div class="meter" hidden><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
-    <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Tell us in your next message: a photo is often quicker than words.</p>
+  </section>"""
+    ideas_body = f"""<section class="panel" id="ideas">
+    <div class="block"><h2 class="ptitle">Suggestions in the room</h2><p class="caption">Each one switches the room too: close this to see them.</p>{sugg_chips}</div>
+    {ideas_panel()}
+  </section>"""
+    ask_body = f"""<section class="panel" id="questions">
+    <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Tap an answer; a photo is often quicker than words.</p>
+    <div class="meter"><span id="q-count">0 of {len(QUESTIONS)} answered</span></div>
+    <div class="qprog" aria-hidden="true"><i id="q-bar"></i></div>
     <p class="notice" id="q-local" hidden>Answers can't be saved for both of you from this view: they're kept on this device. When you're done, use Copy all answers and paste them into a message.</p>
     <p class="notice" id="q-ro" hidden>You can read the answers here but not change them. Ask Emma to give you Contributor access in the Share menu.</p>
-    <ul class="qs">
+    <ul class="qs" id="qs-list">
 {q_items}
     </ul>
-    <div class="row" hidden><button class="btn" id="copy-all" type="button">Copy all answers</button><span class="caption" id="copy-st" aria-live="polite"></span></div>
+    <div class="row"><button class="btn" id="copy-all" type="button">Copy all answers</button><span class="caption" id="copy-st" aria-live="polite"></span></div>
     <textarea id="copy-box" class="caption" rows="6" hidden readonly aria-label="All answers as text"></textarea>
-  </section>
-
-  <section class="panel" id="checks" role="tabpanel" aria-labelledby="tb-checks" hidden>
-    <h2 class="ptitle">Fit proof</h2>
-    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
-    <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
-    <div id="fit-zones">{fit_body}</div>
-    <div class="doc"><p class="notice">The open questions are in the {_tablink("questions")}.</p>{sec["12"]}<!--keep--><h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details><!--/keep--></div>
-    <div class="block"><h2 class="ptitle">Downloads</h2><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn. {"" if site else "They open from your GitHub Pages site."}</p>{downloads_html(site)}</div>
-  </section>
-  <footer class="foot"><span>Portsmouth Close · living room · v{VERSION}</span><span><a href="{("media-wall/out/" if site else GITHUB_OUT)}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> · <a href="{("media-wall/out/" if site else GITHUB_OUT)}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a> · <a href="#room" data-go="room">The 3D room</a></span></footer>
+  </section>"""
+    page = f"""<title>Demma Home Improvements</title>
+{room3d_page.IMPORTMAP}
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,1,0&display=block">
+{STYLE_V25}
+<button type="button" class="skip" data-tools-toggle>Open the room's controls</button>
+<div class="brand"><span class="mark" aria-hidden="true"><i style="background:var(--peach)"></i><i style="background:var(--mint)"></i><i style="background:var(--lilac)"></i><i style="background:var(--butter)"></i></span>
+  <span><b>Demma</b><small>Home Improvements</small></span></div>
+{rail}
+<main id="room" aria-label="Your room in 3D">{room3d_page.section(gallery3d())}</main>
+{sheet("plan", "Your plan", "map", 300, plan_home + chapters)}
+{sheet("build", "Build", "construction", 50, build_body)}
+{sheet("buy", "Buy", "shopping_bag", 165, buy_body)}
+{sheet("ideas", "Ideas", "lightbulb", 95, ideas_body)}
+{sheet("questions", "Ask", "forum", 235, ask_body)}
+{bbar}
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="The picture at full size">
+  <div class="lbbar"><span class="caption" id="lb-cap">Full size: drag or scroll to look round. Pinch to zoom on a phone.</span><button class="btn" id="lb-close" type="button">Close</button></div>
+  <div class="lbscroll" id="lb-scroll"><div class="lbwrap"><img id="lb-img" alt=""><img id="lb-dims" alt="" hidden></div></div>
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const DATA = {json.dumps(data)};
 const SITE = {json.dumps(site)};
-const use = n => (window.claude && window.claude.use) ? window.claude.use(n) : Promise.resolve(null);
-const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
-const store = {{ get(k, d) {{ try {{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }} catch (e) {{ return d; }} }},
-                set(k, v) {{ try {{ localStorage.setItem(k, JSON.stringify(v)); }} catch (e) {{}} }} }};
-
-/* ---------- pictures borrowed from the viewer's set (each embedded once) */
-function arts(el) {{ $$("img[data-art]:not([src])", el).forEach(im => {{ const u = DATA.img[im.dataset.art]; if (u) im.src = u; }}); }}   // v14.1: each tab's pictures load when it opens
-arts($("header")); arts(document.getElementById("overview"));
-
-/* ---------- tabs */
-const tabBtns = $$('.tabs [role="tab"]');
-function showTab(id, focus) {{
-  if (!DATA.tabs.includes(id)) id = "overview";
-  tabBtns.forEach(b => {{ const on = b.getAttribute("aria-controls") === id; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); if (on) b.scrollIntoView({{ block: "nearest", inline: "nearest" }}); }});
-  DATA.tabs.forEach(t => {{ document.getElementById(t).hidden = t !== id; }});
-  arts(document.getElementById(id));
-  store.set("mw13-tab", id);
-  try {{ history.replaceState(null, "", "#" + id); }} catch (e) {{}}
-}}
-tabBtns.forEach((b, i) => {{
-  b.addEventListener("click", () => {{ showTab(b.getAttribute("aria-controls")); window.scrollTo({{ top: 0 }}); }});
-  b.addEventListener("keydown", e => {{
-    const k = {{ ArrowRight: 1, ArrowLeft: -1 }}[e.key];
-    if (k) {{ e.preventDefault(); showTab(tabBtns[(i + k + tabBtns.length) % tabBtns.length].getAttribute("aria-controls"), true); }}
-  }});
-}});
-function jumpTo(el) {{ if (el) requestAnimationFrame(() => el.scrollIntoView({{ block: "start" }})); }}
-document.addEventListener("click", e => {{
-  const a = e.target.closest("[data-go]");
-  if (!a) return;
-  e.preventDefault();
-  const tab = a.dataset.go;
-  showTab(tab);
-  const panel = document.getElementById(tab);
-  if (a.dataset.step) {{ jumpTo(document.getElementById("step-" + a.dataset.step)); return; }}
-  if (a.dataset.phase) {{ const d = document.getElementById("ph-" + a.dataset.phase); d.open = true; jumpTo(d); return; }}
-  if (a.dataset.find) {{ const h = $$("h2, h3, h4", panel).find(h => h.textContent.includes(a.dataset.find)); if (h) {{ jumpTo(h); return; }} }}
-  window.scrollTo({{ top: 0 }});
-}});
-/* on-this-tab chips for the long tabs */
-$$(".toc").forEach(nav => {{
-  const hs = $$(".doc h2, .doc h3, .block > h2.ptitle, .block > .qhead > h2.ptitle", nav.parentElement), bs = [];
-  nav.parentElement.classList.add("has-toc");                  // v24: a sticky sidebar on wide screens
-  hs.forEach((h, i) => {{
-    const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (h.tagName === "H2" ? " h2" : "");
-    b.textContent = h.textContent.replace(/:.*$/, ""); b.addEventListener("click", () => jumpTo(h));
-    nav.appendChild(b); bs.push(b);
-  }});
-  if ("IntersectionObserver" in window) {{                     // the section you're reading is marked
-    const io = new IntersectionObserver(es => {{ es.forEach(e => {{ if (e.isIntersecting) {{ const k = hs.indexOf(e.target); bs.forEach((b, j) => b.classList.toggle("on", j === k)); }} }}); }},
-      {{ rootMargin: "-80px 0px -70% 0px" }});
-    hs.forEach(h => io.observe(h));
-  }}
-}});
-showTab((location.hash || "").slice(1) || store.get("mw13-tab", "overview"));
-
-/* ---------- the render viewer */
-const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
-const VIEWS = {{ join: "Artisan oak media wall", four: "The flip-top open and set for four", six: "The flip-top open and set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" }};
-const view = Object.assign({{ style: "join", paint: "card_room", key: false, dims: false }}, store.get("mw13-view", {{}}));
-const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key"), dims = $("#dims"), dimsBtn = $("#k-dims");
-function draw() {{
-  if (!VIEWS[view.style]) view.style = "join";
-  if (view.style !== "join") view.key = false;
-  shot.src = view.key ? DATA.img["key_" + view.style] : DATA.img["art_" + view.style + "_" + view.paint];
-  shot.alt = VIEWS[view.style] + (view.key ? " with numbered key" : " in " + NAMES[view.paint]);
-  $$("[data-style]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.style === view.style)));
-  $$("[data-paint]").forEach(b => {{ b.setAttribute("aria-pressed", String(!view.key && b.dataset.paint === view.paint)); b.disabled = view.key; }});
-  keyBtn.setAttribute("aria-pressed", String(view.key));
-  keyBtn.disabled = view.style !== "join";
-  dims.src = DATA.img["dims_" + view.style];
-  dims.hidden = !view.dims || view.key;
-  dimsBtn.setAttribute("aria-pressed", String(view.dims && !view.key));
-  dimsBtn.disabled = view.key;
-  cap.textContent = view.key
-    ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains. The numbers are listed in the Media wall tab.")
-    : view.style === "six" ? "The flip-top open on its gate leg (110 × 160), still on the wall, set for six (three a side), in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show."
-    : view.style === "drawers" ? "Every drawer out, in " + NAMES[view.paint] + ": the game drawer and the upper record tray 30 cm out, the hidden plinth drawer 25 cm out. In use, open one record tray at a time."
-    : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below; dashed, the chimney breast's outline and the alcove's depth: 38 of the 46 cm base inside it, 8 proud; the media wall end-on at the right (the breast cut away)."
-    : VIEWS[view.style] + ", shown in " + NAMES[view.paint] + ". Evening light, drawn to the measured room.";
-  store.set("mw13-view", view);
-}}
-$$("[data-style]").forEach(b => b.addEventListener("click", () => {{ view.style = b.dataset.style; draw(); }}));
-$$("[data-paint]").forEach(b => b.addEventListener("click", () => {{ view.paint = b.dataset.paint; draw(); }}));
-keyBtn.addEventListener("click", () => {{ view.key = !view.key; draw(); }});
-dimsBtn.addEventListener("click", () => {{ view.dims = !view.dims; draw(); }});
-draw();
-
-/* ---------- full size (HD) */
-const lb = $("#lightbox"), lbImg = $("#lb-img"), lbDims = $("#lb-dims"), lbScroll = $("#lb-scroll");
-$("#k-full").addEventListener("click", () => {{
-  lbImg.src = shot.src; lbImg.alt = shot.alt;
-  lbDims.src = dims.src; lbDims.hidden = dims.hidden;
-  lb.hidden = false; document.body.style.overflow = "hidden";
-  requestAnimationFrame(() => {{ lbScroll.scrollLeft = (lbScroll.scrollWidth - lbScroll.clientWidth) / 2; lbScroll.scrollTop = (lbScroll.scrollHeight - lbScroll.clientHeight) / 2; }});
-  $("#lb-close").focus();
-}});
-function closeLb() {{ lb.hidden = true; document.body.style.overflow = ""; $("#k-full").focus(); }}
-$("#lb-close").addEventListener("click", closeLb);
-document.addEventListener("keydown", e => {{ if (e.key === "Escape" && !lb.hidden) closeLb(); }});
-let drag = null;
-lbScroll.addEventListener("pointerdown", e => {{ if (e.pointerType === "mouse") {{ drag = {{ x: e.clientX, y: e.clientY, l: lbScroll.scrollLeft, t: lbScroll.scrollTop }}; lbScroll.setPointerCapture(e.pointerId); }} }});
-lbScroll.addEventListener("pointermove", e => {{ if (drag) {{ lbScroll.scrollLeft = drag.l - (e.clientX - drag.x); lbScroll.scrollTop = drag.t - (e.clientY - drag.y); }} }});
-lbScroll.addEventListener("pointerup", () => {{ drag = null; }});
-
-/* ---------- fit proof filter */
-$("#fit-only").addEventListener("click", e => {{
-  const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
-  e.currentTarget.setAttribute("aria-pressed", String(on));
-  $("#fit-zones").classList.toggle("fitonly", on);
-  $$("#fit-zones details.zone").forEach(d => {{ if (on && d.querySelector("tr.r-tight, tr.r-check")) d.open = true; }});
-}});
-
-/* ---------- v14: the overview's dashboard, read from the page's own state */
-function dash() {{
-  const st = $$(".step"), sd = $$(".step.done"), next = st.find(x => !x.classList.contains("done"));
-  $("#d-steps").textContent = sd.length + " of " + st.length + " steps";
-  $("#d-steps-bar").style.width = (100 * sd.length / Math.max(1, st.length)) + "%";
-  const nx = $("#d-next");
-  if (next) {{ nx.textContent = "Next: " + next.dataset.s + ". " + $("h3", next).textContent; nx.dataset.step = next.dataset.s; }}
-  else {{ nx.textContent = "Every step done"; delete nx.dataset.step; }}
-  const bi = $$("#tracker li[data-kind=buy]"), bd = bi.filter(x => x.classList.contains("done"));
-  $("#d-buy").textContent = bd.length + " of " + bi.length + " bought";
-  $("#d-buy-bar").style.width = (100 * bd.length / Math.max(1, bi.length)) + "%";
-  const paid = $$("#tracker .paid input").reduce((a, i) => a + (parseFloat(i.value) || 0), 0);
-  $("#d-paid").textContent = "\u00a3" + Math.round(paid).toLocaleString("en-GB") + " paid so far";
-  const qa = $$(".q.answered").length;
-  $("#d-q").textContent = DATA.q.length + " questions";   // v23: no answer boxes
-  $("#d-q-bar").style.width = (100 * qa / Math.max(1, DATA.q.length)) + "%";
-}}
-let dashQ = false;
-const dashSoon = () => {{ if (!dashQ) {{ dashQ = true; requestAnimationFrame(() => {{ dashQ = false; dash(); }}); }} }};
-new MutationObserver(dashSoon).observe($(".wrap"), {{ subtree: true, attributes: true, attributeFilter: ["class"] }});
-document.addEventListener("input", dashSoon);
-dash();
-/* links into the 3D room with its options set */
-document.addEventListener("click", e => {{
-  const b = e.target.closest("[data-r3d]");
-  if (!b) return;
-  const o = JSON.parse(b.dataset.r3d);
-  showTab("room"); window.scrollTo({{ top: 0 }});
-  if (window.R3D) window.dispatchEvent(new CustomEvent("r3d-set", {{ detail: o }})); else window.__r3dPending = o;
-}});
-/* the 3D gallery opens in the full-size viewer */
-$$(".g3d").forEach(b => b.addEventListener("click", () => {{
-  const im = $("img", b);
-  lbImg.src = im.src; lbImg.alt = im.alt; lbDims.hidden = true;
-  lb.hidden = false; document.body.style.overflow = "hidden"; $("#lb-close").focus();
-}}));
-
-/* ---------- shared state: answers, photos, tracker, build steps */
-let db = null, assets = null, user = null, myId = null, readOnly = false;
-const remote = {{}};            // answers/<id> bodies as saved
-const tstate = {{}};            // tracker/<id> bodies as saved
-const sstate = {{}};            // steps/<n> bodies as saved
-const chains = {{}};            // one write at a time per document
-const names = {{}};
-const fmtTime = iso => {{ try {{ return new Date(iso).toLocaleString(undefined, {{ day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }}); }} catch (e) {{ return ""; }} }};
-function write(path, body) {{
-  const run = () => db.doc(path).set(body);
-  chains[path] = (chains[path] || Promise.resolve()).then(run, run);
-  return chains[path];
-}}
-function onWriteError(e, stEl) {{
-  if (e && e.code === "invalid_argument") {{ readOnly = true; lockInputs(); }}
-  if (stEl) {{ stEl.textContent = e && e.code === "quota_exceeded" ? "The page's storage is full; tell Claude." : "Couldn't save. Try again in a moment."; stEl.className = "st err"; }}
-}}
-function lockInputs() {{ $$(".q textarea, .q .save, .items input, .sdone input").forEach(el => el.disabled = true); $$(".upl").forEach(el => el.hidden = true); }}
-async function nameOf(id) {{
-  if (!id) return "";
-  if (id === myId) return "you";
-  if (names[id] !== undefined) return names[id];
-  names[id] = "";
-  try {{ const ps = await user.profiles([id]); names[id] = (ps[id] && ps[id].name) || ""; }} catch (e) {{}}
-  return names[id];
-}}
-
-/* answers */
-const drafts = store.get("mw12-drafts", {{}});
-function cardFor(id) {{ return document.getElementById("q-" + id); }}
-function answeredCount() {{
-  return DATA.q.filter(q => ((remote[q.id] && remote[q.id].text) || (!db && drafts[q.id]) || "").trim() || (remote[q.id] && (remote[q.id].photos || []).length)).length;
-}}
-function meter() {{
-  const n = answeredCount(), t = DATA.q.length;
-  $("#q-count").textContent = n + " of " + t + " answered";
-  $("#q-bar").style.width = (100 * n / t) + "%";
-}}
-async function paintAnswer(id) {{
-  const card = cardFor(id), body = remote[id];
-  if (!card) return;
-  const st = $(".st", card), ta = $("textarea", card);
-  if (body && document.activeElement !== ta && !card.dataset.dirty) ta.value = body.text || "";
-  card.classList.toggle("answered", !!(body && ((body.text || "").trim() || (body.photos || []).length)));
-  if (body && body.at) {{
-    const who = await nameOf(body.by);
-    st.textContent = "Saved " + fmtTime(body.at) + (who ? " by " + who : "");
-    st.className = "st ok";
-  }}
-  const box = $(".photos", card);
-  box.textContent = "";
-  for (const p of (body && body.photos) || []) {{
-    if (!/^[0-9a-f]{{32}}$/.test(p.id || "")) continue;
-    const fig = document.createElement("figure");
-    const im = document.createElement("img");
-    im.src = "/_blob/" + p.id; im.alt = p.name || "Photo"; im.loading = "lazy";
-    im.onerror = () => {{ im.removeAttribute("src"); im.alt = "Photo unavailable"; }};
-    fig.appendChild(im);
-    if (db && !readOnly) {{
-      const rm = document.createElement("button"); rm.type = "button"; rm.textContent = "Remove"; rm.setAttribute("aria-label", "Remove this photo from the answer");
-      rm.addEventListener("click", () => {{
-        const b = Object.assign({{ text: "" }}, remote[id]);
-        b.photos = (b.photos || []).filter(x => x.id !== p.id); b.by = myId; b.at = new Date().toISOString();
-        write("answers/" + id, b).catch(e => onWriteError(e, st));
-      }});
-      fig.appendChild(rm);
-    }}
-    box.appendChild(fig);
-  }}
-  meter();
-}}
-DATA.q.forEach(q => {{
-  const card = cardFor(q.id), ta = $("textarea", card), st = $(".st", card);
-  if (drafts[q.id]) ta.value = drafts[q.id];
-  ta.addEventListener("input", () => {{ card.dataset.dirty = "1"; drafts[q.id] = ta.value; store.set("mw12-drafts", drafts); if (!db) meter(); st.textContent = db ? "Not saved yet" : "Kept on this device"; st.className = "st"; }});
-  $(".save", card).addEventListener("click", async () => {{
-    if (!db) {{ st.textContent = "Kept on this device. Copy all answers to send them."; st.className = "st"; return; }}
-    const body = Object.assign({{ photos: [] }}, remote[q.id], {{ text: ta.value.trim().slice(0, 4000), by: myId, at: new Date().toISOString() }});
-    st.textContent = "Saving…"; st.className = "st";
-    try {{ await write("answers/" + q.id, body); delete card.dataset.dirty; delete drafts[q.id]; store.set("mw12-drafts", drafts); }}
-    catch (e) {{ onWriteError(e, st); }}
-  }});
-  $(".upl input", card).addEventListener("change", async ev => {{
-    const files = [...ev.target.files].slice(0, 6);
-    ev.target.value = "";
-    if (!assets || !files.length) return;
-    st.textContent = "Uploading " + files.length + (files.length > 1 ? " photos…" : " photo…"); st.className = "st";
-    const added = [];
-    for (const f of files) {{
-      try {{ const r = await assets.upload(f); added.push({{ id: r.id, name: (f.name || "photo").slice(0, 80) }}); }}
-      catch (e) {{ st.textContent = e && e.code === "too_large" ? "That photo is over 20 MB; try a smaller one." : e && e.code === "unsupported_type" ? "That file type isn't supported; use a JPEG or PNG." : "Couldn't upload. Try again."; st.className = "st err"; }}
-    }}
-    if (!added.length) return;
-    const body = Object.assign({{ text: "" }}, remote[q.id]);
-    body.photos = (body.photos || []).concat(added); body.by = myId; body.at = new Date().toISOString();
-    try {{ await write("answers/" + q.id, body); }} catch (e) {{ onWriteError(e, st); }}
-  }});
-}});
-meter();
-
-$("#copy-all").addEventListener("click", async () => {{
-  const lines = DATA.q.map((q, i) => {{
-    const t = (cardFor(q.id).querySelector("textarea").value || "").trim();
-    return (i + 1) + ". " + q.q + "\\n" + (t || "(not answered yet)");
-  }});
-  const text = "Media wall: our answers\\n\\n" + lines.join("\\n\\n");
-  const box = $("#copy-box"), st = $("#copy-st");
-  try {{ await navigator.clipboard.writeText(text); st.textContent = "Copied. Paste it into a message."; box.hidden = true; }}
-  catch (e) {{ box.value = text; box.hidden = false; box.focus(); box.select(); st.textContent = "Select the text below and copy it."; }}
-}});
-
-$("#copy-cuts").addEventListener("click", async () => {{
-  const box = $("#cuts-box"), st = $("#cuts-st");
-  try {{ await navigator.clipboard.writeText(box.value); st.textContent = "Copied. Paste it into an email to the timber merchant."; box.hidden = true; }}
-  catch (e) {{ box.hidden = false; box.focus(); box.select(); st.textContent = "Select the text below and copy it."; }}
-}});
-
-/* tracker and the cost chart */
-const local = store.get("mw12-tracker", {{}});
-const money = v => "£" + (Math.round(v * 100) / 100).toLocaleString(undefined, {{ minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }});
-function tget(id) {{ return (db ? tstate[id] : local[id]) || null; }}
-function paintTracker() {{
-  let done = 0, paid = 0, leftLo = 0, leftHi = 0;
-  const phPaid = {{}};
-  DATA.track.forEach(r => {{
-    const s = tget(r.id), isDone = s ? !!s.done : r.done;
-    const li = document.querySelector('[data-t="' + r.id + '"]'), cb = li.querySelector("input[type=checkbox]"), pd = li.querySelector("input[type=number]");
-    cb.checked = isDone; li.classList.toggle("done", isDone);
-    if (pd && document.activeElement !== pd) pd.value = s && typeof s.paid === "number" ? s.paid : "";
-    if (isDone) done++; else {{ leftLo += r.lo; leftHi += r.hi; }}
-    if (s && typeof s.paid === "number") {{ paid += s.paid; phPaid[r.phase] = (phPaid[r.phase] || 0) + s.paid; }}
-  }});
-  $$("details.phase").forEach(d => {{
-    const lis = $$(".items li", d), n = lis.filter(li => li.classList.contains("done")).length;
-    $(".pd", d).textContent = n + " of " + lis.length + " done";
-  }});
-  DATA.phases.forEach(p => {{
-    const row = document.querySelector('.crow[data-ph="' + p.idx + '"]'), v = phPaid[p.name] || 0;
-    $(".cpaid", row).style.width = Math.min(100, 100 * v / DATA.top) + "%";
-    $(".cpv", row).textContent = v ? "paid " + money(v) : "";
-  }});
-  $("#t-done").textContent = done + " of " + DATA.track.length;
-  $("#t-paid").textContent = money(paid);
-  $("#t-left").textContent = leftHi ? money(leftLo) + "–" + money(leftHi).slice(1) : "£0";
-}}
-function saveTrack(id, patch) {{
-  const r = DATA.track.find(x => x.id === id);
-  const cur = tget(id) || {{ done: r.done, paid: null }};
-  const body = Object.assign({{}}, cur, patch);
-  if (!db) {{ local[id] = body; store.set("mw12-tracker", local); paintTracker(); return; }}
-  body.by = myId; body.at = new Date().toISOString();
-  tstate[id] = body; paintTracker();
-  write("tracker/" + id, body).catch(e => onWriteError(e, null));
-}}
-DATA.track.forEach(r => {{
-  const li = document.querySelector('[data-t="' + r.id + '"]');
-  li.querySelector("input[type=checkbox]").addEventListener("change", e => saveTrack(r.id, {{ done: e.target.checked }}));
-  const pd = li.querySelector("input[type=number]");
-  if (pd) pd.addEventListener("change", e => {{
-    const v = e.target.value === "" ? null : Math.max(0, Math.round(parseFloat(e.target.value) * 100) / 100);
-    saveTrack(r.id, {{ paid: Number.isFinite(v) ? v : null }});
-  }});
-}});
-$$("[data-filter]").forEach(b => b.addEventListener("click", () => {{
-  $$("[data-filter]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-  const t = $("#tracker");
-  t.classList.toggle("f-left", b.dataset.filter === "left");
-  t.classList.toggle("f-jobs", b.dataset.filter === "jobs");
-  if (b.dataset.filter !== "all") $$("details.phase", t).forEach(d => d.open = true);
-}}));
-paintTracker();
-
-/* build steps */
-const slocal = store.get("mw13-steps", {{}});
-function sget(n) {{ return (db ? sstate["s" + n] : slocal["s" + n]) || null; }}
-function paintSteps() {{
-  let done = 0;
-  $$(".step").forEach(li => {{
-    const s = sget(li.dataset.s), on = !!(s && s.done), cb = $(".sdone input", li);
-    cb.checked = on; li.classList.toggle("done", on);
-    if (on) done++;
-  }});
-  $("#s-count").textContent = done + " of " + DATA.steps + " steps done";
-  $("#s-bar").style.width = (100 * done / DATA.steps) + "%";
-}}
-$$(".step").forEach(li => {{
-  $(".sdone input", li).addEventListener("change", e => {{
-    const body = {{ done: e.target.checked }};
-    if (!db) {{ slocal["s" + li.dataset.s] = body; store.set("mw13-steps", slocal); paintSteps(); return; }}
-    body.by = myId; body.at = new Date().toISOString();
-    sstate["s" + li.dataset.s] = body; paintSteps();
-    write("steps/s" + li.dataset.s, body).catch(err => onWriteError(err, null));
-  }});
-}});
-paintSteps();
-
-/* light up what this view can do */
-(async () => {{
-  const [d, u, a] = await Promise.all([use("db"), use("user"), use("assets")]);
-  user = u;
-  if (!d) {{
-    $("#q-local").hidden = true;   // v23: no answer boxes, so no notice about where answers are kept
-    $("#t-note").textContent = "Each phase says which build step it's needed for. Ticks and amounts are kept on this device only from this view.";
-    $("#s-note").textContent = "Tick each step when it's done; from this view the ticks are kept on this device only.";
-    return;
-  }}
-  db = d;
-  try {{ myId = u ? await u.id() : null; }} catch (e) {{ myId = null; }}
-  let canWrite = null;
-  try {{ canWrite = u ? await u.can("data.write") : null; }} catch (e) {{}}
-  if (canWrite === false) {{ readOnly = true; lockInputs(); }}
-  else if (a) {{ assets = a; $$(".upl").forEach(el => el.hidden = false); }}
-  $$(".q .st").forEach(st => {{ if (st.textContent === "Kept on this device") st.textContent = "Not saved yet"; }});
-  db.collection("answers").onSnapshot(snap => {{
-    snap.docChanges().forEach(ch => {{
-      if (ch.type === "removed") delete remote[ch.doc.id]; else remote[ch.doc.id] = ch.doc.data();
-      paintAnswer(ch.doc.id);
-    }});
-    meter();
-  }}, () => {{}});
-  db.collection("tracker").onSnapshot(snap => {{
-    snap.docChanges().forEach(ch => {{ if (ch.type === "removed") delete tstate[ch.doc.id]; else tstate[ch.doc.id] = ch.doc.data(); }});
-    paintTracker();
-  }}, () => {{}});
-  db.collection("steps").onSnapshot(snap => {{
-    snap.docChanges().forEach(ch => {{ if (ch.type === "removed") delete sstate[ch.doc.id]; else sstate[ch.doc.id] = ch.doc.data(); }});
-    paintSteps();
-  }}, () => {{}});
-}})();
-(() => {{
-  // v13.7: lighting scene buttons
-  const sb = document.getElementById("scene-btns");
-  if (!sb) return;
-  sb.addEventListener("click", e => {{
-    const b = e.target.closest("button[data-scene]"); if (!b) return;
-    sb.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-    document.querySelectorAll(".scene").forEach(d => {{ d.hidden = d.dataset.sc !== b.dataset.scene; }});
-  }});
-}})();
-(() => {{
-  // v13.6: show one part of the build at a time
-  const bar = document.getElementById("part-filter");
-  if (!bar) return;
-  const note = document.getElementById("pf-note");
-  const pick = part => {{
-    bar.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.part === part)));
-    let shown = 0;
-    document.querySelectorAll(".steps-list > li.step").forEach(li => {{
-      const on = !part || li.dataset.parts.split("|").includes(part);
-      li.hidden = !on; if (on) shown++;
-    }});
-    note.textContent = part ? ("Showing " + shown + " of " + DATA.steps + " steps: " + part + ".") : "";
-    try {{ localStorage.setItem("mw-part", part); }} catch (e) {{}}
-  }};
-  bar.addEventListener("click", e => {{ const b = e.target.closest("button[data-part]"); if (b) pick(b.dataset.part); }});
-  document.addEventListener("click", e => {{
-    const a = e.target.closest("[data-step]");
-    if (a) {{ const li = document.getElementById("step-" + a.dataset.step); if (li && li.hidden) pick(""); }}
-  }}, true);
-  let saved = "";
-  try {{ saved = localStorage.getItem("mw-part") || ""; }} catch (e) {{}}
-  if (saved && bar.querySelector('button[data-part="' + saved.replace(/"/g, "") + '"]')) pick(saved);
-}})();
+""" + (HERE / "page.js").read_text() + """
 </script>
 <script>""" + STEP_JS + """</script>
-<script>""" + SKIN_JS + """</script>
 <script>""" + __import__("tidy").MORE_JS + """</script>
-""")
+<script>""" + (HERE / "page_router.js").read_text() + """</script>
+"""
+    # the build parts in the page's pastels (the PDF keeps its own colours)
+    for name, hue in PAGE_PART.items():
+        page = page.replace(f"--pc:{PARTS[name]}", f"--pc:oklch(0.78 0.12 {hue})").replace(f"background:{PARTS[name]}\"></span>{html.escape(name)}", f"background:oklch(0.78 0.12 {hue})\"></span>{html.escape(name)}")
+    return uniq_svgs(page)
 
 
 # v23: the page looks (the header's "Page look" buttons) and larger text, kept on each device

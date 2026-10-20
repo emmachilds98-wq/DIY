@@ -401,12 +401,12 @@ def full():
                     "Fit the smart colour bulbs and point every head straight down, evenly spread along the bar (v17). Tilt one only if its pool lands in the TV's screen or someone's eyes. If a WiZ bulb shows below its shade's rim, use the shorter Hue lustre there.",
                 ]),
                 ("Power on and test", [
-                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the five scenes (General first) from the lighting scenes below (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
+                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the three presets, Bright, Cosy and Film, from the lighting presets below (levels, and colours if you want them). Your red lamp's colour bulbs go in the same presets. With the table open, bar 2 comes up to at least 80 and bar 1 down to 15 (the table rule): save that as a fourth scene, Table, if your app can't do it on its own.",
                 ]),
                 ("The low-voltage lights (nothing to isolate)", [
                     "Cut the smart strip at its marks into three lengths: one for each upright's groove and one for the side-wall run. Press each into its aluminium channel under the opal diffuser; take the uprights' leads down their grooves to the strip's power on the 10-gang (v16: smart colour).",
                     "The side-wall run's strip: in its channel in the groove under the run's front edge, 1.5 cm back from the edge, the full 220 cm; its lead drops with the PC's through the brush grommet into the conduit, to the same power.",
-                    "Add the strips to the app beside the bars' bulbs, so each scene sets the wall's glow too: warm white for everyday, low and coloured for TV night.",
+                    "Add the strips to the app beside the bars' bulbs, so each preset sets the wall's glow too: warm white for Bright, low and coloured for Cosy and Film.",
                     "Clip the ceiling strip through its notches in the uprights; stick the bias light round the back of the TV on its USB port.",
                     "Stand your red lamp in its spot (the 3D room shows the three), its bulbs green, pink and purple, top to bottom.",
                 ]),

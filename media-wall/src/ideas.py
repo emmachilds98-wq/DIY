@@ -45,7 +45,7 @@ IDEAS = [
      "Keeps the rug flat and square on the carpet where the sofa's open end and the coffee table push it.", "Under the rug.", False),
     ("button", "A smart scene button by the door",
      "a small wireless button, about 5 × 5", (15, 25),
-     "One press for the General scene coming in, a long press for everything off, in the same app as the bars' bulbs and the strips.",
+     "One press for the Bright preset coming in, a long press for everything off, in the same app as the bars' bulbs and the strips.",
      "On the wall beside the door's light switch.", False),
     ("night", "A motion nightlight on the stairs",
      "battery LED strips under the treads' noses, or a single motion light", (15, 30),

@@ -21,7 +21,7 @@ const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? 
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
-const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
+const DEF = { site: "B", dining: "folded", scene: "bright", tod: "evening", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
               quality: SMALL ? "fast" : "hd", view: "room",   // v21: the whole room first
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
@@ -47,13 +47,27 @@ S.edit = false;
 if (!S.seen21) { S.view = "room"; S.seen21 = true; }   // v21: everyone starts once on the new whole-room view
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
 
-/* ---------------------------------------------------------------- the lighting scenes (scenes.py) plus daytime */
+/* ---------------------------------------------------------------- the lighting presets (scenes.py) and their two rules
+   v25: three presets (bright, cosy, film); dinner is a rule (the table open lifts bar 2), daytime a switch (S.tod) that works with any
+   preset. Saved choices from the old six buttons map across once. */
 const SCENES = JSON.parse(document.getElementById("scenes-data").textContent);
-SCENES.day = { name: "Daytime", levels: { strip: 0, uprights: 0, bias: 0, bar1: 0, bar2: 0, lamp: 0 }, day: true };
+const LIGHT_RULES = JSON.parse((document.getElementById("lightrules-data") || {}).textContent || '{"boost":{"bar2_min":80,"bar1_max":15,"bias":0},"old":{}}');
+const OLD_SCENE = LIGHT_RULES.old || {};
+function oldScene(o) {               // an old scene key in o (saved state, a link, a still) becomes a preset, with daytime as a switch
+  if (o.scene && !(o.scene in SCENES) && o.scene in OLD_SCENE) { if (o.scene === "day") o.tod = "day"; o.scene = OLD_SCENE[o.scene]; if (o === S) S.lv = null; }
+  return o;
+}
+oldScene(S);
 if (!(S.scene in SCENES)) S.scene = DEF.scene;
+if (S.tod !== "day") S.tod = "evening";
 const LAYERS = ["strip", "uprights", "bias", "bar1", "bar2", "lamp"];
 if (!S.lv) S.lv = Object.assign({}, SCENES[S.scene].levels);
-const lvl = k => Math.max(0, Math.min(100, (S.lv[k] ?? 0) * S.master / 100));   // a layer's level after the master slider
+const tableOpen = () => S.dining && S.dining !== "folded";
+function lvl(k) {                     // a layer's level: the slider, the table rule when the flip-top is open, then the master slider
+  let v = S.lv[k] ?? 0;
+  if (tableOpen()) { const B = LIGHT_RULES.boost; if (k === "bar2") v = Math.max(v, B.bar2_min); else if (k === "bar1") v = Math.min(v, B.bar1_max); else if (k === "bias") v = B.bias; }
+  return Math.max(0, Math.min(100, v * S.master / 100));
+}
 
 /* ---------------------------------------------------------------- renderer */
 let canvas = qs("canvas");
@@ -1165,7 +1179,7 @@ function applyState() {
   dirty();
 }
 function applyLight() {
-  const sc = SCENES[S.scene], day = !!sc.day, hd = S.quality === "hd";
+  const day = S.tod === "day", hd = S.quality === "hd";
   const L = {}; LAYERS.forEach(k => L[k] = lvl(k));          // v15: the sliders (a scene button fills them in), times the master
   const set = (list, lv) => list.forEach(l => {
     l.intensity = (l.userData.k || 1) * Math.pow(lv / 100, 1.6);
@@ -1513,7 +1527,7 @@ function setEdit(on) {
   S.edit = on; root.classList.toggle("editing", on);
   qs("#r3d-editbtn").setAttribute("aria-pressed", String(on));
   qs("#r3d-editbar").hidden = !on;
-  if (on) { preEditView = S.view; if (!(VIEWS[S.view] || {}).above) setView("room"); }   // v21: edit from the whole room, cut away
+  if (on) { preEditView = S.view; if (!(VIEWS[S.view] || {}).above) setView("room"); const pn = document.getElementById("r3d-panel"); if (pn) pn.hidden = true; closePop(); }   // v21: edit from the whole room, cut away (v25: the Tools panel steps aside)
   else { select(null); qs("#r3d-addlist").hidden = true; if (preEditView && preEditView !== S.view) setView(preEditView); }
   dirty();
 }
@@ -1756,6 +1770,59 @@ function updateCut() {        // which wall the camera is outside of, if any (on
   reshadow();
   return true;
 }
+/* ---------------------------------------------------------------- v25: the numbered stickers on the room
+   Each has an anchor in room cm (room3d_page.hotspots). Every frame the camera moves it is projected to the stage; a sticker behind
+   the camera or off the picture hides; one on a wall seen from behind (and not opened by the cutaway) fades. Tapping one opens the
+   popover under it: Open in the plan (the page's Plan sheet, at that chapter) and Fly here (the matching view). */
+const HOTS = JSON.parse((document.getElementById("hotspots-data") || {}).textContent || "[]");
+const stickEls = {}; qsa(".stk").forEach(b => { stickEls[b.dataset.hot] = b; });
+const pop = qs("#r3d-pop"), stage = qs(".r3d-stage");
+let popId = null;
+const _p = new THREE.Vector3();
+function placeStickers() {
+  if (!HOTS.length || !started) return;
+  const w = stage.clientWidth, h = stage.clientHeight, cx = -camera.position.x / M, cz = camera.position.z / M;
+  for (const H of HOTS) {
+    const el = stickEls[H.id]; if (!el) continue;
+    _p.copy(v3(...H.at)).project(camera);
+    const off = _p.z > 1 || _p.z < -1 || Math.abs(_p.x) > 1.02 || Math.abs(_p.y) > 1.02;
+    el.hidden = off;
+    if (off) { if (popId === H.id) closePop(); continue; }
+    const hw = (el.offsetWidth || 140) / 2 + 6, x = Math.max(hw, Math.min(w - hw, (_p.x + 1) / 2 * w)), y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
+    el.style.left = x + "px"; el.style.top = y + "px";
+    const behind = H.nrm && !(H.cut && H.cut === cutSide) && ((cx - H.at[0]) * H.nrm[0] + (cz - H.at[2]) * H.nrm[1]) < 0;
+    el.classList.toggle("behind", !!behind);
+    if (popId === H.id) placePop(el);
+  }
+}
+function placePop(el) {
+  const sw = stage.clientWidth, x = parseFloat(el.style.left), y = parseFloat(el.style.top), pw = 290;
+  const left = Math.max(12, Math.min(sw - pw - 12, x - pw / 2));
+  pop.style.left = left + "px"; pop.style.top = (y + 30) + "px"; pop.style.setProperty("--ax", (x - left) + "px");
+}
+function openPop(id) {
+  const H = HOTS.find(h => h.id === id); if (!H) return;
+  if (popId) stickEls[popId].setAttribute("aria-expanded", "false");
+  popId = id; const el = stickEls[id]; el.setAttribute("aria-expanded", "true");
+  pop.style.setProperty("--h", H.hue);
+  qs("#r3d-pop-h").textContent = H.name;
+  const ul = qs(".facts", pop); ul.textContent = "";
+  H.facts.forEach(f => { const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); });
+  pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true });
+}
+function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; }
+qsa(".stk").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); popId === b.dataset.hot ? closePop() : openPop(b.dataset.hot); }));
+if (pop) pop.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const H = HOTS.find(h => h.id === popId);
+  if (b.classList.contains("x")) { const was = popId; closePop(); if (was) stickEls[was].focus(); return; }
+  if (!H) return;
+  if (b.dataset.popgo === "fly") { setView(H.view); closePop(); }
+  else if (b.dataset.popgo === "plan") { closePop(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: H.chapter } })); }
+});
+canvas.addEventListener("pointerdown", () => { if (popId) closePop(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && popId) { const was = popId; closePop(); stickEls[was].focus(); } });
+new ResizeObserver(() => placeStickers()).observe(stage);
 function setAbove(show) {   // the floor above (the stairwell's upper walls) hides in the views from above
   scene.traverse(o => { if (o.name === "above") o.visible = show; });
   view.visible = show;
@@ -1800,7 +1867,7 @@ function frame(now) {
   if (updateCut()) need = 2;
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
-    gl.render(scene, camera); need--;
+    gl.render(scene, camera); need--; placeStickers();
     if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
   }
 }
@@ -1848,7 +1915,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v24 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v25 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -1870,7 +1937,10 @@ qs("#r3d-save").addEventListener("click", async () => {
 function press(attr, val) { qsa(`[data-${attr}]`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === String(val)))); }
 const sameAsScene = () => LAYERS.every(k => (S.lv[k] ?? 0) === (SCENES[S.scene].levels[k] ?? 0));
 function syncButtons() {
-  press("site", S.site); press("dining", S.dining); press("scene", sameAsScene() ? S.scene : ""); press("paint", S.paint); press("lamp", S.lamp);
+  press("site", S.site); press("dining", S.dining); press("scene", S.scene); press("tod", S.tod);
+  qsa("[data-scene]").forEach(b => b.classList.toggle("adjusted", b.dataset.scene === S.scene && !(sameAsScene() && S.master === 100)));   // v25: "Bright · adjusted"
+  const ln = qs("#r3d-litst"); if (ln) ln.textContent = SCENES[S.scene].name + (sameAsScene() && S.master === 100 ? "" : " · adjusted") + (S.tod === "day" ? " · daytime" : "");
+  const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
@@ -1878,6 +1948,7 @@ function syncButtons() {
   qsa("[data-sugg]").forEach(b => b.setAttribute("aria-pressed", String(!!S.sugg[b.dataset.sugg])));
   qsa("[data-decor]").forEach(b => { const [k, v] = b.dataset.decor.split(":"); b.setAttribute("aria-pressed", String(S.decor[k] === v)); });
   qs("#r3d-custom").value = S.custom;
+  qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase())));
   if (S.ceil !== "match" && qs("#r3d-ceil")) qs("#r3d-ceil").value = S.ceil;
   if (S.skirt !== "match" && qs("#r3d-skirt")) qs("#r3d-skirt").value = S.skirt;
   qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : (S.lv[k] ?? 0); i.value = v; qs(`[data-lvout="${k}"]`).textContent = `${Math.round(v)}%`; });
@@ -1890,7 +1961,8 @@ root.addEventListener("click", e => {
   if (d.walk) { walk(d.walk); return; }
   if (d.site) { S.site = d.site; applyState(); if (S.view === "dining") setView("dining"); }
   else if (d.dining) S.dining = d.dining, applyState();
-  else if (d.scene) S.scene = d.scene, S.lv = Object.assign({}, SCENES[d.scene].levels), applyLight(), updateCaption(), store.set(KEY, S);
+  else if (d.scene) S.scene = d.scene, S.lv = Object.assign({}, SCENES[d.scene].levels), S.master = 100, applyLight(), updateCaption(), store.set(KEY, S);   // tapping the tile again resets it
+  else if (d.tod) S.tod = d.tod, applyLight(), updateCaption(), store.set(KEY, S);
   else if (d.ceil) S.ceil = d.ceil, repaint(), store.set(KEY, S), dirty();
   else if (d.skirt) S.skirt = d.skirt, repaint(), store.set(KEY, S), dirty();
   else if (d.colreset) S.col[d.colreset] = WARM, applyLight(), store.set(KEY, S);
@@ -1913,7 +1985,8 @@ root.addEventListener("click", e => {
   else if (d.chairs) S.chairs = d.chairs, applyState();
   else if (d.seat) S.seat = d.seat, applyState();
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
-  else if (b.id === "r3d-full") { const st = qs(".r3d-stage"); (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
+  else if (b.id === "r3d-full") { const st = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
+  else if (d.paintcustom) S.custom = d.paintcustom, S.paint = "custom", repaint(), updateCaption(), store.set(KEY, S), dirty();   // v25: Deep green, a ready-made custom colour
   else if (b.id === "r3d-reset") { setView(S.view); return; }
   else return;
   syncButtons();
@@ -1922,7 +1995,7 @@ qs("#r3d-custom").addEventListener("input", e => { S.custom = e.target.value; S.
 // v15: the sliders, the colour bulbs, and the ceiling and skirting paints
 root.addEventListener("input", e => {
   const t = e.target, d = t.dataset;
-  if (d.lv) { const v = +t.value; if (d.lv === "master") S.master = v; else S.lv[d.lv] = v; qs(`[data-lvout="${d.lv}"]`).textContent = `${v}%`; press("scene", sameAsScene() ? S.scene : ""); applyLight(); updateCaption(); }
+  if (d.lv) { const v = +t.value; if (d.lv === "master") S.master = v; else S.lv[d.lv] = v; qs(`[data-lvout="${d.lv}"]`).textContent = `${v}%`; syncButtons(); applyLight(); updateCaption(); }
   else if (d.col) { S.col[d.col] = t.value; applyLight(); }
   else if (t.id === "r3d-ceil") { S.ceil = t.value; press("ceil", ""); repaint(); dirty(); }
   else if (t.id === "r3d-skirt") { S.skirt = t.value; press("skirt", ""); repaint(); dirty(); }
@@ -1953,7 +2026,7 @@ function start() {
   requestAnimationFrame(frame);
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
-    set(o) { Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
+    set(o) { oldScene(o); Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
     still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, VIEWS },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
