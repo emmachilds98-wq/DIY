@@ -1,0 +1,168 @@
+"""v14: exports the scene for the 3D room on the plan page (build_viewer.py).
+
+The 3D room is built from the same drawing code as the HD renders: render.py records every box, polygon and face frame it
+draws, in room coordinates, and this groups them by what they are and what state they're in (drawers in or out, the table
+folded, down for four or out for six). The room's shell, the TV's picture, the lights and the floor lamp are built in the
+browser from the numbers in "room" below. Site B (the table under the shelf by the stairs) is the same dining wall turned
+90° onto the west wall.
+
+python3 export3d.py   -> scene3d.json here
+"""
+import json, pathlib, re
+import geometry as G
+import render as R
+
+HERE = pathlib.Path(__file__).parent
+SKIP_FILL = {"#2b3530"}                     # the dark plug render.py draws over the stairwell's ceiling opening
+URL_FILL = {"url(#glass)": "glass", "url(#art1)": "art", "url(#bayBack)": "#2a2219", "url(#bayLight)": "#e0c393",
+            "url(#bayLightW)": "#e4e0d6", "url(#pot)": "#c46c45", "url(#screen)": "screen",
+            "url(#leftwall)": "#2c5643", "url(#rightwall)": "#2c5643", "url(#backwall)": "#2c5643"}
+
+
+def _fill(f):
+    if f.startswith("url("):
+        return URL_FILL.get(f)
+    return f.lower()
+
+
+def _flags(extra):
+    fl = "g" if "grain" in extra else ""
+    m = re.search(r'(?<![-\w])opacity="([\d.]+)"', extra)
+    if m and float(m.group(1)) < 0.99:
+        fl += f"o{float(m.group(1)):g}"
+    return fl
+
+
+def _keep_poly(fill, extra):
+    """Glows, soft shadows and light pools are the 2D renders' stand-ins for light: the 3D room has real light."""
+    if fill is None or fill in SKIP_FILL:
+        return False
+    if "url(#soft" in extra or "fill-opacity" in extra:
+        return False
+    return True
+
+
+def encode(recs, keep_polys=True):
+    out = []
+    for r in recs:
+        if r[0] == "poly":
+            _, pts, fill, extra = r
+            f = _fill(fill)
+            if not keep_polys or not _keep_poly(f, extra) or len(pts) < 3:
+                continue
+            out.append(["p", [c for q in pts for c in q], f, _flags(extra)])
+        elif r[0] == "frame":
+            _, x1, x2, top, z, holes, fill = r
+            out.append(["f", x1, x2, top, z, holes, _fill(fill)])
+        else:
+            x, y, z, w, h, d, front, top, side, extra = r
+            f = _fill(front)
+            if f is None or "fill-opacity" in extra or "url(#soft" in extra:
+                continue
+            t, s = _fill(top or front), _fill(side or front)
+            out.append(["b", x, y, z, w, h, d, f, t if t != f else 0, s if s != f else 0, _flags(extra)])
+    return out
+
+
+def rec(fn, *a, **kw):
+    R.REC = []
+    try:
+        fn(*a, **kw)
+        return R.REC
+    finally:
+        R.REC = None
+
+
+def state(dining="folded", game=0.0, rec_up=0.0, rec_lo=0.0, plinth=0.0):
+    R.VIEW, R.STYLE, R.DINING = "front", "joinery", dining
+    R.GAME_OPEN, R.REC_OPEN_UP, R.REC_OPEN, R.PLINTH_OPEN = game, rec_up, rec_lo, plinth
+    R.SOFA_GHOST = False
+
+
+def to_site_b(items):
+    """Turn the dining wall from the breast (along +x, out towards -z) onto the west wall (along -z, out towards -x),
+    about the table's centre: x' = ROOM_W + z, z' = TABLE_B_CZ - (x - TABLE_CX)."""
+    W, CX, CZ = G.ROOM_W, G.TABLE_CX, G.TABLE_B_CZ
+    out = []
+    for it in items:
+        if it[0] == "b":
+            _, x, y, z, w, h, d, *rest = it
+            out.append(["b", round(W + z, 2), y, round(CZ - (x + w - CX), 2), d, h, w, *rest])
+        elif it[0] == "p":
+            c = it[1]
+            nc = []
+            for i in range(0, len(c), 3):
+                x, y, z = c[i:i + 3]
+                nc += [round(W + z, 2), y, round(CZ - (x - CX), 2)]
+            out.append(["p", nc, *it[2:]])
+    return out
+
+
+def strip(items, drop):
+    ds = {json.dumps(d) for d in drop}
+    return [i for i in items if json.dumps(i) not in ds]
+
+
+def scene():
+    state()
+    fixed = []
+    sk = ("#346650", "#3d7259", "#2b5643", "#2d5a46", "#3b6e56")
+    fixed += [i for i in encode(rec(R.west_end, sk)) if i[0] == "b" or i[2] != "#2c5643"]   # the stairs; the shell is built in 3D
+    for fn in (R.high_shelf, R.tv, R.uprights, R.rz_shelf, R.worktop_items, R.wrap, R.sofa_solid):
+        fixed += encode(rec(fn))
+    groups = {"fixed": fixed}
+    groups["unit_in"] = encode(rec(R.unit))
+    state(game=30, rec_up=30, plinth=25)
+    groups["unit_out"] = encode(rec(R.unit))
+    state()
+    frames = encode(rec(R.breast_frames))
+    groups["frames"] = frames
+    bar2 = {}
+    for st in ("folded", "four", "six"):
+        state(dining=st)
+        wall = strip(encode(rec(R.dining_wall)), frames)
+        chairs = encode(rec(R.dining_chairs))
+        groups[f"A_{st}"] = wall + chairs
+        groups[f"B_{st}"] = to_site_b(wall) + (to_site_b(chairs) if st == "four" else chairs)
+        bar2[f"A_{st}"] = R.spot_heads2()
+        bx = (G.TABLE_B_X[0] + G.TABLE_B_X[1]) / 2 if st == "four" else G.ROOM_W - 2.0
+        by = G.TABLE_TOP if st == "four" else G.FOLDED_TOP - 30.0
+        if st == "six":
+            bar2[f"B_{st}"] = bar2[f"A_{st}"]
+        else:                  # bar 2 is over the table's stair end on the west wall: blue and mustard on the table, pink on the shelf
+            h = R.spot_heads2()
+            bar2[f"B_{st}"] = [h[0], (h[1][0], h[1][1], h[1][2], (bx, by, G.TABLE_B_CZ + 22)), (h[2][0], h[2][1], h[2][2], (bx, by, G.TABLE_B_CZ - 22)),
+                               (h[3][0], h[3][1], h[3][2], (G.ROOM_W - 10, G.SHELF_B["top"] + 8, G.TABLE_B_CZ - 60))]
+    state()
+
+    def bar(cx, cz, heads):
+        return {"x": cx, "z": cz, "heads": [{"dx": dx, "col": col, "stem": stem, "tgt": list(tgt)} for dx, col, stem, tgt in heads]}
+    room_spec = {
+        "W": G.ROOM_W, "CEIL": G.CEIL, "ALC_W": G.ALC_W, "ALC_D": G.ALC_D, "BREAST_X": G.BREAST_X, "RECESS_Z": G.BREAST_D_WEST,
+        "DOOR_X": G.DOOR_X, "DOOR_H": 198.0, "STAIR_X": G.STAIR_X, "STAIR_FRONT": G.ALC_D - G.STAIR_D,
+        "WELL_X0": G.DOOR_X[1] + 1.5, "WINDOW_Z": G.WINDOW_Z, "WINDOW_X": G.WINDOW_X, "WINDOW_Y": (88.0, 212.0),
+        "RADIATOR_X": G.RADIATOR_X, "RADIATOR_Y": (15.0, 70.0), "SKIRT_H": G.SKIRT_H,
+        "TV_X": G.TV_X, "TV_Y": (G.TV_BOTTOM, G.TV_TOP), "TV_Z": G.TV_PANEL_Z[0],
+        "SHELF_B": G.SHELF_B, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},
+        "TABLE_B": {"x": G.TABLE_B_X, "z": G.TABLE_B_Z, "cz": G.TABLE_B_CZ}, "SIX": {"x": G.SIX_X, "z": G.FREE_Z},
+        "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
+        "COFFEE": G.COFFEE, "LAMP": G.FLOOR_LAMP,
+        "LAMP_SPOTS": {k: {"label": v[0], "x": v[1][0], "z": v[1][1]} for k, v in G.FLOOR_LAMP_SPOTS.items()},
+        "SITES": G.DINING_SITES, "PAINT_OLD": R.PAINT_OLD, "PAINT_BASE": "#2d5a46",
+        "PAINTS": {k: {"hex": v[0], "name": v[1]} for k, v in R.PAINTS.items()},
+        "BAR1": bar(G.PEND_X, G.PEND_Z, R.SPOT_HEADS), "BAR2": {k: bar(G.BAR2_X, G.BAR2_Z, v) for k, v in bar2.items()},
+        "LED_Y": G.CEIL - 0.6, "RZ": G.RZ, "HIGH_UNDER": G.HIGH_UNDER, "WORKTOP": G.WORKTOP,
+    }
+    return {"room": room_spec, "groups": groups}
+
+
+def main():
+    sc = scene()
+    p = HERE / "scene3d.json"
+    p.write_text(json.dumps(sc, separators=(",", ":")))
+    n = {k: len(v) for k, v in sc["groups"].items()}
+    print("scene3d.json", round(p.stat().st_size / 1024), "KB", n)
+
+
+if __name__ == "__main__":
+    main()

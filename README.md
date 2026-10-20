@@ -2,14 +2,27 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v13.8
+## Media wall and dining wall, v14
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
-with a fold-down oak dining table on the chimney breast. Everything below shows here on GitHub; nothing needs downloading.
+with a fold-down oak dining table on the chimney breast, or (new option) on the stairs wall under your shelf. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v13%20-%20artisan%20oak%20-%20Card%20Room%20Green%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v14%20-%20artisan%20oak%20-%20Card%20Room%20Green%20(HD).png)
 
-**New in v13** (you asked for less cladding, the stairs going up, and the drawer layouts)
+**New in v14** (you asked for the table on the stairs wall, realistic renders of your options from round the room, and a better page)
+- **A second place for the table:** on the wall going up the stairs, under your 2 m shelf, measured from your photos. Same table and build; it leaves 84 cm to the stair box and 74 to the window, folds 42 cm under the shelf, sits under the existing pendant (bar 2) and out of the door's swing. Its end chairs are tight and the wall's build needs a knock first. Both options are compared in section 5 and on the plan page.
+- **The room in 3D** on the plan page: walk round it, put the table on either wall (folded, for four or for six), change the lighting scene, the paint (or any colour), where the floor lamp stands, open the drawers, and save any view as a 3840 × 2160 picture. Twelve HD stills are below and in `media-wall/out/`.
+- **v14.1: a faster 3D room** (it builds when you open it, redraws shadows only when something changes, drops resolution while you drag, and picks Fast on phones or slower machines), with the record covers in the frames and on the ledges, and an upholstered sofa. The whole plan is now on GitHub Pages.
+- **The page reorganised:** tabs in four groups, a dashboard on the overview (steps done, what's bought and paid, answers), and the two table options side by side.
+- Fit proof: 66 checks, 49 fit, 13 tight, 4 to check on site, none fail. 17 questions, three new: which wall for the table, what the stairs wall is built of, and where the lamp stands.
+
+| Option A: on the chimney breast | Option B: under your shelf by the stairs |
+|---|---|
+| ![Option A in 3D](media-wall/out/Media%20wall%20v14%20-%203D%20-%20the%20dining%20table%20on%20the%20breast,%20down%20for%20four%20-%20dinner%20(HD).png) | ![Option B in 3D](media-wall/out/Media%20wall%20v14%20-%203D%20-%20the%20dining%20table%20by%20the%20stairs,%20down%20for%20four%20-%20dinner%20(HD).png) |
+
+![The room in 3D from the window](media-wall/out/Media%20wall%20v14%20-%203D%20-%20from%20the%20window%20-%20table%20on%20the%20breast,%20folded%20-%20everyday%20evening%20(HD).png)
+
+**v13** (you asked for less cladding, the stairs going up, and the drawer layouts)
 - **Less cladding.** Gone: the slatted cable spine, the slatted PC screen, the slat panel behind the turntable, the slatted sub box and the reeded table. The slat-wall alternative is retired too.
 - **Cables you can't see.** The side wall is solid, so the PC's leads drop through a brush grommet in its shelf into conduit chased into the wall (your own job since v13.6): no spine, no trunking.
 - **Plain oak where it was slatted.** The sub stands on a low oak riser; the folded table is plain oiled oak between its pegged breadboard ends.
@@ -27,14 +40,13 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 - **v13.2: the stairwell opening** starts just after the door, over the banister; the sofa is drawn as your black jumbo-cord L-sofa.
 - **v13.1: six at the table** now use the leaf too: 170 × 80, 85 cm a diner, 75 cm off the breast, every clearance checked.
 - **v13.1: the side view** marks how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud.
-- Fit proof: 58 checks, 44 fit, 11 tight, 3 to check on site (the TV's plugs, the RetroTINK's size, the sub's vibration), none fail.
 - **Your answers (v12.1):** the sofa's long side ends in line with the breast's reveal (about 188 cm, from your photo); the door hinges on the breast side and opens in; the side wall and breast are solid; the PC is an average gaming case.
 
 | The table set for six, both spot bars | The PC side wall |
 |---|---|
-| ![Six at the table](media-wall/out/Media%20wall%20v13%20-%20table%20set%20for%20six,%20both%20spot%20bars%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v13%20-%20the%20PC%20side%20wall%20(HD).png) |
+| ![Six at the table](media-wall/out/Media%20wall%20v14%20-%20table%20set%20for%20six,%20both%20spot%20bars%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v14%20-%20the%20PC%20side%20wall%20(HD).png) |
 
-![Numbered key](media-wall/out/Media%20wall%20v13%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
+![Numbered key](media-wall/out/Media%20wall%20v14%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -54,7 +66,7 @@ with a fold-down oak dining table on the chimney breast. Everything below shows 
 ### The sub's cover
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v13%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v14%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)

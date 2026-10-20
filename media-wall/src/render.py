@@ -19,6 +19,7 @@ VY = Y0 - EYE_Y * S
 D = 505.0           # camera distance in front of the breast face, cm
 
 XOFF = YOFF = ZOFF = 0.0   # offsets applied by P(), used to place whole groups
+REC = None                 # v14: a list while recording boxes for the 3D viewer (see export3d.py)
 CAM_DEFAULT = (EYE_X, X0, S, SHIFT)
 
 
@@ -69,12 +70,22 @@ def cam_pos():
     return (D, EYE_Y, EYE_X) if VIEW == "side" else (EYE_X, EYE_Y, -D)
 
 
+class P3(tuple):
+    """v14: a projected point that remembers where it is in the room, so a recorded polygon can be rebuilt in 3D."""
+
+
 def P(x, y, z):
     x, y, z = x + XOFF, y + YOFF, z + ZOFF
+    w = (x, y, z)
     if VIEW == "side":       # across the picture = along the side wall (z), depth = distance from it (x)
         x, z = z, -x
     k = D / (D + z)
-    return (VX + (X0 + x * S - VX) * k, VY + (Y0 - y * S - VY) * k)
+    q = (VX + (X0 + x * S - VX) * k, VY + (Y0 - y * S - VY) * k)
+    if REC is None:
+        return q
+    q = P3(q)
+    q.w = tuple(round(v, 2) for v in w)
+    return q
 
 
 def K(z, x=0.0):
@@ -89,6 +100,8 @@ def pts(*p):
 
 
 def poly(points, fill, extra=""):
+    if REC is not None and fill != "none" and points and all(isinstance(q, P3) for q in points):
+        REC.append(("poly", [q.w for q in points], fill, extra))
     return f'<polygon points="{pts(*points)}" fill="{fill}" {extra}/>'
 
 
@@ -103,6 +116,8 @@ def box(x, y, z, w, h, d, front, top=None, side=None, bottom=None, extra=""):
     side = side or front
     bottom = bottom or side
     gx, gy, gz = x + XOFF, y + YOFF, z + ZOFF
+    if REC is not None:   # v14: the 3D viewer's scene is every box the renderer draws, in room coordinates
+        REC.append((round(gx, 2), round(gy, 2), round(gz, 2), round(w, 2), round(h, 2), round(d, 2), front, top, side, extra))
     cx, cy, cz = cam_pos()
     out = []
     if cx > gx + w:      # right (+x) face visible
@@ -117,6 +132,9 @@ def box(x, y, z, w, h, d, front, top=None, side=None, bottom=None, extra=""):
         out.append(quad_front(x, y, z + d, w, h, side, extra))
     if cz < gz:          # front face
         out.append(quad_front(x, y, z, w, h, front, extra))
+    if REC is not None:  # the box is already recorded whole: drop the faces poly() just recorded for it
+        while REC and REC[-1][0] == "poly":
+            REC.pop()
     return "\n".join(out)
 
 
@@ -134,6 +152,15 @@ def art_on(q, blocks):
         bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
         tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
         return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
+    if REC is not None and all(isinstance(p_, P3) for p_ in q):   # v14.1: the 3D export gets the sleeve art too
+        bl, br, tr, tl = (p_.w for p_ in q)
+        nx = [(br[i] - bl[i]) for i in range(3)]; ny = [(tl[i] - bl[i]) for i in range(3)]
+        nrm = [nx[1] * ny[2] - nx[2] * ny[1], nx[2] * ny[0] - nx[0] * ny[2], nx[0] * ny[1] - nx[1] * ny[0]]
+        ln = math.sqrt(sum(c * c for c in nrm)) or 1.0
+        def L3(u, v, k):   # bilinear on the quad, lifted off it (towards the viewer) a little more for each layer
+            pt = [bl[i] + nx[i] * u + ny[i] * v + (tr[i] - br[i] - ny[i]) * u * v - nrm[i] / ln * 0.06 * (k + 1) for i in range(3)]
+            q_ = P3(L(u, v)); q_.w = tuple(round(c, 3) for c in pt); return q_
+        return "\n".join(poly([L3(u1, v1, k), L3(u2, v1, k), L3(u2, v2, k), L3(u1, v2, k)], c) for k, (c, u1, u2, v1, v2) in enumerate(blocks))
     return "\n".join(poly([L(u1, v1), L(u2, v1), L(u2, v2), L(u1, v2)], c) for (c, u1, u2, v1, v2) in blocks)
 
 # ---------------------------------------------------------------- shared with v9 (unchanged drawings)
@@ -695,6 +722,9 @@ def face_frame(x1, x2, holes, top=73.0):
         h = [P(a, yb, 0), P(b, yb, 0), P(b, top - 2.0, 0), P(a, top - 2.0, 0)]
         d += " M" + " L".join(f"{p[0]:.1f},{p[1]:.1f}" for p in h) + " Z"
     fill = OAK if STYLE == "joinery" else G_FRAME
+    if REC is not None:   # v14: the face frame, with its openings, for the 3D viewer
+        REC.append(("frame", round(x1 + XOFF, 2), round(x2 + XOFF, 2), round(top + YOFF, 2), round(ZOFF, 2),
+                    [(round(a + XOFF, 2), round(b + XOFF, 2), round(yb + YOFF, 2)) for a, b, yb in holes], fill))
     return (f'<path d="{d}" fill="{fill}" fill-rule="evenodd" {GH if STYLE == "joinery" else ""}/>'
             f'<path d="{d}" fill="none" stroke="#000" stroke-opacity="0.18" stroke-width="1"/>')
 

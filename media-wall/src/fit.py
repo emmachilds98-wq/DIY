@@ -32,6 +32,7 @@ SOURCES = {
     "subport": "Klipsch subwoofer placement guidance, as quoted by Cloudspress and TechYorker (2026): leave about 6–12 in (15–30 cm) between a rear-firing port and the nearest obstruction",
     "psuplace": "Xbox Support (Microsoft), About the Xbox One power supply (archived): don't block its vents, don't put it in a confined space such as a bookcase, rack or stereo cabinet unless the space is well ventilated, don't stack devices on it, and lay it flat on its four rubber pads; the Xbox 360 brick's advice is the same",
     "x360place": "Xbox Support (Microsoft), Xbox 360 placement tips, as quoted on Gaming Stack Exchange: an open, well-ventilated area, a hard surface, and away from high-vibrating sources such as subwoofers",
+    "photo20": "Your two photos of the west end (20 Oct 2026): the 2 m black shelf on the wall beside the stairs, scaled from its 2 m: it starts about 41 cm past the stair box and stops about 16 cm short of the window corner, top about 200; the pendant hangs about 55 cm out from the wall, a quarter of the way along it",
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
 }
 ORDER = list(SOURCES)
@@ -49,6 +50,32 @@ def r1(x):
     if abs(x - G.TV_CENTRE) < 1e-6:
         return "116.5"            # 116.55: quoted as 116.5 throughout the plan
     return f"{x:.2f}".rstrip("0").rstrip(".")
+
+
+def stairs_zone():
+    """v14: the dining table's second site, on the stairs wall under the client's 2 m shelf."""
+    g = G
+    tw, td, tt = g.TABLE
+    cd = g.CHAIR[1]
+    south = g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0]
+    north = g.TABLE_B_Z[1] - g.WINDOW_Z
+    under = g.SHELF_B["top"] - g.SHELF_B["t"]
+    room_side = g.TABLE_B_X[0] - cd
+    swing = g.BREAST_D_WEST - g.DOOR_SWING
+    bar_over = g.TABLE_B_X[0] <= g.BAR2_X <= g.TABLE_B_X[1] and g.TABLE_B_Z[1] <= g.BAR2_Z <= g.TABLE_B_Z[0]
+    return ("Option: the table under the shelf, by the stairs", f"the same {r1(tw)} × {r1(td)} fold-down table on the west wall, centred {r1(-g.TABLE_B_CZ)} from the breast's face line", [
+        ("The wall beside the stairs", f"table {r1(tw)} long", ref("photo20", "room"), f"{r1(g.STAIRS_WALL_Z[0] - g.WINDOW_Z)} from the stair box to the window wall",
+         f"{r1(south)} to the stair box, {r1(north)} to the window wall", PASS),
+        ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
+        ("Down for four: the room side", f"table edge {r1(g.ROOM_W - g.TABLE_B_X[0])} out from the wall; chairs to x {r1(room_side)}", ref("dining", "terje"),
+         f"the sofa's end at x {r1(g.SOFA_X[1])}", f"{r1(room_side - g.SOFA_X[1])} to walk behind the chairs (100+ is the aim)", PASS),
+        ("The stair end's chair", f"{r1(cd)} deep at the table's south end", ref("terje"), f"{r1(south)} to the stair box", f"{r1(south - cd)} behind it: tuck it in after a meal so the stair's foot stays clear", TIGHT),
+        ("The window end's chair", f"{r1(cd)} deep at the north end", ref("terje"), f"{r1(north)} to the window wall", f"{r1(north - cd)} behind it", TIGHT),
+        ("The door's swing", f"the door opens in, {r1(g.DOOR_SWING)} wide", ref("room"), f"its edge reaches {r1(swing)}", f"{r1(swing - g.TABLE_B_Z[0])} clear of the table: unlike the breast, nobody sits in its swing", PASS),
+        ("Light over the table", "the existing pendant point, for bar 2", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})",
+         "right over the table's stair end: the bar's heads light the table directly" if bar_over else "beside the table: aim two heads at it", PASS),
+        ("Fixing the brackets", "500 kg a pair, into the wall", ref("hebgo"), "the west wall's build isn't known yet", "solid (plugs and screws) or studwork (fix into studs): knock and look before choosing this site", CHECK),
+    ])
 
 
 def zones():
@@ -193,6 +220,7 @@ def zones():
             ("Feet under the table, four at the wall", f"the cover {r1(box_front)} out from the breast", ref("terje"), f"table {r1(td)} deep", f"{r1(td + g.RAIL[2] - box_front)} of legroom in front of it on the room side; the end seats are clear", PASS),
             ("Chairs at the table", f"seat {r1(g.CHAIR[3])}", ref("terje"), f"top {r1(g.TABLE_TOP)}", f"{r1(g.TABLE_TOP - g.CHAIR[3])} seat to top, the usual 25–30", PASS),
         ]),
+        stairs_zone(),
         ("The room", f"{r1(g.ROOM_W)} × {r1(g.ROOM_D)}, ceiling {r1(g.CEIL)}", [
             ("Eyes to screen from the sofa", "the L-sofa's long side against the window wall, 10 off the radiator", ref("room", "sofa"), f"{r1(g.SCREEN_FROM_WINDOW)} window wall to screen", f"about {g.VIEW_DIST / 100:.2f} m; a 55-inch fills about 26°", PASS),
             ("From the end of the sofa's return", f"sitting up at its end, {r1(g.TV_PANEL_Z[0] - g.CHAISE_EYES_Z)} from the screen", ref("sofa"), "straight ahead of the TV", "the TV's move puts it square on to this seat", PASS),
