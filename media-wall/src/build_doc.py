@@ -1,92 +1,170 @@
-"""Builds the revised plan as HTML, then PDF via headless Chromium."""
+"""Builds the plan (v13) as HTML, then PDF via headless Chromium, plus the beginner's build guide as its own PDF.
+The plan reads in build order: decision, room, media wall and fit proof, records and turntable, dining wall, side wall,
+joinery, paint and light, power and network, build guide, buy list, then what's left to confirm.
+Numbers come from geometry.py and fit.py."""
 import base64, pathlib
-from diagrams import network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house, living_plan
-PARTS = pathlib.Path(__file__).parent / 'parts'
+import geometry as G
+import fit
+import questions
+from diagrams import (light_scene, leaf_case, sub_box, drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
+                      living_plan, why_layout, seating, dining_section, dining_sites)
 
 HERE = pathlib.Path(__file__).parent
+VERSION = "14"
+REVISION = "14.1: a faster 3D room, on GitHub Pages"
+PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
+GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
+
+
+DECK = False   # True while the plan page (build_viewer.py) borrows these sections: images become art/ keys
+DECK_ART = {"render_v13_join_clean.png": "art_join_card_room", "render_v13_join_key_scene.png": "key_join",
+            "render_v13_drawers.png": "art_drawers_card_room", "render_v13_dining_four.png": "art_four_card_room",
+            "render_v13_dining_six.png": "art_six_card_room", "render_v13_side.png": "art_side_card_room",
+            "paint_grid.png": "doc_paint", "skirting_options.png": "doc_skirt",
+            "render_v14_3d_window_A_folded.png": "3d_window_A_folded", "render_v14_3d_dining_B_four.png": "3d_dining_B_four",
+            "render_v14_3d_B_folded.png": "3d_B_folded"}
+
 
 def img(name, alt=""):
-    data = base64.b64encode((HERE / name).read_bytes()).decode()
-    return f'<img src="data:image/png;base64,{data}" alt="{alt}">'
+    if DECK:
+        return f'<img data-art="{DECK_ART[name]}" alt="{alt}" loading="lazy">'
+    p = HERE / name
+    mime = "jpeg" if p.suffix.lower() in (".jpg", ".jpeg") else "png"
+    return f'<img src="data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}" alt="{alt}">'
 
-# ---------------------------------------------------------------- tracker data
+
+def n(x):
+    return f"{x:.2f}".rstrip("0").rstrip(".")
+
+
+LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS             # 188
+SINGLES = 2 * G.TRAY_SINGLES                               # 240
+
+# ---------------------------------------------------------------- buy list and jobs, in build order
 # (status, item, phase, qty, lo, hi)  lo/hi None = no cost
 TRACK = [
-    ("To do", "Put the Virgin Hub 5 into modem mode", "Network", "", None, None),
-    ("To do", "Set up Deco A, Switch 1 and both PCs", "Network", "", None, None),
-    ("To do", "Add Deco B and C; speed-test each room and the Xbox", "Network", "", None, None),
-    ("To buy", "Cat6 patch leads, 0.5–2 m", "Network", "11", 15, 20),
-    ("To buy", "TP-Link TL-SG108 8-port switch: one for the living room, one to replace the 5-port upstairs <b>(new)</b>", "Network", "2", 36, 50),
-    ("To do", "Book one electrician visit: both Cat6 runs plus a spare each (Deco B's through the ceiling in the alcove's right corner), swap the single socket on the side wall in front of bay 1 for a double (or move it 40 cm back into the alcove, behind the unit) <b>(changed)</b>, a socket by the sofa for the rear speakers if there isn't one, a socket under the PC shelf, a switched fused spur for the LED drivers, and an LED-compatible dimmer for the ceiling light <b>(new)</b>", "Cabling and power", "", None, None),
-    ("To buy", "Cat6 solid pure copper, round (not CCA)", "Cabling and power", "2 runs", 30, 50),
-    ("To buy", "6-way surge-protected extension with individually switched sockets, for Deco B, the 8-port switch, turntable, preamp and RetroTINK (your 10-gang takes the rest)", "Cabling and power", "1", 25, 40),
-    ("To buy", "4-port USB charger, 5V 2A per port (HDMI switch, Xbox fan stand, controller dock)", "Cabling and power", "1", 10, 20),
-    ("To buy", "USB plug, 5V 2A or more, for the RetroTINK on the switched strip <b>(new)</b>", "Cabling and power", "1", 5, 10),
-    ("To buy", "Cable kit: brush grommets, velcro ties, labels, corner trunking", "Cabling and power", "1", 20, 30),
-    ("To buy", "Two-compartment trunking for the service channel, about 2 m", "Cabling and power", "1", 10, 20),
-    ("To buy", "Slim paintable trunking for the PC drop and skirting run, about 3 m", "Cabling and power", "1", 15, 30),
-    ("To buy", "DC extension lead for the Deco adapter, if its lead won't reach down the upright's groove to the 6-way (match the plug)", "Cabling and power", "1", 5, 10),
-    ("To buy", "PC tidy kit: braided sleeve, right-angle C13 power lead, shelf-notch grommet <b>(new)</b>", "Cabling and power", "1", 10, 20),
-    ("To do", "Sample Farrow & Ball Card Room Green No. 79 on an A4 board; check by day and with the LED strip on <b>(changed)</b>", "Decorating", "", None, None),
-    ("To buy", "Farrow & Ball Card Room Green No. 79: Estate (or Modern) Emulsion for walls, ceiling and alcove; Estate Eggshell for skirting, door, frame and trunking; primer/undercoat <b>(changed)</b>", "Decorating", "", 200, 500),
-    ("To buy", "Woodwork primer, sanding pads and sugar soap for the white skirting and door <b>(new)</b>", "Decorating", "1", 20, 40),
-    ("To do", "Paint the whole room, alcove included, before the unit goes in; skirting and door from white to Card Room Green eggshell", "Decorating", "", None, None),
-    ("Done", "Check the alcove back wall for the shelf fixings (solid)", "Media wall", "", None, None),
-    ("To do", "Check the left wall where the PC shelf goes: solid, or plasterboard on studs <b>(new)</b>", "Media wall", "", None, None),
-    ("To buy", "Two IKEA BESTÅ 60×40×64 frames, white stained oak effect, for bays 1–2 <b>(changed: bay 3 is now custom)</b>", "Media wall", "2", 70, 200),
-    ("To buy", "Plinth for bays 1–2: 18 mm ply ladder frame 120 × 38 × 9 cm, plus shims <b>(new)</b>", "Media wall", "1", 15, 30),
-    ("To buy", "Bay 3 carcass: 18 mm birch ply cut to size (sides 73 × 40, top and bottom 56.4 × 40, two back rails), connector bolts <b>(new)</b>", "Media wall", "1", 60, 110),
-    ("To buy", "Felt-lined battens for the worktop over the sub bay", "Media wall", "1", 5, 10),
-    ("To buy", "BESTÅ shelves, 56 × 36 cm (20 kg max each), two each for bays 1 and 2", "Media wall", "4", 12, 32),
-    ("To buy", "Anti-tip wall brackets and 10 cm spacer blocks for the two frames and the bay 3 carcass", "Media wall", "1 set", 15, 25),
-    ("To buy", "Two face-out record tray kits: 12 mm and 9 mm birch ply cut to size, 6 mm oak dividers, 15 mm oak lips, raked rests, felt, two pairs of 400 mm runners rated 68–70 kg <b>(changed: thinner, singles face-out)</b>", "Media wall", "2", 150, 240),
-    ("To do", "Measure about ten games of each kind (PS2, Xbox 360, Xbox One) before cutting the game drawer <b>(new)</b>", "Media wall", "", None, None),
-    ("To buy", "Game drawer kit: 12 mm birch ply cut to size, 350 mm full-extension soft-close runners (35–49 kg), oak lip, follower block, felt <b>(new)</b>", "Media wall", "1", 50, 90),
-    ("To buy", "Hidden cleats for the shelf ends on the side walls, 44 × 22 mm planed softwood, about 3 m", "Media wall", "1", 15, 25),
-    ("To buy", "Bookends for the high shelf <b>(new)</b>", "Media wall", "2", 10, 20),
-    ("To buy", "Lidded box for cables and controllers on the high shelf", "Media wall", "1", 10, 20),
-    ("To buy", "LP browser for the worktop under the deck: oak base, low front rail and side, 44 × 24 cm", "Media wall", "1", 30, 60),
-    ("To buy", "Kit shelf over the sub: oak or ply 44 × 30 cm on battens, top at 38.8 cm, with rubber pads", "Media wall", "1", 15, 30),
-    ("To buy", "Hidden slim drawer under the worktop in the sub bay: oak front 44 × 7.4 cm, 12 mm ply box 40 × 28 × 6 cm, 250 mm full-extension runners <b>(new)</b>", "Media wall", "1", 25, 45),
-    ("To buy", "PC shelf rebuilt as a box with a keyboard and mouse tray: oak, 300 mm light runners, French cleat <b>(new)</b>", "Media wall", "1", 25, 50),
-    ("To buy", "Oak for the PC shelf box: 27 mm top 65 × 32, 18 mm sides; French cleat and 2 steel brackets rated 25 kg+", "Media wall", "1", 30, 70),
-    ("To buy", "Compact isolation riser for the sub (about 30 × 35 cm, 4–6 cm tall), plus isolation feet for the turntable", "Media wall", "1", 30, 60),
-    ("To do", "Build the plinth and bay 3 carcass, fix everything to the wall; set rows to the fit check heights; fit the game drawer and both record trays; place the TV, soundbar, Series X and sub", "Media wall", "", None, None),
-    ("To buy", "5-in-1 4K60 HDMI switch, auto-switching, with remote", "TV and consoles", "1", 20, 35),
-    ("To do", "Measure the PC-to-TV cable route (estimated 4–5 m)", "TV and consoles", "", None, None),
-    ("To buy", "Active optical HDMI cable for the PC, certified Ultra High Speed (48 Gbps), about 5–7.5 m", "TV and consoles", "1", 20, 60),
-    ("To buy", "High Speed HDMI leads, 1–2 m", "TV and consoles", "5", 20, 30),
-    ("To buy", "RetroTINK-6X CE upscaler for the PS2 and PS1 (order on restock; UK price includes VAT and import fees)", "TV and consoles", "1", 200, 240),
-    ("To buy", "PS2 component video cable, good quality", "TV and consoles", "1", 10, 20),
-    ("To buy", "Optical (TOSLINK) cable, 2 m, PS2 straight to the soundbar", "TV and consoles", "1", 5, 10),
-    ("To buy", "RGB SCART cable for the PS1", "TV and consoles", "1", 8, 15),
-    ("To do", "Connect the TV inputs; set up the PS2 and RetroTINK", "TV and consoles", "", None, None),
-    ("To buy", "Replacement stylus for the slim turntable", "Vinyl", "1", 15, 40),
-    ("To buy", "External phono preamp (only if the deck has a PHONO/LINE switch)", "Vinyl", "1", 40, 100),
-    ("To buy", "RCA-to-3.5 mm lead", "Vinyl", "1", 5, 10),
-    ("To buy", "Carbon-fibre record brush", "Vinyl", "1", 10, 15),
-    ("To do", "Set tracking weight and soundbar Music mode", "Vinyl", "", None, None),
-    ("To do", "Turn on HDMI-CEC (SIMPLINK); PS3 Control for HDMI off", "Finishing", "", None, None),
-    ("To do", "Deco app: prioritise Series X and PC, guest Wi-Fi, auto firmware", "Finishing", "", None, None),
-    ("To do", "Label each switched socket and HDMI switch input with the console's name", "Finishing", "", None, None),
-    ("To do", "Set the sub and rear speaker levels from the sofa", "Finishing", "", None, None),
-    ("To buy", "Two solid oak uprights, 150 × 30 × 4.5 cm, quarter-sawn if possible <b>(new: main plan)</b>", "Oak joinery and lighting", "2", 150, 300),
-    ("To buy", "Solid oak for the shelves: high shelf in three lengths (128.9, 45.7, 46.2 × 30 × 4), left shelf 51 × 25 × 4, turntable shelf 51.5 × 45 × 4, record ledge 128.9 × 7 × 2.4", "Oak joinery and lighting", "1 set", 200, 350),
-    ("To buy", "Oak wedges, 10 mm oak dowel for pegs and dowels, concealed upright brackets", "Oak joinery and lighting", "1", 15, 30),
-    ("To buy", "Solid oak worktop, full stave, cut to 225 × 40 × 3 cm, chamfered edge (the offcut makes the LP browser base)", "Oak joinery and lighting", "1", 200, 400),
-    ("To buy", "Oak face frame, 20 mm, stiles and rails", "Oak joinery and lighting", "1", 80, 180),
-    ("To buy", "Cane screen for the PC: oak frame and pre-woven cane, 26 × 48 cm", "Oak joinery and lighting", "1", 20, 40),
-    ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, driver; 6500K bias light for the TV", "Oak joinery and lighting", "1", 40, 90),
-    ("To buy", "Ceiling light: Dunelm Elements Wolston 4-light spotlight bar (£49), in the multicoloured style, plus four warm-white (2700K) dimmable E14 LED bulbs, 6 W max <b>(changed)</b>", "Oak joinery and lighting", "1", 60, 80),
-    ("To buy", "Later: aluminium channel and opal diffuser for the existing ceiling LED strip (optional)", "Oak joinery and lighting", "1", 0, 80),
-    ("To do", "Cut the joints, fit the uprights, shelves, ledge and face frame, notch the uprights for the ceiling strip, and wire the LEDs (see the build guide)", "Oak joinery and lighting", "", None, None),
+    ("To do", "Put the Virgin Hub 5 into modem mode", "1 Network, now", "", None, None),
+    ("To do", "Set up Deco A, Switch 1 and the PCs in bedroom 3", "1 Network, now", "", None, None),
+    ("To do", "Add Deco B and Deco C over Wi-Fi for now; speed-test each room and the Xbox", "1 Network, now", "", None, None),
+    ("To buy", "Cat6 patch leads, 0.5–2 m", "1 Network, now", "11", 15, 20),
+    ("To buy", "TP-Link TL-SG108 8-port switch: one for the living room, one to replace the 5-port in bedroom 3", "1 Network, now", "2", 36, 50),
+    ("To do", "Cat6, your own job: two runs from bedroom 3, across the landing and down through the airing cupboard, one to the alcove's right corner (Deco B) and one on to the kitchen (Deco C), a spare pulled with each, and the optional runs to the master and bedroom 2 <b>(changed: no electrician)</b>", "2 Cables and power", "", None, None),
+    ("To buy", "Cat6 solid pure copper, round (not CCA): two runs, four with the optional ones", "2 Cables and power", "2–4 runs", 30, 60),
+    ("To buy", "Cat6 tools: a punch-down tool, RJ45 keystones and two surface boxes (or plugs and a crimper), a cable tester, a draw-rod set <b>(new: you run the Cat6 yourselves)</b>", "2 Cables and power", "1 set", 30, 60),
+    ("To do", "Swap the single socket on the side wall for a double at the same spot: like for like, not notifiable; step 3 has the safe way to do it <b>(changed: your own job)</b>", "2 Cables and power", "", None, None),
+    ("To buy", "A double socket in the same finish, and a deeper back box if the old one is shallow <b>(new)</b>", "2 Cables and power", "1", 5, 15),
+    ("To buy", "Electrical safety kit: a two-pole voltage tester to GS38 with its proving unit, an MCB lock-off and padlock, a plug-in socket tester <b>(new: for doing it yourselves)</b>", "2 Cables and power", "1 set", 45, 90),
+    ("To buy", "Insulated (VDE) screwdrivers, wire strippers and side cutters <b>(new)</b>", "2 Cables and power", "1 set", 20, 40),
+    ("To buy", "6-way surge-protected extension for the retro set (Xbox One, 360, PS3, PS2, PS1, RetroTINK) <b>(changed: switched at the wall)</b>", "2 Cables and power", "1", 20, 35),
+    ("To buy", "4-port USB charger, 5 V 2 A per port (HDMI switch, fan stand, pad dock, bias light)", "2 Cables and power", "1", 10, 20),
+    ("To buy", "USB plug, 5 V 2 A or more, for the RetroTINK on the retro 6-way", "2 Cables and power", "1", 5, 10),
+    ("To buy", "Cable kit: brush grommets, velcro ties, labels", "2 Cables and power", "1", 20, 30),
+    ("To buy", "Flat two-compartment trunking for the 4 cm channel behind the base, about 2 m", "2 Cables and power", "1", 10, 20),
+    ("To do", "Chase two conduits into the solid side wall for the PC, from behind the PC shelf down to skirting height and behind the skirting to the base's plinth: 38 mm oval for the HDMI and Cat6, 25 mm oval for the PC's mains lead; make good and paint <b>(changed: your own job; the PC now runs from the 10-gang)</b>", "2 Cables and power", "", None, None),
+    ("To buy", "Conduit: 38 mm and 25 mm oval, about 4 m each, two draw wires, one oak-coloured brush grommet; a 5 m C13 lead with a rewireable 13 A plug for the PC <b>(changed)</b>", "2 Cables and power", "1", 15, 35),
+    ("To buy", "For the chase: a wall chaser with dust extraction for a day (or a bolster chisel and club hammer), one-coat filler <b>(new)</b>", "2 Cables and power", "1", 20, 45),
+    ("To buy", "PC tidy kit: braided sleeve, shelf-notch grommet", "2 Cables and power", "1", 5, 15),
+    ("To buy", "Only if there's no socket by the sofa: a 12-way surge-protected strip in place of the 10-gang, so the rear speakers get a way <b>(new)</b>", "2 Cables and power", "1", 0, 60),
+    ("To do", "Sample Farrow & Ball Card Room Green No. 79 on an A4 board; check it by day and with the LED strip on", "3 Paint", "", None, None),
+    ("To buy", "Card Room Green: Estate (or Modern) Emulsion for walls, ceiling, alcove and chimney breast; Estate Eggshell for skirting, door and frame; primer and undercoat", "3 Paint", "", 200, 500),
+    ("To buy", "Woodwork primer, sanding pads and sugar soap for the white skirting and door", "3 Paint", "1", 20, 40),
+    ("To do", "Paint the whole room before anything is fixed: alcove and breast included; skirting and door from white to eggshell", "3 Paint", "", None, None),
+    ("Done", "Check the alcove back wall for fixings (solid)", "4 Base unit", "", None, None),
+    ("To do", "Measure the alcove's width at the floor, 76, 134, 155 and 196 and the ceiling, and the floor's level across it", "4 Base unit", "", None, None),
+    ("Done", "Check the side wall where the ledge and PC shelf go, and the chimney breast where the dining wall goes: solid (you confirmed) <b>(new)</b>", "4 Base unit", "", None, None),
+    ("To buy", "Two IKEA BESTÅ 60×40×64 frames, white stained oak effect, for bays 1–2", "4 Base unit", "2", 70, 200),
+    ("To buy", "Plinth for bays 1–2: 18 mm ply ladder frame 120 × 38 × 9 cm with a clear bay under bay 2, plus shims", "4 Base unit", "1", 15, 30),
+    ("To buy", "Hidden plinth drawer: oak front 54 × 6 with a finger-pull groove underneath, 12 mm ply box 52 × 34 × 5, 300 mm full-extension runners <b>(changed: no push-to-open at floor level, as v6.1 said)</b>", "4 Base unit", "1", 30, 50),
+    ("To buy", "Bay 3 carcass for the records: 18 mm birch ply, 60 × 40 × 73 cm from the floor, connector bolts <b>(changed: holds the trays)</b>", "4 Base unit", "1", 45, 80),
+    ("To buy", "Two face-out record tray kits: 12 and 9 mm birch ply cut to size, 6 mm oak dividers, 15 mm oak lips, raked rests, felt, two pairs of 400 mm runners rated 68–70 kg", "4 Base unit", "2", 150, 240),
+    ("To buy", "BESTÅ shelves, 56 × 36 cm (20 kg max each), two each for bays 1 and 2", "4 Base unit", "4", 12, 32),
+    ("To buy", "The sub in bay 2: an isolation riser for it (dense foam or sorbothane, about 22 × 28 × 3), 12 mm birch ply for the divider (35.3 × 38) and the part shelf (32.2 × 36), four shelf pins, felt pads <b>(new in v13.5: the sub moves into the media wall)</b>", "4 Base unit", "1", 25, 45),
+    ("To buy", "Anti-tip brackets and 4 cm spacer blocks: both frames and bay 3", "4 Base unit", "1 set", 15, 25),
+    ("To do", "Measure about ten games of each kind (PS2, Xbox 360, Xbox One) before cutting the game drawer", "4 Base unit", "", None, None),
+    ("To buy", "Game drawer kit: 12 mm birch ply cut to size, 350 mm full-extension soft-close runners (35–49 kg), oak lip, follower block, felt", "4 Base unit", "1", 50, 90),
+    ("To do", "Build the plinth and bay 3, fix everything to the wall, fit the shelves, drawers and trays; place the TV and soundbar", "4 Base unit", "", None, None),
+    ("To buy", "Two solid oak uprights, 165 × 30 × 4.5 cm (cut to 159), quarter-sawn if possible", "5 Oak joinery", "2", 150, 300),
+    ("To buy", "Solid oak for the shelves: high shelf in two lengths (128.9 and 51.7 × 30 × 4), Series X shelf 55 × 30 × 4, record ledge 128.9 × 7 × 2.4, wrap ledge 134 × 7 × 2.4, PC shelf 82 × 28 × 4, lips <b>(changed)</b>", "5 Oak joinery", "1 set", 200, 340),
+    ("To buy", "Oak wedges, 10 mm oak dowel for pegs and dowels, concealed upright brackets; two concealed shelf brackets for the PC shelf, rated 40 kg+ a pair", "5 Oak joinery", "1", 30, 60),
+    ("To buy", "One solid oak worktop, 300 × 62 cm, full stave: the alcove top (186 × 46) and the dining wall's backboard (110 × 22) from the offcut, chamfered fronts <b>(changed)</b>", "5 Oak joinery", "1", 250, 450),
+    ("To buy", "Oak face frame, 20 mm, 186 cm for the base", "5 Oak joinery", "1", 60, 120),
+    ("To buy", "Keyboard tray for the PC shelf: 7 cm oak housing under it, 12 mm ply tray 54 × 26 with an oak lip, 300 mm light-duty runners <b>(new: back from v6.1)</b>", "5 Oak joinery", "1", 25, 45),
+    ("To do", "Cut the joints and fit the uprights, shelves, ledges and face frame; notch the uprights for the ceiling strip", "5 Oak joinery", "", None, None),
+    ("To buy", "Solid oak table top 110 × 80 × 2.7 with pegged breadboard ends, and a 60 × 80 × 2.7 leaf (edge-glued staves from a timber merchant, who can also radius the corners) <b>(new)</b>", "6 Dining wall", "1 set", 220, 400),
+    ("To buy", "Two Häfele Hebgo heavy-duty folding brackets, 287.43.428 (580 arm, 500 kg a pair) <b>(new)</b>", "6 Dining wall", "2", 70, 120),
+    ("To buy", "Union PowerLoad lift-off hinges, 100 × 88, one 3-pack (all the same hand) <b>(new)</b>", "6 Dining wall", "1", 16, 20),
+    ("To buy", "Eight tapered oak legs, 71 cm, 4.5 tapering to 3, each with an M8 hanger bolt (made from the cutting list, or bought ready-tapered): four for the top, four for the leaf <b>(changed in v13.6: oak only, so they store in the leaf)</b>", "6 Dining wall", "8", 70, 160),
+    ("To buy", "The leaf's leg case: oak for its frame (two rails 77 × 5.5 × 1.8, two 50.4 × 5.5 × 1.8), eight RS PRO 45 mm spring clips, felt <b>(new in v13.6)</b>", "6 Dining wall", "1", 25, 45),
+    ("To buy", "Two oak turn buttons, two leaf-alignment dowels and two table clips for the leaf, felt pads <b>(new)</b>", "6 Dining wall", "1", 10, 20),
+    ("To buy", "Four folding chairs, IKEA TERJE or similar (skip if yours fit: seat about 45–48) <b>(new)</b>", "6 Dining wall", "4", 100, 160),
+    ("To buy", "Two LP frames for the chimney breast, hung from 165 cm", "6 Dining wall", "2", 20, 40),
+    ("To buy", "Eight M8 brass threaded inserts for the legs, four in the top's breadboard ends and four in the leaf, set into the underside instead of plates <b>(changed in v13.5: the leaf's four)</b>", "6 Dining wall", "8", 12, 20),
+    ("To do", "Fix the backboard to the breast, hang the brackets and the top, check it folds and locks; set the legs to the right height", "6 Dining wall", "", None, None),
+    ("To do", "Swap both ceiling fittings for the spot bars and both light switches for LED-compatible dimmers: like for like, your own job; step 12 has the safe way <b>(changed: no electrician)</b>", "7 Lighting", "", None, None),
+    ("To buy", "Two LED-compatible dimmers (trailing edge), in your switches' finish, rated for the bars' LED load and your back boxes' depth <b>(new: on the buy list now)</b>", "7 Lighting", "2", 30, 60),
+    ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, a plug-in driver with an inline dimmer (on the 10-gang, so no fused spur); 6500K bias light for the TV <b>(changed)</b>", "7 Lighting", "1", 40, 90),
+    ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars (£49 each), plus eight warm-white (2700K) dimmable E14 LED bulbs, 6 W max <b>(changed: two)</b>", "7 Lighting", "2", 120, 160),
+    ("To buy", "A floor or table lamp by the sofa with a 2700K warm LED bulb: the low layer a green room needs <b>(new: from v6.1)</b>", "7 Lighting", "1", 30, 80),
+    ("To buy", "Later: aluminium channel and opal diffuser for the existing ceiling LED strip (optional)", "7 Lighting", "1", 0, 80),
+    ("To buy", "5-in-1 4K60 HDMI switch with remote", "8 TV, consoles and AV", "1", 20, 35),
+    ("To do", "Measure the PC-to-TV cable route (about 4–5 m along the skirting)", "8 TV, consoles and AV", "", None, None),
+    ("To buy", "Active optical HDMI cable for the PC, certified Ultra High Speed (48 Gbps), about 5 m", "8 TV, consoles and AV", "1", 20, 60),
+    ("To buy", "High Speed HDMI leads, 1–2 m; two 90° HDMI adapters in case the TV's plugs need them", "8 TV, consoles and AV", "5 + 2", 25, 40),
+    ("To buy", "RetroTINK-6X CE upscaler for the PS2 and PS1 (order on restock; UK price includes VAT and import fees)", "8 TV, consoles and AV", "1", 200, 240),
+    ("To buy", "PS2 component video cable, good quality", "8 TV, consoles and AV", "1", 10, 20),
+    ("To buy", "Optical (TOSLINK) cable, 2 m, PS2 straight to the soundbar", "8 TV, consoles and AV", "1", 5, 10),
+    ("To buy", "RGB SCART cable for the PS1", "8 TV, consoles and AV", "1", 8, 15),
+    ("To do", "Connect the TV inputs; set up the PS2 and RetroTINK", "8 TV, consoles and AV", "", None, None),
+    ("To buy", "Replacement stylus for the turntable (exact match for its model)", "9 Vinyl kit", "1", 15, 40),
+    ("To buy", "External phono preamp (only if the deck has a PHONO/LINE switch)", "9 Vinyl kit", "1", 40, 100),
+    ("To buy", "RCA-to-3.5 mm lead, 2 m: preamp under the Series X shelf to the soundbar's AUX <b>(changed: shorter)</b>", "9 Vinyl kit", "1", 5, 10),
+    ("To buy", "Isolation feet for the turntable; a carbon-fibre record brush", "9 Vinyl kit", "1", 20, 40),
+    ("To do", "Set the tracking weight; soundbar in Music mode", "9 Vinyl kit", "", None, None),
+    ("To do", "Turn on HDMI-CEC (SIMPLINK); PS3 Control for HDMI off", "10 Finishing", "", None, None),
+    ("To do", "Deco app: prioritise the Series X and PC, guest Wi-Fi, automatic firmware", "10 Finishing", "", None, None),
+    ("To do", "Label both outlets of the double socket (left: everything, right: retro) and each HDMI switch input", "10 Finishing", "", None, None),
+    ("To do", "Set the sub and rear speaker levels from the sofa", "10 Finishing", "", None, None),
 ]
-PHASES = ["Network", "Cabling and power", "Decorating", "Media wall", "TV and consoles", "Vinyl", "Oak joinery and lighting"]
-BIGGEST = {"Oak joinery and lighting": "solid oak worktop and shelves", "Network": "two 8-port switches", "Cabling and power": "Cat6 cable and trunking", "Decorating": "paint",
-           "Media wall": "record trays and the bay 3 carcass", "TV and consoles": "RetroTINK-6X CE", "Vinyl": "phono preamp"}
+PHASES = []
+for r in TRACK:
+    if r[2] not in PHASES:
+        PHASES.append(r[2])
+BIGGEST = {"1 Network, now": "two 8-port switches", "2 Cables and power": "the electrical safety kit and Cat6", "3 Paint": "paint",
+           "4 Base unit": "record trays and the BESTÅ frames", "5 Oak joinery": "the solid oak worktop", "6 Dining wall": "the oak table top",
+           "7 Lighting": "two spot bars", "8 TV, consoles and AV": "RetroTINK-6X CE", "9 Vinyl kit": "phono preamp", "10 Finishing": "—"}
+
+
+# v13.6, client: "make the build plan easy to tell how to find which part ie network/media wall/table etc".
+# Every step and every buy-list phase carries one or more of these coloured part labels.
+PARTS = {"Prep": "#6b6862", "Network": "#2a73d9", "Power & cables": "#c4482c", "Paint": "#4f7a52",
+         "Media wall": "#8a5a32", "Dining table": "#b0700f", "Lighting": "#8f7a00", "AV": "#7a4fb0"}
+PHASE_PART = {"1 Network, now": ["Network"], "2 Cables and power": ["Power & cables", "Network"], "3 Paint": ["Paint"],
+              "4 Base unit": ["Media wall"], "5 Oak joinery": ["Media wall"], "6 Dining wall": ["Dining table"], "7 Lighting": ["Lighting"],
+              "8 TV, consoles and AV": ["AV"], "9 Vinyl kit": ["AV"], "10 Finishing": ["AV", "Network"]}
+
+
+def part_chip(parts):
+    if isinstance(parts, str):
+        parts = [parts]
+    return "".join(f'<span class="part" style="--pc:{PARTS[x]}">{x}</span>' for x in parts)
+
+
+def scenes_html():
+    """v13.7: the four lighting scenes: a table of every layer's setting, then each scene on the room plan. In the viewer the
+    figures become buttons (build_viewer replaces the part between the markers)."""
+    import scenes as SC
+    head = "<tr><th>Light</th><th>Control</th>" + "".join(f"<th>{s[1]}</th>" for s in SC.SCENES) + "</tr>"
+    rows = "".join(f"<tr><td>{name}</td><td>{ctl}</td>" + "".join(f"<td class='num'>{SC.level_word(s[3][k])}</td>" for s in SC.SCENES) + "</tr>"
+                   for k, name, ctl in SC.LAYERS)
+    figs = "".join(f"<figure>{light_scene(s[0])}</figure><ul>" + "".join(f"<li>{x}</li>" for x in s[4]) + "</ul>" for s in SC.SCENES)
+    return (f"<table class='tight'>{head}{rows}</table>"
+            "<p class='note'>Levels are roughly how far up each dimmer goes. One dimmer per bar, so its four heads stay aimed as in the table above; a scene changes how bright they are, not where they point.</p>"
+            f"<!--scenes-->{figs}<!--/scenes-->")
+
 
 def money(a, b):
     return f"{a:,}–{b:,}"
+
 
 def phase_totals():
     rows, tl, th = [], 0, 0
@@ -94,29 +172,21 @@ def phase_totals():
         lo = sum(r[4] for r in TRACK if r[2] == ph and r[4] is not None)
         hi = sum(r[5] for r in TRACK if r[2] == ph and r[5] is not None)
         tl += lo; th += hi
-        extra = ", plus electrician" if ph == "Cabling and power" else ""
-        rows.append(f"<tr><td>{ph}</td><td class='num'>{money(lo, hi)}{extra}</td><td>{BIGGEST[ph]}</td></tr>")
-    rows.append(f"<tr class='total'><td>Total</td><td class='num'>{money(tl, th)}, plus electrician</td><td></td></tr>")
+        rows.append(f"<tr><td>{part_chip(PHASE_PART[ph])} {ph}</td><td class='num'>{money(lo, hi) if hi else '—'}</td><td>{BIGGEST[ph]}</td></tr>")
+    rows.append(f"<tr class='total'><td>Total</td><td class='num'>{money(tl, th)}</td><td>no electrician: the electrics are your own job (section 9)</td></tr>")
     return "\n".join(rows), tl, th
 
+
 def tracker_rows():
-    out = []
+    out, cur = [], None
     for st, item, ph, q, lo, hi in TRACK:
+        if ph != cur:
+            out.append(f"<tr class='ph'><td colspan='5'>{part_chip(PHASE_PART[ph])} {ph}</td></tr>")
+            cur = ph
         box = "☑" if st == "Done" else "☐"
-        est = money(lo, hi) if lo is not None else ("Quote" if "electrician" in item else "")
-        out.append(f"<tr><td class='st'>{box} {st}</td><td>{item}</td><td>{ph}</td><td class='num'>{q}</td><td class='num'>{est}</td><td class='paid'></td></tr>")
+        est = money(lo, hi) if lo is not None else ""
+        out.append(f"<tr><td class='st'>{box} {st}</td><td>{item}</td><td class='num'>{q}</td><td class='num'>{est}</td><td class='paid'></td></tr>")
     return "\n".join(out)
-
-UPGRADE = [("Oak acoustic slat panels, 4 × 240 × 60 cm (one bought early for the PC screen)", 200, 320), ("Battens 25 × 50 mm (about 14 m), fixings and adhesive", 30, 60),
-           ("MDF face frame and filler strips, primed and finished in the room's soft green eggshell", 60, 150),
-           ("LED strips, aluminium channels, drivers and bias light, including under the PC shelf", 60, 140),
-           ("Cane or mesh fronts for the two console bays (optional)", 0, 270)]
-
-def upgrade_rows():
-    lo = sum(u[1] for u in UPGRADE); hi = sum(u[2] for u in UPGRADE)
-    rows = "\n".join(f"<tr><td>{a}</td><td class='num'>{money(b, c)}</td></tr>" for a, b, c in UPGRADE)
-    rows += f"<tr class='total'><td>Total</td><td class='num'>about {money(lo, hi)}, plus any electrician work</td></tr>"
-    return rows, lo, hi
 
 
 def key_table():
@@ -127,743 +197,868 @@ def key_table():
             cur = [it[1], []]; groups.append(cur)
         else:
             cur[1].append(it)
-    left = groups[:3]; right = groups[3:]
+    left, right = groups[:3], groups[3:]
     def col(gs):
         out = []
         for name, items in gs:
             out.append(f"<tr><td colspan='2' class='kg'>{name}</td></tr>")
-            out += [f"<tr><td class='kn'>{n}</td><td>{lab}</td></tr>" for n, _, lab in items]
+            out += [f"<tr><td class='kn'>{num}</td><td>{lab}</td></tr>" for num, _, lab in items]
         return "<table class='key'>" + "".join(out) + "</table>"
     return "<div class='keycols'>" + col(left) + col(right) + "</div>"
 
 
-def build():
+OTHER_SOURCES = [
+    "Virgin Media: Hub 5 modem mode",
+    "RetroTINK: Introducing the RetroTINK-6X CE (inputs including TOSLINK, deinterlacing); RetroTINK-2X Pro listed as legacy; RetroTINK-4K CE",
+    "Expert Reviews: LG C6 OLED review (4 × HDMI 2.1, one eARC, ports on the left); JB Hi-Fi: LG C6 specifications (165 Hz mode for PC sources)",
+    "Hisense AX5100G spec sheet (inputs, auto power-on); JB Hi-Fi Business: AX5100G (rears linked by cable, wireless to the soundbar)",
+    "TP-Link: Deco X1500 specifications (two gigabit ports per unit)",
+    "Glorious Vinyl Vault specifications (80 LPs and 24.5 kg per drawer), a check on the tray capacity",
+    "Screwfix: Essentials 964VN 350 mm runners; Metrol: Accuride DZ3832EC; IKEA: BESTÅ drawer runners",
+    "NIST SP 500-252 / CLIR pub121: Care and Handling of CDs and DVDs (store upright, book style)",
+    "Sony PS3 and Microsoft Xbox 360 S manuals: ventilation; IKEA UK: secure it",
+    "Ideal Home: colour drenching; The Paint Shed: colour drenching with Farrow &amp; Ball; Livingetc: sage green shades (Card Room Green, Treron, Sage Green, Green Smoke)",
+    "Pontata: Card Room Green vs Little Greene Sage Green (approximate screen colours)",
+    "Homebase and NC Tiles: Farrow &amp; Ball Card Room Green No. 79 in Modern Eggshell and Estate Eggshell",
+    "haart Medway: floor plans and listing photos for the house (Portsmouth Close)",
+    "ConsoleMods: PS2 Component Video Out setting",
+    "GOV.UK: Electrical safety, Approved Document P (2013 edition, for use in England): notifiable work is a new circuit, a replacement consumer unit, or an addition or alteration to a circuit in a special location (round a bath or shower); like-for-like replacements and additions to existing circuits elsewhere are not notifiable (gov.uk/government/publications/electrical-safety-approved-document-p)",
+    "IET Electrical: Part P, England and Wales (notifiable and non-notifiable work); Planning Portal: Electrics, Building Regulations (non-notifiable work must still meet the regulations, BS 7671)",
+]
+
+
+# ---------------------------------------------------------------- the beginner's build guide (in the plan and as its own PDF)
+TOOLS = [
+    ("Measure and mark", [
+        ("Tape measure (5 m) and a steel rule", "every cut and every height", "Buy", "10–15"),
+        ("Combination square", "squaring lines across boards and checking corners", "Buy", "10–15"),
+        ("Spirit level, 60 cm and 120 cm", "levelling the base, the shelves and the table", "Buy", "15–30"),
+        ("Cross-line laser level", "marking all the heights round the alcove in one go", "Buy or borrow", "30–60"),
+        ("Cable and pipe detector", "checking every wall before you drill: non-negotiable", "Buy", "15–30"),
+        ("Pencil, masking tape, a marking knife", "marking cuts (tape stops oak splintering)", "Buy", "5"),
+    ]),
+    ("Cut", [
+        ("Track saw, or a circular saw with a straight-edge guide", "the worktop, the table top and the long shelves", "Hire or borrow", "25–40 a day"),
+        ("Jigsaw", "notches and the cable slot", "Buy or borrow", "40–70"),
+        ("Tenon saw (Japanese pull saw is easiest)", "the tenons and the wedge kerfs", "Buy", "15–25"),
+        ("Sharp chisels, 6, 12 and 25 mm, and a mallet", "cleaning out mortises and housings", "Buy", "30–50"),
+    ]),
+    ("Drill and fix", [
+        ("Cordless drill-driver (18 V)", "pilot holes and screws; most of the job", "Buy or borrow", "60–120"),
+        ("SDS or hammer drill with masonry bits", "plugs into the brick walls and the chimney breast", "Hire or borrow", "15–25 a day"),
+        ("Dowel jig and 10 mm brad-point bit", "the dowels under the uprights and at the wrap ledge", "Buy", "20–35"),
+        ("Clamps: four 60 cm sash or F-clamps, four small", "glue-ups and holding work while you fix it", "Buy", "40–60"),
+        ("Stud finder (if any wall is plasterboard)", "finding studs to fix into", "Buy", "15"),
+    ]),
+    ("Shape and finish", [
+        ("Router (1/4 in is enough) with a straight bit and a guide", "the housings, the LED grooves and the cable groove", "Hire, borrow or buy", "60–120"),
+        ("Random-orbit sander, 120 and 180 grit", "smoothing the oak before oiling", "Buy or borrow", "40–70"),
+        ("Hardwax oil, lint-free cloths, a brush", "finishing the oak", "Buy", "25–35"),
+    ]),
+    ("Electrics (your own: steps 3 and 12)", [
+        ("Two-pole voltage tester to GS38, with its proving unit", "proving every wire dead before you touch it: non-negotiable", "Buy", "35–70"),
+        ("MCB lock-off and a small padlock", "keeping the circuit off while you work on it", "Buy", "8–15"),
+        ("Plug-in socket tester", "checking the new double socket is wired the right way round", "Buy", "8–15"),
+        ("Insulated (VDE) screwdrivers, wire strippers, side cutters", "the socket, the dimmers and the ceiling fittings", "Buy", "20–40"),
+        ("Wall chaser with dust extraction (or a bolster and club hammer)", "the PC's two conduits in the side wall", "Hire", "25–45 a day"),
+        ("Cat6 punch-down tool and a cable tester", "terminating and checking the Cat6 runs", "Buy", "20–35"),
+    ]),
+    ("Safety", [
+        ("Safety glasses, ear defenders, FFP2 dust masks", "every cut, every sanding job; oak dust is an irritant", "Buy", "15–25"),
+        ("Work gloves; a first-aid kit", "handling boards and sheet goods", "Buy", "10"),
+        ("A sturdy step ladder", "the high shelf, the ceiling and the PC shelf", "Borrow", "—"),
+    ]),
+]
+
+
+def tools_html():
+    out = ["<table class='tight tools'><tr><th>Tool</th><th>What it's for</th><th>Get it</th><th>About £</th></tr>"]
+    for grp, items in TOOLS:
+        out.append(f"<tr class='ph'><td colspan='4'>{grp}</td></tr>")
+        out += [f"<tr><td>{a}</td><td>{b}</td><td>{c}</td><td class='num'>{d}</td></tr>" for a, b, c, d in items]
+    out.append("</table>")
+    return "\n".join(out)
+
+
+def steps():
+    """The order of work, one dict per step: used by the PDF's table and the plan page's step cards.
+    buy: the buy-list phases to have in before the step starts (each phase listed at the first step that needs it)."""
+    g = G
+    import instructions
+    extra = instructions.full()
+    return [dict(st, **extra.get(st["n"], {})) for st in [
+        dict(n=1, part=["Prep"], title="Measure and count", who="You", time="2 h", buy=[], see=[("overview", "The room")],
+             do=["The alcove's width at the floor, 76, 134, 155 and 196 cm and at the ceiling: cut everything to the smallest.",
+                 "The floor's level across the alcove, and the chimney breast's flatness with a long level.",
+                 "The door's swing, and the sofa: overall width, depth with the return, back height.",
+                 "Count the LPs, singles and games (PS2, Xbox 360, Xbox One), and measure ten cases of each.",
+                 "Make a cardboard template of the alcove at worktop height: walls are rarely square."],
+             check="Every figure within 1 cm of the plan. If not, send the numbers and the drawings are redone first."),
+        dict(n=2, part=["Network"], title="Network, stage 1", who="You", time="2 h", buy=["1 Network, now"], see=[("network", "Network")],
+             do=["Unplug everything from the Hub 5. Log in at 192.168.0.1 with the password on its base, then Modem Mode → Enable Modem Mode → Apply. Its page moves to 192.168.100.1.",
+                 "Connect a hub port to Deco A in bedroom 3 and set it up in the Deco app, reusing the old Wi-Fi name and password. If it shows no internet, try another hub port and restart the hub.",
+                 "Plug the new 8-port Switch 1 into Deco A's other port, then the PCs into Switch 1.",
+                 "Add Deco B in the living room and Deco C in the kitchen. For now they link over Wi-Fi.",
+                 "Speed-test each room, and check the Xbox's network settings show NAT: Open."],
+             check="Internet in every room, and NAT: Open on the Xbox."),
+        dict(n=3, part=["Power & cables", "Network"], title="Cables and the socket, your own job", who="You + a helper", time="2–3 days", buy=["2 Cables and power"], see=[("network", "Electrics: your own job"), ("network", "Power and cables")],
+             do=["The Cat6: two runs from bedroom 3, across the landing and down through the airing cupboard, one to the alcove's right corner for Deco B, one on to the kitchen for Deco C, a spare pulled with each; the optional runs to the master and bedroom 2 if you want them. Low voltage: no rules beyond care.",
+                 "The socket: swap the single on the side wall for a double at the same spot, with the circuit isolated, locked off and proved dead (the safe routine is in this step). Like for like, so not notifiable.",
+                 "The PC's two conduits: chase them into the solid side wall from behind the PC shelf to skirting height and behind the skirting to the base, 38 mm oval for the HDMI and Cat6, 25 mm for the PC's mains lead, a draw wire in each. Make good.",
+                 "Stop and call an electrician if anything on the stop list turns up (old wiring, no earth, a reading where there should be none, anything you can't match).",
+                 "Before you fill a chase, photograph it with a tape measure in shot, and mark every route on the plan."],
+             check="The socket tester shows correct wiring on both outlets, both Cat6 runs test good end to end, and every route is photographed."),
+        dict(n=4, part=["Paint"], title="Paint", who="You", time="2–3 days, then a week to cure", buy=["3 Paint"], see=[("paint", "Paint and light")],
+             do=["Paint an A4 board in Card Room Green and look at it by day and with the LED strip on.",
+                 "Wash the skirting and door with sugar soap, sand to a key, and prime them.",
+                 "Two coats of emulsion on the walls, ceiling, alcove and chimney breast.",
+                 "Two coats of eggshell in the same green on the skirting, door, frame and radiator.",
+                 "Leave it a week to cure before fixing anything to it."],
+             check="Two even coats, and no white showing at the edges or behind the radiator."),
+        dict(n=5, part=["Prep"], title="Mark the heights", who="You", time="1 h", buy=[], see=[("wall", "Front view")],
+             do=["With the laser level: 73 and 76 for the worktop, 130 and 134 for the Series X shelf, 153 and 155.4 for the ledges, 192 and 196 for the high shelf.",
+                 f"The uprights at {n(g.UP_L[0])}–{n(g.UP_L[1])} and {n(g.UP_R[0])}–{n(g.UP_R[1])} cm from the side wall.",
+                 f"The dining wall's backboard at {n(g.RAIL_TOP - g.RAIL[1])}–{n(g.RAIL_TOP)}, centred on the breast.",
+                 "Run the cable detector along every line you will drill, and mark anything it finds."],
+             check="Every line level end to end, and the uprights' lines plumb."),
+        dict(n=6, part=["Media wall"], title="Build the base", who="You", time="1 day", buy=["4 Base unit"], see=[("build", "Cutting list"), ("wall", "Drawer layouts")],
+             do=["Order the oak and ply from the cutting list (below the steps), a week or two ahead: most merchants cut to size for a small charge.",
+                 "Build the 9 cm plinth for bays 1–2, with the open bay for the hidden drawer under bay 2. Level it with shims.",
+                 "Assemble the two BESTÅ frames with their back panels left off and stand them on the plinth.",
+                 "Build bay 3 from 18 mm ply, 60 × 40 × 73, and bolt it to bay 2.",
+                 "Screw the 4 cm spacer blocks to the wall, push the base against them and fit the anti-tip brackets.",
+                 "Lay the flat two-compartment trunking in the channel behind (mains one side, data the other) and run the cables in."],
+             check="The tops level within 1 mm across 186 cm, and nothing rocks."),
+        dict(n=7, part=["Media wall"], title="Fit the worktop", who="You + a helper", time="½ day", buy=["5 Oak joinery"], see=[("build", "Cutting list"), ("wall", "Built to your alcove")],
+             do=["Cut the worktop and the dining wall's backboard from the one 300 × 62 oak board, using the template from step 1.",
+                 "Scribe the ends to the walls; cut the TV slot over the channel and the grommet hole behind the deck.",
+                 "Oil it on every face, undersides and cut ends included.",
+                 "Screw it up through the frame tops in slotted holes, so the oak can move."],
+             check="Tight to both walls, and the slot sits over the channel."),
+        dict(n=8, part=["Media wall"], title="Fit out the base", who="You", time="1–2 days", buy=[], see=[("wall", "Drawer layouts"), ("wall", "The records")],
+             do=["Shelves on their pins at the fit-proof heights for the consoles.",
+                 "The game drawer in bay 1: runners on the frame's sides, then the box (cut list in the Media wall tab).",
+                 "The record trays in bay 3: runners at 2.3 and 37.0 cm, then each tray.",
+                 "The hidden plinth drawer under bay 2.",
+                 "Bay 2: the divider and the part shelf, then the sub on its riser, its front flush with the face frame."],
+             check="Every drawer runs smoothly, and the two trays clear each other by 2 cm."),
+        dict(n=9, part=["Media wall"], title="Uprights and shelves", who="You + a helper", time="2–3 days", buy=[], see=[("wall", "The oak joinery")],
+             do=["On the bench: cut the housings and the mortises in both uprights, and the LED groove and cable groove.",
+                 "Dry-fit each upright with its shelves before any glue.",
+                 "Lay Deco B's leads in the groove behind the right upright.",
+                 "Stand the uprights on their dowels and fix the concealed brackets to the back wall.",
+                 "Fit the high shelf and the ledge, then the Series X shelf: wedge its tenons, and peg the housings."],
+             check="Uprights plumb, shelves level, and the TV slides in with 2 cm each side."),
+        dict(n=10, part=["Media wall"], title="Side wall and PC shelf", who="You", time="1 day", buy=[], see=[("wall", "The side wall")],
+             do=["Screw the oak cleat for the wrap ledge and the PC shelf to the side wall.",
+                 "Dowel the wrap ledge to the left upright's front edge.",
+                 "Fit the concealed PC shelf brackets, then the shelf.",
+                 "Screw the keyboard tray's housing under it and fit its runners.",
+                 "Fit the brush grommet and pull the PC's leads down the two chased conduits with the draw wires: data in the big one, its mains lead in the small one."],
+             check="One level line with the ledge over the TV, and the PC shelf holds your weight leaning on it."),
+        dict(n=11, part=["Dining table"], title="The dining wall and the leaf's leg case", who="You + a helper", time="1 day", buy=["6 Dining wall"], see=[("dining", "The dining wall")],
+             do=["Screw the backboard to the breast, plugs every 20 cm.",
+                 "Fit the two Hebgo brackets on its face, 80 cm apart, arm tops level with its top.",
+                 "Screw the lift-off hinges to the backboard's top edge and the table's back edge, all the same hand.",
+                 "On the bench: oil the table's underside and set the four brass inserts for the legs.",
+                 "Hang the table and fit the two turn buttons above it.",
+                 "The leaf's leg case: glue and screw the slim oak frame under the leaf, fit the eight spring clips, and clip all eight legs in."],
+             check="It folds up and down without binding, both brackets click and lock, and it doesn't move when you lean on it; all eight legs clip into the leaf and nothing rattles when you carry it."),
+        dict(n=12, part=["Lighting"], title="Lighting: dimmers and spot bars, your own job", who="You + a helper", time="1 day", buy=["7 Lighting"], see=[("network", "Electrics: your own job"), ("paint", "Light")],
+             do=["Isolate the lighting circuit at the consumer unit, lock it off and prove it dead at each switch and each ceiling point.",
+                 "Swap both light switches for the LED-compatible dimmers, wire for wire, and take down the two old fittings.",
+                 "Hang bar 1 on the rose between the TV and the sofa and bar 2 on the point by the door, earth first; fit the 2700K bulbs and aim the heads (the table in the Paint and light tab).",
+                 "The LED strips in the uprights' grooves on their plug-in driver (on the 10-gang), the ceiling strip through its notches, the bias light on the TV, the lamp by the sofa.",
+                 "Power back on: each dimmer runs smoothly from low to high with no flicker or buzz. Then try the four lighting scenes (Paint and light)."],
+             check="No flicker at any dimmer setting, and from the sofa no spot head shows in the screen or shines in your eyes."),
+        dict(n=13, part=["AV", "Network"], title="Connect and finish", who="You", time="1 day", buy=["8 TV, consoles and AV", "9 Vinyl kit", "10 Finishing"], see=[("network", "AV"), ("network", "Network")],
+             do=["TV inputs: HDMI 1 the PC, HDMI 2 the soundbar (eARC), HDMI 3 the Series X, HDMI 4 the HDMI switch (Xbox One, 360, PS3, RetroTINK).",
+                 "The PS2 by component into the RetroTINK and by optical to the soundbar; the PS1 by RGB SCART.",
+                 "The deck to the preamp, the preamp to the soundbar's AUX; set the tracking weight; soundbar in Music mode for vinyl.",
+                 "Network stage 2: plug each Cat6 run into its Deco, check Deco B and C show \"Ethernet\", and give the Series X and PC high priority.",
+                 "Label both outlets of the double socket and each HDMI switch input; set the sub and rear levels from the sofa."],
+             check="Everything on the network's \"done when\" list, and every source plays through the soundbar."),
+    ]]
+
+
+DIAGRAMS = {"front": "front", "section": "section", "drawer_layouts": "drawer_layouts", "game_drawer": "game_drawer", "drawer": "drawer",
+            "storage": "storage", "joints": "joints", "pc_shelf": "pc_shelf", "dining_section": "dining_section", "seating": "seating",
+            "av": "av", "power": "power", "network": "network", "routes": "routes", "leaf_case": "leaf_case"}
+
+
+def need_html(st):
+    cols = [(lab, st.get(k, [])) for k, lab in (("parts", "Parts"), ("hardware", "Hardware and fixings"), ("tools", "Tools"))]
+    cols = [(lab, items) for lab, items in cols if items]
+    if not cols:
+        return ""
+    return ("<div class='need'>" + "".join(f"<div><h5>{lab}</h5><ul>" + "".join(f"<li>{i}</li>" for i in items) + "</ul></div>" for lab, items in cols)
+            + "</div>")
+
+
+def full_html(st):
+    """Every instruction for one step, numbered straight through its sub-assemblies."""
+    if not st.get("parts_full"):
+        return "<ol>" + "".join(f"<li>{d}</li>" for d in st["do"]) + "</ol>"
+    out, k = [], 1
+    for head, items in st["parts_full"]:
+        out.append(f"<h5>{head}</h5><ol start='{k}'>" + "".join(f"<li>{i}</li>" for i in items) + "</ol>")
+        k += len(items)
+    return "".join(out)
+
+
+def full_steps_html():
+    """The PDF's step-by-step section: each step with what you need, its drawings and every instruction."""
+    import diagrams as D
+    out = []
+    for st in steps():
+        out.append(f"<div class='fstep'><h3 class='pb'>Step {st['n']} · {st['title']} <span class='note'>· {st['who']} · {st['time']}</span></h3><p>{part_chip(st['part'])}</p>")
+        if st["buy"]:
+            out.append(f"<p class='note'>Buy first: {', '.join(st['buy'])} (the buy list).</p>")
+        out.append(need_html(st))
+        out.append("".join(f"<figure>{getattr(D, DIAGRAMS[d])()}</figure>" for d in st.get("draw", [])))
+        out.append(full_html(st))
+        out.append(f"<p class='callout'><b>Check before moving on:</b> {st['check']}</p></div>")
+    return "\n".join(out)
+
+
+def steps_table_html():
+    rows = "".join(f"<tr><td>{s['n']}</td><td>{part_chip(s['part'])}<br>{s['title']}</td><td>{' '.join(s['do'])}</td><td>{s['check']}</td><td>{s['time']}</td></tr>" for s in steps())
+    return ("<table class=\"tight steps\"><tr><th>#</th><th>Stage</th><th>What to do</th><th>Check before moving on</th><th>Time</th></tr>"
+            + rows + "</table>")
+
+
+GUIDE_RULES = """
+<p>This guide assumes you've hung shelves and put flat-pack together, but haven't cut a joint before. Every step says what to do,
+what to check before moving on, and roughly how long it takes the first time. Each step carries a coloured label for its part of the
+house (Prep, Network, Power &amp; cables, Paint, Media wall, Dining table, Lighting, AV), and so does each phase of the buy list.
+You're doing the electrics yourselves: steps 3 and 12 have the safe routine and the point where you stop and call an electrician.
+Sizes are finished sizes in centimetres.</p>
+
+<div class="callout"><b>Before you start: five rules</b><ul>
+<li><b>Check every wall before you drill.</b> Run the cable and pipe detector over the spot, and never drill straight above, below or beside a socket or switch: cables run vertically and horizontally from them.</li>
+<li><b>Measure twice, mark once, cut once.</b> Walls are rarely square: measure the alcove at the floor, 76, 134, 155, 196 and the ceiling, and cut to the smallest.</li>
+<li><b>Two people for anything over 15 kg</b>: the uprights, the worktop, the table top, the TV.</li>
+<li><b>The electrics are yours, within limits.</b> Swapping the socket for a double, the two dimmers and the two ceiling fittings are like-for-like jobs, not notifiable under Part P in England, as long as they meet the wiring regulations. Isolate, lock off and prove dead every time. Anything new (a new circuit, the consumer unit, work by a bath or shower) is an electrician's, and so is anything on the stop list in section 9.</li>
+<li><b>Dry-fit everything</b> (assemble without glue or screws) before the final fix.</li>
+</ul></div>
+"""
+
+
+def guide_tools():
+    return f"""<h3>Tools</h3>
+<p>You don't need a workshop. Hire the two big tools for a weekend (a track saw and an SDS drill), or ask the timber merchant to cut the oak and ply to the cut lists: most will, for a small charge, and that removes the hardest cuts.</p>
+{tools_html()}"""
+
+
+GUIDE_TECHNIQUES = """<h3>Six techniques you'll use</h3>
+<ol>
+<li><b>Fixing into brick.</b> Detect, mark, drill with the SDS on hammer setting, clear the dust, push in a brown (7 mm) wall plug and drive a 5 × 60 mm screw. In plasterboard, find a stud, or use heavy-duty plasterboard fixings rated for the load.</li>
+<li><b>Cutting oak cleanly.</b> Put masking tape over the cut line, score it with a knife, cut with the good face down (circular or track saw) or up (jigsaw). Clamp a straight edge as a guide.</li>
+<li><b>Routing a housing</b> (a shallow slot a shelf sits in). Clamp a straight batten as a guide, set the bit 4 mm deep, rout, then step down to 12 mm in passes. Practise on an offcut first.</li>
+<li><b>A wedged through-tenon.</b> Mark the 6 × 2.4 cm mortise on both faces of the upright and drill most of it out with a 20 mm bit from each side. Chisel it to the line. Saw the tenon on the shelf's end. Saw a kerf down its middle, glue it, tap it home, then drive a glued oak wedge into the kerf. When it's dry, saw it flush and plane it.</li>
+<li><b>Dowelling.</b> Use a dowel jig to drill matching 10 mm holes 3 cm deep in both parts, glue the dowels, clamp.</li>
+<li><b>Oiling.</b> Sand to 180 grit, wipe off the dust, rub on a thin coat of hardwax oil, wipe off the excess after 15 minutes, let it dry overnight, give it a second coat. Do the undersides too, so the boards don't cup.</li>
+</ol>
+"""
+
+GUIDE_TIME = "<p>Roughly 14–18 working days spread over a few weekends, the electrics and the Cat6 included, plus the paint drying. Steps 6–11 can be split: the base and dining wall first, the oak joinery once you're confident.</p>"
+
+GUIDE_PITFALLS = """<h3>Where beginners usually go wrong</h3>
+<ul>
+<li><b>Cutting the worktop to the tape instead of to a template.</b> Make a cardboard template of the alcove first; walls are rarely square.</li>
+<li><b>Skipping the dry-fit.</b> Gluing a tenon that doesn't fit is the one mistake you can't undo.</li>
+<li><b>Oil on one side only.</b> The board cups within a week.</li>
+<li><b>Loading the trays before the anti-tip brackets go in.</b> A full tray weighs about 32 kg.</li>
+<li><b>Folding the table up with something on it.</b> Clear it first, every time, and keep both turn buttons turned when it's up.</li>
+</ul>
+"""
+
+
+def cuts():
+    """Every made part in one cutting list, grouped by what the timber merchant cuts it from (sizes in cm, L × W × T).
+    Rows: (part, size, qty, notes, where it goes). Drawn from the cut lists in sections 3, 5 and 7 and v6.1's game drawer."""
+    g = G
+    pc_len = g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]
+    return [
+        ("Solid oak, hardwax oil", "Ask for it planed all round; scribe the uprights and worktop on site", [
+            ("Uprights", f"{n(g.UPRIGHT_LEN)} × 30 × 4.5", "2", "Buy 165 long and scribe to the ceiling; housings, mortises, LED and cable grooves cut on the bench", "Media wall"),
+            ("High shelf, long length", "128.9 × 30 × 4", "1", "Housed 1.2 into both uprights and pegged", "Media wall"),
+            ("High shelf, short length", "51.7 × 30 × 4", "1", "Housed into the right upright; cleat on the reveal", "Media wall"),
+            ("Series X shelf", "55 × 30 × 4", "1", "Two through-tenons 6 × 2.4, wedged flush", "Media wall"),
+            ("Record ledge · wrap ledge", "128.9 × 7 × 2.4 · 134 × 7 × 2.4", "1 · 1", "Housed and pegged · on a cleat, dowelled to the left upright", "Media wall"),
+            ("Ledge lips", "128.9 × 1.5 × 0.9 · 134 × 1.5 × 0.9", "1 · 1", "Glued along the ledges' front edges", "Media wall"),
+            ("PC shelf", f"{n(pc_len)} × {n(g.PC_SHELF_D)} × 4", "1", "Oak cleat and two concealed brackets", "Media wall"),
+            ("Keyboard tray housing", "70 × 28 × 7, sides 7 × 2", "1", "Screwed under the PC shelf", "Media wall"),
+            ("Worktop", f"{n(g.ALC_W)} × {n(g.BASE_D)} × 3", "1", "From one 300 × 62 full-stave worktop; chamfered front", "Media wall"),
+            ("Dining backboard", f"{n(g.RAIL[0])} × {n(g.RAIL[1])} × {n(g.RAIL[2])}", "1", "From the same worktop's offcut", "Dining table"),
+            ("Face frame", "186 × 73 overall, 2 thick, stiles about 5 wide", "1 set", "End stiles scribed to the walls", "Media wall"),
+            ("Table top, centre", "101 × 80 × 2.7", "1", "Edge-glued staves: 96 between the shoulders, plus a 2.5 tongue each end", "Dining table"),
+            ("Breadboard ends", "80 × 7 × 2.7", "2", "Pegged with three 10 mm pegs each, in slotted holes", "Dining table"),
+            ("Leaf", f"{n(g.LEAF[0])} × {n(g.LEAF[1])} × {n(g.LEAF[2])}", "1", "Two alignment dowels and two table clips", "Dining table"),
+            ("Leaf frame, long rails", f"{n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}", "2", f"Under the leaf's joint edge and west end, {n(g.LEAF_FRAME['inset_x'])} in; glued along the middle 10 cm only, screwed in slotted holes elsewhere (v13.6)", "Dining table"),
+            ("Leaf frame, side rails", f"{n(g.LEAF_FRAME_IN[0])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}", "2", f"Between the long rails, {n(g.LEAF_FRAME['inset_z'])} in from the leaf's sides; one has eight 10 mm holes for the legs' bolts, {n(g.LEG_PITCH)} apart (v13.6)", "Dining table"),
+            ("Legs", f"{n(g.LEG_H)} × {n(g.LEG[0])}, tapering to {n(g.LEG[1])}", "8", "Tapered on the two inside faces; an M8 hanger bolt in each top; they store in the leaf's frame", "Dining table"),
+            ("Turn buttons", "6 × 2.5 × 2.2", "2", "On a single screw each", "Dining table"),
+            ("Drawer fronts", "game drawer 56.8 × 6.5 × 2 · plinth drawer 54 × 6 × 2", "1 · 1", "Finger pull cut underneath", "Media wall"),
+            ("Record tray lips", "about 56 × 5 × 1.5", "2", "Cut to the face frame's opening, less 3 mm", "Media wall"),
+            ("Record tray dividers", "38.2 × 8 × 0.6", "2", "Between the LP and singles troughs", "Media wall"),
+            ("Follower blocks · Xbox One lift block", "19 × 12 × 2 · 15 × 12 × 2", "2 · 1", "Offcuts, felted underneath", "Media wall"),
+            ("Wedges · pegs · dowels", "6 × 3, tapering · 10 mm dowel, 5 long · 10 mm dowel", "2 + spares · 6 + 6 · 8", "Glued", "Media wall"),
+        ]),
+        ("Birch ply, 18 mm", "", [
+            ("Bay 3 sides", "73 × 40", "2", "The record carcass, standing on the floor", "Media wall"),
+            ("Bay 3 top and bottom", "56.4 × 40", "2", "Between the sides; back left open to the channel", "Media wall"),
+            ("Plinth rails", "120 × 9", "2", "Front and back of the ladder frame under bays 1–2", "Media wall"),
+            ("Plinth cross-pieces", "34.4 × 9", "3", "At both ends and under the bay 1–bay 2 joint, so the bay under bay 2 stays clear for the drawer", "Media wall"),
+        ]),
+        ("Birch ply, 12 mm", "", [
+            ("Game drawer sides", "35 × 15.5", "2", "", "Media wall"),
+            ("Game drawer back · front panel", "51.9 × 15.5 · 51.9 × 6", "1 · 1", "", "Media wall"),
+            ("Record tray bases", "53.9 × 40", "2", "The sides and ends stand on them", "Media wall"),
+            ("Plinth drawer sides · ends", "34 × 4.4 · 49.6 × 4.4", "2 · 2", "A 52 × 34 × 5 box", "Media wall"),
+            ("Bay 2 divider · part shelf", "35.3 × 38 · 32.2 × 36", "1 · 1", "The sub's column on the left; the PS2 over the PS1 on the right", "Media wall"),
+            ("Keyboard tray", "54 × 26", "1", "Oak lip on its front edge", "Media wall"),
+        ]),
+        ("Birch ply, 9 mm", "", [
+            ("Game drawer base", "52.5 × 34.4", "1", "In a 6 mm groove", "Media wall"),
+            ("Record tray sides · ends", "40 × 8 · 52.1 × 8", "4 · 4", "Two of each per tray; new in v13.3: sides set at 8 cm tall, room for the runners", "Media wall"),
+        ]),
+        ("Birch ply, 6 mm", "", [
+            ("Game drawer cross divider", "51.9 × 9", "1", "13 cm back from the front", "Media wall"),
+            ("Game drawer bin walls · bin floors", "12.6 × 9 · 16 × 12.6", "2 · 2", "Floors raked so the cases lean about 13°", "Media wall"),
+            ("Plinth drawer base", "52 × 34", "1", "Screwed under the box", "Media wall"),
+        ]),
+        ("Hardware", "Runners are sold in pairs", [
+            ("Record tray runners", "400 mm full extension, 68–70 kg a pair", "2 pairs", "Screwed straight into bay 3's sides", "Media wall"),
+            ("Game drawer runners", "350 mm full extension, soft-close", "1 pair", "Accuride DZ3832EC or Screwfix 964VN", "Media wall"),
+            ("Plinth drawer and keyboard tray runners", "300 mm full extension · 300 mm light duty", "1 pair · 1 pair", "", "Media wall"),
+            ("Häfele Hebgo folding brackets", "287.43.428, 580 arm", "2", "500 kg a pair", "Dining table"),
+            ("Lift-off hinges", "Union PowerLoad 100 × 88, all the same hand", "3", "", "Dining table"),
+            ("Brass M8 threaded inserts", "for the legs", "8", "Four in the top's breadboard ends, four in the leaf", "Dining table"),
+            ("M8 hanger bolts", "M8, about 50 long", "8", "One in each leg's top, 1.5 left showing", "Dining table"),
+            ("Spring clips for the stored legs", "RS PRO 45 mm, 42.1 × 56 × 12.7 mm", "8", f"Screwed under the leaf, {n(g.LEG_CLIP_FROM_FOOT)} cm up from each stored leg's foot", "Dining table"),
+            ("Sub isolation riser", "dense foam or sorbothane, about 22 × 28 × 3", "1", "Under the sub in bay 2", "Media wall"),
+            ("Concealed brackets", "for the uprights; two for the PC shelf, 40 kg+ a pair", "1 set", "", "Media wall"),
+        ]),
+    ]
+
+
+def cuts_html():
+    out = ["<p>Every made part in one list, grouped by what it's cut from, for the timber merchant. Sizes are finished sizes in cm, length × width × thickness. The cut lists in the other sections say how each part joins; this list is for ordering.</p>"]
+    for grp, note, rows in cuts():
+        out.append(f"<h4>{grp}</h4>" + (f"<p class='note'>{note}</p>" if note else ""))
+        out.append("<table class='tight cuts'><tr><th>Part</th><th>Size (cm)</th><th>Qty</th><th>Notes</th><th>Section</th></tr>"
+                   + "".join(f"<tr><td>{a}</td><td class='num'>{b}</td><td class='num'>{c}</td><td>{d}</td><td>{e}</td></tr>" for a, b, c, d, e in rows)
+                   + "</table>")
+    return "\n".join(out)
+
+
+def cuts_text():
+    lines = ["Cutting list: media wall and dining wall (finished sizes in cm, length x width x thickness)"]
+    for grp, note, rows in cuts():
+        lines += ["", grp.upper() + (f" ({note})" if note else "")]
+        lines += [f"- {a}: {b}, qty {c}" + (f" ({d})" if d else "") for a, b, c, d, e in rows]
+    return "\n".join(lines)
+
+
+def guide_html():
+    return (GUIDE_RULES + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html()
+            + GUIDE_TIME + GUIDE_PITFALLS + "<h3>The cutting list</h3>" + cuts_html())
+
+
+def guide_pdf_html():
+    """The build guide PDF: the guide, then every step in full."""
+    return guide_html() + "<h2 class='pb'>Step by step, in full</h2>" + full_steps_html()
+
+
+def _plan(deck=False):
+    """The plan as one HTML document. deck=True: images as art/ keys and markers kept, for the plan page's tabs."""
+    global DECK
+    DECK = deck
     ptot, tl, th = phase_totals()
-    urows, ul, uh = upgrade_rows()
+    c = fit.counts()
+    nfit = sum(c.values())
     css = (HERE / "doc.css").read_text()
+    s = G.summary()
+    g = G
     html = f"""<!doctype html><html><head><meta charset="utf-8"><title>Home Network &amp; Media Wall Plan</title>
 <style>{css}</style></head><body>
 
+<div class="p1">
 <h1>Home Network &amp; Media Wall Plan</h1>
-<p class="byline">Revised Oct 18, 2026 · @emma · version 9</p>
+<p class="byline">Revised Oct 20, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<h2>The plan</h2>
-<p>One plan for the whole house: a three-unit Deco mesh wired by Cat6, and a built-in media wall in the 225 × 220 cm living room alcove, set in a room painted top to bottom in Farrow &amp; Ball Card Room Green. The Virgin Hub 5 becomes a plain modem and the main Deco takes over as router. The PC and Series X plug straight into the LG C6, and every other console shares one input through an HDMI switch. A RetroTINK upscaler makes PS2 games look their best on the 55-inch screen. Every LP and most singles are face-out, in two pull-out trays, a browser under the turntable and a ledge above the TV, and games live in a roll-out drawer with every title visible. It all costs about £{money(tl, th)} plus the electrician, tracked item by item below. Above the worktop, solid oak uprights carry the shelves on joints left on show, with warm light from the ceiling strip, the uprights and a paper lantern; the slat wall is kept as the alternative.</p>
+<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).<br><b>v13.5:</b> the sub is back in the media wall. The two Xbox bricks lie flat at the back of their shelves by the power leads, the RetroTINK and the HDMI switch move into the space that frees in bay 1, and the sub takes the lower left of bay 2, under the TV, on an isolation riser beside the PS2 and PS1 (section 3). The dining wall has nothing under it now, so eight can sit down without moving anything.<br><b>v13.7:</b> four <b>lighting scenes</b> (TV night, dinner, records, everyday evening), each drawn on the room plan with every light's level, so you know where to set each dimmer (section 8).<br><b>v13.8:</b> the whole plan is back on your own deck (the one you can edit, with your saved answers), and the summaries now follow the fit proof and the questions list, so they can't fall out of date: the PC case is answered and off the list, and the three checks on site are the TV's plugs, the RetroTINK's size and the sub's vibration.<br><b>v13.6:</b> the <b>leaf carries the legs</b>: a slim oak frame underneath holds all eight oak legs in clips, so the folded table stays a plain panel, nothing new stands in the room, and the leaf goes wherever the chairs are kept (section 5). <b>The electrics are your own job</b>: swapping the socket for a double, the two dimmers and the two spot bars are like-for-like and not notifiable in England, so there's no electrician's visit; there is a safe routine and a clear point to stop and call one (section 9). The PC now runs from the 10-gang. Every step and every buy-list phase carries a <b>coloured label</b> for its part (Network, Media wall, Dining table and so on), and one list says what we still need from you.<br><b>v14:</b> a <b>second place for the table</b>: on the wall by the stairs, under your 2 m shelf (section 5 compares the two). The plan page now has a <b>3D room</b> you can walk round: switch the table's wall, fold it or set it for four or six, change the paint, the lighting scene and where the floor lamp stands, and save any view as an HD picture.</div>
 
-<h3>Recommendations at a glance</h3>
-<table><tr><th>Area</th><th>Recommendation</th><th>Why</th></tr>
-<tr><td>Internet</td><td>Virgin Hub 5 in modem mode; Deco A becomes the router</td><td>One router: Open NAT for the Xbox, and HomeShield and parental controls work</td></tr>
-<tr><td>Mesh</td><td>One Deco per floor, each wired back to an 8-port Switch 1 by Cat6</td><td>Full speed on every floor; dual-band Decos slow down over wireless hops</td></tr>
-<tr><td>Living room network</td><td>8-port switch wiring the Series X, Xbox One, Xbox 360, PS3, PC and TV</td><td>Lowest lag for games, phones get the Wi-Fi to themselves, one port spare</td></tr>
-<tr><td>Room colour</td><td>Colour-drench the room in Farrow &amp; Ball Card Room Green No. 79: matt walls and ceiling, the same colour in Estate Eggshell on the skirting (now white), door and trunking</td><td>The media wall becomes part of the room; a soft grey-green that lets the oak and the records lead</td></tr>
-<tr><td>Lighting</td><td>Keep the LED strip round the ceiling (upgrade to a diffused channel later), LED grooves in the oak uprights, and a four-head cone spotlight bar on the existing ceiling rose, all 2700K and dimmable</td><td>Warm, layered light that suits the hand-made oak and keeps glare off the OLED</td></tr>
-<tr><td>TV inputs</td><td>HDMI 1 PC, HDMI 2 soundbar (eARC), HDMI 3 Series X, HDMI 4 five-way switch</td><td>PC and Series X keep 120Hz+ and VRR; every other console shares one input</td></tr>
-<tr><td>PS2 and PS1</td><td>RetroTINK-6X CE: PS2 by component and optical, PS1 by RGB SCART, powered with the retro consoles</td><td>Motion-adaptive deinterlacing keeps PS2 games clean on a 55" OLED; optical carries 5.1 where games have it</td></tr>
-<tr><td>Vinyl</td><td>New stylus; turntable → phono preamp (on a shelf over the sub) → soundbar AUX, in Music mode; about 230 LPs, every one face-out, and about 310 singles: two thinner trays in bay 3, a browser under the deck and a ledge above the TV</td><td>Biggest sound gain for the money, and the collection is on display right where you play it</td></tr>
-<tr><td>Media wall</td><td>Artisan oak: two solid oak uprights with pegged and through-tenoned shelves above a solid oak worktop at 76 cm; below, two BESTÅ frames on a 9 cm plinth, a ply bay for the records and an open sub bay behind one oak face frame. Xbox bay left with a roll-out game drawer, PlayStation bay centre, vinyl bay right with two face-out record drawers</td><td>Every console fits even at its largest version, each zone sits under the kit it belongs to, and every game title and record cover is visible</td></tr>
-<tr><td>Sound</td><td>Sub in the alcove's right corner facing the sofa; soundbar centred; rears either side of the sofa, linked by a cable behind it</td><td>A corner gives the most bass; the surround is built around the seats opposite the TV</td></tr>
-<tr><td>Power</td><td>The low socket on the side wall in front of bay 1 becomes a double: your 10-gang behind the TV (side A left on, side B the retro switch) and a 6-way with a switch per socket, which keeps Deco B always on</td><td>Retro gear fully off between sessions; the TV stays in standby for OLED care</td></tr>
-<tr><td>PC</td><td>Oak wall shelf on the left wall, glass to the room, back screened by an oak frame with woven cane, keyboard tray underneath; active optical HDMI cable for the 4–5 m route</td><td>On show without losing 4K at 120Hz+, and no cable mess facing the sofa</td></tr>
-<tr><td>Sound</td><td>Every source plays through the Hisense: HDMI sources via the TV's eARC, vinyl, PS2 and phones straight in</td><td>One volume control and full 5.1 wherever a source has it</td></tr>
+<h2>1 · The plan on a page</h2>
+<div class="hero">
+<figure class="render">{img("render_v13_join_clean.png", "The artisan oak media wall in Card Room Green with the dining wall folded")}
+<figcaption>Drawn to your measurements, in Card Room Green: the alcove with the turntable zone on the right, the dining wall folded on the chimney breast, both spot bars. Full-resolution renders come with this plan.</figcaption></figure>
+<div class="summary">
+<div><b>£{money(tl, th)}</b><span>the whole plan, item by item in section 11; no electrician on top</span></div>
+<div><b>{c[fit.PASS]} of {nfit}</b><span>fit checks pass outright; {c[fit.TIGHT]} are tight, {c[fit.CHECK]} need a check on site (section 3)</span></div>
+<div><b>{LPS} · {SINGLES} · 4–8</b><span>LPs and singles, all face-out · seats at the table</span></div>
+</div></div>
+<table><tr><th>Area</th><th>Decision</th></tr>
+<tr><td>Alcove</td><td>The TV between two oak uprights, the left one now a corner post on the side wall; on the right, the turntable on the worktop and the Series X on a shelf at {n(g.RZ_SHELF_TOP)}; below, three 60 cm bays: the Xbox consoles, the PlayStations with the sub, and the two record trays.</td></tr>
+<tr><td>Side wall</td><td>The record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, clear of the TV's sightlines.</td></tr>
+<tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off with its leaf for six or eight. The leaf carries all eight oak legs in a slim frame underneath.</td></tr>
+<tr><td>Records</td><td>Every record face-out: about {LPS} LPs (180 in the trays, 8 on the two ledges) and {SINGLES} singles.</td></tr>
+<tr><td>Heights</td><td>Worktop and table {n(g.WORKTOP)} · TV centre 116.5 · Series X shelf {n(g.RZ_SHELF_TOP)} · ledges and PC shelf {n(g.LEDGE_TOP)} · high shelf {n(g.HIGH_TOP)}, {n(g.CEIL - g.HIGH_TOP)} under the {n(g.CEIL)} ceiling.</td></tr>
+<tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars on your two existing ceiling points: between the TV and the sofa, and between the door and the wall.</td></tr>
+<tr><td>Power and network</td><td>Your own job: the side-wall socket becomes a double, left for the 10-gang (everything modern, the PC included), right for the retro set, switched at the wall. Deco A in bedroom 3, Cat6 down the airing cupboard.</td></tr>
 </table>
+<p class="confirm"><b>To confirm (section 12):</b> {questions.summary_line()}.</p>
+</div>
 
-<h3>Build tracker</h3>
-<p>Every purchase and job in build order comes to about £{money(tl, th)}, plus the electrician's quote. Tick items off as you go and write in what you paid. Estimates are approximate UK prices. New items are marked.</p>
-<table class="tight"><tr><th>Phase</th><th>Estimate (£)</th><th>Biggest item</th></tr>{ptot}</table>
-<p class="note">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" with its stand, a 10-gang extension with a switch per five-socket side, Hisense AX5100G-class 5.1 soundbar, the Series X fan stand, the slim turntable and all the consoles.</p>
-<table class="tracker"><thead><tr><th>Status</th><th>Item</th><th>Phase</th><th>Qty</th><th>Estimate (£)</th><th>Paid (£)</th></tr></thead><tbody>
-{tracker_rows()}</tbody></table>
-
-<h2 class="pb">Network</h2>
-<figure>{network()}</figure>
-<p>The hub feeds Deco A, and Switch 1 sends a Cat6 run down to each of the other Decos. In the living room, Deco B feeds the 8-port switch, which gives every networked console, the PC and the TV its own cable. Each Deco X1500 has two gigabit ports, so one takes the incoming cable and the other feeds the switch.</p>
-<h3>Around the house</h3>
+<h2 class="pb">2 · The room</h2>
+<p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is drawn from your photo<sup>{fit.ORDER.index("sofa") + 1}</sup>: its long side ends in line with the breast's reveal (about {n(g.SOFA_W)} cm); the return along the side wall is a typical {n(g.SOFA_D)} until you measure it.</p>
+<figure>{living_plan()}</figure>
+<figure class="render">{img("render_v14_3d_window_A_folded.png", "The room in 3D from the window, everyday evening")}
+<figcaption>New in v14: the whole room in 3D, from the window on an everyday evening, the table folded on the breast. On the plan page you can walk round it, switch the table's wall, the paint, the lights and the lamp's spot, and save any view in HD.</figcaption></figure>
+<table class="tight"><tr><th>From your sketch</th><th>mm</th><th>Notes</th></tr>
+<tr><td>Room, east to west along the window</td><td class="num">{n(g.ROOM_W*10)}</td><td>The media wall is the south wall, shared with the hall and garage</td></tr>
+<tr><td>Window wall to the alcove's back wall</td><td class="num">{n(g.ROOM_D*10)}</td><td>To the chimney breast's face: {n((g.ROOM_D - g.ALC_D)*10)}</td></tr>
+<tr><td>Ceiling</td><td class="num">{n(g.CEIL*10)}</td><td></td></tr>
+<tr><td>TV alcove, east wall to the breast</td><td class="num">{n(g.ALC_W*10)} × {n(g.ALC_D*10)}</td><td>Floor to ceiling</td></tr>
+<tr><td>Chimney breast</td><td class="num">{n(g.BREAST_W*10)}</td><td>Projects 380 on the alcove side, 390 on the west side: the dining wall</td></tr>
+<tr><td>Window and radiator (north wall)</td><td class="num">2350 · 1370</td><td>Window starts 730 from the east wall; radiator ends 130 inside its west end</td></tr>
+<tr><td>Skirting</td><td class="num">60 × 20</td><td>White now; Card Room Green eggshell in the plan</td></tr>
+<tr><td>West end: recess, door, stair box</td><td class="num">935 / 1045 / 660 / 820</td><td>Drawn roughly: please confirm which is which</td></tr>
+<tr><td>Stairs, beside the door</td><td class="num">820 wide</td><td>They go <b>up</b> to the first floor (you confirmed), behind a wooden banister; drawn rising away from the room until you send a photo</td></tr>
+</table>
+<p><b>From the sofa:</b> from the middle of the long side your eyes are about {s["view_dist"]/100:.2f} m from the screen, which a 55-inch fills at about {s["view_angle"]:.0f}°: right for TV and games. With the TV {n(g.TV_SHIFT)} cm nearer the side wall, it now sits square on to the end of the sofa's return ({n(s["chaise_dist"])} cm away), and only about {s["sofa_mid_off_axis_deg"]:.0f}° off-centre from the middle of the long side. The screen's centre at 116.5 cm is 1–2.5° above a seated eye line. Both spot bars hang {n(g.BAR[2])} cm, so the lowest shade is at {n(g.CEIL - g.BAR[2])} cm: no headroom worries.</p>
+<h3>The house</h3>
 <figure>{house()}</figure>
-<ul>
-<li><b>Deco A and Switch 1</b> stay upstairs with the Hub 5 and both PCs. Both Cat6 runs go to the airing cupboard on the landing, which sits right over the media wall's right-hand corner, and drop through its floor, often beside the existing pipes.</li>
-<li><b>Run 1 to Deco B</b> comes down through the living room ceiling in the alcove's right corner, straight to Deco B on the high shelf. Only a short length shows, between the ceiling and the shelf.</li>
-<li><b>Run 2 to Deco C</b> follows run 1 down the groove behind the right upright to the cable channel, then through the floor into the kitchen below, where the brick cupboard sits under the chimney breast. Fix Deco C on the outside of the cupboard, up high on the kitchen side: inside the brick it would lose much of its Wi-Fi.</li>
-<li><b>Lengths:</b> roughly 6–9 m for run 1 and 9–13 m for run 2, depending on where the Hub 5 is; measure the real route and add 2–3 m to each.</li>
-<li><b>Sloped ceilings:</b> the bathroom and bedroom 2 slope down towards the back wall. Keep any Deco, switch or desk in bedroom 2 on the high side, and run cables along the floor there, not the ceiling.</li>
-</ul>
-<h3>What each part does</h3>
-<table><tr><th>Part</th><th>Job</th><th>Why it's needed</th></tr>
-<tr><td>Virgin Hub 5, modem mode</td><td>Brings the internet into the house, nothing else</td><td>Stops two routers fighting (double NAT), which breaks Xbox online play. Its Wi-Fi switches off, so it no longer clutters the airwaves.</td></tr>
-<tr><td>Deco A, top floor (main)</td><td>The router: runs the network, Wi-Fi, parental controls and HomeShield</td><td>Everything starts here. HomeShield and parental controls only work when the Deco is the router.</td></tr>
-<tr><td>Switch 1, top floor, 8-port</td><td>Turns Deco A's one spare port into seven</td><td>Feeds both PCs plus the two cables down to the other floors, with three ports left for later.</td></tr>
-<tr><td>Deco B, living room</td><td>Wi-Fi for the middle floor, and the wired point for the TV area</td><td>Fixes the 5GHz dead side of the living room.</td></tr>
-<tr><td>Switch 2, living room, 8-port</td><td>Turns Deco B's spare port into seven</td><td>The Series X, Xbox One, Xbox 360, PS3, PC and TV each get a cable, with one port spare.</td></tr>
-<tr><td>Deco C, kitchen</td><td>Wi-Fi for the bottom floor</td><td>The kitchen currently gets poor signal on every band.</td></tr>
-<tr><td>Cat6 runs between floors</td><td>Wired link between Decos ("Ethernet backhaul")</td><td>Without it, Decos relay each other over the same 5GHz phones use, losing speed at each hop.</td></tr>
-</table>
-<h3>How to set it up</h3>
-<p>The build runs in two stages: get the mesh working now, then add the cables between floors when they're run.</p>
-<p><b>Stage 1: mesh up today (no cables between floors yet)</b></p>
-<ol>
-<li>Unplug everything from the hub. Log in at 192.168.0.1 with the password on its base, then choose Super Hub → Modem Mode → Enable Modem Mode → Apply Changes. Afterwards its settings page moves to 192.168.100.1.</li>
-<li>Connect hub port 1 to Deco A and set it up in the Deco app, reusing the old Wi-Fi name and password. Virgin's guide doesn't name the port, so if the Deco shows no internet, try another port and restart the hub.</li>
-<li>Plug the new 8-port Switch 1 into Deco A's other port, then both PCs into Switch 1.</li>
-<li>Add Deco B on the living room's high shelf. Connect the 8-port switch to it, then the Series X, Xbox One, Xbox 360, PS3, PC and TV.</li>
-<li>Add Deco C in the kitchen, on the side nearest the living room. For now it links over Wi-Fi.</li>
-<li>Check the Xbox network settings show NAT: Open.</li>
-</ol>
-<p><b>Stage 2: add the Cat6 runs</b></p>
-<ol>
-<li>Run Cat6 from Switch 1 to Deco B, and a second run from Switch 1 straight to Deco C.</li>
-<li>Plug each run into the Deco's free port. On Deco B, Switch 2 stays in the other port.</li>
-<li>In the Deco app, confirm Deco B and Deco C show as "Ethernet".</li>
-<li>Move each Deco to the centre of its floor for best coverage. They no longer need to see each other.</li>
-<li>In the Deco app, give the Series X and PC high priority under QoS.</li>
-</ol>
-<h3>Cabling rules</h3>
-<ul>
-<li><b>Cable type:</b> solid pure-copper Cat6, round. Avoid "CCA" (copper-clad aluminium) and flat cable for long runs.</li>
-<li><b>Length:</b> measure the actual route, not the straight line, and add 2–3 m spare. Anything under 100 m runs at full gigabit.</li>
-<li><b>Routing:</b> go through the floor beside pipes, along skirting, or down an outside wall with outdoor-rated cable. Cross mains cables at right angles rather than running alongside them.</li>
-<li><b>Separation:</b> in the media wall's service channel, mains goes in one compartment of the trunking and HDMI, Cat6 and the turntable leads in the other.</li>
-<li><b>Handling:</b> no kinks or tight folds, never staple through the cable, and label both ends.</li>
-<li><b>No loops:</b> never connect two cables between the same pair of devices. A loop can take the whole network down.</li>
-</ul>
-<div class="callout"><b>Done when</b><ul>
-<li>Deco app shows Deco B and Deco C as "Ethernet"</li>
-<li>Each PC's network status shows 1.0 Gbps (100 Mbps means a bad cable: swap it)</li>
-<li>Xbox shows NAT: Open</li>
-<li>Phones hold a strong signal in the kitchen and on both sides of the living room</li></ul></div>
+<p>Deco A and Switch 1 sit with the Hub 5 and the gaming PCs in bedroom 3; both Cat6 runs go across the landing and drop through the airing cupboard, which sits over the alcove's corner (section 9).</p>
 
-<h2 class="pb">Media wall proposal</h2>
-<p>The main plan is now the artisan oak build: oak used as furniture and joinery against a wall painted in Farrow &amp; Ball Card Room Green. Below the worktop is one full-width unit: bays 1 and 2 are IKEA BESTÅ 60×40×64 frames on a 9 cm plinth, bay 3 is a custom plywood carcass with two face-out record trays, and the 45 cm bay at the right stays open for the subwoofer, all behind one oak face frame under a 3 cm solid oak worktop at 76 cm. Above it, two solid oak uprights frame the TV and carry the shelves on joints left on show: wedged through-tenons, pegged housings and a record ledge above the screen. Each bay holds one family: Xbox under the Series X, PlayStation under the TV, vinyl under the turntable. Every console fits even at its largest version, every record and single is face-out, and every cable drops into a hidden channel.</p>
-<figure class="render">{img("render_v8_join_key_scene.png", "Render with numbered parts")}
-<figcaption>The artisan oak media wall in Farrow &amp; Ball Card Room Green, drawn to the real measurements in a one-point perspective, with the game drawer and the lower record tray rolled out 30 cm and an inset of each from above. The view now takes in the ceiling: the existing LED strip round the room's edge and the new spotlight bar on the existing rose. Dashed lines show what's hidden: gold for Deco B's leads and the 10-gang, coral for mains from the double socket on the side wall. The numbers match the key below.</figcaption></figure>
+<h2 class="pb">3 · The media wall</h2>
+<figure>{why_layout()}</figure>
+<div class="why"><b>Why this layout, and what we ruled out</b>
+<ul>
+<li><b>The TV in the middle (v10):</b> left two {n(25.25)} cm gaps either side, too narrow for a turntable, so the vinyl had to move out to the chimney breast. Moving the TV joins them into one {n(g.RZ_W)} cm zone.</li>
+<li><b>The turntable with the Series X beside it:</b> 45.2 + 20.5 cm won't go in 50.5. The Series X goes up on a shelf instead, above the lid's swing, where it gets more air than it had in v10 (15 cm each side, 21 above).</li>
+<li><b>The vinyl cabinet on the breast as well as a table:</b> a table needs the breast's full width, and a cabinet in front would put the diners 44 cm further into the room.</li>
+<li><b>A gateleg table in the recess:</b> it would block the door; the breast is the only clear wall.</li>
+</ul></div>
+<figure class="render">{img("render_v13_join_key_scene.png", "Render with numbered parts")}
+<figcaption>Numbered view: the game drawer and the lower record tray are pulled out 30 cm, with a view of each from above. Dashed lines show what's hidden: gold for data, audio and low-voltage leads, coral for mains. The sofa isn't drawn so the base stays in view; the room plan shows it.</figcaption></figure>
 {key_table()}
-<figure class="render">{img("render_v8_join_clean.png", "Render, drawers closed")}
-<figcaption>The same view with every drawer closed. The front covers of the two game bins, the front LP and single in each record tray, the browser's front record and the four LPs on the ledge stay on show. Full-resolution copies of both renders come with this plan.</figcaption></figure>
 
-<h3>Built to your alcove: 225 cm wide, 50 cm deep, floor to ceiling (220 cm)</h3>
+<h3>Built to your alcove: {n(g.ALC_W)} wide, {n(g.ALC_D)} deep, {n(g.CEIL)} to the ceiling</h3>
 <ul>
-<li><b>Bays 1 and 2:</b> two BESTÅ frames, each 60 × 40 × 64 cm, stand on a 9 cm plywood plinth, so their tops are at 73 cm. Back panels off. The oak face frame's bottom rail covers the plinth, so it never shows.</li>
-<li><b>Bay 3:</b> a custom carcass in 18 mm birch ply, 60 × 40 × 73 cm, standing on the floor with its top level with the frames. Inside it is 56.4 cm wide and 69.4 cm tall: exactly two face-out tiers of 34.7 cm. The drawer runners screw straight into the ply sides, so it needs no liners.</li>
-<li><b>Fixing:</b> the frames and carcass are bolted to each other, stand 10 cm off the back wall on spacer blocks, and are fixed to it with anti-tip brackets. With two trays of about 32 kg each, the anti-tip brackets on bay 3 are essential, and only one record tray should be open at a time.</li>
-<li><b>Worktop:</b> solid oak, full stave or wide board, 225 × 40 × 3 cm with a chamfered front edge, flush with the fronts, top at 76 cm. The 10 cm left open behind it is the slot for cables and rising warm air.</li>
-<li><b>Oak uprights:</b> two, 4.5 × 30 cm, from the worktop to the ceiling at 44.5–49 and 175.5–180 cm from the left wall, about 2 cm clear of the TV each side. They carry the high shelf, the record ledge, the left shelf and the turntable shelf (see "The oak joinery").</li>
-<li><b>Power:</b> everything runs from the wall socket on the side wall just in front of bay 1, about 30 cm up, swapped from a single to a double: one socket for your 10-gang behind the TV, one for the 6-way at the back of the sub bay. The two leads drop to the floor, enter the unit through a small notch at the left end of the face frame's bottom rail, run back through the plinth and along the mains side of the channel. If the electrician is changing the socket anyway, moving it about 40 cm back into the alcove, behind bay 1, hides it and the plugs completely.</li>
-<li><b>Inside bays 1 and 2:</b> about 56.8 cm wide, 38–40 cm deep with the back open, and 60.8 cm high, exactly as before: every row and console just sits 9 cm higher. The game drawer's base is now 11.6 cm off the floor, easier to reach.</li>
-<li><b>Matching fronts:</b> the game drawer and both record trays have oak lips with a hand-cut finger pull (6.5 cm on the game drawer, a slimmer 5 cm on the record trays), so the bottom of the unit reads as one sideboard, with covers on show in each.</li>
-<li><b>TV:</b> on LG's own stand (base 47 × 23 cm), set towards the back of the worktop. The bottom of the screen is about 5.4 cm above the worktop (about 81.4 cm), its centre at about 116.5 cm and its top just under the record ledge. The C6's HDMI ports are on the left as you face it, the same side as the Series X and the PC's cable.</li>
-<li><b>Soundbar:</b> about 92 × 9 × 6 cm at the front edge, 8 cm in front of the TV stand. From the sofa you look down over it, so it stays below the picture, and the TV's remote sensor still works.</li>
-<li><b>Series X:</b> upright on its fan stand at the left end of the worktop, about 15 cm from the wall and the TV. Console and stand stand about 37 cm tall (to 112.4 cm), with open air above.</li>
-<li><b>Turntable:</b> on a 45 cm-deep oak shelf with its top at 113 cm in the right-hand gap, big enough for a deck as large as the Audio-Technica AT-LP120X (45 × 35 cm). It is carried by a wedged through-tenon in the right upright and a hidden cleat on the right-hand wall, clear of the unit below. Keep about 40 cm clear above the deck: the lid opens to about 165 cm.</li>
-<li><b>LP browser:</b> on the worktop under the turntable shelf, 33 cm clear (worktop 76 to the shelf's underside at 109). A 31.4 cm sleeve leaning back 10° stands about 31.7 cm on the browser's base, leaving 1.3 cm. At 44 × 24 cm, clear of the right upright, it holds about 50 LPs face-out, about 13 kg, which the worktop carries over the sub bay.</li>
-<li><b>Sub bay:</b> open from the floor. The sub stands on a 5 cm riser (its top at 34.4 cm) under a kit shelf with its top at 38.8 cm. The shelf holds the preamp, spare stylus, cleaning kit and brush on the left and about 70 singles spines-out on the right, with 26.8 cm clear up to the hidden drawer.</li>
-<li><b>Hidden slim drawer:</b> under the worktop in the sub bay, an oak front 44 × 7.4 cm (65.6–73 cm) with a finger pull underneath, on a ply box 40 × 28 × 6 cm and 250 mm runners. Remotes, batteries, styli, spare cables.</li>
-<li><b>PC:</b> on an oak wall shelf about 65 × 32 cm, top at 110 cm, on the left wall about 1.3–2 m forward of the alcove, glass to the room, the back ports towards the sofa behind an oak frame with a woven cane panel, keyboard tray underneath. See "The PC shelf".</li>
-<li><b>High shelf:</b> solid oak, 30 × 4 cm in three lengths housed into the uprights, top at 192 cm, wall to wall, with 28 cm to the ceiling: books up to 26 cm, a box for cables, a print and Deco B. The left shelf sits at 156 cm and the record ledge at 155.4 cm.</li>
-<li><b>Deco B, powered:</b> on the right end of the high shelf. The Cat6 from the top floor comes in through the ceiling in the corner; its 12 V lead and the patch lead down to Switch 2 run along the back of the shelf into a groove routed in the back of the right upright, down to the cable slot and on to an always-on socket of the 6-way. Its light shows solid green once it's online.</li>
+<li><b>Base:</b> 3 cm filler, three 60 cm bays, 3 cm filler. Bays 1 and 2 are IKEA BESTÅ 60×40×64 frames on a 9 cm plinth (tops at 73, back panels off); bay 3 is an 18 mm ply carcass 60 × 40 × 73 from the floor, for the record trays. One oak face frame runs across all three; its bottom rail hides the plinth and a hidden drawer under bay 2 with a finger pull (no push-to-open at floor level).</li>
+<li><b>Depth:</b> 40 cm frames, a 4 cm cable channel behind and the 2 cm face frame make {n(g.BASE_D)} cm from the back wall, {n(g.BASE_PROUD)} cm proud of the chimney breast.</li>
+<li><b>Worktop:</b> solid oak, {n(g.ALC_W)} × {n(g.BASE_D)} × 3, top at 76, with a brush-lined slot behind the TV and a grommet behind the deck.</li>
+<li><b>Oak uprights:</b> 4.5 × 30 cm, {n(g.UPRIGHT_LEN)} cm from the worktop to the ceiling. The left one stands against the side wall at {n(g.UP_L[0])}–{n(g.UP_L[1])}, a corner post that frames the TV and carries the wrap ledge. The right one is at {n(g.UP_R[0])}–{n(g.UP_R[1])}. That leaves {n(g.TV_GAP)} cm between them, {n(g.TV_CLEAR)} cm clear of the TV each side.</li>
+<li><b>TV:</b> centre {n(g.TV_CX)} cm from the side wall (it was 93), on LG's stand set 2 cm off the back wall: bottom {n(g.TV_BOTTOM)}, centre 116.5, top {n(g.TV_TOP)}. The soundbar sits centred under it at the worktop's front edge.</li>
+<li><b>The turntable zone:</b> {n(g.RZ_W)} cm between the right upright and the breast. The deck sits on the worktop with {n((g.RZ_W - g.DECK[0]) / 2)} cm each side and its lid opens to about {n(round(g.LID_TOP_OPEN))}. Above it is an oak shelf at {n(g.RZ_SHELF_TOP)}, through-tenoned into the upright, carrying the Series X on its fan stand; the phono preamp hangs underneath at the back.</li>
+<li><b>Shelves above:</b> the record ledge at 155.4 between the uprights, four LPs face-out; the high shelf at 196, wall to wall in two lengths, with books, a box, a print, the framed "now playing" 7-inch and Deco B.</li>
+<li><b>Bay 2 with the sub (v13.5):</b> the PS3 keeps the top row. Below its shelf the bay splits: on the left the sub's column, {n(g.SUB_COL[1] - g.SUB_COL[0])} cm wide, then a 12 mm ply divider, then {n(g.PS_COL[1] - g.PS_COL[0])} cm for the PS2 over the PS1 on a part shelf. The sub stands on a {n(g.SUB_RISER_H)} cm isolation riser with 1 cm each side and {n(g.SUB_COL_TOP - g.SUB_IN["y"][1])} above. Its front is flush with the face frame, so its driver faces the room and its rear port has {n(g.SUB_PORT_GAP)} cm to the wall.</li>
+<li><b>Power:</b> the side-wall socket in front of bay 1 becomes a double. Its two leads enter through a notch at the left end of the face frame's bottom rail and run back through the plinth to the channel.</li>
 </ul>
 <figure>{front()}</figure>
-<figure>{living_plan()}</figure>
-<p><b>From the sofa:</b> with the sofa against the window wall, your eyes are about 2.7–3.2 m from the screen, depending on whether the agent's 3.65 m runs to the chimney breast or to the back of the alcove. At that distance the TV's centre at 116.5 cm is about 2° above a seated eye line, which is comfortable. A 55-inch screen fills about 22–25° of your view: fine for TV and games, on the small side for films, and the most that fits between the oak uprights (a 65-inch is about 145 cm wide, the gap is 126.5). The sofa will sit in front of the radiator under the window, so leave a 10 cm gap behind it.</p>
+<figure>{section()}</figure>
+<h3>The sub in the media wall</h3>
+<p>You asked for the sub back in the unit, with the Xbox bricks moved behind. It fits, and it sits in the best spot for it: under the TV, beside the soundbar, so the bass comes from the same place as the picture. Here's how the base makes room, and what was checked.</p>
+<ul>
+<li><b>The bricks go to the back.</b> The Xbox One's brick (17 × 7.5 × 4.8<sup>{fit.ORDER.index("xb1psu") + 1}</sup>) and the Xbox 360's (allowed 21 × 10 × 6<sup>{fit.ORDER.index("x360psu") + 1}</sup>) lie flat at the back of their shelves, by the channel's power leads. Microsoft asks for a ventilated space, flat on the rubber pads, with nothing on top<sup>{fit.ORDER.index("psuplace") + 1}</sup>; the bays are open front and back.</li>
+<li><b>That frees bay 1's fronts</b> beside the two Xboxes, so the HDMI switch (beside the Xbox One, where its remote reaches it) and the RetroTINK (beside the Xbox 360) move up from bay 2.</li>
+<li><b>Bay 2's lower half becomes two columns:</b> the sub on the left, under the TV, and the PS2 over the PS1 on the right. The sub is {n(g.SUB[0])} × {n(g.SUB[2])} × {n(g.SUB[1])}<sup>{fit.ORDER.index("hisense") + 1}</sup>; its column is {n(g.SUB_COL[1] - g.SUB_COL[0])} wide and {n(g.SUB_COL_TOP - g.SUB_COL_FLOOR)} tall.</li>
+<li><b>The port:</b> the sub's front sits flush with the face frame, so its rear port is {n(g.SUB_PORT_GAP)} cm from the wall through the open back and the channel. That's inside the 15–30 cm advised for a rear port<sup>{fit.ORDER.index("subport") + 1}</sup>, at the low end, so the channel behind bay 2 stays clear: Switch 2 and the retro 6-way move behind bay 1.</li>
+<li><b>Vibration, the one thing to test:</b> Microsoft advises keeping the Xbox 360 away from subwoofers<sup>{fit.ORDER.index("x360place") + 1}</sup>, and the deck shares the worktop. The 360 is a whole bay away, the sub stands on an isolation riser without touching the divider or the frame, and the deck has isolation feet. Once it's built, play a disc game and a record at film volume. If anything skips, turn the sub down for that source; if it still does, the sub can go back under the dining wall.</li>
+<li><b>The dining wall is clear underneath:</b> no cover to make, and nothing to move for eight at the table.</li>
+</ul>
 
-<h3>Why the unit is 76 cm tall</h3>
-<p>Two face-out drawers stacked need more height than a BESTÅ frame has inside, and the worktop has to stay level across the alcove because the TV spans bays 1 to 3. So the whole unit goes up 9 cm, from 67 to about 76 cm.</p>
-<table class="tight"><tr><th>One face-out tier</th><th>cm</th></tr>
-<tr><td>Gap under the box</td><td>0.5</td></tr>
-<tr><td>Drawer base</td><td>1.8</td></tr>
-<tr><td>12-inch sleeve leaning back 10° (31.4 × cos 10°)</td><td>30.9</td></tr>
-<tr><td>Finger room above</td><td>1.5</td></tr>
-<tr class="total"><td>One tier · two tiers · carcass with 18 mm top and bottom</td><td>34.7 · 69.4 · 73.0</td></tr>
-</table>
-<p><b>The trade-off:</b> the TV's centre is about 116.5 cm instead of 108, about 2° higher from the sofa. That still sits close to seated eye height, the soundbar in front stops it going any lower even on a wall mount, and in return every record in the wall is face-out (about 230 LPs and 310 singles). Once the floor plan gives the sofa distance, the plan will confirm the viewing angle.</p>
-
-<h3>Fit check, sized for the largest version of each console</h3>
-<table class="tight"><tr><th>Zone</th><th>What goes there</th><th>Space (W × D × H, cm)</th><th>Largest version (cm)</th><th>Spare</th></tr>
-<tr><td>Worktop, left</td><td>Series X on its fan stand</td><td>51 wide, open above</td><td>20.5 × 20.5 footprint, 37 tall</td><td>About 15 cm each side</td></tr>
-<tr><td>Worktop, centre</td><td>TV on LG's stand at the back, soundbar at the front edge</td><td>122 wide, 40 deep</td><td>Stand base 47 × 23; soundbar 92 × 9 × 6</td><td>8 cm spare in depth</td></tr>
-<tr><td>Worktop, right</td><td>LP browser under the turntable shelf</td><td>44 × 24 × 33</td><td>LP sleeve 31.4, about 31.7 tall leaning on the base</td><td>1.3 cm above; about 50 LPs</td></tr>
-<tr><td>Oak shelf, right</td><td>Turntable, shelf top at 113</td><td>45 × 45, 40 clear above</td><td>AT-LP120X: 45 × 35 × 14</td><td>Just fits; most decks are 42–43 wide</td></tr>
-<tr><td>Bay 1, top row</td><td>Xbox One and its power brick</td><td>56 × 40 × 16</td><td>One original: 33.3 × 27.4 × 7.9</td><td>8.1 above; 23 beside for the brick</td></tr>
-<tr><td>Bay 1, middle</td><td>Xbox 360 and its power brick</td><td>56 × 40 × 16</td><td>360 original: 30.9 × 25.8 × 8.3</td><td>7.7 above; 25 beside for the brick</td></tr>
-<tr><td>Bay 1, bottom</td><td>Roll-out game drawer</td><td>56 × 40 × 25.2</td><td>PS2/360 case 19 × 13.5 × 1.4; leaning in a bin about 18.5 tall</td><td>About 3 cm above the bins; about 48 games</td></tr>
-<tr><td>Bay 2, top row</td><td>PS3 and a controller basket</td><td>56 × 40 × 23.7</td><td>PS3 original: 32.5 × 27.4 × 9.8</td><td>13.9 above; 24 beside</td></tr>
-<tr><td>Bay 2, middle</td><td>PS2, HDMI switch at the front edge</td><td>56 × 40 × 16.5</td><td>PS2 original: 30.2 × 18.3 × 7.8</td><td>8.7 above; 26 beside</td></tr>
-<tr><td>Bay 2, bottom</td><td>PS1 and RetroTINK</td><td>56 × 40 × 17</td><td>PS1 27 × 18.8 × 6; RetroTINK up to 23 × 23 × 8</td><td>9 above; 6 beside</td></tr>
-<tr><td>Bay 3, upper tray</td><td>LPs face-out leaning 10°, 7-inch singles face-out beside them</td><td>56.4 × 40 × 34.2 (37.0 to 71.2)</td><td>LP sleeve 31.4, 30.9 tall leaning; single 18.3, 18.0 tall</td><td>2.1 cm above; about 90 LPs + 120 singles</td></tr>
-<tr><td>Bay 3, lower tray</td><td>The same</td><td>56.4 × 40 × 35.2 (1.8 to 37.0)</td><td>The same</td><td>2.6 cm to the upper tray; about 90 LPs + 120 singles</td></tr>
-<tr><td>Sub bay, upper</td><td>Kit shelf: preamp, stylus, cleaning kit, brush, spare inner sleeves; singles spines-out</td><td>44 × 30, 26.8 high</td><td>7-inch sleeve 18.3; cleaning kit about 12</td><td>8.5 cm above the singles; about 70 singles</td></tr>
-<tr><td>Sub bay, lower</td><td>Subwoofer on a 5 cm riser, facing the sofa, open in front</td><td>45 × 50 × 37</td><td>AX5100G sub 21.4 × 30.4 × 29.4</td><td>2.6 cm above; 13.6 cm behind for its port</td></tr>
-<tr><td>Sub bay, top</td><td>Hidden slim drawer</td><td>40 × 28 × 6 box</td><td>Remotes, batteries, styli</td><td>—</td></tr>
-<tr><td>High shelf</td><td>Books, a cable box, print, Deco B</td><td>225 × 30, top at 192</td><td>Books up to 26 tall</td><td>2 cm above the tallest books</td></tr>
-</table>
-<p>The PS3 keeps the top row of bay 2 because it runs far hotter than the others, so its heat rises out under the worktop and through the open back. The games sit below the Xbox 360, so warm air rises away from them. The records have their own plywood carcass, away from the PS3, and stand on drawer bases on runners screwed into 18 mm ply, never on a BESTÅ shelf (20 kg limit).</p>
+<h3>The fit proof: every item against its published size</h3>
+<p>Each zone below lists what goes in it, its size and where that size comes from (numbered sources, section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail. {c[fit.TIGHT]} are tight: the deck's 2.65 cm sides and the preamp over the open lid; the sub's column, its port gap, the PS2 over the PS1 and the switch channel in bay 2; the dining seats at 55–57 cm each, the door's swing and the clearances for six and eight; and, if you choose the stairs wall for the table, its two end chairs. {c[fit.CHECK]} need a check on site: the TV's plugs by the corner post, the RetroTINK's size when it arrives, whether the sub's vibration reaches the consoles and the deck (test it before fixing the shelves; the fallback is the dining wall), and, for the stairs option only, what the west wall is built of.</p>
+<!--fit-->{fit.tables_html()}<!--/fit-->
 
 <h3>Console sizes, every version</h3>
 <p>The bays are sized for the largest version of each console. The model number is on the label underneath; a smaller version just leaves more room.</p>
 <table class="tight"><tr><th>Console</th><th>Version</th><th>W × D × H (cm)</th><th>Power</th></tr>
-<tr><td>PS1</td><td>Original (largest)</td><td>27.0 × 18.8 × 6.0</td><td>Built in</td></tr>
-<tr><td>PS1</td><td>PS one</td><td>19.3 × 14.4 × 3.8</td><td>External adapter</td></tr>
-<tr><td>PS2</td><td>Original (largest)</td><td>30.2 × 18.3 × 7.8</td><td>Built in</td></tr>
-<tr><td>PS2</td><td>Slim</td><td>23.1 × 15.2 × 2.8</td><td>External brick</td></tr>
-<tr><td>PS3</td><td>Original (largest)</td><td>32.5 × 27.4 × 9.8</td><td>Built in</td></tr>
-<tr><td>PS3</td><td>Slim</td><td>29.0 × 29.0 × 6.5</td><td>Built in</td></tr>
-<tr><td>PS3</td><td>Super Slim</td><td>29.0 × 23.0 × 6.0</td><td>Built in</td></tr>
-<tr><td>Xbox 360</td><td>Original (largest)</td><td>30.9 × 25.8 × 8.3</td><td>Large external brick</td></tr>
-<tr><td>Xbox 360</td><td>S</td><td>about 27.0 × 26.4 × 7.5</td><td>External brick</td></tr>
-<tr><td>Xbox 360</td><td>E</td><td>about 25.4 × 26.4 × 6.7</td><td>External brick</td></tr>
-<tr><td>Xbox One</td><td>Original (largest)</td><td>33.3 × 27.4 × 7.9</td><td>External brick</td></tr>
-<tr><td>Xbox One</td><td>S</td><td>29.5 × 22.9 × 6.4</td><td>Built in</td></tr>
-<tr><td>Xbox One</td><td>X</td><td>30.0 × 24.0 × 6.0</td><td>Built in</td></tr>
+<tr><td>PS1</td><td>Original (largest) · PS one</td><td>27.0 × 18.8 × 6.0 · 19.3 × 14.4 × 3.8</td><td>Built in · external adapter</td></tr>
+<tr><td>PS2</td><td>Original (largest) · Slim</td><td>30.2 × 18.3 × 7.8 · 23.1 × 15.2 × 2.8</td><td>Built in · external brick</td></tr>
+<tr><td>PS3</td><td>Original (largest) · Slim · Super Slim</td><td>32.5 × 27.4 × 9.8 · 29.0 × 29.0 × 6.5 · 29.0 × 23.0 × 6.0</td><td>Built in</td></tr>
+<tr><td>Xbox 360</td><td>Original (largest) · S · E</td><td>30.9 × 25.8 × 8.3 · about 27.0 × 26.4 × 7.5 · 25.4 × 26.4 × 6.7</td><td>External brick</td></tr>
+<tr><td>Xbox One</td><td>Original (largest) · S · X</td><td>33.3 × 27.4 × 7.9 · 29.5 × 22.9 × 6.4 · 30.0 × 24.0 × 6.0</td><td>External brick · built in</td></tr>
 <tr><td>Xbox Series X</td><td>Standing</td><td>15.1 × 15.1 footprint, 30.1 tall</td><td>Built in</td></tr>
 </table>
 
-<h2 class="pb">The oak joinery</h2>
-<p>Above the worktop the wall is furniture rather than cladding: two solid oak uprights, shelves carried on joints you can see, and the Card Room Green wall left to show between them. Slatted panels are the look of the moment and will date with it; joinery like this won't.</p>
+<h3>The drawer layouts</h3>
+<p>Four drawers in the alcove base, all drawn to scale from above: <b>A</b> the game drawer (bay 1), <b>B</b> the hidden plinth drawer under bay 2, <b>C</b> and <b>D</b> the two face-out record trays (bay 3). Each one shows its compartments, what goes in them and how many, and its runners. Every front is a plain oak lip with a finger pull cut underneath.</p>
+<figure>{drawer_layouts()}</figure>
+<figure class="render">{img("render_v13_drawers.png", "Every drawer out: the game drawer, the upper record tray and the plinth drawer")}
+<figcaption>Every drawer out, in place: the game drawer and the upper record tray 30 cm out, the plinth drawer 25 cm out. In use, open one record tray at a time (a full one is about 32 kg).</figcaption></figure>
+<h3>The game drawer (bay 1, bottom row)</h3>
+<p>Unchanged. Two display bins at the front show covers face-out even with the drawer shut (Xbox left, PS2 right, a small tray between them); behind them the rest of the games stand on edge with the spine on top, so every title faces up when you roll it out.</p>
+<figure>{game_drawer()}</figure>
 <ul>
-<li><b>Two oak uprights frame the TV:</b> solid oak, 4.5 × 30 cm and about 144 cm long, from the worktop (76) to the ceiling, about 2 cm clear of each side of the screen. They stand on the worktop on two dowels each, are scribed to the ceiling and held to the solid back wall with concealed brackets.</li>
-<li><b>Wedged through-tenons:</b> the left shelf (top 156) and the turntable shelf (top 113) pass through the uprights on two tenons each and show 2 cm on the TV side, held with oak wedges. They are the joints you see first, so they're the ones worth cutting by hand.</li>
-<li><b>Housed and pegged:</b> the high shelf, in three lengths at 192, and the record ledge are housed into the uprights and pinned with 10 mm oak pegs. The pegs show as dark dots on the uprights' faces.</li>
-<li><b>Record ledge above the TV:</b> 7 cm deep with a 1.5 cm lip, top at 155.4, holding four LPs face-out against the wall up to about 186.5, just under the high shelf. The rotating "now playing" wall.</li>
-<li><b>LED grooves:</b> a routed groove in each upright's inner face holds a 2700K strip that washes the green wall either side of the TV.</li>
-<li><b>Cane screen for the PC:</b> an oak frame with a woven cane panel instead of slats; it hides the ports and lets the exhaust breathe.</li>
-<li><b>Solid oak where you touch it:</b> a 3 cm solid oak worktop with a chamfered edge (top at about 76), the face frame in oak rather than painted, so the base reads as one sideboard, and drawer fronts with hand-cut finger pulls.</li>
-<li><b>The green wall stays visible</b> behind the TV and between the shelves, so the oak reads as furniture against the colour, not a covering.</li>
-<li><b>Notch for the ceiling strip:</b> a 2 × 1.5 cm notch in the back top corner of each upright lets the existing LED strip run straight past.</li>
-<li><b>Finish:</b> hardwax oil throughout. A lightly limed or smoked oak for the uprights keeps away from the bright orange "new oak" look.</li>
-<li><b>Hidden cables:</b> a 2 × 1.5 cm groove routed down the back of the right-hand upright carries Deco B's 12 V lead and its patch lead to Switch 2, from the high shelf to the cable slot. The TV's leads drop straight into the slot.</li>
+<li><b>Box:</b> about 54.3 × 35 cm outside on 350 mm full-extension soft-close runners screwed to the BESTÅ sides; sides 15 cm; 9 mm base lined in felt. About 48 games.</li>
+<li><b>Runners:</b> Accuride DZ3832EC (43 kg) or Screwfix Essentials 964VN (40 kg); not IKEA's BESTÅ runners, which aren't full extension.</li>
+<li><b>The bricks:</b> both Xbox bricks lie flat at the back of their shelves, on their rubber pads, beside the channel's power leads, with nothing on top. Microsoft only asks that the space is ventilated<sup>{fit.ORDER.index("psuplace") + 1}</sup>, and these bays are open at the front and the back.</li>
+</ul>
+
+<h2 class="pb">4 · The records and the turntable</h2>
+<p>The vinyl is back in one place, in the alcove: the deck on the worktop, the records in the two trays right underneath it, the preamp tucked under the shelf above. You can pull a tray, pick a record and play it without crossing the room.</p>
+<figure>{drawer()}</figure>
+<h3>How the record trays work</h3>
+<ul>
+<li><b>LP trough:</b> 32.6 cm wide, so a bare 31.4 cm sleeve has 6 mm each side. Records lean back 10° like a record shop browser; the last one leans on a raked oak rest.</li>
+<li><b>Singles trough:</b> 18.9 cm wide, the same lean.</li>
+<li><b>Capacity:</b> about 90 LPs and 120 singles per tray; two trays, about 180 LPs and 240 singles.</li>
+<li><b>Runners:</b> 400 mm full extension, 68–70 kg per pair, screwed straight into bay 3's 18 mm ply sides. A full tray weighs about 32 kg: open one at a time, and fit the anti-tip brackets before loading.</li>
+<li><b>Outer sleeves:</b> if most LPs live in thick outer sleeves (up to 32.3 cm), widen the LP trough to 33.4 cm; the singles trough then drops to 18.1, too narrow for face-out singles.</li>
+</ul>
+<table class="tight"><tr><th>Dimension</th><th>Figure</th><th>How it adds up</th></tr>
+<tr><td>Bay 3 carcass</td><td>60 × 40 × 73 outside, 56.4 × 69.4 inside</td><td>18 mm birch ply; back open to the channel</td></tr>
+<tr><td>Tray</td><td>53.9 × 40 outside, 52.1 × 38.2 inside</td><td>56.4 − 2 × 1.25 runners; 9 mm sides and ends</td></tr>
+<tr><td>Inside layout</td><td>32.6 + 0.6 + 18.9</td><td>LP trough, oak divider, singles trough</td></tr>
+<tr><td>Lower tray · upper tray</td><td>Undersides 2.3 · 37.0; sleeves to 34.4 · 69.1</td><td>2.6 and 2.1 cm finger room; top panel at 71.2</td></tr>
+</table>
+<h3>The turntable zone</h3>
+<ul>
+<li><b>The deck:</b> on isolation feet, 2 cm back from the worktop's front edge, with {n(g.ALC_D - g.DECK_Z[1])} cm behind it for the lid's hinges. The zone takes a deck up to the size of an AT-LP120X (45.2 × 35.2 cm); most decks are smaller.</li>
+<li><b>The lid:</b> AT's cover is 44.1 × 34.6 cm<sup>{fit.ORDER.index("lid") + 1}</sup>, so standing open its top edge is at about {n(round(g.LID_TOP_OPEN))}; the shelf's underside is at {n(g.LID_CLEAR_TO)}.</li>
+<li><b>Bass:</b> the sub is in bay 2, in the same base the deck sits on. It stands on an isolation riser, clear of the divider and the frame, and the deck stands on isolation feet. If a record skips or hums at film volume, turn the sub down for vinyl.</li>
+<li><b>Signal path:</b> turntable set to PHONO → the preamp under the shelf → a 2 m RCA-to-3.5 mm lead down the groove behind the right upright and along the back of the worktop to the soundbar's AUX. If the deck has no PHONO/LINE switch, plug it straight into the AUX.</li>
+<li><b>Soundbar:</b> Music mode, bass up, surround, night and dialogue modes off. Always the AUX cable, never Bluetooth.</li>
+</ul>
+<h3>Storage options, to scale</h3>
+<figure>{storage()}</figure>
+<h3>Where every record lives</h3>
+<table class="tight"><tr><th>Where</th><th>What</th><th>How many</th></tr>
+<tr><td>Bay 3, upper and lower trays</td><td>LPs and singles, face-out</td><td>About 180 LPs + 240 singles</td></tr>
+<tr><td>Above the TV</td><td>Oak record ledge, the "now playing" wall</td><td>4 LPs</td></tr>
+<tr><td>Side wall</td><td>The ledge wrapped round the corner</td><td>4 LPs</td></tr>
+<tr><td>High shelf, right</td><td>A framed 7-inch</td><td>1</td></tr>
+<tr class="total"><td>Total</td><td></td><td>About {LPS} LPs and {SINGLES} singles, every one face-out</td></tr>
+</table>
+<p>That's fewer than v10's cabinet held (it had a 50-LP browser and a singles drawer). If the collection is bigger than this, tell me the counts. The neatest overflow is a matching face-out tray unit under the window at the end of the sofa.</p>
+
+<h2 class="pb">5 · The dining wall</h2>
+<p>The chimney breast becomes the dining wall. A solid oak table, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard. Every day it stands folded flat against the breast, about {n(g.FOLDED_D)} cm deep. Down, it's a table for four at the same 76 cm as the alcove's worktop. Lifted off with its matching 60 cm leaf, which carries all eight oak legs in a slim frame underneath, it makes a 170 × 80 table in the room: six with room to spare, or eight at a squeeze.</p>
+<figure class="render">{img("render_v13_dining_four.png", "The dining wall down and set for four")}
+<figcaption>Down and set for four: two on the room side, one at each end, nothing under the wall now. The second spot bar, on the point by the door just out of view here, lights the table and the framed LPs.</figcaption></figure>
+<figure class="render">{img("render_v13_dining_six.png", "The table lifted off and set for six, with both spot bars")}
+<figcaption>Lifted off with its leaf (170 × 80, on eight tapered oak legs; the leaf's slim frame shows under its end) and set for six, {n(-g.FREE_Z[0])} cm off the breast: two a side with {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm each, one at each end. The camera stands back in line with the alcove's edge, so both spot bars show: bar 1 on the rose over the coffee table, bar 2 on the point by the door, two heads on the table. The backboard and the folded brackets stay on the breast. The stairs (going up) and the door are drawn roughly until you confirm the west end.</figcaption></figure>
+<figure>{dining_section()}</figure>
+<h3>Two places for the table: the chimney breast, or under your shelf by the stairs (v14)</h3>
+<p>You asked what it would look like with the table on the wall going up the stairs, under your 2 m shelf, with everything else free to move and the floor lamp staying but able to shift. Your photos put that wall at about {n(g.STAIRS_WALL_Z[0] - g.WINDOW_Z)} cm from the stair box to the window corner, with the shelf about {n(g.SHELF_B['top'])} cm up. The same table, backboard, brackets and leaf work on either wall: only the backboard's fixings change. Option B is drawn in the 3D room on the plan page, from every angle and in each lighting scene.</p>
+<figure>{dining_sites()}</figure>
+<figure class="render">{img("render_v14_3d_dining_B_four.png", "Option B in 3D: the table down for four under the shelf by the stairs")}
+<figcaption>Option B in the 3D room, set for dinner: bar 2 hangs on the existing pendant point over the table's stair end, your shelf stays above it, the stairs are behind the end chair.</figcaption></figure>
+<figure class="render">{img("render_v14_3d_B_folded.png", "Option B folded under the shelf")}
+<figcaption>Option B folded on an everyday evening: about 6 cm deep against the wall, 42 cm under the shelf, with the floor lamp beside it and the chimney breast left clear.</figcaption></figure>
+<ul>
+<li><b>B fits:</b> centred on the wall it leaves {n(g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0])} cm to the stair box and {n(g.TABLE_B_Z[1] - g.WINDOW_Z)} cm to the window. Folded, its top edge ({n(g.FOLDED_TOP)}) is {n(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)} cm under the shelf, so the shelf and what's on it stay.</li>
+<li><b>B's wins:</b> nobody sits in the door's swing; the existing pendant point is right over the table, so spot bar 2 lights it directly; the chimney breast is left clear (framed LPs, the lamp, or an armchair); and with the dresser gone the room's west half opens up.</li>
+<li><b>B's costs:</b> the two end chairs are tight ({n(g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0] - g.CHAIR[1])} cm behind the stair end's, {n(g.TABLE_B_Z[1] - g.WINDOW_Z - g.CHAIR[1])} behind the window end's), so tuck them in after a meal to keep the stair's foot clear; six and eight still happen in the middle of the room, as on the breast. The west wall's build is unknown: knock on it before choosing (solid takes plugs; studwork means fixing the backboard into the studs).</li>
+<li><b>What moves for B:</b> the dresser goes (its turntable and records already have homes in the media wall: face-out and spine-up); the floor lamp moves to one of the spots in the 3D room's options; the sofa stays where it is, with a clear walk behind the chairs.</li>
+</ul>
+<h3>Where the legs live: inside the leaf (v13.6)</h3>
+<p>You asked for the legs to be part of the table's build, maybe in a box, so they don't become one more thing to store. The leaf is the box. A slim oak frame, {n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME_OUT[0])} with rails {n(g.LEAF_FRAME['h'])} deep, is glued and screwed under the 60 × 80 leaf. All eight legs lie side by side inside it: each one's bolt sits in a hole in the end rail and its foot snaps into a sprung clip<sup>{fit.ORDER.index("clip") + 1}</sup>. Leaf, frame and legs come to about 16 kg and go wherever the chairs are kept.</p>
+<figure>{leaf_case()}</figure>
+<ul>
+<li><b>Why this way:</b> the folded table stays a plain oak panel, nothing new stands in the room, and the frame stiffens the leaf like an apron. With the table up for six, the frame's underside is {n(g.LEG_H - g.LEAF_FRAME['h'])} cm from the floor, {n(g.LEG_H - g.LEAF_FRAME['h'] - g.CHAIR[3])} above a chair seat: the same as an ordinary table's apron.</li>
+<li><b>What we set aside:</b> folding legs fixed under the table (they'd show on the folded panel and stand it about 5 cm further off the wall); a box under the dining wall (it sits where the breast-side chairs push back with six seated); the plinth drawer (too short for 71 cm legs).</li>
+<li><b>The legs are oak now,</b> not the steel option: they match the wall, and the case is sized to them ({n(g.LEG[0])} tapering to {n(g.LEG[1])}, {n(g.LEG_H)} long).</li>
+</ul>
+<h3>How it works</h3>
+<ul>
+<li><b>The top:</b> solid oak with <b>pegged breadboard ends</b>, 7 cm oak strips across each end on a tongue, pinned with three oak pegs in slotted holes so the top can move. They stop it cupping when it lives upright, and they frame it like the uprights frame the TV. The corners are rounded to a 5 cm radius (kinder on hips by a door), and the underside edges are chamfered 1 cm so it reads slim.</li>
+<li><b>Backboard:</b> oak, {n(g.RAIL[0])} × {n(g.RAIL[1])} × {n(g.RAIL[2])}, from the worktop's offcut, screwed to the breast with plugs every 20 cm, top at {n(g.RAIL_TOP)}.</li>
+<li><b>Brackets:</b> two Häfele Hebgo heavy-duty folding brackets (287.43.428: 580 mm arm, 500 kg a pair<sup>{fit.ORDER.index("hebgo") + 1}</sup>), {n(g.HEBGO_X[1] - g.HEBGO_X[0])} cm apart on the backboard's face. Raised, they lock on their own; a light lift on the arm releases them, and they fold flat down the breast.</li>
+<li><b>Hinges:</b> three 100 mm lift-off hinges<sup>{fit.ORDER.index("liftoff") + 1}</sup>, all the same hand, along the backboard's top edge. Slide the table 5 cm sideways and it comes off.</li>
+<li><b>Folded:</b> two oak turn buttons on the breast, plus a magnetic catch, hold the top edge at {n(g.FOLDED_TOP)}. The underside faces the room: plain oiled oak between the pegged breadboard ends, the same finish as the worktop, so folded up it reads as a calm oak panel under the two framed LPs (v13: no reeding). The legs screw into four small brass threaded inserts in the breadboard ends instead of black plates.</li>
+<li><b>For six or eight:</b> lift it off (two people, about 18 kg) and lay it face down on a blanket. Unclip the eight tapered oak legs from the leaf (4.5 cm to 3 cm, 71 long, the standard dining leg height<sup>{fit.ORDER.index("legs") + 1}</sup>), screw four into the table's brass inserts and four into the leaf's, and stand both up: the top is at {n(g.LEG_H + g.TABLE[2])}. Butt the 60 × 80 leaf against the table's west end, joined by two alignment dowels and two table clips: six and eight both use it (v13.1: 110 × 80 alone gives six only 55 cm each, under the 60 a diner needs). Felt glides take up an uneven floor.</li>
+<li><b>Chairs:</b> drawn at IKEA TERJE size (43 × 49, seat 48<sup>{fit.ORDER.index("terje") + 1}</sup>), which folds flat. Any dining chair with a 45–48 cm seat works.</li>
+</ul>
+<figure>{seating()}</figure>
+<table class="tight"><tr><th>Seats</th><th>Where the table stands</th><th>Per diner</th><th>Clearances</th></tr>
+<tr><td>Four</td><td>Down at the wall, on its brackets</td><td>55 on the room side (60 is ideal); the ends are 80 wide</td><td>{n(g.TABLE_Z[1] - g.SOFA_FRONT_Z)} to the sofa: room to walk behind</td></tr>
+<tr><td>Six</td><td>Lifted off with the leaf: 170 × 80 at x {n(g.SIX_X[0])}–{n(g.SIX_X[1])}, {n(-g.FREE_Z[0])} off the breast</td><td>{n((g.TABLE[0] + g.LEAF[0]) / 2)}, two a side; 80 at each end</td><td>{n(-g.FREE_Z[0])} to the breast (the figure to aim for), {n(g.FREE_Z[1] - g.WINDOW_Z)} to the window, {n(g.ROOM_W - g.SIX_X[1])} to the west wall</td></tr>
+<tr><td>Eight</td><td>The same 170 × 80, in the same place</td><td>57, three a side</td><td>As for six: nothing to move, the wall is clear underneath</td></tr>
+</table>
+<p>Clearances from a UK planning guide: 60 cm of table edge per diner, 60 cm from the table to a wall as a tight minimum, 75 to aim for, 100–110 to walk behind someone seated<sup>{fit.ORDER.index("dining") + 1}</sup>. For six or eight, slide the coffee table to the window first, and keep the door to the hall shut while you eat if it opens into the room: the chairs on that side sit in its swing.</p>
+<h3>Cut list and hardware</h3>
+<table class="tight"><tr><th>Part</th><th>Material</th><th>Size (cm)</th><th>Qty</th></tr>
+<tr><td>Table top · leaf</td><td>Solid oak, edge-glued staves</td><td>96 × 80 × 2.7 centre + two 7 × 80 breadboard ends (110 overall) · 60 × 80 × 2.7</td><td>1 · 1</td></tr>
+<tr><td>Breadboard pegs</td><td>10 mm oak dowel, slotted holes in the tongue</td><td>3 per end</td><td>6</td></tr>
+<tr><td>Legs</td><td>Solid oak, tapered on two inside faces</td><td>71 × 4.5 tapering to 3, an M8 hanger bolt in each</td><td>8</td></tr>
+<tr><td>Leaf frame (the leg case)</td><td>Solid oak</td><td>long rails {n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}; side rails {n(g.LEAF_FRAME_IN[0])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}, one with eight 10 mm holes</td><td>2 + 2</td></tr>
+<tr><td>Leg clips</td><td>RS PRO 45 mm steel spring clips</td><td>42.1 × 56 × 12.7 mm</td><td>8</td></tr>
+<tr><td>Backboard</td><td>Solid oak, from the worktop offcut</td><td>110 × 22 × 3</td><td>1</td></tr>
+<tr><td>Turn buttons</td><td>Oak offcut</td><td>6 × 2.5 × 2.2, on a single screw</td><td>2</td></tr>
+<tr><td>Leg inserts</td><td>Brass M8 threaded inserts, in the breadboard ends and the leaf</td><td>—</td><td>8</td></tr>
+<tr><td>Folding brackets</td><td>Häfele Hebgo 287.43.428</td><td>arm 58, height 22</td><td>2</td></tr>
+<tr><td>Lift-off hinges</td><td>Union PowerLoad, 100 × 88</td><td>one 3-pack, same hand</td><td>3</td></tr>
+<tr><td>Leaf joint</td><td>Alignment dowels, table clips</td><td>—</td><td>2 + 2</td></tr>
+</table>
+<p class="note">Safety: never fold it up with anything on it, keep both turn buttons turned when it's up, and check the brackets have locked (a click each side) before you load it.</p>
+
+<h2 class="pb">6 · The side wall</h2>
+<p>One oak line at {n(g.LEDGE_TOP)} cm runs from the ledge over the TV, round the corner on the left upright, and along the side wall: first a 7 cm record ledge with four more LPs face-out, then an oak shelf for the PC over the end of the sofa. It ties the alcove to the rest of the room and moves the PC out of the TV's sightlines.</p>
+<figure class="render">{img("render_v13_side.png", "The PC side wall")}
+<figcaption>The side wall from the room: the ledge round the corner with its four LPs, the PC on its shelf with the keyboard tray's housing underneath, and nothing else on the wall: the leads run inside it, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on; its outline is dashed, with the depths marked: the alcove is 38 deep, so 38 of the 46 cm base sits inside it and 8 stands proud (picked out in gold), and the 30 cm uprights and shelves sit wholly inside.</figcaption></figure>
+<figure>{pc_shelf()}</figure>
+<ul>
+<li><b>Wrap ledge:</b> 134 × 7 × 2.4 cm with a 1.5 cm lip, on an oak cleat screwed to the side wall, butt-jointed to the left upright's front edge on two 10 mm dowels.</li>
+<li><b>PC shelf:</b> {n(g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1])} × {n(g.PC_SHELF_D)} × 4 cm, on an oak cleat with two concealed heavy-duty brackets (40 kg+ a pair), {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.SOFA_H)} cm above the sofa's back. The case sits with its glass to the room and its front towards the alcove. The ports face the window and stay open to the air (v13: no screen, so nothing traps the exhaust); from the sofa you look at the glass side, not the ports. The pad dock sits beyond the case.</li>
+<li><b>Cables:</b> through a brush grommet at the shelf's back corner straight into a 25 mm conduit chased into the side wall (it's solid, as you confirmed), down to skirting height and behind the skirting to the base's plinth; you chase it yourselves in step 3, with a second, smaller conduit beside it for the PC's mains lead, then it's filled and painted, so nothing shows. A draw wire left in it pulls the next lead through. The HDMI is an active optical cable (about 5 m), "source" end at the PC.</li>
+<li><b>Power:</b> the PC plugs into the 10-gang behind the TV: its lead (a 5 m C13 lead with a rewireable plug, fed down bare and the plug fitted at the bottom) runs in its own 25 mm conduit beside the data one. The 10-gang's load check, with the PC, is in section 9. No new socket.</li>
+<li><b>Keyboard tray (back from v6.1):</b> the shelf sits on a 7 cm oak housing with a tray on 300 mm light-duty runners that rolls 25 cm out towards the room. It holds a full-size wireless keyboard and mouse: pull it out, lift the keyboard onto your lap, park it again. The housing stops 12 cm short of the sofa end so the cables drop past it; its underside is {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.KB_TRAY["h"])}, {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.KB_TRAY["h"] - g.SOFA_H)} above the sofa's back.</li>
+<li><b>Headroom:</b> the shelf's underside is at {n(g.PC_SHELF_TOP - g.PC_SHELF_T)}, and it covers only the 28 cm of the sofa nearest the wall.</li>
+</ul>
+
+<h2 class="pb">7 · The oak joinery</h2>
+<p>Above the worktop the wall is furniture rather than cladding: two solid oak uprights, shelves carried on joints you can see, and the Card Room Green wall showing between them.</p>
+<ul>
+<li><b>Uprights:</b> solid oak, 4.5 × 30 cm, {n(g.UPRIGHT_LEN)} cm long, each on two 10 mm dowels into the worktop, scribed to the ceiling and held to the back wall with concealed brackets; the left one also screws to the side wall.</li>
+<li><b>Wedged through-tenons:</b> the Series X shelf (top {n(g.RZ_SHELF_TOP)}) passes through the right upright on two tenons, 6 cm wide and 2.4 thick, 12 and 20 cm from the wall. They're wedged and planed flush: standing proud, they'd touch the TV.</li>
+<li><b>Housed and pegged:</b> the high shelf (two lengths, top 196) and the record ledge (top 155.4) are housed 1.2 cm into the uprights and pinned with 10 mm oak pegs, which show as dark dots.</li>
+<li><b>LED grooves:</b> a routed groove on each upright's inner face holds a 2700K strip that washes the wall either side of the TV.</li>
+<li><b>Hidden cables:</b> a 2 × 1.5 cm groove down the back of the right upright carries Deco B's 12 V lead and patch lead, the Series X's HDMI and power, and the vinyl lead.</li>
+<li><b>Finish:</b> hardwax oil throughout; lightly limed or smoked oak avoids the bright orange "new oak" look.</li>
 </ul>
 <figure>{joints()}</figure>
 <h3>Joinery cut list</h3>
 <table class="tight"><tr><th>Part</th><th>Material</th><th>Finished size (cm)</th><th>Joints</th><th>Qty</th></tr>
-<tr><td>Uprights</td><td>Solid oak, quarter-sawn if you can</td><td>144 × 30 × 4.5 (buy 150 and scribe)</td><td>2 mortises each for the through-tenons, housings for the high shelf and ledge, LED groove inside, cable groove at the back of the right one</td><td>2</td></tr>
-<tr><td>High shelf, centre</td><td>Solid oak</td><td>128.9 × 30 × 4</td><td>Housed 1.2 into both uprights, stub tenons, pegged</td><td>1</td></tr>
-<tr><td>High shelf, left and right ends</td><td>Solid oak</td><td>45.7 and 46.2 × 30 × 4</td><td>Housed into one upright, on a cleat on the side wall</td><td>2</td></tr>
-<tr><td>Record ledge</td><td>Solid oak</td><td>128.9 × 7 × 2.4, lip 126.5 × 1.5 × 0.9</td><td>Housed and pegged</td><td>1</td></tr>
-<tr><td>Left shelf</td><td>Solid oak</td><td>51 × 25 × 4 (44.5 + 4.5 through + 2 proud)</td><td>Two through-tenons 7 × 2.4, wedged; cleat on the left wall</td><td>1</td></tr>
-<tr><td>Turntable shelf</td><td>Solid oak</td><td>51.5 × 45 × 4 (45 + 4.5 through + 2 proud)</td><td>Two through-tenons 7 × 2.4 within the upright's 30 cm depth, wedged; cleat on the right wall</td><td>1</td></tr>
-<tr><td>Wedges</td><td>Oak, contrasting if you like</td><td>7 × 3, tapering 4 to 0.5 mm</td><td>Glued into saw kerfs</td><td>4 + spares</td></tr>
-<tr><td>Pegs</td><td>10 mm oak dowel, riven if possible</td><td>5 long</td><td>Driven from the front edge, trimmed flush</td><td>6</td></tr>
-<tr><td>Worktop</td><td>Solid oak, full stave or wide board</td><td>225 × 40 × 3</td><td>Chamfered front edge; cut edges sealed</td><td>1</td></tr>
-<tr><td>Face frame</td><td>Oak, 20 mm</td><td>Stiles about 5 wide, rails 2.6 and 2 tall, 225 long</td><td>Glued and pinned; end stiles scribed</td><td>1 set</td></tr>
-<tr><td>PC screen</td><td>Oak frame 2 × 3 section, pre-woven cane</td><td>26 × 48</td><td>Cane in a groove with a spline</td><td>1</td></tr>
+<tr><td>Uprights</td><td>Solid oak, quarter-sawn if you can</td><td>{n(g.UPRIGHT_LEN)} × 30 × 4.5 (buy 165 and scribe)</td><td>Housings for the high shelf and ledge; mortises for the Series X shelf in the right one; LED groove inside; cable groove at the back of the right one</td><td>2</td></tr>
+<tr><td>High shelf</td><td>Solid oak</td><td>128.9 × 30 × 4 and 51.7 × 30 × 4</td><td>Housed 1.2 into the uprights, pegged; the short length on a cleat on the reveal</td><td>2</td></tr>
+<tr><td>Record ledge · wrap ledge</td><td>Solid oak</td><td>128.9 × 7 × 2.4 · 134 × 7 × 2.4; lips 0.9 × 1.5</td><td>Housed and pegged · cleat and two dowels</td><td>1 · 1</td></tr>
+<tr><td>Series X shelf</td><td>Solid oak</td><td>55 × 30 × 4 ({n(g.RZ_W)} + 4.5 through)</td><td>Two through-tenons 6 × 2.4, wedged flush; cleat on the reveal</td><td>1</td></tr>
+<tr><td>PC shelf</td><td>Solid oak</td><td>{n(g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1])} × {n(g.PC_SHELF_D)} × 4</td><td>Oak cleat and two concealed brackets</td><td>1</td></tr>
+<tr><td>Worktop and backboard</td><td>One solid oak worktop, 300 × 62</td><td>{n(g.ALC_W)} × {n(g.BASE_D)} × 3 and 110 × 22 × 3</td><td>Chamfered fronts; cut edges sealed</td><td>1 board</td></tr>
+<tr><td>Face frame</td><td>Oak, 20 mm</td><td>186 × 73, stiles about 5 wide</td><td>Glued and pinned; end stiles scribed</td><td>1 set</td></tr>
+<tr><td>Wedges · pegs · dowels</td><td>Oak · 10 mm oak dowel</td><td>6 × 3, tapering · 5 long</td><td>Glued</td><td>2 + spares · 6 · 8</td></tr>
+<tr><td>Keyboard tray</td><td>Oak housing sides 7 × 2, ply tray, oak lip</td><td>70 × 28 × 7; tray 54 × 26</td><td>Housing screwed under the shelf; 300 mm runners</td><td>1</td></tr>
 </table>
-<table class="tight"><tr><th>Compared with the slat wall</th><th>Estimate (£)</th></tr>
-<tr><td>Two solid oak uprights, 150 × 30 × 4.5 cm, with the joints cut</td><td class="num">150–300</td></tr>
-<tr><td>Solid oak worktop instead of laminate</td><td class="num">150–300 more</td></tr>
-<tr><td>Oak face frame instead of painted MDF</td><td class="num">20–30 more</td></tr>
-<tr><td>No slat panels or battens</td><td class="num">230–380 less</td></tr>
-</table>
-<p>Overall it costs about the same as the slat wall, a little more with the solid worktop, and it's a more permanent piece of furniture. If a joiner cuts the joints, add their time. Every cost is in the build tracker under "Oak joinery and lighting".</p>
 
-<h2 class="pb">The record trays</h2>
-<p>Bay 3, under the turntable, is two roll-out trays stacked, and everything in them is face-out. LPs stand in a trough on the left of each tray, leaning back about 10° like a record shop browser; 7-inch singles stand the same way in a narrower trough on the right, where the singles and spare sleeves used to stand spine-up. With a tray shut, the room sees the front LP and the front single above a slim oak lip. Pull it out and flip through both rows of covers from the front.</p>
-<figure>{drawer()}</figure>
-<h3>What changed, and why</h3>
-<ul>
-<li><b>Thinner trays:</b> 9 mm birch ply sides, front and back instead of 12 mm, a 12 mm base instead of 18 mm, a 6 mm oak divider, and a slimmer oak lip, 5 cm tall and 15 mm thick. It looks lighter from the room and shows more of each front cover.</li>
-<li><b>What the slimmer build buys:</b> 4.2 cm more width inside each tray, enough to turn the singles to face-out (a 7-inch sleeve is 18.3 cm), and 6 mm more finger room above every row.</li>
-<li><b>Spare inner sleeves</b> move to the kit shelf or the hidden drawer.</li>
-</ul>
-<h3>How the system works</h3>
-<ul>
-<li><b>LP trough:</b> 32.6 cm wide, so a bare 31.4 cm sleeve has 6 mm each side. Records lean back 10° against each other; the last one leans on a raked oak rest at the back.</li>
-<li><b>Singles trough:</b> 18.9 cm wide, the same lean, a smaller rest at the back.</li>
-<li><b>Capacity:</b> the inside is 38.2 cm deep. The lean takes about 5.5 cm for LPs, leaving about 31 cm of stack: about 90 LPs at about 3.3 mm each, allowing for gatefolds. Singles lean less far, leaving about 34 cm: about 120 at about 2.8 mm. Two trays: about 180 LPs and 240 singles.</li>
-<li><b>Outer plastic sleeves:</b> if most of your LPs live in thick outer sleeves (up to about 32.3 cm), widen the LP trough to 33.4 cm; the singles trough then drops to 18.1 cm, too narrow for face-out singles, so they go back to spine-up.</li>
-<li><b>Runners:</b> 400 mm full-extension ball-bearing runners rated 68–70 kg per pair (45 kg is the minimum), screwed straight into the carcass's 18 mm ply sides. The whole tray clears the unit, so the back records are as easy to reach as the front.</li>
-<li><b>Weight and safety:</b> about 32 kg per full tray. The carcass must be fixed to the wall with anti-tip brackets before the trays are loaded, and only one tray opened at a time.</li>
-</ul>
-<h3>Sizes</h3>
-<table class="tight"><tr><th>Dimension</th><th>Figure</th><th>How it adds up</th></tr>
-<tr><td>Carcass</td><td>60 × 40 × 73 outside, 56.4 × 69.4 inside</td><td>18 mm birch ply sides, top and bottom; back open to the cable channel</td></tr>
-<tr><td>Tray width</td><td>53.9 outside, 52.1 inside</td><td>56.4 opening − 2 × 1.25 runners; 9 mm sides</td></tr>
-<tr><td>Tray depth</td><td>40 outside, 38.2 inside</td><td>9 mm front and back panels</td></tr>
-<tr><td>Inside layout</td><td>32.6 + 0.6 + 18.9</td><td>LP trough, oak divider, singles trough</td></tr>
-<tr><td>Lower tray</td><td>Underside 2.3, base top 3.5, sleeves to 34.4</td><td>Lip from 2.3 to 7.3; 2.6 cm finger room under the upper tray</td></tr>
-<tr><td>Upper tray</td><td>Underside 37.0, base top 38.2, sleeves to 69.1</td><td>Lip from 37.0 to 42.0; 2.1 cm finger room under the top panel at 71.2</td></tr>
-<tr><td>Capacity</td><td>About 90 LPs and 120 singles per tray</td><td>About 31 cm of LP stack ÷ 3.3 mm; about 34 cm of singles ÷ 2.8 mm</td></tr>
-<tr><td>Weight</td><td>About 32 kg per tray, full</td><td>90 × about 0.23 kg + 120 × about 0.045 kg + about 5 kg of tray</td></tr>
-</table>
-<h3>Cut list</h3>
-<table class="tight"><tr><th>Part</th><th>Material</th><th>Size (cm)</th><th>Qty</th></tr>
-<tr><td>Carcass sides</td><td>18 mm birch ply</td><td>73 × 40</td><td>2</td></tr>
-<tr><td>Carcass top and bottom (between the sides)</td><td>18 mm birch ply</td><td>56.4 × 40</td><td>2</td></tr>
-<tr><td>Carcass back rails (top and bottom, back open between)</td><td>18 mm birch ply</td><td>56.4 × 8</td><td>2</td></tr>
-<tr><td>Tray bases</td><td>12 mm birch ply</td><td>53.9 × 40</td><td>2</td></tr>
-<tr><td>Tray sides</td><td>9 mm birch ply</td><td>40 × 12</td><td>4</td></tr>
-<tr><td>Tray backs</td><td>9 mm birch ply</td><td>52.1 × 12</td><td>2</td></tr>
-<tr><td>Tray front panels (low, so the covers show)</td><td>9 mm birch ply</td><td>52.1 × 4.5</td><td>2</td></tr>
-<tr><td>Dividers</td><td>6 mm oak</td><td>38.2 × 10</td><td>2</td></tr>
-<tr><td>Raked back rests (10°)</td><td>20 mm oak offcut</td><td>32.6 × 12 and 18.9 × 8</td><td>2 + 2</td></tr>
-<tr><td>Oak lips (fronts)</td><td>15 mm oak</td><td>56.8 × 5</td><td>2</td></tr>
-<tr><td>Felt or cork liner</td><td>2 mm</td><td>52 × 38</td><td>2</td></tr>
-<tr><td>Runners</td><td>Full extension, side mount, 12.5 mm, 68–70 kg pair</td><td>400 mm</td><td>2 pairs</td></tr>
-</table>
-<p>The 12 mm base carries about 27 kg of records. Glue and screw it under the sides, front and back all round, and glue the oak divider down to it: the divider stiffens the middle, so the base doesn't sag over time.</p>
-<h3>How to build them</h3>
-<ol>
-<li><b>Build the carcass:</b> glue and screw the top and bottom between the sides, square, with the two back rails. Have the merchant cut the ply to the list.</li>
-<li><b>Set it in place</b> beside bay 2 on a flat floor, shim it level with the frames' tops at 73, bolt it to bay 2's frame, and fix it to the wall with anti-tip brackets.</li>
-<li><b>Fit the runners</b> straight onto the ply sides, level, every screw hole used: the lower pair so the tray's underside sits at 2.3 cm, the upper pair at 37.0 cm. Make the tray width exactly what the runner instructions specify (normally the opening less 25 mm).</li>
-<li><b>Build the trays:</b> sides, back and low front panel glued and pinned to each other, then glued and screwed down onto the 12 mm base. Glue the oak divider 32.6 cm in from the left inside face, fit the two raked rests, and glue the felt down.</li>
-<li><b>Hang the trays</b> and check they run true empty.</li>
-<li><b>Fit the oak lips</b> from inside the tray, with a hand-cut finger pull at the top centre, 2–3 mm clear of the face frame.</li>
-<li><b>Load gradually,</b> one tray at a time, and check both still run smoothly full.</li>
-</ol>
-
-<h2 class="pb">The game drawer</h2>
-<p>The bottom row of bay 1 becomes a roll-out drawer for Xbox 360, Xbox One and PS2 games. At the front, two display bins hold games face-out, leaning back slightly like the record trays, so the front cover of each is on show even with the drawer shut: Xbox on the left, PS2 on the right, with a small tray between them. Behind them, the rest of the collection stands on its long edge with the spine on top. Roll the drawer out and every title faces up at you, in rows you can read without moving anything, and any game lifts straight out.</p>
-<figure>{game_drawer()}</figure>
-<h3>The cases it's built for</h3>
-<table class="tight"><tr><th>Console</th><th>Case (height × width × thickness)</th><th>Spine-up, it stands</th><th>Where it goes</th></tr>
-<tr><td>PS2 (PAL)</td><td>19 × 13.5 × 1.4 cm (DVD-size keep case)</td><td>13.5 tall, 19 long</td><td>Back row left; PS2 display bin</td></tr>
-<tr><td>Xbox 360</td><td>19 × 13.5 × 1.4 cm, same as PS2</td><td>13.5 tall, 19 long</td><td>Back row centre; Xbox display bin</td></tr>
-<tr><td>Xbox One</td><td>17 × 13.5 × 1.1–1.2 cm</td><td>13.5 tall, 17 long</td><td>Back row right, behind the follower block; Xbox display bin</td></tr>
-<tr><td>PS1 (PAL)</td><td>14.3 × 13 × 1.74 cm, much fatter</td><td>—</td><td>Not in this unit</td></tr>
-</table>
-<p>Measure about ten of your own games of each kind before cutting: cases vary by 1–3 mm between publishers and replacement cases, and steelbooks are slightly bigger.</p>
-<h3>Sizes and capacity</h3>
-<ul>
-<li><b>Box:</b> about 54.3 cm wide and 35 cm deep outside, on 350 mm runners screwed to the BESTÅ sides (the same way IKEA's own BESTÅ drawers fix). With 12 mm ply sides that leaves about 51.9 cm inside. Sides about 15 cm tall, with a 9 mm base lined in felt.</li>
-<li><b>Front (13 cm deep):</b> two bins 16 cm wide, each taking one column of cases leaning back 13°, about six per bin, so 12 games are on display and you flip through them from the front. A removable 2 cm block in the Xbox bin lifts the shorter Xbox One cases level with the 360 ones. The 18.7 cm tray between them holds memory cards, a pad or manuals.</li>
-<li><b>Back (about 19.5 cm deep):</b> one transverse row of cases standing on their opening edge, spine up, each 19 cm case running front to back. About 37 PS2 or 360 games fit across at 1.4 cm each, or about 43 Xbox One at 1.2 cm. A sliding follower block keeps a part-full row upright and divides the consoles. As drawn: 15 PS2, 12 Xbox 360 and 9 Xbox One.</li>
-<li><b>In total</b> about 48 games, roughly 5–6 kg with the drawer about 10 kg. That's fewer than the 80 the old two-deep upright row held, but none are hidden.</li>
-<li><b>Height:</b> a 25.2 cm row. Base clearance, the drawer base and a leaning 19 cm case come to about 22 cm, leaving about 3 cm to get fingers in.</li>
-<li><b>Is spine-up safe?</b> Yes. The disc still stands vertically, as in book-style shelving, which archival guidance prefers over lying flat. Don't pack the row so tight the cases bow, and keep the covers out of direct sun.</li>
-</ul>
-<h3>Runners</h3>
-<table class="tight"><tr><th>Runner, 350 mm</th><th>Type</th><th>Rating</th><th>Note</th></tr>
-<tr><td>Accuride DZ3832EC (premium)</td><td>Full extension, soft-close, side-mount</td><td>43 kg</td><td>About 30 cm of travel exposes the whole back row</td></tr>
-<tr><td>Screwfix Essentials 964VN (value)</td><td>Full extension, self-closing, ball-bearing</td><td>40 kg</td><td>Easy to buy locally</td></tr>
-<tr><td>IKEA BESTÅ drawer runners</td><td>Soft-close or push-open</td><td>—</td><td>Not recommended: reported as not full extension, and push-open fires from a stray foot</td></tr>
-</table>
-<p>At about 10 kg, any of the first two has at least four times the load it needs.</p>
-<h3>Cut list</h3>
-<table class="tight"><tr><th>Part</th><th>Material</th><th>Size (cm)</th><th>Qty</th></tr>
-<tr><td>Box sides</td><td>12 mm birch ply</td><td>35 × 15.5</td><td>2</td></tr>
-<tr><td>Box back and front panel</td><td>12 mm birch ply</td><td>51.9 × 15.5 (back), 51.9 × 6 (front)</td><td>1 + 1</td></tr>
-<tr><td>Base, in a 6 mm groove</td><td>9 mm birch ply</td><td>52.5 × 34.4</td><td>1</td></tr>
-<tr><td>Cross divider</td><td>6 mm ply</td><td>51.9 × 9</td><td>1</td></tr>
-<tr><td>Bin walls</td><td>6 mm ply</td><td>12.6 × 9</td><td>2</td></tr>
-<tr><td>Bin floors (raked)</td><td>6 mm ply</td><td>16 × 12.6</td><td>2</td></tr>
-<tr><td>Follower blocks</td><td>20 mm oak offcut, felted</td><td>19 × 12</td><td>2</td></tr>
-<tr><td>Xbox One lift block</td><td>20 mm offcut</td><td>15 × 12</td><td>1</td></tr>
-<tr><td>Oak lip (front)</td><td>20 mm oak</td><td>56.8 × 6.5</td><td>1</td></tr>
-<tr><td>Runners</td><td>Full extension, soft-close, side mount</td><td>350 mm</td><td>1 pair</td></tr>
-</table>
-<h3>How to build it</h3>
-<ol>
-<li><b>Fix the frames to the wall first</b>, on their plinth, as for the record trays.</li>
-<li><b>Fit the runners</b> to the frame sides, level, with the drawer base about 1 cm above the frame's bottom panel; drill pilot holes, as BESTÅ sides are particleboard. Use the frame's pre-drilled holes or short chipboard screws; if a screw won't hold, add a 12 mm ply packer.</li>
-<li><b>Build the box</b> from 12 mm birch ply: sides and back about 15 cm tall, a 9 mm base in a groove, glued and screwed. Make its width exactly what the runners specify.</li>
-<li><b>Add the dividers:</b> a cross divider 13 cm back from the front, and two bin walls 16 cm in from each side. Fit the two bin floors with a slight back-rake so cases lean about 13°.</li>
-<li><b>Make the follower block</b> from a 2 cm offcut, 12 cm tall and 19 cm long, felted underneath so it slides; one or two of them separate the consoles.</li>
-<li><b>Fit the front:</b> a 6.5 cm oak lip with a hand-cut finger pull, in the same oak as the record trays, overlaying the face frame with a 2–3 mm gap.</li>
-</ol>
-<div class="callout"><b>Options</b><ul>
-<li><b>PS1 games:</b> stored outside this unit. PAL cases are about 14.3 × 13 × 1.74 cm, about 57 per metre of shelf.</li>
-<li><b>More games:</b> past about 48, keep the overflow spine-up in a high-shelf box, rotating favourites into the drawer.</li>
-<li><b>Sorting:</b> label the follower blocks by console, and keep the bins for what you're playing now.</li></ul></div>
-<h2>Storage: every record face-out</h2>
-<p>With PS1 games out of the unit, the vinyl side is set up so every LP and single shows its cover.</p>
-<table class="tight"><tr><th>Where</th><th>What</th><th>How many</th><th>Notes</th></tr>
-<tr><td>Bay 3, upper tray</td><td>LPs and singles, face-out</td><td>About 90 LPs + 120 singles</td><td>Front covers on show above the lip</td></tr>
-<tr><td>Bay 3, lower tray</td><td>LPs and singles, face-out</td><td>About 90 LPs + 120 singles</td><td>The same, at floor level</td></tr>
-<tr><td>Under the turntable</td><td>Oak LP browser, face-out</td><td>About 50 LPs</td><td>Shelf at 113 leaves 33 cm clear; the front record is on show beside the TV</td></tr>
-<tr><td>Above the TV</td><td>Oak record ledge</td><td>4 LPs</td><td>The "now playing" wall</td></tr>
-<tr><td>Sub bay, kit shelf</td><td>Preamp, stylus, cleaning kit, brush, inner sleeves; singles spines-out</td><td>About 70 singles</td><td>Shelf top at 38.8, over the sub</td></tr>
-<tr><td>Sub bay, top</td><td>Hidden slim drawer</td><td>—</td><td>Remotes, cables, batteries, styli</td></tr>
-<tr><td>High shelf</td><td>Books, a box for cables and controllers</td><td>About 40–50 books</td><td>Books up to 26 cm; LPs are too heavy up here (about 70 kg per metre)</td></tr>
-<tr><td><b>Total in the wall</b></td><td></td><td><b>About 230 LPs, all face-out, and about 310 singles</b></td><td>240 of the singles face-out</td></tr>
-</table>
-<h3>If the collection grows</h3>
-<ul>
-<li><b>Overflow cube unit:</b> a 1 × 4 or 2 × 4 cube unit such as IKEA KALLAX (cubes about 33 cm inside, 39 cm deep) holds about 60–70 LPs per cube. On its side behind the sofa or under a window, a 2 × 4 holds about 500 LPs and gives you a second display top.</li>
-<li><b>Tighter packing:</b> each tray takes about 95 LPs packed tight, at the cost of an easy flip.</li>
-<li><b>LP browser depth:</b> keep it face-out at 24 cm deep. A deeper rack under the turntable would weigh about 35 kg over the sub bay, more than the worktop should carry there.</li>
-</ul>
-
-<h2 class="pb">Paint: Farrow &amp; Ball Card Room Green</h2>
-<p>The room is colour-drenched in Farrow &amp; Ball Card Room Green No. 79, your pick from the last grid: walls, ceiling, alcove, skirting, door and frame, radiator and the PC trunking, all one colour. It's a soft, neutral grey-green, calm without feeling cold, a little lighter and greyer than Sage Green. The oak, the records and the colours of the spotlight bar do the contrast work.</p>
+<h2 class="pb">8 · Paint and light</h2>
+<h3>Paint: Farrow &amp; Ball Card Room Green No. 79</h3>
+<p>The room is colour-drenched in Card Room Green: walls, ceiling, alcove, chimney breast, skirting, door and frame and the radiator. There's no trunking left to paint. It's a soft grey-green that lets the oak and the records lead.</p>
 <figure>{img("paint_grid.png", "The artisan oak render in four greens")}
-<figcaption>The artisan oak version in Card Room Green (top left, chosen) beside Sage Green, Treron and the earlier deep green. Screen colours are approximate and the renders are lit as in the evening, so judge from painted samples.</figcaption></figure>
+<figcaption>The wall in Card Room Green (chosen) beside Sage Green, Treron and the earlier deep green. Screen colours are approximate and the renders are lit as in the evening: judge from painted samples.</figcaption></figure>
 <ul>
-<li><b>Finishes:</b> Estate Emulsion (chalky, flat) or Modern Emulsion (more wipeable) on walls, ceiling and alcove; Estate Eggshell in the same colour on skirting, door, frame, radiator and trunking. Modern Eggshell is the tougher choice for the skirting if it takes knocks.</li>
-<li><b>Ceiling:</b> the same colour keeps the drench seamless and makes the LED strip's wash read as one soft band.</li>
-<li><b>For the OLED:</b> Card Room Green is a mid-tone (LRV about 27): matt and muted enough that the screen keeps its contrast in the evening. Turn the spots down while watching and keep the bias light behind the TV.</li>
-<li><b>Choosing:</b> paint an A4 board and look at it by day and with the LED strip on: warm LEDs push greys towards green, cool daylight towards grey.</li>
-<li><b>Order:</b> paint before building anything, alcove included, so nothing needs cutting in around the uprights and shelves.</li>
-<li><b>How much:</b> measure walls and ceiling. A mid-tone over pale walls usually covers in two coats; over the old white gloss on the woodwork, prime first.</li>
+<li><b>Finishes:</b> Estate or Modern Emulsion on walls, ceiling, alcove and breast; Estate Eggshell in the same colour on skirting, door, frame and radiator (Modern Eggshell if the skirting takes knocks).</li>
+<li><b>Order:</b> paint before anything is fixed, so nothing needs cutting in round the uprights, shelves or the dining wall.</li>
 </ul>
-<h3>Skirting: paint it Card Room Green too</h3>
-<figure>{img("skirting_options.png", "Three skirting options with Card Room Green walls")}</figure>
+<h3>Skirting: Card Room Green too</h3>
+<figure>{img("skirting_options.png", "Three skirting options")}</figure>
+<p>Recommended: Card Room Green in Estate Eggshell, which completes the drench and hides scuffs far better than white. Darker option: Green Smoke. Over the white gloss: wash, key, woodwork primer, two coats of eggshell.</p>
+<h3>Light, in three warm layers</h3>
 <ul>
-<li><b>Recommended: Card Room Green in Estate Eggshell.</b> The wall colour with a soft sheen. It completes the drench, so the room's edges disappear and the oak base and records are what you notice, and it hides scuffs from feet and the hoover far better than white.</li>
-<li><b>Darker option: Green Smoke.</b> A deeper Farrow &amp; Ball grey-green with a hint of blue, for a defined edge that grounds the room. It draws the eye down, so keep it to the skirting and door.</li>
-<li><b>Keeping a light trim:</b> swap the brilliant white for a soft off-white. Bright white next to a muted grey-green looks cold and stark.</li>
-<li><b>Painting over white gloss or satin:</b> wash, key with a fine sanding pad, prime with a woodwork primer, then two coats of eggshell. Do the door, frame and window board at the same time.</li>
-<li><b>Behind the unit:</b> where the base meets the side wall inside the alcove, cut the skirting back so the oak end stile sits flush, or scribe the stile over it.</li>
+<li><b>The LED strip on the ceiling</b> (as now): round the room's edge, into the alcove and across the breast; 2700K on a dimmer.</li>
+<li><b>Built into the oak:</b> a 2700K strip in each upright's groove, on a plug-in driver with an inline dimmer, on the 10-gang (no fused spur); a 6500K bias light on the back of the TV from its USB port.</li>
+<li><b>A lamp by the sofa (from v6.1):</b> a floor or table lamp with a 2700K bulb at the sofa's west end. A deep green room needs a low, warm layer as well as the light from above; it's also the one to leave on for a film.</li>
+<li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>), parallel to the media wall, on your two existing ceiling points. Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa. Bar 2 hangs on the point between the door and the west wall, and its heads swing to the table. Each gets an LED-compatible dimmer in place of its switch: like-for-like swaps you do yourselves (step 12), with no new wiring. Bar 1 sits in front of the screen, so tilt its heads up and away: none should be visible in the screen from the sofa.</li>
 </ul>
-
-<h2 class="pb">Lighting</h2>
-<p>Three layers, all warm: the LED strip you already have round the ceiling, light built into the oak, and a spotlight bar on the existing ceiling rose in the middle of the room.</p>
-<h3>Now: the LED strip round the ceiling</h3>
-<ul>
-<li><b>What you have:</b> a strip stuck to the ceiling (not the wall) round the whole edge of the room, facing down, as in your photo. In the renders it runs along the left wall, into the alcove, across its back wall and reveal, and across the chimney breast, washing the top of every wall.</li>
-<li><b>Where it meets the oak:</b> the uprights run up to the ceiling against the back wall, so the strip would stop at each one. Cut a small notch, about 2 × 1.5 cm, in the back top corner of each upright so the strip runs straight through.</li>
-<li><b>Keep it warm:</b> 2700K, on a dimmer, so it matches the rest.</li>
-</ul>
-<h3>Later: upgrading the strip</h3>
-<table class="tight"><tr><th>Upgrade</th><th>What it does</th><th>Effort</th></tr>
-<tr><td>Aluminium channel with an opal diffuser, in the same place</td><td>Hides the individual LED dots and gives a clean line; cools the strip so it lasts longer</td><td>Easy: stick or clip the channel up, re-lay the strip</td></tr>
-<tr><td>LED coving or a shadow-gap cornice</td><td>Hides the strip completely and throws light up across the ceiling instead of down the walls: softer, no glare from the sofa</td><td>Medium: fixed and painted Card Room Green with the walls</td></tr>
-<tr><td>Strip in the uprights' grooves only, on a separate circuit</td><td>Light the media wall on its own for films, with the room strip off</td><td>Planned already; needs the fused spur for the driver</td></tr>
+<table class="tight"><tr><th>Head</th><th>Bar 1, on the existing rose</th><th>Bar 2, over the dining area</th></tr>
+<tr><td>Sage</td><td>The books and the left of the high shelf</td><td>The framed LPs above the table</td></tr>
+<tr><td>Pale blue</td><td>The record ledge above the TV</td><td>The table (the folded top, when it's up)</td></tr>
+<tr><td>Mustard</td><td>Down onto the coffee table</td><td>The table</td></tr>
+<tr><td>Dusty pink</td><td>The turntable and the Series X</td><td>Down onto the way in, by the door</td></tr>
 </table>
-<h3>Built into the oak</h3>
-<ul>
-<li><b>Upright grooves:</b> a 2700K strip in an aluminium channel in a groove on each upright's inner face, washing the green wall either side of the TV.</li>
-<li><b>Bias light:</b> a 6500K strip on the back of the TV, from its USB port, which is easier on the eyes in a dark room.</li>
-</ul>
-<h3>The ceiling light: a four-head spotlight bar</h3>
-<p>On the existing ceiling rose, in the middle of the room in line with the alcove's right-hand edge, in the style of Dunelm's Elements Wolston bar: a slim white bar with four conical shades on short stems, each with a light-wood topper, in your photo's colours of sage green, pale blue, mustard and dusty pink. The colours pick up the record sleeves, the wood toppers echo the oak, and against Card Room Green the pastel shades read as soft colour rather than clutter.</p>
-<table class="tight"><tr><th>Wolston 4-light spotlight bar</th><th>Figure</th></tr>
-<tr><td>Price</td><td>£49 at Dunelm</td></tr>
-<tr><td>Size</td><td>84 cm long, 16 cm deep, 22.4 cm drop; shades 15 cm across</td></tr>
-<tr><td>Build</td><td>Steel, adjustable heads, wood-effect toppers; semi-flush on a ceiling plate</td></tr>
-<tr><td>Bulbs</td><td>4 × E14 (small screw), 6 W max each, not included; dimmable with compatible E14 LED bulbs</td></tr>
-<tr><td>Rating</td><td>IP20 (indoors), Class 1: needs wiring in to the ceiling rose</td></tr>
-</table>
-<ul>
-<li><b>Which way it runs:</b> parallel to the media wall, as drawn, so all four heads can reach their targets.</li>
-<li><b>Aiming:</b> the two heads nearest the wall (sage and blue) light the books, the record ledge and the high shelf; the other two (mustard and pink) point down into the room and the coffee table. Never point a head at the TV, and tilt the front pair so the shades hide the bulbs from the sofa.</li>
-<li><b>Bulbs:</b> four warm-white (2700K) dimmable E14 LED bulbs, 4–6 W each, so they match the strip and the uprights.</li>
-<li><b>Dimmer:</b> swap the wall switch for an LED-compatible dimmer; turn the spots right down for films.</li>
-<li><b>Headroom:</b> with a 22.4 cm drop on a 220 cm ceiling, the lowest shade sits at about 198 cm. Tilted heads hang a little lower, so if it's over the walkway, angle them up rather than down at the front. Measure the room's ceiling before buying.</li>
-<li><b>Fitting:</b> it replaces the bare pendant on the existing rose; have the electrician wire it and the dimmer on the same visit.</li>
-</ul>
+<p>Never point a head at the TV. For six or eight the table stands right under bar 2: point its blue and mustard heads straight down onto it. Use warm-white (2700K) dimmable E14 LED bulbs throughout.</p>
+<h3>Lighting scenes (v13.7)</h3>
+<p>Four ways to set the room with the controls it already has: the strip's controller, the inline dimmer on the uprights' LED driver, the two wall dimmers and the lamp's switch. No smart kit needed; if you add smart dimmers later, these are the scenes to save.</p>
+{scenes_html()}
 
-<h2>Sound layout</h2>
-<figure>{sound()}</figure>
-<p>With the sofa directly opposite the TV at the left of the room, the sub fires straight at the seats, and nothing sits in the walkway by the door.</p>
-<ul>
-<li><b>Subwoofer:</b> wireless, in the alcove's right-hand corner, facing the sofa. A corner gives the most bass, and deep bass spreads in every direction, so it blends in from there. Keep 10–15 cm between the sub and the wall behind it. A 5 cm riser lifts it off the floor so the bass stays tight.</li>
-<li><b>Rear speakers:</b> one each side of the sofa, at about seated ear height or slightly above, level with or just behind your heads, angled towards the seats. On the AX5100G they're joined by a cable and only the link to the soundbar is wireless: run that cable behind the sofa along the skirting, and plan one socket for them.</li>
-<li><b>Soundbar:</b> centred in front of the TV, pointing straight at the sofa.</li>
-<li><b>Tuning:</b> sit on the sofa and set the sub and rear levels with the soundbar's remote or app. If the bass booms, turn the sub down rather than moving it.</li>
-<li><b>Open room:</b> the sofa area is the left part of a larger space, so bass can sound a little lighter at the seats than in a closed room. The corner sub helps make up for it.</li>
-</ul>
-
-<h3>Storage without crowding</h3>
-<ul>
-<li><b>Inside the unit:</b> about 180 LPs and 240 singles face-out in the two record trays, about 70 singles and the vinyl kit over the sub, about 48 games in the game drawer (12 face-out, the rest spine-up), and a controller basket beside the PS3.</li>
-<li><b>On the worktop and ledge:</b> about 50 LPs in the browser under the turntable and 4 on the ledge above the TV, so about 230 LPs in all, every one face-out.</li>
-<li><b>High shelf:</b> about a metre of books between oak bookends, one lidded box for spare cables and controllers, a print and Deco B.</li>
-<li><b>Left of the alcove:</b> the oak shelf through-tenoned into the left upright, top at 156 cm, above the Series X, for display or favourite games.</li>
-<li><b>Keep clear:</b> the band around the TV, the 40 cm above the turntable for its lid, the air above the Series X, and the front of the sub.</li>
-<li><b>Maximum storage:</b> if you need more, swap the high shelf for shallow wall cabinets across the left two-thirds, keeping the right end open for Deco B. It adds a lot of hidden space but makes the wall look heavier.</li>
-</ul>
-
-<h3>Build options</h3>
-<table><tr><th>Option</th><th>How</th><th>Good</th><th>Watch out</th></tr>
-<tr><td>Frames on a plinth + custom record bay + full-width top (recommended)</td><td>Two IKEA BESTÅ 60×40×64 frames on a 9 cm plinth, an 18 mm ply carcass for bay 3, and a solid oak worktop cut to 225 × 40 cm, resting on felt-lined battens over the open sub bay, all behind an oak face frame</td><td>Built-in look, mostly flat-pack, shelves on pins, room for two face-out record trays</td><td>Top at about 76 cm, so the TV sits 9 cm higher; back panels off; oil the worktop all over</td></tr>
-<tr><td>Kallax 4×2 on its side</td><td>Cube unit plus side fillers</td><td>Cheapest; cubes are about 33.5 cm square inside, so LPs and single consoles fit</td><td>147 cm wide leaves a gap even after the sub bay; no room for the record drawers</td></tr>
-<tr><td>Custom built-in</td><td>18 mm board carcasses built to the alcove</td><td>Exact fit throughout</td><td>Most work, and permanent</td></tr>
-</table>
-
-<h3>Easy use and access</h3>
-<ul>
-<li>Disc trays, power buttons and front USB ports at the front edge of each bay.</li>
-<li>Every drawer and tray runs on full-extension runners with a finger pull in the oak lip; no push-to-open at floor level. Open one record tray at a time.</li>
-<li>Label each switched socket and each HDMI switch input with the same console name.</li>
-<li>The controller basket holds the TV and HDMI switch remotes plus a charging dock for the Xbox and PlayStation pads, powered from the USB charger.</li>
-<li>Keep console bays open, or use cane or mesh fronts, so air and the HDMI switch remote both get through.</li>
-</ul>
-
-<h3>Cables, power and airflow</h3>
-<ul>
-<li><b>Service channel:</b> with the unit 10 cm off the wall, every cable drops through the 10 cm slot at the back of the worktop into two-compartment trunking: mains on one side, HDMI, Cat6 and audio on the other. Fit brush grommets at the back of each bay, and velcro-tie and label every cable.</li>
-<li><b>To the TV:</b> it stands on the worktop, so its power, four HDMI leads (PC, Series X, HDMI switch, soundbar eARC) and Ethernet drop straight down behind it. No socket behind the TV is needed.</li>
-<li><b>To Deco B:</b> a patch lead runs in slim corner trunking from the high shelf down to the 8-port switch. The switch is 10.1 cm deep, just too deep to lie flat in the 10 cm channel, so stand it on its edge or screw it to the back of the unit using its wall-mount slots.</li>
-<li><b>Power bricks:</b> the original Xbox 360 and Xbox One bricks sit on the free half of their console's row in bay 1, where air reaches them.</li>
-<li><b>Turntable:</b> its leads drop through a grommet at the back of the worktop, behind the browser, straight to the preamp on the kit shelf below; the preamp's output runs along the data side of the trunking to the soundbar's AUX input. Keep them away from the power bricks and the sub's mains lead.</li>
-<li><b>To Deco B:</b> the Cat6 from the top floor comes in through the ceiling in the alcove's right corner. Its 12 V lead and the patch lead to Switch 2 run along the back of the high shelf into the groove behind the right upright, down to the slot, and to an always-on socket of the 6-way at the back of the sub bay. If the adapter's lead won't reach, add a DC extension with the same plug rather than a mains extension up at the shelf.</li>
-<li><b>To the subwoofer:</b> its power lead runs along the channel to the always-on strip. Put felt or rubber pads where the worktop rests on its wall batten, so bass doesn't rattle it.</li>
-<li><b>PC on the left wall:</b> HDMI and Cat6 drop through the shelf notch, down the trunking and along the skirting into the service channel. Over 3 m, use an active optical HDMI cable; these work one way round only, so the end marked "source" goes into the PC.</li>
-<li><b>Power:</b> the wall socket on the side wall just in front of bay 1, swapped from a single to a double, feeds your 10-gang and the 6-way, one per socket, never one plugged into the other. You won't need to reach it day to day: the strips' own switches do that. See the power map below.</li>
-<li><b>OLED care:</b> keep the TV on the always-on strip. It runs its pixel refresh while in standby, so don't switch it off at the wall.</li>
-<li><b>Airflow:</b> no doors on the console bays (use mesh or slatted fronts if you want them), open backs, and at least 4 cm, ideally 10 cm, clear around the Series X.</li>
-</ul>
-
-<h3>Power map</h3>
+<h2 class="pb">9 · Power, cables and network</h2>
+<h3>Power</h3>
 <figure>{power()}</figure>
 <ul>
-<li><b>Where the 10-gang goes:</b> lying flat on the worktop behind the TV, switches up, with side B's switch at the left end. From the left, reach in through the 15 cm gap between the Series X and the TV. From the sofa, the soundbar and the TV's bottom edge hide it.</li>
-<li><b>Leads up to it:</b> console leads rise through the slot behind the worktop; label each plug at the strip end.</li>
-<li><b>The 6-way:</b> screwed to the back of the sub bay, just under the kit shelf, so its switches are in reach and its leads are short to the deck, preamp and Deco lead.</li>
+<li><b>The socket:</b> the single on the side wall just in front of bay 1, about 30 cm up, becomes a double at the same spot. The left outlet feeds the 10-gang; the right one feeds the retro 6-way, so its own switch is now the retro switch. The 10-gang's switches sit behind the TV, 2 cm from the corner post, where you can't reach them any more.</li>
+<li><b>10-gang:</b> lying flat on the worktop behind the TV, both sides left on: TV, soundbar, sub, Series X, USB charger, Deco B, Switch 2, the deck, the preamp and now the PC. With everything running that's about 1.55 kW (the PC's 850 W at most), under the strip's 13 A (3 kW).</li>
+<li><b>Retro 6-way:</b> in the channel behind bay 1 (bay 2's back is the sub's port): Xbox One, Xbox 360, PS3, PS2, PS1, RetroTINK.</li>
+<li><b>OLED care:</b> leave the TV in standby so it runs its pixel refresh.</li>
 </ul>
+<h4>Socket by socket</h4>
+<table class="tight"><tr><th>Socket</th><th>Feeds</th><th>On or off</th></tr>
+<tr><td>Side wall, double, left outlet</td><td>The 10-gang behind the TV: TV, soundbar, sub, Series X, USB charger (fan stand, pad dock, bias light, HDMI switch), Deco B, Switch 2, the turntable, the preamp, the PC and the uprights' LED driver</td><td>Always on: about 1.55 kW with everything running, PC included</td></tr>
+<tr><td>Side wall, double, right outlet</td><td>The retro 6-way in the channel: Xbox One, Xbox 360, PS3, PS2, PS1, the RetroTINK's USB plug</td><td>The wall switch is the retro switch: off between sessions; up to about 0.8 kW with a launch PS3</td></tr>
+<tr><td>By the sofa, if there is one</td><td>The rear speakers (if there's no socket there, a 12-way strip in place of the 10-gang gives them a way)</td><td>On</td></tr>
+<tr><td>Ceiling points 1 and 2</td><td>The two spot bars, each on an LED-compatible dimmer</td><td>Dimmed</td></tr>
+</table>
+<p class="note">One strip per outlet, never one plugged into another, and each under its 13 A (3 kW) limit: about 1.55 kW on the 10-gang and up to 0.8 kW on the retro 6-way, about 10 A together.</p>
+<h3>Electrics: your own job</h3>
+<p>You're doing the electrics yourselves. In England, Part P of the Building Regulations makes only three kinds of work notifiable: a new circuit, a replacement consumer unit, and any addition or alteration to a circuit in a special location (round a bath or shower). Replacing an accessory like for like, and adding to an existing circuit anywhere else, isn't notifiable, though it must still be done to the wiring regulations (BS 7671). So the jobs here need no electrician and no building control: the socket swapped for a double, the two dimmers, and the two spot bars in place of the old fittings. The Cat6 and the conduits aren't mains work at all.</p>
+<div class="callout"><b>The safe routine, every time</b><ol>
+<li><b>Isolate:</b> switch off that circuit's breaker at the consumer unit (the lighting circuit for the dimmers and bars, the socket circuit for the socket). If the labels aren't clear, switch off the main switch.</li>
+<li><b>Lock off:</b> fit the MCB lock-off and padlock, keep the key in your pocket, and tape a note on the board.</li>
+<li><b>Prove dead:</b> check the tester lights on its proving unit, test between every pair of terminals (live–neutral, live–earth, neutral–earth), then check the tester on the proving unit again.</li>
+<li><b>Photograph</b> the wiring before you disconnect anything, and connect the new one wire for wire: brown (or red) to L, blue (or black) to N, green-and-yellow to earth, sleeved, no copper showing, every screw tight.</li>
+<li><b>Test:</b> power back on, then the socket tester in both outlets; each dimmer from low to high with no flicker.</li></ol></div>
+<div class="callout"><b>Stop and call an electrician if…</b><ul>
+<li>the tester shows anything live after you've isolated;</li>
+<li>the wiring is old (rubber or fabric sheath, or red and black with no earth), or there's no earth at a ceiling point (the spot bars need one);</li>
+<li>there are more wires than you can match to your photo (two-way switching, a loop in a ceiling rose you can't follow), or scorch marks, or a loose, hot or crumbling fitting;</li>
+<li>the consumer unit has rewireable fuses or no RCD;</li>
+<li>a job grows into a new circuit, consumer unit work, or anything by the bath or shower.</li></ul></div>
 <h3>Cable routes</h3>
 <figure>{routes()}</figure>
-
-<h2 class="pb">The PC shelf</h2>
-<p>A standard PC case has its glass window on its left side. With that glass facing the room, the front of the case points at the alcove and the back, with all its ports and leads, faces the sofa. The design hides that back without blocking the hot air leaving it, and parks the keyboard and mouse underneath.</p>
-<figure>{pc_shelf()}</figure>
 <ul>
-<li><b>Layout on the shelf:</b> the shelf runs 65 cm along the wall and 32 cm out. The 45 cm-deep case sits 5 cm from the alcove end, leaving 13 cm behind it, then an oak frame with a woven cane panel at the sofa end, 26 cm wide and 48 cm tall, the height of the case.</li>
-<li><b>Airflow:</b> the screen's top is open and the cane breathes, so the rear exhaust fan's air rises out of the 13 cm gap instead of being trapped. Keep the front (alcove end) and the glass side clear for intake.</li>
-<li><b>Cables:</b> a 6 × 8 cm notch in the shelf's back corner, against the wall at the sofa end, with a brush grommet. Every lead (power, HDMI, Cat6) goes from the ports into a braided sleeve, through the notch, and down slim trunking painted the wall green to the skirting. A right-angle C13 power lead keeps the plug flat to the case.</li>
-<li><b>Power:</b> ideally a socket under the shelf, added on the electrician's visit, so the PC's 500–850 W stays off the media wall strips. Then only HDMI and Cat6 travel along the skirting.</li>
-<li><b>Keyboard and mouse tray:</b> build the shelf as a 9 cm-deep oak box: the shelf on top, and a 7 cm housing underneath with a tray on 300 mm light-duty runners that rolls 25 cm out towards the room. It holds a full-size wireless keyboard and mouse. The housing stops 12 cm short of the sofa end so the cables can drop past it. Pull it out, lift the keyboard onto your lap, and park it again after.</li>
-<li><b>Fixing:</b> hang the box on a French cleat plus two steel brackets rated 25 kg or more; the PC weighs about 10–18 kg. Into masonry, use plugs and screws; on plasterboard, fix into studs or use heavy-duty cavity fixings rated for the load.</li>
+<li><b>The channel:</b> 4 cm behind the frames, flat two-compartment trunking: mains on one side, HDMI, Cat6 and audio on the other. Switch 2 and the retro 6-way stand on edge in it.</li>
+<li><b>The groove behind the right upright:</b> Deco B's 12 V and patch leads, the Series X's HDMI and power, and the vinyl lead, down to the worktop's slot.</li>
+<li><b>The PC:</b> through the shelf's brush grommet into two conduits chased into the side wall (the HDMI and Cat6 in a 38 mm one, its mains lead in a 25 mm one), behind the skirting and into the plinth notch; the mains lead goes on to the 10-gang.</li>
+<li><b>The sub:</b> its mains lead from the 10-gang drops through the slot behind the TV to the back of bay 2, about 1 m. Keep the channel behind the sub clear: its port needs the air.</li>
+<li><b>Airflow:</b> console bays stay open-backed; the Series X has 15 cm each side and 21 above.</li>
 </ul>
-
-<h2 class="pb">Alternative: the slat wall</h2>
-<p>Kept for reference. The base, drawers, records and consoles are identical; above the worktop, oak acoustic slat panels on battens run from the worktop to the ceiling instead of the uprights, the shelves sit on hidden cleats, and the face frame is painted. It's quicker to fit, hides cables in the batten gap and softens sound, but it follows a current trend.</p>
-<figure class="render">{img("render_v8_slat_key_scene.png", "Slat wall alternative with numbered parts")}
-<figcaption>The slat wall alternative in the same Card Room Green; numbers follow its own key, which comes with the full-resolution renders.</figcaption></figure>
+<h3>Network</h3>
+<figure>{network()}</figure>
 <ul>
-<li><b>What changes:</b> four 240 × 60 cm slat panels on 25 × 50 mm battens (about £230–380), a laminate worktop instead of solid oak, an MDF face frame painted Card Room Green eggshell, and the shelves on cleats with no joints on show.</li>
-<li><b>What stays:</b> every height, the record trays, the power and network routes and the lighting, except that the LED wash comes from strips under each shelf instead of the upright grooves.</li>
+<li><b>Bedroom 3:</b> the Hub 5 (in modem mode), Deco A and Switch 1 sit together with the gaming PCs. Switch 1's eight ports: the uplink, two PCs, the two Cat6 runs down to Deco B and Deco C, and, if you want them, the projector in the master and the music room in bedroom 2.</li>
+<li><b>The route down:</b> across the landing to the airing cupboard, which sits over the alcove's corner, and down through its floor. Run 1 comes through the living room ceiling in the alcove's right corner to Deco B; run 2 follows the right upright's groove down and through the floor to the kitchen, where Deco C goes on the outside of the brick cupboard, up high.</li>
+<li><b>Sloped ceilings:</b> bedroom 2 and the bathroom slope down to the back wall; keep any Deco or desk in bedroom 2 on the high side.</li>
 </ul>
-
-<h2 class="pb">Build guide: the whole wall</h2>
-<p>Everything needed to build the unit, the oak joinery, the trays and drawers, and the PC shelf. Sizes are finished sizes in centimetres. Measure your own alcove first: walls are rarely square, so take its width at the floor, at 76 cm, at 192 cm and at the ceiling, and cut the worktop and shelves to the smallest.</p>
-<figure>{section()}</figure>
-<h3>What it's made of</h3>
-<table class="tight"><tr><th>Element</th><th>Made from</th><th>Finished size</th><th>Fixing</th></tr>
-<tr><td>Plinth (bays 1–2)</td><td>18 mm ply ladder frame: front and back rails, four cross rails</td><td>120 × 38 × 9</td><td>Shimmed level on the floor; frames screwed down onto it from inside</td></tr>
-<tr><td>Bays 1–2</td><td>2 × IKEA BESTÅ frame, white stained oak effect, back panels off</td><td>Each 60 × 40 × 64, tops at 73</td><td>Joined to each other, 10 cm spacer blocks to the wall, 2 anti-tip brackets each</td></tr>
-<tr><td>Bay 3 carcass</td><td>18 mm birch ply, back open</td><td>60 × 40 × 73</td><td>On the floor, bolted to bay 2, 10 cm spacers and 2 anti-tip brackets</td></tr>
-<tr><td>Internal shelves</td><td>4 × BESTÅ shelf (20 kg each)</td><td>56 × 36</td><td>On pins at the fit-check heights</td></tr>
-<tr><td>Worktop</td><td>Solid oak, full stave or wide board, chamfered front edge</td><td>225 × 40 × 3, top at 76</td><td>Screwed up through the frame and carcass tops in slotted holes so it can move; on felt-lined battens over the sub bay</td></tr>
-<tr><td>Uprights</td><td>Solid oak</td><td>144 × 30 × 4.5 (scribed)</td><td>Two 10 mm dowels into the worktop, two concealed brackets each into the back wall</td></tr>
-<tr><td>Sub bay battens</td><td>44 × 22 mm planed softwood, felt-lined</td><td>40 (right wall) + 44 (back)</td><td>Into the wall, top at 73</td></tr>
-<tr><td>Kit shelf</td><td>18 mm oak-veneered ply or oak</td><td>44.4 × 30</td><td>On two 30 cm battens, top at 38.8; rubber pads</td></tr>
-<tr><td>Record trays</td><td>9 and 12 mm birch ply, oak dividers and lips, 400 mm runners</td><td>Trays 53.9 × 40 × 13.2</td><td>Runners straight into the bay 3 carcass (cut list above)</td></tr>
-<tr><td>Game drawer</td><td>Birch ply, oak lip, 350 mm runners</td><td>Box 54.3 × 35 × 16.4</td><td>Runners on bay 1's sides (cut list above)</td></tr>
-<tr><td>Hidden drawer</td><td>12 mm birch ply box, 20 mm oak front</td><td>Box 40 × 28 × 6; front 44 × 7.4 at 65.6–73</td><td>250 mm runners on a ply cheek against the bay 3 carcass and a batten on the right wall, just under the worktop</td></tr>
-<tr><td>LP browser</td><td>Oak offcut base, 20 mm oak front rail and side</td><td>44 × 24, rail 4 tall, side 9 tall</td><td>Loose on the worktop, rubber feet</td></tr>
-<tr><td>High shelf</td><td>Solid oak, three lengths</td><td>30 × 4, top at 192</td><td>Housed and pegged into the uprights; the end lengths also on cleats on the side walls</td></tr>
-<tr><td>Record ledge</td><td>Solid oak</td><td>128.9 × 7 × 2.4, top 155.4</td><td>Housed and pegged into the uprights</td></tr>
-<tr><td>Turntable shelf</td><td>Solid oak</td><td>51.5 × 45 × 4, top at 113</td><td>Wedged through-tenons in the right upright, cleat on the right wall; clear of the unit</td></tr>
-<tr><td>Left shelf</td><td>Solid oak</td><td>51 × 25 × 4, top at 156</td><td>Wedged through-tenons in the left upright, cleat on the left wall</td></tr>
-<tr><td>PC shelf box</td><td>27 mm oak top, 18 mm oak sides</td><td>65 × 32, box 9 deep</td><td>French cleat plus 2 steel brackets (25 kg+)</td></tr>
-<tr><td>Keyboard tray</td><td>12 mm birch ply, oak lip</td><td>About 46 × 30</td><td>300 mm light-duty runners in the box</td></tr>
-<tr><td>PC screen</td><td>Oak frame with a woven cane panel</td><td>26 × 48</td><td>Screwed to the shelf from below</td></tr>
-<tr><td>Face frame</td><td>20 mm oak</td><td>Stiles about 5 wide, rails 2.6 and 2 tall, 225 long, 73 tall overall</td><td>Glued and pinned to the frame and carcass fronts; end stiles scribed to the walls</td></tr>
+<h4>What each part does</h4>
+<table class="tight"><tr><th>Part</th><th>Where</th><th>Job</th><th>Why it's needed</th></tr>
+<tr><td>Virgin Hub 5, in modem mode</td><td>Bedroom 3</td><td>Brings the internet in, nothing else</td><td>Two routers fighting (double NAT) breaks Xbox online play; its Wi-Fi switches off</td></tr>
+<tr><td>Deco A (main)</td><td>Bedroom 3</td><td>The router: Wi-Fi, parental controls, HomeShield</td><td>HomeShield and parental controls only work when the Deco is the router</td></tr>
+<tr><td>Switch 1, 8-port</td><td>Bedroom 3</td><td>Turns Deco A's spare port into seven</td><td>The two PCs, both Cat6 runs down, and the optional projector and music-room runs</td></tr>
+<tr><td>Deco B</td><td>Living room, high shelf at {n(g.HIGH_TOP)}</td><td>Wi-Fi for the living room, and the wired point for the wall</td><td>Fixes the living room's weak 5 GHz side</td></tr>
+<tr><td>Switch 2, 8-port</td><td>Standing on edge in the channel behind the base</td><td>Turns Deco B's spare port into seven</td><td>The Series X, Xbox One, Xbox 360, PS3, PC and TV each get a cable, one port spare</td></tr>
+<tr><td>Deco C</td><td>Kitchen, high on the outside of the brick cupboard</td><td>Wi-Fi for the kitchen</td><td>The kitchen gets poor signal on every band today</td></tr>
+<tr><td>Cat6 runs 1 and 2</td><td>Bedroom 3 → airing cupboard → alcove corner, and on to the kitchen</td><td>The wired link between Decos ("Ethernet backhaul")</td><td>Without it the Decos relay each other over the 5 GHz band the phones use, losing speed at each hop</td></tr>
 </table>
-<h3>Tools</h3>
-<ul>
-<li>Drill-driver and an SDS or hammer drill for the masonry, with masonry bits and plugs.</li>
-<li>Spirit level (a cross-line laser makes the shelf heights quick), tape, combination square, stud and cable detector.</li>
-<li>Track or circular saw for the worktop and ply (or have the timber merchant cut the ply and oak to the cut lists), jigsaw for notches.</li>
-<li>For the joints: a sharp set of chisels (6, 12 and 25 mm), a marking gauge, a tenon saw, a router with a straight bit for the housings and grooves, a 10 mm drill bit for the pegs, and a mallet.</li>
-<li>Router with a cove bit for the finger pulls (or buy lips with the pull routed), clamps, sander, wood glue.</li>
-<li>Dust mask, eye and ear protection.</li>
-</ul>
-<h3>Order of work</h3>
+<h4>Stage 1: the mesh up today, before any cables</h4>
 <ol>
-<li><b>Check and measure:</b> ceiling height, alcove width at four heights, the walls for plumb, the floor for level across the alcove, and your records and games.</li>
-<li><b>Electrician:</b> Cat6 runs (the one for Deco B through the ceiling in the alcove's right corner), swap the single socket in front of bay 1 for a double (or move it back into the alcove), sockets by the sofa and under the PC shelf, the fused spur for the LED drivers, and the spotlight bar and its dimmer. Mark every cable route on the wall before painting.</li>
-<li><b>Paint the room</b> in Card Room Green, skirting and door in eggshell, alcove included, and let it cure for a few days before fixing anything to it.</li>
-<li><b>Mark heights</b> on the walls with a level or laser: 73 (worktop battens), 37 (kit shelf battens), 109 (turntable shelf underside), 152 (left shelf underside), 188 (high shelf underside), and the uprights' lines at 44.5–49 and 175.5–180 cm from the left wall.</li>
-<li><b>Fix the cleats and battens</b> on the side walls for the shelf ends and the sub bay, into the masonry, level. Cut the skirting back where the base meets the walls.</li>
-<li><b>Build the plinth</b> and set it against the spacer blocks, shimmed dead level: it decides whether the worktop sits flat.</li>
-<li><b>Assemble the frames</b> with their back panels off, stand them on the plinth, join them with BESTÅ connectors and screw them down to it.</li>
-<li><b>Build the bay 3 carcass,</b> set it beside bay 2, shim it so its top is level with the frames at 73, bolt it to bay 2, and fit the anti-tip brackets on all three.</li>
-<li><b>Fit the worktop:</b> scribe the ends to the walls, oil it all over (underside too, so it stays flat), and screw up through the frame and carcass tops in slotted holes (short screws that can't come through). Felt pads on the sub-bay battens.</li>
-<li><b>Fit the trunking</b> in the channel behind the unit, mains on one side and data on the other, and run the cables in.</li>
-<li><b>Fit the internal shelves</b> in bays 1 and 2 at the fit-check heights.</li>
-<li><b>Build and fit the trays and drawers:</b> both record trays in bay 3, then the game drawer in bay 1 (steps in their sections).</li>
-<li><b>Fit the kit shelf and the hidden drawer</b> in the sub bay, and put the sub on its riser.</li>
-<li><b>Cut the joints and fit the oak:</b> dry-fit each upright with its shelves on the bench, then stand the uprights on their dowels, fix the concealed brackets, and fit the shelves, ledge, wedges and pegs (see "The oak joinery"). Lay the Deco leads in the right upright's groove before it goes up.</li>
-<li><b>Build the PC shelf box,</b> fit the keyboard tray runners, hang it on its cleat and brackets, fit the screen and the trunking down to the skirting.</li>
-<li><b>Make the LP browser,</b> fit the oak face frame, and finish all the oak with hardwax oil.</li>
-<li><b>Place and connect everything,</b> label each plug and HDMI input, and test.</li>
+<li>Unplug everything from the hub. Log in at 192.168.0.1 with the password on its base, then Modem Mode → Enable Modem Mode → Apply. Its settings page moves to 192.168.100.1.</li>
+<li>Connect a hub port to Deco A and set it up in the Deco app, reusing the old Wi-Fi name and password. If it shows no internet, try another port and restart the hub.</li>
+<li>Plug Switch 1 into Deco A's other port, then the PCs into Switch 1.</li>
+<li>Add Deco B in the living room and Deco C in the kitchen. For now they link over Wi-Fi.</li>
+<li>Check the Xbox's network settings show NAT: Open.</li>
 </ol>
-
-<h3>Then: lighting</h3>
+<h4>Stage 2: after your Cat6 runs (step 3)</h4>
 <ol>
-<li><b>Upright grooves:</b> aluminium channel and a 2700K strip in each upright's inner groove, wired down the back groove to a driver on the fused spur in the sub bay.</li>
-<li><b>Ceiling strip:</b> re-stick the existing strip through the notches at the top of the uprights; add the channel and diffuser whenever you upgrade it.</li>
-<li><b>Bias light</b> on the back of the TV, from its USB port.</li>
-<li><b>Spotlight bar:</b> fit it on the existing rose, parallel to the media wall, then aim the heads and set the dimmer.</li>
+<li>Plug run 1 into Deco B's free port (Switch 2 stays in the other) and run 2 into Deco C.</li>
+<li>In the Deco app, check Deco B and Deco C show as "Ethernet".</li>
+<li>Plug the Series X, Xbox One, Xbox 360, PS3, PC and TV into Switch 2.</li>
+<li>Under QoS, give the Series X and the PC high priority; turn on guest Wi-Fi and automatic firmware.</li>
 </ol>
-<h2 class="pb">Living room AV</h2>
-<p>The TV's four HDMI 2.1 ports cover everything. The PC and Series X get their own ports for 120Hz+ and VRR (the C6's 165Hz mode is for PCs), the soundbar takes eARC, and the other five consoles share HDMI 4 through a switch. The C6 has no analogue inputs, so the PS2 and PS1 go through the RetroTINK first.</p>
+<div class="callout"><b>Cabling rules</b><ul>
+<li>Solid pure-copper Cat6, round; not CCA or flat cable for the long runs. Measure the real route and add 2–3 m.</li>
+<li>Cross mains at right angles; never staple through a cable; no kinks; label both ends. Never two cables between the same two devices.</li>
+<li><b>Done when:</b> Deco B and C show "Ethernet", each PC shows 1.0 Gbps, the Xbox shows NAT: Open, and phones hold a strong signal in the kitchen and across the living room.</li></ul></div>
+<h3>AV: everything sounds through the Hisense</h3>
 <figure>{av()}</figure>
-<h3>How each source reaches the Hisense</h3>
-<table class="tight"><tr><th>Source</th><th>Picture</th><th>Sound</th><th>Soundbar input</th></tr>
-<tr><td>PC</td><td>TV HDMI 1</td><td>Via the TV over eARC</td><td>HDMI ARC</td></tr>
-<tr><td>Xbox Series X</td><td>TV HDMI 3</td><td>Via the TV over eARC, 5.1 or Atmos</td><td>HDMI ARC</td></tr>
-<tr><td>Xbox One, Xbox 360, PS3</td><td>HDMI switch → TV HDMI 4</td><td>Via the TV over eARC, 5.1</td><td>HDMI ARC</td></tr>
-<tr><td>PS2</td><td>Component → RetroTINK → switch → TV</td><td>Optical, straight to the soundbar, 5.1 where the game has it</td><td>Optical</td></tr>
-<tr><td>PS1</td><td>RGB SCART → RetroTINK → switch → TV</td><td>Stereo through the RetroTINK and the TV's eARC (no digital out)</td><td>HDMI ARC</td></tr>
-<tr><td>Turntable</td><td>—</td><td>Preamp → AUX, straight in</td><td>AUX</td></tr>
-<tr><td>Phone or tablet</td><td>—</td><td>Bluetooth, straight in</td><td>Bluetooth</td></tr>
-<tr><td>TV apps</td><td>Built in</td><td>eARC</td><td>HDMI ARC</td></tr>
+<table class="tight"><tr><th>Source</th><th>Picture</th><th>Sound</th></tr>
+<tr><td>PC · Xbox Series X</td><td>TV HDMI 1 · HDMI 3</td><td>Via the TV over eARC (5.1 or Atmos)</td></tr>
+<tr><td>Xbox One, Xbox 360, PS3</td><td>HDMI switch → TV HDMI 4</td><td>Via the TV over eARC, 5.1</td></tr>
+<tr><td>PS2</td><td>Component → RetroTINK → switch → TV</td><td>Optical straight to the soundbar</td></tr>
+<tr><td>PS1</td><td>RGB SCART → RetroTINK → switch → TV</td><td>Stereo through the RetroTINK and eARC</td></tr>
+<tr><td>Turntable · phone</td><td>—</td><td>Preamp → AUX · Bluetooth</td></tr>
 </table>
-<p>The soundbar has no HDMI inputs, so anything with an HDMI lead has to reach it through the TV; eARC carries the full 5.1. Everything that can skip the TV does: vinyl on AUX, the PS2 on optical and phones on Bluetooth. Pick the input on the soundbar's remote when you switch to the deck or the PS2; it wakes by itself when a signal arrives. If PS2 sound ever runs slightly ahead of the picture, nudge the soundbar's audio delay or AV sync setting if it has one.</p>
-<h3>TV and console settings</h3>
+<p>TV settings: rename the inputs (HDMI 4 "Retro"), Deep Colour on HDMI 1, 3 and 4, Game Optimiser on the console inputs, sound out to HDMI eARC. RetroTINK-6X CE: a 5 V 2 A USB plug on the retro 6-way; the PS2's Component Video Out set to Y Cb/Pb Cr/Pr; RGB SCART for the PS1.</p>
+<h3>Sound layout</h3>
+<figure>{sound()}</figure>
 <ul>
-<li>Rename each TV input, with HDMI 4 as "Retro", and turn on HDMI Ultra HD Deep Colour for HDMI 1, 3 and 4.</li>
-<li>Use Game Optimiser on the console inputs for the lowest lag.</li>
-<li>Set sound output to HDMI eARC, with digital audio on Auto or Passthrough.</li>
-<li>Set the PS3, 360 and Xbox One to output 5.1 over HDMI.</li>
-<li>On the PS3, turn off "Control for HDMI" so it doesn't grab the TV input.</li>
-<li>For the PC at 4K above 120Hz, use a cable certified Ultra High Speed (48 Gbps), which includes the active optical one.</li>
-</ul>
-<h3>PS2 and retro on the 55-inch</h3>
-<ul>
-<li><b>Upscaler:</b> the RetroTINK-6X CE, $230 in the US; RetroTINK's international prices include VAT and import fees. Its motion-adaptive deinterlacing suits PS2 games, which mostly run interlaced, and it outputs up to 1440p for the TV to finish scaling to 4K.</li>
-<li><b>Stock:</b> the September run sold out and the next restock is estimated for October to November, so order as soon as it's back.</li>
-<li><b>Why not the 2X Pro:</b> RetroTINK now lists it as a legacy model, and it won't accept the 480p mode some PS2 games use.</li>
-<li><b>Wiring:</b> component cable from the PS2 into the RetroTINK's rear RCA input for the picture, and a 2 m optical cable from the PS2 straight to the soundbar's optical input, which carries 5.1 in games that support it. The component lead's stereo plugs can still go to the RetroTINK as a fallback.</li>
-<li><b>Power:</b> it comes with a USB-A to USB-C lead but no plug, and needs at least 5V 2A. Use a USB plug on its own switched socket of the 6-way, and switch it with side B.</li>
-<li><b>PS2 settings:</b> set System Configuration → Component Video Out to Y Cb/Pb Cr/Pr, or you may get no picture. Turn the digital (optical) audio out on.</li>
-<li><b>PAL games:</b> choose the 60 Hz mode when a game offers it at start-up, for smoother motion.</li>
-<li><b>PS1:</b> an RGB SCART cable into the RetroTINK's SCART input. PS1 discs also play on the PS2 if you'd rather keep that console boxed.</li>
-<li><b>Sharper still:</b> PCSX2 on the PC renders PS2 games at native 4K, with widescreen patches for many. Use your own discs and a BIOS copied from your own PS2.</li>
-<li><b>Premium option:</b> the RetroTINK-4K CE ($475) outputs true 4K with the same processing, and a 6X Pro is due in the coming months. Only worth it if picture quality becomes a hobby.</li>
-<li><b>OLED care:</b> 4:3 games leave black bars at the sides. Mix in full-screen viewing, and leave the TV in standby so it runs its pixel refresh.</li>
-</ul>
-<h3>Vinyl: through the soundbar, done properly</h3>
-<ul>
-<li><b>Setup:</b> slim turntable with a new stylus, set to PHONO → external phono preamp on the shelf over the sub → soundbar AUX input, using an RCA-to-3.5 mm lead.</li>
-<li><b>Check first:</b> the external preamp only helps if the deck has a PHONO/LINE switch. With no switch, its built-in preamp can't be bypassed, so skip the external one and plug the deck straight into the soundbar AUX.</li>
-<li><b>Why the external preamp:</b> a slim deck's built-in preamp is its weakest part. A proper one gives fuller bass, clearer highs and less hiss.</li>
-<li><b>Soundbar settings:</b> Music mode, bass up, and surround effects, night mode and dialogue mode off. Turn the sub down slightly from your film setting if bass gets boomy.</li>
-<li><b>No Bluetooth:</b> always use the AUX cable, as Bluetooth loses quality.</li>
-<li><b>Stylus:</b> buy the exact replacement for the deck's model, and set the tracking weight to the cartridge maker's figure.</li>
-<li><b>Records:</b> clean them with a carbon-fibre brush before playing, and keep a few spare inner sleeves in the drawer's side compartment.</li>
-</ul>
-<h3>Upgrade path for vinyl</h3>
-<p>Start with the soundbar route. Step up only if you want more. The old hi-fi and its built-in deck can be retired.</p>
-<ol>
-<li><b>Best for vinyl (about £200–450):</b> a stereo amp with phono input and sub output, the hi-fi's wired speakers, and a powered subwoofer. Fully analogue, loud and bassy. The Hisense sub can't be reused, as it only pairs with the soundbar.</li>
-<li><b>Best for the whole room (about £500+):</b> an AV receiver with phono input and HDMI eARC, replacing the soundbar and driving real 5.1 speakers. Pure stereo for vinyl, proper surround for films.</li>
-</ol>
-
-<h2 class="pb">Why we chose this option</h2>
-<p>Wired where it matters, wireless everywhere else. The devices that need speed and stability are on cable, and the Wi-Fi is left free for phones.</p>
-<ul>
-<li><b>Wired gaming and streaming:</b> the Xboxes, PS3, TV and PCs get full gigabit with the lowest latency and no dropouts, whatever the walls or neighbours do.</li>
-<li><b>Phones get uncrowded Wi-Fi:</b> with heavy users on cable, phones aren't competing with a 4K stream or game download.</li>
-<li><b>Dual-band Decos need cables to shine:</b> the X1500 has no dedicated band for unit-to-unit traffic. Cabling the links gives every floor the same strength as the top floor.</li>
-<li><b>Star layout:</b> each Deco has its own cable from the top floor, so the kitchen doesn't depend on the living room kit being on.</li>
-<li><b>Switches cost nothing in speed:</b> every port runs at full speed at once, with no setup. They're simply extra ports, about £18–25 each.</li>
-<li><b>Zones that match the kit above them:</b> the Xbox bay under the Series X, the PlayStation bay under the TV, and the records under the turntable, so cables stay short and everything lives where it's used.</li>
-</ul>
-<h3>Options we rejected</h3>
-<table><tr><th>Option</th><th>Why not</th></tr>
-<tr><td>Keep the Virgin hub as router, Decos in access point mode</td><td>Loses HomeShield and parental controls</td></tr>
-<tr><td>All-wireless mesh</td><td>Works, but speed drops with each wireless hop, worst in the kitchen</td></tr>
-<tr><td>Powerline adapters</td><td>Slower and less stable than Cat6; fallback only if cabling is impossible</td></tr>
-<tr><td>2.5Gb switches</td><td>Decos and PCs top out at 1Gb, so no gain for the extra cost</td></tr>
-<tr><td>Keeping the 5-port switch upstairs</td><td>Full on day one; any new device upstairs would need another switch</td></tr>
-<tr><td>Plugging devices straight into Decos</td><td>Only one spare port per Deco: not enough for 2 PCs upstairs or 6 devices downstairs</td></tr>
-<tr><td>Games upright, two lines deep</td><td>The back line is hidden and you pull out the front ones to reach it</td></tr>
-<tr><td>Games lying flat in stacks</td><td>Hard to pick from, and long-term flat storage can bow discs in a warm room</td></tr>
-<tr><td>Records on an open shelf in bay 1</td><td>Far from the deck, spines only, and too heavy for a BESTÅ shelf; the drawer puts them under the turntable with the art on show</td></tr>
-<tr><td>A green feature wall only</td><td>Leaves the alcove looking applied; the drench ties the room together</td></tr>
-<tr><td>White skirting</td><td>Cuts a bright line round the room and breaks the drench; Card Room Green eggshell or a soft off-white sits better</td></tr>
-<tr><td>A paper lantern for the ceiling</td><td>Replaced by the spotlight bar you chose: aimable light for the shelves, and it sits higher</td></tr>
-<tr><td>A long pendant drop</td><td>On a 220 cm ceiling it would hang into the walkway; a flattened shade on a short drop keeps headroom</td></tr>
-<tr><td>Keeping the deep forest green</td><td>Still a good option for the darkest picture at night, but you asked for softer; the grey-green keeps the drench and feels lighter by day</td></tr>
-<tr><td>Singles spine-up beside the LPs</td><td>Thinner trays free enough width to show them face-out too, and hold twice as many</td></tr>
-<tr><td>Records spine-up in one drawer</td><td>Held slightly fewer and showed only a handful of covers; two face-out drawers show every one, at the cost of a TV 9 cm higher</td></tr>
-<tr><td>RetroTINK-2X Pro</td><td>Now a legacy model, won't accept 480p, and has simpler deinterlacing than the 6X CE</td></tr>
-<tr><td>Cheap PS2-to-HDMI adapters</td><td>Soft, washed-out picture that a 55" OLED makes obvious</td></tr>
-<tr><td>Bluetooth from the turntable</td><td>Compresses the sound; the AUX cable keeps full quality</td></tr>
-</table>
-
-<h2>Later ideas</h2>
-<ul>
-<li><b>Dave and Emma's watch log:</b> a shared movie and TV area, like a Spotify Blend for what you watch. Log each film or episode, mark whether you watched it together or one of you on your own, and give it a simple rating. It could live on the TV (a small web app on the LG's browser) or on your phones, and later suggest what to watch together next. First thought only; to be shaped up separately.</li>
+<li><b>Sub:</b> wireless, in bay 2 under the TV, its driver facing the room and its rear port {n(g.SUB_PORT_GAP)} cm from the wall through the open back (15–30 is advised<sup>{fit.ORDER.index("subport") + 1}</sup>). Next to the soundbar, its bass blends with the bar instead of coming from behind you, and it's off the floor where feet and drinks are. If the bass booms, turn it down rather than moving it.</li>
+<li><b>Rears:</b> one on the side wall at seated ear height behind the sofa's corner, one on a stand past the sofa's west end; linked by a cable behind the sofa, powered from the socket by the sofa if there is one (if not, from a 12-way strip in place of the 10-gang).</li>
 </ul>
 
-<h2>Still to confirm</h2>
+<h2 class="pb">10 · Build guide, for a first-time builder</h2>
+{guide_html()}
+
+<h2 class="pb">11 · Buy list and tracker</h2>
+<p>Every purchase and job, in build order, comes to about £{money(tl, th)}, with no electrician on top: the electrics are your own job, and the tools for them are on the list. Each phase carries its part's coloured label. Estimates are approximate UK prices; changed and new items are marked. Tick items off and write in what you paid.</p>
+<table class="tight"><tr><th>Phase</th><th>Estimate (£)</th><th>Biggest item</th></tr>{ptot}</table>
+<p class="note">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles.</p>
+<table class="tracker"><thead><tr><th>Status</th><th>Item</th><th>Qty</th><th>Estimate (£)</th><th>Paid (£)</th></tr></thead><tbody>
+{tracker_rows()}</tbody></table>
+
+<h2 class="pb">12 · Still to confirm, later ideas, sources</h2>
+<!--confirm--><h3>Still to confirm</h3>
 <ul class="checks">
-<li class="done">Alcove: 225 cm wide, about 50 cm deep, floor to ceiling.</li>
-<li class="done">Every record face-out: two trays in bay 3, unit raised to 76 cm; thinner trays with singles face-out.</li>
-<li class="done">Paint: Farrow &amp; Ball Card Room Green No. 79; skirting to match in eggshell.</li>
-<li class="done">Floor plans and room photos: alcove on the right of the hall-side wall, LED strip on the ceiling, rose in the middle of the room.</li>
-<li class="done">Main build: the artisan oak version.</li>
-<li class="done">Power: one socket on the side wall just in front of bay 1, becoming a double.</li>
-<li class="done">Lighting: LED strip round the ceiling now; one ceiling light in the middle of the room.</li>
-<li>Ceiling height: the plan assumes 220 cm (the alcove's measured height). Check it at a few points before cutting the uprights, and in the middle of the room for the pendant's headroom.</li>
-<li>The socket's height (drawn at about 30 cm) and its distance in front of the alcove, and whether you'd like it moved back behind the unit while the electrician is there.</li>
-<li>Living room depth: does the agent's 3.65 m run to the chimney breast or to the back of the alcove? And the chimney breast's width (drawn at about 85 cm).</li>
-<li>The brick cupboard in the kitchen: its size, and whether a Cat6 cable can come down into it from behind the media wall.</li>
-<li>Which room the Hub 5 is in upstairs, and the height of the low side of the sloped ceilings in the bathroom and bedroom 2.</li>
-<li class="done">The Xbox 360 has an HDMI port, and the black box is the Xbox One.</li>
-<li class="done">The PC connects by HDMI cable, and Cat6 runs between floors are possible.</li>
-<li class="done">The Series X uses its fan stand, on the left; the turntable is raised on the right.</li>
-<li class="done">Room: sofa directly opposite the TV at the left of the room; door about 2 m right of the alcove, with the stairs beside it; sub at the far right.</li>
-<li class="done">The alcove back wall is solid, which suits the shelf cleats and battens.</li>
-<li class="done">The TV's remote sensor works with the soundbar in front, so LG's own stand stays.</li>
-<li class="done">Kitchen cable: straight from the top floor, now that Switch 1 has spare ports.</li>
-<li class="done">Power: your 10-gang has a switch for each five-socket side.</li>
-<li>PC case: confirm the window is on its left side (as standard), so the back faces the sofa.</li>
-<li>10-gang: check it's surge-protected, and where its two switches sit.</li>
-<li>Deco B: check its adapter lead reaches from the high shelf to the back of the sub bay (about 2.2 m); if not, a DC extension with the same plug.</li>
-<li>Soundbar model: the plan assumes the AX5100G (3.5 mm AUX, optical and coax inputs, wireless sub, rears linked by cable). Confirm yours.</li>
-<li>Rear speakers: is there a socket near the sofa, and a route behind it for the link cable?</li>
-<li>Left wall where the PC shelf goes: solid or plasterboard? It decides the fixings.</li>
-<li>Paint: Card Room Green after sampling, and the room's wall and ceiling area for quantities.</li>
-<li>Floor in the alcove: carpet or hard floor? The plinth and the bay 3 carcass stand on it and must sit level.</li>
-<li>Records: roughly how many LPs and singles, and are most LPs in thick outer sleeves? The wall holds about 230 LPs and 310 singles; outer sleeves need a wider LP trough.</li>
-<li>Games: roughly how many PS2, Xbox 360 and Xbox One games? Past about 48, plan overflow (see the game drawer options).</li>
-<li class="done">PS1 games: stored outside this unit.</li>
-<li>Turntable: a modern deck usually has a small PHONO/LINE switch on the back. Check for it, and that the deck is under 45 cm wide.</li>
-<li>Console model numbers (on the label underneath), to tighten the row heights. The plan assumes the largest version of each.</li>
-<li>RetroTINK: order on restock, then check its size against the 23 × 23 × 8 cm reserved.</li>
-<li>Check the PC cable route before buying the HDMI cable; it's estimated at 4–5 m, so active optical.</li>
+{questions.pdf_items()}
 </ul>
+<p class="note">Easiest way to answer: the viewer page has a box for each of these and takes photos; or reply in a message, a line each.</p><!--/confirm-->
+<h3>Agreed so far</h3>
+<ul class="agreed">
+<li>From your v13.6 message: the legs store as part of the table (in the leaf's frame); the electrics are your own job; each step labelled with its part.</li>
+<li>From your v13 message: less cladding (done: no slats, spine, sub box or reeding; cables chased into the wall); the stairs go up; the drawer layouts drawn.</li>
+<li>From your answers (v12.1): the sofa's long side ends in line with the breast's reveal; the door hinges on the breast side and opens in; the side wall and breast are solid (plugs and screws, no stud fixings); the PC is an average gaming case (allowed for at 23 × 45.3 × 46.6).</li>
+<li>Artisan oak, Card Room Green with matching eggshell skirting, every record face-out, the game drawer as designed.</li>
+<li>The TV {n(g.TV_SHIFT)} cm nearer the side wall, the turntable in the alcove, the Series X above it, the records below.</li>
+<li>The ledge wrapping round onto the side wall, with the PC above the sofa.</li>
+<li>A fold-down oak dining table on the chimney breast; the spot bars on the existing ceiling points; the sub back in the media wall, in bay 2 (v13.5).</li>
+</ul>
+<h3>Later ideas</h3>
+<ul>
+<li><b>Dave and Emma's watch log:</b> a shared film and TV log, like a Spotify Blend for what you watch: log each film or episode, mark whether you watched it together, rate it, and later get suggestions for what to watch next. To be shaped up separately.</li>
+</ul>
+<h3>Sources</h3>
+<p class="note">Numbered sources are the item sizes used in the fit proof (section 3).</p>
+{fit.sources_html(OTHER_SOURCES)}
 
-<h2>Sources</h2>
-<ul class="sources">
-<li>Virgin Media: Hub modem mode</li>
-<li>RetroTINK-6X CE shop page (stock, power, box contents): retrotink.com/shop/retrotink-6x-ce</li>
-<li>Introducing the RetroTINK-6X CE (inputs incl. TOSLINK, deinterlacing): retrotink.com/blog/introducing-the-retrotink-6x-ce</li>
-<li>RetroTINK-2X Pro, listed as legacy; RetroTINK-4K CE</li>
-<li>Expert Reviews: LG C6 OLED review (HDMI 2.1 ×4, one eARC, ports on the left): expertreviews.co.uk/technology/tvs-home-cinema/lg-c6-oled-review</li>
-<li>JB Hi-Fi: LG C6 specifications (165Hz mode for PC sources)</li>
-<li>Hisense AX5100G spec sheet (inputs, sub size, auto power-on): assets.hisense-usa.com</li>
-<li>JB Hi-Fi Business: Hisense AX5100G (rears linked by cable, wireless to the soundbar)</li>
-<li>IKEA: BESTÅ shelf 56×36 cm, max load 20 kg; BESTÅ frame, white stained oak effect</li>
-<li>TP-Link Deco X1500 specifications (2 gigabit ports per unit)</li>
-<li>Glorious Vinyl Vault specifications (80 LPs and 24.5 kg per drawer), a check on the face-out drawer capacity</li>
-<li>Emuca: heavy-duty full-extension runners, 400 mm, 68 kg per pair</li>
-<li>Game case sizes: videogamecasesize.info; coverstitch.io/dimensions; Walvis Products (Xbox 360 14 mm, Xbox One 11 mm cases); Wikipedia: Keep case</li>
-<li>NIST SP 500-252 / CLIR pub121: Care and Handling of CDs and DVDs (store upright, book style)</li>
-<li>Screwfix: Essentials 964VN 350 mm runners; Metrol: Accuride DZ3832EC; IKEA: BESTÅ drawer runners</li>
-<li>Can-Am, mmdesign (DiscSox): spine-up media drawer capacities</li>
-<li>Sony PS3 and Microsoft Xbox 360 S manuals: ventilation and disc storage; IKEA UK: secure it</li>
-<li>Ideal Home: living room paint ideas (colour drenching, double drenching); The Paint Shed: colour drenching with Farrow &amp; Ball</li>
-<li>Pontata: Card Room Green vs Little Greene Sage Green (approximate screen colours): pontata.com/compare/fb-card-room-green/lg-sage-green</li>
-<li>Dunelm: Elements Wolston 4 Light Semi Flush Spotlight Bar (£49; 84 × 16 cm, 22.4 cm drop; E14, 6 W max; adjustable heads): dunelm.com/product/wolston-4-light-spotlight-bar-1000189449</li>
-<li>Homebase and NC Tiles: Farrow &amp; Ball Card Room Green No. 79 in Modern Eggshell and Estate Eggshell</li>
-<li>Haart Medway: floor plans and listing photos for the house (Portsmouth Close)</li>
-<li>Livingetc: the best sage green paint shades, according to designers (Card Room Green, Treron, Sage Green, Green Smoke)</li>
-<li>Wikipedia: Comparison of PlayStation consoles, Xbox One and Xbox Series X; Neowin: official Xbox 360 dimensions</li>
-<li>Pure Xbox: Microsoft's Series X ventilation guidance; Xbox Support on clearance</li>
-<li>Audio-Technica AT-LP120XUSB; TP-Link TL-SG108; ConsoleMods: PS2 Component Video Out setting</li>
-</ul>
+<h2 class="pb">Appendix · Options we set aside</h2>
+<h3>Options we rejected along the way</h3>
+<table class="tight"><tr><th>Option</th><th>Why not</th></tr>
+<tr><td>Slatted oak cladding: cable spine, PC screen, turntable panel, sub box, reeded table (v12)</td><td>You asked for less cladding: the chased conduit and plain oak do the same jobs more quietly</td></tr>
+<tr><td>The slat wall alternative (v7–v12)</td><td>Cladding over the whole alcove; the oak uprights won</td></tr>
+<tr><td>The vinyl cabinet on the chimney breast (v10)</td><td>The breast is the only clear wall for a table; the turntable fits in the alcove now</td></tr>
+<tr><td>Hub as router, Decos as access points</td><td>Loses HomeShield and parental controls</td></tr>
+<tr><td>All-wireless mesh · powerline</td><td>Speed drops at each hop · slower and less stable than Cat6</td></tr>
+<tr><td>Records spine-up in one drawer</td><td>Showed only a handful of covers; face-out trays show every one</td></tr>
+<tr><td>A green feature wall only · white skirting</td><td>The drench ties the room together; white cuts a bright line round it</td></tr>
+<tr><td>Bluetooth from the turntable</td><td>Compresses the sound; the AUX lead keeps full quality</td></tr>
+<tr><td>Folding legs fixed under the table · a box for the legs under the dining wall · the plinth drawer (v13.6)</td><td>They'd show on the folded panel and stand it 5 cm off the wall · it sits where the chairs push back with six · too short for 71 cm legs. The leaf carries them instead.</td></tr>
+<tr><td>An electrician's visit for the socket, dimmers and fittings (v13.6)</td><td>You're doing them yourselves: like-for-like, not notifiable; a new socket behind the sofa and a fused spur are dropped</td></tr>
+</table>
 </body></html>"""
+    DECK = False
+    return html, tl, th, c, css
+
+
+def plan_sections():
+    """The plan split at its h2s, for the plan page: {"pre": the title block, "1".."12", "appendix": html}."""
+    import re
+    html = _plan(deck=True)[0]
+    body = html.split("<body>", 1)[1].rsplit("</body>", 1)[0]
+    parts = re.split(r'(?=<h2[ >])', body)
+    out = {"pre": parts[0]}
+    for part in parts[1:]:
+        m = re.match(r'<h2[^>]*>(\d+|Appendix) · ([^<]+)</h2>', part)
+        key = m.group(1).lower() if m else "x"
+        out[key] = part[m.end():] if m else part
+    return out
+
+
+def build():
+    html, tl, th, c, css = _plan()
     (HERE / "plan.html").write_text(html)
-    print("totals", tl, th, "upgrade", ul, uh)
+    guide = f"""<!doctype html><html><head><meta charset="utf-8"><title>Build Guide</title><style>{css}</style></head><body>
+<h1>Media Wall &amp; Dining Wall: Build Guide</h1>
+<p class="byline">Version {VERSION} · Oct 18, 2026 · for Emma and Dave · sizes in cm; the full plan has the drawings and the fit proof</p>
+<figure class="render small">{img("render_v13_join_clean.png", "The finished wall")}</figure>
+{guide_pdf_html()}
+<h2 class="pb">Shopping list</h2>
+<p>About £{money(tl, th)}, in build order; no electrician on top.</p>
+<table class="tracker"><thead><tr><th>Status</th><th>Item</th><th>Qty</th><th>Estimate (£)</th><th>Paid (£)</th></tr></thead><tbody>
+{tracker_rows()}</tbody></table>
+</body></html>"""
+    (HERE / "guide.html").write_text(guide)
+    print("totals", tl, th, "fit", c)
 
 
 def pdf():
     from playwright.sync_api import sync_playwright
-    footer = ('<div style="width:100%;font-family:Inter,sans-serif;font-size:8px;color:#8a867e;padding:0 18mm;'
-              'display:flex;justify-content:space-between"><span>Home Network &amp; Media Wall Plan · v9</span>'
-              '<span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>')
+    from shot import _launch
+    def footer(name):
+        return ('<div style="width:100%;font-family:Inter,sans-serif;font-size:8px;color:#8a867e;padding:0 18mm;'
+                f'display:flex;justify-content:space-between"><span>{name} · v{VERSION}</span>'
+                '<span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>')
     with sync_playwright() as p:
-        b = p.chromium.launch()
-        pg = b.new_page()
-        pg.goto((HERE / "plan.html").resolve().as_uri())
-        pg.wait_for_timeout(500)
-        pg.pdf(path=str(HERE.parent / "out" / "Home_Network_Plan_v9.pdf"), format="A4", print_background=True,
-               margin={"top": "16mm", "bottom": "18mm", "left": "18mm", "right": "18mm"},
-               display_header_footer=True, header_template="<div></div>", footer_template=footer)
+        b = _launch(p)
+        for src, out, name in (("plan.html", PDF_NAME, "Home Network &amp; Media Wall Plan"), ("guide.html", GUIDE_NAME, "Build Guide")):
+            pg = b.new_page()
+            pg.goto((HERE / src).resolve().as_uri())
+            pg.wait_for_timeout(500)
+            pg.pdf(path=str(HERE.parent / "out" / out), format="A4", print_background=True,
+                   margin={"top": "16mm", "bottom": "18mm", "left": "18mm", "right": "18mm"},
+                   display_header_footer=True, header_template="<div></div>", footer_template=footer(name))
+            pg.close()
         b.close()
 
 

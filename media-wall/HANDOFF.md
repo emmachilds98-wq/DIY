@@ -1,4 +1,329 @@
-# Handoff: Home Network & Media Wall Plan, final accurate version (v10)
+# Handoff: Home Network & Media Wall Plan
+
+## START HERE (next agent)
+- **Branch:** `claude/sharp-franklin-lrray1` (PR https://github.com/emmachilds98-wq/DIY/pull/4) now carries every round, v10 to v13.8: in round 7i
+  it was fast-forwarded to `claude/eloquent-johnson-pgmnud` (v13.7, PR #5, which was stacked on it). Keep working here. `main` is still at v9.
+- **Viewer artifact (the deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's sessions run
+  as), version 14 = v14.1 (published 20 Oct 2026; v13 was v14, v12 was v13.8). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
+  that URL with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:**
+  ArtifactData `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck (v13.6) belongs to another account and isn't
+  readable from this one: don't use it. Rounds 7b–7h ran from a session outside the deck's org, which is why they reported "no write access";
+  from this account the deck, its db and its comments all work.
+- **`main` now carries everything (v14.1) and is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root
+  `index.html` is `build_viewer.site()`; `.nojekyll` skips Jekyll). The client asked for the latest version on main so they can view it there:
+  work on a branch, open a PR into `main`, and merge it once checked so Pages stays current. The Claude deck (below) is the shared copy.
+- **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
+  (shot3d renders 12 stills headless in SwiftShader WebGL: about 10 minutes; `python3 shot3d.py test <name>` makes quick 1280 × 720 ones).
+- **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
+  (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 8b: v14.1 (a faster 3D room, GitHub Pages)
+- Client: "ive activated pages on github, do another full upgrade wherever necessary. it runs very slow on the renders but it looks great so
+  far. improve everything wherever possible"; then "put the latest version on main where i can view it via the pages link". PRs #6 and #4
+  merged, so main = v14.1.
+- 3D speed (`room3d.js`, backup `room3d_v14_backup.js`): built only when the Room tab first opens; shadow maps redrawn only when the room
+  changes (`shadowMap.autoUpdate = false`, `reshadow()`); half resolution while dragging, full again 180 ms after; PCF shadows interactively,
+  PCF-soft for saved pictures; HD pixel ratio capped at 1.5; the shell's small parts merged per material; the 4 upward strip area lights
+  replaced by an emissive glow map on the ceiling; Fast mode drops all area lights (the costliest) and lifts the fill; phones start on Fast
+  and any device that takes >70 ms over a full HD frame drops to Fast unless you picked. SwiftShader bench: HD 2.8 s → 1.56 s a frame,
+  Fast 1.8 s → 0.70 s, before the 4× saving while moving. `R3D.bench(n)` and `R3D._dbg` are there for tuning.
+- Realism: `render.art_on()` now records sleeve art in 3D, so the framed LPs, the ledges and the trays show their covers; the sofa is
+  upholstered (RoundedBoxGeometry, matte fabric).
+- Page: pictures load per tab; header buttons for the 3D room and both PDFs; a Downloads list (Checks tab) that links straight into
+  `media-wall/out/` on Pages; the Pages copy says its ticks stay on the device and links the deck; dashboard 2-up on phones.
+
+## Update 20 Oct 2026, round 8: v14 (the table by the stairs, the room in 3D, the page reorganised)
+- Client (with two photos of the west wall): "see all the latest work … merge any not in your version … full review of the format and layout
+  … full upgrade. I want customisable HD realistic renders to show my options as well as more views of around the room … what if the table
+  was on the wall going up the stairs under my shelf which is 2m long … all other furniture can move, the lamp is only 100% and we can still
+  shift location". Merge: this session's duplicate v13.6 work was dropped; v13.6–v13.8 (other sessions) are the base. Read "the lamp is
+  only 100%" as "the lamp definitely stays" (and it's drawn on/off only anyway); asked in the `lamp` question to be sure.
+- **Option B, the table on the stairs wall:** geometry `STAIRS_WALL_Z` (−41 … −309), `SHELF_B` (2 m black floating shelf, top ~200, 25 deep,
+  z −93 … −293, scaled from the photos at ~4.5 px/cm), `TABLE_B_*` (centred z −180: 84 to the stair box, 74 to the window), `DINING_SITE(S)`,
+  `FLOOR_LAMP(_SPOTS)`; `BAR2` moved to (412, −143), the existing pendant point in the photo. `fit.stairs_zone()` (8 rows: 2 tight end chairs,
+  1 check on the wall's build) → fit proof 66: 49 fit, 13 tight, 4 check. `diagrams.dining_sites()` (A vs B mini plans) and a "Two places for
+  the table" subsection in plan section 5. Questions now 17: new `site`, `westwall`, `lamp`; `westend` and `point2` rewritten from the photos.
+- **The room in 3D** (`src/room3d.js`, `room3d_page.py`, `export3d.py`, `shot3d.py`): render.py records every box, polygon and face frame
+  it draws (`REC`, `P3`), in room coordinates; export3d groups them by state (unit in/out, A/B × folded/four/six; B = A turned 90° onto the
+  west wall) into `scene3d.json`. The shell, shelf B, the lamp, the spot bars (real spotlights aimed as in `SPOT_HEADS`), the strip
+  (RectAreaLights), bias light and the TV picture are built in the browser. Three.js 0.160.0 from jsDelivr by importmap. Options: table
+  site and state, lighting scene (+ daytime), paint (+ any colour), lamp spot, drawers, quality; 9 cameras plus orbit; "Save HD"
+  (3840 × 2160 PNG via the downloads capability). Headless stills: 12 in `out/Media wall v14 - 3D - *.png`, art/3d_*.webp, and three in the PDF.
+- **Page:** tabs grouped (See it / The plan / Do it / Your input); new Room in 3D tab with a gallery; "3D views" renamed "Drawn views";
+  the overview opens with a dashboard (steps done and next step, bought and paid, answers) and an A-vs-B options card, also on the Dining tab;
+  buttons on each option open the 3D room set to it.
+- `out/`: v13 files moved to `out/v13/`; drawn HD renders renamed v14. Backups `*_v13_8_backup.py`, `build_viewer_v14_pre_layout_backup.py`.
+
+## Update 19 Oct 2026, round 7i: v13.8 (back on the deck, summaries that follow the data)
+- Client: "view this chat and continue … improve anything you need to and publish". That session wasn't visible from here, so it was picked
+  up from git (v13.7, `f5a48b3`) and its HANDOFF; full rebuild ran clean; phone (390) and desktop (1280) checked on every tab: no overflow,
+  no console errors.
+- Fixed: the overview's "To confirm" line still listed the PC case (answered v12.1); it's now `questions.summary_line()` (new `SHORT`
+  labels). The fit-proof intro named four "check on site" items (PC case, door) for three checks and an old tight list; it now names the
+  three real checks (TV plugs, RetroTINK size, sub vibration) and all eleven tight ones. README fit numbers (were v13.2's) corrected.
+- `GITHUB_OUT` now points at this branch (switch to `main` after PR #4 merges).
+- Published v13.8 to 71ff (version 12); the open stairwell comment thread was answered (stairs go up since v13) and resolved.
+- Backups: `build_doc_v13_7_backup.py`, `build_viewer_v13_7_backup.py`, `questions_v13_7_backup.py`.
+- Still offered, not done: daytime renders; furniture options (waits on the sofa's return). Bar 2's position waits on `point2`.
+
+## Update 19 Oct 2026, round 7h: v13.7 (lighting scenes)
+- Upgrade picked from the offered three: lighting scenes. Why: the client is now fitting the dimmers and bars themselves (step 12), so a
+  setting for each control per occasion is immediately usable, and it doesn't wait on an open question. (Furniture options wait on the
+  sofa return's length; daytime renders matter less now the paint is chosen and sampling is in step 4.)
+- `src/scenes.py` (LAYERS, SCENES: TV night, dinner, records, everyday evening), `diagrams.light_scene(key)` (room plan with each light's
+  glow and a level bar per layer), `build_doc.scenes_html()` in section 8 (table + four figures between `<!--scenes-->` markers),
+  `build_viewer.scenes_block()` turns them into buttons in the Paint & light tab. The uprights' LED driver now has an inline dimmer.
+- Found while drawing it: bar 2's point is assumed 35 cm from the west wall, but the 84 cm bar parallel to the media wall would reach
+  past it (433 + 42 = 475 > 467). Added to the `point2` question; if confirmed, hang it turned along the west wall.
+- **Deck conflict:** v13.6 was published as QRfYUvbPVQpSHFgaDN4YMU (version 1) at about 20:53Z; at 20:55Z another session or agent
+  published a different build to the same artifact (eyebrow v13.3, total £2,784–5,297, `.p-prep` part classes). v13.7 was NOT
+  published over it; the client was asked which to keep. Git was unaffected (branch head was this session's own commit).
+
+## Update 19 Oct 2026, round 7g: v13.6 (leg case in the leaf, electrics as your own job, part labels, one questions list)
+Redone from the brief after the previous session hit its limit before committing.
+- Client: "include legs on the table build or make it more easy to get out and assembled ... store them as a part of the tables build
+  maybe in a box"; "we will also be doing electrics ourselves other than maybe changing a view fixtures for lights and sockets. make the
+  build plan easy to tell how to find which part ie network/media wall/table etc"; "update what you still need from me too".
+- Legs: `geometry.LEAF_FRAME` (insets 3/1.5, rails 1.8 × 5.5 → outside 54 × 77, inside 50.4 × 73.4), `LEG` 4.5→3 oak, `LEG_BOLT`,
+  `LEG_CLIP` (RS PRO 45 mm, source `clip`), `LEG_PITCH` 6, `LEAF_LEG_IN` (7.5, 6.5). Oak legs only now (steel option dropped).
+  `render.free_table()` draws tapered oak legs and the frame; new `diagrams.leaf_case()` (A underside, B section, C steps) in section 5,
+  step 11 and its instructions. Fit proof 58: 44 fit, 11 tight, 3 check (two leaf rows: storage, knees 17.5 above the seat).
+- Electrics: phase "2 Electrician and cabling" renamed "2 Cables and power" (its tracker ids changed; the db was new anyway). No
+  electrician, no new socket behind the sofa (`SOCKET2` = an existing one IF there is one, drawn dashed), no fused spur (plug-in LED driver).
+  PC on the 10-gang (load ~1.55 kW) via its own 25 mm conduit beside a 38 mm data conduit. Steps 3 and 12 rewritten with the safe
+  routine and a stop list; section 9 "Electrics: your own job" cites GOV.UK Approved Document P + IET + Planning Portal. Tools and
+  a GS38 tester on the buy list. If there's no socket by the sofa, a 12-way strip (0–60) gives the rears a way.
+- Parts: `build_doc.PARTS`, `PHASE_PART`, `part_chip()`; every step has `part`; chips on step cards, the overview run list, buy phases,
+  PDF steps and phase tables; Build steps tab has a "Show one part" filter (remembered per device).
+- `src/questions.py`: the one list (15) for the PDF's "Still to confirm" and the viewer's Questions tab; new `electrics`, `retrotink`;
+  dropped door/walls/pc (answered) and the leaf/legs part of `chairs`.
+- Total £2,764–5,317 (was 2,589–4,897 plus an electrician). Backups `*_v13_5_backup.py`. Viewer: the new artifact above, version 1.
+
+## Update 19 Oct 2026, round 7f: v13.5 (sub back in the media wall, every step in full, HD renders)
+- Client: "adjust the media wall unit to still include the sub somewhere; the consoles' battery packs can be stored behind near
+  power cables. Re-assess, research, validate sizing"; "full build instructions step by step for the wall and the dining table";
+  "integrated in the one deck we are using, we should not be splitting info apart"; "improve the renders to HD".
+- `geometry.SUB_IN_WALL = True`: the Xbox bricks lie flat at the back of their rows (Microsoft PSU guidance, source `psuplace`);
+  the RetroTINK and HDMI switch move to bay 1's fronts; bay 2 below the PS3 shelf = sub column 23.4 wide (`SUB_COL`), 12 mm
+  divider, PS2 over PS1 in 32.2 (`PS_COL`). Sub on a 3 cm isolation riser, front flush with the face frame, port 15.6 cm from the
+  wall (`SUB_PORT_GAP`; Klipsch 15–30). The retro 6-way and Switch 2 move behind bay 1. `SUB_POS` follows the sub, so the plans
+  move with it; the dining wall's cover is gone (the old code paths are kept behind `not SUB_IN_WALL`).
+- Fit proof: 56 checks, 42 fit, 11 tight, 3 check (TV plugs, RetroTINK size, vibration: Microsoft says keep the 360 away from
+  subwoofers, source `x360place`; test on site, fallback is the dining wall). 
+- `src/instructions.py`: full instructions per step (parts, hardware, tools, drawings, numbered sub-assemblies); merged into
+  `build_doc.steps()`; the page's step cards show them with their drawings inline; the build guide PDF prints them in full.
+  Fixes on the way: table centre panel ordered 101 long (2.5 tongues), 8 leg inserts (the leaf has four), bay 2 divider/part shelf/riser.
+- HD: page images are WebP at 1.5 × (3300 wide, `make_images.ART_SCALE`), overlays WebP with alpha, a "View full size" lightbox.
+  Inline page ~5 MB. `build_viewer.uniq_svgs()` prefixes ids per inline drawing (patterns in hidden tabs don't paint).
+- Viewer version 11.
+
+## Update 19 Oct 2026, round 7e: v13.4 (cutting list)
+- Viewer version 10. `cuts()` in build_doc.py: every made part grouped by stock (solid oak; birch ply 18, 12, 9, 6 mm;
+  hardware), from the section 3/5/7 cut lists and v6.1's game drawer. New size: record tray sides 8 cm tall. Shown in the Build
+  steps tab (with Copy as text) and at the end of the build guide PDF. Step 6 now starts with ordering from it.
+- Still offered, not done: daytime renders (needs relighting in render.py), lighting-scene buttons, furniture options.
+
+## Update 19 Oct 2026, round 7d: v13.3 (the plan in tabs on the viewer, step-by-step build, cost by phase)
+- The client asked for the whole plan inside the viewer (no fetching PNGs or PDFs from GitHub), in tabs or pages, with a clear
+  build plan, buy guide, cost by phase, the table, and the network/power plan (they sent their v6.1 PDF as the reference for
+  network and power: `Home_Network_Plan_v6_1.pdf`, its "What each part does" table and two setup stages are now in section 9).
+- Viewer version 9, ~5.5 MB inline. Tabs: overview, views, wall, dining, paint, network, build, buy, questions, checks (bare
+  `#token` deep links; last tab remembered per device).
+- `build_doc.py`: `_plan(deck=True)` renders the plan with images as `data-art` keys (`DECK_ART`) and markers around the fit tables
+  and the still-to-confirm list; `plan_sections()` splits it at the h2s; `build_viewer.deck_section()` turns "section N" into tab links,
+  wraps tables to scroll and puts SVGs on paper cards. Edit content in build_doc.py once; the PDF and the page both pick it up.
+- `steps()` in build_doc.py is the order of work (13 steps, each with substeps, a check, its time, and `buy`: the buy-list phases
+  needed before it). The PDF table and the page's step cards both come from it. Step ticks save to db `steps/s<n>`.
+- Buy tab: cost-by-phase range chart (one £ scale, 200 steps), paid per phase from the tracker, a still-to-buy total, filters.
+- `art/doc_paint.jpg`, `art/doc_skirt.jpg` are made by `build_viewer.doc_images()` from the two PNGs.
+
+## Update 19 Oct 2026, round 7c: v13.2 (sub cover, drawers view, measurement overlays, stairwell opening, sofa)
+- Viewer version 8 (publish `src/media_wall_viewer_inline.html`, ~7 MB, images inlined).
+- Sub: `SUB_HOOD` is now a cover (no sides, no front): 1.5 backboard on two keyhole screws, 2 cm top with drip groove 3 cm over the
+  sub, tray with a 2 cm lip all round. Tip check in fit.py: the sub's corner would rise 7 cm to tip; the cover stops it 4 cm short.
+- New view "drawers" (`CAM_DRAWERS`, `plinth_drawer()`, `PLINTH_OPEN`): game drawer and upper tray 30 out, plinth drawer 25 out.
+- Measurement overlays: `measure_layer(kind)` / `measure_side()` draw rough sizes in pale yellow (`MC`); `build(..., measure=kind)`
+  returns only that layer; make_images renders them transparent (`shot.py` 6th job field) to `art/dims_<view>.png`; the viewer's
+  "Show measurements" button lays the one for the current view over the picture.
+- Stairwell: the ceiling opening now runs from just after the door (`DOOR_X[1]`) over the banister to the west wall, from the stair's
+  front edge back; seen through it, the stairwell walls and a landing balustrade; the LED strip follows the opening's edge.
+- Sofa (side view): `sofa_solid()` redrawn as the black jumbo-cord L-sofa: plinth, seat bases, plump seat and back cushions with cord
+  channels, arms, the grey faux-fur cushion.
+- Fit proof: 59 checks, 47 fit, 9 tight, 3 check, 0 fail.
+
+## Update 19 Oct 2026, round 7b: v13.1 (sub safety box, six with the leaf, side view dimensioned)
+- **Publishing:** the artifact refuses some JPEG uploads from this (cross-org) session as "cpio archive" (false sniff, unpredictable),
+  so `build_viewer.py` also writes `src/media_wall_viewer_inline.html` (images as data URIs, ~6 MB, gitignored). Publish **that file**
+  to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 with no `files` (version 7). Downloads link to GitHub.
+- Client: "something that increases the safety of the sub… a box with an open front… not restrict sound… stop spills or knocking it
+  over". The AX5100G's driver fires out of its front, the port out of its back (Trusted/Expert Reviews), and it stands sideways under
+  the table, so `SUB_HOOD` (x 214–249, 28.2 out, 37.4 tall) is open at both ENDS, solid top (drip groove, 1 cm overhang) and front,
+  base tray with 2 cm lips, hung on a cleat. Port to the west arm 36.7 (15–30 advised: new source `subport`). `render.subwoofer()`,
+  new `diagrams.sub_box()` (plan, viewer #subbox, `out/Sub box - ….png`). Fit rows for sound, spills/knocks, chairs.
+- Client: "ensure measurements of the table are correct and would fit even when seating 6". 110 × 80 alone gave six 55 cm each
+  (< 60). Now `SIX_LEAF`: six use the leaf (170 × 80) at `SIX_X` 232–402, `FREE_Z` −75…−155 (75 to the breast, 154 to the window,
+  65 to the west wall), 85 a diner on the long sides; breast-side chairs 4 cm beside / 4.8 in front of the sub's box. Eight = same
+  table, three a side (56.7, tight); lift the box off for eight (CHECK). `free_table()` draws the leaf and eight legs.
+- Client: "in the side view of the pc wall ensure it's clear how much of the alcove covers the media wall". `side_alcove()` ghosts the
+  cut-away breast and dimensions: alcove 38, base 46 (38 inside, 8 proud in gold), uprights/shelves 30 all inside.
+- Fit proof: 58 checks, 46 fit, 9 tight, 3 check, 0 fail.
+
+## Update 18 Oct 2026, round 7: v13 (less cladding, stairs up, drawer layouts)
+**Branch:** `claude/eloquent-johnson-pgmnud` (built on v12.1, `claude/sharp-franklin-lrray1`). Viewer artifact updated in place:
+https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (version 6). This session is an editor from outside the artifact's organisation: the
+publish **refuses PDFs and some large images** (and the db/answers can't be read from here), so `build_viewer.DOWNLOADS_ON_GITHUB = True`
+links every download to `media-wall/out/` on GitHub and `publish_files.json` holds only `art/*.jpg`. `art/zz_house.jpg` was refused as a
+"cpio archive" (false sniff) and left as v12's copy (unchanged drawing).
+
+Client, round 7: "less cladding all over the place, improve and upgrade design again. stairs also go up not down as i said. show the drawer layouts too".
+- `geometry.PLAIN = True` switches off every v12 slat: the PC's slatted screen, the slatted cable spine and its skirting trunking, the
+  slat panel behind the turntable (`rz_slats()`), the slatted sub box (sub now on `SUB_RISER`, plain oak, 5 cm) and the reeded table
+  (`FOLDED_D` drops 1 cm; plain oiled underside, brass leg inserts kept). PC leads: brush grommet in the shelf + 25 mm conduit chased into
+  the solid side wall (electrician, same visit). The slat-wall alternative is retired (no renders, no viewer button; appendix is now
+  "Options we set aside").
+- Stairs: `STAIRS_UP`, `STAIR_RISE`/`STAIR_GOING`; `west_end()` draws a flight rising away from the room (towards the hall) through an
+  opening in the ceiling, closed string and raking banister on the door side; the part beyond the recess wall is clipped to the
+  openings. **Direction is a guess**: question `stairs` now asks which way it runs (photo).
+- New `diagrams.drawer_layouts()`: base elevation with drawers A–D, then each drawer from above at 5 px/cm. In the plan (section 3), the
+  viewer (#drawers) and `out/Drawer layouts - ….png`.
+- Fit proof: 56 checks, 45 fit, 8 tight, 3 check, 0 fail. Outputs v13; v12's moved to `out/v12/`. Backups: `*_v12_backup.py`.
+- The open stairwell comment thread on the artifact can't be replied to from this session (cross-org); tell the client in chat.
+
+## Update 18 Oct 2026, round 6b: v12.1, the client's answers
+- Sofa (photo `inputs/photo_sofa_window_wall.webp`): black jumbo-cord L-sofa; the long side under the window ends in line with the
+  breast's reveal → `SOFA_W = 188` (was 247). Return along the side wall still assumed 168, footstool at its end. Ask its length.
+- Door: hinged on the chimney-breast side, opens into the room (`DOOR_HINGE`, `DOOR_OPENS_IN`); the fit row says keep it shut while
+  eating (west-end and breast-side chairs sit in its swing) or rehang it to open into the hall.
+- Walls: side wall and breast solid (`WALLS_SOLID`): masonry plugs and screws; the "check the walls" tracker item is Done.
+- PC: "average gaming case" → `PC_CASE = (23, 46.6, 45.3)` (Corsair 4000D, 453 × 230 × 466 mm, TechPowerUp); the check now passes.
+- Fit proof: 57 checks, 44 fit, 10 tight, 3 check, 0 fail. Answers written to the viewer's db (`answers/sofa|door|walls|pc`).
+- Still open: sofa return length, west-end sizes, stairs up or down, LP/single/game counts, turntable and fan-stand models, 10-gang
+  length and surge protection, second ceiling point position, chairs, the 23 × 22 box, wired ports, console models.
+
+
+## Update 18 Oct 2026, round 6: v12 delivered (the v11 layout, upgraded)
+**Delivered:** `out/Home_Network_Plan_v12.pdf` (45 pages), `out/Build_Guide_v12.pdf` (9 pages), HD renders in `out/` (v11 outputs
+moved to `out/v11/`), the viewer artifact **https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2** (the client's copy of the v11 viewer on
+this account; update this one in place), and `index.html`. The root `README.md` now carries the key renders, heights, storage sheet and
+open questions so the client can read them on GitHub without downloading.
+
+**What changed (the client's list from the session that hit its limit, their comments, and their v6.1 upgrades)**
+- Sub in a slatted oak box (`SUB_BOX`, `sub_box()`): 52 × 30 × 42 between the folded arms; sub moved to x 214.5–244.9 inside it.
+- Oak slats: PC screen (v6.1: 2.1 slats, 1.2 gaps, open top), a slatted cable spine (`SPINE`), a slatted panel behind the turntable
+  zone (`rz_slats()`, preamp moved 2.2 forward; deck now 6.6 from the panel: tight).
+- Folded table: reeded underside (`REED`), brass inserts instead of leg plates (client comment).
+- Camera: default pulled back (`CAM_DEFAULT` = eye 120, X0 290, S 3.4, shift 150; v11's is `CAM_V11`) so bar 2 shows (client
+  comment). The west end is an open stairwell with a wooden banister (`west_end()`, client comment; up/down asked, drawn going down).
+- New views: dining for six (`CAM_SIX`), the PC side wall (`build_side()`, `VIEW = "side"`; `box()` now culls faces against
+  `cam_pos()` in both views; the side view draws the media wall as massing in `media_end_on()` and leaves the breast out).
+- `diagrams.storage()`: every space to one scale with counts and overflow options (high shelf spine-out ≈380 LPs; a second
+  bay-3 unit west of the sofa).
+- From v6.1: keyboard tray (`KB_TRAY`), lamp by the sofa, plinth-drawer finger pull, conduit to TV height, questions on games
+  count, 10-gang surge protection, console models.
+- Viewer (`build_viewer.py`): views join/four/six/side/slats × 4 paints; open questions with answers and photos saved to the artifact's
+  db (`answers/<id>`, photos via assets); shared buy tracker (`tracker/<id>`); fit proof; downloads (published under `files/`).
+  Read the client's answers with ArtifactData `list` on `answers` next round.
+- Fit proof: 57 checks, 42 fit, 10 tight, 5 check, 0 fail.
+
+**Next:** read the answers in the viewer's db; fix the stairwell direction; sofa size → PC shelf and clearances; walls solid or not → fixings.
+
+
+## Update 18 Oct 2026, round 5: v11 delivered (turntable back in the alcove, dining wall, side-wall wrap)
+**Delivered:** `out/Home_Network_Plan_v11.pdf` (40 pages), `out/Build_Guide_v11.pdf` (8 pages, beginner-friendly, with tool list
+and shopping list), HD renders in `out/` (v10 outputs in `out/v10/`), the viewer artifact
+https://claude.ai/artifact/42PUQjJwfafV93mrjeFYX9 (update this one in place; it is the account this repo's sessions use) and
+`index.html` at the repo root, the same viewer for GitHub Pages (Settings → Pages → deploy from this branch, root).
+PR: https://github.com/emmachilds98-wq/DIY/pull/2 (contains v10's commit too). Note: an earlier session drafted v11 but never
+committed it; this round rebuilt it from the client's agreed layout.
+
+**The v11 layout (all numbers in `src/geometry.py`)**
+- TV shifted 25.25 cm towards the side wall (centre 67.75). Left upright = corner post at x 0–4.5; right upright 131–135.5.
+- Right-hand zone 135.5–186 (50.5): turntable on the worktop (AT-LP120X size, 2.65 each side, lid top ≈121), Series X on an
+  oak shelf at 134 (underside 130), flush wedged tenons through the right upright (proud ones would touch the TV), 15 cm air
+  each side, 21.4 above; phono preamp hung under the shelf at the back.
+- Base: bay 1 Xbox, bay 2 PlayStation (unchanged), bay 3 = the two v9/v10 face-out record trays. Hidden slim drawer moved into
+  the plinth under bay 2 (push to open). Sub under the dining wall between the Hebgo arms (x 232–262.4, on its side, driver east, oak riser) — round-5 feedback.
+- Side wall: record ledge wraps the corner (7 deep, z 8 → −126, 4 LPs), then the PC shelf (82 × 28 at 155.4, z −130 → −212)
+  over the end of the L-sofa; cane screen, pad dock, trunking down to the skirting. No keyboard tray (over the sofa).
+- Dining wall on the breast: oak backboard 110 × 22 × 3, a 110 × 80 × 2.7 oak top on three lift-off hinges, two Häfele Hebgo
+  287.43.428 brackets 80 apart. Folded: ≈7 cm deep, top edge 153.3. Four at the wall; six lifted off onto Emuca 710 legs
+  (table at x 255–365, z −60…−140); eight with a 60 × 80 leaf (x 220–390). Clearances checked in `fit.py`.
+- Spot bars on the client's two existing ceiling points: bar 1 straight out from the TV unit halfway to the sofa (93, −106); bar 2 between the door and the west wall (433, −80, to confirm; just out of the render's frame). Dimmers only, no new point. Table: pegged 7 cm breadboard ends, 5 cm radius corners, oak or Emuca legs. Double socket: left → 10-gang (always on),
+  right → retro 6-way, so the wall switch is the retro switch. New socket behind the sofa for the PC and rears.
+- L-sofa assumed 247 × 168 × 80 (M&S Easy Velvet corner size) with the return along the side wall; **ask for the real size**.
+- Records: ~188 LPs (180 trays + 4 + 4) and ~240 singles face-out (v10 had 234/350 with the browser and singles drawer).
+- Fit proof: 52 checks, 40 fit, 8 tight, 4 check on site, none fail.
+
+**Code**
+- `render.py`: camera moved to EYE_X 120; new `rz_shelf()`, `series_x()`, `wrap()`, `dining_wall()` (DINING "folded"/"four"),
+  `chair()`, `table_settings()`, `subwoofer()`, `spot_bar()` (two bars), `sofa()` (see-through; off by default, it read as
+  if in front of the base). The key numbers itself (`_numbered`).
+- `diagrams.py`: `_room()`/`_sofa()`/`_side_wall()` helpers; new `seating()`, `dining_section()`; v11 `front`, `section`
+  (A TV, B turntable zone), `routes`, `pc_shelf`, `sound`, `power`, `living_plan`, `why_layout` (what moved in v11).
+- `build_doc.py` writes `plan.html` + `guide.html` and both PDFs. `build_viewer.py` writes the viewer and `../../index.html`.
+- `make_images.py renders` skips the diagrams (handy mid-edit). Backups: `*_v10_backup.py`.
+
+**Questions for the client (ask together)**
+1. The L-sofa's size, and that its return runs along the side wall.
+2. The door to the hall: which side it hinges, and does it open into the room? (The dining chairs on that side sit in its swing.)
+3. Models: turntable, PC case, Series X fan stand.
+4. Chairs: theirs, or four folding ones? Where do the leaf and the legs live?
+5. Are the side wall and the chimney breast solid or plasterboard?
+6. Roughly how many LPs and singles? (Capacity fell to ~188 / ~240.)
+7. Still open from v10: the west end sizes, the 23 × 22 box, wired ports for the projector and music room.
+
+---
+
+## Update 18 Oct 2026, round 4: v10 delivered (drawn to the measured room)
+**Delivered:** `out/Home_Network_Plan_v10.pdf` (34 pages, restructured: plan on a page → room → media wall + fit proof →
+vinyl corner → joinery → paint and light → power/cables/network → build guide → buy list → confirm/sources; slat wall
+in an appendix), HD renders in `out/` (v9 outputs moved to `out/v9/`), and the viewer page rebuilt from `src/art/`.
+
+**What changed in the code**
+- `src/geometry.py` (new) holds every dimension; `render.py`, `diagrams.py`, `fit.py` and `build_doc.py` read from it.
+  Change a number there and rebuild: `python3 make_images.py && python3 build_doc.py && python3 build_viewer.py`.
+- `src/fit.py` (new) is the fit proof: 39 checks with numbered sources (34 fit, 1 tight, 2 check on site, 2 don't fit).
+- `src/render.py` was rebuilt for the real room: `P()` now honours `XOFF/YOFF/ZOFF` via `place(dx, dy, dz, fn)`, and
+  `box()` culls faces in world coordinates. New: `vinyl_cabinet()`, `singles_drawer()`, `browser()`, `deck()`,
+  `breast_frames()`, `side_shelves()`, the recess and door in `room()`. The v9 drawings of consoles, trays and the
+  game drawer are unchanged. Backups: `render_v9_backup.py`, `diagrams_v9_backup.py`, `build_doc_v9_backup.py`.
+- New diagram `why_layout()`; `living_plan()`, `house()`, `front()`, `section()` (now A alcove + B vinyl cabinet),
+  `routes()`, `network()`, `sound()`, `joints()` and `drawer()` redrawn for v10.
+
+**Design decisions taken this round (all in the plan)**
+- Alcove: uprights at 25.25–29.75 and 156.25–160.75, TV gap 126.5, side zones 25.25 (Series X left, pad dock right).
+  Base 3 + 60 + 60 + 60 + 3: BESTÅ bays 1–2 on the 9 cm plinth, bay 3 a ply carcass for the sub (sub 2 cm forward of
+  v9's spot: 11.6 cm behind it for the rear port), hidden slim drawer 56.4 wide. Base 46 deep (40 + 4 channel + 2 face
+  frame), 8 cm proud of the breast; the vinyl cabinet's oak end panel covers that step.
+- Heights: worktop 76; side shelves 156 both sides; ledge 155.4; high shelf moved to **196** (39 cm to the 235 ceiling,
+  5.5 cm above the ledge LPs).
+- **Joinery fix:** the side shelves' through-tenons now sit 12 and 20 cm from the wall (6 wide), clear of the ledge's
+  7 cm housing. In v9 they collided with the ledge housing (hidden by draw order).
+- Vinyl cabinet 100 × 44 × 76 at x 186–286, tight to the reveal, 17.5 cm short of the breast's west corner. Bay A:
+  the two v9 trays. Bay B (40): preamp cubby over a new face-out singles drawer (~110). Top: browser left, deck right
+  (AT-LP120X size allowed), breast clear to 130, two LP frames from 150. Totals: ~234 LPs, ~350 singles, all face-out.
+- Spot bar on the rose at x 186, 173.5 from the window: pink head now aims at the vinyl cabinet; lowest shade 212.6.
+- PC shelf moved 20 cm towards the alcove (z −110 to −175) to clear an assumed 2.0 × 0.95 m sofa.
+- Deco A + Switch 1 in bedroom 3; optional Cat6 to the master (projector) and bedroom 2 (music room).
+- Series X fit is **tight** on the sides (5 cm vs Microsoft's recommended 10–15 cm); offered option: shift the TV and
+  uprights 5 cm right (left zone 30.25, right 20.25).
+
+**Questions sent to the client (await answers before v11)**
+1. OK to move the vinyl corner to the oak cabinet on the chimney breast?
+2. Where does the door hinge, and which of 935 / 1045 / 660 / 820 are the recess, door and stair box?
+3. Models: turntable, PC case, Series X fan stand; the 10-gang's length.
+4. What's the 230 × 220 box in the window corner?
+5. Wired ports for the projector and the music room?
+6. Keep the TV centred, or shift it 5 cm right to give the Series X more air?
+7. Sofa size (the plan assumes about 2.0 × 0.95 m) and where the rear speakers can go.
+
+**Viewer artifact:** the old viewer link (9cB8xgi6Pt22gT4GUNNQEk) couldn't be opened from this account, so v10 was
+published as a new viewer artifact: https://claude.ai/artifact/D9y2P2ve6WveMJwyWrTNLQ (built from `src/media_wall_viewer.html` + `src/art/`). Update that one in place next time. The client's "Media Wall Build
+Tracker" artifact (4sWMHkRn3XhmwqJgG7NU3x) is still the first-round version (225 × 220 × 50); offered to refresh it.
+
+---
+
+# Earlier brief for v10 (kept for reference)
 
 **Read this first.** The client (Emma, with Dave) has now sent an accurate hand-measured sketch of the living room
 (`inputs/room_sketch_accurate_mm.png`). It changes the core geometry: everything since v6 assumed an alcove
