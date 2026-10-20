@@ -167,6 +167,13 @@ const ART_TEX = canvasTex(256, 256, (g, w, h) => {
   gr.addColorStop(0, "#e9b44c"); gr.addColorStop(0.5, "#e2683c"); gr.addColorStop(1, "#7a2e5a");
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
 });
+const HESSIAN = canvasTex(256, 256, (g, w, h) => {   // v15: hessian's coarse, open weave
+  const r = rnd(31);
+  g.fillStyle = "#cfc4ae"; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < w; i += 4) { g.fillStyle = `rgba(90,70,40,${0.12 + r() * 0.14})`; g.fillRect(i, 0, 1.6, h); }
+  for (let j = 0; j < h; j += 4) { g.fillStyle = `rgba(255,248,230,${0.08 + r() * 0.12})`; g.fillRect(0, j, w, 1.4); }
+}, true);
+HESSIAN.repeat.set(3, 9);
 const LBOX_TEX = canvasTex(256, 192, (g, w, h) => {   // the light box's face: a soft warm glow, brighter in the middle
   const gr = g.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, w * 0.6);
   gr.addColorStop(0, "#fff7e6"); gr.addColorStop(1, "#f3d9b0");
@@ -439,8 +446,17 @@ function buildShell() {
   rug.position.copy(v3((RG.x[0] + RG.x[1]) / 2, 0.4, (RG.z[0] + RG.z[1]) / 2)); rug.rotation.y = Math.PI; rug.receiveShadow = true; shell.add(rug);
   // v15: the curtains, from the client's photo: long pencil-pleat panels to the floor in oatmeal, on a rail just under the ceiling strip
   // running 30 past the window each side; open (stacked either side) or drawn across (S.curtains)
-  const CU = R.CURTAIN, cloth = reg(new THREE.MeshStandardMaterial({ color: CU.col, roughness: 0.95, side: THREE.DoubleSide, bumpMap: WALL_BUMP, bumpScale: 0.3 }));
-  cube(wx0 - CU.ext, CU.rail_y, WZ + 4, wx1 - wx0 + 2 * CU.ext, 2, 2, white);
+  // "hessian curtains from dunelm with a wood rail": a coarse natural weave, on a 28 mm wooden pole with rings and ball finials
+  const CU = R.CURTAIN, cloth = reg(new THREE.MeshStandardMaterial({ color: CU.col, roughness: 1, side: THREE.DoubleSide, map: HESSIAN, bumpMap: HESSIAN, bumpScale: 0.8 }));
+  const wood = reg(new THREE.MeshStandardMaterial({ color: CU.pole_col, map: OAK_TEX, roughness: 0.5 }));
+  const poleL = wx1 - wx0 + 2 * CU.ext, pole = new THREE.Mesh(new THREE.CylinderGeometry(CU.pole / 2 * M, CU.pole / 2 * M, poleL * M, 16), wood);
+  pole.rotation.z = Math.PI / 2; pole.position.copy(v3((wx0 + wx1) / 2, CU.rail_y + CU.pole / 2, WZ + 8)); shell.add(shadow(pole));
+  for (const xf of [wx0 - CU.ext - CU.finial / 2, wx1 + CU.ext + CU.finial / 2]) {
+    const f = new THREE.Mesh(new THREE.SphereGeometry(CU.finial / 2 * M, 16, 12), wood); f.position.copy(v3(xf, CU.rail_y + CU.pole / 2, WZ + 8)); shell.add(shadow(f));
+  }
+  for (let x = wx0 - CU.ext + 3; x < wx1 + CU.ext - 2; x += 10) {          // rings, one every 10 cm
+    const r = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.0035, 6, 16), wood); r.position.copy(v3(x, CU.rail_y + CU.pole / 2, WZ + 8)); r.rotation.y = Math.PI / 2; shell.add(r);
+  }
   const panel = (x0, w, folds) => {
     const g = new THREE.PlaneGeometry(w * M, (CU.rail_y - CU.drop_to) * M, Math.round(folds * 8), 1), pos = g.attributes.position;
     for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * 0.026);
@@ -762,7 +778,7 @@ function autoQuality() {
 function updateCaption() {
   const sc = SCENES[S.scene];
   const site = S.site === "A" ? "Table on the chimney breast" : "Table under the shelf by the stairs";
-  const din = { folded: "folded", four: "down for four", six: "lifted off with its leaf, for six" }[S.dining];
+  const din = { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
   const paint = S.paint === "custom" ? `your colour ${S.custom}` : R.PAINTS[S.paint].name;
   const lights = sameAsScene() && S.master === 100 ? sc.name : `your lighting (from ${sc.name})`;
   qs("#r3d-cap").textContent = `${(VIEWS[S.view] || VIEWS.window).label} · ${site}, ${din} · ${lights} · ${paint}${S.drawers ? " · drawers out" : ""}`;

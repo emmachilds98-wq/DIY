@@ -34,6 +34,8 @@ SOURCES = {
     "x360place": "Xbox Support (Microsoft), Xbox 360 placement tips, as quoted on Gaming Stack Exchange: an open, well-ventilated area, a hard surface, and away from high-vibrating sources such as subwoofers",
     "photo20": "Your two photos of the west end (20 Oct 2026): the 2 m black shelf on the wall beside the stairs, scaled from its 2 m: it starts about 41 cm past the stair box and stops about 16 cm short of the window corner, top about 200; the pendant hangs about 55 cm out from the wall, a quarter of the way along it",
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
+    "fliphinge": "Lee Valley: 40574 narrow flip-top hinges, solid brass, 1/2 in × 2 3/4 in (1.27 × 7.0 cm), for card and flip-top tables (leevalley.com); their 40208 card-table hinge is 1 3/16 in (3.0 cm) wide, too wide for a 27 mm edge",
+    "curtains": "Your photo (20 Oct) and note: Dunelm hessian pencil-pleat curtains; Dunelm pencil-pleat drops run 137, 182 and 228 cm with a 3 in header; Dunelm 28 mm wooden poles, 120–360 cm, rings included (one per 10 cm), finials up to 8 cm more (dunelm.com)",
     "e14": "Smart colour E14 bulbs for the bars: WiZ Colour P45 E14, 4.9 W, 4.5 × 10.1 cm, Wi-Fi, no hub (Philips UK specification sheet, 8719514437333); Philips Hue White and Colour Ambiance E14 lustre, 5.1 W, 45 × 77 mm (Philips Hue; Lampmasters)",
 }
 ORDER = list(SOURCES)
@@ -78,6 +80,73 @@ def stairs_zone():
          "right over the table's stair end: the bar's heads light the table directly" if bar_over else "beside the table: aim two heads at it", PASS),
         ("Fixing the brackets", "500 kg a pair, into the wall", ref("hebgo"), "the west wall's build isn't known yet", "solid (plugs and screws) or studwork (fix into studs): knock and look before choosing this site", CHECK),
     ])
+
+
+def fliptop_zones():
+    """v15: the flip-top gate-leg table, on the breast (A) and on the stairs wall (B): it stays on the wall, opens to 110 × 160."""
+    g = G
+    tw, td, tt = g.TABLE
+    cw, cd = g.CHAIR[0], g.CHAIR[1]
+    lw_, ld_, lt_ = g.FLIP["leaf"]
+    z0, z1 = g.OPEN_Z
+    tuck = 8.0
+    kg_top = tw * td * tt * 0.72 / 1000
+    kg_half = lw_ * ld_ * lt_ * 0.72 / 1000
+    kg_gate = 2 * g.GATE_LEG_H * ((g.LEG[0] + g.LEG[1]) / 2) ** 2 * 0.72 / 1000 + (tw - 2 * g.FLIP["inset"]) * g.FLIP["apron"][0] * g.FLIP["apron"][1] * 0.72 / 1000
+    leg_room = ld_ - g.FLIP["hinge_in"] - g.LEG[0] / 2              # how much of the half the folded legs can lie along
+    side4, side6 = g.OPEN_LEN / 2, g.OPEN_LEN / 3
+    arm_y = g.RAIL_TOP - 2.4
+    common = [
+        ("Open: 110 × 160, still on the wall", f"the top {r1(tw)} × {r1(td)} on its brackets, the half {r1(lw_)} × {r1(ld_)} on the gate leg", ref("hebgo", "fliphinge"), "nothing comes off the wall; no leaf to store",
+         f"the table runs {r1(-z1)} out from the wall", PASS),
+        ("Three flip-top hinges at the joint", f"{r1(g.FLIP['hinge'][0])} × {r1(g.FLIP['hinge'][1])}, set into both edges", ref("fliphinge"), f"a {r1(tt)} edge", f"{r1((tt - g.FLIP["hinge"][0]) / 2)} of oak either side of each hinge; they open to 180°, so the half lies flat on the top to fold", PASS),
+        ("The gate leg folds inside the half", f"legs {r1(g.GATE_LEG_H)} long, hinged {r1(g.FLIP['hinge_in'])} in from the far edge", ref("legs"), f"{r1(leg_room)} of the half for them to lie along", f"{r1(leg_room - g.GATE_LEG_H)} spare", PASS if leg_room - g.GATE_LEG_H >= 0.5 else TIGHT),
+        ("Folded on the wall", f"the top, the half and its gate: {r1(g.FOLDED_D)} off the wall, top edge {r1(g.FOLDED_TOP)}", ref("liftoff"), "a 7.3 hinge rail makes room for the half and gate behind the top",
+         f"about {r1(g.FOLDED_D - 6.3)} deeper than v14's; the room still sees the plain oak underside", PASS),
+        ("Folding it up", f"top {kg_top:.0f} kg + half {kg_half:.0f} kg + gate {kg_gate:.0f} kg", ref("liftoff", "hebgo"), "lift-off hinges for a 120 kg door; brackets 500 kg a pair",
+         f"about {kg_top + kg_half + kg_gate:.0f} kg to swing up: two people, one at each corner; turn buttons hold it", TIGHT),
+        ("Knees by the brackets", f"each arm {r1((tw - (g.HEBGO_X[1] - g.HEBGO_X[0])) / 2)} in from the side edge, at {r1(arm_y)}", ref("hebgo", "terje"), f"knees at about 60 over a {r1(g.CHAIR[3])} seat",
+         "the first chair each side has the arm above its knees, not in them", PASS),
+        ("Four: two down each side", f"{r1(side4)} of edge each", ref("dining"), f"{r1(g.DINE_W)} each", f"{r1(side4 - g.DINE_W)} spare each", PASS),
+        ("Six: three down each side", f"{r1(side6)} of edge each", ref("dining"), f"{r1(g.DINE_W)} each, 55 at a squeeze", f"{r1(side6)} each: elbows in", TIGHT),
+    ]
+    # A: on the breast, running towards the window
+    end_back_a = z1 - cd + tuck
+    sofa_gap_a = z1 - g.SOFA_FRONT_Z
+    east_back = g.TABLE_X[0] - cd + tuck
+    third_z = z0 - side6 * 2.5                                      # the six layout's last chair down each side
+    cof_clash = east_back < g.COFFEE["x"][1] and (third_z - cw / 2) < g.COFFEE["z"][1] and (third_z + cw / 2) > g.COFFEE["z"][0]
+    hinge_x, hinge_z = g.DOOR_X[0], g.BREAST_D_WEST
+    first6 = z0 - side6 / 2
+    corner = ((g.TABLE_X[1] - tuck + cd - hinge_x) ** 2 + (first6 + cw / 2 - hinge_z) ** 2) ** 0.5
+    zone_a = ("The flip-top table on the chimney breast (A)", f"110 × 160 open, running from the breast towards the window, {r1(-z1)} out", common + [
+        ("Its end and the sofa", f"the table ends {r1(-z1)} out", ref("sofa"), f"the sofa's front at {r1(-g.SOFA_FRONT_Z)}",
+         f"{r1(sofa_gap_a)} between them: no chair at that end (it would need {r1(cd - tuck)}), and the way round is down the sides", CHECK if sofa_gap_a < cd - tuck else TIGHT),
+        ("The coffee table", f"east-side chairs back to x {r1(east_back)}", ref("terje"), f"coffee table x {r1(g.COFFEE['x'][0])}–{r1(g.COFFEE['x'][1])}",
+         "for six, slide the coffee table towards the TV before you sit down" if cof_clash else "clear", TIGHT if cof_clash else PASS),
+        ("The door's swing", "door 83 wide, opens in, hinged by the breast", ref("room"), f"its edge sweeps {r1(g.DOOR_SWING)} round the hinge",
+         f"the west side's first chair is {r1(corner)} from the hinge: in its swing, so keep the door shut while you eat (or rehang it to open into the hall)", TIGHT if corner < g.DOOR_SWING else PASS),
+    ])
+    # B: on the stairs wall, running into the room
+    bz0, bz1 = g.TABLE_B_Z                                          # its long sides (south: stairs, north: window)
+    bx_end = g.TABLE_B_OPEN_X[0]
+    south_back = bz0 + cd - tuck
+    north_back = bz1 - cd + tuck
+    lamp = g.FLOOR_LAMP_SPOTS["corner"][1]
+    end_lo = g.TABLE_B_CZ - cw / 2
+    zone_b = ("The flip-top table under the shelf, by the stairs (B)", f"110 × 160 open, running from the stairs wall into the room, its end at x {r1(bx_end)}", common + [
+        ("The stair side's chairs", f"backs at z {r1(south_back)} when pulled out", ref("terje", "photo20"), f"the stair box's face at {r1(g.STAIRS_WALL_Z[0])}",
+         f"{r1(g.STAIRS_WALL_Z[0] - south_back)} behind them: tuck them in after a meal so the stair's foot stays clear", TIGHT),
+        ("The window side's chairs", f"backs at z {r1(north_back)}", ref("terje"), f"the window wall at {r1(g.WINDOW_Z)}",
+         f"{r1(north_back - g.WINDOW_Z)} behind them; your red lamp moves from the window corner to the sofa's end or by the breast while it's open", TIGHT),
+        ("A seat at its end", f"one chair at x {r1(bx_end - cd + tuck)}–{r1(bx_end + tuck)}", ref("terje", "sofa"), f"the sofa's arm ends at x {r1(g.SOFA_X[1])}, front z {r1(g.SOFA_FRONT_Z)}",
+         f"one chair, centred on the table, clears the sofa's front by {r1(end_lo - g.SOFA_FRONT_Z)}: seven with three a side (a second end chair would hit the arm)", PASS if end_lo - g.SOFA_FRONT_Z >= 0 else TIGHT),
+        ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}, {r1(g.FOLDED_D)} off the wall", ref("photo20"), f"shelf's underside about {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
+         f"{r1(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
+        ("Light over the table", "the existing pendant point, for bar 2", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})", "over the open table's stair side: the bar runs along it", PASS),
+        ("Fixing the brackets", "500 kg a pair, into the wall", ref("hebgo"), "the west wall's build isn't known yet", "solid (plugs and screws) or studwork (fix into studs): knock and look before choosing this site", CHECK),
+    ])
+    return zone_a, zone_b
 
 
 def zones():
@@ -242,6 +311,11 @@ def zones():
              f"the bar's {r1(g.BAR_MAX_W)} W a lamp; 15 cm shades", f"{r1(g.BAR_MAX_W - g.BULB_E14['wiz'][1])} W under; the WiZ's 10.1 sits inside a 15 shade with its holder; if it shows below the rim, the Hue's 7.7 doesn't", PASS),
         ]),
     ]
+    if g.TABLE_STYLE == "fliptop":   # v15: the flip-top replaces the fold-down-and-lift-off table on both walls
+        za, zb_ = fliptop_zones()
+        zs = [za if title.startswith("The dining wall") else zb_ if title.startswith("Option: the table under the shelf") else (title, space, rows)
+              for (title, space, rows) in zs]
+        return zs
     if g.SUB_IN_WALL:   # v13.5: nothing under the dining wall now
         gone = ("the sub's cover", "Sub under its oak cover", "The sound: no sides", "Spills", "Knocks: it can't", "Feet under the table")
         for zi_, (title, space, rows) in enumerate(zs):

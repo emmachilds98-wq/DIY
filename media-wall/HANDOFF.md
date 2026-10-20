@@ -43,6 +43,15 @@
 - Then the client's photo (20 Oct, `inputs/photo_room_curtains_evening.jpg`, evening, purple RGB light): the curtains are long pencil-pleat panels
   to the floor, oatmeal, on a rail just under the ceiling strip (`CURTAIN` redone; 3D toggle `S.curtains`); the carpet is already soft grey.
   Questions 18 (curtains and carpet answered and dropped). Still to come: the hat's photo, the light box's name.
+- Then: "hessian curtains from dunelm with a wood rail" (`CURTAIN` col/pole/finials; 3D `HESSIAN` weave, wooden pole, rings, finials; source
+  `curtains`) and "an improved table design that could maybe stay attached to the wall and maybe even seat more people": the **flip-top
+  gate-leg table** (`TABLE_STYLE = "fliptop"`, `FLIP`, `FLIP_SPACER`, `RAIL` now 10.3 deep with its hinge rail, `OPEN_Z`, `OPEN_LEN`,
+  `GATE_LEG_H`, `TABLE_B_OPEN_X`). The half hinges on three Lee Valley 40574 flip-top hinges (source `fliphinge`; their 40208 needs a 30 mm
+  edge). `render.fliptop_wall()`, `dining_chairs()` (2 or 3 a side), `table_settings(n_side=)`; DINING states folded / four (open, 2 a side)
+  / six (open, 3 a side); the free-standing table and the leaf's leg case are kept behind `TABLE_STYLE` but unused. export3d rotates the
+  chairs to B for every state. `fit.fliptop_zones()` replaces the dining zone and `stairs_zone()` (A: up to 6, no end seat (sofa: CHECK);
+  B: up to 7). `diagrams.fliptop()` (section, folded/open) replaces `dining_section()` and `leaf_case()` in the plan; `seating()` and
+  `dining_sites()` redrawn. Section 5, step 11 + its instructions, buy list and cut lists rewritten. Fit proof 69: 50 fit, 14 tight, 5 check.
 
 ## Update 20 Oct 2026, round 8b: v14.1 (a faster 3D room, GitHub Pages)
 - Client: "ive activated pages on github, do another full upgrade wherever necessary. it runs very slow on the renders but it looks great so

@@ -89,7 +89,7 @@ def controls():
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     return "".join([
         seg("site", [("A", "On the chimney breast"), ("B", "Under the shelf, by the stairs")], "Where the table goes"),
-        seg("dining", [("folded", "Folded"), ("four", "Down for four"), ("six", "Out for six")], "The table"),
+        seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
         lights,
         seg("paint", paints, "Wall paint", picker("r3d-custom", "#899081", "Any colour")),
         seg("ceil", CEIL_PRESETS, "Ceiling paint", picker("r3d-ceil", "#f2f0ea", "Any colour")),

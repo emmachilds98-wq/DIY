@@ -176,12 +176,25 @@ BREADBOARD = 7.0                           # oak breadboard ends, each, pegged; 
 TABLE_CX = (BREAST_X[0] + BREAST_X[1]) / 2 # 244.75
 TABLE_X = (TABLE_CX - TABLE[0] / 2, TABLE_CX + TABLE[0] / 2)   # 189.75 .. 299.75
 TABLE_TOP = WORKTOP                        # 76 at the wall, on one line with the alcove worktop
-RAIL = (TABLE[0], 22.0, 3.0)               # oak backboard on the breast: L, H, D; hinges on its top edge, brackets on its face
+# v15, client: "an improved table design that could maybe stay attached to the wall and maybe even seat more people if possible":
+# a FLIP-TOP GATE-LEG wall table. The 110 × 80 oak top stays on its hinges and brackets; a second 110 × 80 oak half is hinged to its
+# front edge on three brass flip-top hinges (Lee Valley 40574 narrow flip-top hinge, 1.27 × 7.0 cm, made for card and flip-top
+# tables; their wider 40208 needs a 30 mm edge and the top is 27) and flips out to make a 110 × 160 table
+# running into the room, its far end on a folding oak gate leg (two tapered legs and an apron, hinged under it). To fold: gate up,
+# flip the half back onto the top, fold the pair up to the wall. Nothing comes off the wall and there's no leaf to store.
+TABLE_STYLE = "fliptop"
+FLIP = dict(leaf=(110.0, 80.0, 2.7), hinge=(1.27, 7.0), hinges=3, gate_t=4.6, apron=(7.0, 2.0), inset=8.0, hinge_in=3.0, kg=None)
+FLIP_SPACER = FLIP["gate_t"] + FLIP["leaf"][2]   # 7.3: the hinge rail stands this far proud so the folded half and gate fit behind the top
+RAIL = (TABLE[0], 22.0, 3.0 + (FLIP_SPACER if TABLE_STYLE == "fliptop" else 0.0))   # oak backboard (3) and its hinge rail on the breast:
+                                            # L, H, D; the top hinges on the rail's front edge, brackets on the backboard's face
 RAIL_TOP = TABLE_TOP - TABLE[2]            # 73.3
 TABLE_Z = (-RAIL[2], -RAIL[2] - TABLE[1])  # -3 .. -83 when down at the wall
 FOLDED_TOP = RAIL_TOP + TABLE[1]           # 153.3: the folded table's top edge
 REED = (2.0, 1.0, 1.0)                     # v12: reeded underside, oak strips 2 wide, 1 apart, 1 thick, between the breadboard ends
-FOLDED_D = RAIL[2] + TABLE[2] + (0.0 if PLAIN else REED[2]) + 0.3   # about 6 off the breast (v13: flat underside)
+FOLDED_D = RAIL[2] + TABLE[2] + (0.0 if PLAIN else REED[2]) + 0.3   # v15 flip-top: about 13 off the breast (was 6)
+OPEN_Z = (TABLE_Z[0], TABLE_Z[1] - FLIP["leaf"][1])   # -10.3 .. -170.3: the table open, 160 long, out from the breast
+OPEN_LEN = OPEN_Z[0] - OPEN_Z[1]                 # 160
+GATE_LEG_H = TABLE_TOP - FLIP["leaf"][2]          # 73.3: the gate's legs, floor to the half's underside
 HEBGO = (58.0, 22.0)                       # Häfele Hebgo 287.43.428: arm 580, height 220; 500 kg a pair
 HEBGO_X = (TABLE_CX - 40.0, TABLE_CX + 40.0)   # 80 apart (Häfele: up to 800 between brackets)
 LEG_H = 71.0                               # v13.6: tapered oak legs, 71 long (the standard 710 dining leg), on M8 hanger bolts into brass inserts
@@ -262,7 +275,8 @@ DINING_SITES = {"breast": "On the chimney breast", "stairs": "Under the shelf, b
 DINING_SITE = "breast"                              # the plan's default; both are drawn, checked and costed
 TABLE_B_CZ = -180.0                                # the table's centre along the stairs wall: 84 to the stair box, 74 to the window
 TABLE_B_Z = (TABLE_B_CZ + TABLE[0] / 2, TABLE_B_CZ - TABLE[0] / 2)    # -125 .. -235
-TABLE_B_X = (ROOM_W - RAIL[2] - TABLE[1], ROOM_W - RAIL[2])          # 384 .. 464 when down
+TABLE_B_X = (ROOM_W - RAIL[2] - TABLE[1], ROOM_W - RAIL[2])          # the inner top, down
+TABLE_B_OPEN_X = (ROOM_W + OPEN_Z[1], ROOM_W + OPEN_Z[0])            # v15: 296.7 .. 456.7 open, out from the stairs wall
 FLOOR_LAMP = dict(h=165.0, base=28.0, heads=3)      # the client's three-headed floor lamp (keeps; it can move): drawn, not measured
 FLOOR_LAMP_SPOTS = {"corner": ("By the window, west corner", (ROOM_W - 22.0, WINDOW_Z + 30.0)),
                     "sofa": ("At the sofa's west end", (SOFA_X[1] + 20.0, SOFA_BACK_Z + 20.0)),
@@ -320,10 +334,11 @@ def side_run_depth(z):
 CARPET_COL = "#8f9194"                      # soft cool grey
 RUG = dict(x=(100.0, 330.0), z=(-198.0, -38.0), border=8.0)   # 230 × 160: from the return's seat to past the breast, sofa front to 30 short of the base
 RUG_COLS = ("#efe7d8", "#c7643a", "#d9a441", "#2f4a6e", "#7a8a6a")   # cream ground, rust, ochre, deep blue (the sofa), sage
-CURTAIN = dict(rail_y=CEIL - 6.0, drop_to=1.5, stack=44.0, ext=30.0, col="#cbbfae", folds=11)   # from the client's photo (20 Oct,
-                                            # inputs/photo_room_curtains_evening.jpg): long pencil-pleat panels to the floor, oatmeal (the
-                                            # photo's purple light makes them look mauve), on a rail just under the ceiling strip that runs
-                                            # 30 past the window each side; drawn open (stacked either side), or drawn across in the 3D room
+CURTAIN = dict(rail_y=CEIL - 7.0, drop_to=1.5, stack=44.0, ext=30.0, col="#b9a47f", folds=11, pole=2.8, finial=7.0, pole_col="#a9794b")
+                                            # the client's curtains (photo 20 Oct, inputs/photo_room_curtains_evening.jpg; "hessian curtains
+                                            # from dunelm with a wood rail"): natural hessian, pencil pleat, to the floor (Dunelm's pencil-pleat
+                                            # drops run to 228, header 3"), on a 28 mm wooden pole with rings and ball finials (Dunelm sells them
+                                            # 120-360 long, rings included, finials up to 8 more), running 30 past the window each side: a 300 pole
 # shelf B (the 2 m shelf on the stairs wall): "make the hanging plant on the wall shelf actually hang and add my small laser from the middle.
 # on the left of that shelf is my ikea light box"
 LIGHTBOX = dict(z=(SHELF_B["z"][0] - 4.0, SHELF_B["z"][0] - 60.0), h=42.0, d=12.0)   # the box in the photo, at the shelf's stair (left) end

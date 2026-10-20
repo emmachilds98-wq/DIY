@@ -416,7 +416,7 @@ CAP3D = {"3d_window_A_folded": "From the window, everyday evening: the table fol
          "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
          "3d_dining_A_four": "Option A: down for four on the chimney breast",
          "3d_dining_B_four": "Option B: down for four under the shelf, bar 2 right over it",
-         "3d_six_day": "Out for six with the leaf, in daylight",
+         "3d_six_day": "The flip-top open for six, in daylight: three a side, your hessian curtains on their wooden pole",
          "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
          "3d_plan_B": "Bird\u2019s eye, option B set for four",
          "3d_doll_A": "Dolls\u2019 house view, option A"}
@@ -432,13 +432,13 @@ def options_card():
     b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "dinner"}, "See B in 3D")
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_dining_A_four" alt="Option A in 3D: the table down for four on the chimney breast" loading="lazy">
-    <div class="ob"><span class="label">Option A · the plan so far</span><h3>On the chimney breast</h3>
-    <ul><li>Bar 1 and bar 2 already planned round it; the framed LPs over it.</li><li>Solid breast: plugs and screws, no surprises.</li>
-    <li class="minus">The west-end chair sits in the door's swing.</li></ul>{a}</div></article>
+    <div class="ob"><span class="label">Option A · up to six</span><h3>On the chimney breast</h3>
+    <ul><li>The flip-top opens towards the window: four with room, six elbows-in.</li><li>Solid breast: plugs and screws, no surprises.</li>
+    <li class="minus">No seat at its end (the sofa); one chair in the door's swing.</li></ul>{a}</div></article>
   <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
-    <div class="ob"><span class="label">Option B · new in v14</span><h3>Under your shelf, by the stairs</h3>
-    <ul><li>Out of the door's swing; the pendant point is right over it.</li><li>Frees the breast; the dresser goes, the lamp moves.</li>
-    <li class="minus">End chairs tight: {south - g.CHAIR[1]:.0f} and {north - g.CHAIR[1]:.0f} cm behind them.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
+    <div class="ob"><span class="label">Option B · up to seven</span><h3>Under your shelf, by the stairs</h3>
+    <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast.</li>
+    <li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
 </div>"""
 
 
@@ -846,7 +846,7 @@ showTab((location.hash || "").slice(1) || store.get("mw13-tab", "overview"));
 
 /* ---------- the render viewer */
 const NAMES = {{ card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" }};
-const VIEWS = {{ join: "Artisan oak media wall", four: "The dining wall, down and set for four", six: "The table and its leaf set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" }};
+const VIEWS = {{ join: "Artisan oak media wall", four: "The flip-top open and set for four", six: "The flip-top open and set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" }};
 const view = Object.assign({{ style: "join", paint: "card_room", key: false, dims: false }}, store.get("mw13-view", {{}}));
 const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key"), dims = $("#dims"), dimsBtn = $("#k-dims");
 function draw() {{
@@ -864,7 +864,7 @@ function draw() {{
   dimsBtn.disabled = view.key;
   cap.textContent = view.key
     ? ("Full numbered key for the artisan oak build, in Card Room Green. Game drawer and lower record tray pulled out 30 cm. Dashed lines are hidden: gold for data, audio and low-voltage leads, coral for mains. The numbers are listed in the Media wall tab.")
-    : view.style === "six" ? "The table and its leaf (170 × 80) on legs, 75 cm off the breast, set for six, in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show; the stairs go up beside the door; their direction is drawn roughly until you send a photo."
+    : view.style === "six" ? "The flip-top open on its gate leg (110 × 160), still on the wall, set for six (three a side), in " + NAMES[view.paint] + ". The camera stands in line with the alcove's edge so both spot bars show."
     : view.style === "drawers" ? "Every drawer out, in " + NAMES[view.paint] + ": the game drawer and the upper record tray 30 cm out, the hidden plinth drawer 25 cm out. In use, open one record tray at a time."
     : view.style === "side" ? "The PC side wall in " + NAMES[view.paint] + ": the ledge round the corner, the PC on its shelf with the keyboard tray, its leads inside the wall, the sofa below; dashed, the chimney breast's outline and the alcove's depth: 38 of the 46 cm base inside it, 8 proud; the media wall end-on at the right (the breast cut away)."
     : VIEWS[view.style] + ", shown in " + NAMES[view.paint] + ". Evening light, drawn to the measured room.";
