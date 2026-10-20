@@ -48,6 +48,8 @@
 - Then the client's hat photo: both hats hang on the red lamp (a black graduation cap on the pole's top, a navy baseball cap with a poem
   printed under its peak on the pole below the top head). `G.HATS`; `buildLamp()` draws them (`POEM_TEX`); the `hat` question is answered and
   dropped (14 questions); the hat to-do is gone from the buy list.
+- Built: total £3,060–6,227; plan 64 pages, build guide 42; page QA at 390/1280, no overflow or console errors, 3D ready. Published v16 to
+  71ff (version 16, id 1792469962-5df0). Deck db answers written: site, box, lightbox, hat.
 
 ## Update 20 Oct 2026, round 9: v15 (the room as it really is, smart lights, one oak run on the side wall)
 - Client: "my sofa goes to around 40cm before the end of the window ... 2 seats then corner ... blue corduroy and you can remove the white

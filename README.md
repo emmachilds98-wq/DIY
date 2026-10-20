@@ -15,8 +15,8 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 - **Smart colour strips** in the upright grooves and under the side-wall run, in the same app as the bars' bulbs, so one scene sets the whole wall (a colour picker on that slider in the 3D room).
 - **Your shelf by the stairs:** the black **IKEA OBEGRÄNSAD** panel at its left end, its 16 × 16 white LEDs drawn showing a pixel music note; the **laser is there but off**; the **plant hangs from the window end**; the **hollow pipe boxing** in the window corner (about 23 × 22, floor to ceiling) is drawn in, the shelf stopping just short of it. **Your hats** hang on the red lamp, as in your photo: the graduation cap on top, the navy cap with its poem on the pole.
 - **The sofa's end towards the TV is open:** no arm, one long seat cushion wrapping round to the back, an ottoman-style end.
-- TOTALS_LINE
-- FIT_LINE
+- Total about £3,060–6,227 (the slim drawers, the smart strips and the ledge added; the hat peg gone), no electrician on top.
+- Fit proof: 79 checks, 56 fit, 17 tight, 6 to check on site (one new: your shelf's height, for the OBEGRÄNSAD to stand on it), none fail. 14 questions: the table's place, the corner box, the light box and the hats are answered.
 
 | Every drawer out: LP crates, slim game drawer | The stairs wall: OBEGRÄNSAD, plant, pipe boxing |
 |---|---|
@@ -113,8 +113,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v16.pdf`](media-wall/out/Home_Network_Plan_v16.pdf) (62 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v16.pdf`](media-wall/out/Build_Guide_v16.pdf) (41 pages: tools, techniques, order of work, step by step)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v16.pdf`](media-wall/out/Home_Network_Plan_v16.pdf) (64 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v16.pdf`](media-wall/out/Build_Guide_v16.pdf) (42 pages: tools, techniques, order of work, step by step)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v15/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v16 is published there with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
