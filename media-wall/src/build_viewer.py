@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "14"
+VERSION = "15"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -410,14 +410,14 @@ TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
 CAP3D = {"3d_window_A_folded": "From the window, everyday evening: the table folded on the chimney breast",
          "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
-         "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the lamp on",
+         "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, your red lamp's pink and purple glow",
          "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the trays",
-         "3d_B_folded": "Option B folded: about 6 cm deep under your shelf, everyday evening",
+         "3d_B_folded": "The stairs wall: your shelf with the light box, the laser and the hanging plant, the hat on its peg, the red lamp, the table folded under it",
          "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
          "3d_dining_A_four": "Option A: down for four on the chimney breast",
          "3d_dining_B_four": "Option B: down for four under the shelf, bar 2 right over it",
          "3d_six_day": "Out for six with the leaf, in daylight",
-         "3d_pc_day": "The PC side wall in daylight",
+         "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
          "3d_plan_B": "Bird\u2019s eye, option B set for four",
          "3d_doll_A": "Dolls\u2019 house view, option A"}
 
@@ -608,7 +608,7 @@ def page(site=False):
 {STYLE}
 <div class="wrap">
   <header>
-    <p class="eyebrow">Portsmouth Close · living room · v{VERSION}.1 · 20 Oct 2026</p>
+    <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
     {('<p class="notice">This is the copy on GitHub Pages: your ticks, amounts and answers are kept on this device only. To share them with each other, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
     <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table (now with a second place to put it), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. {"Ticks, amounts and answers save for both of you." if not site else ""}</p>
@@ -645,7 +645,7 @@ def page(site=False):
 
   <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
     <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · scroll or pinch to zoom · right-drag or two fingers to slide</span></div>
-    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set, the lighting scene, the paint (or any colour), where the floor lamp stands (it stays; it's on or off) and whether the drawers are out, then pick a camera or move your own. Save any view as an HD picture.</p>
+    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set; pick a lighting scene and then slide any light, and give the smart bars and your red lamp's three bulbs any colour; paint the walls, the ceiling and the skirting (with the door and radiator) separately; turn the light box and the laser on or off; move the lamp; pull the drawers out. Then pick a camera or move your own, and save any view as an HD picture.</p>
     {room3d_page.section()}
     <h3 class="ptitle">HD pictures from the 3D room</h3>
     <p class="caption">Rendered at 2560 \u00d7 1440; tap one to see it full size. The same set is in the project folder.</p>
@@ -705,7 +705,7 @@ def page(site=False):
       <h2>In the wall</h2>
       <div class="counts">
         <div><strong>~{LPS}</strong><span>LPs, all face-out</span></div>
-        <div><strong>~{SINGLES}</strong><span>singles, all face-out</span></div>
+        <div><strong>LPs</strong><span>only, in the trays: room to flip</span></div>
         <div><strong>4–8</strong><span>at the dining table</span></div>
       </div>
       <p class="caption">The numbered key works on the main view. Measurements are rough, in pale yellow, for checking against the real room; the drawings in the other tabs are the exact ones.</p>

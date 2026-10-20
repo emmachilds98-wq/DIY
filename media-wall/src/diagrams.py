@@ -26,6 +26,23 @@ def wire(points, color=LINE, sw=1.4, dash=None):
     d = "M" + " L".join(f"{a},{b}" for a, b in points)
     da = f'stroke-dasharray="{dash}"' if dash else ""
     return f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{sw}" {da}/>'
+
+def bar_heads(n):
+    """v15: each bar's heads for the plans, from the same list as the renders: (offset along the bar, colour, (aim x, aim z))."""
+    import render as R
+    hs = G.BAR1_HEADS if n == 1 else R.spot_heads2()
+    return [(h[0], h[1], (h[3][0], h[3][2])) for h in hs]
+
+
+def _bar_rect(X, Y, bx, bz, w, fill="#ddd9d0", stroke="#999", rx=0):
+    """A spot bar seen from above (84 long, w px wide), along z since v15."""
+    if G.BAR_AXIS == "z":
+        x0, x1 = X(bx), X(bx)
+        y0, y1 = sorted((Y(bz - 42), Y(bz + 42)))
+        return f'<rect x="{x0 - w / 2:.1f}" y="{y0:.1f}" width="{w}" height="{y1 - y0:.1f}" rx="{rx}" fill="{fill}" stroke="{stroke}"/>'
+    xa, xb = sorted((X(bx - 42), X(bx + 42)))
+    return f'<rect x="{xa:.1f}" y="{Y(bz) - w / 2:.1f}" width="{xb - xa:.1f}" height="{w}" rx="{rx}" fill="{fill}" stroke="{stroke}"/>'
+
 def svg(w, h, body, title=None, sub=None):
     head = []
     top = 0
@@ -133,22 +150,20 @@ def drawer():
         o.append(f'<rect x="{PX(x0_)}" y="{PY(39.5)}" width="{1.25*k}" height="{39.5*k}" fill="#e4e4e4" stroke="#999" stroke-width="0.8"/>')
     o.append(f'<rect x="{PX(0)}" y="{PY(40)}" width="{53.9*k}" height="{40*k}" fill="{VIN_F}" stroke="{VIN_S}"/>')
     o.append(f'<rect x="{PX(0.9)}" y="{PY(39.1)}" width="{52.1*k}" height="{38.2*k}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
+    lx = 0.9 + (g.TRAY_INSIDE - g.LP) / 2                   # v15: LPs only, centred in the full width
     for i in range(26):
         zz = 2.6 + i * 1.2
-        o.append(f'<rect x="{PX(1.5)}" y="{PY(zz + 0.4)}" width="{31.4*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
-    o.append(f'<rect x="{PX(33.5)}" y="{PY(39.1)}" width="{0.6*k}" height="{38.2*k}" fill="#c48c57"/>')
-    for i in range(30):
-        zz = 2.6 + i * 1.1
-        o.append(f'<rect x="{PX(34.4)}" y="{PY(zz + 0.3)}" width="{18.3*k}" height="{0.4*k}" fill="#6f86a8" opacity="{0.8 - i*0.015}"/>')
-    o.append(t(PX(17.2), PY(22), "LP trough 32.6", 11, "middle", 650))
-    o.append(t(PX(17.2), PY(22) + 13, "~90 face-out", 10, "middle", 400, MUTED))
-    o.append(t(PX(43.5), PY(22), "singles 18.9", 10.5, "middle", 650))
-    o.append(t(PX(43.5), PY(22) + 13, "~120 face-out", 10, "middle", 400, MUTED))
+        o.append(f'<rect x="{PX(lx)}" y="{PY(zz + 0.4)}" width="{g.LP*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
+    o.append(t(PX(26.95), PY(22) - 4, "LPs only, centred", 11, "middle", 650, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
+    o.append(t(PX(26.95), PY(22) + 10, "~90 face-out", 10, "middle", 400, MUTED, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
+    for x_ in (0.9, 0.9 + lx - 0.9 + g.LP):
+        o.append(t(PX(x_ + (lx - 0.9) / 2), PY(36), f"{(g.TRAY_INSIDE - g.LP) / 2:g}", 9.5, "middle", 600, VIN_S))
+    o.append(t(PX(26.95), PY(36) + 12, "finger room either side to flip", 9.5, "middle", 400, MUTED))
     o.append(f'<rect x="{PX(-1.45)}" y="{PY(0)}" width="{56.8*k}" height="{1.5*k}" fill="#e9c9a4" stroke="{VIN_S}"/>')
     o.append(t(PX(26.95), PY(0) + 26, "tray 53.9 × 40 outside, 52.1 × 38.2 inside", 10, "middle", 400, MUTED))
-    o.append(t(PX(26.95), PY(0) + 40, "9 mm sides · 6 mm oak divider · 5 cm oak lip", 10, "middle", 400, MUTED))
+    o.append(t(PX(26.95), PY(0) + 40, "9 mm sides · 5 cm oak lip · no divider", 10, "middle", 400, MUTED))
     o.append(t(PX(26.95), PY(0) + 54, "about 32 kg full: open one tray at a time", 10, "middle", 500, VIN_S))
-    return svg(W, H, "\n".join(o), "The record trays: every LP and single face-out, two tiers in bay 3",
+    return svg(W, H, "\n".join(o), "The record trays: LPs only, every one face-out, two tiers in bay 3",
                "Bay 3 of the alcove base, right under the turntable. Section left, plan right. Pull a tray and flip through the covers like a record shop browser")
 
 
@@ -584,8 +599,8 @@ def front():
         cell(i1, i2, P_ + 20.4, P_ + 36.9, "PS2 + HDMI switch", "16.5 row", "g")
         cell(i1, i2, P_ + 1.6, P_ + 18.6, "PS1 + RetroTINK", "17 row", "g")
     i1, i2 = b3a + 1.8, b3b - 1.8
-    cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "Upper record tray", "~90 LPs + ~120 singles", "v")
-    cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "Lower record tray", "~90 LPs + ~120 singles", "v")
+    cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "Upper record tray", "~90 LPs, face-out", "v")
+    cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "Lower record tray", "~90 LPs, face-out", "v")
     for a in (b1a, b2a):
         o.append(f'<rect x="{X(a)}" y="{Y(73)}" width="{60*s}" height="{64*s}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
     o.append(f'<rect x="{X(b3a)}" y="{Y(73)}" width="{60*s}" height="{73*s}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
@@ -708,7 +723,7 @@ def _sofa(o, X, Y, k, label=True):
     back = [(x0, zb), (x1, zb), (x1, zb + 22), (x0 + 22, zb + 22), (x0 + 22, ze), (x0, ze)]
     o.append('<polygon points="' + " ".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in back) + '" fill="#dfddd6" stroke="none"/>')
     if label:
-        o.append(t((X(cx1) + X(x1)) / 2, Y((zb + zf) / 2) + 4, f"L-sofa, about {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} (from your photo)", 9.5, "middle", 650))
+        o.append(t((X(cx1) + X(x1)) / 2, Y((zb + zf) / 2) + 4, f"L-sofa, about {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} (blue cord)", 9.5, "middle", 650))
 
 
 def living_plan():
@@ -754,18 +769,18 @@ def living_plan():
     o.append(t(X(0) + 10, Y(z2) - 4, "socket by the sofa,", 8.5, "start", 600, "#d0573b"))
     o.append(t(X(0) + 10, Y(z2) + 7, "if there is one: rears", 8.5, "start", 400, "#d0573b"))
     # the two spot bars
-    for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1, existing rose"),
-                                  (g.BAR2_X, g.BAR2_Z, [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "second bar, existing point")]:
+    for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, bar_heads(1), "bar 1, existing rose"), (g.BAR2_X, g.BAR2_Z, bar_heads(2), "bar 2, existing point")]:
         rx_, ry_ = X(bx), Y(bz)
-        o.append(f'<rect x="{rx_ - 42*k:.1f}" y="{ry_ - 2:.1f}" width="{84*k:.1f}" height="4" fill="#ddd9d0" stroke="#999"/>')
+        o.append(_bar_rect(X, Y, bx, bz, 4))
         for dx, col, (tx_, tz_) in heads:
-            hx_ = X(bx + dx)
+            hxz = g.bar_head_xz(bx, bz, dx)
+            hx_, hy_ = X(hxz[0]), Y(hxz[1])
             tx, ty = X(tx_), Y(tz_)
-            ln = max(((tx - hx_) ** 2 + (ty - ry_) ** 2) ** 0.5, 1)
-            ex, ey = hx_ + (tx - hx_) / ln * min(48, ln), ry_ + (ty - ry_) / ln * min(48, ln)
-            o.append(f'<circle cx="{hx_:.1f}" cy="{ry_:.1f}" r="5" fill="{col}" stroke="#555" stroke-width="0.6"/>')
-            o.append(arrow(hx_, ry_, ex, ey, col, 1.4))
-        o.append(t(rx_, ry_ - 10, lab, 9, "middle", 600, "#8a6a1a"))
+            ln = max(((tx - hx_) ** 2 + (ty - hy_) ** 2) ** 0.5, 1)
+            ex, ey = hx_ + (tx - hx_) / ln * min(48, ln), hy_ + (ty - hy_) / ln * min(48, ln)
+            o.append(f'<circle cx="{hx_:.1f}" cy="{hy_:.1f}" r="5" fill="{col}" stroke="#555" stroke-width="0.6"/>')
+            o.append(arrow(hx_, hy_, ex, ey, col, 1.4))
+        o.append(t(rx_, min(Y(bz - 42), Y(bz + 42)) - 8 if g.BAR_AXIS == "z" else ry_ - 10, lab, 9, "middle", 600, "#8a6a1a"))
     # LED strip round the ceiling (dotted)
     sd = g.ALC_D - g.STAIR_D
     pts_ = [(0, g.WINDOW_Z), (g.ROOM_W, g.WINDOW_Z), (g.ROOM_W, sd), (g.STAIR_X[0], sd), (g.STAIR_X[0], g.BREAST_D_WEST), (g.BREAST_X[1], g.BREAST_D_WEST),
@@ -792,7 +807,7 @@ def living_plan():
     o.append(t(X(g.ROOM_W) - 36, Y(-150), f"{_fmt(g.ROOM_D*10)} mm", 9.5, "end", 400, MUTED))
     o.append(t(X(g.ROOM_W) - 36, Y(-150) + 12, "window to alcove back", 9, "end", 400, MUTED))
     o.append(t(X((g.WINDOW_X[0] + g.WINDOW_X[1]) / 2), Y(g.WINDOW_Z) - 10, f"window {_fmt(g.WINDOW_X[1]-g.WINDOW_X[0])} · radiator below", 9.5, "middle", 400, MUTED))
-    o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. Sofa from your photo (long side to the reveal; return {_fmt(g.SOFA_D)} assumed). The stairs go up; their direction is drawn roughly.", 9, "start", 400, MUTED))
+    o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. Sofa from your notes (long side to 40 cm short of the window's end; return {_fmt(g.SOFA_D)} assumed). Both spot bars run from the TV towards the window.", 9, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "The living room from above, as you measured it",
                "To scale, north at the top. Media wall in the alcove, the ledge and PC shelf on the side wall over the sofa, the dining wall on the chimney breast, two spot bars")
 
@@ -1307,7 +1322,7 @@ def why_layout():
     o.append(t(0, 62, "v10: the TV in the middle, the vinyl cabinet on the breast", 12, "start", 650))
     strip(74, [(0, 25.25, "Series X", "g"), (25.25, 29.75, "", "o"), (29.75, 156.25, "TV gap 126.5", "w"), (156.25, 160.75, "", "o"), (160.75, 186, "dock", "w"),
                (186, 286, "vinyl cabinet: deck + browser on top", "v")])
-    strip(112, [(0, 3, "", "w"), (3, 63, "Xbox 60", "g"), (63, 123, "PlayStation 60", "g"), (123, 183, "sub 60", "s"), (183, 186, "", "w"), (186, 286, "record trays · singles", "v")])
+    strip(112, [(0, 3, "", "w"), (3, 63, "Xbox 60", "g"), (63, 123, "PlayStation 60", "g"), (123, 183, "sub 60", "s"), (183, 186, "", "w"), (186, 286, "record trays · LPs", "v")])
     o.append(t(X(g.BREAST_X[1]) + 8, 95, "above the worktop", 9.5, "start", 400, MUTED))
     o.append(t(X(g.BREAST_X[1]) + 8, 133, "below the worktop", 9.5, "start", 400, MUTED))
     o.append(t(0, 172, f"v11: the TV {_fmt(g.TV_SHIFT)} cm nearer the side wall, the dining wall on the breast", 12, "start", 650))
@@ -1407,12 +1422,12 @@ def storage():
     for i in range(5):
         item(tx + 1.5 * k, ty + (3 + i * 6.5) * k, 31.4, 5.2, LP_C[i % 6])
         item(tx + (35.1) * k, ty + (3 + i * 6.5) * k, 18.4, 5.2, LP_C[(i + 2) % 6])
-    o.append(t(tx + 27 * k, ty + 40 * k + 14, "LP trough 32.6 · singles 18.9", 9.5, "middle", 500, MUTED))
-    o.append(t(x0 + 200, y0 + 92, "≈ 90 LPs + 120 singles a tray", 12, "start", 650))
-    o.append(t(x0 + 200, y0 + 110, "× 2 trays = 180 LPs, 240 singles", 10.5, "start", 400, MUTED))
+    o.append(t(tx + 27 * k, ty + 40 * k + 14, "one LP trough, 52.1 wide", 9.5, "middle", 500, MUTED))
+    o.append(t(x0 + 200, y0 + 92, "≈ 90 LPs a tray, LPs only", 12, "start", 650))
+    o.append(t(x0 + 200, y0 + 110, "× 2 trays = 180 LPs, all face-out", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 200, y0 + 128, "sleeves lean back 10°, flip like a shop", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 200, y0 + 146, "thick outer sleeves: widen the LP", 10.5, "start", 400, MUTED))
-    o.append(t(x0 + 200, y0 + 160, "trough to 33.4; singles drop to 18.1", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 200, y0 + 160, "the trough takes them: 52.1 wide", 10.5, "start", 400, MUTED))
 
     # C · plinth drawer, from above
     x0, y0 = 0, 326
@@ -1478,7 +1493,7 @@ def storage():
     o.append(t(x0 + 14, y0 + 66, "1 · LPs spine-out on the high shelf: about 380 more", 11.5, "start", 650))
     o.append(t(x0 + 14, y0 + 82, "No building; books move to the second option's top.", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 14, y0 + 110, "2 · A second record unit, west of the sofa, under the window", 11.5, "start", 650))
-    o.append(t(x0 + 14, y0 + 126, "Bay 3 again (60 × 46 × 73, two face-out trays): 180 LPs, 240 singles.", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 14, y0 + 126, "Bay 3 again (60 × 46 × 73, two face-out trays): 180 LPs.", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 14, y0 + 142, "At x 300–360 it leaves 123 cm to the table set for six (100 to walk).", 10.5, "start", 400, MUTED))
     space(x0 + 30, y0 + 158, 60, 20)
     item(x0 + 30 + 2 * k, y0 + 158 + 3 * k, 26.6, 14, "#efe6d6", "tray", INK, 7.5)
@@ -1611,12 +1626,12 @@ def drawer_layouts():
         zz = 2.6 + i * 1.15
         o.append(f'<rect x="{PX(34.4)}" y="{PY(zz + 0.35)}" width="{18.3 * s}" height="{0.42 * s}" fill="{LP_C[(i + 3) % 6]}" opacity="0.8"/>')
     o.append(t(PX(17.2), PY(20), "LPs", 11, "middle", 700, "#fff", 'paint-order="stroke" stroke="#3b3833" stroke-width="3"'))
-    o.append(t(PX(43.5), PY(20), "singles", 10.5, "middle", 700, "#fff", 'paint-order="stroke" stroke="#3b3833" stroke-width="3"'))
+    
     o.append(f'<rect x="{PX(-1.45)}" y="{PY(1.5)}" width="{56.8 * s}" height="{1.5 * s}" fill="#e9c9a4" stroke="{VIN_S}"/>')
     yb = PY(0) + 22
-    dim(PX(0.9), PX(33.5), yb, "LP trough 32.6"); dim(PX(34.1), PX(53.0), yb, "singles 18.9")
+    dim(PX(0.9), PX(53.0), yb, "one LP trough, 52.1 (LPs centred, 10.3 to flip either side)")
     o.append(t(PX(26.95), yb + 18, "every sleeve face-out, leaning back 10°: flip like a shop", 9.5, "middle", 400, MUTED))
-    o.append(t(PX(26.95), yb + 31, f"~{g.TRAY_LPS} LPs + ~{g.TRAY_SINGLES} singles each · two trays", 9.5, "middle", 600, GC))
+    o.append(t(PX(26.95), yb + 31, f"~{g.TRAY_LPS} LPs each, LPs only · two trays", 9.5, "middle", 600, GC))
 
     o.append(t(0, H - 26, "Plans drawn from above at 5 px per cm, front (the room) at the bottom; the elevation at 3.6 px per cm. Sizes: BESTÅ frame 60 × 40 × 64 (IKEA);", 10, "start", 400, MUTED))
     o.append(t(0, H - 12, "game cases 19 × 13.5 × 1.4 and 17 × 13.5 × 1.2; jewel case 14.2 × 12.5 × 1; sleeves 31.4 and 18.3; runners Emuca 400 mm 68 kg, Accuride 350 mm (see the fit proof).", 10, "start", 400, MUTED))
@@ -1853,16 +1868,17 @@ def light_scene(key):
     if lv["bias"] > 0:
         glow(g.TV_CX, g.TV_PANEL_Z[1] + 2, 60, lv["bias"], "bglow")
     # the bars: beams to their aims, glows where they land
-    bars = [(g.PEND_X, g.PEND_Z, lv["bar1"], [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1"),
-            (g.BAR2_X, g.BAR2_Z, lv["bar2"], [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "bar 2")]
+    bars = [(g.PEND_X, g.PEND_Z, lv["bar1"], bar_heads(1), "bar 1"), (g.BAR2_X, g.BAR2_Z, lv["bar2"], bar_heads(2), "bar 2")]
     for bx, bz, v, heads, name in bars:
         for dx, col, (ax, az) in heads:
+            hx, hz = g.bar_head_xz(bx, bz, dx)
             if v > 0:
-                o.append(f'<line x1="{X(bx + dx):.1f}" y1="{Y(bz):.1f}" x2="{X(ax):.1f}" y2="{Y(az):.1f}" stroke="{col}" stroke-width="{1 + 3 * v:.1f}" stroke-opacity="{0.25 + 0.6 * v:.2f}"/>')
-                glow(ax, az, 26, v)
-        o.append(f'<rect x="{X(bx + 42):.1f}" y="{Y(bz) - 3:.1f}" width="{84 * k:.1f}" height="6" rx="3" fill="#f4f1ea" stroke="#8a857a"/>')
+                o.append(f'<line x1="{X(hx):.1f}" y1="{Y(hz):.1f}" x2="{X(ax):.1f}" y2="{Y(az):.1f}" stroke="{col}" stroke-width="{1 + 3 * v:.1f}" stroke-opacity="{0.25 + 0.6 * v:.2f}"/>')
+                glow(ax, az, 34, v * 0.8)
+        o.append(_bar_rect(X, Y, bx, bz, 6, '#f4f1ea', '#8a857a', 3))
         for dx, col, _ in heads:
-            o.append(f'<circle cx="{X(bx + dx):.1f}" cy="{Y(bz):.1f}" r="5.5" fill="{col}" stroke="#555" stroke-width="0.8" opacity="{1 if v > 0 else 0.45}"/>')
+            hx, hz = g.bar_head_xz(bx, bz, dx)
+            o.append(f'<circle cx="{X(hx):.1f}" cy="{Y(hz):.1f}" r="5.5" fill="{col}" stroke="#555" stroke-width="0.8" opacity="{1 if v > 0 else 0.45}"/>')
     lx, lz = g.SOFA_X[1] + 16, g.SOFA_BACK_Z + 22
     glow(lx, lz, 46, lv["lamp"])
     o.append(f'<circle cx="{X(lx):.1f}" cy="{Y(lz):.1f}" r="6" fill="#f4f1ea" stroke="#8a857a"/>')

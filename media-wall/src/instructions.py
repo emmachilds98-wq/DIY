@@ -367,14 +367,14 @@ def full():
                 ]),
             ]),
         12: dict(
-            parts=["Both Wolston-style spot bars and eight warm-white dimmable E14 bulbs, 6 W max", "Two LED-compatible dimmers (trailing edge), in your switches' finish",
-                   "2700K LED strip, two aluminium channels, a plug-in driver with an inline dimmer", "6500K bias light for the TV", "A lamp and a 2700K bulb"],
+            parts=["Both Wolston-style spot bars and eight smart colour E14 bulbs under 6 W (WiZ Colour P45 4.9 W, or Hue E14 lustre 5.1 W)",
+                   "2700K LED strip (about 4.5 m), three aluminium channels, a plug-in driver with an inline dimmer", "6500K bias light for the TV", "Your red lamp, with its colour bulbs"],
             hardware=["Connector block or lever connectors (if the bar's flex needs them)", "Earth sleeving, insulating tape"],
             tools=["Two-pole voltage tester (GS38) and its proving unit", "MCB lock-off and padlock", "Insulated screwdrivers, wire strippers", "Step ladder", "A helper to hold the bar"],
             draw=[],
             parts_full=[
                 ("Before you start", [
-                    "Check each dimmer's box: the new dimmer's depth against the back box, and its minimum load against your bulbs (four 6 W LEDs is 24 W a bar). Trailing-edge dimmers made for LEDs flicker least.",
+                    "No dimmers: smart bulbs need full power, so leave the light switches as they are and keep them on. A dimmer in front of a smart bulb makes it flicker and can damage it.",
                     "The same stop list as step 3. Here, also stop if a ceiling point has no earth (the bars need one), or the rose has more wires than you can match to your photo.",
                 ]),
                 ("Isolate the lighting circuit", [
@@ -385,24 +385,20 @@ def full():
                     "At each switch and each ceiling point, with the cover off, test between every pair: live and neutral, live and earth, neutral and earth. No reading on any of them.",
                     "Prove the tester on the proving unit again. Only now is it safe to touch.",
                 ]),
-                ("Swap the two switches for dimmers", [
-                    "Unscrew each switch, photograph its wiring, and note which wire goes to which terminal (COM, L1, L2 on a two-way).",
-                    "Move each wire to the same terminal on the dimmer; the earth to the box's earth terminal, sleeved. If the switch is two-way and you can't match it, stop: that's an electrician's.",
-                    "Fold the wires in and screw the dimmer on level.",
-                ]),
                 ("Take down the old fittings, hang the bars", [
                     "Unscrew each old fitting's cover. Prove dead again at its terminals. Photograph the wiring, mark the switched live (the wire from the switch) with tape, then disconnect and take the fitting down.",
-                    "Fix bar 1's mounting plate to the ceiling over the rose between the TV and the sofa, square to the media wall, with screws into the joist or the plate's fixings. Bar 2's goes on the point by the door.",
+                    "Fix bar 1's mounting plate to the ceiling over the rose between the TV and the sofa, the bar running from the TV towards the window (v15), with screws into the joist or the plate's fixings. Bar 2's goes on the pendant point by the stairs, running the same way, along the west wall.",
                     "Connect earth first (green-and-yellow to the bar's earth), then neutral to N and the switched live to L, in the bar's terminal block; any loop wires go back together exactly as they were. Tighten, tuck, and fit the canopy.",
-                    "Fit the 2700K bulbs and aim the heads: the table in the Paint and light tab says which goes where. Never at the TV.",
+                    "Fit the smart colour bulbs and aim the heads: the table in the Paint and light tab says which goes where. Never at the TV. If a WiZ bulb shows below its shade's rim, use the shorter Hue lustre there.",
                 ]),
                 ("Power on and test", [
-                    "Remove the lock-off and switch on. Run each dimmer from low to high: no flicker, no buzz. If it flickers at the low end, set the dimmer's minimum (most have a trim screw) or try a different bulb.",
+                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the four scenes from the Paint and light tab (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
                 ]),
                 ("The low-voltage lights (nothing to isolate)", [
                     "Press the 2700K strip into each upright's groove in its aluminium channel; take its lead down the groove to the plug-in driver on the 10-gang.",
+                    "The side-wall shelf's strip (v15): in its channel in the groove under the run's front edge, 1.5 cm back from the edge, the full 220 cm; its lead drops with the PC's through the brush grommet into the conduit, to the same driver.",
                     "Clip the ceiling strip through its notches in the uprights; stick the bias light round the back of the TV on its USB port.",
-                    "Stand the lamp by the sofa's west end with a 2700K bulb.",
+                    "Stand your red lamp in its spot (the 3D room shows the three), its bulbs green, pink and purple, top to bottom.",
                 ]),
             ]),
         13: dict(

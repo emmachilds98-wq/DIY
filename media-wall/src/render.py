@@ -210,7 +210,7 @@ def defs():
   <linearGradient id="backwall" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#2c5643"/><stop offset="1" stop-color="#2a5340"/></linearGradient>
   <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#7d776e"/><stop offset="1" stop-color="#5d5850"/></linearGradient>
+    <stop offset="0" stop-color="#9a9c9f"/><stop offset="1" stop-color="#77797c"/></linearGradient>
   <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="#1b1638"/><stop offset="0.45" stop-color="#4a2d5e"/>
     <stop offset="0.72" stop-color="#c0566a"/><stop offset="0.88" stop-color="#f2a65e"/>
@@ -345,7 +345,8 @@ REC_OPEN_UP = 0.0   # upper record drawer
 def record_tier(yb, open_cm, part="all"):
     """v8 face-out record tray in the bay-3 carcass. Box 53.9 x 40 on 400 mm runners screwed to the 18 mm ply.
     Thinner build: 9 mm sides, 12 mm base, 6 mm oak divider, 5 cm oak lip. LP trough 32.6 wide on the left,
-    7-inch singles face-out in an 18.9 cm trough on the right, both leaning back 10 degrees."""
+    7-inch singles face-out in an 18.9 cm trough on the right, both leaning back 10 degrees. v15: LPs only (TRAY_LP_ONLY), centred in
+    the full 52.1 width with 10.3 either side to flip with both hands; no divider, no singles."""
     o = []
     oz = -open_cm
     LIP_H = 5.0
@@ -365,11 +366,12 @@ def record_tier(yb, open_cm, part="all"):
     o.append(box(bx1, yb, oz, bx2 - bx1, 1.2, 40, "#cdb38a", "#5a5148"))               # base, felt top
     lean = math.radians(10)
     dx = ix1 + 32.6                                                                     # divider
+    lp_only = G.TRAY_LP_ONLY                                                            # v15: LPs only, centred, no divider
     # singles trough: 7-inch sleeves face-out, leaning back
     sh, sdz = 18.3 * math.cos(lean), 18.3 * math.sin(lean)
     s1, s2 = dx + 0.6 + 0.3, dx + 0.6 + 0.3 + 18.3
     scols = ["#1f1f1f", "#e9e3d3", "#c8452f", "#3a6ea5", "#f0c24b", "#6a8f5a", "#b3307a", "#2f3e5c", "#d27a2e", "#efe6d2", "#14806d", "#2c2c2c"]
-    for i, col in enumerate(scols):
+    for i, col in enumerate([] if lp_only else scols):
         zb = oz + 33.0 - i * 2.5
         q = [P(s1, yt, zb), P(s2, yt, zb), P(s2, yt + sh, zb + sdz), P(s1, yt + sh, zb + sdz)]
         o.append(poly(q, col, 'stroke="#000" stroke-opacity="0.25" stroke-width="0.5"'))
@@ -382,13 +384,15 @@ def record_tier(yb, open_cm, part="all"):
         return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
     sart = ([("#2f3e5c", 0, 1, 0, 1), ("#f0c24b", 0.1, 0.9, 0.1, 0.9), ("#c8452f", 0.32, 0.68, 0.32, 0.68)] if yb < 10 else
             [("#efe6d2", 0, 1, 0, 1), ("#14806d", 0, 1, 0, 0.35), ("#1f1f1f", 0.2, 0.8, 0.5, 0.85)])
-    for (c, u1, u2, v1, v2) in sart:
-        o.append(poly([Lq(sq, u1, v1), Lq(sq, u2, v1), Lq(sq, u2, v2), Lq(sq, u1, v2)], c))
-    o.append(poly(sq, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.7"'))
-    o.append(box(dx, yt, oz + 0.9, 0.6, 10, 38.2, OAK, OAK_T, OAK_S))                     # oak divider
+    if not lp_only:
+        for (c, u1, u2, v1, v2) in sart:
+            o.append(poly([Lq(sq, u1, v1), Lq(sq, u2, v1), Lq(sq, u2, v2), Lq(sq, u1, v2)], c))
+        o.append(poly(sq, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.7"'))
+        o.append(box(dx, yt, oz + 0.9, 0.6, 10, 38.2, OAK, OAK_T, OAK_S))                 # oak divider
     # LP trough
     hgt, dzl = 31.4 * math.cos(lean), 31.4 * math.sin(lean)
-    x1, x2 = ix1 + 0.6, ix1 + 0.6 + 31.4
+    x1 = ix1 + (G.TRAY_INSIDE - 31.4) / 2 if lp_only else ix1 + 0.6
+    x2 = x1 + 31.4
     cols = ["#2c2c2c", "#e9e3d3", "#3a6ea5", "#c8452f", "#f0c24b", "#1f1f1f", "#6a8f5a", "#b3307a", "#efe6d2", "#2f3e5c", "#d27a2e"]
     for i, col in enumerate(cols):
         zb = oz + 31.0 - i * 2.6
@@ -644,8 +648,8 @@ def record_inset(x0=1545, y0=330, num=26):
         o.append(f'<rect x="{X(34.4)}" y="{Y(zz + 0.4)}" width="{18.3*k}" height="{max(0.4*k - 0.3, 0.7)}" fill="{cols[(i*3) % 8]}"/>')
     o.append(f'<rect x="{X(-1.45)}" y="{Y(1.4)}" width="{56.8*k*0.95}" height="{1.5*k}" fill="#c48c57"/>')
     o.append(f'<text x="{X(17)}" y="{Y(22)}" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#f4efe4" text-anchor="middle" paint-order="stroke" stroke="#14261d" stroke-width="3">~90 LPs</text>')
-    o.append(f'<text x="{X(43.5)}" y="{Y(22)}" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#f4efe4" text-anchor="middle" paint-order="stroke" stroke="#14261d" stroke-width="3">~120 singles</text>')
-    o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 22}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">all face-out · LPs left, singles right</text>')
+    o.append(f'<text x="{X(43.5)}" y="{Y(22)}" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#f4efe4" text-anchor="middle" paint-order="stroke" stroke="#14261d" stroke-width="3">LPs only</text>')
+    o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 22}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">all face-out · LPs only, centred</text>')
     o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 9}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">9 mm sides · 400 mm runners</text>')
     return "\n".join(o)
 
@@ -747,6 +751,32 @@ def disc_z(xc, yc, zp, r, fill, extra="", n=40):
 
 
 # ------------------------------------------------------------- the room
+def rug():
+    """v15: "a nice design rug that fits": 230 × 160 (geometry.RUG) in front of the sofa, from the return's seat to past the breast and
+    30 short of the base. A cream ground with a deep blue border (the sofa), and big overlapping arches in rust, ochre and sage."""
+    (x0, x1), (z0, z1), b = G.RUG["x"], G.RUG["z"], G.RUG["border"]
+    cream, rust, ochre, blue, sage = G.RUG_COLS
+    y = 0.15
+    flat = lambda pts_: [P(x, y, z) for x, z in pts_]
+    o = [poly(flat([(x0 + 3, z0 - 3), (x1 + 3, z0 - 3), (x1 + 3, z1 - 3), (x0 + 3, z1 - 3)]), "#000", 'opacity="0.18" filter="url(#soft)"')]
+    o.append(poly(flat([(x0, z0), (x1, z0), (x1, z1), (x0, z1)]), blue))
+    o.append(poly(flat([(x0 + b, z0 + b), (x1 - b, z0 + b), (x1 - b, z1 - b), (x0 + b, z1 - b)]), cream))
+    def arch(cx, cz, r, w, col):            # a half-ring standing on the line z = cz, opening towards the window
+        outer = [(cx + r * math.cos(t), cz - r * math.sin(t)) for t in [math.pi * i / 24 for i in range(25)]]
+        inner = [(cx + (r - w) * math.cos(t), cz - (r - w) * math.sin(t)) for t in [math.pi * (24 - i) / 24 for i in range(25)]]
+        pts_ = [(min(max(x, x0 + b), x1 - b), min(max(z, z0 + b), z1 - b)) for x, z in outer + inner]
+        o.append(poly(flat(pts_), col))
+    zc = z1 - b - 18
+    for cx, r, col in ((x0 + 62, 46, rust), (x0 + 128, 58, ochre), (x0 + 172, 40, sage), (x0 + 112, 30, blue)):
+        arch(cx, zc, r, 9, col)
+        arch(cx, zc, r - 15, 4, col)
+    o.append(poly(flat([(x0 + b + 6, z0 + b + 14), (x1 - b - 6, z0 + b + 14), (x1 - b - 6, z0 + b + 18), (x0 + b + 6, z0 + b + 18)]), rust))
+    for i in range(9):                       # a row of ochre dots along the window end
+        cx = x0 + b + 18 + i * (x1 - x0 - 2 * b - 36) / 8
+        o.append(ellipse_flat(cx, y + 0.01, z0 + b + 30, 3.2, 3.2, ochre))
+    return "\n".join(o)
+
+
 def room():
     o = []
     o.append(f'<rect x="0" y="{-SHIFT - 60}" width="{W}" height="{H + SHIFT + 120}" fill="url(#backwall)"/>')
@@ -755,7 +785,7 @@ def room():
     far = BX1 + RW
     # the recess west of the breast, with the door to the hall (drawn where the agent's plan shows it: to confirm)
     o.append(quad_front(BX1, 0, zr, RW, CEIL, G_RECESS))
-    o.append(poly([P(BX1, 0, 0), P(far, 0, 0), P(far, 0, zr), P(BX1, 0, zr)], "#4f4a43"))
+    o.append(poly([P(BX1, 0, 0), P(far, 0, 0), P(far, 0, zr), P(BX1, 0, zr)], "#77797c"))
     dx1, dx2, dh = G.DOOR_X[0], G.DOOR_X[1], 198
     o.append(quad_front(dx1 - 6, 0, zr - 0.2, (dx2 - dx1) + 12, dh + 6, "#2d5a46"))
     o.append(quad_front(dx1, 0, zr - 0.4, dx2 - dx1, dh, "#2a5340"))
@@ -765,7 +795,7 @@ def room():
     # the alcove: back wall, reveal (the breast's east side) and floor
     o.append(quad_front(0, 0, ALC_D, ALC_W, CEIL, "#244a39"))
     o.append(poly([P(ALC_W, 0, 0), P(ALC_W, CEIL, 0), P(ALC_W, CEIL, ALC_D), P(ALC_W, 0, ALC_D)], G_REVR))
-    o.append(poly([P(0, 0, 0), P(ALC_W, 0, 0), P(ALC_W, 0, ALC_D), P(0, 0, ALC_D)], "#4f4a43"))
+    o.append(poly([P(0, 0, 0), P(ALC_W, 0, 0), P(ALC_W, 0, ALC_D), P(0, 0, ALC_D)], "#6d6f72"))
     # the east (side) wall, continuous into the alcove
     o.append(poly([P(0, CEIL, -470), P(0, CEIL, ALC_D), P(0, 0, ALC_D), P(0, 0, -470)], "url(#leftwall)"))
     # ceiling: one plane at 235 over the room, alcove and recess
@@ -787,8 +817,7 @@ def room():
     o.append(box(BX0, 0, -1.8, G.BREAST_W, sh, 1.8, sk[0], sk[1], sk[2]))
     o.append(box(BX1, 0, zr - 1.8, dx1 - 6 - BX1, sh, 1.8, sk[0], sk[1], sk[2]))
     o.append(box(dx2 + 6, 0, zr - 1.8, far - dx2 - 6, sh, 1.8, sk[0], sk[1], sk[2]))
-    # a rug in front of the alcove
-    o.append(poly([P(104, 0.1, -20), P(184, 0.1, -20), P(184, 0.1, -128), P(104, 0.1, -128)], "#8a7f70", 'opacity="0.5"'))
+    o.append(rug())
     o.append(west_end(sk))
     return "\n".join(o)
 
@@ -1074,12 +1103,56 @@ def led_lines():
 
 
 # ------------------------------------------------------------- the side wall: the ledge wraps the corner, the PC above the sofa
+def side_run():
+    """v15: the side wall's oak run: one board line from the corner post to past the PC, 4 thick, top 155.4. Its front edge is 7 off the
+    wall along the LPs and sweeps out to 28 under the PC (geometry.side_run_depth), with a 5 cm radius on the end; a warm LED strip in a
+    groove under the front edge washes the wall below."""
+    o = []
+    za, zb = G.SIDE_RUN_Z
+    top, th = G.LEDGE_TOP, G.SIDE_RUN_T
+    under = top - th
+    R_ = G.SIDE_END_R
+    zs = [za]
+    z = za
+    while z > zb:
+        z -= 1.0 if G.SIDE_SWEEP[1] - 2 <= z <= G.SIDE_SWEEP[0] + 2 or z < zb + R_ + 1 else 6.0
+        zs.append(max(z, zb))
+    def d(z):
+        dd = G.side_run_depth(z)
+        if z < zb + R_:                      # the rounded end
+            u = (zb + R_) - z
+            dd = G.PC_SHELF_D - R_ + math.sqrt(max(R_ * R_ - u * u, 0.0))
+        return dd
+    edge = [(d(z), z) for z in zs]
+    cam = cam_pos()
+    if G.SIDE_GLOW and VIEW in ("front", "side"):   # the wash on the wall below the front edge
+        o.append(poly([P(0.05, under, za), P(0.05, under, zb), P(0.05, under - 46, zb + 6), P(0.05, under - 46, za)], "#ffd9a0",
+                      'opacity="0.16" filter="url(#softer)"'))
+    def strip_(y, col, extra=""):                    # the top or underside as convex quads (the 3D builder fans each polygon)
+        for (x1, z1), (x2, z2) in zip(edge, edge[1:]):
+            o.append(poly([P(0, y, z1), P(0, y, z2), P(x2, y, z2), P(x1, y, z1)], col, f'stroke="{col}" stroke-width="0.6" ' + extra))
+    if cam[1] < under:                               # the underside, seen from below
+        strip_(under, OAK_D)
+    segs = []
+    for (x1, z1), (x2, z2) in zip(edge, edge[1:]):
+        mid = ((x1 + x2) / 2, top - th / 2, (z1 + z2) / 2)
+        segs.append((-sum((cam[i] - mid[i]) ** 2 for i in range(3)), [P(x1, under, z1), P(x2, under, z2), P(x2, top, z2), P(x1, top, z1)]))
+    for _, q in sorted(segs, key=lambda t: t[0]):
+        o.append(poly(q, OAK, 'stroke="#9c6a3f" stroke-width="0.4" ' + GH))
+    o.append(poly([P(0, under, zb), P(edge[-1][0], under, zb), P(edge[-1][0], top, zb), P(0, top, zb)], OAK_S))   # the end
+    strip_(top, OAK_T)
+    if G.SIDE_GLOW:                                  # the strip itself, a warm line under the front edge
+        pts_ = " ".join(f"{P(x - 1.2, under - 0.2, z)[0]:.1f},{P(x - 1.2, under - 0.2, z)[1]:.1f}" for x, z in edge[::2])
+        o.append(f'<polyline points="{pts_}" fill="none" stroke="#fff1d0" stroke-width="2" opacity="0.9"/>')
+    return "\n".join(o)
+
+
 def wrap():
     o = []
     za, zb = G.WRAP_Z
     L = za - zb
     top = G.LEDGE_TOP
-    o.append(box(0, G.LEDGE_UNDER, zb, G.WRAP_D, top - G.LEDGE_UNDER, L, OAK, OAK_T, OAK_S, extra=GH))
+    o.append(side_run())
     lean = math.radians(8)
     hgt, dxl = G.LP * math.cos(lean), G.LP * math.sin(lean)
     xb = 4.8
@@ -1089,11 +1162,10 @@ def wrap():
         q = [P(xb, top, z1), P(xb, top, z2), P(xb - dxl, top + hgt, z2), P(xb - dxl, top + hgt, z1)]
         o.append(art_on(q, art))
         o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.35" stroke-width="0.8"'))
-    o.append(box(G.WRAP_D - 0.9, top, zb, 0.9, G.LEDGE_LIP, L, OAK, OAK_T, OAK_S))
-    # the PC shelf, one line with the ledge, over the chaise end of the sofa
+    o.append(box(G.WRAP_D - 0.9, top, G.SIDE_SWEEP[0], 0.9, G.LEDGE_LIP, za - G.SIDE_SWEEP[0], OAK, OAK_T, OAK_S))   # the LPs' lip, along the 7 cm part
+    # the PC end of the run (v15: the same board, swept out to 28), over the end of the sofa's return; concealed brackets inside it
     pa, pb = G.PC_SHELF_Z
     st, th, d = G.PC_SHELF_TOP, G.PC_SHELF_T, G.PC_SHELF_D
-    o.append(box(0, st - th - 3.0, pb + 2, 2.0, 3.0, pa - pb - 4, OAK_D, OAK_T, OAK_S))   # the oak cleat it sits on (concealed brackets inside)
     # v6.1's roll-out keyboard tray: a 7 cm oak housing under the shelf, stopping 12 cm short of the sofa end for the cables
     kh = G.KB_TRAY["h"]
     hz0, hz1 = pb + 12.0, pa
@@ -1103,7 +1175,6 @@ def wrap():
         o.append(poly([P(d + 0.02, st - th - kh + 1.0, hz0 + 3), P(d + 0.02, st - th - kh + 1.0, hz1 - 3), P(d + 0.02, st - th - 1.0, hz1 - 3), P(d + 0.02, st - th - 1.0, hz0 + 3)], "#b9824c"))
         a, b = P(d + 0.04, st - th - kh + 1.8, (hz0 + hz1) / 2 - 7), P(d + 0.04, st - th - kh + 1.8, (hz0 + hz1) / 2 + 7)
         o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#5e3d22" stroke-width="3" stroke-linecap="round"/>')
-    o.append(box(0, st - th, pb, d, th, pa - pb, OAK, OAK_T, OAK_S, extra=GH))
     cw, ch, cd = G.PC_CASE
     cz1, cz0 = G.PC_Z
     cx1 = 2.5
@@ -1713,25 +1784,20 @@ def wall_shadows():
 
 
 # x offset on the bar, shade, stem, and what each head is aimed at (a point in the room)
-SPOT_HEADS = [
-    (-31.5, "#a9c7ab", "#8db59c", (40.0, 212.0, 30.0)),            # sage: books and the left of the high shelf
-    (-10.5, "#a7d0d8", "#7fbfc8", (G.TV_CX, 172.0, 34.0)),         # pale blue: the record ledge above the TV
-    (10.5, "#e8b53f", "#dca52f", (148.0, 45.0, -169.0)),           # mustard: down onto the coffee table
-    (31.5, "#e79c95", "#d9877f", (160.0, 95.0, 8.0)),              # dusty pink: the turntable and the Series X
-]
+SPOT_HEADS = G.BAR1_HEADS   # v15: the bar runs from the TV towards the window; offsets are along it (see geometry.BAR1_HEADS)
 
 
 def spot_heads2():
-    """The second bar, on the existing point between the door and the west wall: two heads on the table, one on the
-    framed LPs, one down onto the way in."""
+    """The second bar, on the existing pendant point by the stairs, running TV to window (v15): pink down onto the way in at its door
+    end, sage on the framed LPs, blue and mustard on the table."""
     ty, tz = (G.TABLE_TOP, -45.0) if DINING == "four" else (115.0, -6.0)
     tx = G.TABLE_CX
     if DINING == "six":
         tx, ty, tz = sum(G.SIX_X) / 2, G.LEG_H + G.TABLE[2], sum(G.FREE_Z) / 2
-    return [(-31.5, "#a9c7ab", "#8db59c", (G.TABLE_CX, G.FRAMES_Y + 17, -2.0)),
-            (-10.5, "#a7d0d8", "#7fbfc8", (tx - 22, ty, tz)),
-            (10.5, "#e8b53f", "#dca52f", (tx + 22, ty, tz)),
-            (31.5, "#e79c95", "#d9877f", (G.BAR2_X, 0.0, G.BAR2_Z + 40))]
+    return [(31.5, *G.PINK, (G.BAR2_X, 0.0, G.BAR2_Z + 60)),
+            (10.5, *G.SAGE, (G.TABLE_CX, G.FRAMES_Y + 17, -2.0)),
+            (-10.5, *G.BLUE, (tx - 22, ty, tz)),
+            (-31.5, *G.MUSTARD, (tx + 22, ty, tz))]
 
 
 def spot_bar(cx, cz, spots):
@@ -1741,21 +1807,26 @@ def spot_bar(cx, cz, spots):
     cam = cam_pos()
     for dx, col, stem, tgt in spots:
         c = P(*tgt)
-        rx, ry = (95, 70) if tgt[2] > -10 else (120, 45)
-        o.append(f'<ellipse cx="{c[0]:.1f}" cy="{c[1]:.1f}" rx="{rx}" ry="{ry}" fill="#fff1d2" opacity="0.15" filter="url(#softer)"/>')
+        rx, ry = (130, 95) if tgt[2] > -10 else (165, 62)   # v15: wider, fainter pools (the bulbs are smart and set softer)
+        o.append(f'<ellipse cx="{c[0]:.1f}" cy="{c[1]:.1f}" rx="{rx}" ry="{ry}" fill="#fff1d2" opacity="0.09" filter="url(#softer)"/>')
     o.append(ellipse_flat(cx, CEIL - 0.05, cz, 6.5, 6.5, "#f3f1ec", 'stroke="#d8d4cc" stroke-width="1"'))
     o.append(box(cx - 6, CEIL - 2.6, cz - 6, 12, 2.5, 12, "#efede8", "#f7f5f0", "#dcd8d0"))
-    o.append(box(cx - 42, CEIL - 3.8, cz - 1.1, 84, 1.3, 2.2, "#f2f0eb", "#fbfaf6", "#d9d5cc"))
+    if G.BAR_AXIS == "z":   # v15: the bar runs from the TV towards the window
+        o.append(box(cx - 1.1, CEIL - 3.8, cz - 42, 2.2, 1.3, 84, "#f2f0eb", "#fbfaf6", "#d9d5cc"))
+    else:
+        o.append(box(cx - 42, CEIL - 3.8, cz - 1.1, 84, 1.3, 2.2, "#f2f0eb", "#fbfaf6", "#d9d5cc"))
+    def at_(h):
+        x_, z_ = G.bar_head_xz(cx, cz, h[0])
+        return (x_, CEIL - 6.5, z_)
     def aim(h):
-        dx, _, _, tgt = h
-        return _norm(tuple(tgt[i] - (cx + dx, CEIL - 6.5, cz)[i] for i in range(3)))
-    heads = sorted(spots, key=lambda h: -(cz + aim(h)[2]))
+        return _norm(tuple(h[3][i] - at_(h)[i] for i in range(3)))
+    heads = sorted(spots, key=lambda h: -(at_(h)[2] + aim(h)[2]))
     for h in heads:
         dx, col, stem, _ = h
-        x0 = cx + dx
-        a_, b_ = P(x0, CEIL - 3.8, cz), P(x0, CEIL - 6.5, cz)
+        apex = at_(h)
+        x0, z0 = apex[0], apex[2]
+        a_, b_ = P(x0, CEIL - 3.8, z0), P(x0, CEIL - 6.5, z0)
         o.append(f'<line x1="{a_[0]:.1f}" y1="{a_[1]:.1f}" x2="{b_[0]:.1f}" y2="{b_[1]:.1f}" stroke="{stem}" stroke-width="3.2" stroke-linecap="round"/>')
-        apex = (x0, CEIL - 6.5, cz)
         dn = aim(h)
         th, _, tm = _cone(apex, dn, 3.8, 1.1, 1.9)
         sh, ring, m = _cone(tm, dn, 13.0, 1.9, 7.5)
@@ -1920,8 +1991,7 @@ def measure_layer(kind):
         o.append(m3((tx0, g.TRAY_UPPER[0] - 0.5, tz - 0.6), (tx0 + 53.9, g.TRAY_UPPER[0] - 0.5, tz - 0.6), "record tray 54 wide", dy=20))
         o.append(m3((tx0 + 53.9 + 1, g.TRAY_UPPER[0], tz), (tx0 + 53.9 + 1, g.TRAY_UPPER[0], tz + 40), "40 deep", dx=34, dy=4))
         o.append(m3((tx0 + 53.9 + 1.5, 0.5, bf), (tx0 + 53.9 + 1.5, 0.5, tz), f"out {REC_OPEN_UP:g}", dx=34, dy=8))
-        o.append(m3((tx0 + 0.9, ty + 2, tz + 3), (tx0 + 33.5, ty + 2, tz + 3), "LPs 32.6", dy=-6, size=14))
-        o.append(m3((tx0 + 34.1, ty + 2, tz + 3), (tx0 + 53, ty + 2, tz + 3), "singles 18.9", dy=-6, size=14))
+        o.append(m3((tx0 + 0.9, ty + 2, tz + 3), (tx0 + 53, ty + 2, tz + 3), "LP trough 52.1", dy=-6, size=14))
         px0, px1 = g.PLINTH_DRAWER["x"]; pz = bf - PLINTH_OPEN
         o.append(m3((px0, g.PLINTH_DRAWER["y"][1] + 0.5, pz - 0.8), (px1, g.PLINTH_DRAWER["y"][1] + 0.5, pz - 0.8), f"plinth drawer 52 × 34 × 5, out {PLINTH_OPEN:g}", dy=26))
         o.append(m3((-1, g.PLINTH + 2.6, bf), (-1, g.PLINTH + 2.6 + 15.5, bf), "11.6–27 up", dx=-42, dy=4, size=14))
@@ -1997,7 +2067,7 @@ JOIN_KEY = [
     (19, (83, 52.5, G.BASE_FRONT_Z + 6), "PS3 + controller basket · bay 2 top row"),
     (20, (106, 33.3, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (83, 33.3, G.BASE_FRONT_Z + 6), "PS2 · bay 2, beside the sub" if G.SUB_IN_WALL else "PS2 + HDMI switch · bay 2 middle row"),
     (21, (106, 15.5, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (78, 15.5, G.BASE_FRONT_Z + 6), "PS1 · under the PS2" if G.SUB_IN_WALL else "PS1 + RetroTINK · bay 2 bottom row"),
-    (22, (153, 56, G.BASE_FRONT_Z + 1), "Upper record tray: ~90 LPs + ~120 singles · bay 3"),
+    (22, (153, 56, G.BASE_FRONT_Z + 1), "Upper record tray: ~90 LPs, face-out · bay 3"),
     (23, (153, 22, "tray"), "Lower record tray: the same, shown pulled out"),
     (24, (93, 4.6, G.BASE_FRONT_Z - 0.1), "Hidden slim drawer in the plinth, finger pull"),
     *([(34, ((G.SUB_IN["x"][0] + G.SUB_IN["x"][1]) / 2, 36, G.SUB_IN["z"][0]), "Sub · bay 2, under the TV, on an isolation riser")] if G.SUB_IN_WALL else []),
@@ -2160,25 +2230,24 @@ SOFA_COL = ("#8c8276", "#a0968a", "#776e63")
 
 
 def sofa_solid():
-    """v13.2: the client's sofa, from their photo: a black jumbo-cord L-sofa, the long side under the window (about 188, ending in
-    line with the breast's reveal), the return along the side wall (168 assumed). Plinth, seat bases, plump seat and back cushions
-    with the cord's channels, arms at both ends, and the grey faux-fur cushion from the photo."""
-    C, T, SD = "#2a2b30", "#383940", "#1f2024"          # cord: face, top, side
-    RIB = "#17181b"
+    """v15: the client's sofa: blue corduroy, an L with the long side under the window ending about 40 cm short of the window's west
+    end, two seats then the corner seat, the return along the side wall (168 assumed). Plinth, seat bases, plump seat and back cushions
+    with the cord's channels, arms at both ends; no cushion (the client: "you can remove the white cushion")."""
+    C, T, SD, RIB = G.SOFA_CORD                       # cord: face, top, side, channels
     x0 = G.SOFA_X[0]
     zb, zf, ze = G.SOFA_BACK_Z, G.SOFA_FRONT_Z, G.CHAISE_END_Z
     cx1, mx1 = G.CHAISE_X[1], G.SOFA_X[1]
     arm, bk, ph, sb, st, ah, bh = 20.0, 20.0, 8.0, 40.0, 52.0, 62.0, G.SOFA_H
     o = []
-    def ribs_x(x, za, zb_, ya, yb_, step=5.5):           # cord channels on a face looking along +x
+    def ribs_x(x, za, zb_, ya, yb_, step=3.2):           # cord channels on a face looking along +x
         y = ya + step
         while y < yb_ - 1:
-            o.append(_line(P(x + 0.05, y, za + 1), P(x + 0.05, y, zb_ - 1), RIB, 1.1, 'opacity="0.55"'))
+            o.append(_line(P(x + 0.05, y, za + 1), P(x + 0.05, y, zb_ - 1), RIB, 1.0, 'opacity="0.5"'))
             y += step
-    def ribs_z(z, xa, xb_, ya, yb_, step=5.5):           # ... and on a face looking along +z
+    def ribs_z(z, xa, xb_, ya, yb_, step=3.2):           # ... and on a face looking along +z
         y = ya + step
         while y < yb_ - 1:
-            o.append(_line(P(xa + 1, y, z + 0.05), P(xb_ - 1, y, z + 0.05), RIB, 1.1, 'opacity="0.55"'))
+            o.append(_line(P(xa + 1, y, z + 0.05), P(xb_ - 1, y, z + 0.05), RIB, 1.0, 'opacity="0.5"'))
             y += step
     o.append(poly([P(x0, 0.05, zb), P(mx1 + 6, 0.05, zb), P(mx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, ze + 6), P(x0, 0.05, ze + 6)],
                   "#000", 'opacity="0.25" filter="url(#soft)"'))
@@ -2192,26 +2261,56 @@ def sofa_solid():
     o.append(box(x0 + bk, ph, zf, cx1 - x0 - bk, sb - ph, ze - arm - zf, C, T, SD))
     ribs_z(zf, cx1, mx1 - arm, ph, sb)
     ribs_x(cx1, zf, ze - arm, ph, sb)
-    # back cushions, plump, leaning on the frames: along the side wall, then along the window
-    for (za, zb2) in ((zf + 2, ze - arm - 1), (zb + bk + 32, zf + 1)):
-        o.append(box(x0 + bk, st - 2, za, 16, bh - st + 2, zb2 - za, C, T, SD))
-        ribs_x(x0 + bk + 16, za, zb2, st, bh - 2)
-    for (xa, xb) in ((x0 + bk + 16, 96.0), (96.0, mx1 - arm - 1)):
+    # the long side: the corner seat (x0+bk .. cx1), then two seats to the arm
+    n = G.SOFA_SEATS
+    seat_w = (mx1 - arm - cx1) / n
+    xs = [(x0 + bk + 16, cx1)] + [(cx1 + i * seat_w + 0.5, cx1 + (i + 1) * seat_w - 0.5) for i in range(n)]
+    # back cushions, plump, leaning on the frames: along the side wall, then one per seat along the window
+    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - arm - 1 - zf - 2, C, T, SD))
+    ribs_x(x0 + bk + 16, zf + 2, ze - arm - 1, st, bh - 2)
+    o.append(box(x0 + bk, st - 2, zb + bk + 32, 16, bh - st + 2, zf + 1 - zb - bk - 32, C, T, SD))
+    ribs_x(x0 + bk + 16, zb + bk + 32, zf + 1, st, bh - 2)
+    for (xa, xb) in xs:
         o.append(box(xa, st - 2, zb + bk, xb - xa, bh - st + 2, 16, C, T, SD))
         ribs_z(zb + bk + 16, xa, xb, st, bh - 2)
-    # seat cushions: two on the long side, one on the return
-    for (xa, xb) in ((x0 + bk + 16, 96.0), (96.5, mx1 - arm - 0.5)):
+    # seat cushions: the corner, two on the long side, one on the return
+    for (xa, xb) in xs:
         o.append(box(xa, sb, zb + bk + 16, xb - xa, st - sb, zf - zb - bk - 16 + 1, C, T, SD))
-        ribs_z(zf + 1, xa, xb, sb, st, 4.0)
+        ribs_z(zf + 1, xa, xb, sb, st, 2.6)
     o.append(box(x0 + bk + 16, sb, zf + 1.5, cx1 - x0 - bk - 16, st - sb, ze - arm - zf - 2, C, T, SD))
-    ribs_x(cx1, zf + 1.5, ze - arm - 0.5, sb, st, 4.0)
-    # the grey faux-fur cushion in the corner, from the photo
-    o.append(box(x0 + bk + 18, st - 1, zb + bk + 17, 34, 30, 11, "#a19c95", "#b4afa8", "#8b867f"))
+    ribs_x(cx1, zf + 1.5, ze - arm - 0.5, sb, st, 2.6)
+    if G.SOFA_CUSHION:
+        o.append(box(x0 + bk + 18, st - 1, zb + bk + 17, 34, 30, 11, "#a19c95", "#b4afa8", "#8b867f"))
     # arms: at the long side's end and at the return's end
     o.append(box(mx1 - arm, ph, zb, arm, ah - ph, zf - zb, C, T, SD))
     ribs_z(zf, mx1 - arm, mx1, ph, ah)
     o.append(box(x0, ph, ze - arm, cx1 - x0, ah - ph, arm, C, T, SD))
     ribs_x(cx1, ze - arm, ze, ph, ah)
+    return "\n".join(o)
+
+
+def curtains(far=480.0):
+    """v15: the client's curtains (photo to come): a slim rail over the window, two sill-length panels stacked either side, clear of the
+    radiator below; plain pale grey with soft folds until the photo arrives (geometry.CURTAIN)."""
+    c = G.CURTAIN
+    wz = G.WINDOW_Z + 6.0
+    wx0, wx1 = G.WINDOW_X
+    y0, y1 = c["drop_to"], c["rail_y"]
+    o = [box(wx0 - c["stack"] - 6, y1, wz - 1, wx1 - wx0 + 2 * c["stack"] + 12, 2.0, 2.0, "#d8d4cc", "#ebe8e1", "#bdb8ae")]
+    base = c["col"]
+    import colorsys
+    r, g_, b_ = [int(base[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    h, l, s_ = colorsys.rgb_to_hls(r, g_, b_)
+    shade = lambda k: "#%02x%02x%02x" % tuple(round(v * 255) for v in colorsys.hls_to_rgb(h, max(0, min(1, l * k)), s_))
+    for xa in (wx0 - c["stack"] + 4, wx1 - 4):
+        n = c["folds"]
+        w = c["stack"] / n
+        for i in range(n):
+            xl, xr = xa + i * w, xa + (i + 1) * w
+            if xl > far:
+                continue
+            q = [P(xl, y0, wz), P(min(xr, far), y0, wz), P(min(xr, far), y1, wz), P(xl, y1, wz)]
+            o.append(poly(q, shade(1.06 if i % 2 else 0.86)))
     return "\n".join(o)
 
 
@@ -2228,6 +2327,7 @@ def side_room():
     o.append(poly([P(wx0, 88, wz0 + 0.3), P(wx0, 212, wz0 + 0.3), P(wx0 + 5, 212, wz0 + 0.3), P(wx0 + 5, 88, wz0 + 0.3)], "#f1efe9"))
     rx0, rx1 = G.RADIATOR_X
     o.append(poly([P(rx0, 15, wz0 + 4), P(rx0, 70, wz0 + 4), P(min(rx1, far), 70, wz0 + 4), P(min(rx1, far), 15, wz0 + 4)], "#ece9e2"))
+    o.append(curtains(far))
     o.append(poly([P(0, 0, az), P(0, CEIL, az), P(ALC_W, CEIL, az), P(ALC_W, 0, az)], "#244a39"))         # alcove back wall
     sk = SKIRT or ("#346650", "#3d7259", "#2b5643", "#2d5a46", "#3b6e56")
     o.append(poly([P(0.2, 0, wz0), P(0.2, G.SKIRT_H, wz0), P(0.2, G.SKIRT_H, az), P(0.2, 0, az)], sk[3]))

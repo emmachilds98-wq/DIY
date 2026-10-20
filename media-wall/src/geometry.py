@@ -109,7 +109,7 @@ TRAY_BOX = (53.9, 40.0)
 TRAY_LOWER = (2.3, 3.5, 34.4)              # box underside, base top, sleeve tops
 TRAY_UPPER = (37.0, 38.2, 69.1)
 TRAY_TOP_PANEL = 71.2
-TRAY_LPS, TRAY_SINGLES = 90, 120
+TRAY_LPS, TRAY_SINGLES = 90, 0             # v15 client: "vinyl large only, no extra small slot": LP-only trays (were 90 LPs + 120 singles each)
 LEDGE_LPS, WRAP_LPS = 4, 4
 
 # ---------------------------------------------------------------- the side (east) wall: the ledge wraps the corner, the PC above the sofa
@@ -129,7 +129,7 @@ PLAIN = True                                # v13, client: "less cladding all ov
                                             # turntable panel or sub box, no reeded table; cables chased into the solid walls
 
 # ---------------------------------------------------------------- the L-sofa (assumed until measured) and the sub
-SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 188.0, 168.0, 95.0, 80.0   # v12.1 client photo: the long side runs from the side wall to in line with the breast's reveal (about 188); the return along the side wall (168) still assumed
+SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 266.0, 168.0, 95.0, 80.0   # v15 client: "my sofa goes to around 40cm before the end of the window" (window ends at 308, so 268 from the side wall: 266 long from x 2); the return along the side wall (168) still assumed
 DOOR_HINGE, DOOR_OPENS_IN = "breast", True  # v12.1 client: hinged on the chimney-breast side, opens into the room
 WALLS_SOLID = True                          # v12.1 client: the side wall and the chimney breast are solid
 SOFA_X = (2.0, 2.0 + SOFA_W)               # 2 .. 249 along the window wall
@@ -267,3 +267,77 @@ FLOOR_LAMP = dict(h=165.0, base=28.0, heads=3)      # the client's three-headed 
 FLOOR_LAMP_SPOTS = {"corner": ("By the window, west corner", (ROOM_W - 22.0, WINDOW_Z + 30.0)),
                     "sofa": ("At the sofa's west end", (SOFA_X[1] + 20.0, SOFA_BACK_Z + 20.0)),
                     "breast": ("Beside the chimney breast", (BREAST_X[1] + 22.0, -22.0))}
+
+
+# ---------------------------------------------------------------- v15 (21 Oct): the client's notes on the room as it really is
+# "my sofa goes to around 40cm before the end of the window ... it has 2 seats then corner. it is also blue corduroy and you can remove
+# the white cushion" -> SOFA_W above; the long side is an arm, two seats and the corner seat, then the return along the side wall.
+SOFA_SEATS = 2                               # seat cushions on the long side, west of the corner seat
+SOFA_CORD = ("#34507f", "#40609a", "#283f68", "#1f3354")   # blue corduroy: face, top, side, the cord's channels
+SOFA_CUSHION = False                         # the white/grey cushion is gone
+
+# "i'd like the media wall drawers for vinyl to be for vinyl large only": one trough the tray's full width, the LPs centred in it with
+# finger room either side to flip with both hands (LP 31.4 in 52.1 inside: 10.3 each side); no divider, no singles.
+TRAY_LP_ONLY = True
+TRAY_INSIDE = TRAY_BOX[0] - 2 * 0.9         # 52.1 between the 9 mm sides
+
+# "i'd like the bar lights to run in the other direction ie tv to window on both fixtures": both bars turn 90°, so they run along z
+# (from the media wall towards the window); their heads are spaced along the bar the same 21 cm apart.
+BAR_AXIS = "z"
+# "make these lights also smart rgb because they will be": the Wolston bar takes 4 × E14 (SES) bulbs, 6 W max (Dunelm). Smart colour E14
+# bulbs: WiZ Colour P45 E14, 4.9 W, 4.5 × 10.1 cm (Philips/WiZ), or the shorter Philips Hue E14 lustre, 5.1 W, 4.5 × 7.7 cm. Smart bulbs
+# need full power, so the two wall dimmers are dropped: the wall switches stay on and the app (or a smart button) sets level and colour.
+SMART_BARS = True
+BULB_E14 = {"wiz": ("WiZ Colour P45 E14", 4.9, (4.5, 10.1)), "hue": ("Philips Hue White and Colour E14 lustre", 5.1, (4.5, 7.7))}
+BAR_MAX_W = 6.0
+# the lamp: "bright red, it has rgb lights mainly stay on green on top then pink then purple going down"
+LAMP_BODY = "#c8102e"
+LAMP_HEADS_RGB = ("#3ddc84", "#ff5fb0", "#8a4dff")   # top, middle, bottom
+
+# "i want it to look better especially on the left wall side": the ledge and the PC shelf become one oak run on one line (top 155.4,
+# 4 thick all along), its front edge sweeping out from the 7 cm LP ledge to the 28 cm PC shelf over 16 cm, with a 5 cm radius on the
+# end, like the table's corners; a warm LED strip in a groove under the front edge washes the wall below it (on the uprights' driver).
+SIDE_RUN_Z = (WRAP_Z[0], PC_SHELF_Z[1])     # 8 .. -212: 220 long, one board line (two boards, scarf-jointed at the sweep)
+SIDE_RUN_T = PC_SHELF_T                     # 4 all along (the ledge part was 2.4)
+SIDE_SWEEP = (PC_SHELF_Z[0] + 12.0, PC_SHELF_Z[0] - 2.0)   # -118 .. -132: the front edge eases from 7 out to 28, under the last LP
+SIDE_END_R = 5.0
+SIDE_GLOW = True                            # LED strip under the run's front edge
+
+
+def side_run_depth(z):
+    """The run's depth off the wall at z (cm): 7 along the LPs, an S-curve out to 28 under the PC."""
+    import math
+    a, b = SIDE_SWEEP
+    if z >= a:
+        return WRAP_D
+    if z <= b:
+        return PC_SHELF_D
+    t = (a - z) / (a - b)
+    return WRAP_D + (PC_SHELF_D - WRAP_D) * (0.5 - 0.5 * math.cos(math.pi * t))
+
+
+# soft furnishings: "make it soft grey carpet and add a nice design rug that fits", "add my curtains also which ill add a photo of"
+CARPET_COL = "#8f9194"                      # soft cool grey
+RUG = dict(x=(100.0, 330.0), z=(-198.0, -38.0), border=8.0)   # 230 × 160: from the return's seat to past the breast, sofa front to 30 short of the base
+RUG_COLS = ("#efe7d8", "#c7643a", "#d9a441", "#2f4a6e", "#7a8a6a")   # cream ground, rust, ochre, deep blue (the sofa), sage
+CURTAIN = dict(rail_y=CEIL - 8.0, drop_to=82.0, stack=34.0, col="#b9b6ae", folds=7)   # sill-length over the radiator, stacked either
+                                            # side of the window; drawn plain until the client's photo arrives
+# shelf B (the 2 m shelf on the stairs wall): "make the hanging plant on the wall shelf actually hang and add my small laser from the middle.
+# on the left of that shelf is my ikea light box"
+LIGHTBOX = dict(z=(SHELF_B["z"][0] - 4.0, SHELF_B["z"][0] - 60.0), h=42.0, d=12.0)   # the box in the photo, at the shelf's stair (left) end
+LASER = dict(z=sum(SHELF_B["z"]) / 2, size=(9.0, 6.0, 9.0))   # a small star/laser projector in the middle of the shelf
+PLANT_B = dict(z=SHELF_B["z"][1] + 48.0, pot=14.0, trail=(55.0, 110.0), strands=7)   # a trailing plant towards the window end, hanging down, clear of the lamp
+# "either add my hat there or give it a wallstand or something to display it": an oak hat peg on the stairs wall by the lamp
+HAT_PEG = dict(z=STAIRS_WALL_Z[0] - 26.0, y=165.0, d=9.0)   # -67: between the stair box and the shelf's stair end, clear of table B
+
+# the heads along each bar (offset along the bar from its centre, + towards the media wall / door), shade colour, stem colour, aim
+SAGE, BLUE, MUSTARD, PINK = ("#a9c7ab", "#8db59c"), ("#a7d0d8", "#7fbfc8"), ("#e8b53f", "#dca52f"), ("#e79c95", "#d9877f")
+BAR1_HEADS = [(31.5, *SAGE, (40.0, 212.0, 30.0)),                 # the media-wall end: books and the left of the high shelf
+              (10.5, *BLUE, (TV_CX, 172.0, 34.0)),                # the record ledge above the TV
+              (-10.5, *PINK, (160.0, 95.0, 8.0)),                 # the turntable and the Series X
+              (-31.5, *MUSTARD, (148.0, 45.0, -169.0))]           # the window end: down onto the coffee table
+
+
+def bar_head_xz(bx, bz, off):
+    """Where a head hangs: bars run along z since v15 (TV to window), along x before."""
+    return (bx, bz + off) if BAR_AXIS == "z" else (bx + off, bz)

@@ -28,12 +28,13 @@ SOURCES = {
     "clip": "RS PRO 45 mm steel spring clip (RS 175-3588): 42.1 × 56 × 12.7 mm, packs of 10 (uk.rs-online.com)",
     "terje": "IKEA: TERJE folding chair, 43 W × 49 D × 78 H cm, seat height 48 cm, tested for 110 kg",
     "dining": "Book a Builder UK, small dining room ideas: 600 mm of table edge per diner; table edge to a wall 600 mm tight minimum, 750 mm to aim for, 1000–1100 mm to walk behind; dining height about 750 mm",
-    "sofa": "Your photo of the sofa (18 Oct 2026): a black jumbo-cord L-sofa, the long side under the window ending in line with the breast's reveal, about 188 cm; the return's 168 is a typical corner-sofa size until measured",
+    "sofa": "Your photo of the sofa (18 Oct 2026) and your note (21 Oct): a blue corduroy L-sofa, two seats then the corner on the long side, which ends about 40 cm short of the window's west end (about 266 cm long); the return's 168 is a typical corner-sofa size until measured",
     "subport": "Klipsch subwoofer placement guidance, as quoted by Cloudspress and TechYorker (2026): leave about 6–12 in (15–30 cm) between a rear-firing port and the nearest obstruction",
     "psuplace": "Xbox Support (Microsoft), About the Xbox One power supply (archived): don't block its vents, don't put it in a confined space such as a bookcase, rack or stereo cabinet unless the space is well ventilated, don't stack devices on it, and lay it flat on its four rubber pads; the Xbox 360 brick's advice is the same",
     "x360place": "Xbox Support (Microsoft), Xbox 360 placement tips, as quoted on Gaming Stack Exchange: an open, well-ventilated area, a hard surface, and away from high-vibrating sources such as subwoofers",
     "photo20": "Your two photos of the west end (20 Oct 2026): the 2 m black shelf on the wall beside the stairs, scaled from its 2 m: it starts about 41 cm past the stair box and stops about 16 cm short of the window corner, top about 200; the pendant hangs about 55 cm out from the wall, a quarter of the way along it",
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
+    "e14": "Smart colour E14 bulbs for the bars: WiZ Colour P45 E14, 4.9 W, 4.5 × 10.1 cm, Wi-Fi, no hub (Philips UK specification sheet, 8719514437333); Philips Hue White and Colour Ambiance E14 lustre, 5.1 W, 45 × 77 mm (Philips Hue; Lampmasters)",
 }
 ORDER = list(SOURCES)
 
@@ -68,7 +69,8 @@ def stairs_zone():
          f"{r1(south)} to the stair box, {r1(north)} to the window wall", PASS),
         ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
         ("Down for four: the room side", f"table edge {r1(g.ROOM_W - g.TABLE_B_X[0])} out from the wall; chairs to x {r1(room_side)}", ref("dining", "terje"),
-         f"the sofa's end at x {r1(g.SOFA_X[1])}", f"{r1(room_side - g.SOFA_X[1])} to walk behind the chairs (100+ is the aim)", PASS),
+         f"the sofa's end at x {r1(g.SOFA_X[1])}", f"{r1(room_side - g.SOFA_X[1])} to walk behind the chairs (100+ is the aim, 60 the minimum){'' if room_side - g.SOFA_X[1] >= 100 else ': the walk is between the sofa’s arm and the chairs'}",
+         PASS if room_side - g.SOFA_X[1] >= 100 else TIGHT if room_side - g.SOFA_X[1] >= 60 else CHECK),
         ("The stair end's chair", f"{r1(cd)} deep at the table's south end", ref("terje"), f"{r1(south)} to the stair box", f"{r1(south - cd)} behind it: tuck it in after a meal so the stair's foot stays clear", TIGHT),
         ("The window end's chair", f"{r1(cd)} deep at the north end", ref("terje"), f"{r1(north)} to the window wall", f"{r1(north - cd)} behind it", TIGHT),
         ("The door's swing", f"the door opens in, {r1(g.DOOR_SWING)} wide", ref("room"), f"its edge reaches {r1(swing)}", f"{r1(swing - g.TABLE_B_Z[0])} clear of the table: unlike the breast, nobody sits in its swing", PASS),
@@ -118,6 +120,8 @@ def zones():
     box_front = -(SB["z"][0] - SB["over"])                               # the box's top overhang, out from the breast
     east_end = g.SIX_X[0] - cd                                           # the east-end diner's chair, pushed back
     cof_gap = (sum(g.FREE_Z) / 2 - cw / 2) - g.COFFEE["z"][1]             # that chair's side to the coffee table's near edge (z)
+    win_first = g.SIX_X[0] + (g.SIX_X[1] - g.SIX_X[0]) / 4               # v15: the first window-side chair's centre (two a side)
+    win_overlap = g.SOFA_X[1] - (win_first - cw / 2)                     # how far the sofa's end reaches past that chair's east edge
     port_gap = (g.HEBGO_X[1] - 1.4) - g.SUB_POS["x"][1]                  # the port (west end) to the west bracket arm
     drv_gap = g.SUB_POS["x"][0] - (g.HEBGO_X[0] + 1.4)                   # the driver (east end) to the east bracket arm
     e_first = g.EIGHT_X[0] + (g.EIGHT_X[1] - g.EIGHT_X[0]) / 6           # first breast-side chair's centre, three a side
@@ -185,9 +189,11 @@ def zones():
         ("Bay 3, the records (18 mm ply carcass from the floor)", "56.4 wide × 40 deep × 69.4 tall inside, under the turntable", [
             ("Two face-out record trays", "trays 53.9 × 40 on 400 mm runners, 68–70 kg pairs", ref("runners", "media"), "56.4 inside", "exact: 53.9 + 2 × 1.25 runner allowance = 56.4", PASS),
             ("Tray heights", "lower sleeves to 34.4, upper to 69.1", ref("media"), "top panel underside 71.2", "2.6 and 2.1 finger room", PASS),
-            ("LP trough · singles trough", "32.6 for 31.4 sleeves · 18.9 for 18.3–18.4", ref("media"), "52.1 inside each tray", "0.6 each side · 0.25–0.3 each side", PASS),
+            ("One LP trough, the tray's full width (v15: LPs only)", f"{r1(g.LP)} sleeves face-out, centred", ref("media"), f"{r1(g.TRAY_INSIDE)} inside each tray", f"{r1((g.TRAY_INSIDE - g.LP) / 2)} each side: room for both hands to flip; no divider, no singles slot", PASS),
         ]),
-        ("The side wall: the ledge wraps the corner, the PC shelf", f"one oak line at {r1(g.LEDGE_TOP)}: ledge {r1(wrap_len)} long × 7, then a shelf {r1(pc_len)} × {r1(g.PC_SHELF_D)}", [
+        ("The side wall: one oak run from the corner to the PC", f"one board line at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep along the LPs, sweeping out to {r1(g.PC_SHELF_D)} under the PC (v15)", [
+            ("The sweep from the ledge to the PC shelf", f"front edge 7 → {r1(g.PC_SHELF_D)} over {r1(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} (z {r1(g.SIDE_SWEEP[0])} to {r1(g.SIDE_SWEEP[1])})", "", f"the last wrap LP ends at z {r1(g.WRAP_Z[0] - 1.5 - 4 * g.LP - 3 * 1.4)}; the PC starts at z {r1(g.PC_Z[0])}",
+             f"the LP stands on the start of the curve; {r1(g.SIDE_SWEEP[1] - g.PC_Z[0])} between the full depth and the case", PASS),
             ("Four more LPs on the wrap ledge", f"4 × {r1(g.LP)} + gaps = {r1(4 * g.LP + 3 * 1.4)}", ref("media"), f"{r1(wrap_len)} long", f"{r1(wrap_len - 4 * g.LP - 3 * 1.4 - 1.5)}", PASS),
             ("The PC on its shelf", f"{r1(g.PC_CASE[0])} × {r1(g.PC_CASE[2])} × {r1(g.PC_CASE[1])} tall (an average gaming case, e.g. Corsair 4000D)", ref("case"), f"{r1(g.PC_SHELF_D)} × {r1(pc_len)}", "2.5 off the wall, the brush grommet and pad dock beyond it; height 46.6 under the 79.6 to the ceiling", PASS),
             ("Air above the PC", f"top at {r1(g.PC_SHELF_TOP + g.PC_CASE[1])}", "", f"{r1(g.CEIL)} ceiling", f"{r1(g.CEIL - g.PC_SHELF_TOP - g.PC_CASE[1])} for the top exhaust", PASS),
@@ -211,6 +217,10 @@ def zones():
             ("Six and eight: to the breast and the window", f"table {r1(free_breast)}–{r1(-g.FREE_Z[1])} out", ref("dining"), f"{r1(g.CLEAR_OK)} to aim for", f"{r1(free_breast)} to the breast; {r1(free_window)} to the window", PASS if free_breast >= g.CLEAR_OK else TIGHT),
             ("Six and eight: the west end", f"table end at {r1(g.SIX_X[1])}", ref("dining"), f"west wall at {r1(g.ROOM_W)}", f"{r1(six_wall)} for the end diner (60 is the tight minimum; the stairs are behind the breast-side corner, clear of it)", PASS if six_wall >= g.CLEAR_OK else TIGHT),
             ("Six and eight: the east end and the coffee table", f"end chair at x {r1(east_end)}–{r1(g.SIX_X[0])}", ref("dining", "sofa"), "coffee table and sofa", f"{r1(cof_gap)} to the coffee table's edge: slide it towards the window first; the sofa ends at {r1(g.SOFA_X[1])}, clear of the chair ({r1(eight_sofa)} to its front line)", TIGHT),
+            ("Six and eight: the window side and the sofa (v15)", f"window-side chairs from x {r1(win_first - cw / 2)}, backs reach z {r1(g.FREE_Z[1] - cd)} pushed out", ref("terje", "sofa"),
+             f"the sofa now runs to x {r1(g.SOFA_X[1])}, its front at z {r1(g.SOFA_FRONT_Z)}",
+             (f"the first window-side chair overlaps the sofa's end by {r1(win_overlap)} and has {r1(g.FREE_Z[1] - cd - g.SOFA_FRONT_Z)} behind it: that diner sits with the sofa's arm at their back. Fine for a meal; or use the table by the stairs (option B), which stands clear of the sofa"
+              if win_overlap > 0 else f"{r1(-win_overlap)} clear of the sofa's end"), CHECK if win_overlap > 0 and g.FREE_Z[1] - cd - g.SOFA_FRONT_Z < 15 else PASS),
             ("Six: the breast-side chairs and the sub's cover", f"chairs at x {r1(six_first - cw / 2)}–{r1(six_first + cw / 2)} and on, backs at {r1(chair_back)} from the breast", ref("terje"), f"cover x {r1(SB['x'][0] - SB['over'])}–{r1(SB['x'][1] + SB['over'])}, {r1(box_front)} out", f"{r1(six_sub_gap)} beside it and {r1(chair_back - box_front)} in front of it: chairs and cover don't meet", (CHECK if min(six_sub_gap, chair_back - box_front) < 0 else TIGHT if min(six_sub_gap, chair_back - box_front) < 10 else PASS)),
             ("Eight: the breast-side end chair and the sub's cover", f"chair at x {r1(e_first - cw / 2)}–{r1(e_first + cw / 2)}", ref("terje"), f"cover x {r1(SB['x'][0])}–{r1(SB['x'][1])}", (f"they overlap {r1(e_overlap)} across, so that chair can push back only {r1(chair_back - box_front)} before it meets the cover: for eight, lift the cover off its two keyhole screws and stand the sub at the end of the base (it's wireless; leave 1 m of slack in its lead)" if e_overlap > 0 else f"{r1(-e_overlap)} clear"), CHECK if e_overlap > 0 else PASS),
             ("Sub under its oak cover, under the dining wall", f"sub {r1(g.SUB[2])} long × {r1(g.SUB[0])} out × {r1(g.SUB[1])} tall, standing sideways: driver east, port west", ref("hisense"), f"cover {r1(SB['x'][1] - SB['x'][0] + 2 * SB['over'])} × {r1(-SB['z'][0] + SB['over'])} at {r1(SB['h'])} on a backboard, between the folded arms", f"{r1(SB['x'][0] - g.HEBGO_X[0] - 1.4)} clear of the east arm, {r1(g.HEBGO_X[1] - 1.4 - SB['x'][1])} of the west; {r1(over_sub)} over the sub", PASS),
@@ -226,6 +236,10 @@ def zones():
             ("From the end of the sofa's return", f"sitting up at its end, {r1(g.TV_PANEL_Z[0] - g.CHAISE_EYES_Z)} from the screen", ref("sofa"), "straight ahead of the TV", "the TV's move puts it square on to this seat", PASS),
             ("TV centre against seated eyes", f"{r1(g.TV_CENTRE)}", ref("lg"), f"eyes at {r1(eye_lo)}–{r1(eye_hi)}", "about 1–2.5° above the eye line", PASS),
             ("Both spotlight bars under the ceiling", f"{r1(g.BAR[2])} drop", ref("wolston"), f"{r1(g.CEIL)} ceiling", f"lowest shade at {r1(g.CEIL - g.BAR[2])}", PASS),
+            ("Both bars turned to run TV to window (v15)", f"{r1(g.BAR[0])} long along the room", ref("wolston", "photo20"), f"bar 2 at {r1(g.ROOM_W - g.BAR2_X)} from the west wall",
+             f"bar 1 spans z {r1(g.PEND_Z + 42)} to {r1(g.PEND_Z - 42)}; bar 2 now runs along the wall, so its end no longer reaches past the west wall (v13.7's worry)", PASS),
+            ("Smart colour bulbs in the bars (v15)", f"8 × E14: WiZ P45 {r1(g.BULB_E14['wiz'][1])} W, {r1(g.BULB_E14['wiz'][2][0])} × {r1(g.BULB_E14['wiz'][2][1])}; or Hue lustre {r1(g.BULB_E14['hue'][1])} W, {r1(g.BULB_E14['hue'][2][0])} × {r1(g.BULB_E14['hue'][2][1])}", ref("wolston", "e14"),
+             f"the bar's {r1(g.BAR_MAX_W)} W a lamp; 15 cm shades", f"{r1(g.BAR_MAX_W - g.BULB_E14['wiz'][1])} W under; the WiZ's 10.1 sits inside a 15 shade with its holder; if it shows below the rim, the Hue's 7.7 doesn't", PASS),
         ]),
     ]
     if g.SUB_IN_WALL:   # v13.5: nothing under the dining wall now
