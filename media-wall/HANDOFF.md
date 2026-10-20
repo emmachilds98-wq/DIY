@@ -49,6 +49,10 @@
   over the canvas. Fixed in passing: the side run's strip brightness (`multiplyScalar` had been commented out in v16).
 - Built: total £3,090–6,297; plan 68 pages, build guide 48; page QA at 390/1280: 12 tabs, no overflow, no console errors, 3D ready, walk
   buttons and idea toggles tested headless.
+- **Deck 71ff not updated in round 11:** this session's account got "artifact not found" reading https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2
+  (deleted, or not shared with the account the session ran as). Nothing was published elsewhere, so the client's saved answers stay
+  with that deck. Next session: try the read again; if it works, publish `src/media_wall_viewer_inline.html` there (no files map, omit
+  capabilities). GitHub Pages carries v17 meanwhile.
 - shot3d: 19 stills (new: `3d_window_general`, `3d_pc_lit`, `3d_ideas_window`, `3d_ideas_ctable`, `3d_ideas_breast`); each resets `ideas`.
 
 ## Update 20 Oct 2026, round 10: v16 (the whole wall redesigned, the table by the stairs by default)
