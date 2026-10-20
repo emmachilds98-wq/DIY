@@ -142,7 +142,7 @@ def scene():
         "TV_X": G.TV_X, "TV_Y": (G.TV_BOTTOM, G.TV_TOP), "TV_Z": G.TV_PANEL_Z[0],
         "SHELF_B": G.SHELF_B, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},
         "TABLE_B": {"x": G.TABLE_B_X, "z": G.TABLE_B_Z, "cz": G.TABLE_B_CZ}, "SIX": {"x": G.SIX_X, "z": G.FREE_Z}, "OPEN_Z": G.OPEN_Z, "TABLE_B_OPEN_X": G.TABLE_B_OPEN_X,
-        "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
+        "IDEAS": __import__("ideas").SPOTS, "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
         "COFFEE": G.COFFEE, "LAMP": G.FLOOR_LAMP,
         "LAMP_SPOTS": {k: {"label": v[0], "x": v[1][0], "z": v[1][1]} for k, v in G.FLOOR_LAMP_SPOTS.items()},
         "SITES": G.DINING_SITES, "PAINT_OLD": R.PAINT_OLD, "PAINT_BASE": "#2d5a46",

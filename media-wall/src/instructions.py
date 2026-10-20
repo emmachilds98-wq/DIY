@@ -19,7 +19,7 @@ def full():
     breast_l = lambda x: n(x - g.BREAST_X[0])               # a position on the breast, from its alcove-side corner
     return {
         1: dict(
-            tools=["Tape measure", "Spirit level, 120 cm", "Notebook or the Questions tab"],
+            tools=["Tape measure", "Spirit level, 120 cm", "A notebook (or the questions list on the plan page)"],
             draw=[]),
         2: dict(
             parts=["Two TP-Link TL-SG108 8-port switches", "Cat6 patch leads, 0.5–2 m (11)"],
@@ -233,7 +233,7 @@ def full():
             ]),
         9: dict(
             parts=["Two oak uprights, 165 × 30 × 4.5 (cut to fit)", "High shelf: 128.9 × 30 × 4 and 51.7 × 30 × 4", "Record ledge 128.9 × 7 × 2.4 and its lip",
-                   "Series X shelf 55 × 30 × 4", "Two oak cleats for the reveal, 30 long", "Oak wedges (2 + spares), 10 mm oak dowel for pegs and the uprights' dowels"],
+                   "Series X shelf 55 × 30 × 4", "Two oak cleats for the reveal, 30 long", "The “now playing” ledge 105.5 × 7 × 2.4 and its lip, two concealed brackets", "Oak wedges (2 + spares), 10 mm oak dowel for pegs and the uprights' dowels"],
             hardware=["Four concealed upright brackets", "5 × 60 mm screws and plugs", "Wood glue", "LED strip in its aluminium channel (from the lighting phase)"],
             tools=["Router with a straight bit and a guide batten", "Chisels 6, 12 and 25 mm, and a mallet", "Japanese pull saw", "Drill with a 10 mm brad-point bit and a 20 mm bit",
                    "Dowel jig or dowel centres", "Combination square, marking knife", "Spirit level and laser", "Clamps", "A helper"],
@@ -276,6 +276,11 @@ def full():
                     "Screw a 30 cm cleat to the breast's side face (the reveal) for the short high shelf, and another at the Series X shelf's underside height. Slide the short high shelf in from the front onto its cleat and into its housing.",
                     "Feed the Series X shelf's tenons through the mortises from the turntable side, onto its cleat. Glue the wedges and drive them into the kerfs from the TV side. When dry, saw them flush and plane: proud, they'd touch the TV.",
                     "Pegs: drill 10 mm through each upright's face into the housed shelf ends, 4 cm deep, about 4 cm from the front edge. Glue in a peg and saw it flush.",
+                ]),
+                ("The “now playing” ledge on the breast (v16)", [
+                    f"Cut it {n(g.NOW_LEDGE['x'][1] - g.NOW_LEDGE['x'][0])} × 7 × 2.4 from the shelf board's offcut and glue a 1.5 cm lip along its front edge, so a sleeve stands against the wall without sliding.",
+                    f"Mark a level line on the chimney breast at {n(g.NOW_LEDGE['top'] - g.NOW_LEDGE['t'])} (the ledge's underside), {n(g.NOW_LEDGE['x'][0] - g.BREAST_X[0])} cm in from each side of the breast.",
+                    "Fit its two concealed brackets to the maker's instructions, slide the ledge on, and stand three LPs on it.",
                 ]),
             ]),
         10: dict(
@@ -348,6 +353,7 @@ def full():
                     f"Stand it on the floor upside down and check: folded, the legs lie flat with {g.FLIP['leaf'][1] - g.FLIP['hinge_in'] - g.LEG[0] / 2 - g.GATE_LEG_H:.1f} cm to spare before the joint.",
                 ]),
                 ("The backboard and hinge rail", [
+                    "First, knock along the stairs wall where the backboard goes (v17). A solid sound: brick, so plugs and screws as below. A hollow sound: plasterboard on studs. Then stop and find the studs with a detector before drilling anything; the screws go into the studs (or the fixings change), so tell us what you find.",
                     f"Glue and screw the hinge rail along the backboard's top edge, flush at the back, so it stands {n(g.RAIL[2] - 3)} cm proud of the backboard's face.",
                     f"Hold the backboard on its marks: centred on the wall, the rail's top at {n(g.RAIL_TOP)}, level.",
                     "Drill through it and into the wall every 20 cm in two rows, 3 cm from its top and bottom edges. Plug, then fix with 5 × 70 countersunk screws.",
