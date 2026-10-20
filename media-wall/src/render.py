@@ -932,8 +932,9 @@ def west_end(sk):
     sb = lambda z: max(0.0, ry(z) - G.STAIR_STRING)
     def string(z1, z2):
         return poly([P(sx0 - 0.6, sb(z1), z1), P(sx0 - 0.6, sb(z2), z2), P(sx0 - 0.6, ry(z2), z2), P(sx0 - 0.6, ry(z1), z1)], "#9c6a3f")   # v17: 0.6 off the risers
+    # v27, client: "paint the bricking on the stairs it has wall infront": the brick is behind a wall, so it's painted like the room
     def brick(z1, z2):
-        return poly([P(sx0 - 0.5, 0, z1), P(sx0 - 0.5, 0, z2), P(sx0 - 0.5, sb(z2), z2), P(sx0 - 0.5, sb(z1), z1)], "url(#brick)")
+        return poly([P(sx0 - 0.5, 0, z1), P(sx0 - 0.5, 0, z2), P(sx0 - 0.5, sb(z2), z2), P(sx0 - 0.5, sb(z1), z1)], "url(#leftwall)")
     zbr = za + G.STAIR_STRING / rise * going        # where the string's underside leaves the floor
     far.append(brick(zb, far_z)); far.append(string(zb, far_z))
     near.append(brick(zbr, zb)); near.append(string(za, zb))

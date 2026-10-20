@@ -469,22 +469,26 @@ WALL_SEAT = dict(w=38.0, d=33.0, t=2.7, h=46.0, fold=5.0, z=(CHAIR_STORE["stair_
 SOFA_POUF = dict(w=75.0, d=75.0, h=44.0, x=(200.5, 275.5), z=(-195.0, -120.0))   # on the rug beside the coffee table, a footrest
 
 
-# ---------------------------------------------------------------- v26 (20 Oct): option C, the dining cabinet (a second option; the flip-top stays the plan)
-# client: "exploire other table config that looks more tidy and includes the chairs, this is a second option build not replacing the current",
-# then "with the table option assess the max number of seatings you can fit and try to execute in the plan, remembering the chairs also".
-# One flush oak cabinet under your shelf (the stair's foot stays clear, as for the chair cupboard), 24 deep like the pipe boxing:
-#  - at the stair end, the table bay: a 225 × 90 solid-oak top made of two 112.5 halves joined by flip-top hinges. Folded, the halves lie
-#    face to face and stand up in the bay (a fold-down table, hinged at its foot on a piano hinge); its oak underside is the bay's front.
-#    Lower it onto its folding legs, flip the outer half over onto its own: 225 × 90, out from the wall. A drawer under it for the mats.
-#  - at the window end, the chair bay behind two doors: eight FRÖSVI folded, two across, two deep, on the floor and on a shelf.
+# ---------------------------------------------------------------- v26 (20 Oct): option C, the dining cabinet; v27: the plan, for six
+# client (v26): "exploire other table config that looks more tidy and includes the chairs", "assess the max number of seatings you can fit".
+# client (v27): "use the cabinet version as our primary table model now and improve on its current design to have a seating of 6, i would
+# like the chairs to exist within the same thing the table is built into". One flush oak cabinet under your shelf (the stair's foot stays
+# clear), 24 deep like the pipe boxing:
+#  - at the stair end, the table bay: a 180 × 90 solid-oak top made of two 90 × 90 halves joined by flip-top hinges (v26's were 112.5 long,
+#    for eight). Folded, the halves lie face to face and stand up in the bay (a fold-down table, hinged at its foot on a piano hinge); its
+#    oak underside is the bay's front. Lower it onto its folding legs, flip the outer half over onto its own: 180 × 90, out from the wall,
+#    three a side in comfort. A drawer under it for the mats; over it, where v26's longer halves stood, a lift-up flap for the cloth.
+#  - at the window end, the chair bay behind two doors: the six FRÖSVI folded, four on the floor (two across, two deep) and two on the
+#    shelf, with the shelf's front half free for the seat pads and the runner.
 _cb_z0, _cb_z1 = SHELF_B["z"]                                   # -84 .. -284: the shelf's length (the stair's foot stays clear)
 OPTC = dict(
     z=(_cb_z0 - 2.0, _cb_z1), d=24.0, h=SHELF_B["top"] - SHELF_B["t"] - 2.0, t=1.8, door=1.8, back=0.6, plinth=3.0, shelf_y=93.0,
-    top=(90.0, 112.5, 2.7),                                     # each half: width along the wall, length out from it, thickness
+    top=(90.0, 90.0, 2.7),                                      # each half: width along the wall, length out from it, thickness (v27: 90 long)
     apron=4.6,                                                  # the frame under each half that the folded legs lie inside
     leg=(6.5, 4.5),                                             # oak legs, 6.5 × 4.5 (the folding brackets want 6.4 at the top)
     drawer_h=16.0,                                              # the drawer under the folded table
-    chairs=8,
+    chairs=6,                                                   # v27: six (v26: eight)
+    shelf_chairs=2,                                             # v27: two of the six on the shelf, at the back; four on the floor
 )
 _c = OPTC
 OPTC["front"] = ROOM_W - _c["d"]                                # 443: the cabinet's front face
@@ -493,26 +497,40 @@ OPTC["bay_c"] = (OPTC["bay_t"][1] - _c["t"], _c["z"][1] + _c["t"])              
 OPTC["cz"] = (OPTC["bay_t"][0] + OPTC["bay_t"][1]) / 2                                     # the table's centre line
 OPTC["tz"] = (OPTC["cz"] + _c["top"][0] / 2, OPTC["cz"] - _c["top"][0] / 2)               # its long sides when open
 OPTC["pivot"] = (OPTC["front"] + _c["apron"], TABLE_TOP - _c["top"][2])                   # the piano hinge: x, height (the top's underside)
-OPTC["len"] = 2 * _c["top"][1]                                                              # 225 open
-OPTC["tx"] = (OPTC["pivot"][0] - OPTC["len"], OPTC["pivot"][0])                           # open: x 222.6 .. 447.6
+OPTC["len"] = 2 * _c["top"][1]                                                              # 180 open
+OPTC["tx"] = (OPTC["pivot"][0] - OPTC["len"], OPTC["pivot"][0])                           # open: x 267.6 .. 447.6
 OPTC["joint_x"] = OPTC["pivot"][0] - _c["top"][1]
-OPTC["folded_top"] = OPTC["pivot"][1] + _c["top"][1]                                       # 185.8: the halves standing up
+OPTC["folded_top"] = OPTC["pivot"][1] + _c["top"][1]                                       # 163.3: the halves standing up
+OPTC["flap"] = (OPTC["folded_top"] + 1.0 + _c["t"], _c["h"] - _c["t"])                   # v27: the linen space over the folded table (on its own floor)
 OPTC["stack"] = 2 * _c["apron"] + 2 * _c["top"][2] + 0.3                                   # 14.9 deep folded
 OPTC["leg_h"] = TABLE_TOP - _c["top"][2] - _c["apron"]                                     # 68.7: floor to the apron's underside
 del _c, _cb_z0, _cb_z1
 DINE_SQUEEZE = 55.0                                             # table edge per diner at a squeeze (UK guide: 60 to aim for)
+DINE_COMFORT = 58.0                                             # v27: near the guide's 60: what we call "in comfort" here
 CHAIR_TUCK = 8.0                                                # chairs pushed 8 under the edge: their backs 41 behind it (as for A and B)
-# v26: option C's legs and seats. The inner half's legs stand under the joint, 32 in from each side, so knees miss them; the outer
-# half's pair at the far end's corners. Seats: chairs centred 16.5 out from the edge (49 deep, tucked 8), facing the table.
+# Legs and seats. The inner half's legs stand near the joint, 32 in from each side, so knees miss them; the outer half's pair in the far
+# end's corners. Seats: chairs centred 16.5 out from the edge (49 deep, tucked 8), facing the table, spread evenly along each side.
 _o = OPTC
-OPTC["legs"] = [(_o["joint_x"] + 4.0, _o["cz"] + s * 13.0) for s in (1, -1)] + [(_o["tx"][0] + 4.0, _o["cz"] + s * 39.0) for s in (1, -1)]
+# v27: each leg stands inside its apron, against the end rail (the rails are 2 thick, 3 in from the ends and 4 in from the sides):
+# its centre 3 + 2 + 6.5 / 2 = 8.25 from the half's end; the outer pair in the corners (8.25 in from the sides), the inner pair 32 in.
+OPTC["leg_in"] = 3.0 + 2.0 + _o["leg"][0] / 2
+OPTC["legs"] = [(_o["joint_x"] + OPTC["leg_in"], _o["cz"] + s * 13.0) for s in (1, -1)] + \
+               [(_o["tx"][0] + OPTC["leg_in"], _o["cz"] + s * (_o["top"][0] / 2 - 4.0 - 2.0 - _o["leg"][1] / 2)) for s in (1, -1)]
 _sz, _wz = _o["tz"][0] + CHAIR[1] / 2 - CHAIR_TUCK, _o["tz"][1] - CHAIR[1] / 2 + CHAIR_TUCK
 _sl, _wl = _o["front"] - _o["tx"][0], _o["front"] - max(_o["tx"][0], SOFA_X[1])
 _stair = lambda n: [round(_o["front"] - _sl + _sl / n * (i + 0.5), 1) for i in range(n)]
 _window = lambda n: [round(_o["front"] - _wl + _wl / n * (i + 0.5), 1) for i in range(n)]
-OPTC["seats"] = {   # (x, z, the way the chair faces: "s" towards -z ... as room3d.js reads it: the chair's back away from the table)
-    "four": [(x, _sz, "n") for x in (355.0, 415.0)] + [(x, _wz, "w") for x in (355.0, 415.0)],
+OPTC["seats"] = {   # (x, z, the way the chair faces: "n" ... as room3d.js reads it: the chair's back away from the table)
+    "four": [(x, _sz, "n") for x in _stair(2)] + [(x, _wz, "w") for x in _window(2)],
     "six": [(x, _sz, "n") for x in _stair(3)] + [(x, _wz, "w") for x in _window(3)],
-    "eight": [(x, _sz, "n") for x in _stair(4)] + [(x, _wz, "w") for x in _window(3)] + [(_o["tx"][0] - CHAIR[1] / 2 + CHAIR_TUCK, _o["cz"], "e")],
 }
 del _o, _sz, _wz, _sl, _wl, _stair, _window
+
+
+# ---------------------------------------------------------------- v27 (20 Oct): your rear speakers, standing behind the sofa
+# client: "add my surround speakers to the build that exist standing behind the sofa ill send a photo". The AX5100G's rears
+# (90 × 144 × 109 mm, Hisense) on slim floor stands in the 13 cm gap behind the sofa's long side, one near each end, the speakers
+# a little above seated ear height. Provisional until the photo: the stands' size and the exact spots.
+REAR_SPK = (9.0, 14.4, 10.9)                   # W, H, D
+REAR_STAND = dict(base=(11.0, 11.0, 1.5), pole=2.5, top=96.0)   # a weighted base, a pole, the speaker on a plate at 96
+REAR_SPOTS = [(24.0, SOFA_BACK_Z - 6.5), (SOFA_X[1] - 24.0, SOFA_BACK_Z - 6.5)]   # x, z of each stand's centre

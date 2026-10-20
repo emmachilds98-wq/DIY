@@ -2295,7 +2295,8 @@ OAKF, OAKS, OAKD = "#e9d3b4", "#b88a55", "#9c6a3f"
 
 def option_c_elevation():
     """The stairs wall from the room, to scale: one oak cabinet under your shelf, the table standing up in its bay at the stair end
-    (its framed oak underside is the front), a drawer under it; eight folded chairs in the chair bay (doors drawn see-through)."""
+    (its framed oak underside is the front), a drawer under it and the linen flap over it; v27: six folded chairs in the chair bay, four
+    on the floor and two on the shelf (doors drawn see-through)."""
     g, C = G, G.OPTC
     W, H = 900, 820
     k = 2.55
@@ -2335,18 +2336,20 @@ def option_c_elevation():
     o.append(t(X(C["cz"]), Y(py + tl / 2) + 21, "standing up", 10, "middle", 500, "#5a3a20"))
     o.append(f'<rect x="{X(tz0)}" y="{Y(py - 7)}" width="{(tz0 - tz1) * k}" height="{(py - 7 - C["plinth"]) * k}" fill="{OAKF}" stroke="{OAKD}" stroke-width="1.2"/>')
     o.append(t(X(C["cz"]), Y((py - 7 + C["plinth"]) / 2) + 4, "drawer: mats, the cloth", 9.5, "middle", 600, "#5a3a20"))
+    o.append(f'<rect x="{X(tz0)}" y="{Y(C["h"] - C["t"])}" width="{(tz0 - tz1) * k}" height="{(C["h"] - C["t"] - C["folded_top"]) * k}" fill="#efe2cf" stroke="{OAKD}" stroke-width="1.2"/>')
+    o.append(t(X(C["cz"]), Y((C["h"] + C["folded_top"]) / 2) + 4, "linen flap: the cloth, napkins", 9.5, "middle", 600, "#5a3a20"))   # v27
     o.append(f'<circle cx="{X(C["cz"])}" cy="{Y(py - 3.5)}" r="3.2" fill="{BLUE}"/>')
     o.append(t(X(tz1) - 4, Y(py - 3.5) + 4, f"← piano hinge at {_fmt(py)}", 9, "start", 700, BLUE))
-    # the chair bay: eight folded chairs, two across, two deep, four on the floor and four on the shelf
+    # the chair bay (v27): six folded chairs, two across; two deep on the floor, one deep on the shelf with the seat pads in front
     o.append(f'<rect x="{X(bc0)}" y="{Y(C["shelf_y"] + C["t"])}" width="{(bc0 - bc1) * k}" height="{C["t"] * k}" fill="{OAKS}"/>')
     zm = (bc0 + bc1) / 2
     o.append(f'<line x1="{X(zm)}" y1="{Y(C["h"])}" x2="{X(zm)}" y2="{Y(C["plinth"])}" stroke="{OAKD}" stroke-width="1.2" stroke-dasharray="6 3"/>')
-    for y0_ in (C["plinth"], C["shelf_y"] + C["t"]):
+    for y0_, lab, sub in ((C["plinth"], "2 chairs", "two deep"), (C["shelf_y"] + C["t"], "1 chair", "+ seat pads")):
         for cz in (zm + cw / 2 + 2, zm - cw / 2 - 2):
             xa = X(cz + cw / 2)
             o.append(f'<rect x="{xa}" y="{Y(y0_ + ch)}" width="{cw * k}" height="{ch * k}" rx="4" fill="none" stroke="{OAKD}" stroke-dasharray="5 3"/>')
-            o.append(t(xa + cw * k / 2, Y(y0_ + ch / 2) + 4, "2 chairs", 11, "middle", 700, "#5a3a20"))
-            o.append(t(xa + cw * k / 2, Y(y0_ + ch / 2) + 17, "two deep", 8.5, "middle", 500, "#5a3a20"))
+            o.append(t(xa + cw * k / 2, Y(y0_ + ch / 2) + 4, lab, 11, "middle", 700, "#5a3a20"))
+            o.append(t(xa + cw * k / 2, Y(y0_ + ch / 2) + 17, sub, 8.5, "middle", 500, "#5a3a20"))
     # dimensions
     def dz(za, zb, y, lab, col=BLUE, dy=-5):
         o.append(f'<line x1="{X(za)}" y1="{Y(y)}" x2="{X(zb)}" y2="{Y(y)}" stroke="{col}" stroke-width="1.3"/>')
@@ -2359,8 +2362,8 @@ def option_c_elevation():
     o.append(f'<line x1="{X(z0) - 8}" y1="{Y(0)}" x2="{X(z1) + 8}" y2="{Y(0)}" stroke="{WALL}" stroke-width="2.4"/>')
     o.append(t(X(z0), Y(0) + 46, "← door wall", 9.5, "start", 500, MUTED))
     o.append(t(X(z1), Y(0) + 46, "window wall →", 9.5, "end", 500, MUTED))
-    return svg(W, H, "\n".join(o), "Option C: the dining cabinet, packed away",
-               f"The stairs wall from the room, to scale (1 cm = {k} px). One oak cabinet: the table stands up in its bay, eight chairs behind the doors (drawn see-through).")
+    return svg(W, H, "\n".join(o), "The dining cabinet, packed away",
+               f"The stairs wall from the room, to scale (1 cm = {k} px). One oak cabinet: the table stands up in its bay, the six chairs behind the doors (drawn see-through).")
 
 
 def option_c_section():
@@ -2409,13 +2412,13 @@ def option_c_section():
     dx(jx, tx1, py + 26, f"inner half {_fmt(tl)}")
     dx(tx0, tx1, -12, f"open: {_fmt(C['len'])} from the cabinet, the top at {_fmt(g.TABLE_TOP)}", dy=16)
     o.append(t(X(tx0 + 12), Y(C["leg_h"] / 2), f"legs {_fmt(C['leg_h'])}, folding", 9.5, "start", 600, "#5a3a20"))
-    return svg(W, H, "\n".join(o), "Option C: how the table comes down",
+    return svg(W, H, "\n".join(o), "The dining cabinet: how the table comes down",
                "Cut through the table bay, the wall on the right. Folded (dashed): the two halves face to face, standing up. Open: swing it down, flip the outer half over.")
 
 
 def option_c_plan():
-    """The room from above with option C open for eight: four on the stair side, three on the window side (the sofa's arm stops a
-    fourth), one at the far end; what stops a ninth."""
+    """The room from above with the dining cabinet open for six (v27): three on the stair side, three on the window side, the coffee
+    table where it is; the ottoman pushed to the sofa."""
     g, C = G, G.OPTC
     W, H = 860, 680
     k = 1.62
@@ -2423,12 +2426,11 @@ def option_c_plan():
     X, Y = _room(o, k, 40, 70, table=False)
     _sofa(o, X, Y, k, label=False)
     cof = g.COFFEE
-    o.append(f'<rect x="{X(cof["x"][1]):.1f}" y="{Y(cof["z"][0]):.1f}" width="{(cof["x"][1] - cof["x"][0]) * k:.1f}" height="{(cof["z"][1] - cof["z"][0]) * k:.1f}" fill="none" stroke="#9a958b" stroke-dasharray="3 2"/>')
-    o.append(f'<rect x="{X(cof["x"][1] - 12):.1f}" y="{Y(cof["z"][0]):.1f}" width="{(cof["x"][1] - cof["x"][0]) * k:.1f}" height="{(cof["z"][1] - cof["z"][0]) * k:.1f}" fill="#d8d3c8" stroke="#6b6862"/>')
-    o.append(t(X((cof["x"][0] + cof["x"][1]) / 2 - 12), Y((cof["z"][0] + cof["z"][1]) / 2) + 4, "coffee table, 12 →", 8.5, "middle", 600))
+    o.append(f'<rect x="{X(cof["x"][1]):.1f}" y="{Y(cof["z"][0]):.1f}" width="{(cof["x"][1] - cof["x"][0]) * k:.1f}" height="{(cof["z"][1] - cof["z"][0]) * k:.1f}" fill="#d8d3c8" stroke="#6b6862"/>')
+    o.append(t(X((cof["x"][0] + cof["x"][1]) / 2), Y((cof["z"][0] + cof["z"][1]) / 2) + 4, "coffee table (stays put)", 8.5, "middle", 600))
     P_ = g.SOFA_POUF
     o.append(f'<rect x="{X(P_["x"][1]):.1f}" y="{Y(P_["z"][0]):.1f}" width="{P_["w"] * k:.1f}" height="{P_["d"] * k:.1f}" fill="none" stroke="#a3352b" stroke-dasharray="4 3"/>')
-    o.append(t(X((P_["x"][0] + P_["x"][1]) / 2), Y(P_["z"][0]) + 12, "ottoman: moves aside", 8.5, "middle", 600, "#a3352b"))
+    o.append(t(X((P_["x"][0] + P_["x"][1]) / 2), Y(P_["z"][0]) + 12, "ottoman: to the sofa", 8.5, "middle", 600, "#a3352b"))
     # the stairs' foot, kept clear
     sz = g.STAIRS_WALL_Z[0]
     o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(sz):.1f}" width="{(g.ROOM_W - g.STAIR_X[0]) * k:.1f}" height="{(sz - C["z"][0]) * k:.1f}" fill="#fbe7e1" fill-opacity="0.8"/>')
@@ -2439,7 +2441,7 @@ def option_c_plan():
     # the cabinet
     ca, cb = C["z"]
     o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(cb):.1f}" width="{C["d"] * k:.1f}" height="{(ca - cb) * k:.1f}" fill="{OAKF}" stroke="{OAKD}" stroke-width="1.6"/>')
-    o.append(f'<text x="{X(g.ROOM_W - C["d"] / 2):.1f}" y="{Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f}" {FONT} font-size="9" font-weight="700" fill="#5a3a20" text-anchor="middle" transform="rotate(-90 {X(g.ROOM_W - C["d"] / 2):.1f} {Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f})">8 chairs</text>')
+    o.append(f'<text x="{X(g.ROOM_W - C["d"] / 2):.1f}" y="{Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f}" {FONT} font-size="9" font-weight="700" fill="#5a3a20" text-anchor="middle" transform="rotate(-90 {X(g.ROOM_W - C["d"] / 2):.1f} {Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f})">{C["chairs"]} chairs</text>')
     # the open table, its joint and legs
     tx0, tx1 = C["tx"]; tz0, tz1 = C["tz"]
     o.append(f'<rect x="{X(tx1):.1f}" y="{Y(tz1):.1f}" width="{(tx1 - tx0) * k:.1f}" height="{(tz0 - tz1) * k:.1f}" fill="#d9b48a" stroke="{OAKD}" stroke-width="1.6"/>')
@@ -2447,15 +2449,127 @@ def option_c_plan():
     for lx, lz in C["legs"]:
         o.append(f'<rect x="{X(lx + C["leg"][0] / 2):.1f}" y="{Y(lz - C["leg"][1] / 2):.1f}" width="{C["leg"][0] * k:.1f}" height="{C["leg"][1] * k:.1f}" fill="{OAKD}"/>')
     o.append(t(X((tx0 + tx1) / 2), Y(C["cz"]) + 4, f"table {_fmt(C['len'])} × {_fmt(C['top'][0])}", 11, "middle", 700, "#5a3a20"))
-    # the eight chairs, numbered
+    # the six chairs, numbered
     cw, cd = g.CHAIR[0], g.CHAIR[1]
-    for i, (x, z, f) in enumerate(C["seats"]["eight"]):
+    for i, (x, z, f) in enumerate(C["seats"]["six"]):
         w_, d_ = (cd, cw) if f == "e" else (cw, cd)
         o.append(f'<rect x="{X(x + w_ / 2):.1f}" y="{Y(z - d_ / 2):.1f}" width="{w_ * k:.1f}" height="{d_ * k:.1f}" rx="4" fill="#fff" stroke="{BLUE}" stroke-width="1.4"/>')
         o.append(t(X(x), Y(z) + 4, str(i + 1), 11, "middle", 700, BLUE))
     st_side = C["tz"][0] + g.CHAIR[1] - g.CHAIR_TUCK
-    o.append(t(X(C["tx"][0] + 5), Y(st_side) + 14, "stair side: 4 at 55", 9.5, "start", 700, BLUE))
-    o.append(t(X(g.SOFA_X[1]) - 4, Y(C["tz"][1] - g.CHAIR[1] + g.CHAIR_TUCK) - 6, "window side: 3 (the sofa's arm stops a 4th)", 9.5, "end", 700, BLUE))
-    o.append(t(X(C["tx"][0] - g.CHAIR[1] + g.CHAIR_TUCK) + 4, Y(C["cz"]) + 26, "← 8th at the end", 9, "start", 700, BLUE))
-    return svg(W, H, "\n".join(o), "Option C open for eight",
-               "From above, to scale. Four on the stair side, three on the window side, one at the end. Six sit in comfort (three a side); a ninth won't fit.")
+    sl, wl = C["front"] - C["tx"][0], C["front"] - max(C["tx"][0], g.SOFA_X[1])
+    o.append(t(X(C["tx"][0] + 5), Y(st_side) + 14, f"stair side: 3 at {sl / 3:.1f}", 9.5, "start", 700, BLUE))
+    o.append(t(X(g.SOFA_X[1]) - 4, Y(C["tz"][1] - g.CHAIR[1] + g.CHAIR_TUCK) - 6, f"window side: 3 at {wl / 3:.1f}", 9.5, "end", 700, BLUE))
+    return svg(W, H, "\n".join(o), "The dining cabinet open for six",
+               "From above, to scale. Three on the stair side, three on the window side, all in comfort; the coffee table stays where it is.")
+
+
+# ---------------------------------------------------------------- v27: build drawings for the dining cabinet (step 11)
+def _dim(o, x1, y1, x2, y2, lab, col=None, off=0, size=9.5, anchor="middle"):
+    """A dimension line with end ticks and a label at its middle (horizontal or vertical)."""
+    col = col or BLUE
+    o.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="1.2"/>')
+    if y1 == y2:
+        for x in (x1, x2):
+            o.append(f'<line x1="{x:.1f}" y1="{y1 - 4:.1f}" x2="{x:.1f}" y2="{y1 + 4:.1f}" stroke="{col}" stroke-width="1.2"/>')
+        o.append(t((x1 + x2) / 2, y1 - 5 + off, lab, size, anchor, 700, col))
+    else:
+        for y in (y1, y2):
+            o.append(f'<line x1="{x1 - 4:.1f}" y1="{y:.1f}" x2="{x1 + 4:.1f}" y2="{y:.1f}" stroke="{col}" stroke-width="1.2"/>')
+        o.append(t(x1 + 6 + off, (y1 + y2) / 2 + 4, lab, size, "start", 700, col))
+
+
+def option_c_carcass():
+    """The cabinet's carcass from the front, doors and table off, to scale: every panel and the heights you mark out."""
+    g, C = G, G.OPTC
+    L = C["z"][0] - C["z"][1]
+    k = 3.2
+    W, H = 900, 800
+    ox, oy = 60, 70
+    X = lambda u: ox + u * k                 # u: cm from the cabinet's stair end
+    Y = lambda y: oy + (C["h"] - y) * k
+    t_ = C["t"]
+    bt = C["bay_t"][0] - C["bay_t"][1]
+    part_u = t_ + bt                          # the partition's stair-side face
+    o = []
+    o.append(f'<rect x="{X(0)}" y="{Y(C["h"])}" width="{L * k}" height="{C["h"] * k}" fill="#f6efe3" stroke="{OAKD}" stroke-width="2"/>')
+    for u0, w in ((0, t_), (L - t_, t_), (part_u, t_)):                                      # the two ends and the partition
+        o.append(f'<rect x="{X(u0)}" y="{Y(C["h"])}" width="{w * k}" height="{C["h"] * k}" fill="{OAKF}" stroke="{OAKD}"/>')
+    o.append(f'<rect x="{X(t_)}" y="{Y(C["h"])}" width="{(L - 2 * t_) * k}" height="{t_ * k}" fill="{OAKF}" stroke="{OAKD}"/>')   # the top
+    o.append(f'<rect x="{X(t_)}" y="{Y(C["plinth"])}" width="{(L - 2 * t_) * k}" height="{C["plinth"] * k}" fill="{OAKS}" stroke="{OAKD}"/>')   # the plinth and floor
+    rail_y = C["pivot"][1] - 7
+    o.append(f'<rect x="{X(t_)}" y="{Y(C["pivot"][1])}" width="{bt * k}" height="{7 * k}" fill="#c9a074" stroke="{OAKD}"/>')                 # the hinge rail
+    o.append(f'<rect x="{X(t_)}" y="{Y(C["flap"][0])}" width="{bt * k}" height="{t_ * k}" fill="{OAKF}" stroke="{OAKD}"/>')                   # the linen floor
+    o.append(f'<rect x="{X(part_u + t_)}" y="{Y(C["shelf_y"] + t_)}" width="{(L - part_u - 2 * t_) * k}" height="{t_ * k}" fill="{OAKF}" stroke="{OAKD}"/>')   # the chair shelf
+    lab = lambda u, y, s, w=700: o.append(t(X(u), Y(y), s, 10, "middle", w, "#5a3a20"))
+    lab(t_ + bt / 2, (C["plinth"] + rail_y) / 2 + 2, "drawer")
+    lab(t_ + bt / 2, (C["plinth"] + rail_y) / 2 - 4, f"opening {_fmt(bt)} × {_fmt(rail_y - C['plinth'])}", 500)
+    lab(t_ + bt / 2, (C["pivot"][1] + C["flap"][0]) / 2 + 2, "the table stands up here")
+    lab(t_ + bt / 2, (C["pivot"][1] + C["flap"][0]) / 2 - 5, f"(two halves, {_fmt(C['top'][1])} tall)", 500)
+    lab(t_ + bt / 2, (C["flap"][1] + C["flap"][0]) / 2 - 1, "linen space")
+    lab(t_ + bt / 2, C["pivot"][1] - 3.5 - 1.5, "hinge rail", 600)
+    cc = (part_u + t_ + L - t_) / 2
+    lab(cc, (C["plinth"] + C["shelf_y"]) / 2, "4 chairs, 2 across, 2 deep")
+    lab(cc, (C["shelf_y"] + C["h"]) / 2, "2 chairs + the seat pads")
+    # dimensions: lengths across the bottom, heights down the right
+    yb = Y(0) + 26
+    _dim(o, X(0), yb, X(L), yb, f"{_fmt(L)} overall")
+    _dim(o, X(t_), yb + 26, X(part_u), yb + 26, f"table bay {_fmt(bt)} inside")
+    _dim(o, X(part_u + t_), yb + 26, X(L - t_), yb + 26, f"chair bay {_fmt(L - part_u - 2 * t_)} inside")
+    xr = X(L) + 18
+    for y, s in ((C["h"], f"{_fmt(C['h'])} top"), (C["flap"][0], f"{_fmt(C['flap'][0])} linen floor (top face)"), (C["folded_top"], f"{_fmt(C['folded_top'])} table's top edge, folded"),
+                 (C["shelf_y"] + t_, f"{_fmt(C['shelf_y'] + t_)} chair shelf (top face)"), (C["pivot"][1], f"{_fmt(C['pivot'][1])} hinge rail top = piano hinge"),
+                 (rail_y, f"{_fmt(rail_y)} hinge rail underside"), (C["plinth"], f"{_fmt(C['plinth'])} plinth")):
+        o.append(f'<line x1="{X(L)}" y1="{Y(y):.1f}" x2="{xr - 2}" y2="{Y(y):.1f}" stroke="{BLUE}" stroke-width="0.8" stroke-dasharray="3 2"/>')
+        o.append(t(xr, Y(y) + 3.5, s, 9, "start", 700, BLUE))
+    o.append(t(X(0), Y(C["h"]) - 12, "stair end", 9.5, "start", 600, MUTED))
+    o.append(t(X(L), Y(C["h"]) - 12, "window end (2 short of the pipe boxing)", 9.5, "end", 600, MUTED))
+    return svg(W, H, "\n".join(o), "The dining cabinet's carcass, from the front",
+               f"To scale (1 cm = {k} px), doors, drawer and table off. Heights are from the floor, to the top face of each panel; all panels 18 mm oak-faced ply, {_fmt(C['d'] - C['door'])} deep.")
+
+
+def option_c_halves():
+    """The table's two halves from underneath, open, to scale: the breadboard ends, the aprons, where each leg and hinge goes."""
+    g, C = G, G.OPTC
+    tw, tl, tt = C["top"]
+    k = 3.6
+    W, H = 900, 470
+    ox, oy = 70, 110
+    X = lambda a: ox + a * k                 # a: cm from the wall end of the inner half, along the table
+    Y = lambda b: oy + b * k                 # b: cm across the table
+    L = 2 * tl
+    ap = C["apron"]
+    o = []
+    for a0, name in ((0, "inner half (on the piano hinge)"), (tl, "outer half (flips over)")):
+        o.append(f'<rect x="{X(a0)}" y="{Y(0)}" width="{tl * k}" height="{tw * k}" fill="#efdcc0" stroke="{OAKD}" stroke-width="1.8"/>')
+        for e in (a0, a0 + tl - 7):                                                          # breadboard ends, 7 wide
+            o.append(f'<rect x="{X(e)}" y="{Y(0)}" width="{7 * k}" height="{tw * k}" fill="#e3c9a3" stroke="{OAKD}" stroke-width="0.8"/>')
+        # the apron frame: 2 thick, its long rails 4 in from the sides, its short rails 3 in from the ends (the inner half's stops 4.6 short
+        # of its wall end: that strip rests on the hinge rail)
+        e0 = ap if a0 == 0 else 3
+        o.append(f'<rect x="{X(a0 + e0) + k:.1f}" y="{Y(4) + k:.1f}" width="{(tl - e0 - 3 - 2) * k:.1f}" height="{(tw - 10) * k:.1f}" fill="none" stroke="{OAKS}" stroke-width="{2 * k}"/>')
+        o.append(t(X(a0 + tl / 2), Y(tw / 2) - 8, name, 10.5, "middle", 700, "#5a3a20"))
+        o.append(t(X(a0 + tl / 2), Y(tw / 2) + 7, f"{_fmt(tl)} × {_fmt(tw)} × {_fmt(tt)}", 10, "middle", 500, "#5a3a20"))
+    # the legs, folded flat inside the aprons (open, they stand where the squares are)
+    lg = C["leg"]
+    li, ls = C["leg_in"], tw / 2 - 4 - 2 - lg[1] / 2
+    inner = [(tl - li, tw / 2 + s * 13) for s in (-1, 1)]      # on the inner half, against the end rail by the joint, 32 in from each side
+    outer = [(L - li, tw / 2 + s * ls) for s in (-1, 1)]       # on the outer half, in the corners at the far end
+    for a, b in inner + outer:
+        o.append(f'<rect x="{X(a) - lg[0] * k / 2:.1f}" y="{Y(b) - lg[1] * k / 2:.1f}" width="{lg[0] * k:.1f}" height="{lg[1] * k:.1f}" fill="{OAKD}"/>')
+    o.append(t(X(tl - li) - 10, Y(tw / 2) + 28, f"inner legs: centres {_fmt(li)} from the joint, 32 in from each side", 9, "end", 700, BLUE))
+    o.append(t(X(L), Y(tw) + 14, f"outer legs: in the corners, centres {_fmt(li)} from the end and the sides", 9, "end", 700, BLUE))
+    # the joint's three flip-top hinges and the piano hinge at the wall end
+    for b in (10, tw / 2, tw - 10):
+        o.append(f'<rect x="{X(tl) - 2.5:.1f}" y="{Y(b) - 3.5 * k / 2:.1f}" width="5" height="{3.5 * k:.1f}" fill="{BLUE}"/>')
+    o.append(t(X(tl), Y(0) - 8, "3 flip-top hinges at the joint: 10 in from each side and the middle", 9.5, "middle", 700, BLUE))
+    o.append(f'<rect x="{X(0) - 6}" y="{Y(0)}" width="5" height="{tw * k}" fill="{BLUE}"/>')
+    o.append(t(X(0) - 10, Y(tw / 2), "piano hinge", 9.5, "end", 700, BLUE))
+    o.append(t(X(0) - 10, Y(tw / 2) + 13, f"cut to {_fmt(tw)}", 9, "end", 500, BLUE))
+    yb = Y(tw) + 30
+    yb += 12
+    _dim(o, X(0), yb, X(tl), yb, f"{_fmt(tl)}")
+    _dim(o, X(tl), yb, X(L), yb, f"{_fmt(tl)}")
+    _dim(o, X(0), yb + 26, X(L), yb + 26, f"{_fmt(L)} open")
+    _dim(o, X(L) + 22, Y(0), X(L) + 22, Y(tw), f"{_fmt(tw)}")
+    return svg(W, H, "\n".join(o), "The table's two halves, from underneath",
+               f"Laid out open, to scale. Breadboard ends 7 wide; apron frame 2 × {_fmt(ap)}, 4 in from the sides, 3 from the ends; legs fold inside it.")

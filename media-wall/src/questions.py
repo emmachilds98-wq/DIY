@@ -1,4 +1,5 @@
-"""v20: answered and dropped: hdcrash ("no crashes"); chairs now six ideally, four fine; the ledge is 25 (as drawn).
+"""v27: dropped: optc (the dining cabinet is the plan, for six) and chairs (the flip-top's chair cupboard: the cabinet keeps all six). New: rears.
+v20: answered and dropped: hdcrash ("no crashes"); chairs now six ideally, four fine; the ledge is 25 (as drawn).
 v18.1: answered by the listings the client sent and dropped: the plant stand (98 × 29.5 × 158) and the vinyl stand (70 × 32 × 78).
 v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
 New: hat, lightbox. The curtains and the carpet came with the client's photo the same day (asked and answered).
@@ -21,7 +22,7 @@ def _n(x):
 # (id, question, why it matters, how to check, a photo helps)
 QUESTIONS = [
     ("westwall", "The stairs wall under your shelf: solid, or plasterboard on studs?",
-     "The table goes there now (v16, the default): its brackets are rated 500 kg a pair, and the fixings depend on the wall.",
+     "The dining cabinet goes there (v27): it stands on the floor and two angle brackets hold its top to the wall, into plugs or studs.",
      "Knock along it: a hollow sound is plasterboard. Or look at how the shelf is fixed.", False),
     ("electrics", "The electrics: are you swapping the two light fittings and the socket yourselves?",
      "The plan has both as your own job (like for like, not notifiable), with the safe routine and the stop list. Since v15 there are no dimmers to fit: the bars take smart bulbs. If you'd rather an electrician did the fittings, say so and we'll add that visit back.",
@@ -36,12 +37,9 @@ QUESTIONS = [
      "The zone takes up to 45.2 × 35.2 cm; the switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
     ("fanstand", "The Series X fan stand's make and model",
      f"The shelf takes a footprint up to about 30 cm wide; the plan assumes {_n(G.FAN_STAND[0])} × {_n(G.FAN_STAND[2])}.", "A photo of the stand is enough.", True),
-    ("chairs", "Keeping the chairs: which of the ways?",
-     f"v23: the plan is the chair cupboard beside the table: four folded chairs at {_n(G.CHAIR_STORE['cupboard']['d'])} deep, flush with the pipe boxing, or six at {_n(G.CHAIR_STORE['cupboard']['d6'])} deep ({_n(G.CHAIR_STORE['cupboard']['d6'] - G.CHAIR_STORE['cupboard']['d'])} cm proud). New: four more can hang behind the folded top (the table then stands {_n(G.BEHIND_TOP['gap'])} cm further out), and a fold-down seat can go in the gap at the stair end. Under the stairs is brick, so the garage is the other place.",
-     "Four or six in the cupboard; and yes or no to behind the top and to the fold-down seat.", False),
-    ("optc", "The table: keep the flip-top (the plan), or option C, the dining cabinet?",
-     f"v26: option C is one oak cabinet under your shelf, the table ({_n(G.OPTC['len'])} × {_n(G.OPTC['top'][0])}) standing up in its bay and all {G.OPTC['chairs']} chairs in the other: up to eight at the table (six in comfort), against the flip-top's seven. It costs more (section 5).",
-     "The flip-top or option C; and how many you'd like to seat most of the time.", False),
+    ("rears", "Your rear speakers: a photo of them on their stands, behind the sofa",
+     f"v27: you said they stand behind the sofa. They're drawn as the soundbar's two rears ({_n(G.REAR_SPK[0])} × {_n(G.REAR_SPK[1])} × {_n(G.REAR_SPK[2])}) on slim stands in the {_n(G.SOFA_BACK_Z - G.WINDOW_Z)} cm gap behind the sofa's long side, near each end. The photo sets the stands' size, the height and the spots, and shows whether the curtains catch them.",
+     "One photo from the side of the sofa is enough; the stands' base size if you can.", True),
     ("pouf", "Your sofa's ottoman: how tall is it?",
      f"v23: drawn {_n(G.SOFA_POUF['w'])} cm square (one seat of the sofa, as you said) and {_n(G.SOFA_POUF['h'])} tall, on the rug beside the coffee table.", "A tape measure from the floor to the top of its cushion.", False),
     ("records", "Roughly how many LPs?",
@@ -67,14 +65,13 @@ QUESTIONS = [
 
 # a short line for the plan PDF's "Still to confirm" list, by id
 PDF_LINE = {
-    "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the table's bracket fixings.",
+    "rears": "Your rear speakers: a photo on their stands behind the sofa, to set the stands' size, height and spots (v27).",
+    "westwall": "The stairs wall: solid, or plasterboard on studs? It decides how the dining cabinet's top is fixed to it.",
     "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
     "westend": "The stairs wall's length and your shelf's height (drawn at 196: the OBEGRÄNSAD needs 198 or lower to stand on it).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
     "fanstand": "The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.",
-    "chairs": "Keeping the chairs (v23): the cupboard for four (22 deep) or six (31 deep), and yes or no to four more behind the folded top and to a fold-down seat at the stair end.",
-    "optc": "The table: the flip-top (the plan) or option C, the dining cabinet (up to eight, the chairs inside)?",
     "pouf": "Your sofa's ottoman: how tall is it? (Drawn 75 square, 44 tall.)",
     "cornergap": "The window corner at floor level: from the pipe boxing to the curtains when open (the ledge's 25 cm is in; the plant stand is drawn with 4.5 cm a side).",
     "records": f"Records: roughly how many LPs (the wall and the vinyl stand hold about {LPS}: {G.WALL_LPS} in the wall, all face-out, and {G.STAND_LPS} in the stand)?",
@@ -93,14 +90,13 @@ def pdf_items():
 
 # v13.8: a few words per question for the plan's one-page summary ("To confirm"), so it follows this list too
 SHORT = {
+    "rears": "the rear speakers' stands",
     "westwall": "the stairs wall's build",
     "electrics": "that you're swapping the light fittings yourselves",
     "sofa": "the sofa's return length",
     "westend": "the shelf's height",
     "turntable": "the turntable's model",
     "fanstand": "the fan stand's model",
-    "chairs": "keeping the chairs: which ways",
-    "optc": "the flip-top or the dining cabinet",
     "pouf": "the ottoman's height",
     "cornergap": "the window corner at floor level",
     "records": "record counts",
@@ -122,15 +118,13 @@ def summary_line():
 # upload. The answer is saved as plain text in the same answers/<id> record, e.g. "Cupboard: For six, 31 deep · Behind the top: No".
 # The PDF ignores these. Check the wording with Emma when it's shown.
 OPTS = {
+    "rears": [("Where", ["Behind the long side, as drawn", "At the sofa's ends", "Somewhere else"]), (None, ["Add a photo of the speakers"])],
     "westwall": [(None, ["Solid: it sounds solid", "Hollow: plasterboard", "Not sure yet", "Add a photo"])],
     "electrics": [(None, ["All ours", "An electrician for the fittings", "Not sure yet"])],
     "sofa": [("Return along the side wall", ["About 150", "About 160", f"About {_n(G.SOFA_D)} (as drawn)", "Longer"])],
     "westend": [("Shelf top", ["198 or lower", "Higher than 198", "Not measured yet"]), (None, ["Add a photo"])],
     "turntable": [("PHONO/LINE switch", ["Yes", "No", "Not sure"]), (None, ["Add a photo"])],
     "fanstand": [("Its width", ["Under 25", "25 to 30", "Over 30"]), (None, ["Add a photo"])],
-    "chairs": [("Cupboard", [f"For four, {_n(G.CHAIR_STORE['cupboard']['d'])} deep", f"For six, {_n(G.CHAIR_STORE['cupboard']['d6'])} deep"]),
-               ("Behind the top", ["Yes", "No"]), ("Fold-down seat", ["Yes", "No"])],
-    "optc": [("The table", ["The flip-top (the plan)", "Option C, the dining cabinet", "Not sure yet"]), ("Most nights", ["Two", "Four", "Six or more"])],
     "pouf": [("Height", ["About 40", f"About {_n(G.SOFA_POUF['h'])} (as drawn)", "About 48", "Taller"])],
     "records": [(None, ["Under 200", "About 250", f"About {LPS}", "More"])],
     "games": [(None, ["Under 50", "50 to 90", "90 to 150", "More"])],
