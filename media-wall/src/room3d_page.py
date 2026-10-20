@@ -111,8 +111,7 @@ def controls():
               '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
               '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
-              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button>'
-              '<button type="button" data-tog="grow" aria-pressed="false">Plant stand lights</button></div></div>'
+              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>'
               # v17: the ideas (ideas.py), all off by default: suggestions, not in the plan
               '<div class="grp"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
@@ -123,7 +122,7 @@ def controls():
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
         # v18: your plant stand and record shelf, two layouts; the lamp, the ceiling and the skirting menus went: in "Edit room" you
         # drag the lamp, and tap the ceiling or the skirting to paint it
-        seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and record shelf"),
+        seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and vinyl stand"),
         lights,
         seg("paint", paints, "Wall paint (or tap a wall in Edit room)", picker("r3d-custom", "#899081", "Any colour")),
         seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers"),

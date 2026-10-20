@@ -876,6 +876,7 @@ function applyLight() {
   if (pcGlow) { pcGlow.visible = !!S.pc; pcLight.visible = !!S.pc; }
   for (const [k, g] of Object.entries(IDEA_G)) g.visible = !!S.ideas[k] && (k !== "case" || S.site === "B");   // v17: ideas, off by default
   if (G.frames) G.frames.visible = !(S.ideas.case && S.site === "B");                                         // the case replaces the frames
+  if (G.frames) G.frames.position.y = S.site === "B" && S.plants === "breast" ? 0.3 : 0;                        // v18.1: up 30 over the 158 plant stand
   if (ideaLed) ideaLed.color.set(day ? "#8a8578" : "#fff1d6");
   curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
   win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
@@ -953,45 +954,57 @@ function buildPlantsAndRecords() {
   const r = rnd(73), PS = R.PLANT_STAND, RS = R.RECORD_SHELF;
   const leafM = reg(new THREE.MeshStandardMaterial({ color: "#4a8640", roughness: 0.65, side: THREE.DoubleSide }));
   const pots = ["#ece6da", "#c9c2b4", "#b5643f", "#7f8f72", "#2f2f2f"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.75 })));
-  // the plant stand: bamboo, two columns, four slatted tiers, warm grow bars under the top two (from the client's photo)
-  { const g = new THREE.Group(), bam = reg(new THREE.MeshStandardMaterial({ color: PS.col, map: OAK_TEX, roughness: 0.6 }));
-    const w = PS.w, d = PS.d, h = PS.h, cw = (w - 3 * PS.post) / 2;
-    for (const x of [-w / 2 + PS.post / 2, 0, w / 2 - PS.post / 2]) for (const z of [-d / 2 + PS.post / 2, d / 2 - PS.post / 2]) lb(g, x, 0, z, PS.post, h + 6, PS.post, bam);
-    PS.tiers.forEach((ty, ti) => {
-      for (const z of [-d / 2 + PS.post / 2, d / 2 - PS.post / 2]) lb(g, 0, ty - 2.2, z, w, 2.2, 2.0, bam);
-      for (const cx of [-(cw + PS.post) / 2, (cw + PS.post) / 2]) {
-        for (let k = 0; k < 8; k++) lb(g, cx - cw / 2 + 2 + k * (cw - 4) / 7, ty, 0, 2.2, 1.2, d - 3, bam);
-        const n = ti === 3 ? 2 : 2 + (r() < 0.5 ? 1 : 0);
-        for (let j = 0; j < n; j++) {
-          const rad = 5 + r() * 4, px = cx - cw / 2 + (j + 0.5) * cw / n;
-          potPlant(g, px, ty + 1.2, (r() - 0.5) * 6, rad, ti === 0 ? 3 : Math.round(4 + r() * 8), ti < 2 && r() < 0.5 ? 2 : 0, r, pots[(ti * 2 + j) % pots.length], leafM);
-        }
-        if (PS.lights.includes(ti)) {                  // a grow bar under this tier, and its warm wash on the wall behind
-          const bar = new THREE.Mesh(new THREE.BoxGeometry((cw - 8) * M, 0.012, 0.03), new THREE.MeshBasicMaterial({ color: "#ffe0b0", toneMapped: false }));
-          bar.position.copy(v3(cx, ty - 1.4, -d / 2 + 6)); g.add(bar);
-          const glow = new THREE.Mesh(new THREE.PlaneGeometry(cw * 1.5 * M, 0.7), new THREE.MeshBasicMaterial({ map: GLOW_TEX, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
-          glow.position.copy(v3(cx, ty - 22, -d / 2 - 0.6)); g.add(glow); growGlow.push(glow, bar);
-        }
+  // v18.1: the plant stand from the client's listing: 98 × 29.5 × 158, slatted wood, two five-tier towers and an open middle with two shelves
+  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: PS.col, map: OAK_TEX, roughness: 0.6 }));
+    const w = PS.w, d = PS.d, h = PS.h, [cl, cm, cr] = PS.cols, pt = PS.post;
+    const xs = [-w / 2 + pt / 2, -w / 2 + cl, w / 2 - cr, w / 2 - pt / 2];                  // the four post lines across
+    for (const x of xs) for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, x, 0, z, pt, h, pt, wood);
+    const tier = (xa, xb, y, plants) => {                                                    // slats front to back, rails at front and back
+      for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, (xa + xb) / 2, y - 2, z, xb - xa, 2, pt, wood);
+      const n = Math.max(4, Math.round((xb - xa) / 4.5));
+      for (let k = 0; k < n; k++) lb(g, xa + 1.5 + k * (xb - xa - 3) / (n - 1), y, 0, 2.2, 1.2, d - 3, wood);
+      for (let j = 0; j < plants; j++) {
+        const rad = 5 + r() * 3.5, px = xa + (j + 0.5) * (xb - xa) / plants;
+        potPlant(g, px, y + 1.2, (r() - 0.5) * 6, rad, Math.round(4 + r() * 8), r() < 0.35 ? 2 : 0, r, pots[Math.floor(r() * pots.length)], leafM);
       }
-    });
-    movable("plants", "Your plant stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].plants; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [bam]); }
-  // the 2 x 2 record shelf, a tray in each cube with its LPs face-out
-  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: RS.col, map: OAK_TEX, roughness: 0.6 }));
-    const w = RS.w, d = RS.d, h = RS.h, t = RS.t, cw = (w - 3 * t) / 2, ch = (h - 3 * t) / 2;
-    lb(g, 0, 0, -d / 2 + 0.3, w, h, 0.6, wood);
-    for (const x of [-w / 2 + t / 2, 0, w / 2 - t / 2]) lb(g, x, 0, 0, t, h, d, wood);
-    for (const y of [0, h / 2 - t / 2, h - t]) lb(g, 0, y, 0, w, t, d, wood);
-    const tray = reg(new THREE.MeshStandardMaterial({ color: "#b88a5c", map: OAK_TEX, roughness: 0.6 }));
+    };
+    const L = [xs[0] - pt / 2, xs[1]], Rr = [xs[2], xs[3] + pt / 2], Mi = [xs[1], xs[2]];
+    PS.tower.forEach((y, ti) => { tier(L[0], L[1], y, ti === 4 ? 1 : 1 + (r() < 0.5 ? 1 : 0)); tier(Rr[0], Rr[1], y, ti === 4 ? 1 : 1 + (r() < 0.5 ? 1 : 0)); });
+    PS.middle.forEach((y, mi) => tier(Mi[0], Mi[1], y, 1));
+    for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, 0, h - 2, z, w, 2, pt, wood);  // the top rails across the open middle
+    potPlant(g, 0, PS.middle[0] + 1.2, 0, 9, 22, 0, r, pots[0], leafM);
+    movable("plants", "Your plant stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].plants; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood]); }
+  // v18.1: the client's vinyl stand (their listing): 70 × 32 × 78, black steel, rustic wood; two face-out bays on top, wires below
+  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: RS.col, map: OAK_TEX, roughness: 0.65 }));
+    const steel = reg(new THREE.MeshStandardMaterial({ color: RS.steel, roughness: 0.45, metalness: 0.6 }));
+    const w = RS.w, d = RS.d, h = RS.h, ft = RS.frame_top, p = 2, sy = RS.shelf_y, yb = RS.bottom_y;
+    for (const x of [-w / 2 + p / 2, w / 2 - p / 2]) {
+      lb(g, x, 0, d / 2 - p / 2, p, ft, p, steel);                                             // front posts to 63 (front is local +z)
+      lb(g, x, 0, -d / 2 + p / 2, p, h, p, steel);                                             // rear posts to 78
+      const sl = new THREE.Mesh(new THREE.BoxGeometry(p * M, Math.hypot(h - ft, d - p) * M, p * M), steel);   // the slope between them
+      sl.position.copy(v3(x, (ft + h) / 2, 0)); sl.rotation.x = -Math.atan2(d - p, h - ft); g.add(shadow(sl));
+    }
+    lb(g, 0, ft - 6, d / 2 - 1, w, 1.2, 1.2, steel);                                           // the front rail
+    lb(g, 0, yb, 0, w - 2 * p, 2, d, wood); lb(g, 0, yb + 2, -d / 2 + 1, w - 2 * p, 10, 1.6, wood);   // bottom shelf and its back board
+    lb(g, 0, sy, 0, w - 2 * p, 2, d, wood); lb(g, 0, sy + 2, d / 2 - 0.8, w - 2 * p, RS.lip, 1.6, wood);   // upper shelf and its 10 cm front board
+    lb(g, 0, sy + 2, -2, 2, h - sy - 6, d - 8, wood);                                          // the divider between the two bays
+    for (const y of [h - 10, h - 22]) lb(g, 0, y, -d / 2 + 1.5, w, 6, 1.6, wood);              // back boards
     const sleeves = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d", "#f0c24b", "#7a4fb0", "#e8603c"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.55 })));
-    for (const y0 of [t, h / 2 + t / 2]) for (const cx of [-(cw + t) / 2, (cw + t) / 2]) {
-      lb(g, cx, y0, d / 2 - 2, cw - 1, 6, 1.2, tray);                                   // the tray's front lip
-      const lp = Math.min(R.LP, ch - 2);
-      for (let k = 0; k < 6; k++) {                                                     // the front few LPs, leaning back
+    const lp = R.LP;
+    for (const bx of [-w / 4, w / 4]) for (let k = 0; k < 5; k++) {                            // top bays: LPs leaning back, face-out
+      const m = new THREE.Mesh(new THREE.BoxGeometry((RS.bay - 2) * M * 0.97, lp * M, 0.004), sleeves[Math.floor(r() * sleeves.length)]);
+      m.position.copy(v3(bx, sy + 2 + lp / 2, d / 2 - 6 - k * 3.2)); m.rotation.x = -0.3; g.add(shadow(m));
+    }
+    for (let k = 0; k < RS.wires; k++) {                                                        // the wire dividers, and LPs between them
+      const zz = d / 2 - 3 - k * (d - 6) / (RS.wires - 1);
+      for (const x of [-w / 2 + 12, w / 2 - 12]) lb(g, x, yb + 2, zz, 0.5, RS.wire_h, 0.5, steel, false);
+      lb(g, 0, yb + 2 + RS.wire_h - 0.5, zz, w - 24, 0.5, 0.5, steel, false);
+      if (k < RS.wires - 1) for (let j = 0; j < 3; j++) {
         const m = new THREE.Mesh(new THREE.BoxGeometry(lp * M, lp * M, 0.004), sleeves[Math.floor(r() * sleeves.length)]);
-        m.position.copy(v3(cx, y0 + 1 + lp / 2, d / 2 - 5 - k * 3.2)); m.rotation.x = -0.18; g.add(shadow(m));
+        m.position.copy(v3(0, yb + 2 + lp / 2, zz - 2 - j * 2.5)); m.rotation.x = -0.12; g.add(shadow(m));
       }
     }
-    movable("records", "Your record shelf", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].records; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood]); }
+    movable("records", "Your vinyl stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].records; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood]); }
   // the red lamp and the C-table idea are movable too
   MOV.lamp = { id: "lamp", label: "Your red lamp", lamp: true, w: 30, d: 30, mats: [], base: [],
     def: () => { const p = R.LAMP_SPOTS[S.lamp] || R.LAMP_SPOTS[DEF.lamp]; return { x: p.x, z: p.z, rot: 0 }; } };

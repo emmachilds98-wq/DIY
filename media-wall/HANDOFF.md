@@ -1,7 +1,8 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v18 is built (round 12, below).** `UPGRADE_PLAN_v18.md` was the brief. **Next round (the client asked for it "in next run"):**
+- **Next agent: `media-wall/UPGRADE_PLAN_v19.md`** (chair storage first). v18.1 is built and merged (rounds 12 and 12b, below).
+- **Chair storage (the client asked for it "in next run"):**
   somewhere to keep the dining chairs, "optional not essential unless easily done to the original table without many changes" (e.g.
   folding chairs on wall hooks by the stairs, or stored in the garage; don't redesign the flip-top for it). The open questions are in
   `src/questions.py` (new: the plant stand's and the record shelf's sizes).
@@ -18,6 +19,18 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 12b: v18.1 (the plant stand and the vinyl stand from the client's listings)
+- PR #10 (v18) was merged by the client. The branch was restarted from main for this follow-up.
+- The client sent both listings: the plant stand is 98 × 29.5 × 158 (two five-tier towers, an open middle with two shelves, no grow lights;
+  `inputs/plant_stand_listing_98x29.5x158.png`); "and vinyl stand": 70 × 32 × 78, black steel frame (front posts to 63, sloping to 78 at
+  the back), rustic wood, two face-out top bays of 32.3 with a wooden divider and a 10 cm front board, a bottom shelf with four 19.5 wire
+  dividers (the listing image came inline only; it's the stand in the window corner of `photo_stairs_wall_record_shelf.jpeg`).
+- geometry `PLANT_STAND` and `RECORD_SHELF` rewritten (the key keeps its name; it's the vinyl stand); the corner spot centred at x 391.5
+  (4.5 each side: TIGHT). fit sources `plantstand`, `vinylstand` (kallax dropped); the zone has 7 rows: 87 checks, 59 fit, 21 tight,
+  7 check. Total £3,103–6,323; plan 72 pages, guide 48; QA at 390/1280 clean. The two size questions are answered and dropped (14 questions). Grow lights, the smart plug, the strap and the "Plant stand
+  lights" button are gone (the stand has none); drip trays and felt pads stay. `render.record_shelf()` draws the vinyl stand; room3d.js
+  builds both stands anew; in layout B the frames lift 30 (`G.frames.position.y`).
 
 ## Update 20 Oct 2026, round 12: v18 (plant stand and record shelf, the PC's glass side, edit mode in 3D)
 - Client: "PC internals still not visible, there is a clear side panel ... ive bought a plant shelf something very similar to this image

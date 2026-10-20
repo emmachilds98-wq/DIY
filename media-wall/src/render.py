@@ -1702,35 +1702,51 @@ def now_playing():
 
 
 def record_shelf():
-    """v18, client: "i could keep the vinyl shelf i have ... 4 trays in 2x2 square wood shelf". In layout A (the recommendation) it stands
-    on the breast under the “now playing” ledge: a 2 × 2 wooden cube shelf (drawn at KALLAX 2 × 2's size until measured), a tray in each
-    cube with its LPs face-out, the front sleeve showing."""
+    """v18.1, the client's vinyl stand (their listing): 70 × 32 × 78, a black steel frame whose front posts rise to 63 and slope back to the
+    rear posts at 78; rustic wood: a bottom shelf with four wire dividers 19.5 tall, an upper shelf at about 46 with a 10 cm front board,
+    a wooden divider making two bays of 32.3, two back boards. In layout A (the recommendation) it stands on the breast under the
+    “now playing” ledge, LPs face-out."""
     lay = G.PLANT_LAYOUTS[G.PLANT_LAYOUT]
     cx, cz, facing = lay["records"]
     if facing != -1:                     # in the window corner: out of these views
         return ""
     Rs = G.RECORD_SHELF
-    w, d, h, t = Rs["w"], Rs["d"], Rs["h"], Rs["t"]
-    x0, z0 = cx - w / 2, cz - d / 2
-    W_ = (Rs["col"], "#d4ac80", "#a57a50")
-    o = [box(x0, 0, z0 + d - 0.6, w, h, 0.6, "#8a6844")]                                  # the back
-    o.append(box(x0, 0, z0, t, h, d, *W_)); o.append(box(x0 + w - t, 0, z0, t, h, d, *W_))
-    o.append(box(x0 + w / 2 - t / 2, t, z0, t, h - 2 * t, d, *W_))
+    w, d, h, ft = Rs["w"], Rs["d"], Rs["h"], Rs["frame_top"]
+    x0, z0 = cx - w / 2, cz - d / 2                     # z0: the front (room side)
+    ST = (Rs["steel"], "#2a2a2d", "#141416")
+    WD = (Rs["col"], "#8e6340", "#5e3d22")
+    p_ = 2.0
+    o = []
+    for xx in (x0, x0 + w - p_):                       # the rear posts, full height
+        o.append(box(xx, 0, z0 + d - p_, p_, h, p_, *ST))
+    o.append(box(x0, h - 10.0, z0 + d - 3.0, w, 6.0, 1.6, *WD))                       # back boards
+    o.append(box(x0, h - 22.0, z0 + d - 3.0, w, 6.0, 1.6, *WD))
+    o.append(box(x0 + p_, Rs["bottom_y"], z0 + d - 3.0, w - 2 * p_, 10.0, 1.6, *WD))  # the bottom shelf's back board
+    o.append(box(x0 + p_, Rs["bottom_y"], z0, w - 2 * p_, 2.0, d, *WD))              # bottom shelf
     arts = [[("#e9e3d3", 0, 1, 0, 1), ("#2f3e5c", 0.15, 0.85, 0.15, 0.7)], [("#d24b33", 0, 1, 0, 1), ("#f3d27a", 0.1, 0.9, 0.62, 0.9)],
             [("#1f1f1f", 0, 1, 0, 1), ("#e8e1cf", 0.3, 0.7, 0.3, 0.7)], [("#14806d", 0, 1, 0, 1), ("#efe6d2", 0.1, 0.9, 0.1, 0.45)]]
-    cw = (w - 3 * t) / 2
-    k = 0
-    for yb in (t, h / 2 + t / 2):
-        for xb in (x0 + t, x0 + t + cw + t):
-            ch_ = h / 2 - 1.5 * t
-            lp = min(G.LP, ch_ - 2.0)
-            q = [P(xb + (cw - lp) / 2, yb + 1.0, z0 + 3.0), P(xb + (cw + lp) / 2, yb + 1.0, z0 + 3.0),
-                 P(xb + (cw + lp) / 2, yb + 1.0 + lp * 0.98, z0 + 3.0 + lp * 0.17), P(xb + (cw - lp) / 2, yb + 1.0 + lp * 0.98, z0 + 3.0 + lp * 0.17)]
-            o.append(art_on(q, arts[k % 4]))
-            o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
-            o.append(box(xb + 0.5, yb, z0 + 1.0, cw - 1.0, 6.0, 1.2, "#b88a5c", "#cfa274", "#94683f"))   # the tray's front lip
-            k += 1
-    o.append(box(x0, 0, z0, w, t, d, *W_)); o.append(box(x0 + t, h / 2 - t / 2, z0, w - 2 * t, t, d, *W_)); o.append(box(x0, h - t, z0, w, t, d, *W_))
+    lp = G.LP
+    # the bottom shelf: LPs face-out, the front one showing, a wire divider in front of it
+    yb = Rs["bottom_y"] + 2.0
+    q = [P(x0 + (w - lp) / 2, yb, z0 + 6.0), P(x0 + (w + lp) / 2, yb, z0 + 6.0), P(x0 + (w + lp) / 2, yb + lp * 0.98, z0 + 6.0 + lp * 0.17), P(x0 + (w - lp) / 2, yb + lp * 0.98, z0 + 6.0 + lp * 0.17)]
+    o.append(art_on(q, arts[2])); o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
+    for k in range(Rs["wires"]):                       # the wire dividers: thin steel V's across the shelf
+        xx = x0 + 10.0 + k * (w - 20.0) / (Rs["wires"] - 1)
+        o.append(box(xx, yb, z0 + 3.0, 0.5, Rs["wire_h"], 0.5, *ST))
+    # the upper shelf, its front board, the divider and two LPs face-out, one a bay
+    sy = Rs["shelf_y"]
+    o.append(box(x0 + p_, sy, z0, w - 2 * p_, 2.0, d, *WD))
+    o.append(box(x0 + w / 2 - 1.0, sy + 2.0, z0 + 4.0, 2.0, h - sy - 6.0, d - 7.0, *WD))
+    for i_, bx in enumerate((x0 + p_, x0 + w / 2 + 1.0)):
+        bw = w / 2 - p_ - 1.0
+        q = [P(bx + (bw - lp) / 2, sy + 2.0, z0 + 4.0), P(bx + (bw + lp) / 2, sy + 2.0, z0 + 4.0),
+             P(bx + (bw + lp) / 2, sy + 2.0 + lp * 0.96, z0 + 4.0 + lp * 0.28), P(bx + (bw - lp) / 2, sy + 2.0 + lp * 0.96, z0 + 4.0 + lp * 0.28)]
+        o.append(art_on(q, arts[i_ % 2])); o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
+    o.append(box(x0 + p_, sy + 2.0, z0, w - 2 * p_, Rs["lip"], 1.6, *WD))            # the 10 cm front board
+    for xx in (x0, x0 + w - p_):                       # the front posts to 63, the slope back to the rear posts' tops, the front rail
+        o.append(box(xx, 0, z0, p_, ft, p_, *ST))
+        o.append(poly([P(xx, ft, z0), P(xx + p_, ft, z0), P(xx + p_, h, z0 + d - p_), P(xx, h, z0 + d - p_)], ST[0]))
+    o.append(box(x0, ft - 6.0, z0 + 1.0, w, 1.2, 1.2, *ST))
     return "\n".join(o)
 
 

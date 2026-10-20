@@ -36,8 +36,8 @@ SOURCES = {
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
     "fliphinge": "Lee Valley: 40574 narrow flip-top hinges, solid brass, 1/2 in × 2 3/4 in (1.27 × 7.0 cm), for card and flip-top tables (leevalley.com); their 40208 card-table hinge is 1 3/16 in (3.0 cm) wide, too wide for a 27 mm edge",
     "curtains": "Your photo (20 Oct) and note: Dunelm hessian pencil-pleat curtains; Dunelm pencil-pleat drops run 137, 182 and 228 cm with a 3 in header; Dunelm 28 mm wooden poles, 120–360 cm, rings included (one per 10 cm), finials up to 8 cm more (dunelm.com)",
-    "plantstand": "Your plant stand, from your photo (20 Oct): bamboo, two columns, four slatted tiers, LED grow bars under the top two. Drawn at 90 × 30 × 120 (W × D × H), the usual size of a two-column four-tier bamboo stand (e.g. VIVOSUN's 4-tier bamboo stand, 47.2 in = 120 cm tall: homedepot.com); please measure yours",
-    "kallax": "IKEA: KALLAX shelving unit 2 × 2, 77 × 39 × 77 cm, cubes 33 × 33 inside (ikea.com). Your 2 × 2 wooden record shelf with four trays is drawn at this size until you measure it",
+    "plantstand": "Your plant stand, from the listing you sent (20 Oct): 98 × 29.5 × 158 cm (W × D × H), slatted wood; two five-tier towers with an open middle holding two shelves",
+    "vinylstand": "Your vinyl stand, from the listing you sent (20 Oct): 70 × 32 × 78 cm (W × D × H), 63 to where the frame slopes; two top bays 32.3 wide split by a wooden divider, a 10 cm front board, wire dividers 19.5 tall on the bottom shelf; black steel and rustic wood",
     "obegransad": "IKEA: OBEGRÄNSAD LED wall lamp, black (your 905.262.63; 005.262.48 and others by country): 52 × 36 × 6 cm, 5 W, five lighting programmes, hangs landscape or portrait, runs on a 5 V USB-A adapter sold separately (ikea.com); its face is a 16 × 16 grid of white LEDs. From the Swedish House Mafia collection (IKEA press kit, Sept 2022)",
     "pads": "Sony: DualSense controller 160 × 66 × 106 mm (W × H × D); Microsoft: Xbox Wireless Controller 153 × 61 × 104 mm",
     "crate": "Record-shop browser crates and LP storage boxes are made about 32.5–33 cm inside for 31.4 cm sleeves (31.8–32.4 in outer sleeves), flipped by the sleeves' top edges",
@@ -392,7 +392,7 @@ def sources_html(extra=()):
     return "<ol class='sources'>" + "".join(f"<li>{s}</li>" for s in items) + "</ol>"
 
 
-# v18: the client's plant stand and their 2 x 2 record shelf, in either layout
+# v18: the client's plant stand and vinyl stand, in either layout (v18.1: both from their listings)
 _zones_v17 = zones
 
 
@@ -405,17 +405,21 @@ def plants_zone():
     px0, px1 = cx - P_["w"] / 2, cx + P_["w"] / 2
     bw = g.BREAST_X[1] - g.BREAST_X[0]
     ledge_under = g.NOW_LEDGE["top"] - g.NOW_LEDGE["t"]
-    rx = g.PLANT_LAYOUTS["breast"]["records"][0]
-    return ("Your plant stand and your record shelf (v18)", f"the window wall's west end, {r1(box_x - curt)} between the curtains' stack and the pipe boxing; the chimney breast, {r1(bw)} wide", [
+    lp_top = R_["shelf_y"] + g.LP
+    frames_bottom = g.FRAMES_Y - g.LP / 2 - 2.0
+    return ("Your plant stand and your vinyl stand (v18.1)", f"the window wall's west end, {r1(box_x - curt)} between the curtains' stack and the pipe boxing; the chimney breast, {r1(bw)} wide", [
         ("A: the plant stand in the window corner (recommended)", f"{r1(P_['w'])} × {r1(P_['d'])} × {r1(P_['h'])}", ref("plantstand"), f"x {r1(curt)} to {r1(box_x)}",
-         f"x {r1(px0)}–{r1(px1)}: {r1(px0 - curt)} from the curtains, {r1(box_x - px1)} from the boxing; daylight from the window beside it, its grow bars for the rest", TIGHT),
-        ("A: the 2 × 2 record shelf on the breast", f"{r1(R_['w'])} × {r1(R_['d'])} × {r1(R_['h'])}, four trays", ref("kallax"), f"breast {r1(bw)} wide, the “now playing” ledge's underside at {r1(ledge_under)}",
+         f"x {r1(px0)}–{r1(px1)}: {r1(px0 - curt)} from the curtains, {r1(box_x - px1)} from the boxing; daylight from the window beside it; {r1(g.CEIL - P_['h'])} to the ceiling for the top plants", TIGHT),
+        ("A: the vinyl stand on the breast", f"{r1(R_['w'])} × {r1(R_['d'])} × {r1(R_['h'])}", ref("vinylstand"), f"breast {r1(bw)} wide, the “now playing” ledge's underside at {r1(ledge_under)}",
          f"{r1((bw - R_['w']) / 2)} each side, {r1(ledge_under - R_['h'])} under the ledge; a step from the turntable", PASS),
-        ("A: records in the 2 × 2", f"four trays, face-out, about {R_['lps_each']} LPs each", ref("kallax", "media"), "33 × 33 cubes", f"about {4 * R_['lps_each']} more LPs, flipped like the crates", PASS),
-        ("B: the record shelf in the window corner, as today", f"{r1(R_['w'])} wide", ref("kallax"), f"{r1(box_x - curt)} between the curtains and the boxing", f"{r1(box_x - curt - R_['w'])} to spare", PASS),
-        ("B: the plant stand on the breast", f"{r1(P_['w'])} wide, {r1(P_['h'])} tall", ref("plantstand"), f"breast {r1(bw)}", f"{r1((bw - P_['w']) / 2)} each side; the “now playing” ledge comes off (the plants stand above its height), the frames stay above", TIGHT),
-        ("Power for the grow bars", "a USB or mains lead from the stand", ref("plantstand"), "the nearest socket", "A: your photo shows an extension lead in that corner today; put the grow bars on a smart plug with a schedule (about 12 hours a day). B: the double socket by bay 1 is a few steps away", CHECK),
-        ("Your red lamp", "28 base", ref("room"), "the window corner is taken in A and B", f"it moves to the sofa's west end (in the 3D room, drag it anywhere)", PASS),
+        ("A: LPs in its top bays, face-out", f"2 bays × {r1(R_['bay'])}; an LP {r1(g.LP)}", ref("vinylstand", "media"), f"shelf at about {r1(R_['shelf_y'])}",
+         f"{r1(R_['bay'] - g.LP)} spare a bay; the front LP's top at about {r1(lp_top)}, {r1(ledge_under - lp_top)} under the ledge; about {R_['lps_top']} LPs", TIGHT),
+        ("A: LPs on its bottom shelf, between the wires", f"{R_['wires']} wires {r1(R_['wire_h'])} tall", ref("vinylstand", "media"), f"{r1(R_['w'])} wide, {r1(R_['shelf_y'] - R_['bottom_y'])} high",
+         f"three slots of LPs standing; about {R_['lps_bottom']} more (about {R_['lps_top'] + R_['lps_bottom']} in all)", PASS),
+        ("B: the vinyl stand in the window corner, as today", f"{r1(R_['w'])} wide", ref("vinylstand"), f"{r1(box_x - curt)} between the curtains and the boxing", f"{r1(box_x - curt - R_['w'])} to spare", PASS),
+        ("B: the plant stand on the breast", f"{r1(P_['w'])} wide, {r1(P_['h'])} tall", ref("plantstand"), f"breast {r1(bw)}; the frames from about {r1(frames_bottom)}",
+         f"{r1((bw - P_['w']) / 2)} each side; the “now playing” ledge comes off and the two frames go up 30 (or elsewhere): at {r1(P_['h'])} it stands past the frames' bottoms", TIGHT),
+        ("Your red lamp", "28 base", ref("room"), "the window corner is taken in A and B", "it moves to the sofa's west end (in the 3D room, drag it anywhere)", PASS),
     ])
 
 
