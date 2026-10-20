@@ -61,7 +61,15 @@
 - Not done this round (the plan's step 9 text pass): Network's Part P note and the plant stand as short lists; the reference designs'
   exact suggested question wording (`QS` in Plan Sheet.dc.html) wasn't available, so `questions.OPTS` is our own: check it with Emma.
 - **Kept:** localStorage keys (`mw13-view`, `mw22-*`, `mw23-*` untouched, `mw18-3d`, `mw12-*`, `mw13-steps`), tracker ids (one row's words
-  changed: `TRACK_KEEP_ID` keeps its old id), question ids, step numbers.
+  changed: `TRACK_KEEP_ID` keeps its old id), question ids, step numbers. Ids removed on purpose: `big-text`, `data-skin`, `data-theme`,
+  `data-walk` (the page looks, dark mode and the walk pad are gone).
+- **Outputs:** version 25 everywhere; v24 outputs moved to `out/v24/`. 29 stills (`render_v25_3d_*`, `Media wall v25 - 3D - …`), plan
+  82 pages, guide 48; fit 70 fit, 29 tight, 8 check, 0 don't fit; total £3,223–6,463.
+- **QA (Playwright, 390 × 844 and 1280 × 800):** every Tools tab and its controls, Edit room, all five sheets, all eleven chapters: no
+  horizontal overflow, no console errors. Old saved ticks and steps still show; Up next's Done ticks the step and cheers; quick taps
+  compose and save an answer (the badge drops, the toast shows); stickers open their chapter; deep links `#step-5`, `#q-chairs`,
+  `#views`, `#ph-3`, `#checks` work. Fixes found in QA: the ring ids sat inside an `<svg>` (renamed by `uniq_svgs`) so they're on the
+  `<a class="ring">`; the phone bar's Tools button was added after `DRAWER_JS` bound its buttons, so the toggle is now delegated.
 
 ## Update 20 Oct 2026, round 18: v24 (less to read, a cleaner page)
 - Client: "can you now take away uneeded explainer text across the doc and give it a better overall design and ui".

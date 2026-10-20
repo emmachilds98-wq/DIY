@@ -12,7 +12,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       living_plan, why_layout, seating, dining_section, dining_sites, chair_storage, chair_options)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "24"
+VERSION = "25"
 REVISION = "24: less to read and a cleaner page: round numbers out of the text, long captions folded, a new layout"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"

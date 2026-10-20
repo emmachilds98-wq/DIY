@@ -177,14 +177,14 @@ DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return
   let cur = "layout"; try { cur = localStorage.getItem(K) || "layout"; } catch (e) {}
   if (!tabs.some(t => t.dataset.drawer === cur)) cur = "layout";
   const sync = open => { r.classList.toggle("tools-open", open); document.body.classList.toggle("tools-open", open);
-    btns.forEach(b => { b.setAttribute("aria-expanded", String(open)); const i = b.querySelector(".ms"); if (i) i.textContent = open ? "close" : "tune"; }); };
+    document.querySelectorAll("[data-tools-toggle]").forEach(b => { b.setAttribute("aria-expanded", String(open)); const i = b.querySelector(".ms"); if (i) i.textContent = open ? "close" : "tune"; }); };
   const show = k => { cur = k; tabs.forEach(t => { const on = t.dataset.drawer === k; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1;
       document.getElementById("r3d-dp-" + t.dataset.drawer).hidden = !on; });
     panel.hidden = false; panel.setAttribute("aria-labelledby", "r3d-dt-" + k); try { localStorage.setItem(K, k); } catch (e) {} };
   const open = k => { sync(true); show(k || cur); window.dispatchEvent(new CustomEvent("demma-tools", { detail: true })); };
   const close = () => { sync(false); panel.hidden = true; };
   window.DemmaTools = { open, close, toggle() { r.classList.contains("tools-open") ? close() : open(); }, isOpen: () => r.classList.contains("tools-open") };
-  btns.forEach(b => b.addEventListener("click", () => window.DemmaTools.toggle()));
+  document.addEventListener("click", e => { if (e.target.closest("[data-tools-toggle]")) window.DemmaTools.toggle(); });   // the phone's bottom bar comes later in the page
   tabs.forEach((t, i) => { t.addEventListener("click", () => show(t.dataset.drawer));
     t.addEventListener("keydown", e => { const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
       const n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); show(n.dataset.drawer); }); });
