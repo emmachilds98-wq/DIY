@@ -21,12 +21,12 @@ const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? 
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
-const DEF = { site: "A", dining: "folded", scene: "everyday", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
+const DEF = { site: "B", dining: "folded", scene: "everyday", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
               quality: SMALL ? "fast" : "hd", view: "window",
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
-              lv: null, master: 100, col: { bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
-              ceil: "match", skirt: "match", laser: true, lbox: true, curtains: false };
-const KEY = "mw15-3d";
+              lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
+              ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false };   // v16: the table by the stairs by default; the laser off
+const KEY = "mw16-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
@@ -174,10 +174,19 @@ const HESSIAN = canvasTex(256, 256, (g, w, h) => {   // v15: hessian's coarse, o
   for (let j = 0; j < h; j += 4) { g.fillStyle = `rgba(255,248,230,${0.08 + r() * 0.12})`; g.fillRect(0, j, w, 1.4); }
 }, true);
 HESSIAN.repeat.set(3, 9);
-const LBOX_TEX = canvasTex(256, 192, (g, w, h) => {   // the light box's face: a soft warm glow, brighter in the middle
-  const gr = g.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, w * 0.6);
-  gr.addColorStop(0, "#fff7e6"); gr.addColorStop(1, "#f3d9b0");
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+// v16: the client's light box is an IKEA OBEGRÄNSAD: a black panel with a 16 x 16 grid of white LEDs that shows blocky black-and-white
+// pictures, "like pharmacy LED ads". Drawn showing a pixel music note; the unlit LEDs are dark grey dots on the black face.
+const NOTE = ["................", "......#######...", "......#######...", "......##....#...", "......#.....#...", "......#.....#...",
+              "......#.....#...", "......#.....#...", "......#.....#...", "..####....####..", ".######..######.", ".######..######.",
+              "..####....####..", "................", "................", "................"];
+const LBOX_TEX = canvasTex(416, 416, (g, w, h) => {
+  g.fillStyle = "#0b0b0c"; g.fillRect(0, 0, w, h);
+  const n = 16, c = w / n;
+  for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) {
+    const on = NOTE[r][k] === "#";
+    if (on) { g.fillStyle = "rgba(255,255,255,0.16)"; g.beginPath(); g.arc((k + 0.5) * c, (r + 0.5) * c, c * 0.62, 0, 7); g.fill(); }
+    g.fillStyle = on ? "#ffffff" : "#26262a"; g.beginPath(); g.arc((k + 0.5) * c, (r + 0.5) * c, c * 0.3, 0, 7); g.fill();
+  }
 });
 function skyTex(day) {
   return canvasTex(512, 256, (g, w, h) => {
@@ -389,6 +398,9 @@ function buildShell() {
   wall("z", RZ, B1, Wd, 0, C, [0, 0, -1], recP, [[dx0, dx1, 0, R.DOOR_H], [sx0, Wd, 0, C]]);   // the door wall, open over the stairs
   wall("x", Wd, WZ, RZ, 0, C, [-1, 0, 0], wallP);                                  // the stairs (west) wall
   wall("z", WZ, 0, Wd, 0, C, [0, 0, 1], wallP, [[wx0, wx1, wy0, wy1]]);            // the window wall
+  // v16: the hollow pipe boxing in the window's west corner, floor to ceiling, painted with the walls
+  const PX = R.PIPE_BOX;
+  cube(PX.x[0], 0, PX.z[0], PX.x[1] - PX.x[0], C, PX.z[1] - PX.z[0], wallP);
   // floor (carpet) and ceiling (painted, with the opening over the stairs)
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(Wd * M, (RZ - WZ) * M), reg(new THREE.MeshStandardMaterial({ map: CARPET, roughness: 1, bumpMap: PILE, bumpScale: 0.5 })));
   floor.rotation.x = -Math.PI / 2; floor.position.copy(v3(Wd / 2, 0, (RZ + WZ) / 2)); floor.receiveShadow = true; shell.add(floor);
@@ -472,11 +484,13 @@ function buildShell() {
   // shelf B: the client's 2 m black floating shelf on the stairs wall
   const sb = R.SHELF_B, black = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
   cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black);
-  // v15: "on the left of that shelf is my ikea light box": the box from the photo, its face lit
-  const LB = R.LIGHTBOX;
-  cube(Wd - 2 - LB.d, sb.top, LB.z[1], LB.d, LB.h, LB.z[0] - LB.z[1], white);
-  lboxFace = new THREE.Mesh(new THREE.PlaneGeometry((LB.z[0] - LB.z[1] - 4) * M, (LB.h - 4) * M), new THREE.MeshBasicMaterial({ map: LBOX_TEX, toneMapped: false }));
-  lboxFace.position.copy(v3(Wd - 2 - LB.d - 0.15, sb.top + LB.h / 2, (LB.z[0] + LB.z[1]) / 2)); lboxFace.rotation.y = -Math.PI / 2; shell.add(lboxFace);
+  // v16: "on the left of that shelf is my ikea light box" ... "black not white": the OBEGRÄNSAD panel, black, standing landscape against
+  // the wall at the shelf's stair end; its 16 x 16 LEDs fill a square in the middle of the face
+  const LB = R.LIGHTBOX, lbBlack = reg(new THREE.MeshStandardMaterial({ color: "#121213", roughness: 0.5 }));
+  cube(Wd - 1 - LB.d, sb.top, LB.z[1], LB.d, LB.h, LB.z[0] - LB.z[1], lbBlack);
+  const lbS = LB.h - 4;
+  lboxFace = new THREE.Mesh(new THREE.PlaneGeometry(lbS * M, lbS * M), new THREE.MeshBasicMaterial({ map: LBOX_TEX, toneMapped: false }));
+  lboxFace.position.copy(v3(Wd - 1 - LB.d - 0.15, sb.top + LB.h / 2, (LB.z[0] + LB.z[1]) / 2)); lboxFace.rotation.y = Math.PI / 2; shell.add(lboxFace);   // v16: faces the room (it faced the wall)
   // v15: "add my small laser from the middle": a small star projector on the shelf; its dots land on the ceiling over the room
   const LZ = R.LASER, [lw, lh, ld] = LZ.size;
   cube(Wd - 6 - lw, sb.top, LZ.z - ld / 2, lw, lh, ld, reg(new THREE.MeshStandardMaterial({ color: "#202124", roughness: 0.35, metalness: 0.3 })));
@@ -509,7 +523,8 @@ function buildShell() {
   }
   for (let i = 0; i < 18; i++) { const g = new THREE.SphereGeometry(0.03, 8, 6); g.scale(1, 0.3, 1); const q = v3(Wd - sb.d / 2 - 1 + (r() - 0.5) * 12, sb.top + 13 + r() * 6, PB.z + (r() - 0.5) * 14); g.translate(q.x, q.y, q.z); leaves.push(g); }
   shell.add(shadow(new THREE.Mesh(mergeGeometries(leaves), leaf))); shell.add(new THREE.Mesh(mergeGeometries(vines), vine));
-  // v15: "either add my hat there or give it a wallstand": an oak peg on the stairs wall with the hat on it (photo to come)
+  // v15: "either add my hat there or give it a wallstand": an oak peg on the stairs wall with the hat on it. v16: off until the photo
+  if (R.HAT_PEG) {
   const HP = R.HAT_PEG, oakM = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
   const peg = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.017, HP.d * M, 20), oakM); peg.rotation.z = Math.PI / 2; peg.position.copy(v3(Wd - HP.d / 2, HP.y, HP.z)); shell.add(shadow(peg));
   const rose = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.012, 24), oakM); rose.rotation.z = Math.PI / 2; rose.position.copy(v3(Wd - 0.6, HP.y, HP.z)); shell.add(rose);
@@ -521,6 +536,7 @@ function buildShell() {
   hat.add(shadow(brim), shadow(crown), ribbon);
   // resting on the peg, crown up and tipped a little towards the room, as a hat sits on a hook
   hat.rotation.z = -0.22; hat.position.copy(v3(Wd - 15, HP.y + 1.5, HP.z)); shell.add(hat);
+  }
   // ceiling LED strip: an emissive line round the room's edge
   ledMat = new THREE.MeshBasicMaterial({ color: "#ffd9a8", toneMapped: false });
   const ly = R.LED_Y - 0.8;
@@ -554,10 +570,10 @@ function buildLights() {
   lights.strip.push(area(warm, R.WELL_X0, 6, [R.WELL_X0 / 2, C - 4, -4], [R.WELL_X0 / 2, 0, -4]));
   lights.strip.forEach(l => l.userData.k = 520);
   // the uprights' grooves wash the wall either side of the TV
-  for (const x of [2.25, 133.25]) { const l = area("#ffcf96", 2, 112, [x, 134, 22], [x, 134, 40]); l.userData.k = 3500; lights.uprights.push(l); }
+  for (const x of [2.25, 133.25]) { const l = area("#ffcf96", 2, 112, [x, 134, 22], [x, 134, 40]); l.userData.k = 3500; l.userData.colKey = "strips"; lights.uprights.push(l); }
   // v15: the side run's strip washes the side wall below it
   const SR = R.SIDE_RUN, zr0 = SR.edge[0][1], zr1 = SR.edge[SR.edge.length - 1][1];
-  const sw = area("#ffcf96", zr0 - zr1, 3, [9, SR.under - 1, (zr0 + zr1) / 2], [0, SR.under - 60, (zr0 + zr1) / 2]); sw.userData.k = 260; lights.uprights.push(sw);
+  const sw = area("#ffcf96", zr0 - zr1, 3, [9, SR.under - 1, (zr0 + zr1) / 2], [0, SR.under - 60, (zr0 + zr1) / 2]); sw.userData.k = 260; sw.userData.colKey = "strips"; lights.uprights.push(sw);
   // bias light behind the TV, onto the wall
   const [tx0, tx1] = R.TV_X, [ty0, ty1] = R.TV_Y;
   const b = area("#e9efff", tx1 - tx0 - 10, ty1 - ty0 - 10, [(tx0 + tx1) / 2, (ty0 + ty1) / 2, R.TV_Z + 5], [(tx0 + tx1) / 2, (ty0 + ty1) / 2, 60]);
@@ -675,10 +691,10 @@ function applyLight() {
   set(lights.lamp, L.lamp);                                   // v15: the lamp's colour bulbs dim in their app
   set(lights.tv, L.bias > 0 && hd ? 100 : 0);
   ledMat.color.set(L.strip > 0 ? "#ffd9a8" : "#5a5248").multiplyScalar(L.strip > 0 ? 0.6 + L.strip / 100 * 1.4 : 1);
-  runLed.color.set(L.uprights > 0 ? "#ffd9a8" : "#5a5248").multiplyScalar(L.uprights > 0 ? 0.6 + L.uprights / 100 * 1.4 : 1);
+  runLed.color.set(L.uprights > 0 ? (S.col.strips || "#ffd9a8") : "#5a5248")   // v16: smart colour strips.multiplyScalar(L.uprights > 0 ? 0.6 + L.uprights / 100 * 1.4 : 1);
   ceilMat.emissiveIntensity = 0.55 * Math.pow(L.strip / 100, 1.2);
   tvScreen.material = L.bias > 0 ? screenOn : screenOff;
-  lboxFace.material.color.set(S.lbox && !day ? "#ffffff" : "#8a8580");
+  lboxFace.material.color.set(S.lbox && !day ? "#ffffff" : "#5a5a5e");
   laserDots.visible = S.laser && !day;
   curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
   win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
@@ -704,7 +720,7 @@ const VIEWS = {
   sofa:    { label: "From the sofa", eye: [62, 104, -255], at: [72, 112, 20], fov: 58 },
   door:    { label: "From the door", eye: [372, 165, -6], at: [110, 85, -210], fov: 64 },
   stairs:  { label: "From the stairs", eye: [438, 205, 4], at: [190, 70, -205], fov: 62 },
-  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [198, 140, -180], at: [467, 92, -180] }, fov: 56 },
+  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [190, 150, -172], at: [467, 126, -182] }, fov: 56 },
   pc:      { label: "The PC side wall", eye: [345, 135, -168], at: [0, 112, -168], fov: 56 },
   plan:    { label: "Bird’s eye", eye: [233.5, 1150, -135], at: [233.5, 0, -134.9], fov: 30, above: true },
   doll:    { label: "Dolls’ house", eye: [780, 560, -700], at: [230, 60, -120], fov: 40, above: true },
@@ -804,7 +820,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v15 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v16 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");

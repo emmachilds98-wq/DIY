@@ -36,6 +36,10 @@ SOURCES = {
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
     "fliphinge": "Lee Valley: 40574 narrow flip-top hinges, solid brass, 1/2 in × 2 3/4 in (1.27 × 7.0 cm), for card and flip-top tables (leevalley.com); their 40208 card-table hinge is 1 3/16 in (3.0 cm) wide, too wide for a 27 mm edge",
     "curtains": "Your photo (20 Oct) and note: Dunelm hessian pencil-pleat curtains; Dunelm pencil-pleat drops run 137, 182 and 228 cm with a 3 in header; Dunelm 28 mm wooden poles, 120–360 cm, rings included (one per 10 cm), finials up to 8 cm more (dunelm.com)",
+    "obegransad": "IKEA: OBEGRÄNSAD LED wall lamp, black (00526248): 52 × 36 × 6 cm, 5 W, five lighting programmes, hangs landscape or portrait (ikea.com); its face is a 16 × 16 grid of white LEDs",
+    "pads": "Sony: DualSense controller 160 × 66 × 106 mm (W × H × D); Microsoft: Xbox Wireless Controller 153 × 61 × 104 mm",
+    "crate": "Record-shop browser crates and LP storage boxes are made about 32.5–33 cm inside for 31.4 cm sleeves (31.8–32.4 in outer sleeves), flipped by the sleeves' top edges",
+    "strips": "Philips Hue Lightstrip Plus V4: 2 m base kit, cuttable every 33 cm, extendable with 1 m; WiZ Wi-Fi LED strip, 2 m starter kit, cuttable; both RGB and tunable white, in the same apps as the bars' bulbs (philips-hue.com; wizconnected.com)",
     "e14": "Smart colour E14 bulbs for the bars: WiZ Colour P45 E14, 4.9 W, 4.5 × 10.1 cm, Wi-Fi, no hub (Philips UK specification sheet, 8719514437333); Philips Hue White and Colour Ambiance E14 lustre, 5.1 W, 45 × 77 mm (Philips Hue; Lampmasters)",
 }
 ORDER = list(SOURCES)
@@ -119,7 +123,7 @@ def fliptop_zones():
     hinge_x, hinge_z = g.DOOR_X[0], g.BREAST_D_WEST
     first6 = z0 - side6 / 2
     corner = ((g.TABLE_X[1] - tuck + cd - hinge_x) ** 2 + (first6 + cw / 2 - hinge_z) ** 2) ** 0.5
-    zone_a = ("The flip-top table on the chimney breast (A)", f"110 × 160 open, running from the breast towards the window, {r1(-z1)} out", common + [
+    zone_a = ("Option A: the flip-top table on the chimney breast", f"110 × 160 open, running from the breast towards the window, {r1(-z1)} out", common + [
         ("Its end and the sofa", f"the table ends {r1(-z1)} out", ref("sofa"), f"the sofa's front at {r1(-g.SOFA_FRONT_Z)}",
          f"{r1(sofa_gap_a)} between them: no chair at that end (it would need {r1(cd - tuck)}), and the way round is down the sides", CHECK if sofa_gap_a < cd - tuck else TIGHT),
         ("The coffee table", f"east-side chairs back to x {r1(east_back)}", ref("terje"), f"coffee table x {r1(g.COFFEE['x'][0])}–{r1(g.COFFEE['x'][1])}",
@@ -134,7 +138,7 @@ def fliptop_zones():
     north_back = bz1 - cd + tuck
     lamp = g.FLOOR_LAMP_SPOTS["corner"][1]
     end_lo = g.TABLE_B_CZ - cw / 2
-    zone_b = ("The flip-top table under the shelf, by the stairs (B)", f"110 × 160 open, running from the stairs wall into the room, its end at x {r1(bx_end)}", common + [
+    zone_b = ("The flip-top table under your shelf, by the stairs (B, the default)", f"110 × 160 open, running from the stairs wall into the room, its end at x {r1(bx_end)}", common + [
         ("The stair side's chairs", f"backs at z {r1(south_back)} when pulled out", ref("terje", "photo20"), f"the stair box's face at {r1(g.STAIRS_WALL_Z[0])}",
          f"{r1(g.STAIRS_WALL_Z[0] - south_back)} behind them: tuck them in after a meal so the stair's foot stays clear", TIGHT),
         ("The window side's chairs", f"backs at z {r1(north_back)}", ref("terje"), f"the window wall at {r1(g.WINDOW_Z)}",
@@ -144,6 +148,12 @@ def fliptop_zones():
         ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}, {r1(g.FOLDED_D)} off the wall", ref("photo20"), f"shelf's underside about {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
          f"{r1(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
         ("Light over the table", "the existing pendant point, for bar 2", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})", "over the open table's stair side: the bar runs along it", PASS),
+        ("Your shelf and the pipe boxing (v16)", f"the shelf {r1(g.SHELF_B['z'][0] - g.SHELF_B['z'][1])} long", ref("photo20", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])}, {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} out",
+         f"drawn {r1(g.SHELF_B['z'][1] - g.PIPE_BOX['z'][1])} short of it, {r1(g.SHELF_B['z'][0] - g.STAIRS_WALL_Z[0])} past the stair box (your photo: about 41)", PASS),
+        ("The OBEGRÄNSAD panel on the shelf (v16)", f"{r1(g.LIGHTBOX['z'][0] - g.LIGHTBOX['z'][1])} × {r1(g.LIGHTBOX['h'])} × {r1(g.LIGHTBOX['d'])}, standing landscape at the stair end", ref("obegransad"), f"shelf top {r1(g.SHELF_B['top'])} to the {r1(g.CEIL)} ceiling",
+         f"{r1(g.CEIL - g.SHELF_B['top'] - g.LIGHTBOX['h'])} over it: this needs the shelf at 198 or lower (measure it); higher, hang the panel on the wall beside the shelf instead", CHECK),
+        ("The window side's chairs and the pipe boxing", f"backs at z {r1(north_back)}", ref("terje", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])} (x {r1(g.PIPE_BOX['x'][0])} to the wall)",
+         f"{r1(north_back - g.PIPE_BOX['z'][1])} clear of the boxing", PASS if north_back > g.PIPE_BOX["z"][1] else TIGHT),
         ("Fixing the brackets", "500 kg a pair, into the wall", ref("hebgo"), "the west wall's build isn't known yet", "solid (plugs and screws) or studwork (fix into studs): knock and look before choosing this site", CHECK),
     ])
     return zone_a, zone_b
@@ -255,10 +265,17 @@ def zones():
         ]),
         bay1,
         bay2,
-        ("Bay 3, the records (18 mm ply carcass from the floor)", "56.4 wide × 40 deep × 69.4 tall inside, under the turntable", [
-            ("Two face-out record trays", "trays 53.9 × 40 on 400 mm runners, 68–70 kg pairs", ref("runners", "media"), "56.4 inside", "exact: 53.9 + 2 × 1.25 runner allowance = 56.4", PASS),
-            ("Tray heights", "lower sleeves to 34.4, upper to 69.1", ref("media"), "top panel underside 71.2", "2.6 and 2.1 finger room", PASS),
-            ("One LP trough, the tray's full width (v15: LPs only)", f"{r1(g.LP)} sleeves face-out, centred", ref("media"), f"{r1(g.TRAY_INSIDE)} inside each tray", f"{r1((g.TRAY_INSIDE - g.LP) / 2)} each side: room for both hands to flip; no divider, no singles slot", PASS),
+        ("Bay 3: the LP crates and the slim game column (v16)", f"56.4 wide × 40 deep × 69.4 tall inside the ply carcass, split by a 12 mm divider", [
+            ("Across the bay", f"slim drawer {r1(g.SLIM_BOX_X[1] - g.SLIM_BOX_X[0])} + divider 1.2 + LP crate {r1(g.TRAY_BOX[0])}, each drawer with 1.27 runners a side", ref("runners"), f"{r1(g.B3_IN[1] - g.B3_IN[0])} inside",
+             f"exact: {r1(g.SLIM_BOX_X[1] - g.SLIM_BOX_X[0])} + 2.54 + 1.2 + {r1(g.TRAY_BOX[0])} + 2.54 = 56.4; nothing left over", PASS),
+            ("LPs in the crate", f"{r1(g.LP)} sleeves face-out, leaning back 10°", ref("media", "crate"), f"{r1(g.TRAY_INSIDE)} trough", f"{r1((g.TRAY_INSIDE - g.LP) / 2)} each side: snug like a shop crate; outer sleeves up to 32.4 still fit", TIGHT),
+            ("Crate heights", "lower sleeves to 34.4, upper to 69.1", ref("media"), "top panel underside 71.2", "2.6 and 2.1 to lift a sleeve", PASS),
+            ("Games in the slim drawers, face-out", f"DVD-size cases {r1(g.GAME_CASE[0])} wide, {r1(g.GAME_CASE[1])} tall, leaning back 10°", ref("media"), f"{r1(g.SLIM_INSIDE)} inside (6 mm ply sides)",
+             f"{r1(g.SLIM_INSIDE - g.GAME_CASE[0])} spare: they flip like the records; about {g.SLIM_DRAWERS[0]['n']} a drawer in 40 deep", TIGHT),
+            ("The game drawers' height", f"cases stand {r1(g.GAME_CASE[1] * 0.985)} on a 1.2 base", ref("media"), f"{r1(g.SLIM_DRAWERS[1]['yb'] - g.SLIM_DRAWERS[0]['yb'])} from one drawer to the next",
+             f"{r1(g.SLIM_DRAWERS[1]['yb'] - g.SLIM_DRAWERS[0]['yb'] - 1.2 - g.GAME_CASE[1] * 0.985)} clear over the cases", PASS),
+            ("Pads in the top slim drawer", f"4 pads on edge, two side by side: 2 × {r1(g.PAD[2])} = {r1(2 * g.PAD[2])} across, {r1(g.PAD[0])} long", ref("pads"), f"{r1(g.SLIM_INSIDE)} wide, {r1(g.TRAY_TOP_PANEL - g.SLIM_DRAWERS[2]['yb'] - 1.2)} tall",
+             f"{r1(g.SLIM_INSIDE - 2 * g.PAD[2])} across; {r1(g.PAD[1])} tall in {r1(g.TRAY_TOP_PANEL - g.SLIM_DRAWERS[2]['yb'] - 1.2)}; the remotes in front", TIGHT),
         ]),
         ("The side wall: one oak run from the corner to the PC", f"one board line at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep along the LPs, sweeping out to {r1(g.PC_SHELF_D)} under the PC (v15)", [
             ("The sweep from the ledge to the PC shelf", f"front edge 7 → {r1(g.PC_SHELF_D)} over {r1(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} (z {r1(g.SIDE_SWEEP[0])} to {r1(g.SIDE_SWEEP[1])})", "", f"the last wrap LP ends at z {r1(g.WRAP_Z[0] - 1.5 - 4 * g.LP - 3 * 1.4)}; the PC starts at z {r1(g.PC_Z[0])}",
@@ -313,9 +330,25 @@ def zones():
     ]
     if g.TABLE_STYLE == "fliptop":   # v15: the flip-top replaces the fold-down-and-lift-off table on both walls
         za, zb_ = fliptop_zones()
-        zs = [za if title.startswith("The dining wall") else zb_ if title.startswith("Option: the table under the shelf") else (title, space, rows)
-              for (title, space, rows) in zs]
-        return zs
+        L = g.NOW_LEDGE
+        gap = (L["x"][1] - L["x"][0] - L["n"] * g.LP) / (L["n"] + 1)
+        lp_top = L["top"] + g.LP * 0.99
+        breast = ("The chimney breast, with the table by the stairs (v16)", f"breast {r1(g.BREAST_W)} wide; the “now playing” ledge {r1(L['x'][1] - L['x'][0])} × {r1(L['d'])}, top {r1(L['top'])}", [
+            ("Three LPs on the ledge", f"3 × {r1(g.LP)} = {r1(3 * g.LP)}", ref("media"), f"{r1(L['x'][1] - L['x'][0])} long", f"{r1(gap)} between and at the ends", PASS),
+            ("Leaning back 8°, under the framed LPs", f"tops at {r1(lp_top)}", ref("media"), f"frames from {r1(g.FRAMES_Y)}", f"{r1(g.FRAMES_Y - lp_top)} between", PASS),
+            ("Beside the turntable", f"ledge {r1(L['top'])} up, {r1(L['d'])} deep", ref("atlp120"), f"the deck's top at about {r1(g.WORKTOP + g.DECK[1])}, an arm's reach to the left",
+             "sleeve off the ledge, record on, sleeve back: the base stands 8 proud of the breast, the ledge 7", PASS),
+            ("If you choose option A instead", "the flip-top folds on the breast", ref("liftoff"), "the ledge's place", "the ledge comes off its two screws; the frames stay", PASS),
+        ])
+        out = []
+        for (title, space, rows) in zs:
+            if title.startswith("The dining wall"):
+                out += [zb_, breast]
+            elif title.startswith("Option: the table under the shelf"):
+                out.append(za)
+            else:
+                out.append((title, space, rows))
+        return out
     if g.SUB_IN_WALL:   # v13.5: nothing under the dining wall now
         gone = ("the sub's cover", "Sub under its oak cover", "The sound: no sides", "Spills", "Knocks: it can't", "Feet under the table")
         for zi_, (title, space, rows) in enumerate(zs):

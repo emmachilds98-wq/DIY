@@ -342,57 +342,46 @@ REC_OPEN = 0.0      # lower record drawer
 
 REC_OPEN_UP = 0.0   # upper record drawer
 
+def _lq(q, u, v):
+    """A point inside a quad (bottom-left, bottom-right, top-right, top-left) at (u, v)."""
+    bl, br, tr, tl = q
+    bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
+    tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
+    return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
+
+
+def _lip(x1, x2, yb, oz, h=5.0, pull=14.0):
+    """An oak drawer lip with the finger pull cut in its underside, centred."""
+    o = [box(x1, yb, oz - 0.6, x2 - x1, h, 1.5, OAK, OAK_T, OAK_S, extra=GH)]
+    cx = (x1 + x2) / 2
+    a, b = P(cx - pull / 2, yb + h, oz - 0.61), P(cx + pull / 2, yb + h, oz - 0.61)
+    o.append(f'<path d="M{a[0]:.1f},{a[1]:.1f} Q{(a[0]+b[0])/2:.1f},{a[1]+7:.1f} {b[0]:.1f},{b[1]:.1f}Z" fill="#7a5130"/>')
+    return "\n".join(o)
+
+
+PLY, PLY_T, PLY_S = "#d9c09a", "#e8d3b0", "#b99e78"
+
+
 def record_tier(yb, open_cm, part="all"):
-    """v8 face-out record tray in the bay-3 carcass. Box 53.9 x 40 on 400 mm runners screwed to the 18 mm ply.
-    Thinner build: 9 mm sides, 12 mm base, 6 mm oak divider, 5 cm oak lip. LP trough 32.6 wide on the left,
-    7-inch singles face-out in an 18.9 cm trough on the right, both leaning back 10 degrees. v15: LPs only (TRAY_LP_ONLY), centred in
-    the full 52.1 width with 10.3 either side to flip with both hands; no divider, no singles."""
+    """v16: a face-out LP crate in bay 3's right-hand column, under the turntable (absolute x). Box 34.86 x 40 on 400 mm runners:
+    9 mm sides, 12 mm base with a felt top, a low front; the LPs lean back 10 degrees in a 33 cm trough, the snug width record shops
+    use, and flip by their top edges. About 90 LPs a crate."""
     o = []
     oz = -open_cm
-    LIP_H = 5.0
+    bx1, bx2 = G.REC_BOX_X
     if part == "lip":
-        o.append(box(121.6, yb, oz - 0.6, 56.8, LIP_H, 1.5, OAK, OAK_T, OAK_S, extra=GH))
-        a, b = P(143, yb + LIP_H, oz - 0.61), P(157, yb + LIP_H, oz - 0.61)
-        o.append(f'<path d="M{a[0]:.1f},{a[1]:.1f} Q{(a[0]+b[0])/2:.1f},{a[1]+7:.1f} {b[0]:.1f},{b[1]:.1f}Z" fill="#7a5130"/>')
-        return "\n".join(o)
-    bx1, bx2 = 123.07, 176.93
+        return _lip(bx1 - 0.7, bx2 + 0.7, yb, oz)
     ix1, ix2 = bx1 + 0.9, bx2 - 0.9
     yt = yb + 1.2
-    PLY, PLY_T, PLY_S = "#d9c09a", "#e8d3b0", "#b99e78"
     if open_cm > 0:
         o.append(poly([P(bx1, 0.05, oz), P(bx2 + 3, 0.05, oz), P(bx2 + 3, 0.05, oz + 34), P(bx1, 0.05, oz + 34)], "#000", 'opacity="0.2" filter="url(#soft)"'))
     o.append(box(bx1, yb, oz + 39.1, bx2 - bx1, 12, 0.9, PLY, PLY_T, PLY_S))            # back
     o.append(box(bx1, yb, oz, 0.9, 12, 40, PLY, PLY_T, "#ead7b6"))                      # left side
     o.append(box(bx1, yb, oz, bx2 - bx1, 1.2, 40, "#cdb38a", "#5a5148"))               # base, felt top
     lean = math.radians(10)
-    dx = ix1 + 32.6                                                                     # divider
-    lp_only = G.TRAY_LP_ONLY                                                            # v15: LPs only, centred, no divider
-    # singles trough: 7-inch sleeves face-out, leaning back
-    sh, sdz = 18.3 * math.cos(lean), 18.3 * math.sin(lean)
-    s1, s2 = dx + 0.6 + 0.3, dx + 0.6 + 0.3 + 18.3
-    scols = ["#1f1f1f", "#e9e3d3", "#c8452f", "#3a6ea5", "#f0c24b", "#6a8f5a", "#b3307a", "#2f3e5c", "#d27a2e", "#efe6d2", "#14806d", "#2c2c2c"]
-    for i, col in enumerate([] if lp_only else scols):
-        zb = oz + 33.0 - i * 2.5
-        q = [P(s1, yt, zb), P(s2, yt, zb), P(s2, yt + sh, zb + sdz), P(s1, yt + sh, zb + sdz)]
-        o.append(poly(q, col, 'stroke="#000" stroke-opacity="0.25" stroke-width="0.5"'))
-    zf = oz + 2.6
-    sq = [P(s1, yt, zf), P(s2, yt, zf), P(s2, yt + sh, zf + sdz), P(s1, yt + sh, zf + sdz)]
-    def Lq(q, u, v):
-        bl, br, tr, tl = q
-        bx_ = bl[0] + (br[0] - bl[0]) * u; by_ = bl[1] + (br[1] - bl[1]) * u
-        tx_ = tl[0] + (tr[0] - tl[0]) * u; ty_ = tl[1] + (tr[1] - tl[1]) * u
-        return (bx_ + (tx_ - bx_) * v, by_ + (ty_ - by_) * v)
-    sart = ([("#2f3e5c", 0, 1, 0, 1), ("#f0c24b", 0.1, 0.9, 0.1, 0.9), ("#c8452f", 0.32, 0.68, 0.32, 0.68)] if yb < 10 else
-            [("#efe6d2", 0, 1, 0, 1), ("#14806d", 0, 1, 0, 0.35), ("#1f1f1f", 0.2, 0.8, 0.5, 0.85)])
-    if not lp_only:
-        for (c, u1, u2, v1, v2) in sart:
-            o.append(poly([Lq(sq, u1, v1), Lq(sq, u2, v1), Lq(sq, u2, v2), Lq(sq, u1, v2)], c))
-        o.append(poly(sq, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.7"'))
-        o.append(box(dx, yt, oz + 0.9, 0.6, 10, 38.2, OAK, OAK_T, OAK_S))                 # oak divider
-    # LP trough
-    hgt, dzl = 31.4 * math.cos(lean), 31.4 * math.sin(lean)
-    x1 = ix1 + (G.TRAY_INSIDE - 31.4) / 2 if lp_only else ix1 + 0.6
-    x2 = x1 + 31.4
+    hgt, dzl = G.LP * math.cos(lean), G.LP * math.sin(lean)
+    x1 = ix1 + (G.TRAY_INSIDE - G.LP) / 2
+    x2 = x1 + G.LP
     cols = ["#2c2c2c", "#e9e3d3", "#3a6ea5", "#c8452f", "#f0c24b", "#1f1f1f", "#6a8f5a", "#b3307a", "#efe6d2", "#2f3e5c", "#d27a2e"]
     for i, col in enumerate(cols):
         zb = oz + 31.0 - i * 2.6
@@ -404,10 +393,10 @@ def record_tier(yb, open_cm, part="all"):
            if yb < 10 else
            [("#1f3a52", 0, 1, 0, 1), ("#e9b44c", 0, 1, 0, 0.42), ("#d8613e", 0.12, 0.88, 0.5, 0.9), ("#f5e6c6", 0.35, 0.65, 0.58, 0.82)])
     for (c, u1, u2, v1, v2) in art:
-        o.append(poly([Lq(fq, u1, v1), Lq(fq, u2, v1), Lq(fq, u2, v2), Lq(fq, u1, v2)], c))
+        o.append(poly([_lq(fq, u1, v1), _lq(fq, u2, v1), _lq(fq, u2, v2), _lq(fq, u1, v2)], c))
     o.append(poly(fq, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
     if yb < 10:
-        cc = Lq(fq, 0.5, 0.71)
+        cc = _lq(fq, 0.5, 0.71)
         o.append(f'<circle cx="{cc[0]:.1f}" cy="{cc[1]:.1f}" r="10" fill="#1b1b1b"/>')
         o.append(f'<circle cx="{cc[0]:.1f}" cy="{cc[1]:.1f}" r="3.6" fill="#e8603c"/>')
     o.append(box(ix2, yb, oz, 0.9, 12, 40, PLY, PLY_T, PLY_S))                          # right side
@@ -416,6 +405,68 @@ def record_tier(yb, open_cm, part="all"):
         a, b = P(bx2 + 0.05, yb + 6, oz + 1), P(bx2 + 0.05, yb + 6, oz + 38)
         o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#9aa0a6" stroke-width="5"/>')
         o.append(record_tier(yb, open_cm, "lip"))
+    return "\n".join(o)
+
+
+SLIM_OPEN = 0.0      # how far the middle slim drawer (games) is out
+
+
+GAME_ARTS = [("#1d2f6b", [(0, 1, 0.88, 1, "#0f0f12"), (0.06, 0.94, 0.1, 0.84, "#2a5aa6"), (0.15, 0.85, 0.5, 0.78, "#f1e7d0"), (0.25, 0.75, 0.16, 0.44, "#e8603c")]),
+             ("#2c8f3e", [(0, 1, 0.86, 1, "#3fae54"), (0.08, 0.92, 0.1, 0.8, "#1a2a3a"), (0.2, 0.8, 0.45, 0.72, "#e0b43a"), (0.3, 0.7, 0.18, 0.4, "#c84b34")]),
+             ("#202226", [(0, 1, 0.87, 1, "#0d0d0f"), (0.07, 0.93, 0.1, 0.83, "#7b2d3a"), (0.18, 0.82, 0.46, 0.74, "#f0c24b"), (0.3, 0.7, 0.14, 0.38, "#efe6d2")])]
+
+
+def slim_drawer(d, open_cm, part="all"):
+    """v16: one of the three slim drawers in bay 3's left-hand column (absolute x): 6 mm birch-ply box 15.26 x 40 on 400 mm runners,
+    14.06 inside. "games": DVD-size cases face-out, leaning back 10 degrees, flipped like the records (about 22 a drawer);
+    "pads": two pads on edge each side of a divider strip, the TV and soundbar remotes, and a USB-C charging lead through the back."""
+    o = []
+    oz = -open_cm
+    yb = d["yb"]
+    bx1, bx2 = G.SLIM_BOX_X
+    if part == "lip":
+        return _lip(bx1 - 0.6, bx2 + 0.6, yb, oz, 5.0, 8.0)
+    t = G.SLIM_SIDE
+    ix1, ix2 = bx1 + t, bx2 - t
+    yt = yb + 1.2
+    if open_cm > 0:
+        o.append(poly([P(bx1, 0.05, oz), P(bx2 + 3, 0.05, oz), P(bx2 + 3, 0.05, oz + 34), P(bx1, 0.05, oz + 34)], "#000", 'opacity="0.2" filter="url(#soft)"'))
+    o.append(box(bx1, yb, oz + 40 - t, bx2 - bx1, 10, t, PLY, PLY_T, PLY_S))           # back
+    o.append(box(bx1, yb, oz, t, 10, 40, PLY, PLY_T, "#ead7b6"))                       # left side
+    o.append(box(bx1, yb, oz, bx2 - bx1, 1.2, 40, "#cdb38a", "#5a5148"))              # base, felt top
+    if d["kind"] == "games":
+        lean = math.radians(10)
+        cw, ch, ct = G.GAME_CASE
+        hgt, dzl = ch * math.cos(lean), ch * math.sin(lean)
+        x1 = ix1 + (G.SLIM_INSIDE - cw) / 2
+        x2 = x1 + cw
+        n = 9
+        for i in range(n - 1, -1, -1):
+            zb = oz + 2.6 + i * 1.45 * 2.4
+            col, art = GAME_ARTS[(i + (0 if yb < 10 else 1)) % len(GAME_ARTS)]
+            q = [P(x1, yt, zb), P(x2, yt, zb), P(x2, yt + hgt, zb + dzl), P(x1, yt + hgt, zb + dzl)]
+            o.append(poly(q, col, 'stroke="#000" stroke-opacity="0.3" stroke-width="0.6"'))
+            if i == 0:
+                for (u1, u2, v1, v2, c) in art:
+                    o.append(poly([_lq(q, u1, v1), _lq(q, u2, v1), _lq(q, u2, v2), _lq(q, u1, v2)], c))
+    else:
+        pw, pd, ph = G.PAD
+        o.append(box(ix1 + G.SLIM_INSIDE / 2 - 0.3, yt, oz + 1.5, 0.6, 5, 37, PLY, PLY_T, PLY_S))   # centre strip
+        for k, (xa, col) in enumerate([(ix1 + 0.2, "#f2f2f0"), (ix1 + G.SLIM_INSIDE / 2 + 0.5, "#1c1d20")]):
+            for j in range(2):
+                zb = oz + 18.5 + j * 9.0
+                o.append(box(xa, yt, zb, ph - 0.2, pd, 8.0, col, "#2a2b2e" if k else "#e2e2df", "#bdbdb9" if not k else "#121214"))
+        o.append(box(ix1 + 0.4, yt, oz + 2.0, 4.2, 2.2, 14.5, "#1a1a1c", "#2b2b2e"))        # TV remote
+        o.append(box(ix1 + 5.2, yt, oz + 2.0, 4.0, 2.0, 12.0, "#26272a", "#35363a"))        # soundbar remote
+        o.append(box(ix1 + 9.8, yt, oz + 3.0, 3.6, 1.6, 9.0, "#ececea", "#f7f7f5"))         # streaming remote
+        a, b = P(ix2 - 1.2, yt + 0.6, oz + 39), P(ix2 - 2.0, yt + 0.6, oz + 17)
+        o.append(f'<path d="M{a[0]:.1f},{a[1]:.1f} Q{b[0]+6:.1f},{(a[1]+b[1])/2:.1f} {b[0]:.1f},{b[1]:.1f}" fill="none" stroke="#222" stroke-width="1.6"/>')
+    o.append(box(ix2, yb, oz, t, 10, 40, PLY, PLY_T, PLY_S))                           # right side
+    o.append(box(bx1, yb, oz, bx2 - bx1, 4.0, t, PLY, PLY_T, PLY_S))                   # low front
+    if open_cm > 0:
+        a, b = P(bx2 + 0.05, yb + 5, oz + 1), P(bx2 + 0.05, yb + 5, oz + 38)
+        o.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#9aa0a6" stroke-width="4"/>')
+        o.append(slim_drawer(d, open_cm, "lip"))
     return "\n".join(o)
 
 GAME_OPEN = 0.0
@@ -627,30 +678,28 @@ def drawer_inset(x0=24, y0=852, num=16):
     return "\n".join(o)
 
 def record_inset(x0=1545, y0=330, num=26):
-    k = 3.9
+    """v16: an LP crate from above: 34.86 x 40, the 33 cm trough, LPs face-out."""
+    k = 4.6
+    bw, bd = G.TRAY_BOX
     w, h = 245, 236
     o = [f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="10" fill="#f4efe4" opacity="0.96"/>',
          f'<circle cx="{x0 + 24}" cy="{y0 + 24}" r="12" fill="#fff" stroke="#14261d" stroke-width="1.4"/>',
          f'<text x="{x0 + 24}" y="{y0 + 28.5}" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#14261d" text-anchor="middle">{num}</text>',
-         f'<text x="{x0 + 42}" y="{y0 + 29}" font-family="Inter, sans-serif" font-size="12.5" font-weight="600" fill="#14261d">Record tray from above</text>']
-    ox, oy = x0 + (w - 53.9 * k) / 2, y0 + 44
+         f'<text x="{x0 + 42}" y="{y0 + 29}" font-family="Inter, sans-serif" font-size="12.5" font-weight="600" fill="#14261d">LP crate from above</text>']
+    ox, oy = x0 + (w - bw * k) / 2, y0 + 40
     X = lambda c: ox + c * k
-    Y = lambda c: oy + (40 - c) * k
-    o.append(f'<rect x="{X(0)}" y="{Y(40)}" width="{53.9*k}" height="{40*k}" fill="#d9c09a" stroke="#a88a62"/>')
-    o.append(f'<rect x="{X(0.9)}" y="{Y(39.1)}" width="{52.1*k}" height="{38.2*k}" fill="#5a5148"/>')
+    Y = lambda c: oy + (bd - c) * k * 0.85
+    o.append(f'<rect x="{X(0)}" y="{Y(bd)}" width="{bw*k}" height="{bd*k*0.85}" fill="#d9c09a" stroke="#a88a62"/>')
+    o.append(f'<rect x="{X(0.9)}" y="{Y(bd - 0.9)}" width="{G.TRAY_INSIDE*k}" height="{(bd - 1.8)*k*0.85}" fill="#5a5148"/>')
     cols = ["#e9e3d3", "#2f3e5c", "#c8452f", "#f0c24b", "#1f1f1f", "#6a8f5a", "#3a6ea5", "#b3307a"]
+    lx = 0.9 + (G.TRAY_INSIDE - G.LP) / 2
     for i in range(40):
         zz = 3.0 + i * 0.78
-        o.append(f'<rect x="{X(1.5)}" y="{Y(zz + 0.5)}" width="{31.4*k}" height="{max(0.5*k - 0.3, 0.8)}" fill="{cols[i % 8]}"/>')
-    o.append(f'<rect x="{X(33.5)}" y="{Y(39.1)}" width="{0.6*k}" height="{38.2*k}" fill="#c48c57"/>')
-    for i in range(46):
-        zz = 3.0 + i * 0.72
-        o.append(f'<rect x="{X(34.4)}" y="{Y(zz + 0.4)}" width="{18.3*k}" height="{max(0.4*k - 0.3, 0.7)}" fill="{cols[(i*3) % 8]}"/>')
-    o.append(f'<rect x="{X(-1.45)}" y="{Y(1.4)}" width="{56.8*k*0.95}" height="{1.5*k}" fill="#c48c57"/>')
-    o.append(f'<text x="{X(17)}" y="{Y(22)}" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#f4efe4" text-anchor="middle" paint-order="stroke" stroke="#14261d" stroke-width="3">~90 LPs</text>')
-    o.append(f'<text x="{X(43.5)}" y="{Y(22)}" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#f4efe4" text-anchor="middle" paint-order="stroke" stroke="#14261d" stroke-width="3">LPs only</text>')
-    o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 22}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">all face-out · LPs only, centred</text>')
-    o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 9}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">9 mm sides · 400 mm runners</text>')
+        o.append(f'<rect x="{X(lx)}" y="{Y(zz + 0.5)}" width="{G.LP*k}" height="{max(0.5*k*0.85 - 0.3, 0.8)}" fill="{cols[i % 8]}"/>')
+    o.append(f'<rect x="{X(-0.7)}" y="{Y(1.4)}" width="{(bw + 1.4)*k}" height="{1.5*k}" fill="#c48c57"/>')
+    o.append(f'<text x="{X(bw / 2)}" y="{Y(22)}" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f4efe4" text-anchor="middle" paint-order="stroke" stroke="#14261d" stroke-width="3">~{G.TRAY_LPS} LPs</text>')
+    o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 22}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">33 cm trough · all face-out, no gaps</text>')
+    o.append(f'<text x="{x0 + w/2}" y="{y0 + h - 9}" font-family="Inter, sans-serif" font-size="10" fill="#5f5a50" text-anchor="middle">box 34.9 × 40 · 400 mm runners</text>')
     return "\n".join(o)
 
 PAINT_OLD = ["#16271f", "#1d3d30", "#21443a", "#22432f", "#244a38", "#244a39", "#264c3a", "#28503e", "#2a5141",
@@ -1389,18 +1438,22 @@ def _unit():
         return "\n".join(q)
     o.append(place(G.FILLER, RAISE, 0, bays12))
 
-    # bay 3: 18 mm ply carcass from the floor with the two face-out record trays (the v9 trays), under the turntable
+    # bay 3: 18 mm ply carcass from the floor. v16: a 12 mm ply divider splits it: the LP column on the right, under the turntable (two
+    # snug face-out crates), the slim column on the left (two face-out game drawers, the pads and remotes drawer on top)
     b3a, b3b = G.BAYS[2]
     o.append(bay_interior(b3a + 1.8, b3b - 1.8, 1.8, 71.2))
     o.append(poly([P(b3a + 1.8, 71.2, 2), P(b3b - 1.8, 71.2, 2), P(b3b - 1.8, 48, 2), P(b3a + 1.8, 48, 2)], "url(#warmpool)", 'opacity="0.9"'))
-    dx = b3a - 120.0
+    o.append(box(G.B3_DIV[0], 1.8, 2, G.B3_DIV[1] - G.B3_DIV[0], 69.4, 38, "#d8c39f", "#e6d2ae", "#b99e78"))
     if REC_OPEN_UP == 0:
-        o.append(place(dx, 0, 0, record_tier, G.TRAY_UPPER[0], 0))
+        o.append(record_tier(G.TRAY_UPPER[0], 0))
     if REC_OPEN == 0:
-        o.append(place(dx, 0, 0, record_tier, G.TRAY_LOWER[0], 0))
+        o.append(record_tier(G.TRAY_LOWER[0], 0))
+    for k, d in enumerate(G.SLIM_DRAWERS):
+        if not (k == 1 and SLIM_OPEN > 0):
+            o.append(slim_drawer(d, 0))
 
     (b1a, b1b), (b2a, b2b), _ = G.BAYS
-    o.append(face_frame(0, ALC_W, [(b1a + 2.6, b1b - 2.6, 11.6), (b2a + 2.6, b2b - 2.6, 11.6), (b3a + 2.6, b3b - 2.6, 2.6)]))
+    o.append(face_frame(0, ALC_W, [(b1a + 2.6, b1b - 2.6, 11.6), (b2a + 2.6, b2b - 2.6, 11.6), (b3a + 2.6, G.FACE_STILE[0], 2.6), (G.FACE_STILE[1], b3b - 2.6, 2.6)]))
     o.append(_line(P(0, 9, -0.02), P(b2b, 9, -0.02), "#000", 1, 'stroke-opacity="0.2"'))
     # the hidden slim drawer in the plinth under bay 2: a push-to-open front in the bottom rail
     pxa, pxb = G.PLINTH_DRAWER["x"]
@@ -1409,8 +1462,10 @@ def _unit():
     if PLINTH_OPEN > 0:
         o.append(plinth_drawer(PLINTH_OPEN))
     o.append(place(G.FILLER, RAISE, 0, lambda: game_drawer(GAME_OPEN) if GAME_OPEN > 0 else game_drawer(0, "lip")))
-    o.append(place(dx, 0, 0, lambda: record_tier(G.TRAY_UPPER[0], REC_OPEN_UP) if REC_OPEN_UP > 0 else record_tier(G.TRAY_UPPER[0], 0, "lip")))
-    o.append(place(dx, 0, 0, lambda: record_tier(G.TRAY_LOWER[0], REC_OPEN) if REC_OPEN > 0 else record_tier(G.TRAY_LOWER[0], 0, "lip")))
+    o.append(record_tier(G.TRAY_UPPER[0], REC_OPEN_UP) if REC_OPEN_UP > 0 else record_tier(G.TRAY_UPPER[0], 0, "lip"))
+    o.append(record_tier(G.TRAY_LOWER[0], REC_OPEN) if REC_OPEN > 0 else record_tier(G.TRAY_LOWER[0], 0, "lip"))
+    for k, d in enumerate(G.SLIM_DRAWERS):
+        o.append(slim_drawer(d, SLIM_OPEN) if (k == 1 and SLIM_OPEN > 0) else slim_drawer(d, 0, "lip"))
     o.append(worktop_top(0, ALC_W, G.BASE_D))
     # brush-lined cable slot behind the TV, and a grommet behind the deck
     o.append(poly([P(14, 76.02, 41), P(120, 76.02, 41), P(120, 76.02, 44.5), P(14, 76.02, 44.5)], "#2a1f16", 'opacity="0.85"'))
@@ -1562,9 +1617,36 @@ def fliptop_wall():
     return "\n".join(o)
 
 
+SITE = G.DINING_SITE        # v16: "stairs" by default: the table on the stairs wall, the breast free
+SITE_NOW = SITE
+
+
+def now_playing():
+    """v16: with the table by the stairs, an oak "now playing" ledge on the chimney breast beside the turntable: 7 deep with a 1.5 lip,
+    for the sleeve of the record that's on and the next two, leaning back 8 degrees."""
+    L = G.NOW_LEDGE
+    x0, x1 = L["x"]
+    y, d, t, lip = L["top"], L["d"], L["t"], L["lip"]
+    o = [box(x0, y - t, -d, x1 - x0, t, d, OAK, OAK_T, OAK_S, extra=GH), box(x0, y, -d, x1 - x0, lip, 1.2, OAK, OAK_T, OAK_S)]
+    lean = math.radians(8)
+    hgt, dz = G.LP * math.cos(lean), G.LP * math.sin(lean)
+    gap = (x1 - x0 - L["n"] * G.LP) / (L["n"] + 1)
+    arts = [[("#e9e3d3", 0, 1, 0, 1), ("#c8452f", 0.12, 0.88, 0.12, 0.62), ("#1f1f1f", 0.38, 0.62, 0.7, 0.9)],
+            [("#2f3e5c", 0, 1, 0, 1), ("#f0c24b", 0, 1, 0.78, 1), ("#efe6d2", 0.2, 0.8, 0.2, 0.66)],
+            [("#14806d", 0, 1, 0, 1), ("#e8603c", 0.1, 0.5, 0.1, 0.9), ("#f1e7d0", 0.55, 0.9, 0.1, 0.9)]]
+    for i in range(L["n"]):
+        xa = x0 + gap + i * (G.LP + gap)
+        q = [P(xa, y, -d + 2.0), P(xa + G.LP, y, -d + 2.0), P(xa + G.LP, y + hgt, -d + 2.0 + dz), P(xa, y + hgt, -d + 2.0 + dz)]
+        o.append(art_on(q, arts[i % 3]))
+        o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
+    return "\n".join(o)
+
+
 def dining_wall():
     """An oak backboard on the breast carries a 110 × 80 solid oak top on lift-off hinges and two Hebgo folding
     brackets. Everyday it stands folded up against the breast; down, it seats four at the wall."""
+    if SITE_NOW == "stairs":            # v16: the table is on the stairs wall (out of these views): the breast has its ledge and frames
+        return now_playing() + "\n" + breast_frames()
     if G.TABLE_STYLE == "fliptop":
         return fliptop_wall()
     o = []
@@ -2098,15 +2180,17 @@ def measure_layer(kind):
         o.append(m3((gx0, g.PLINTH + 2.6 + 15.5, gz - 0.6), (gx0 + 54.3, g.PLINTH + 2.6 + 15.5, gz - 0.6), "game drawer 54 wide", dy=-10))
         o.append(m3((gx0 - 1.5, g.PLINTH + 2.6, gz), (gx0 - 1.5, g.PLINTH + 2.6, gz + 35), "35 deep", dx=-40, dy=-4))
         o.append(m3((gx0 - 1.5, 0.5, bf), (gx0 - 1.5, 0.5, gz), f"out {GAME_OPEN:g}", dx=-34, dy=8))
-        tx0 = g.BAYS[2][0] + 3.07; tz = bf - REC_OPEN_UP; ty = g.TRAY_UPPER[0] + 12
-        o.append(m3((tx0, g.TRAY_UPPER[0] - 0.5, tz - 0.6), (tx0 + 53.9, g.TRAY_UPPER[0] - 0.5, tz - 0.6), "record tray 54 wide", dy=20))
-        o.append(m3((tx0 + 53.9 + 1, g.TRAY_UPPER[0], tz), (tx0 + 53.9 + 1, g.TRAY_UPPER[0], tz + 40), "40 deep", dx=34, dy=4))
-        o.append(m3((tx0 + 53.9 + 1.5, 0.5, bf), (tx0 + 53.9 + 1.5, 0.5, tz), f"out {REC_OPEN_UP:g}", dx=34, dy=8))
-        o.append(m3((tx0 + 0.9, ty + 2, tz + 3), (tx0 + 53, ty + 2, tz + 3), "LP trough 52.1", dy=-6, size=14))
+        tx0, tx1 = g.REC_BOX_X; tz = bf - REC_OPEN_UP; ty = g.TRAY_UPPER[0] + 12
+        o.append(m3((tx0, g.TRAY_UPPER[0] - 0.5, tz - 0.6), (tx1, g.TRAY_UPPER[0] - 0.5, tz - 0.6), f"LP crate {g.TRAY_BOX[0]:.1f} wide", dy=20))
+        o.append(m3((tx1 + 1, g.TRAY_UPPER[0], tz), (tx1 + 1, g.TRAY_UPPER[0], tz + 40), "40 deep", dx=34, dy=4))
+        o.append(m3((tx1 + 1.5, 0.5, bf), (tx1 + 1.5, 0.5, tz), f"out {REC_OPEN_UP:g}", dx=34, dy=8))
+        o.append(m3((tx0 + 0.9, ty + 2, tz + 3), (tx1 - 0.9, ty + 2, tz + 3), f"trough {g.TRAY_INSIDE:.1f}", dy=-6, size=14))
+        sx0, sx1 = g.SLIM_BOX_X; sz = bf - SLIM_OPEN; sy = g.SLIM_DRAWERS[1]["yb"]
+        o.append(m3((sx0, sy - 0.5, sz - 0.6), (sx1, sy - 0.5, sz - 0.6), f"game drawer {sx1 - sx0:.1f} wide", dy=34, size=14))
         px0, px1 = g.PLINTH_DRAWER["x"]; pz = bf - PLINTH_OPEN
         o.append(m3((px0, g.PLINTH_DRAWER["y"][1] + 0.5, pz - 0.8), (px1, g.PLINTH_DRAWER["y"][1] + 0.5, pz - 0.8), f"plinth drawer 52 × 34 × 5, out {PLINTH_OPEN:g}", dy=26))
         o.append(m3((-1, g.PLINTH + 2.6, bf), (-1, g.PLINTH + 2.6 + 15.5, bf), "11.6–27 up", dx=-42, dy=4, size=14))
-        o.append(m3((g.BAYS[2][1] + 0.5, g.TRAY_LOWER[0], bf), (g.BAYS[2][1] + 0.5, g.TRAY_UPPER[0], bf), "trays at 2.3 and 37", dx=60, dy=4, size=14))
+        o.append(m3((g.BAYS[2][1] + 0.5, g.TRAY_LOWER[0], bf), (g.BAYS[2][1] + 0.5, g.TRAY_UPPER[0], bf), "crates at 2.3 and 37", dx=60, dy=4, size=14))
     elif kind in ("four", "six") and g.TABLE_STYLE == "fliptop":   # v15: the flip-top, open
         x0, x1 = g.TABLE_X; z0, z1 = g.OPEN_Z; top = g.TABLE_TOP
         o.append(m3((x0, top + 1, z1), (x1, top + 1, z1), f"table {g.TABLE[0]:g} wide", dy=-12))
@@ -2166,9 +2250,9 @@ JOIN_KEY = [
     (3, (UP_R[0], G.RZ_SHELF_TOP - 2, TENON_Z[0]), f"Flush wedged tenons carry the Series X shelf ({G.RZ_SHELF_TOP:g})"),
     (4, (50, 214, 20), f"High shelf, top {G.HIGH_TOP:g}: books up to 30 cm"),
     (5, (G.TV_CX, 172, 34), "Record ledge above the TV: 4 LPs face-out"),
-    (6, (3.5, 172, -60), "The ledge wraps the corner: 4 more LPs face-out"),
-    (7, (UP_R[0], 104, 22), "LED groove in each upright washes the wall"),
-    (8, (RZ[0] + 12.6, 207, 31), "High shelf, right: the “now playing” 7-inch"),
+    (6, (3.5, 172, -60), "The oak run wraps the corner: 4 more LPs face-out"),
+    (7, (UP_R[0], 104, 22), "LED groove in each upright: a smart colour strip washes the wall"),
+    (8, (RZ[0] + 12.6, 207, 31), "High shelf, right: a small framed sleeve"),
     (H_, "On the worktop"),
     (9, (40, 140, 26), f"LG OLED C6 55in · centre {G.TV_CENTRE:.1f} · now {G.TV_SHIFT:.0f} cm nearer the side wall"),
     (10, (G.TV_CX - 30, 79, -7), "Soundbar · eARC, optical and AUX inputs"),
@@ -2184,19 +2268,17 @@ JOIN_KEY = [
     (19, (83, 52.5, G.BASE_FRONT_Z + 6), "PS3 + controller basket · bay 2 top row"),
     (20, (106, 33.3, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (83, 33.3, G.BASE_FRONT_Z + 6), "PS2 · bay 2, beside the sub" if G.SUB_IN_WALL else "PS2 + HDMI switch · bay 2 middle row"),
     (21, (106, 15.5, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (78, 15.5, G.BASE_FRONT_Z + 6), "PS1 · under the PS2" if G.SUB_IN_WALL else "PS1 + RetroTINK · bay 2 bottom row"),
-    (22, (153, 56, G.BASE_FRONT_Z + 1), "Upper record tray: ~90 LPs, face-out · bay 3"),
-    (23, (153, 22, "tray"), "Lower record tray: the same, shown pulled out"),
+    (22, (162.5, 56, G.BASE_FRONT_Z + 1), f"Upper record tray: an LP crate, ~{G.TRAY_LPS} face-out, under the turntable"),
+    (23, (162.5, 22, "tray"), "Lower LP crate: the same, shown pulled out"),
+    (23, (133.7, 62, G.BASE_FRONT_Z + 1), "Slim drawer: pads and remotes, a charging lead"),
+    (23, (133.7, 30, G.BASE_FRONT_Z + 1), f"Two slim game drawers: ~{G.SLIM_DRAWERS[0]['n']} games each, face-out"),
     (24, (93, 4.6, G.BASE_FRONT_Z - 0.1), "Hidden slim drawer in the plinth, finger pull"),
     *([(34, ((G.SUB_IN["x"][0] + G.SUB_IN["x"][1]) / 2, 36, G.SUB_IN["z"][0]), "Sub · bay 2, under the TV, on an isolation riser")] if G.SUB_IN_WALL else []),
-    (H_, "The dining wall on the chimney breast"),
-    (25, (G.TABLE_X[0] + 9, G.RAIL_TOP - 11, -G.RAIL[2]), "Oak backboard: lift-off hinges on top, brackets below"),
-    (26, (G.TABLE_CX, 118, -7), "Oak table 110 × 80: folded, a plain oiled oak panel"),
-    (27, (G.HEBGO_X[1], 40, -4), "Häfele Hebgo folding brackets, 500 kg a pair"),
-    (28, (G.TABLE_X[0] + 16, G.FOLDED_TOP + 2, -3), "Turn buttons hold the folded table"),
+    (H_, "The chimney breast (the table is by the stairs)"),
+    (25, ((G.NOW_LEDGE["x"][0] + G.NOW_LEDGE["x"][1]) / 2, G.NOW_LEDGE["top"] + 16, -5), "“Now playing” oak ledge: what's on and the next two"),
     (29, (G.TABLE_CX + 21, G.FRAMES_Y + 17, -2.3), "Two framed LPs above"),
-    *([] if G.SUB_IN_WALL else [(34, (G.SUB_HOOD["x"][0] + 12, 22, G.SUB_HOOD["z"][0]), "Sub under an oak cover: no sides, a lipped tray, on the breast")]),
     (H_, "The side wall"),
-    (30, (25.5, 182, -150), "PC on its oak shelf, above the end of the sofa (see the room plan)"),
+    (30, (25.5, 182, -150), "PC on the oak run, above the sofa's open end"),
     (31, (3.4, G.PC_SHELF_TOP + 3, G.PC_SHELF_Z[1] + 4), "Brush grommet: the PC's leads drop into the wall"),
     (32, (8, 160, -197), "Pad charging dock"),
     (33, (0.3, 120, -160), "PC cables chased into the wall: no spine, no trunking"),
@@ -2206,8 +2288,8 @@ JOIN_KEY = [
     (37, (0.3, 36, G.SOCKET["z"]), "Double socket: its right switch is the retro switch"),
     (38, (38, 78.6, 34), "10-gang extension, hidden behind the TV"),
     (39, (95, CEIL - 0.6, ALC_D - 0.8), "LED strip round the ceiling edge (as now)"),
-    (40, (G.PEND_X, 226, G.PEND_Z), "Spot bar on the existing rose, between TV and sofa"),
-    (41, (G.BAR2_X, 222, G.BAR2_Z), "Second spot bar, existing point by the door"),
+    (40, (G.PEND_X, 226, G.PEND_Z), "Smart spot bar on the existing rose, TV to window"),
+    (41, (G.BAR2_X, 222, G.BAR2_Z), "Second smart spot bar, existing point by the door"),
     (41, (G.STAIR_X[0] - 0.2, 45, 5), "Stairs UP to the first floor, beside the door (direction to confirm)"),
 ]
 
@@ -2289,9 +2371,11 @@ def build(*a, dining="folded", cam=None, **kw):
 
 
 def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="joinery", rec_open_up=0.0, label=None,
-           dining="folded", ghost=None, plinth_open=0.0, measure=None):
-    global GAME_OPEN, REC_OPEN, STYLE, REC_OPEN_UP, DINING, SOFA_GHOST, PLINTH_OPEN
+           dining="folded", ghost=None, plinth_open=0.0, measure=None, slim_open=0.0):
+    global GAME_OPEN, REC_OPEN, STYLE, REC_OPEN_UP, DINING, SOFA_GHOST, PLINTH_OPEN, SLIM_OPEN, SITE_NOW
     REC_OPEN_UP, STYLE, GAME_OPEN, REC_OPEN, DINING, PLINTH_OPEN = rec_open_up, style, game_open, rec_open, dining, plinth_open
+    SLIM_OPEN = slim_open
+    SITE_NOW = "breast" if dining != "folded" else SITE      # v16: the table's own renders are option A; the rest show the default site
     SOFA_GHOST = bool(ghost)
     if measure:   # v13.2: only the light measurement layer, on a transparent page, to lay over the same view
         return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">' + defs()
@@ -2335,7 +2419,7 @@ def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="j
     o.append('</svg>')
     if numbered:
         title = "Key: artisan oak media wall" if STYLE == "joinery" else "Key: slat wall alternative"
-        o.append(key_panel2(W, key, title, f"v13 · less cladding, stairs up · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
+        o.append(key_panel2(W, key, title, f"v16 · LP crates and a slim game column in bay 3 · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
     o.append('</svg>')
     return repaint("\n".join(o))
 
@@ -2349,7 +2433,9 @@ SOFA_COL = ("#8c8276", "#a0968a", "#776e63")
 def sofa_solid():
     """v15: the client's sofa: blue corduroy, an L with the long side under the window ending about 40 cm short of the window's west
     end, two seats then the corner seat, the return along the side wall (168 assumed). Plinth, seat bases, plump seat and back cushions
-    with the cord's channels, arms at both ends; no cushion (the client: "you can remove the white cushion")."""
+    with the cord's channels, an arm at the long side's end; no cushion (the client: "you can remove the white cushion"). v16: "towards the
+    tv it has no edge that covers the end. it is an open seat with one larger cushion that goes around towards the back making an ottoman
+    type end": no arm on the return; one long seat cushion runs to its open end, the back cushion stopping just short of it."""
     C, T, SD, RIB = G.SOFA_CORD                       # cord: face, top, side, channels
     x0 = G.SOFA_X[0]
     zb, zf, ze = G.SOFA_BACK_Z, G.SOFA_FRONT_Z, G.CHAISE_END_Z
@@ -2375,16 +2461,17 @@ def sofa_solid():
     o.append(box(x0 + 3, 0, zf - 3, cx1 - x0 - 6, ph, ze - zf, "#111214"))
     # seat bases
     o.append(box(x0 + bk, ph, zb + bk, mx1 - arm - x0 - bk, sb - ph, zf - zb - bk, C, T, SD))
-    o.append(box(x0 + bk, ph, zf, cx1 - x0 - bk, sb - ph, ze - arm - zf, C, T, SD))
+    o.append(box(x0 + bk, ph, zf, cx1 - x0 - bk, sb - ph, ze - zf, C, T, SD))
     ribs_z(zf, cx1, mx1 - arm, ph, sb)
-    ribs_x(cx1, zf, ze - arm, ph, sb)
+    ribs_x(cx1, zf, ze, ph, sb)
+    ribs_z(ze, x0 + bk, cx1, ph, sb)                     # v16: the open end, facing the TV
     # the long side: the corner seat (x0+bk .. cx1), then two seats to the arm
     n = G.SOFA_SEATS
     seat_w = (mx1 - arm - cx1) / n
     xs = [(x0 + bk + 16, cx1)] + [(cx1 + i * seat_w + 0.5, cx1 + (i + 1) * seat_w - 0.5) for i in range(n)]
     # back cushions, plump, leaning on the frames: along the side wall, then one per seat along the window
-    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - arm - 1 - zf - 2, C, T, SD))
-    ribs_x(x0 + bk + 16, zf + 2, ze - arm - 1, st, bh - 2)
+    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - 6 - zf - 2, C, T, SD))
+    ribs_x(x0 + bk + 16, zf + 2, ze - 6, st, bh - 2)
     o.append(box(x0 + bk, st - 2, zb + bk + 32, 16, bh - st + 2, zf + 1 - zb - bk - 32, C, T, SD))
     ribs_x(x0 + bk + 16, zb + bk + 32, zf + 1, st, bh - 2)
     for (xa, xb) in xs:
@@ -2394,15 +2481,15 @@ def sofa_solid():
     for (xa, xb) in xs:
         o.append(box(xa, sb, zb + bk + 16, xb - xa, st - sb, zf - zb - bk - 16 + 1, C, T, SD))
         ribs_z(zf + 1, xa, xb, sb, st, 2.6)
-    o.append(box(x0 + bk + 16, sb, zf + 1.5, cx1 - x0 - bk - 16, st - sb, ze - arm - zf - 2, C, T, SD))
-    ribs_x(cx1, zf + 1.5, ze - arm - 0.5, sb, st, 2.6)
+    o.append(box(x0 + bk + 16, sb, zf + 1.5, cx1 - x0 - bk - 16, st - sb, ze - 1 - zf - 1.5, C, T, SD))   # one long cushion to the end
+    o.append(box(x0 + bk, sb, ze - 6, 16, st - sb, 5, C, T, SD))                                         # ... wrapping round to the back
+    ribs_x(cx1, zf + 1.5, ze - 1, sb, st, 2.6)
+    ribs_z(ze - 1, x0 + bk, cx1, sb, st, 2.6)
     if G.SOFA_CUSHION:
         o.append(box(x0 + bk + 18, st - 1, zb + bk + 17, 34, 30, 11, "#a19c95", "#b4afa8", "#8b867f"))
-    # arms: at the long side's end and at the return's end
+    # the arm at the long side's end (the return's end is open, v16)
     o.append(box(mx1 - arm, ph, zb, arm, ah - ph, zf - zb, C, T, SD))
     ribs_z(zf, mx1 - arm, mx1, ph, ah)
-    o.append(box(x0, ph, ze - arm, cx1 - x0, ah - ph, arm, C, T, SD))
-    ribs_x(cx1, ze - arm, ze, ph, ah)
     return "\n".join(o)
 
 
@@ -2561,20 +2648,20 @@ def all_svgs():
     six_sub = ("The flip-top open on its gate leg, 110 × 160, still on the wall · both spot bars · three a side" if G.TABLE_STYLE == "fliptop" else
                "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end")
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · main plan, v13.5: the sub in bay 2", sub))
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v16, the table by the stairs", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
     out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("The flip-top open and set for four · v15", "Flip-top gate-leg oak table on the chimney breast, still on the wall · " + sub))
+                                   label=("Option A: the flip-top on the chimney breast, set for four · v16", "Flip-top gate-leg oak table, still on the wall · " + sub))
     out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
-                                  label=("The table set for six, out in the room · v13", six_sub))
-    dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25)
-    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v13.2", "Game drawer 30 out, upper record tray 30 out, plinth drawer 25 out (open one tray at a time)"))
+                                  label=("Option A: the flip-top on the breast, set for six · v16", six_sub))
+    dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25, slim_open=30)
+    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v16", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
     out["v13_m_join"] = build(with_dims=False, style="joinery", measure="join")
     out["v13_m_four"] = build(with_dims=False, style="joinery", dining="four", measure="four")
     out["v13_m_six"] = build(with_dims=False, style="joinery", dining="six", measure="six")
     out["v13_m_drawers"] = build(**dkw, measure="drawers")
     out["v13_m_side"] = build_side(measure=True)
-    out["v13_side"] = build_side(label=("The PC side wall · v13", "The ledge round the corner, the PC on its shelf with the keyboard tray, cables chased into the wall, the sofa below"))
+    out["v13_side"] = build_side(label=("The PC side wall · v16", "One oak run sweeping out to the PC, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
         lab = name + (" · chosen" if k == MAIN_PAINT else "")

@@ -137,34 +137,52 @@ def drawer():
         o.append(f'<line x1="{xx - 4}" y1="{Y(h)}" x2="{xx + 4}" y2="{Y(h)}" stroke="#9a958b"/>')
     for h, lab, dy in [(0, "0 floor", 4), (3.5, "3.5 lower base", -1), (34.4, "34.4 sleeves", 9), (38.2, "38.2 upper base", -2), (69.1, "69.1 sleeves", 9), (76, "76 top", 0)]:
         o.append(t(xx - 7, Y(h) + dy, lab, 9, "end", 400, MUTED))
-    o.append(t(Z(18), oy + 18, "carcass 18 mm birch ply, 60 × 40 × 73, back open to the channel · trays 40 deep on 400 mm runners", 10, "middle", 400, MUTED))
+    o.append(t(Z(18), oy + 18, "carcass 18 mm birch ply, 60 × 40 × 73, back open to the channel · crates 40 deep on 400 mm runners", 10, "middle", 400, MUTED))
     o.append(t(Z(18), oy + 32, "12 mm base, 9 mm sides, 5 cm oak lip · 2.6 and 2.1 cm finger room (top panel at 71.2)", 10, "middle", 400, MUTED))
-    k = 4.5
-    px0, py0 = 588, 110
-    PX = lambda c: px0 + c * k
+    # v16: bay 3 from above: the slim column, the divider, the LP crate
+    k = 4.3
+    px0, py0 = 560, 110
+    b0 = G.B3_IN[0]
+    PX = lambda c: px0 + (c - b0) * k
     PY = lambda c: py0 + (40 - c) * k
-    o.append(t(px0 - 20, 62, "Top view of one tray", 12, "start", 600))
-    o.append(f'<rect x="{PX(-1.25)}" y="{PY(40)}" width="{56.4*k}" height="{40*k}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
-    o.append(t(PX(26.95), PY(40) - 8, "ply carcass, 56.4 cm inside", 10, "middle", 400, MUTED))
-    for x0_ in (-1.25, 53.9):
-        o.append(f'<rect x="{PX(x0_)}" y="{PY(39.5)}" width="{1.25*k}" height="{39.5*k}" fill="#e4e4e4" stroke="#999" stroke-width="0.8"/>')
-    o.append(f'<rect x="{PX(0)}" y="{PY(40)}" width="{53.9*k}" height="{40*k}" fill="{VIN_F}" stroke="{VIN_S}"/>')
-    o.append(f'<rect x="{PX(0.9)}" y="{PY(39.1)}" width="{52.1*k}" height="{38.2*k}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
-    lx = 0.9 + (G.TRAY_INSIDE - G.LP) / 2                   # v15: LPs only, centred in the full width
+    o.append(t(px0 - 10, 62, "Bay 3 from above (v16)", 12, "start", 600))
+    o.append(f'<rect x="{PX(b0)}" y="{PY(40)}" width="{(G.B3_IN[1] - b0)*k}" height="{40*k}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
+    o.append(t(PX((b0 + G.B3_IN[1]) / 2), PY(40) - 8, f"ply carcass, {G.B3_IN[1] - b0:.1f} inside", 10, "middle", 400, MUTED))
+    o.append(f'<rect x="{PX(G.B3_DIV[0])}" y="{PY(40)}" width="{(G.B3_DIV[1] - G.B3_DIV[0])*k}" height="{40*k}" fill="#e7d6b8" stroke="#c9a77a"/>')
+    for (a_, b_) in ((G.SLIM_BOX_X[0] - G.RUN, G.SLIM_BOX_X[0]), (G.SLIM_BOX_X[1], G.B3_DIV[0]), (G.B3_DIV[1], G.REC_BOX_X[0]), (G.REC_BOX_X[1], G.B3_IN[1])):
+        o.append(f'<rect x="{PX(a_)}" y="{PY(39.5)}" width="{(b_ - a_)*k}" height="{39.5*k}" fill="#e4e4e4" stroke="#999" stroke-width="0.6"/>')
+    # the LP crate
+    r0, r1 = G.REC_BOX_X
+    o.append(f'<rect x="{PX(r0)}" y="{PY(40)}" width="{(r1 - r0)*k}" height="{40*k}" fill="{VIN_F}" stroke="{VIN_S}"/>')
+    o.append(f'<rect x="{PX(r0 + 0.9)}" y="{PY(39.1)}" width="{G.TRAY_INSIDE*k}" height="{38.2*k}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
+    lx = r0 + 0.9 + (G.TRAY_INSIDE - G.LP) / 2
     for i in range(26):
         zz = 2.6 + i * 1.2
         o.append(f'<rect x="{PX(lx)}" y="{PY(zz + 0.4)}" width="{G.LP*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
-    o.append(t(PX(26.95), PY(22) - 4, "LPs only, centred", 11, "middle", 650, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
-    o.append(t(PX(26.95), PY(22) + 10, "~90 face-out", 10, "middle", 400, MUTED, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
-    for x_ in (0.9, 0.9 + lx - 0.9 + G.LP):
-        o.append(t(PX(x_ + (lx - 0.9) / 2), PY(36), f"{(G.TRAY_INSIDE - G.LP) / 2:g}", 9.5, "middle", 600, VIN_S))
-    o.append(t(PX(26.95), PY(36) + 12, "finger room either side to flip", 9.5, "middle", 400, MUTED))
-    o.append(f'<rect x="{PX(-1.45)}" y="{PY(0)}" width="{56.8*k}" height="{1.5*k}" fill="#e9c9a4" stroke="{VIN_S}"/>')
-    o.append(t(PX(26.95), PY(0) + 26, "tray 53.9 × 40 outside, 52.1 × 38.2 inside", 10, "middle", 400, MUTED))
-    o.append(t(PX(26.95), PY(0) + 40, "9 mm sides · 5 cm oak lip · no divider", 10, "middle", 400, MUTED))
-    o.append(t(PX(26.95), PY(0) + 54, "about 32 kg full: open one tray at a time", 10, "middle", 500, VIN_S))
-    return svg(W, H, "\n".join(o), "The record trays: LPs only, every one face-out, two tiers in bay 3",
-               "Bay 3 of the alcove base, right under the turntable. Section left, plan right. Pull a tray and flip through the covers like a record shop browser")
+    o.append(t(PX((r0 + r1) / 2), PY(22) - 4, "LP crate", 11, "middle", 650, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
+    o.append(t(PX((r0 + r1) / 2), PY(22) + 10, f"~{G.TRAY_LPS} face-out", 10, "middle", 400, MUTED, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
+    # the slim drawer (a games one)
+    q0, q1 = G.SLIM_BOX_X
+    o.append(f'<rect x="{PX(q0)}" y="{PY(40)}" width="{(q1 - q0)*k}" height="{40*k}" fill="{GAME_F}" stroke="{GAME_S}"/>')
+    o.append(f'<rect x="{PX(q0 + G.SLIM_SIDE)}" y="{PY(40 - G.SLIM_SIDE)}" width="{G.SLIM_INSIDE*k}" height="{(40 - 2 * G.SLIM_SIDE)*k}" fill="#f6f8fb" stroke="{GAME_S}" stroke-opacity="0.4"/>')
+    gx = q0 + G.SLIM_SIDE + (G.SLIM_INSIDE - G.GAME_CASE[0]) / 2
+    for i in range(G.SLIM_DRAWERS[0]["n"]):
+        zz = 2.6 + i * 1.45
+        o.append(f'<rect x="{PX(gx)}" y="{PY(zz + 0.5)}" width="{G.GAME_CASE[0]*k}" height="{0.7*k}" fill="{GAME_S}" opacity="{0.8 - i*0.025}"/>')
+    o.append(t(PX((q0 + q1) / 2), PY(43.5), "games", 10, "middle", 650, GAME_S))
+    o.append(f'<rect x="{PX(G.B3_IN[0] + 0.2)}" y="{PY(0)}" width="{(G.FACE_STILE[0] - G.B3_IN[0] - 0.4)*k}" height="{1.5*k}" fill="#e9c9a4" stroke="{VIN_S}"/>')
+    o.append(f'<rect x="{PX(G.FACE_STILE[1] + 0.2)}" y="{PY(0)}" width="{(G.B3_IN[1] - G.FACE_STILE[1] - 0.4)*k}" height="{1.5*k}" fill="#e9c9a4" stroke="{VIN_S}"/>')
+    yy = PY(0) + 24
+    o.append(t(PX((q0 + q1) / 2), yy, f"{q1 - q0:.1f}", 9.5, "middle", 600, GAME_S))
+    o.append(t(PX(sum(G.B3_DIV) / 2), yy, "1.2", 9.5, "middle", 600, MUTED))
+    o.append(t(PX((r0 + r1) / 2), yy, f"{r1 - r0:.1f}", 9.5, "middle", 600, VIN_S))
+    cx = PX((b0 + G.B3_IN[1]) / 2)
+    o.append(t(cx, yy + 18, f"LP crate {r1 - r0:.1f} × 40, a {G.TRAY_INSIDE:.1f} trough: LPs snug, no dead space", 10, "middle", 400, MUTED))
+    o.append(t(cx, yy + 32, f"slim drawers {q1 - q0:.1f} × 40, {G.SLIM_INSIDE:.1f} inside: DVD-size cases face-out", 10, "middle", 400, MUTED))
+    o.append(t(cx, yy + 46, "12 mm ply divider · 12.7 mm runners each side", 10, "middle", 400, MUTED))
+    o.append(t(cx, yy + 60, "an LP crate is about 30 kg full: open one at a time", 10, "middle", 500, VIN_S))
+    return svg(W, H, "\n".join(o), "Bay 3: two LP crates under the turntable, a slim game column beside them",
+               "Section left through the LP crates, plan right. Pull a crate and flip through the covers like a record shop browser; the slim drawers flip the same way for games")
 
 
 def game_drawer():
@@ -512,7 +530,7 @@ def front():
     o.append(f'<rect x="{X(0)}" y="{Y(g.CEIL)}" width="{g.ALC_W*s}" height="{g.CEIL*s}" fill="#f8f7f4" stroke="{LINE}" stroke-width="1.2"/>')
     o.append(f'<rect x="{X(g.ALC_W)}" y="{Y(g.CEIL)}" width="{g.BREAST_W*s}" height="{g.CEIL*s}" fill="#f1efe9" stroke="{LINE}" stroke-width="1.2"/>')
     o.append(t(X(g.ALC_W + g.BREAST_W / 2), Y(g.CEIL) + 15, f"chimney breast, {_fmt(g.BREAST_W)} wide:", 10, "middle", 500, MUTED))
-    o.append(t(X(g.ALC_W + g.BREAST_W / 2), Y(g.CEIL) + 28, "the dining wall", 10, "middle", 400, MUTED))
+    o.append(t(X(g.ALC_W + g.BREAST_W / 2), Y(g.CEIL) + 28, "the table is by the stairs", 10, "middle", 400, MUTED))
     o.append(t(X(g.ALC_W / 2), Y(g.CEIL) - 6, f"alcove {_fmt(g.ALC_W)} wide, {_fmt(g.ALC_D)} deep, ceiling {_fmt(g.CEIL)}", 10.5, "middle", 500, MUTED))
     o.append(f'<line x1="{X(-25)}" y1="{oy}" x2="{X(312)}" y2="{oy}" stroke="#b9b4a8" stroke-width="1.4"/>')
     # height scale
@@ -598,50 +616,32 @@ def front():
     else:
         cell(i1, i2, P_ + 20.4, P_ + 36.9, "PS2 + HDMI switch", "16.5 row", "g")
         cell(i1, i2, P_ + 1.6, P_ + 18.6, "PS1 + RetroTINK", "17 row", "g")
-    i1, i2 = b3a + 1.8, b3b - 1.8
-    cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "Upper record tray", "~90 LPs, face-out", "v")
-    cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "Lower record tray", "~90 LPs, face-out", "v")
+    # v16: bay 3 split: the slim column (two game drawers, the pads drawer) and the LP column under the turntable
+    i1, i2 = g.REC_BOX_X[0] - g.RUN, b3b - 1.8
+    cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "LP crate", f"~{g.TRAY_LPS} face-out", "v")
+    cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "LP crate", f"~{g.TRAY_LPS} face-out", "v")
+    j1, j2 = b3a + 1.8, g.B3_DIV[0]
+    for k_, d_ in enumerate(g.SLIM_DRAWERS):
+        top_ = g.SLIM_DRAWERS[k_ + 1]["yb"] - 0.6 if k_ + 1 < len(g.SLIM_DRAWERS) else g.TRAY_TOP_PANEL
+        cell(j1, j2, d_["yb"], top_, "pads" if d_["kind"] == "pads" else "games", "" if d_["kind"] == "pads" else f"~{d_['n']}", "g")
+    o.append(f'<rect x="{X(g.B3_DIV[0])}" y="{Y(71.2)}" width="{(g.B3_DIV[1] - g.B3_DIV[0])*s}" height="{69.4*s}" fill="#e7d6b8" stroke="#c9a77a" stroke-width="0.6"/>')
     for a in (b1a, b2a):
         o.append(f'<rect x="{X(a)}" y="{Y(73)}" width="{60*s}" height="{64*s}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
     o.append(f'<rect x="{X(b3a)}" y="{Y(73)}" width="{60*s}" height="{73*s}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
-    for a, b, lab in [(b1a, b1b, "60 · BESTÅ"), (b2a, b2b, "60 · BESTÅ"), (b3a, b3b, "60 · ply, records")]:
+    for a, b, lab in [(b1a, b1b, "60 · BESTÅ"), (b2a, b2b, "60 · BESTÅ"), (b3a, b3b, "60 · ply: games | LPs")]:
         o.append(t((X(a) + X(b)) / 2, oy + 16, lab, 9.5, "middle", 400, MUTED))
-    # the dining wall: backboard, the table folded up, its brackets folded down, the table's down position dashed
+    # v16: the table is by the stairs (the default), so the breast takes the "now playing" ledge under the two framed LPs; option A's
+    # folded flip-top is dashed where it would go
     x0, x1 = g.TABLE_X
-    o.append(rect(X(x0), Y(g.RAIL_TOP), g.TABLE[0] * s, g.RAIL[1] * s, "#e9dccb", "#b88a55", 1))
-    o.append(rect(X(x0), Y(g.FOLDED_TOP), g.TABLE[0] * s, g.TABLE[1] * s, "#f1e1c8", "#b88a55", 2))
-    o.append(t(X(g.TABLE_CX), Y(122), "oak table, folded up", 11, "middle", 650))
-    o.append(t(X(g.TABLE_CX), Y(122) + 14, f"{_fmt(g.TABLE[0])} × {_fmt(g.TABLE[1])} × {_fmt(g.TABLE[2])}", 9.5, "middle", 400, MUTED))
-    o.append(t(X(g.TABLE_CX), Y(122) + 27, "on lift-off hinges", 9.5, "middle", 400, MUTED))
-    for bx in g.HEBGO_X:
-        o.append(rect(X(bx - 1.4), Y(g.RAIL_TOP), 2.8 * s, g.HEBGO[0] * s, "#d6d8da", "#8a8c8f", 1))
-    o.append(t(X(g.TABLE_CX), Y(46), "Hebgo brackets folded flat", 9, "middle", 600, MUTED))
-    sxx = g.SUB_POS["x"]
-    if g.SUB_IN_WALL:
-        pass      # v13.5: the sub is in bay 2 (drawn with the bays)
-    elif g.PLAIN:   # v13.2: the sub under its oak cover, seen from the room: backboard behind, the cover over it, the tray's lip
-        hb = g.SUB_HOOD
-        hx_ = hb["x"]
-        o.append(rect(X(hx_[0]), Y(hb["h"] - hb["top"]), (hx_[1] - hx_[0]) * s, (hb["h"] - hb["top"]) * s, "#f1e4d0", "#c9a77a", 1, 1))
-        o.append(rect(X(sxx[0]), Y(hb["feet"] + hb["base"] + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
-        o.append(rect(X(hx_[0]), Y(hb["feet"] + hb["base"] + hb["lip"]), (hx_[1] - hx_[0]) * s, (hb["base"] + hb["lip"]) * s, "#e7cfae", "#b88a55", 0, 1.2))
-        o.append(rect(X(hx_[0] - hb["over"]), Y(hb["h"]), (hx_[1] - hx_[0] + 2 * hb["over"]) * s, hb["top"] * s, "#d9b48a", "#9c6a3f", 0, 1.2))
-        o.append(t(X((hx_[0] + hx_[1]) / 2), Y(20), "sub", 9.5, "middle", 600, SND_S))
-        o.append(t(X((hx_[0] + hx_[1]) / 2), Y(20) + 12, "under its cover", 8.5, "middle", 400, MUTED))
-    else:
-        o.append(rect(X(sxx[0] - 2), Y(5), (sxx[1] - sxx[0] + 4) * s, 5 * s, "#e9dccb", "#b88a55", 1))
-        o.append(rect(X(sxx[0]), Y(5 + g.SUB[1]), (sxx[1] - sxx[0]) * s, g.SUB[1] * s, SND_F, SND_S, 3))
-        o.append(t(X((sxx[0] + sxx[1]) / 2), Y(20), "sub", 9.5, "middle", 600))
-    if g.PLAIN or g.SUB_IN_WALL:
-        pass
-    else:
-        bx_, bh_ = g.SUB_BOX["x"], g.SUB_BOX["h"]
-        o.append(rect(X(bx_[0]), Y(bh_), (bx_[1] - bx_[0]) * s, bh_ * s, "none", "#b88a55", 1, 1.4))
-        for xs_ in range(int(bx_[0]) + 5, int(bx_[1]) - 3, 4):
-            o.append(f'<line x1="{X(xs_):.1f}" y1="{Y(bh_ - 2):.1f}" x2="{X(xs_):.1f}" y2="{Y(3):.1f}" stroke="#b88a55" stroke-width="1"/>')
-        o.append(t(X(bx_[1]) + 4, Y(bh_) + 10, "slatted oak box", 8.5, "start", 600, "#8a5a32"))
-    o.append(f'<rect x="{X(x0)}" y="{Y(g.TABLE_TOP)}" width="{g.TABLE[0]*s}" height="{g.TABLE[2]*s}" fill="none" stroke="{BLUE}" stroke-dasharray="5 3"/>')
-    o.append(t(X(x0) + 4, Y(g.TABLE_TOP) - 4, "the top's height when down", 8.5, "start", 600, BLUE))
+    o.append(f'<rect x="{X(x0)}" y="{Y(g.FOLDED_TOP)}" width="{g.TABLE[0]*s}" height="{(g.FOLDED_TOP - g.WORKTOP + 4)*s}" fill="none" stroke="{BLUE}" stroke-dasharray="5 3"/>')
+    o.append(t(X(g.TABLE_CX), Y(g.FOLDED_TOP) + 13, "option A: the flip-top folds here", 8.5, "middle", 600, BLUE))
+    L = g.NOW_LEDGE
+    o.append(rect(X(L["x"][0]), Y(L["top"]), (L["x"][1] - L["x"][0]) * s, L["t"] * s, "#e9dccb", "#b88a55", 0, 1.2))
+    gap = (L["x"][1] - L["x"][0] - L["n"] * g.LP) / (L["n"] + 1)
+    for i in range(L["n"]):
+        xa = L["x"][0] + gap + i * (g.LP + gap)
+        o.append(rect(X(xa), Y(L["top"] + g.LP), g.LP * s, g.LP * s, VIN_F, VIN_S, 1))
+    o.append(t(X((L["x"][0] + L["x"][1]) / 2), Y(L["top"]) + 13, f"“now playing” oak ledge, top {_fmt(L['top'])}", 9, "middle", 600, VIN_S))
     cxc = g.TABLE_CX
     for i in range(2):
         x0_ = cxc - 4 - 34 + i * 42
@@ -656,8 +656,8 @@ def front():
         o.append(rect(i * 100, ly - 11, 14, 14, f, st, 3)); o.append(t(i * 100 + 20, ly + 1, lab, 11, "start", 400, MUTED))
     o.append(f'<line x1="300" y1="{ly-4}" x2="326" y2="{ly-4}" stroke="#b9b4a8" stroke-dasharray="4 3"/>')
     o.append(t(332, ly + 1, "keep clear / hidden / other position", 11, "start", 400, MUTED))
-    return svg(W, H, "\n".join(o), "The media wall and the dining wall from the front, to scale",
-               "The TV between oak uprights nearer the side wall, the turntable zone on its right, three bays below; the fold-down table on the chimney breast. Heights in cm")
+    return svg(W, H, "\n".join(o), "The media wall and the chimney breast from the front, to scale",
+               "The TV between oak uprights nearer the side wall, the turntable zone on its right, three bays below (bay 3: games beside the LP crates); the “now playing” ledge on the breast. Heights in cm")
 
 
 # ------------------------------------------------------------------ room plans (north, the window, at the top; east on the right)
@@ -699,9 +699,18 @@ def _room(o, k, ox, oy, xmin=0.0, label_walls=True):
         o.append(f'<rect x="{X(b):.1f}" y="{Y(g.ALC_D - g.UP_D):.1f}" width="{g.UP_T*k:.1f}" height="{g.UP_D*k:.1f}" fill="#b88a55"/>')
     o.append(f'<rect x="{X(g.TV_X[1]):.1f}" y="{Y(g.TV_PANEL_Z[0]):.1f}" width="{g.TV_W*k:.1f}" height="{max(g.TV_D*k, 2):.1f}" fill="#222"/>')
     o.append(f'<rect x="{X(g.DECK_X[1]):.1f}" y="{Y(g.DECK_Z[0]):.1f}" width="{g.DECK[0]*k:.1f}" height="{g.DECK[2]*k:.1f}" fill="{VIN_F}" stroke="{VIN_S}"/>')
-    # the dining wall: backboard and the table folded flat against the breast
-    x0, x1 = g.TABLE_X
-    o.append(f'<rect x="{X(x1):.1f}" y="{Y(-g.FOLDED_D):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.FOLDED_D*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
+    # v16: the pipe boxing in the window's west corner (hollow, floor to ceiling)
+    pb = g.PIPE_BOX
+    o.append(f'<rect x="{X(pb["x"][1]):.1f}" y="{Y(pb["z"][0]):.1f}" width="{(pb["x"][1] - pb["x"][0])*k:.1f}" height="{(pb["z"][1] - pb["z"][0])*k:.1f}" fill="url(#hatch3)" stroke="{WALL}" stroke-width="2"/>')
+    # the table folded flat: by the stairs (v16, the default), or on the breast; the breast's "now playing" ledge when it's free
+    if g.DINING_SITE == "stairs":
+        z0, z1 = g.TABLE_B_Z
+        o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(z1):.1f}" width="{g.FOLDED_D*k:.1f}" height="{(z0 - z1)*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
+        L = g.NOW_LEDGE
+        o.append(f'<rect x="{X(L["x"][1]):.1f}" y="{Y(-L["d"]):.1f}" width="{(L["x"][1] - L["x"][0])*k:.1f}" height="{L["d"]*k:.1f}" fill="#e9d3b4" stroke="#b88a55"/>')
+    else:
+        x0, x1 = g.TABLE_X
+        o.append(f'<rect x="{X(x1):.1f}" y="{Y(-g.FOLDED_D):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.FOLDED_D*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
     return X, Y
 
 
@@ -736,18 +745,22 @@ def living_plan():
     _sofa(o, X, Y, k)
     _side_wall(o, X, Y, k)
 
-    x0, x1 = g.TABLE_X
-    zo = g.OPEN_Z[1] if g.TABLE_STYLE == "fliptop" else g.TABLE_Z[1]
-    o.append(f'<rect x="{X(x1):.1f}" y="{Y(zo):.1f}" width="{g.TABLE[0]*k:.1f}" height="{(g.TABLE_Z[0] - zo)*k:.1f}" fill="none" stroke="#9c6a3f" stroke-dasharray="5 3"/>')
-    o.append(t(X(g.TABLE_CX), Y(zo) - 8, "flip-top open, 110 × 160" if g.TABLE_STYLE == "fliptop" else "down, for four", 8.5, "middle", 500, "#9c6a3f"))
+    # v16: the table by the stairs is the default: its open outline there; the breast keeps the "now playing" ledge
+    bx0, bx1 = g.TABLE_B_OPEN_X
+    z0, z1 = g.TABLE_B_Z
+    o.append(f'<rect x="{X(bx1):.1f}" y="{Y(z1):.1f}" width="{(bx1 - bx0)*k:.1f}" height="{(z0 - z1)*k:.1f}" fill="none" stroke="#9c6a3f" stroke-dasharray="5 3"/>')
+    o.append(t(X((bx0 + bx1) / 2), Y((z0 + z1) / 2) + 3, "flip-top open, 160 × 110", 8.5, "middle", 500, "#9c6a3f"))
+    o.append(t(X(g.ROOM_W) + 30, Y(sum(g.SHELF_B["z"]) / 2) - 50, "your shelf above", 8.5, "middle", 500, MUTED))
+    pb = g.PIPE_BOX
+    o.append(t(X(pb["x"][0]) - 4, Y(pb["z"][1]) + 12, "pipe boxing", 8.5, "end", 600, MUTED))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 22, "media wall, 46 deep", 9, "middle", 650, "#7a5130"))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 34, "TV 25 cm nearer the side wall · deck right", 8.5, "middle", 400, "#7a5130"))
-    o.append(t(X(g.TABLE_CX), Y(0) + 26, "breast · dining wall", 9.5, "middle", 650, "#8f5b45"))
+    o.append(t(X(g.TABLE_CX), Y(0) + 26, "breast · “now playing” ledge", 9.5, "middle", 650, "#8f5b45"))
     o.append(t(X(g.ROOM_W - 30), Y(g.ALC_D - g.STAIR_D) - 6, "stairs UP to the first floor, banister (direction to confirm)", 9, "middle", 400, MUTED))
     o.append(t(X(g.DOOR_X[0] + 42), Y(g.BREAST_D_WEST) - 6, "door opens in · hinge by the breast", 9, "middle", 600, "#d0573b"))
     # side-wall labels
-    o.append(t(X(0) + 10, Y((g.WRAP_Z[0] + g.WRAP_Z[1]) / 2) + 4, "ledge wraps the corner, 4 LPs", 9, "start", 600, "#7a5130"))
-    o.append(t(X(0) + 10, Y((g.PC_SHELF_Z[0] + g.PC_SHELF_Z[1]) / 2) + 4, "PC shelf at 155.4, over the sofa", 9, "start", 600, GAME_S))
+    o.append(t(X(0) + 10, Y((g.WRAP_Z[0] + g.WRAP_Z[1]) / 2) + 4, "one oak run: 4 LPs, then", 9, "start", 600, "#7a5130"))
+    o.append(t(X(0) + 10, Y((g.PC_SHELF_Z[0] + g.PC_SHELF_Z[1]) / 2) + 4, "the PC at 155.4, over the sofa's open end", 9, "start", 600, GAME_S))
     # coffee table, sub, rears
     cx, cz = g.COFFEE["x"], g.COFFEE["z"]
     o.append(rect(X(cx[1]), Y(cz[0]), (cx[1] - cx[0]) * k, (cz[1] - cz[0]) * k, "#f3efe6", "#c9c5bb", 6))
@@ -810,7 +823,7 @@ def living_plan():
     o.append(t(X((g.WINDOW_X[0] + g.WINDOW_X[1]) / 2), Y(g.WINDOW_Z) - 10, f"window {_fmt(g.WINDOW_X[1]-g.WINDOW_X[0])} · radiator below", 9.5, "middle", 400, MUTED))
     o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. Sofa from your notes (long side to 40 cm short of the window's end; return {_fmt(g.SOFA_D)} assumed). Both spot bars run from the TV towards the window.", 9, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "The living room from above, as you measured it",
-               "To scale, north at the top. Media wall in the alcove, the ledge and PC shelf on the side wall over the sofa, the dining wall on the chimney breast, two spot bars")
+               "To scale, north at the top. Media wall in the alcove, one oak run on the side wall over the sofa, the flip-top table by the stairs (the default), two spot bars")
 
 
 def seating():
@@ -1445,22 +1458,24 @@ def storage():
             item(bx + 0.5 * k, sy + (35.3 - 3) * k, 22.4, 3, "#8a8a90")
     o.append(t(x0 + 14, y0 + 236, "Swap any 16 cm row for two KUGGIS boxes, 26 × 35 × 15, side by side (52 of 56.8 wide).", 9.5, "start", 400, MUTED))
 
-    # B · bay 3 tray, from above
+    # B · bay 3, from above (v16: an LP crate beside a slim game drawer)
     x0, y0 = 460, 56
-    panel(x0, y0, 440, 250, "Bay 3: each record tray, from above", "53.9 × 40 outside, two trays; everything face-out")
-    tx, ty = x0 + 40, y0 + 62
-    space(tx, ty, 53.9, 40)
-    item(tx + 0.9 * k, ty + 2 * k, 32.6, 36, "#efe6d6")
-    item(tx + (0.9 + 32.6 + 0.6) * k, ty + 2 * k, 18.9, 36, "#efe6d6")
+    panel(x0, y0, 440, 250, "Bay 3 from above: LP crate and slim drawer", f"56.4 inside: a {G.SLIM_BOX_X[1] - G.SLIM_BOX_X[0]:.1f} slim drawer, the divider, a {G.TRAY_BOX[0]:.1f} LP crate")
+    tx, ty = x0 + 30, y0 + 62
+    space(tx, ty, 56.4, 40)
+    sx_ = (G.SLIM_BOX_X[0] - G.B3_IN[0]) * k
+    rx_ = (G.REC_BOX_X[0] - G.B3_IN[0]) * k
+    item(tx + sx_, ty + 2 * k, G.SLIM_BOX_X[1] - G.SLIM_BOX_X[0], 36, "#e7eefb")
+    item(tx + rx_, ty + 2 * k, G.TRAY_BOX[0], 36, "#efe6d6")
     for i in range(5):
-        item(tx + 1.5 * k, ty + (3 + i * 6.5) * k, 31.4, 5.2, LP_C[i % 6])
-        item(tx + (35.1) * k, ty + (3 + i * 6.5) * k, 18.4, 5.2, LP_C[(i + 2) % 6])
-    o.append(t(tx + 27 * k, ty + 40 * k + 14, "one LP trough, 52.1 wide", 9.5, "middle", 500, MUTED))
-    o.append(t(x0 + 200, y0 + 92, "≈ 90 LPs a tray, LPs only", 12, "start", 650))
-    o.append(t(x0 + 200, y0 + 110, "× 2 trays = 180 LPs, all face-out", 10.5, "start", 400, MUTED))
-    o.append(t(x0 + 200, y0 + 128, "sleeves lean back 10°, flip like a shop", 10.5, "start", 400, MUTED))
-    o.append(t(x0 + 200, y0 + 146, "thick outer sleeves: widen the LP", 10.5, "start", 400, MUTED))
-    o.append(t(x0 + 200, y0 + 160, "the trough takes them: 52.1 wide", 10.5, "start", 400, MUTED))
+        item(tx + rx_ + (0.9 + (G.TRAY_INSIDE - G.LP) / 2) * k, ty + (3 + i * 6.5) * k, G.LP, 5.2, LP_C[i % 6])
+        item(tx + sx_ + (G.SLIM_SIDE + (G.SLIM_INSIDE - G.GAME_CASE[0]) / 2) * k, ty + (3 + i * 6.5) * k, G.GAME_CASE[0], 5.2, ["#3a5fb8", "#3f9a4c", "#2a2c31"][i % 3])
+    o.append(t(tx + 28 * k, ty + 40 * k + 14, "games | divider | LPs: no dead space", 9.5, "middle", 500, MUTED))
+    o.append(t(x0 + 222, y0 + 92, f"≈ {G.TRAY_LPS} LPs a crate, two crates", 12, "start", 650))
+    o.append(t(x0 + 222, y0 + 110, f"= {2 * G.TRAY_LPS} LPs, all face-out", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 222, y0 + 128, f"beside them {G.SLIM_GAMES} games face-out", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 222, y0 + 146, "and a drawer for pads and remotes", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 222, y0 + 164, f"trough {G.TRAY_INSIDE:.1f}: thick outer sleeves fit", 10.5, "start", 400, MUTED))
 
     # C · plinth drawer, from above
     x0, y0 = 0, 326
@@ -1526,7 +1541,7 @@ def storage():
     o.append(t(x0 + 14, y0 + 66, "1 · LPs spine-out on the high shelf: about 380 more", 11.5, "start", 650))
     o.append(t(x0 + 14, y0 + 82, "No building; books move to the second option's top.", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 14, y0 + 110, "2 · A second record unit, west of the sofa, under the window", 11.5, "start", 650))
-    o.append(t(x0 + 14, y0 + 126, "Bay 3 again (60 × 46 × 73, two face-out trays): 180 LPs.", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 14, y0 + 126, "Another LP column like bay 3 (40 × 46 × 73, two crates): 180 LPs.", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 14, y0 + 142, "At x 300–360 it leaves 123 cm to the table set for six (100 to walk).", 10.5, "start", 400, MUTED))
     space(x0 + 30, y0 + 158, 60, 20)
     item(x0 + 30 + 2 * k, y0 + 158 + 3 * k, 26.6, 14, "#efe6d6", "tray", INK, 7.5)
@@ -1572,9 +1587,10 @@ def drawer_layouts():
     labs = [
         mark(b1[0] + 1.6, b1[1] - 1.6, g.PLINTH + 2.6, g.PLINTH + 2.6 + 15.5, GA, "A", "A · Game drawer: bay 1, bottom row (11.6–27.1 up)"),
         mark(pxa, pxb, g.PLINTH_DRAWER["y"][0], g.PLINTH_DRAWER["y"][1], GB, "B", "B · Plinth drawer: hidden under bay 2 (1.6–7.6 up)"),
-        mark(b3[0] + 1.8, b3[1] - 1.8, g.TRAY_UPPER[0], g.TRAY_UPPER[0] + 12, GC, "C", f"C · Upper record tray: bay 3 ({g.TRAY_UPPER[0]:g}–{g.TRAY_UPPER[2]:g} up)"),
-        mark(b3[0] + 1.8, b3[1] - 1.8, g.TRAY_LOWER[0], g.TRAY_LOWER[0] + 12, GC, "D", f"D · Lower record tray: bay 3 ({g.TRAY_LOWER[0]:g}–{g.TRAY_LOWER[2]:g} up)"),
-    ]
+        mark(g.REC_BOX_X[0], g.REC_BOX_X[1], g.TRAY_UPPER[0], g.TRAY_UPPER[0] + 12, GC, "C", f"C · Upper LP crate: bay 3, right ({g.TRAY_UPPER[0]:g}–{g.TRAY_UPPER[2]:g} up)"),
+        mark(g.REC_BOX_X[0], g.REC_BOX_X[1], g.TRAY_LOWER[0], g.TRAY_LOWER[0] + 12, GC, "D", f"D · Lower LP crate: bay 3, right ({g.TRAY_LOWER[0]:g}–{g.TRAY_LOWER[2]:g} up)"),
+    ] + [mark(g.SLIM_BOX_X[0], g.SLIM_BOX_X[1], d_["yb"], d_["yb"] + 10, GA, L_, f"{L_} · Slim drawer, {'pads and remotes' if d_['kind'] == 'pads' else 'games'}: bay 3, left ({d_['yb']:g} up)")
+         for L_, d_ in zip("GFE", reversed(G.SLIM_DRAWERS))][::-1]
     # the fixed rows, faint, for orientation
     for (x1, x2, y1, y2, lab) in [(b1[0] + 5, b1[0] + 38.3, 46.4 + 9, 54.3 + 9, "Xbox One"), (b1[0] + 5, b1[0] + 35.9, 28.6 + 9, 36.9 + 9, "Xbox 360"),
                                   (b2[0] + 3.5, b2[0] + 36, 38.7 + 9, 48.5 + 9, "PS3"), (b2[0] + 3.5, b2[0] + 33.7, 20.4 + 9, 28.2 + 9, "PS2"),
@@ -1585,12 +1601,13 @@ def drawer_layouts():
     o.append(t(X(g.ALC_W / 2), oy + 18, f"{g.ALC_W:g} wide: 3 + 60 + 60 + 60 + 3 · worktop at 76 · front view, 3.6 px per cm", 10, "middle", 400, MUTED))
     lx = X(g.ALC_W) + 28
     for i, lab in enumerate(labs):
-        col = (GA, GB, GC, GC)[i]
-        o.append(f'<circle cx="{lx + 9}" cy="{Y(66) + i * 34 - 4}" r="5" fill="{col}"/>')
-        o.append(t(lx + 22, Y(66) + i * 34, lab, 11, "start", 600))
-    o.append(t(lx + 22, Y(66) + 4 * 34, "Open one at a time: a full record tray is about 32 kg.", 10, "start", 400, MUTED))
-    o.append(t(lx + 22, Y(66) + 4 * 34 + 16, "Anti-tip brackets fix the base to the wall first.", 10, "start", 400, MUTED))
-    o.append(t(lx + 22, Y(66) + 4 * 34 + 32, "Every front: a plain oak lip, finger pull underneath.", 10, "start", 400, MUTED))
+        col = (GA, GB, GC, GC, GA, GA, GA)[i]
+        o.append(f'<circle cx="{lx + 9}" cy="{Y(66) + i * 26 - 4}" r="5" fill="{col}"/>')
+        o.append(t(lx + 22, Y(66) + i * 26, lab, 10.5, "start", 600))
+    n_ = len(labs)
+    o.append(t(lx + 22, Y(66) + n_ * 26, "Open one LP crate at a time: full, one is about 30 kg.", 10, "start", 400, MUTED))
+    o.append(t(lx + 22, Y(66) + n_ * 26 + 15, "Anti-tip brackets fix the base to the wall first.", 10, "start", 400, MUTED))
+    o.append(t(lx + 22, Y(66) + n_ * 26 + 30, "Every front: a plain oak lip, finger pull underneath.", 10, "start", 400, MUTED))
 
     # ---- B: each drawer from above, 5 px per cm, front (the room) at the bottom
     s = 5.0
@@ -1648,28 +1665,40 @@ def drawer_layouts():
     o.append(t(PX(27.2), yb + 18, "32 PS1 games flat: 8 stacks of 4 jewel cases", 9.5, "middle", 600, GB))
     o.append(t(PX(27.2), yb + 31, "or remotes, spare pads, cables and manuals", 9.5, "middle", 400, MUTED))
 
-    # C and D · record trays
-    PX, PY = plan(770, "C and D · Record trays (the two are the same)", "box 53.9 × 40 · 400 mm runners, 68 kg a pair", 53.9, 40)
-    o.append(f'<rect x="{PX(0.9)}" y="{PY(39.1)}" width="{52.1 * s}" height="{38.2 * s}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
+    # C and D · the LP crates (v16: snug, under the turntable)
+    bw = g.TRAY_BOX[0]
+    PX, PY = plan(745, "C and D · LP crates", f"box {bw:.1f} × 40 · 400 mm runners", bw, 40)
+    o.append(f'<rect x="{PX(0.9)}" y="{PY(39.1)}" width="{g.TRAY_INSIDE * s}" height="{38.2 * s}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
+    lx_ = 0.9 + (g.TRAY_INSIDE - g.LP) / 2
     for i in range(26):
         zz = 2.6 + i * 1.3
-        o.append(f'<rect x="{PX(1.5)}" y="{PY(zz + 0.45)}" width="{31.4 * s}" height="{0.55 * s}" fill="{LP_C[i % 6]}" opacity="0.85"/>')
-    o.append(f'<rect x="{PX(33.5)}" y="{PY(39.1)}" width="{0.6 * s}" height="{38.2 * s}" fill="#c48c57"/>')
-    for i in range(30):
-        zz = 2.6 + i * 1.15
-        o.append(f'<rect x="{PX(34.4)}" y="{PY(zz + 0.35)}" width="{18.3 * s}" height="{0.42 * s}" fill="{LP_C[(i + 3) % 6]}" opacity="0.8"/>')
-    o.append(t(PX(17.2), PY(20), "LPs", 11, "middle", 700, "#fff", 'paint-order="stroke" stroke="#3b3833" stroke-width="3"'))
-    
-    o.append(f'<rect x="{PX(-1.45)}" y="{PY(1.5)}" width="{56.8 * s}" height="{1.5 * s}" fill="#e9c9a4" stroke="{VIN_S}"/>')
+        o.append(f'<rect x="{PX(lx_)}" y="{PY(zz + 0.45)}" width="{g.LP * s}" height="{0.55 * s}" fill="{LP_C[i % 6]}" opacity="0.85"/>')
+    o.append(t(PX(bw / 2), PY(20), "LPs", 11, "middle", 700, "#fff", 'paint-order="stroke" stroke="#3b3833" stroke-width="3"'))
+    o.append(f'<rect x="{PX(-0.7)}" y="{PY(1.5)}" width="{(bw + 1.4) * s}" height="{1.5 * s}" fill="#e9c9a4" stroke="{VIN_S}"/>')
     yb = PY(0) + 22
-    dim(PX(0.9), PX(53.0), yb, "one LP trough, 52.1 (LPs centred, 10.3 to flip either side)")
-    o.append(t(PX(26.95), yb + 18, "every sleeve face-out, leaning back 10°: flip like a shop", 9.5, "middle", 400, MUTED))
-    o.append(t(PX(26.95), yb + 31, f"~{g.TRAY_LPS} LPs each, LPs only · two trays", 9.5, "middle", 600, GC))
+    dim(PX(0.9), PX(bw - 0.9), yb, f"trough {g.TRAY_INSIDE:.1f}: snug, no dead space")
+    o.append(t(PX(bw / 2), yb + 18, "face-out, leaning back 10°", 9.5, "middle", 400, MUTED))
+    o.append(t(PX(bw / 2), yb + 31, f"~{g.TRAY_LPS} LPs each · two crates", 9.5, "middle", 600, GC))
+    # E, F and G · the slim drawers
+    sw = g.SLIM_BOX_X[1] - g.SLIM_BOX_X[0]
+    PX, PY = plan(960, "E, F, G · Slim drawers", f"box {sw:.1f} × 40 · 400 mm runners", sw, 40)
+    o.append(f'<rect x="{PX(g.SLIM_SIDE)}" y="{PY(40 - g.SLIM_SIDE)}" width="{g.SLIM_INSIDE * s}" height="{(40 - 2 * g.SLIM_SIDE) * s}" fill="#f6f8fb" stroke="{GA}" stroke-opacity="0.4"/>')
+    gx = g.SLIM_SIDE + (g.SLIM_INSIDE - g.GAME_CASE[0]) / 2
+    for i in range(g.SLIM_DRAWERS[0]["n"]):
+        zz = 2.6 + i * 1.45
+        o.append(f'<rect x="{PX(gx)}" y="{PY(zz + 0.5)}" width="{g.GAME_CASE[0] * s}" height="{0.75 * s}" fill="{["#3a5fb8", "#3f9a4c", "#2a2c31"][i % 3]}" opacity="0.85"/>')
+    o.append(f'<rect x="{PX(-0.6)}" y="{PY(1.5)}" width="{(sw + 1.2) * s}" height="{1.5 * s}" fill="#e9c9a4" stroke="{VIN_S}"/>')
+    yb = PY(0) + 22
+    dim(PX(g.SLIM_SIDE), PX(sw - g.SLIM_SIDE), yb, f"{g.SLIM_INSIDE:.1f}")
+    o.append(t(PX(sw / 2), yb + 18, f"E, F: ~{g.SLIM_DRAWERS[0]['n']} games", 9.5, "middle", 600, GA))
+    o.append(t(PX(sw / 2), yb + 31, "each, face-out", 9.5, "middle", 400, MUTED))
+    o.append(t(PX(sw / 2), yb + 44, "G: 4 pads, remotes,", 9.5, "middle", 600, GA))
+    o.append(t(PX(sw / 2), yb + 57, "a charging lead", 9.5, "middle", 400, MUTED))
 
     o.append(t(0, H - 26, "Plans drawn from above at 5 px per cm, front (the room) at the bottom; the elevation at 3.6 px per cm. Sizes: BESTÅ frame 60 × 40 × 64 (IKEA);", 10, "start", 400, MUTED))
-    o.append(t(0, H - 12, "game cases 19 × 13.5 × 1.4 and 17 × 13.5 × 1.2; jewel case 14.2 × 12.5 × 1; sleeves 31.4 and 18.3; runners Emuca 400 mm 68 kg, Accuride 350 mm (see the fit proof).", 10, "start", 400, MUTED))
+    o.append(t(0, H - 12, "game cases 19 × 13.5 × 1.4 and 17 × 13.5 × 1.2; jewel case 14.2 × 12.5 × 1; LP sleeve 31.4; pads 16 × 10.6 × 6.6; runners Emuca 400 mm, Accuride 350 mm (see the fit proof).", 10, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "The drawer layouts: where each drawer is and what goes in it",
-               "Four drawers in the alcove base, all to scale: A the game drawer, B the hidden plinth drawer, C and D the two face-out record trays")
+               "Seven drawers in the alcove base, all to scale: A the game drawer, B the hidden plinth drawer, C and D the LP crates, E to G the slim drawers beside them")
 
 
 
@@ -1950,6 +1979,8 @@ def dining_sites():
         o.append('<polyline points="' + " ".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in pts_) + f'" fill="#fbfaf6" stroke="{WALL}" stroke-width="2.4"/>')
         o.append(f'<rect x="{X(g.BREAST_X[1]):.1f}" y="{Y(0):.1f}" width="{g.BREAST_W*k:.1f}" height="{g.ALC_D*k:.1f}" fill="#e2b9a4" stroke="{WALL}" stroke-width="1.6"/>')
         o.append(t(X(g.TABLE_CX), Y(g.ALC_D / 2) + 4, "chimney breast", 8.5, "middle", 600, "#8f5b45"))
+        pb = g.PIPE_BOX                     # v16: the pipe boxing in the window's west corner
+        o.append(f'<rect x="{X(pb["x"][1]):.1f}" y="{Y(pb["z"][0]):.1f}" width="{(pb["x"][1] - pb["x"][0])*k:.1f}" height="{(pb["z"][1] - pb["z"][0])*k:.1f}" fill="#d8d3c8" stroke="{WALL}" stroke-width="1.4"/>')
         o.append(f'<rect x="{X(g.ALC_W):.1f}" y="{Y(g.BASE_FRONT_Z):.1f}" width="{(g.ALC_W - 130)*k:.1f}" height="{g.BASE_D*k:.1f}" fill="#e9d3b4" stroke="#b88a55"/>')
         o.append(t(X((g.ALC_W + 130) / 2), Y(g.BASE_FRONT_Z) + 18, "media wall", 8.5, "middle", 600, "#8a5a32"))
         o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(sd):.1f}" width="{(g.ROOM_W - g.STAIR_X[0])*k:.1f}" height="{(g.ALC_D - sd)*k:.1f}" fill="#eeeae1" stroke="#9a958b"/>')
@@ -1992,7 +2023,7 @@ def dining_sites():
             o.append(t(X(tx1 + cd) - 4, Y(tz1 - 20), "first chair:", 8, "end", 600, "#d0573b"))
             o.append(t(X(tx1 + cd) - 4, Y(tz1 - 20) + 10, "in the door's swing", 8, "end", 600, "#d0573b"))
             o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2), "your 2 m shelf (high),", 8.5, "start", 600, "#33302b"))
-            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2) + 11, "light box, laser, plant", 8.5, "start", 400, MUTED))
+            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2) + 11, "OBEGRÄNSAD, laser, plant", 8.5, "start", 400, MUTED))
             pendant()
             dim((g.TABLE_CX, tz0), (g.TABLE_CX, g.SOFA_FRONT_Z), f"{_fmt(tz0 - g.SOFA_FRONT_Z)} to the sofa: no end seat", dx=4, anchor="start", dy=4, col="#9a5f0c")
             title, sub = "A · On the chimney breast: up to six", "the flip-top open towards the window, three a side; folded flat every day"
@@ -2013,9 +2044,9 @@ def dining_sites():
             o.append(t(X((tx0 + tx1) / 2), Y((tz0 + tz1) / 2) + 4, "110 × 160", 9, "middle", 650, "#5a3a20"))
             pendant()
             o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y(s1) + 10, "your 2 m shelf above it", 8.5, "start", 600, "#33302b"))
-            title, sub = "B · Under your shelf, by the stairs: up to seven", "the flip-top open into the room, three a side and one at the end"
+            title, sub = "B · Under your shelf, by the stairs: up to seven (the default)", "the flip-top open into the room, three a side and one at the end"
             notes = ["+ seven at a squeeze, five with room; right under the pendant point",
-                     "+ out of the door's swing; frees the chimney breast",
+                     "+ out of the door's swing; frees the breast for the “now playing” ledge",
                      "− the side chairs are tight: 43 to the stairs' foot, 33 to the window",
                      "− the lamp moves while it's open; check the wall before fixing the brackets"]
         o.append(t(ox, 70, title, 13, "start", 700))

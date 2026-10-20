@@ -105,7 +105,6 @@ SUB = (21.4, 29.4, 30.4)                   # W, H, D  (Hisense AX5100G subwoofer
 TEN_GANG = (56.0, 4.5, 6.0)                # assumed, lying flat behind the TV (length to confirm)
 
 # ---------------------------------------------------------------- records (the v9/v10 trays, now in bay 3 under the deck)
-TRAY_BOX = (53.9, 40.0)
 TRAY_LOWER = (2.3, 3.5, 34.4)              # box underside, base top, sleeve tops
 TRAY_UPPER = (37.0, 38.2, 69.1)
 TRAY_TOP_PANEL = 71.2
@@ -270,15 +269,19 @@ if __name__ == "__main__":
 # the three-headed floor lamp and the record crate below. Scaled from the photo by the shelf's 2 m (about 4.5 px a cm on the wall):
 # the shelf starts about 41 cm past the stair box and stops about 16 cm short of the window corner, top about 200.
 STAIRS_WALL_Z = (ALC_D - STAIR_D, WINDOW_Z)        # -41 .. -309: the stair box's face to the window wall, 268 long
-SHELF_B = dict(z=(STAIRS_WALL_Z[0] - 52.0, STAIRS_WALL_Z[0] - 252.0), top=200.0, t=5.0, d=25.0)   # -93 .. -293
+# v16, client: "the small alcove in that exists on the edge of that wall, it's like 20x20 out, covers pipes, its hollow": the pipe boxing in
+# the window corner (sketch: 230 along this wall, 220 out), floor to ceiling. The shelf can't run into it, so it stops 2 short of it, 200 long;
+# its top is put at 196 (the photo gave about 200) so the IKEA OBEGRÄNSAD panel (36 tall) stands on it under the 235 ceiling.
+PIPE_BOX = dict(x=(ROOM_W - NW_BOX[1], ROOM_W), z=(WINDOW_Z, WINDOW_Z + NW_BOX[0]), hollow=True)   # x 445 .. 467, z -309 .. -286
+SHELF_B = dict(z=(PIPE_BOX["z"][1] + 202.0, PIPE_BOX["z"][1] + 2.0), top=196.0, t=5.0, d=25.0)   # -84 .. -284
 DINING_SITES = {"breast": "On the chimney breast", "stairs": "Under the shelf, by the stairs"}
-DINING_SITE = "breast"                              # the plan's default; both are drawn, checked and costed
+DINING_SITE = "stairs"                              # v16, client: "table by the stairs should be default view now": the plan's default
 TABLE_B_CZ = -180.0                                # the table's centre along the stairs wall: 84 to the stair box, 74 to the window
 TABLE_B_Z = (TABLE_B_CZ + TABLE[0] / 2, TABLE_B_CZ - TABLE[0] / 2)    # -125 .. -235
 TABLE_B_X = (ROOM_W - RAIL[2] - TABLE[1], ROOM_W - RAIL[2])          # the inner top, down
 TABLE_B_OPEN_X = (ROOM_W + OPEN_Z[1], ROOM_W + OPEN_Z[0])            # v15: 296.7 .. 456.7 open, out from the stairs wall
 FLOOR_LAMP = dict(h=165.0, base=28.0, heads=3)      # the client's three-headed floor lamp (keeps; it can move): drawn, not measured
-FLOOR_LAMP_SPOTS = {"corner": ("By the window, west corner", (ROOM_W - 22.0, WINDOW_Z + 30.0)),
+FLOOR_LAMP_SPOTS = {"corner": ("By the window, west corner", (ROOM_W - 62.0, WINDOW_Z + 34.0)),   # v16: clear of the pipe box and the plant
                     "sofa": ("At the sofa's west end", (SOFA_X[1] + 20.0, SOFA_BACK_Z + 20.0)),
                     "breast": ("Beside the chimney breast", (BREAST_X[1] + 22.0, -22.0))}
 
@@ -293,7 +296,30 @@ SOFA_CUSHION = False                         # the white/grey cushion is gone
 # "i'd like the media wall drawers for vinyl to be for vinyl large only": one trough the tray's full width, the LPs centred in it with
 # finger room either side to flip with both hands (LP 31.4 in 52.1 inside: 10.3 each side); no divider, no singles.
 TRAY_LP_ONLY = True
-TRAY_INSIDE = TRAY_BOX[0] - 2 * 0.9         # 52.1 between the 9 mm sides
+
+# v16, client: "vinyl drawer adjusted but lots of empty space in that drawer now ... a better use of space for something else. i want the
+# ideal media wall now you have the specs and info". Bay 3 splits in two with a 12 mm ply divider: on the right, under the turntable,
+# the LP column: two snug face-out LP crates (the 33 cm trough record shops use: 31.4 sleeves with a little play, flipped by their top
+# edges); on the left, a slim column of three drawers: two face-out game drawers (DVD-size cases, 13.5 wide) and a drawer for the pads
+# and remotes with a charging lead. Every drawer 400 mm deep on 12.7 mm side runners.
+RUN = 1.27                                   # side-mount runner clearance each side
+B3_IN = (BAYS[2][0] + 1.8, BAYS[2][1] - 1.8)               # 124.8 .. 181.2 inside the 18 mm ply carcass
+B3_DIV = (B3_IN[0] + 17.8, B3_IN[0] + 19.0)                # 142.6 .. 143.8: the 12 mm ply divider
+REC_BOX_X = (B3_DIV[1] + RUN, B3_IN[1] - RUN)              # 145.07 .. 179.93: the LP crates, 34.86 wide
+TRAY_BOX = (REC_BOX_X[1] - REC_BOX_X[0], 40.0)
+TRAY_INSIDE = TRAY_BOX[0] - 2 * 0.9         # 33.06 between the 9 mm sides: 0.8 play each side of a 31.4 sleeve
+SLIM_BOX_X = (B3_IN[0] + RUN, B3_DIV[0] - RUN)             # 126.07 .. 141.33: the slim drawers, 15.26 wide
+SLIM_SIDE = 0.6                                            # 6 mm birch-ply sides and back
+SLIM_INSIDE = SLIM_BOX_X[1] - SLIM_BOX_X[0] - 2 * SLIM_SIDE   # 14.06
+GAME_CASE = (13.5, 19.0, 1.4)                # DVD-size game case (PS2, Xbox 360, PS3): W, H, T; Xbox One's are 17 tall
+PAD = (16.0, 10.6, 6.6)                      # DualSense, the larger pad: W, D, H (Xbox Series pad 15.3 x 10.4 x 6.1)
+SLIM_DRAWERS = [dict(yb=2.3, kind="games", n=22), dict(yb=25.1, kind="games", n=22), dict(yb=47.9, kind="pads", n=4)]
+SLIM_GAMES = sum(d["n"] for d in SLIM_DRAWERS if d["kind"] == "games")    # 44
+FACE_STILE = (B3_DIV[0] - 0.4, B3_DIV[1] + 0.4)            # the face frame's stile over the divider: 142.2 .. 144.2
+
+# v16: with the table by the stairs (the default), the chimney breast beside the turntable takes a "now playing" ledge: a 7 cm oak ledge
+# for the sleeve of what's on and the next two, under the two framed LPs
+NOW_LEDGE = dict(x=(BREAST_X[0] + 6.0, BREAST_X[1] - 6.0), top=104.0, d=7.0, t=2.4, lip=1.5, n=3)
 
 # "i'd like the bar lights to run in the other direction ie tv to window on both fixtures": both bars turn 90°, so they run along z
 # (from the media wall towards the window); their heads are spaced along the bar the same 21 cm apart.
@@ -341,11 +367,13 @@ CURTAIN = dict(rail_y=CEIL - 7.0, drop_to=1.5, stack=44.0, ext=30.0, col="#b9a47
                                             # 120-360 long, rings included, finials up to 8 more), running 30 past the window each side: a 300 pole
 # shelf B (the 2 m shelf on the stairs wall): "make the hanging plant on the wall shelf actually hang and add my small laser from the middle.
 # on the left of that shelf is my ikea light box"
-LIGHTBOX = dict(z=(SHELF_B["z"][0] - 4.0, SHELF_B["z"][0] - 60.0), h=42.0, d=12.0)   # the box in the photo, at the shelf's stair (left) end
-LASER = dict(z=sum(SHELF_B["z"]) / 2, size=(9.0, 6.0, 9.0))   # a small star/laser projector in the middle of the shelf
-PLANT_B = dict(z=SHELF_B["z"][1] + 48.0, pot=14.0, trail=(55.0, 110.0), strands=7)   # a trailing plant towards the window end, hanging down, clear of the lamp
+# v16, client: "lightbox is also black not white. it makes black and white print basic images in blocks like pharmacy LED ads": the IKEA
+# OBEGRÄNSAD LED wall lamp (black, 52 x 36 x 6, a 16 x 16 grid of white LEDs, five programmes), standing landscape at the left end
+LIGHTBOX = dict(z=(SHELF_B["z"][0] - 2.0, SHELF_B["z"][0] - 54.0), h=36.0, d=6.0, grid=16, name="IKEA OBEGRÄNSAD")
+LASER = dict(z=sum(SHELF_B["z"]) / 2, size=(9.0, 6.0, 9.0), on=False)   # v16: "the laser lights should not be on, i was just saying that it is on that shelf"
+PLANT_B = dict(z=SHELF_B["z"][1] + 9.0, pot=14.0, trail=(55.0, 110.0), strands=7)   # v16: "move plant to edge of the shelf": the window end
 # "either add my hat there or give it a wallstand or something to display it": an oak hat peg on the stairs wall by the lamp
-HAT_PEG = dict(z=STAIRS_WALL_Z[0] - 26.0, y=165.0, d=9.0)   # -67: between the stair box and the shelf's stair end, clear of table B
+HAT_PEG = None                                       # v16: "youve put a random hat on the wall, ill resend the picture": off until the photo
 
 # the heads along each bar (offset along the bar from its centre, + towards the media wall / door), shade colour, stem colour, aim
 SAGE, BLUE, MUSTARD, PINK = ("#a9c7ab", "#8db59c"), ("#a7d0d8", "#7fbfc8"), ("#e8b53f", "#dca52f"), ("#e79c95", "#d9877f")
