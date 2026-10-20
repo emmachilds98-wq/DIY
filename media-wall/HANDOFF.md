@@ -1,7 +1,8 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next: `media-wall/UPGRADE_PLAN_v17.md`** holds the client's round 11 notes and the full v17 plan, file by file (nothing built yet).
+- **v17 is built (round 11, below).** `UPGRADE_PLAN_v17.md` was the brief; every item in it is done. Next round: wait for the client's
+  notes; the open questions are in `src/questions.py`.
 - **Branch:** `claude/sharp-franklin-lrray1`, restarted from `main` (v14.1) in round 9 after PR #4 merged; work there and open a PR into `main`.
 - **`main` is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root `index.html` is `build_viewer.site()`; `.nojekyll`
   skips Jekyll). The client wants the latest version on main so they can view it there: work on the branch, open a PR into `main`, merge it
@@ -11,10 +12,44 @@
   with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 12 stills headless in SwiftShader WebGL: about 10 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 19 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 11: v17 (the room finished round the client's notes; ideas; walk controls)
+- Brief: `UPGRADE_PLAN_v17.md` (the client's round 11 notes, kept verbatim there). Mid-round the client added: "up the wall of the stairs is
+  all one wall with no turns, the shading sometimes look strange, it should have the same colour making one wall clear, there is a slight
+  overhang that you see where the living room ceiling cuts off the view up the stairs" and "i have no bannister or rail on wall side, only on
+  the side closest into the room". And the light box: "Obegränsad LED wall lamp, Item Number: 905.262.63" (their pasted description calls it a
+  slim bar with app control; IKEA's listing says 52 × 36 × 6 cm, 5 W, five programmes, a USB-A adapter sold separately, no app: kept as drawn,
+  source `obegransad` updated with their article number).
+- Backups: `*_v16_backup.py`, `room3d_v16_backup.js`. v16 outputs moved to `out/v16/`.
+- Sofa: `SOFA_OTTOMAN` 20 (the back frame stops 20 short of the return's end; the seat wraps round), `SOFA_BACK_Z` = window + 13 (clear of
+  the curtains at `CURTAIN.z` = window + 11). Window: `WINDOW_Y` (88, 212), `WINDOW_REVEAL` 22, `SILL`; 3D draws the reveal, a deep sill and
+  `sillPlants()`.
+- Lighting: `HEAD_SPREAD`, every head straight down (`BAR1_HEADS`, `spot_heads2`, export3d bar2 B = A); scenes.py adds "general" first
+  (and the 3D default). The lamp's top head aims at the shelf wall.
+- Flip-top drawn as built (`fliptop_wall`: pegged breadboard ends, three brass hinges as boxes so 3D gets them).
+- Stairs (`west_end`): one wall from `zb`, one colour up the well (#2a5141), a ceiling lip where the living room ceiling stops, the room-side
+  banister only (rail, base rail, balusters, one newel with a cap); the wall-side newel is gone.
+- PC: `pc_internals()` in the renders; 3D `pcLit()` (fan rings, RGB strip, RAM, a point light) on the `pc` toggle ("PC lit", on by default).
+  Review (plan sections 3 and 6): powered USB 3 hub, remote power button, magnetic dust filter (buy list, step 10 and its instructions); fit
+  row: the soundbar's top is 0.6 over the screen's bottom edge, where the remote's receiver is (CHECK). 80 checks: 55 fit, 18 tight, 7 check.
+- Build guide PDF stands alone: `full_steps_html(pdf=True)` adds each step's cut list (`CUT_STEP`, `step_cuts()`) and its "see" picture
+  (`SEE_FIG`); "tab" wording gone; step 9 gains the “now playing” ledge; step 11 starts with the knock test on the stairs wall.
+- "What changed" box: v17, v16, v15; older rounds moved to "Appendix · Earlier rounds" (the page folds them under Checks & sources).
+  `plan_sections()` keys: `appendix` (options set aside), `earlier`, `ideas`.
+- Ideas (`src/ideas.py`, suggestions only, not costed in the plan): glass display case on the breast (site B only; hides the frames), glass
+  plant shelves in the reveal (10 mm, with a centre rod), oak C-table at the sofa's open end, plant ladder (moved to x 345–385: the brief's
+  268–308 sits over the radiator), plus three text-only ones. Page: an "Ideas" tab (See it group) with cards and "See it in the 3D room";
+  3D: an "Ideas (not in the plan)" button group, `S.ideas` all off; views `breast` and `windowwall` for the stills; PDF appendix.
+- Camera: `clampRoom()` keeps the camera inside the walls (and in front of the breast) every frame, unless in a view from above that you
+  haven't walked in; maxDistance 6 m (16 above), minDistance 0.3, `screenSpacePanning` false; WASD/arrows walk 15 cm, Q/E turn 10°; a d-pad
+  over the canvas. Fixed in passing: the side run's strip brightness (`multiplyScalar` had been commented out in v16).
+- Built: total £3,090–6,297; plan 68 pages, build guide 48; page QA at 390/1280: 12 tabs, no overflow, no console errors, 3D ready, walk
+  buttons and idea toggles tested headless.
+- shot3d: 19 stills (new: `3d_window_general`, `3d_pc_lit`, `3d_ideas_window`, `3d_ideas_ctable`, `3d_ideas_breast`); each resets `ideas`.
 
 ## Update 20 Oct 2026, round 10: v16 (the whole wall redesigned, the table by the stairs by default)
 - Client: "the laser lights should not be on ... lightbox is also black not white. it makes black and white print basic images in blocks like

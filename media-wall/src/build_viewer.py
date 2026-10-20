@@ -438,7 +438,7 @@ def ideas_panel():
     cards = []
     for k, title, size, cost, why, where, in3d in I.IDEAS:
         im = (f'<img data-art="{IDEA_SHOT[k]}" alt="{html.escape(CAP3D[IDEA_SHOT[k]])}" loading="lazy">' if in3d else "")
-        opts = json.dumps({"site": "B", "view": IDEA_VIEW[k], "ideas": {k: True}})
+        opts = json.dumps({"site": "B", "view": IDEA_VIEW.get(k, "window"), "ideas": {k: True}})
         b = f"<button type='button' class='btn' data-r3d='{opts}'>See it in the 3D room</button>" if in3d else ""
         cards.append(f'<article class="opt{"" if in3d else " noimg"}">{im}<div class="ob"><span class="label">{html.escape(size)} · about £{cost[0]}–{cost[1]}</span>'
                      f'<h3>{html.escape(title)}</h3><p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>{b}</div></article>')

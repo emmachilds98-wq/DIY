@@ -23,7 +23,7 @@ DECK_ART = {"render_v13_join_clean.png": "art_join_card_room", "render_v13_join_
             "render_v13_dining_six.png": "art_six_card_room", "render_v13_side.png": "art_side_card_room",
             "paint_grid.png": "doc_paint", "skirting_options.png": "doc_skirt",
             "render_v17_3d_window_B_folded.png": "3d_window_B_folded", "render_v17_3d_dining_B_four.png": "3d_dining_B_four",
-            "render_v17_3d_B_folded.png": "3d_B_folded"}
+            "render_v17_3d_B_folded.png": "3d_B_folded", "render_v17_3d_ideas_window.png": "3d_ideas_window", "render_v17_3d_ideas_breast.png": "3d_ideas_breast"}
 
 
 def img(name, alt=""):
