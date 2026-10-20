@@ -52,6 +52,9 @@
   chairs to B for every state. `fit.fliptop_zones()` replaces the dining zone and `stairs_zone()` (A: up to 6, no end seat (sofa: CHECK);
   B: up to 7). `diagrams.fliptop()` (section, folded/open) replaces `dining_section()` and `leaf_case()` in the plan; `seating()` and
   `dining_sites()` redrawn. Section 5, step 11 + its instructions, buy list and cut lists rewritten. Fit proof 69: 50 fit, 14 tight, 5 check.
+- Full rebuild done (total £2,965–5,992; plan 62 pages, build guide 41); QA at 390 and 1280 px, no console errors. Published v15 to 71ff
+  (version 15, id 1792466792-e7af) over the v14.1 deck another session had put up; v15 contains v14.1, and the tracker had no ticks to lose
+  (13 buy/step lines changed text, so their tick ids changed). v14 outputs moved to `out/v14/`.
 
 ## Update 20 Oct 2026, round 8b: v14.1 (a faster 3D room, GitHub Pages)
 - Client: "ive activated pages on github, do another full upgrade wherever necessary. it runs very slow on the renders but it looks great so

@@ -150,14 +150,14 @@ def drawer():
         o.append(f'<rect x="{PX(x0_)}" y="{PY(39.5)}" width="{1.25*k}" height="{39.5*k}" fill="#e4e4e4" stroke="#999" stroke-width="0.8"/>')
     o.append(f'<rect x="{PX(0)}" y="{PY(40)}" width="{53.9*k}" height="{40*k}" fill="{VIN_F}" stroke="{VIN_S}"/>')
     o.append(f'<rect x="{PX(0.9)}" y="{PY(39.1)}" width="{52.1*k}" height="{38.2*k}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
-    lx = 0.9 + (g.TRAY_INSIDE - g.LP) / 2                   # v15: LPs only, centred in the full width
+    lx = 0.9 + (G.TRAY_INSIDE - G.LP) / 2                   # v15: LPs only, centred in the full width
     for i in range(26):
         zz = 2.6 + i * 1.2
-        o.append(f'<rect x="{PX(lx)}" y="{PY(zz + 0.4)}" width="{g.LP*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
+        o.append(f'<rect x="{PX(lx)}" y="{PY(zz + 0.4)}" width="{G.LP*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
     o.append(t(PX(26.95), PY(22) - 4, "LPs only, centred", 11, "middle", 650, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
     o.append(t(PX(26.95), PY(22) + 10, "~90 face-out", 10, "middle", 400, MUTED, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
-    for x_ in (0.9, 0.9 + lx - 0.9 + g.LP):
-        o.append(t(PX(x_ + (lx - 0.9) / 2), PY(36), f"{(g.TRAY_INSIDE - g.LP) / 2:g}", 9.5, "middle", 600, VIN_S))
+    for x_ in (0.9, 0.9 + lx - 0.9 + G.LP):
+        o.append(t(PX(x_ + (lx - 0.9) / 2), PY(36), f"{(G.TRAY_INSIDE - G.LP) / 2:g}", 9.5, "middle", 600, VIN_S))
     o.append(t(PX(26.95), PY(36) + 12, "finger room either side to flip", 9.5, "middle", 400, MUTED))
     o.append(f'<rect x="{PX(-1.45)}" y="{PY(0)}" width="{56.8*k}" height="{1.5*k}" fill="#e9c9a4" stroke="{VIN_S}"/>')
     o.append(t(PX(26.95), PY(0) + 26, "tray 53.9 × 40 outside, 52.1 × 38.2 inside", 10, "middle", 400, MUTED))

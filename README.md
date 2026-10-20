@@ -17,6 +17,7 @@ with a fold-down oak dining table on the chimney breast, or (new option) on the 
 - **Record trays for LPs only:** one trough the full width, room to flip with both hands.
 - **The spot bars run from the TV towards the window** and take **smart colour bulbs** (E14, under the bar's 6 W: WiZ Colour P45 or Philips Hue lustre), so there are no dimmers to fit; set softer and aimed at walls and shelves, so the light is less spotty.
 - **In the 3D room:** a slider for every light (and one for all of them), colour pickers for both bars and the lamp's three bulbs, and separate paint colours for the walls, the ceiling and the skirting.
+- Total about £2,965–5,992 (smart bulbs instead of dimmers, the flip-top's two oak panels and hinges, a rug), no electrician on top.
 - Fit proof: 69 checks, 50 fit, 14 tight, 5 to check on site, none fail. 18 questions: new are the hat and the light box's name (the curtains and the carpet came with your photo).
 
 | The side wall: one oak run | The stairs wall: light box, laser, hanging plant, hat, red lamp |
@@ -98,10 +99,10 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v13.pdf`](media-wall/out/Home_Network_Plan_v13.pdf) (58 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v13.pdf`](media-wall/out/Build_Guide_v13.pdf) (tools, techniques, order of work, step by step)
-- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v12/`)
-- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v13.8 is published there with every round up to it: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v15.pdf`](media-wall/out/Home_Network_Plan_v15.pdf) (62 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v15.pdf`](media-wall/out/Build_Guide_v15.pdf) (41 pages: tools, techniques, order of work, step by step)
+- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v14/`)
+- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v15 is published there with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 
 ### Rebuilding the plan and renders
