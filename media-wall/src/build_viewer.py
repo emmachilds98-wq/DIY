@@ -12,12 +12,12 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "15"
+VERSION = "16"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
 DECK_URL = "https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2"
-LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
+LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS + G.NOW_LEDGE["n"]   # v16: 191, with the "now playing" ledge
 SINGLES = 2 * G.TRAY_SINGLES
 
 # ---------------------------------------------------------------- the open questions, most consequential first
@@ -408,11 +408,12 @@ summary .pf a { color: var(--oak); }
 TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
-CAP3D = {"3d_window_A_folded": "From the window, everyday evening: the table folded on the chimney breast",
+CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table folded under your shelf by the stairs, the breast free",
          "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
-         "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, your red lamp's pink and purple glow",
-         "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the trays",
-         "3d_B_folded": "The stairs wall: your shelf with the light box, the laser and the hanging plant, the hat on its peg, the red lamp, the table folded under it",
+         "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the strips low",
+         "3d_wall_drawers": "Every drawer out, the records scene: the LP crates under the turntable, a slim game drawer beside them",
+         "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the LP crates",
+         "3d_B_folded": "The stairs wall: your shelf with the black OBEGRÄNSAD panel, the laser (off) and the plant hanging at the end by the pipe boxing, the red lamp, the table folded under it",
          "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
          "3d_dining_A_four": "Option A: down for four on the chimney breast",
          "3d_dining_B_four": "Option B: down for four under the shelf, bar 2 right over it",
@@ -431,14 +432,14 @@ def options_card():
     a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "dinner"}, "See A in 3D")
     b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "dinner"}, "See B in 3D")
     return f"""<div class="opts">
+  <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
+    <div class="ob"><span class="label">Option B · up to seven · the default (v16)</span><h3>Under your shelf, by the stairs</h3>
+    <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast for the “now playing” ledge.</li>
+    <li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
   <article class="opt"><img data-art="3d_dining_A_four" alt="Option A in 3D: the table down for four on the chimney breast" loading="lazy">
-    <div class="ob"><span class="label">Option A · up to six</span><h3>On the chimney breast</h3>
+    <div class="ob"><span class="label">Option A · up to six · the alternative</span><h3>On the chimney breast</h3>
     <ul><li>The flip-top opens towards the window: four with room, six elbows-in.</li><li>Solid breast: plugs and screws, no surprises.</li>
     <li class="minus">No seat at its end (the sofa); one chair in the door's swing.</li></ul>{a}</div></article>
-  <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
-    <div class="ob"><span class="label">Option B · up to seven</span><h3>Under your shelf, by the stairs</h3>
-    <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast.</li>
-    <li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
 </div>"""
 
 
@@ -611,7 +612,7 @@ def page(site=False):
     <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
     <h1>Media Wall &amp; Home Network Plan</h1>
     {('<p class="notice">This is the copy on GitHub Pages: your ticks, amounts and answers are kept on this device only. To share them with each other, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
-    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the fold-down dining table (now with a second place to put it), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. {"Ticks, amounts and answers save for both of you." if not site else ""}</p>
+    <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the flip-top dining table (by the stairs now, or on the breast), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. {"Ticks, amounts and answers save for both of you." if not site else ""}</p>
     {pdfs}
     {"" if site else '<p class="caption">This page is also on <a href="' + PAGES + '" target="_blank" rel="noopener">your GitHub Pages site</a> (ticks there stay on that device).</p>'}
   </header>
@@ -619,13 +620,13 @@ def page(site=False):
 
   <section class="panel" id="overview" role="tabpanel" aria-labelledby="tb-overview">
     <div class="dash">
-      <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_window_A_folded" alt="The room in 3D, from the window" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
+      <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_window_B_folded" alt="The room in 3D, from the window" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
       <div class="dcard"><span class="label">Build</span><strong id="d-steps">0 of {len(steps())}</strong><span class="dbar"><i id="d-steps-bar"></i></span><a class="caption" id="d-next" href="#build" data-go="build">Start with step 1</a></div>
       <div class="dcard"><span class="label">Buy list</span><strong id="d-buy">0 bought</strong><span class="dbar"><i id="d-buy-bar"></i></span><span class="caption" id="d-paid">\u00a30 paid so far, of about \u00a3{money(lo_tot, hi_tot)}</span></div>
       <div class="dcard"><span class="label">Your answers</span><strong id="d-q">0 of {len(QUESTIONS)}</strong><span class="dbar"><i id="d-q-bar"></i></span><a class="caption" href="#questions" data-go="questions">Answer what we still need</a></div>
     </div>
     <div class="block"><div class="qhead"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
-      <p class="caption">Same table, same build: it hangs on the chimney breast (A) or on the wall going up the stairs, under your 2 m shelf (B). Everything else can move round it.</p>
+      <p class="caption">Same table, same build. Since v16 it lives on the wall going up the stairs, under your 2 m shelf (B, the default); the chimney breast (A) is the alternative.</p>
       {options_card()}</div>
     <div class="doc">
       <h2>The plan on a page</h2>
@@ -645,7 +646,7 @@ def page(site=False):
 
   <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
     <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · scroll or pinch to zoom · right-drag or two fingers to slide</span></div>
-    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set; pick a lighting scene and then slide any light, and give the smart bars and your red lamp's three bulbs any colour; paint the walls, the ceiling and the skirting (with the door and radiator) separately; turn the light box and the laser on or off; move the lamp; pull the drawers out. Then pick a camera or move your own, and save any view as an HD picture.</p>
+    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set; pick a lighting scene and then slide any light, and give the smart bars and your red lamp's three bulbs any colour; paint the walls, the ceiling and the skirting (with the door and radiator) separately; turn the OBEGRÄNSAD panel and the laser on or off (the laser starts off); colour the strips in the uprights; move the lamp; pull the drawers out. Then pick a camera or move your own, and save any view as an HD picture.</p>
     {room3d_page.section()}
     <h3 class="ptitle">HD pictures from the 3D room</h3>
     <p class="caption">Rendered at 2560 \u00d7 1440; tap one to see it full size. The same set is in the project folder.</p>

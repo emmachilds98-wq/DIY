@@ -8,7 +8,7 @@ Ids are kept from earlier rounds: answers already saved in the viewer's db stay 
 Answered and dropped in v13.6: the door, the walls, the PC case (v12.1), and where the leaf and legs live (the leaf carries them)."""
 import geometry as G
 
-LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS
+LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS + G.NOW_LEDGE["n"]   # v16: 191, with the "now playing" ledge
 SINGLES = 2 * G.TRAY_SINGLES
 
 
@@ -18,20 +18,17 @@ def _n(x):
 
 # (id, question, why it matters, how to check, a photo helps)
 QUESTIONS = [
-    ("site", "Where would you like the dining table: on the chimney breast, or under your shelf by the stairs?",
-     "Both are drawn, fit-checked and costed (the table and its build are the same). The stairs wall frees the breast, puts the table under the existing pendant and out of the door's swing; its end chairs are tight (one by the stairs' foot, one by the window).",
-     "Try both in the 3D room (Room in 3D tab), then say which.", False),
     ("westwall", "The stairs wall under your shelf: solid, or plasterboard on studs?",
-     "Only matters if you choose that spot: the table's brackets are rated 500 kg a pair, and the fixings depend on the wall.",
+     "The table goes there now (v16, the default): its brackets are rated 500 kg a pair, and the fixings depend on the wall.",
      "Knock along it: a hollow sound is plasterboard. Or look at how the shelf is fixed.", False),
     ("electrics", "The electrics: are you swapping the two light fittings and the socket yourselves?",
      "The plan has both as your own job (like for like, not notifiable), with the safe routine and the stop list. Since v15 there are no dimmers to fit: the bars take smart bulbs. If you'd rather an electrician did the fittings, say so and we'll add that visit back.",
      "Yes, all ours; or: an electrician for the fittings only.", False),
     ("sofa", "Your L-sofa's return: how far does it run along the side wall?",
-     f"The long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}. It sets the PC shelf, the walkway and the dining clearances.",
+     f"The long side is about {_n(G.SOFA_W)} from your photo; the return, with its open ottoman-style end towards the TV (v16), is drawn at {_n(G.SOFA_D)}. It sets the PC shelf, the walkway and the dining clearances.",
      "Overall depth with the return, from the window wall; back height and seat depth too if you can.", False),
     ("westend", "The stairs wall's sizes: its length, and where your shelf sits on it",
-     "Your photos give about 257–268 cm from the stair box to the window corner, the shelf starting about 41 cm from the stairs, ending about 16 from the corner, its top at about 200. The table under it is drawn from these.",
+     "Your photos give about 257–268 cm from the stair box to the window corner, the shelf starting about 41 cm from the stairs; it's drawn stopping 2 short of the pipe boxing, its top at 196. Your OBEGRÄNSAD (36 tall) only stands on it under the 235 ceiling if the top is 198 or lower. The table under it is drawn from these.",
      "Tape along the wall at floor level; the shelf's two ends from the corner, and its height from the floor.", True),
     ("turntable", "The turntable's make and model, and does it have a PHONO/LINE switch?",
      "The zone takes up to 45.2 × 35.2 cm; the switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
@@ -40,12 +37,10 @@ QUESTIONS = [
     ("chairs", "Dining chairs: ones you have, or folding ones? How many, and where will they be kept?",
      "The plan draws IKEA TERJE (seat 48); any chair with a 45–48 cm seat works. The flip-top seats up to six on the breast, seven by the stairs: how many chairs do you want to own?",
      "Seat height of yours, and the spot you have in mind (the garage?).", False),
-    ("box", "The 23 × 22 cm box in the window's west corner: what is it?",
-     "If it's pipe boxing it stays; if not, it might go.", "A photo is quickest.", True),
     ("records", "Roughly how many LPs?",
-     f"The wall holds about {LPS} LPs, all face-out (the trays take LPs only since v15). If there are more, the neatest overflow is a matching tray unit.", "A rough count is fine.", False),
+     f"The wall holds about {LPS} LPs, all face-out (two snug LP crates in bay 3 since v16). If there are more, the neatest overflow is another LP column like bay 3's.", "A rough count is fine.", False),
     ("games", "Roughly how many PS2, Xbox 360 and Xbox One games?",
-     "The game drawer holds about 48, 12 of them face-out; more needs an overflow spot.", "A count of each is plenty.", False),
+     f"The game drawer in bay 1 holds about 48 and the two slim drawers in bay 3 about {G.SLIM_GAMES} more, face-out (v16): about {48 + G.SLIM_GAMES} in all.", "A count of each is plenty.", False),
     ("ports", "Wired ports for the projector (master) and the music room (bedroom 2)?",
      "Each is one more Cat6 run on the same day as the other two (step 3); easier now than later.", "Yes or no for each.", False),
     ("surge", "The 10-gang: is it surge-protected, where are its two switches, and how long is it?",
@@ -56,29 +51,21 @@ QUESTIONS = [
     ("point2", "The pendant point by the stairs wall: its exact spot",
      "From your photo it hangs about 55 cm out from the stairs wall, a quarter of the way along the shelf from the stair end. Bar 2 goes on it, over the table if you choose that spot.",
      "Measure from the stairs wall and from the window wall.", False),
-    ("hat", "Your hat: a photo, and is an oak peg on the wall by the stairs the way you'd like to show it?",
-     f"It's drawn as a felt hat on a small oak peg {_n(G.HAT_PEG['y'])} cm up between the stairs and your shelf. A deeper oak shelf, a hat stand or a frame are the other options.", "A photo of the hat; say if you'd prefer another way.", True),
-    ("lightbox", "Your IKEA light box: which one is it?",
-     f"It's drawn from your photo as the box at the shelf's stair end, about {_n(G.LIGHTBOX['z'][0] - G.LIGHTBOX['z'][1])} × {_n(G.LIGHTBOX['h'])} cm, its face lit warm. Its name (on the label) gives its true size and whether its light changes colour.", "The name on its label, or a photo.", True),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
 
 # a short line for the plan PDF's "Still to confirm" list, by id
 PDF_LINE = {
-    "site": "Where the dining table goes: on the chimney breast, or under your shelf by the stairs (both are drawn and checked).",
-    "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the bracket fixings if the table goes there.",
+    "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the table's bracket fixings.",
     "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
-    "hat": "Your hat: a photo, and whether an oak peg by the stairs is how you'd like it shown.",
-    "lightbox": "Your IKEA light box: its name, for its true size.",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
-    "westend": "The stairs wall's length and the shelf's ends and height (the photo gives about 257–268 cm, shelf 41 from the stairs, 16 from the corner, top about 200).",
+    "westend": "The stairs wall's length and your shelf's height (drawn at 196: the OBEGRÄNSAD needs 198 or lower to stand on it).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
     "fanstand": "The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.",
     "chairs": "Dining chairs: use ones you have (seat 45–48), or folding ones (the flip-top seats up to six or seven)? And where they'll be kept.",
-    "box": "The 23 × 22 cm box in the window's west corner.",
-    "records": f"Records: roughly how many LPs (the wall holds about {LPS}, all face-out; the trays take LPs only)?",
-    "games": "Games: roughly how many PS2, Xbox 360 and Xbox One games? The drawer holds about 48.",
+    "records": f"Records: roughly how many LPs (the wall holds about {LPS}, all face-out)?",
+    "games": f"Games: roughly how many PS2, Xbox 360 and Xbox One games? The drawers hold about {48 + G.SLIM_GAMES}.",
     "ports": "Wired ports for the projector (master) and the music room (bedroom 2)?",
     "surge": "The 10-gang: is it surge-protected, where are its two switches, and how long is it? It now feeds the PC too.",
     "models": "Console model numbers, from the labels underneath, to tighten the row heights; the plan assumes the largest version of each.",
@@ -93,18 +80,14 @@ def pdf_items():
 
 # v13.8: a few words per question for the plan's one-page summary ("To confirm"), so it follows this list too
 SHORT = {
-    "site": "which dining spot",
     "westwall": "the stairs wall's build",
     "electrics": "that you're swapping the light fittings yourselves",
     "sofa": "the sofa's return length",
-    "westend": "the stairs wall's sizes",
+    "westend": "the shelf's height",
     "turntable": "the turntable's model",
     "fanstand": "the fan stand's model",
     "chairs": "chairs",
-    "box": "the 23 × 22 cm box by the window",
     "records": "record counts",
-    "hat": "the hat",
-    "lightbox": "the light box's name",
     "games": "game counts",
     "ports": "extra wired ports",
     "surge": "the 10-gang",

@@ -15,6 +15,42 @@
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
 
+## Update 20 Oct 2026, round 10: v16 (the whole wall redesigned, the table by the stairs by default)
+- Client: "the laser lights should not be on ... lightbox is also black not white. it makes black and white print basic images in blocks like
+  pharmacy LED ads ... youve put a random hat on the wall, ill resend the picture of the hat. move plant to edge of the shelf and put the small
+  alcove in that exists on the edge of that wall, it's like 20x20 out, covers pipes, its hollow ... look at my sofa towards the tv is has not
+  edge that covers the end. it is an open seat with one larger cushion that goes around towards the back making an ottoman type end"; then
+  "vinyl drawer adjusted but lots of empty space in that drawer now ... i want the ideal media wall now you have the specs and info", "not even
+  a redesign of the record bay, the whole wall based on all the changes we made", "remember table by the stairs should be default view now too".
+- Backups: `*_v15_backup.py`, `room3d_v15_backup.js`. v15 outputs moved to `out/v15/`.
+- geometry: `PIPE_BOX` (from `NW_BOX`, x 445-467, z -309..-286); `SHELF_B` now z -84..-284 (2 short of the box), top 196 (so the 36-tall
+  OBEGRÄNSAD fits under 235: fit row CHECK, ask the shelf's height); `LIGHTBOX` = IKEA OBEGRÄNSAD 52 x 36 x 6, grid 16 (source `obegransad`);
+  `LASER.on=False`; `PLANT_B` at the shelf's window end; `HAT_PEG = None`; `DINING_SITE = "stairs"`; lamp "corner" spot moved to (405, -275).
+  Bay 3 split: `RUN`, `B3_IN`, `B3_DIV` (12 mm ply), `REC_BOX_X` (LP crates 34.86, trough `TRAY_INSIDE` 33.06), `SLIM_BOX_X` (15.26, 6 mm
+  sides, 14.06 inside), `GAME_CASE`, `PAD`, `SLIM_DRAWERS` (2.3 games, 25.1 games, 47.9 pads), `SLIM_GAMES` 44, `FACE_STILE`; `NOW_LEDGE`
+  (breast, x 192-297.5, top 104, 3 LPs) shown when the table is by the stairs.
+- render: `record_tier()` rewritten (absolute x, LP crate), `slim_drawer()`, `_lip()`, `SLIM_OPEN`; `_unit()` draws the divider and the split
+  face frame; `SITE`/`SITE_NOW`: views with the table folded show the default site (stairs), so `dining_wall()` returns `now_playing()` +
+  frames; the four/six renders stay option A. `sofa_solid()`: no arm at the return's end, one long cushion wrapping to the back. Key, insets,
+  measure overlay and labels updated to v16; drawers view opens the middle slim drawer.
+- 3D: key `mw16-3d`; default site B, laser off; OBEGRÄNSAD texture (16 x 16 LEDs, a pixel note; the face now faces the room: it was turned
+  to the wall in v15); pipe box; hat only if `HAT_PEG`; `S.col.strips` colours the uprights' and side run's strips (picker on that slider);
+  dining B camera raised to show the shelf. export3d: `R.SITE_NOW = "breast"` when recording; B groups add `now_playing`; unit_out opens the
+  slim drawer. shot3d: `3d_window_B_folded` replaces A, new `3d_wall_drawers`; each still resets `drawers`.
+- diagrams: `drawer()` plan = bay 3 from above; `front()` splits bay 3 and shows the ledge with option A dashed; `drawer_layouts()` adds
+  E/F/G; `storage()` bay 3 panel; `_room()` draws the pipe box and the default site; `living_plan()`, `dining_sites()` updated.
+- fit: sources `obegransad`, `pads`, `crate`, `strips`; bay 3 zone rewritten; zone B (the default) gains shelf/pipe box, OBEGRÄNSAD (CHECK)
+  and chairs-vs-box rows; a new breast zone for the ledge; zones ordered B, breast, A. 79 checks: 56 fit, 17 tight, 6 check.
+- Docs: "What changed in v16" box; overview rows; bay 3 text and table; section 5 says B is the default; smart colour strips (buy list,
+  step 12, section 8, scenes.py); buy list adds the divider, the slim drawers, the ledge, drops the hat peg; cut list and step 8 rewritten for
+  the crates and slim drawers. Questions 15: `site`, `box` and `lightbox` answered (write them to the deck's db), hat waits for the photo,
+  westend asks the shelf's height.
+- Then the client's hat photo: both hats hang on the red lamp (a black graduation cap on the pole's top, a navy baseball cap with a poem
+  printed under its peak on the pole below the top head). `G.HATS`; `buildLamp()` draws them (`POEM_TEX`); the `hat` question is answered and
+  dropped (14 questions); the hat to-do is gone from the buy list.
+- Built: total £3,060–6,227; plan 64 pages, build guide 42; page QA at 390/1280, no overflow or console errors, 3D ready. Published v16 to
+  71ff (version 16, id 1792469962-5df0). Deck db answers written: site, box, lightbox, hat.
+
 ## Update 20 Oct 2026, round 9: v15 (the room as it really is, smart lights, one oak run on the side wall)
 - Client: "my sofa goes to around 40cm before the end of the window ... 2 seats then corner ... blue corduroy and you can remove the white
   cushion. the lamp is bright red, it has rgb lights mainly stay on green on top then pink then purple going down. either add my hat there or

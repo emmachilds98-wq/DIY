@@ -128,8 +128,8 @@ def full():
                     "Join the two frames side by side with IKEA's connectors.",
                     "Stand them on the plinth, their backs flush with its back edge, so their fronts sit 2 cm proud of the plinth (the face frame covers the step).",
                 ]),
-                ("Bay 3, the record carcass", [
-                    "While the sides are flat, mark the runner lines on their inner faces: 2.3 and 37.0 cm up from the bottom edge, for the two trays' undersides.",
+                ("Bay 3, the carcass for the LP crates and the slim column", [
+                    "While the sides are flat, mark the runner lines on their inner faces: on the right side 2.3 and 37.0 cm up from the bottom edge, for the two LP crates; on the left side 2.3, 25.1 and 47.9, for the three slim drawers.",
                     "Stand the bottom panel between the two sides, flush with their bottom edges, and the top panel flush with their top edges. Pre-drill, countersink, glue and screw with four 4 × 50 screws a joint.",
                     "Check the diagonals for square. The carcass is 60 × 40 × 73, open at the back.",
                     f"Stand it in its place, {n(g.BAYS[2][0])}–{n(g.BAYS[2][1])} from the side wall, its top level with the frames' tops at {n(g.CARCASS_TOP)}. Shim under it if the floor drops away.",
@@ -138,7 +138,7 @@ def full():
                 ("Fix it to the wall", [
                     f"Screw a 4 cm spacer block to the back wall behind the top of each bay, at {n(g.CARCASS_TOP - 5)} high, with plugs.",
                     "Push the whole base back against the blocks.",
-                    "Fit two anti-tip brackets per bay through the blocks into the wall. Do this before anything heavy goes in: a full record tray pulled out is about 32 kg in front of the unit.",
+                    "Fit two anti-tip brackets per bay through the blocks into the wall. Do this before anything heavy goes in: a full LP crate pulled out is about 30 kg in front of the unit.",
                     "Lay a level across all three tops: within 1 mm over 186 cm. Shim and re-check.",
                 ]),
                 ("The cable channel", [
@@ -178,11 +178,13 @@ def full():
             ]),
         8: dict(
             parts=["Four BESTÅ shelves 56 × 36", "Game drawer: 12 mm ply sides 35 × 15.5 (2), back 51.9 × 15.5, front panel 51.9 × 6; 9 mm base 52.5 × 34.4; 6 mm divider 51.9 × 9, bin walls 12.6 × 9 (2), bin floors 16 × 12.6 (2); oak lip 56.8 × 6.5 × 2; follower blocks",
-                   "Record trays (×2): 12 mm base 53.9 × 40; 9 mm sides 40 × 8 and ends 52.1 × 8; 6 mm oak divider 38.2 × 8; oak lip about 56 × 5 × 1.5; felt",
+                   "LP crates (×2): 12 mm base 34.9 × 40; 9 mm sides 40 × 8 and ends 33.1 × 8; oak lip 36.3 × 5 × 1.5; felt",
+                   "Slim drawers (×3): 12 mm base 15.3 × 40; 6 mm sides 40 × 10, back and front 14.1 × 10; oak lip 16.5 × 5 × 1.5; a 2 m USB-C lead and a grommet for the top one",
+                   "Bay 3's divider: 12 mm ply 69.4 × 38",
                    "Plinth drawer: 12 mm sides 34 × 4.4 and ends 49.6 × 4.4, 6 mm base 52 × 34, oak front 54 × 6 × 2",
                    f"Bay 2: 12 mm divider 35.3 × 38, part shelf {n(ps_w)} × 36, the sub's isolation riser about 22 × 28 × 3",
                    "The oak face frame, 2 cm thick: stiles about 5 wide, rails; 186 × 73 overall"],
-            hardware=["Runners: two pairs of 400 mm (68–70 kg), one pair of 350 mm soft-close, one pair of 300 mm", "3.5 × 16 mm screws for the runners (every hole)",
+            hardware=["Runners: two pairs of 400 mm (68–70 kg) for the LP crates, three pairs of 400 mm light-duty for the slim drawers, one pair of 350 mm soft-close, one pair of 300 mm", "3.5 × 16 mm screws for the runners (every hole)",
                       "Four shelf pins for the part shelf", "Two small steel angle brackets for the divider", "Panel pins, wood glue, felt"],
             tools=["Drill-driver", "Router with a 6 mm straight bit (the game drawer's base groove)", "Combination square", "Spirit level", "Clamps", "Mitre saw or tenon saw"],
             draw=["drawer_layouts", "game_drawer", "drawer", "storage"],
@@ -208,12 +210,14 @@ def full():
                     "Felt the base and make the follower blocks.",
                     "Fit the runners' inner members to the box, hang it, and check it runs true empty.",
                 ]),
-                ("The record trays (bay 3)", [
-                    "Screw the 400 mm runners to bay 3's sides with their bottom edges on the lines at 2.3 and 37.0 cm. Use every hole: a full tray is about 32 kg.",
-                    "For each tray, glue and pin the two 40 × 8 sides and two 52.1 × 8 ends on top of the 53.9 × 40 base, round its edge.",
-                    "Fit the 6 mm oak divider 32.6 cm from the left side's inner face: the LP trough on the left, the singles trough on the right.",
-                    "Glue a raked rest (an oak offcut) at the back of each trough, so the sleeves lean back about 10°. Felt the troughs.",
-                    "Fit the runners' inner members, hang the tray, and run it in and out empty, then with ten records.",
+                ("Bay 3: the divider, the LP crates and the slim drawers (v16)", [
+                    "Stand the 12 mm divider in the bay, its left face 17.8 cm from the left side's inner face, the full height inside. Check it's plumb and parallel to the side at front and back (measure both), then fix it with two small angle brackets top and bottom.",
+                    "Mark the runner lines on the divider's faces: on its right face 2.3 and 37.0 (the crates), on its left face 2.3, 25.1 and 47.9 (the slim drawers), matching the lines on the sides.",
+                    "Screw the crates' 400 mm runners to the right side and the divider's right face; the slim drawers' to the left side and the divider's left face. Use every hole: a full crate is about 30 kg.",
+                    "For each LP crate, glue and pin the two 40 × 8 sides and two 33.1 × 8 ends on top of the 34.9 × 40 base. The trough is 33 inside: snug for 31.4 sleeves, like a record shop's crate.",
+                    "Glue a raked rest (an oak offcut) at the back of each crate, so the sleeves lean back about 10°. Felt the trough.",
+                    "For each slim drawer, glue and pin the 6 mm sides, back and front onto the 15.3 × 40 base: 14.1 inside, for 13.5 cm game cases face-out. In the top one, glue a 6 mm strip down the middle (two pads on edge each side) and drill a 20 mm hole in the back for the USB-C lead's grommet.",
+                    "Hang each box and run it in and out empty, then with ten records or ten games. Feed the charging lead from a USB plug on the 10-gang down the channel, with a loop of slack so the drawer opens fully.",
                 ]),
                 ("The hidden plinth drawer", [
                     "Make the box: the two 34 × 4.4 sides, the two 49.6 × 4.4 ends between them, the 6 mm base screwed underneath. It's 52 × 34 × 5.",
@@ -221,9 +225,9 @@ def full():
                     "Felt the runners: the drawer sits under the sub.",
                 ]),
                 ("The face frame and the drawer fronts", [
-                    "Cut the stiles (about 5 wide) and the rails from 2 cm oak. The bottom rail covers the plinth, 9 tall under bays 1–2, with an opening 54 × 6 for the plinth drawer, 1.6 up, under bay 2.",
+                    "Cut the stiles (about 5 wide, and one 2 wide over bay 3's divider) and the rails from 2 cm oak. The bottom rail covers the plinth, 9 tall under bays 1–2, with an opening 54 × 6 for the plinth drawer, 1.6 up, under bay 2.",
                     "Scribe the two end stiles to the walls, then glue and pin the frame to the frames' fronts and bay 3. Notch the bottom rail's left end for the two socket leads.",
-                    "Screw the oak lips onto the game drawer, the two trays and the plinth drawer from inside each box, with a 2–3 mm gap all round to the face frame.",
+                    "Screw the oak lips onto the game drawer, the two LP crates, the three slim drawers and the plinth drawer from inside each box, with a 2–3 mm gap all round to the face frame.",
                     "Cut each finger pull underneath its lip: a cove routed along the back of the bottom edge.",
                 ]),
             ]),
@@ -362,7 +366,7 @@ def full():
             ]),
         12: dict(
             parts=["Both Wolston-style spot bars and eight smart colour E14 bulbs under 6 W (WiZ Colour P45 4.9 W, or Hue E14 lustre 5.1 W)",
-                   "2700K LED strip (about 4.5 m), three aluminium channels, a plug-in driver with an inline dimmer", "6500K bias light for the TV", "Your red lamp, with its colour bulbs"],
+                   "Smart colour strip, RGB and tunable white (about 4.5 m: Hue Lightstrip Plus or WiZ, in the bulbs' app), three aluminium channels with opal diffusers, its plug-in power", "6500K bias light for the TV", "Your red lamp, with its colour bulbs"],
             hardware=["Connector block or lever connectors (if the bar's flex needs them)", "Earth sleeving, insulating tape"],
             tools=["Two-pole voltage tester (GS38) and its proving unit", "MCB lock-off and padlock", "Insulated screwdrivers, wire strippers", "Step ladder", "A helper to hold the bar"],
             draw=[],
@@ -389,8 +393,9 @@ def full():
                     "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the four scenes from the Paint and light tab (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
                 ]),
                 ("The low-voltage lights (nothing to isolate)", [
-                    "Press the 2700K strip into each upright's groove in its aluminium channel; take its lead down the groove to the plug-in driver on the 10-gang.",
-                    "The side-wall shelf's strip (v15): in its channel in the groove under the run's front edge, 1.5 cm back from the edge, the full 220 cm; its lead drops with the PC's through the brush grommet into the conduit, to the same driver.",
+                    "Cut the smart strip at its marks into three lengths: one for each upright's groove and one for the side-wall run. Press each into its aluminium channel under the opal diffuser; take the uprights' leads down their grooves to the strip's power on the 10-gang (v16: smart colour).",
+                    "The side-wall run's strip: in its channel in the groove under the run's front edge, 1.5 cm back from the edge, the full 220 cm; its lead drops with the PC's through the brush grommet into the conduit, to the same power.",
+                    "Add the strips to the app beside the bars' bulbs, so each scene sets the wall's glow too: warm white for everyday, low and coloured for TV night.",
                     "Clip the ceiling strip through its notches in the uprights; stick the bias light round the back of the TV on its USB port.",
                     "Stand your red lamp in its spot (the 3D room shows the three), its bulbs green, pink and purple, top to bottom.",
                 ]),

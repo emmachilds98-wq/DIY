@@ -56,7 +56,7 @@ def scenes_json():
     return json.dumps({k: {"name": n, "levels": lv} for k, n, _, lv, _ in scenes.SCENES})
 
 
-LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves and the side shelf", None), ("bias", "TV bias light", None),
+LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves and the side shelf (smart colour strips)", "strips"), ("bias", "TV bias light", None),
           ("bar1", "Bar 1, TV to window (smart colour)", "bar1"), ("bar2", "Bar 2, by the stairs (smart colour)", "bar2"),
           ("lamp", "Red lamp: top, middle, bottom", "lamp")]
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
@@ -88,7 +88,7 @@ def controls():
               '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     return "".join([
-        seg("site", [("A", "On the chimney breast"), ("B", "Under the shelf, by the stairs")], "Where the table goes"),
+        seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
         lights,
         seg("paint", paints, "Wall paint", picker("r3d-custom", "#899081", "Any colour")),

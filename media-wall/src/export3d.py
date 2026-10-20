@@ -73,9 +73,10 @@ def rec(fn, *a, **kw):
         R.REC = None
 
 
-def state(dining="folded", game=0.0, rec_up=0.0, rec_lo=0.0, plinth=0.0):
+def state(dining="folded", game=0.0, rec_up=0.0, rec_lo=0.0, plinth=0.0, slim=0.0):
     R.VIEW, R.STYLE, R.DINING = "front", "joinery", dining
-    R.GAME_OPEN, R.REC_OPEN_UP, R.REC_OPEN, R.PLINTH_OPEN = game, rec_up, rec_lo, plinth
+    R.GAME_OPEN, R.REC_OPEN_UP, R.REC_OPEN, R.PLINTH_OPEN, R.SLIM_OPEN = game, rec_up, rec_lo, plinth, slim
+    R.SITE_NOW = "breast"            # the dining wall is recorded on the breast; site B turns it onto the stairs wall
     R.SOFA_GHOST = False
 
 
@@ -112,7 +113,7 @@ def scene():
         fixed += encode(rec(fn))
     groups = {"fixed": fixed}
     groups["unit_in"] = encode(rec(R.unit))
-    state(game=30, rec_up=30, plinth=25)
+    state(game=30, rec_up=30, plinth=25, slim=30)
     groups["unit_out"] = encode(rec(R.unit))
     state()
     frames = encode(rec(R.breast_frames))
@@ -123,7 +124,8 @@ def scene():
         wall = strip(encode(rec(R.dining_wall)), frames)
         chairs = encode(rec(R.dining_chairs))
         groups[f"A_{st}"] = wall + chairs
-        groups[f"B_{st}"] = to_site_b(wall) + (to_site_b(chairs) if st == "four" or G.TABLE_STYLE == "fliptop" else chairs)   # v15: the flip-top stays on its wall
+        groups[f"B_{st}"] = (to_site_b(wall) + (to_site_b(chairs) if st == "four" or G.TABLE_STYLE == "fliptop" else chairs)   # v15: the flip-top stays on its wall
+                             + encode(rec(R.now_playing)))       # v16: with the table by the stairs, the breast's "now playing" ledge
         bar2[f"A_{st}"] = R.spot_heads2()
         bx = (G.TABLE_B_OPEN_X[0] + G.TABLE_B_OPEN_X[1]) / 2 if st != "folded" else G.ROOM_W - 2.0   # v15: over the open flip-top
         by = G.TABLE_TOP if st != "folded" else G.FOLDED_TOP - 30.0
@@ -157,7 +159,7 @@ def scene():
         "SIDE_RUN": {"under": G.LEDGE_TOP - G.SIDE_RUN_T,
                      "edge": [[round(G.side_run_depth(z), 2), z] for z in range(int(G.SIDE_RUN_Z[0]), int(G.SIDE_RUN_Z[1]) - 1, -4)]},
         "SOFA_CORD": G.SOFA_CORD, "CARPET": G.CARPET_COL, "RUG": {**G.RUG, "cols": G.RUG_COLS}, "CURTAIN": G.CURTAIN,
-        "LIGHTBOX": G.LIGHTBOX, "LASER": G.LASER, "PLANT_B": G.PLANT_B, "HAT_PEG": G.HAT_PEG,
+        "LIGHTBOX": G.LIGHTBOX, "LASER": G.LASER, "PIPE_BOX": G.PIPE_BOX, "PLANT_B": G.PLANT_B, "HAT_PEG": G.HAT_PEG, "HATS": G.HATS,
         "LAMP_BODY": G.LAMP_BODY, "LAMP_RGB": G.LAMP_HEADS_RGB,
     }
     return {"room": room_spec, "groups": groups}

@@ -1,10 +1,10 @@
 """v13.7: lighting scenes. Four ways to set the room's six light layers: the ceiling LED strip on its own controller, the
-uprights' grooves (and since v15 the side-wall shelf's strip) on their plug-in driver's inline dimmer, the bias light with the
+uprights' grooves and the side-wall shelf's strip (smart colour since v16, in the bulbs' app), the bias light with the
 TV, and (v15) bar 1, bar 2 and the red lamp on smart colour bulbs, set in their app (the heads stay aimed as in the Paint and
 light table). Levels are 0-100. Used by diagrams.light_scene(), the plan's
 section 8 and the viewer's scene buttons."""
 
-LAYERS = [("strip", "Ceiling LED strip", "its own controller"), ("uprights", "Uprights' grooves and the side shelf", "the inline dimmer on its driver's lead"),
+LAYERS = [("strip", "Ceiling LED strip", "its own controller"), ("uprights", "Uprights' grooves and the side shelf", "the strips' app (smart colour since v16)"),
           ("bias", "TV bias light", "comes on with the TV"), ("bar1", "Bar 1, between the TV and the sofa", "smart bulbs: the app"),
           ("bar2", "Bar 2, by the stairs", "smart bulbs: the app"), ("lamp", "Your red lamp", "its colour bulbs: the app")]
 
