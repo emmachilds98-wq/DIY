@@ -1848,7 +1848,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v23 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v24 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");

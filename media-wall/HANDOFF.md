@@ -1,10 +1,12 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v24.md`.** v23 is built and merged (round 17, below). Waiting on the client: which ways to
-  keep the chairs (the cupboard for four or six; yes or no to four behind the folded top and to the fold-down seat), the ottoman's height,
-  the window corner's floor gap, and the optimisation plan's three questions. The client-facing optimisation plan is
+- **Next agent: `media-wall/UPGRADE_PLAN_v25.md`.** v24 is built and merged (round 18, below). Still waiting on the client: which ways
+  to keep the chairs (the cupboard for four or six; yes or no to four behind the folded top and to the fold-down seat), the ottoman's
+  height, the window corner's floor gap, and the optimisation plan's three questions. The client-facing optimisation plan is
   `media-wall/plans/optimisation_v21.html` (https://claude.ai/artifact/P7D81ZQuuVKBvh8hX2k5w6).
+- **Text rule since v24:** write the plan as it is now, with no round numbers ("(v16)", "v20: ...") in the text; `tidy.strip_versions`
+  takes out any that slip in, except inside `<div class="decision">` boxes and `<!--keep-->...<!--/keep-->` regions (history).
 - **The shared deck works from this account again (round 13):** publishing to 71ff succeeded (v16 → v19). Its db (the saved answers)
   still can't be read from Claude Code ("shared with you from another organization"), so ask the client to paste answers if you need them.
 - **Branch:** round 13 ran on `claude/eloquent-johnson-pgmnud`, restarted from `main`; any session's branch works: restart it from `main` and open a PR into `main`.
@@ -24,6 +26,22 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 18: v24 (less to read, a cleaner page)
+- Client: "can you now take away uneeded explainer text across the doc and give it a better overall design and ui".
+- **`src/tidy.py` (new):** `strip_versions(html)` drops round markers from text between tags (parentheses, "v20: " prefixes, "since
+  v16", " · v23" tails), leaving scripts, styles, decision boxes and `<!--keep-->` regions alone; `shorten_captions(html)` folds a
+  caption over 34 words after its first sentence behind a `button.more` (`MORE_JS`, delegated). build_doc `_plan` and the guide, and
+  build_viewer `page()` (a wrapper over `_page`), run them; the plan's "Earlier rounds" appendix and the page's `details.changes` and
+  Checks-tab history are in keep markers.
+- **Less text:** the "What changed" box holds v24 and v23 only (v22 to v19 moved to the top of "Earlier rounds"); the v10/v11 "why this
+  layout" figure and notes moved from section 3 to the appendix ("How the media wall's layout was chosen"); shorter header, Room tab,
+  gallery, overview build-run, fit-zone, dining and guide intros.
+- **Design (CSS appended at the end of build_viewer `STYLE`, tokens `--tab-on`, `--shadow`):** a floating pill tab bar with blur; each
+  `.panel > .doc` a card; an oak rule before h2s and `.ptitle`s; tables with sticky heads and zebra rows; a contents list (`.toc`) built
+  from the tab's h2/h3s: a sticky sidebar at 1100 px and wider (`.panel.has-toc` grid), a scrolling chip row of h2s below, the current
+  one highlighted by an IntersectionObserver; a footer with the downloads.
+- Version 24; v23 outputs in `out/v23/`. Backups `build_doc_v23_backup.py`, `build_viewer_v23_backup.py`.
 
 ## Update 20 Oct 2026, round 17: v23 (chairs into the table, the room as it is, page looks, more suggestions)
 - Client: "make the page itself a better colour background and some customisations to make it more appealing. i'd like you to explore
