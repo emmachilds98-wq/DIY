@@ -2,12 +2,20 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v24
+## Media wall and dining wall, v25: Demma Home Improvements
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the flip-top oak dining table on the stairs wall under your shelf (the default since v16) or on the chimney breast. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v24%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v25%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v25** (Demma Home Improvements: the plan page as an app)
+- **Your room is the home screen**, full screen, in bright pastels on warm cream. Six numbered stickers sit on it (the media wall, the PC side wall, the chimney breast, the dining table, the window and plants, the sofa and rug): tap one for its key facts, to open its chapter, or to fly there.
+- **One Tools button** holds every 3D control in five tabs (Views, Layout, Lights, Look, Extras), with Edit room beside them. On a phone it's in the bottom bar.
+- **Plan, Build, Buy, Ideas and Ask slide up over the room.** The plan opens on three progress rings and the next step (tick it off there), then eleven chapters, each with its key facts first and the full text behind "Read the full chapter". A little celebration when you tick something off.
+- **Questions with quick taps** and photo buttons, saved to the same answers as before; the Ask button shows how many are left.
+- **Three lighting presets** instead of six buttons: **Bright**, **Cosy** and **Film**. With the table open, bar 2 lights it automatically; daytime is a switch that works with any preset. The plan PDF (section 8) and step 12 follow.
+- Everything from v24 is still there: every control, every saved tick, paid amount and answer.
 
 **New in v24** (less to read, a cleaner page)
 - **Less text:** the round numbers are out of the plan (its history is in the appendix), long captions fold behind a More button, and the longest introductions are cut down.
@@ -62,7 +70,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Layout A: your plant stand in the window corner | Layout A: your vinyl stand on the breast |
 |---|---|
-| ![Plant stand](media-wall/out/Media%20wall%20v24%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v24%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
+| ![Plant stand](media-wall/out/v24/Media%20wall%20v24%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/v24/Media%20wall%20v24%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
 
 **New in v17** (the room finished round your notes)
 - **The sofa's open end** is a proper ottoman end: the seat wraps round to the back, the back stops 20 cm short, and the sofa stands 13 cm off the window wall, clear of the curtains.
@@ -118,7 +126,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 **v14** (you asked for the table on the stairs wall, realistic renders of your options from round the room, and a better page)
 - **A second place for the table:** on the wall going up the stairs, under your 2 m shelf, measured from your photos. Same table and build; it leaves 84 cm to the stair box and 74 to the window, folds 42 cm under the shelf, sits under the existing pendant (bar 2) and out of the door's swing. Its end chairs are tight and the wall's build needs a knock first. Both options are compared in section 5 and on the plan page.
-- **The room in 3D** on the plan page: walk round it, put the table on either wall (folded, for four or for six), change the lighting scene, the paint (or any colour), where the floor lamp stands, open the drawers, and save any view as a 3840 × 2160 picture. Twelve HD stills are below and in `media-wall/out/`.
+- **The room in 3D** on the plan page: walk round it, put the table on either wall (folded, for four or for six), pick a lighting preset, the paint (or any colour), where the floor lamp stands, open the drawers, and save any view as a 3840 × 2160 picture. Twelve HD stills are below and in `media-wall/out/`.
 - **v14.1: a faster 3D room** (it builds when you open it, redraws shadows only when something changes, drops resolution while you drag, and picks Fast on phones or slower machines), with the record covers in the frames and on the ledges, and an upholstered sofa. The whole plan is now on GitHub Pages.
 - **The page reorganised:** tabs in four groups, a dashboard on the overview (steps done, what's bought and paid, answers), and the two table options side by side.
 - Fit proof: 66 checks, 49 fit, 13 tight, 4 to check on site, none fail. 17 questions, three new: which wall for the table, what the stairs wall is built of, and where the lamp stands.
@@ -151,9 +159,9 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Option A: the flip-top on the breast, set for six | The PC side wall |
 |---|---|
-| ![Six at the table](media-wall/out/Media%20wall%20v24%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v24%20-%20the%20PC%20side%20wall%20(HD).png) |
+| ![Six at the table](media-wall/out/v24/Media%20wall%20v24%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/v24/Media%20wall%20v24%20-%20the%20PC%20side%20wall%20(HD).png) |
 
-![Numbered key](media-wall/out/Media%20wall%20v24%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
+![Numbered key](media-wall/out/v24/Media%20wall%20v24%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -172,7 +180,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v24%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/v24/Media%20wall%20v24%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)
