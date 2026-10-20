@@ -42,7 +42,9 @@ CSS = """
 .r3d-sel input[type=color] { width: 34px; height: 28px; padding: 0; border: 1px solid #fff5; border-radius: 6px; background: none; }
 .r3d-sel .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
 .r3d.editing canvas { cursor: pointer; }
-@media (max-width: 600px) { .r3d-edit button, .r3d-edit .chip { padding: 5px 8px; font-size: 12px; } .r3d-hint { display: none; } }
+@media (max-width: 600px) { .r3d-edit button, .r3d-edit .chip { padding: 5px 8px; font-size: 12px; } .r3d-hint { display: none; }
+  .r3d.editing .r3d-edit { right: 8px; } .r3d.editing .r3d-pad, .r3d.editing .r3d-cap { display: none; }
+  .r3d-addlist, .r3d-sel { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .r3d-addlist > *, .r3d-sel > * { flex: none; } }
 details.r3d-more > summary { cursor: pointer; font-size: 14px; color: var(--muted); padding: 4px 0; }
 details.r3d-more[open] > summary { margin-bottom: 8px; }
 /* v17: walk buttons over the canvas (keys: WASD or arrows to move, Q and E to turn) */

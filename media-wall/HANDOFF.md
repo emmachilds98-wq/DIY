@@ -1,8 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v17 is built (round 11, below).** `UPGRADE_PLAN_v17.md` was the brief; every item in it is done. Next round: wait for the client's
-  notes; the open questions are in `src/questions.py`.
+- **v18 is built (round 12, below).** `UPGRADE_PLAN_v18.md` was the brief. **Next round (the client asked for it "in next run"):**
+  somewhere to keep the dining chairs, "optional not essential unless easily done to the original table without many changes" (e.g.
+  folding chairs on wall hooks by the stairs, or stored in the garage; don't redesign the flip-top for it). The open questions are in
+  `src/questions.py` (new: the plant stand's and the record shelf's sizes).
 - **Branch:** `claude/sharp-franklin-lrray1`, restarted from `main` (v14.1) in round 9 after PR #4 merged; work there and open a PR into `main`.
 - **`main` is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root `index.html` is `build_viewer.site()`; `.nojekyll`
   skips Jekyll). The client wants the latest version on main so they can view it there: work on the branch, open a PR into `main`, merge it
@@ -12,10 +14,39 @@
   with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 19 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 21 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 12: v18 (plant stand and record shelf, the PC's glass side, edit mode in 3D)
+- Client: "PC internals still not visible, there is a clear side panel ... ive bought a plant shelf something very similar to this image
+  attached [`inputs/photo_plant_stand_bought.webp`] and i could keep the vinyl shelf i have in images shown before too. 4 trays in 2x2 square
+  wood shelf. add more things to improvements and design options. HD with shadows sometimes crashes also." Then: "add function for moving
+  things around in a dolls house like fashion, edit mode. add things i could add in and make things removable and adjustable. colours
+  adjustable too maybe so we can get rid of some of the menus. optimising user function"; and chair storage "put in next run".
+- Backups: `*_v17_backup.py`, `room3d_v17_backup.js`. v17 outputs moved to `out/v17/`.
+- PC (`render.wrap`): five dark panels plus a `url(#glass)` side poly (3D kind "glass"), so `pc_internals()` shows in 2D and 3D. The local
+  for the panel colours is `PCK` (a later `K()` in `wrap` is a function).
+- geometry: `PLANT_STAND` (90 × 30 × 120 assumed, tiers, grow bars under tiers 2 and 3), `RECORD_SHELF` (KALLAX 2 × 2 size assumed, 40 LPs a
+  tray), `PLANT_LAYOUTS` ("corner" = A, recommended; "breast" = B), `PLANT_LAYOUT`, `LAMP_DEFAULT` = "sofa". fit: sources `plantstand`,
+  `kallax`; a new zone `plants_zone()` (zones() wraps the v17 one): 87 checks, 59 fit, 20 tight, 8 check. questions: `plantstand`,
+  `recordshelf`. Buy list: smart plug and drip trays; felt pads and an anti-tip strap.
+- render: `record_shelf()` drawn on the breast in the main renders (layout A); labels say v18. export3d: the “now playing” ledge is its own
+  group `now_ledge` (hidden in layout B); exports `PLANT_STAND`, `RECORD_SHELF`, `PLANT_LAYOUTS`, `LAMP_DEFAULT`, `LP`.
+- room3d.js edit mode: `MOV` registry (`movable()`, pivots in `movers`, `placeAll()`, `spotOf()`), `S.layout[id]` {x, z, rot, col, off},
+  `S.added` (catalogue `CATALOGUE`: armchair, side table, floor plant, bookcase, beanbag, footstool, floor cushion, record crate). Movable:
+  plant stand, record shelf, red lamp (rebuilt where dropped), coffee table, rug, the C-table idea, anything added. Tap on nothing movable
+  picks a paint surface (`hitSurface`: material `userData.ch`): walls (presets + picker), ceiling, skirting. "Edit room" enters the
+  dolls' house view. Removed things come back from "+ Add" (↩). Page: the lamp, ceiling and skirting menus are gone; sliders fold under
+  "Fine-tune each light"; new "Your plant stand and record shelf" buttons and a "Plant stand lights" toggle (`S.grow`).
+- HD crash: `capShadows()` keeps at most `SHADOW_CAP` (4, fewer on GPUs with under 14 texture units) spotlights shadowed; stills at most 6,
+  1024 maps on phones and 2560 × 1440; `webglcontextlost` switches to Fast and offers a reload.
+- Ideas: the plant ladder dropped; new text-only: TV backlight sync, cushions, plant uplight, rug pad.
+- Built: total £3,110–6,337; plan 72 pages, build guide 48; 21 stills (faster with the shadow cap); page QA at 390/1280: no overflow, no
+  console errors, 3D ready; edit mode tested headless (add, turn, drag, tap a wall to paint). On phones the walk pad and caption hide while
+  editing and the add list scrolls in one row.
+- shot3d: 21 stills (new `3d_plants_corner`, `3d_records_breast`, `3d_plants_breast`); every still resets `layout`, `added`, `plants`.
 
 ## Update 20 Oct 2026, round 11: v17 (the room finished round the client's notes; ideas; walk controls)
 - Brief: `UPGRADE_PLAN_v17.md` (the client's round 11 notes, kept verbatim there). Mid-round the client added: "up the wall of the stairs is
