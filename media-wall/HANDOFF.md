@@ -1,6 +1,7 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Next: `media-wall/UPGRADE_PLAN_v17.md`** holds the client's round 11 notes and the full v17 plan, file by file (nothing built yet).
 - **Branch:** `claude/sharp-franklin-lrray1`, restarted from `main` (v14.1) in round 9 after PR #4 merged; work there and open a PR into `main`.
 - **`main` is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root `index.html` is `build_viewer.site()`; `.nojekyll`
   skips Jekyll). The client wants the latest version on main so they can view it there: work on the branch, open a PR into `main`, merge it
