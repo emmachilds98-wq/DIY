@@ -882,7 +882,7 @@ def west_end(sk):
     zb = G.BREAST_D_WEST                        # the recess back wall line
     wx = G.ROOM_W
     rise, going = G.STAIR_RISE, G.STAIR_GOING
-    o.append(poly([P(wx, 0, sz), P(wx, CEIL, sz), P(wx, CEIL, -470), P(wx, 0, -470)], "url(#rightwall)"))
+    o.append(poly([P(wx, 0, zb), P(wx, CEIL, zb), P(wx, CEIL, -470), P(wx, 0, -470)], "url(#rightwall)"))   # v17: one wall, right back to the recess line
     o.append(poly([P(wx, 0, sz), P(wx, sh_ := G.SKIRT_H, sz), P(wx, sh_, -470), P(wx, 0, -470)], sk[3]))
     # beyond the recess wall line the flight is in the hall: seen only through the stairwell opening (the gap in the
     # recess wall over the stair, and the opening in the ceiling above it), so that part is clipped to those openings
@@ -895,55 +895,79 @@ def west_end(sk):
     o.append(f'<clipPath id="{cid}"><polygon points="{pts(*hole)}"/><polygon points="{pts(*ceil_hole)}"/></clipPath>')
     near, far = [], []
     far.append(quad_front(sx0, 0, far_z, sx1 - sx0, CEIL, "#1d3d30"))
-    far.append(poly([P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx1, CEIL, far_z), P(sx1, 0, far_z)], "#21443a"))
+    # v17, client: "up the wall of the stairs is all one wall with no turns ... it should have the same colour making one wall clear": the
+    # west wall carries on up the stairwell in the colour its room part ends in (the 3D room paints it with the walls)
+    far.append(poly([P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx1, CEIL, far_z), P(sx1, 0, far_z)], "#2a5141"))
     far.append(poly([P(sx0, 0, zb), P(sx0, CEIL, zb), P(sx0, CEIL, far_z), P(sx0, 0, far_z)], "#244a38"))
     # looking up through the opening: the stairwell's walls carry on up to the landing's ceiling
     up = CEIL + 255.0
     hcid = cid + "c"
     near.append(f'<clipPath id="{hcid}"><polygon points="{pts(*ceil_hole)}"/></clipPath><g clip-path="url(#{hcid})">')
     near.append(poly(ceil_hole, "#2b3530"))
-    near.append(poly([P(hx0, up, sz), P(sx1, up, sz), P(sx1, up, far_z), P(hx0, up, far_z)], "#59665d"))     # the landing's ceiling
-    near.append(poly([P(sx1, CEIL, sz), P(sx1, up, sz), P(sx1, up, far_z), P(sx1, CEIL, far_z)], "#3f4d45"))  # west wall, carrying on up
-    near.append(quad_front(hx0, CEIL, far_z, sx1 - hx0, up - CEIL, "#36433c"))                               # the far wall
+    near.append(poly([P(hx0, up, sz), P(sx1, up, sz), P(sx1, up, far_z), P(hx0, up, far_z)], "#33604a"))     # the landing's ceiling, painted
+    near.append(poly([P(sx1, CEIL, sz), P(sx1, up, sz), P(sx1, up, far_z), P(sx1, CEIL, far_z)], "#2a5141"))  # the same west wall, carrying on up
+    near.append(quad_front(hx0, CEIL, far_z, sx1 - hx0, up - CEIL, "#244a38"))                               # the far wall, painted
+    # the living room's ceiling stops here: its edge shows as a shallow lip (the floor's depth) where it cuts off the view up the stairs
+    near.append(quad_front(hx0, CEIL, sz + 0.1, sx1 - hx0, 22.0, "#33604a"))
     for k_ in range(9):                                                                                       # landing balusters, seen from below
         xx = hx0 + 4 + k_ * (sx1 - hx0 - 8) / 8
         near.append(box(xx, CEIL + 22, sz + 2, 2.6, 88, 2.6, "#c79a6b", "#d8ad80", "#a37a50"))
     near.append(box(hx0, CEIL + 108, sz + 1, sx1 - hx0, 5, 5, "#b07a46", "#c89060", "#8a5c33"))               # its handrail
     near.append('</g>')
-    near.append(_line(ceil_hole[0], ceil_hole[1], "#1d3d30", 2.2))
-    near.append(_line(ceil_hole[0], ceil_hole[3], "#1d3d30", 1.6))
+    near.append(_line(ceil_hole[0], ceil_hole[1], "#264c3a", 1.4))
     # the flight: oak treads on risers in the wall colour, the first riser 6 cm behind the stair's front edge
     WOOD, WOOD_T, WOOD_S = "#b07a46", "#c89060", "#8a5c33"
     for i in reversed(range(11)):       # far, higher steps first
         z0 = sz + 6 + i * going
         y1 = (i + 1) * rise
         tgt = far if z0 >= zb else near
-        tgt.append(box(sx0, 0, z0, sx1 - sx0, y1, going, "#2d5a46", "#c48c57", "#244a38"))
+        tgt.append(box(sx0, 0, z0, sx1 - sx0, y1 - 2.2, going, "#2d5a46", "#c48c57", "#244a38"))     # v17: ends under the tread (no z-fight)
         tgt.append(box(sx0, y1 - 2.2, z0 - 1.5, sx1 - sx0, 2.2, going + 1.5, WOOD, WOOD_T, WOOD_S))
     # the closed string on the door side, raking up with the flight
     za = sz + 6
     ry = lambda z: max(rise, (z - za) / going * rise)
     def string(z1, z2):
-        return poly([P(sx0 - 0.1, 0, z1), P(sx0 - 0.1, 0, z2), P(sx0 - 0.1, ry(z2), z2), P(sx0 - 0.1, ry(z1), z1)], "#9c6a3f")
+        return poly([P(sx0 - 0.6, 0, z1), P(sx0 - 0.6, 0, z2), P(sx0 - 0.6, ry(z2), z2), P(sx0 - 0.6, ry(z1), z1)], "#9c6a3f")   # v17: 0.6 off the risers
     far.append(string(zb, far_z))
     near.append(string(za, zb))
-    # the banister: a newel at the bottom, a raking handrail 90 above the nosings, spindles under 10 cm apart
-    rail_h, nw = 90.0, 8.0
+    # the banister (v17, client: "bannister could be improved"): a solid raking handrail 6.5 wide × 5.5 deep at 90 over the nosings, a base
+    # rail capping the string, 3.2 cm square balusters at 10.5 centres (a 10 cm sphere mustn't pass: Approved Document K), and 9 × 9 newels
+    # with a capped, pyramid top at the foot (the wall side has no rail or newel). Every face is a convex quad, so the 3D room builds it cleanly.
+    rail_h, nw = 90.0, 9.0
     hy = lambda z: ry(z) + rail_h
+    xc = sx0 - 3.0
+    def rake(xa, xb, yfn, z1, z2, col):          # a raking strip's top face between two x's
+        return poly([P(xa, yfn(z1), z1), P(xb, yfn(z1), z1), P(xb, yfn(z2), z2), P(xa, yfn(z2), z2)], col)
+    def side(x, yt, yb, z1, z2, col):           # a raking strip's side face at x, between two heights
+        return poly([P(x, yb(z1), z1), P(x, yb(z2), z2), P(x, yt(z2), z2), P(x, yt(z1), z1)], col)
     def rail(z1, z2):
-        return poly([P(sx0 - 3, hy(z1) - 5, z1), P(sx0 - 3, hy(z2) - 5, z2), P(sx0 - 3, hy(z2) + 1, z2), P(sx0 - 3, hy(z1) + 1, z1)], WOOD)
+        top, bot = (lambda z: hy(z) + 1.0), (lambda z: hy(z) - 4.5)
+        return [side(xc + 3.25, top, bot, z1, z2, WOOD_S), side(xc - 3.25, top, bot, z1, z2, WOOD), rake(xc - 3.25, xc + 3.25, top, z1, z2, WOOD_T)]
+    def base_rail(z1, z2):
+        top, bot = (lambda z: ry(z) + 3.0), ry
+        return [side(sx0 + 1.9, top, bot, z1, z2, WOOD_S), side(sx0 - 3.1, top, bot, z1, z2, WOOD), rake(sx0 - 3.1, sx0 + 1.9, top, z1, z2, WOOD_T)]
     zt, zend = za + nw, za + 9 * going
-    z = zt + 4
+    far += base_rail(zb, zend)
+    near += base_rail(zt, zb)
+    z = zt + 5.25
     while z < zend - 2:
-        (far if z >= zb else near).append(box(sx0 - 2.5, ry(z), z, 3, hy(z) - ry(z) - 5, 3, "#c79a6b", "#d8ad80", "#a37a50"))
-        z += 11.0
-    far.append(rail(zb, zend))
-    near.append(rail(zt, zb))
+        (far if z >= zb else near).append(box(xc - 1.6, ry(z) + 3.0, z - 1.6, 3.2, hy(z) - 4.5 - ry(z) - 3.0, 3.2, "#c79a6b", "#d8ad80", "#a37a50"))
+        z += 10.5
+    far += rail(zb, zend)
+    near += rail(zt, zb)
     o.append(f'<g clip-path="url(#{cid})">' + "\n".join(far) + '</g>')
     o.extend(near)
-    o.append(box(sx0 - nw / 2, 0, sz, nw, rail_h + 25, nw, WOOD, WOOD_T, WOOD_S))
-    o.append(box(sx0 - nw / 2 - 0.8, rail_h + 25, sz - 0.8, nw + 1.6, 3, nw + 1.6, WOOD_T, WOOD_T, WOOD_S))
-    o.append(box(sx1 - nw, 0, sz, nw, rail_h + 12, nw, WOOD, WOOD_T, WOOD_S))
+    def newel(x, z, h):
+        q = [box(x, 0, z, nw, h, nw, WOOD, WOOD_T, WOOD_S),
+             box(x - 1, h, z - 1, nw + 2, 3, nw + 2, WOOD_T, WOOD_T, WOOD_S)]                      # the cap, 11 × 11 × 3
+        cx_, cz_, ty = x + nw / 2, z + nw / 2, h + 3
+        apex = P(cx_, ty + 3.5, cz_)
+        corners = [(x - 1, z - 1), (x + nw + 1, z - 1), (x + nw + 1, z + nw + 1), (x - 1, z + nw + 1)]
+        for k in range(4):                                                                            # the low pyramid on top
+            a_, b_ = corners[k], corners[(k + 1) % 4]
+            q.append(poly([P(a_[0], ty, a_[1]), P(b_[0], ty, b_[1]), apex], WOOD_T if k % 2 else WOOD))
+        return "\n".join(q)
+    o.append(newel(sx0 - nw / 2, sz, rail_h + 22))    # client: "i have no bannister or rail on wall side, only on the side closest into the room"
     return "\n".join(o)
 
 
@@ -1250,6 +1274,7 @@ def wrap():
     if VIEW == "side" and not G.PLAIN:       # from the side the screen is beyond the case: draw it first
         o.append(screen())
     o.append(box(cx1, st, cz0, cw, ch, cd, "#121314", "#1d1f21", "#0d0e0f"))
+    o.append(pc_internals(cx1, st, cz0, cz1, cw, ch))
     gx = cx1 + cw + 0.02
     side = [P(gx, st + 1, cz0 + 1), P(gx, st + 1, cz1 - 1), P(gx, st + ch - 1, cz1 - 1), P(gx, st + ch - 1, cz0 + 1)]
     o.append(poly(side, "#0c1714"))
@@ -1540,6 +1565,27 @@ def worktop_items():
 
 
 # ------------------------------------------------------------- the dining wall on the chimney breast
+def pc_internals(cx1, st, cz0, cz1, cw, ch):
+    """v17, client: "add a lit up PC internals to make it clear of what it is, it has a clear side window". Seen through the glass (the
+    case's +x side faces the room): the motherboard on the far side, the PSU shroud along the bottom, a graphics card across the middle,
+    a tower cooler and four RAM sticks above it, three front fans (alcove end) and one rear fan. Boxes, so the 3D room has them too; the
+    3D room lights the fan rings and an RGB strip, and puts a small light inside."""
+    o = []
+    gin = cx1 + cw - 1.0                                                                     # just inside the glass
+    o.append(box(cx1 + 1.0, st + 9.5, cz0 + 2.0, 0.8, ch - 12.0, cz1 - cz0 - 10.0, "#16201f", "#1d2a28", "#101716"))     # motherboard
+    o.append(box(cx1 + 1.0, st + 0.8, cz0 + 1.0, cw - 2.4, 8.5, cz1 - cz0 - 2.0, "#1b1d20", "#26292d", "#141518"))        # PSU shroud
+    o.append(box(cx1 + 2.0, st + 16.5, cz0 + 3.0, 12.0, 4.2, 30.0, "#24272b", "#34383d", "#1a1c1f"))                     # graphics card
+    o.append(box(cx1 + 13.8, st + 16.9, cz0 + 4.0, 0.3, 3.4, 26.0, "#d6d9dc"))                                           # its backplate edge
+    o.append(box(cx1 + 2.0, st + 25.5, cz0 + 11.0, 13.0, 12.0, 7.0, "#8d9196", "#a4a8ad", "#6f7378"))                    # tower cooler
+    o.append(box(cx1 + 2.0, st + 25.5, cz0 + 18.0, 13.0, 12.0, 2.5, "#1b1c1e", "#2a2b2e", "#141516"))                    # its fan
+    for k in range(4):                                                                                                   # RAM
+        o.append(box(cx1 + 2.0, st + 26.0, cz0 + 21.5 + k * 1.3, 4.0, 11.0, 0.7, "#2a2d31", "#d94bd0", "#1e2023"))
+    for yy in (st + 11.0, st + 23.5, st + 36.0):                                                                          # front fans
+        o.append(box(cx1 + 3.0, yy - 6.0, cz1 - 4.0, cw - 6.0, 12.0, 2.5, "#151617", "#1f2022", "#0f1011"))
+    o.append(box(cx1 + 3.0, st + 30.0, cz0 + 0.8, cw - 6.0, 12.0, 2.5, "#151617", "#1f2022", "#0f1011"))                 # rear fan
+    return "\n".join(o)
+
+
 def fliptop_wall():
     """v15: the flip-top gate-leg table. The oak backboard carries a 7.3 cm hinge rail; the 110 × 80 top hinges on its front edge and sits
     on two Hebgo brackets; a second 110 × 80 oak half is hinged to the top's front edge on three brass card-table hinges and opens out on
@@ -1571,14 +1617,13 @@ def fliptop_wall():
         o.append(box(x0, rt + 0.2, -3.0 - g_t - lt_, lw_, ld_, lt_, OAK, OAK_T, OAK_S, extra=GH))      # the half, flipped behind the top
         zt = -Dr - tt - 0.3
         o.append(box(x0, rt + 0.2, zt, tw, td, tt, OAK, OAK_T, OAK_S, extra=GH))                       # the top, folded up: its underside to the room
-        o.append(_line(P(x0 + bb, rt + 0.4, zt - 0.02), P(x0 + bb, rt + td - 0.4, zt - 0.02), "#8f5e33", 1.2))
-        o.append(_line(P(x1 - bb, rt + 0.4, zt - 0.02), P(x1 - bb, rt + td - 0.4, zt - 0.02), "#8f5e33", 1.2))
+        # v17: the breadboard joints, pegs and the hinge line as thin boxes (lines aren't carried into the 3D room)
+        for xl in (x0 + bb, x1 - bb):
+            o.append(box(xl - 0.15, rt + 0.4, zt - 0.06, 0.3, td - 0.8, 0.06, "#8f5e33"))
         for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):
             for py in (rt + 14, rt + td / 2, rt + td - 14):
-                c = P((ea + eb) / 2, py, zt - 0.04)
-                o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="2.0" fill="#5e3d22"/>')
-        o.append(_line(P(x0, rt + 0.2, zt - 0.02), P(x1, rt + 0.2, zt - 0.02), "#5a3a20", 1.8))
-        o.append(_line(P(x0 + 1, rt + td - 0.6, zt - 0.06), P(x1 - 1, rt + td - 0.6, zt - 0.06), "#e9bd86", 1.2))
+                o.append(box((ea + eb) / 2 - 0.5, py - 0.5, zt - 0.08, 1.0, 1.0, 0.08, "#5e3d22"))
+        o.append(box(x0, rt + 0.1, zt - 0.06, tw, 0.4, 0.06, "#5a3a20"))
         for bxx in (x0 + 16, x1 - 16):                   # turn buttons on the breast hold it up
             o.append(box(bxx - 2.6, G.FOLDED_TOP + 0.4, -2.4, 5.2, 2.6, 2.2, OAK_D, OAK_T, OAK_S))
         o.append(breast_frames())
@@ -1607,10 +1652,17 @@ def fliptop_wall():
     o.append(box(x0, rt, zj, tw, tt, -zj + z0, OAK, OAK_T, OAK_S, extra=GH))                            # the top
     o.append(box(x0, rt, z1, lw_, lt_, zj - z1, OAK, OAK_T, OAK_S, extra=GH))                           # the half
     top = rt + tt
+    # v17: the breadboard ends as thin boxes with their three pegs, the joint, and the three brass flip-top hinges showing on top across it
     for (za, zb_) in ((zj, z0), (z1, zj)):
         for (ea, eb) in ((x0, x0 + bb), (x1 - bb, x1)):
-            o.append(poly([P(ea, top + 0.01, za), P(eb, top + 0.01, za), P(eb, top + 0.01, zb_), P(ea, top + 0.01, zb_)], OAK_D, GV))
-    o.append(_line(P(x0, top + 0.02, zj), P(x1, top + 0.02, zj), "#6b4527", 1.4))                      # the joint
+            o.append(box(ea, top, za, eb - ea, 0.05, zb_ - za, OAK_D, OAK_T, OAK_S, extra=GV))
+            for k in range(3):
+                pz = za + (zb_ - za) * (k + 1) / 4
+                o.append(box((ea + eb) / 2 - 0.5, top + 0.05, pz - 0.5, 1.0, 0.04, 1.0, "#5e3d22"))
+    o.append(box(x0, top, zj - 0.3, tw, 0.06, 0.6, "#6b4527"))                                           # the joint
+    hw, hl = G.FLIP["hinge"]
+    for hx in (x0 + 12, (x0 + x1) / 2, x1 - 12):
+        o.append(box(hx - hl / 2, top + 0.02, zj - hw / 2, hl, 0.1, hw, "#c9a24a", "#e0bf6a", "#a8842f"))   # brass, flush in the top
     o.append(quad_front(x0, rt, z1 - 0.02, tw, tt, OAK_S))
     o.append(table_settings(x0, x1, z0, z1, top, n_side=2 if DINING == "four" else 3))
     o.append(breast_frames())
@@ -1987,10 +2039,8 @@ def spot_heads2():
         ty, tz = G.TABLE_TOP, sum(G.OPEN_Z) / 2
     elif DINING == "six":
         tx, ty, tz = sum(G.SIX_X) / 2, G.LEG_H + G.TABLE[2], sum(G.FREE_Z) / 2
-    return [(31.5, *G.PINK, (G.BAR2_X, 0.0, G.BAR2_Z + 60)),
-            (10.5, *G.SAGE, (G.TABLE_CX, G.FRAMES_Y + 17, -2.0)),
-            (-10.5, *G.BLUE, (tx - 22, ty, tz)),
-            (-31.5, *G.MUSTARD, (tx + 22, ty, tz))]
+    # v17: straight down, spread a little along the bar, whatever the table is doing
+    return [(off, *col, (G.BAR2_X, 0.0, G.BAR2_Z + off * G.HEAD_SPREAD)) for off, col in ((31.5, G.PINK), (10.5, G.SAGE), (-10.5, G.BLUE), (-31.5, G.MUSTARD))]
 
 
 def spot_bar(cx, cz, spots):
@@ -2455,7 +2505,8 @@ def sofa_solid():
     o.append(poly([P(x0, 0.05, zb), P(mx1 + 6, 0.05, zb), P(mx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, ze + 6), P(x0, 0.05, ze + 6)],
                   "#000", 'opacity="0.25" filter="url(#soft)"'))
     # the back along the side wall and along the window wall (frames), then the plinth
-    o.append(box(x0, ph, zb, bk, bh - ph, ze - zb, C, T, SD))
+    ott = G.SOFA_OTTOMAN                              # v17: the return's last 20 cm has no back: the seat wraps round to the wall
+    o.append(box(x0, ph, zb, bk, bh - ph, ze - ott - zb, C, T, SD))
     o.append(box(x0, ph, zb, mx1 - x0, bh - ph, bk, C, T, SD))
     o.append(box(x0 + 3, 0, zb + 3, mx1 - x0 - 6, ph, zf - zb - 6, "#111214"))
     o.append(box(x0 + 3, 0, zf - 3, cx1 - x0 - 6, ph, ze - zf, "#111214"))
@@ -2470,8 +2521,9 @@ def sofa_solid():
     seat_w = (mx1 - arm - cx1) / n
     xs = [(x0 + bk + 16, cx1)] + [(cx1 + i * seat_w + 0.5, cx1 + (i + 1) * seat_w - 0.5) for i in range(n)]
     # back cushions, plump, leaning on the frames: along the side wall, then one per seat along the window
-    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - 6 - zf - 2, C, T, SD))
-    ribs_x(x0 + bk + 16, zf + 2, ze - 6, st, bh - 2)
+    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - ott - 1 - zf - 2, C, T, SD))
+    ribs_x(x0 + bk + 16, zf + 2, ze - ott - 1, st, bh - 2)
+    ribs_z(ze - ott - 1, x0, x0 + bk + 16, st, bh - 2)                                                # the back's open end
     o.append(box(x0 + bk, st - 2, zb + bk + 32, 16, bh - st + 2, zf + 1 - zb - bk - 32, C, T, SD))
     ribs_x(x0 + bk + 16, zb + bk + 32, zf + 1, st, bh - 2)
     for (xa, xb) in xs:
@@ -2482,7 +2534,8 @@ def sofa_solid():
         o.append(box(xa, sb, zb + bk + 16, xb - xa, st - sb, zf - zb - bk - 16 + 1, C, T, SD))
         ribs_z(zf + 1, xa, xb, sb, st, 2.6)
     o.append(box(x0 + bk + 16, sb, zf + 1.5, cx1 - x0 - bk - 16, st - sb, ze - 1 - zf - 1.5, C, T, SD))   # one long cushion to the end
-    o.append(box(x0 + bk, sb, ze - 6, 16, st - sb, 5, C, T, SD))                                         # ... wrapping round to the back
+    o.append(box(x0, ph, ze - ott, bk + 16, st - ph, ott - 1, C, T, SD))                                 # ... wrapping round to the wall
+    ribs_z(ze - 1, x0, x0 + bk + 16, ph, st, 2.6)
     ribs_x(cx1, zf + 1.5, ze - 1, sb, st, 2.6)
     ribs_z(ze - 1, x0 + bk, cx1, sb, st, 2.6)
     if G.SOFA_CUSHION:
@@ -2497,7 +2550,7 @@ def curtains(far=480.0):
     """v15: the client's curtains: Dunelm hessian, pencil pleat, to the floor, on a 28 mm wooden pole with rings and ball finials just under
     the ceiling strip, running 30 cm past the window each side; drawn open, stacked either side of the window (geometry.CURTAIN)."""
     c = G.CURTAIN
-    wz = G.WINDOW_Z + 6.0
+    wz = c["z"]                                  # v17: in front of the deep sill and the radiator
     wx0, wx1 = G.WINDOW_X
     y0, y1 = c["drop_to"], c["rail_y"]
     pc = c["pole_col"]
@@ -2534,6 +2587,7 @@ def side_room():
     wx0, wx1 = G.WINDOW_X
     o.append(poly([P(wx0, 88, wz0 + 0.2), P(wx0, 212, wz0 + 0.2), P(min(wx1, far), 212, wz0 + 0.2), P(min(wx1, far), 88, wz0 + 0.2)], "#d9e2dc"))
     o.append(poly([P(wx0, 88, wz0 + 0.3), P(wx0, 212, wz0 + 0.3), P(wx0 + 5, 212, wz0 + 0.3), P(wx0 + 5, 88, wz0 + 0.3)], "#f1efe9"))
+    o.append(box(wx0 - 4, G.SILL["y"] - G.SILL["t"], wz0, min(wx1, far) - wx0 + 8, G.SILL["t"], G.SILL["nose"], "#f1efe9", "#fbfaf6", "#d9d5cc"))   # v17: the deep sill's nose
     rx0, rx1 = G.RADIATOR_X
     o.append(poly([P(rx0, 15, wz0 + 4), P(rx0, 70, wz0 + 4), P(min(rx1, far), 70, wz0 + 4), P(min(rx1, far), 15, wz0 + 4)], "#ece9e2"))
     o.append(curtains(far))

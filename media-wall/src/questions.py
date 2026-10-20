@@ -25,7 +25,7 @@ QUESTIONS = [
      "The plan has both as your own job (like for like, not notifiable), with the safe routine and the stop list. Since v15 there are no dimmers to fit: the bars take smart bulbs. If you'd rather an electrician did the fittings, say so and we'll add that visit back.",
      "Yes, all ours; or: an electrician for the fittings only.", False),
     ("sofa", "Your L-sofa's return: how far does it run along the side wall?",
-     f"The long side is about {_n(G.SOFA_W)} from your photo; the return, with its open ottoman-style end towards the TV (v16), is drawn at {_n(G.SOFA_D)}. It sets the PC shelf, the walkway and the dining clearances.",
+     f"The long side is about {_n(G.SOFA_W)} from your photo; the return, with its open ottoman-style end towards the TV (v16), is drawn at {_n(G.SOFA_D)}, the sofa standing {_n(G.SOFA_BACK_Z - G.WINDOW_Z)} off the window wall (v17). It sets the PC shelf, the walkway and the dining clearances.",
      "Overall depth with the return, from the window wall; back height and seat depth too if you can.", False),
     ("westend", "The stairs wall's sizes: its length, and where your shelf sits on it",
      "Your photos give about 257–268 cm from the stair box to the window corner, the shelf starting about 41 cm from the stairs; it's drawn stopping 2 short of the pipe boxing, its top at 196. Your OBEGRÄNSAD (36 tall) only stands on it under the 235 ceiling if the top is 198 or lower. The table under it is drawn from these.",

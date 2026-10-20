@@ -19,7 +19,7 @@ def full():
     breast_l = lambda x: n(x - g.BREAST_X[0])               # a position on the breast, from its alcove-side corner
     return {
         1: dict(
-            tools=["Tape measure", "Spirit level, 120 cm", "Notebook or the Questions tab"],
+            tools=["Tape measure", "Spirit level, 120 cm", "A notebook (or the questions list on the plan page)"],
             draw=[]),
         2: dict(
             parts=["Two TP-Link TL-SG108 8-port switches", "Cat6 patch leads, 0.5–2 m (11)"],
@@ -233,7 +233,7 @@ def full():
             ]),
         9: dict(
             parts=["Two oak uprights, 165 × 30 × 4.5 (cut to fit)", "High shelf: 128.9 × 30 × 4 and 51.7 × 30 × 4", "Record ledge 128.9 × 7 × 2.4 and its lip",
-                   "Series X shelf 55 × 30 × 4", "Two oak cleats for the reveal, 30 long", "Oak wedges (2 + spares), 10 mm oak dowel for pegs and the uprights' dowels"],
+                   "Series X shelf 55 × 30 × 4", "Two oak cleats for the reveal, 30 long", "The “now playing” ledge 105.5 × 7 × 2.4 and its lip, two concealed brackets", "Oak wedges (2 + spares), 10 mm oak dowel for pegs and the uprights' dowels"],
             hardware=["Four concealed upright brackets", "5 × 60 mm screws and plugs", "Wood glue", "LED strip in its aluminium channel (from the lighting phase)"],
             tools=["Router with a straight bit and a guide batten", "Chisels 6, 12 and 25 mm, and a mallet", "Japanese pull saw", "Drill with a 10 mm brad-point bit and a 20 mm bit",
                    "Dowel jig or dowel centres", "Combination square, marking knife", "Spirit level and laser", "Clamps", "A helper"],
@@ -277,6 +277,11 @@ def full():
                     "Feed the Series X shelf's tenons through the mortises from the turntable side, onto its cleat. Glue the wedges and drive them into the kerfs from the TV side. When dry, saw them flush and plane: proud, they'd touch the TV.",
                     "Pegs: drill 10 mm through each upright's face into the housed shelf ends, 4 cm deep, about 4 cm from the front edge. Glue in a peg and saw it flush.",
                 ]),
+                ("The “now playing” ledge on the breast (v16)", [
+                    f"Cut it {n(g.NOW_LEDGE['x'][1] - g.NOW_LEDGE['x'][0])} × 7 × 2.4 from the shelf board's offcut and glue a 1.5 cm lip along its front edge, so a sleeve stands against the wall without sliding.",
+                    f"Mark a level line on the chimney breast at {n(g.NOW_LEDGE['top'] - g.NOW_LEDGE['t'])} (the ledge's underside), {n(g.NOW_LEDGE['x'][0] - g.BREAST_X[0])} cm in from each side of the breast.",
+                    "Fit its two concealed brackets to the maker's instructions, slide the ledge on, and stand three LPs on it.",
+                ]),
             ]),
         10: dict(
             parts=["Wrap ledge 134 × 7 × 2.4 and its lip", f"PC shelf {n(g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1])} × {n(g.PC_SHELF_D)} × 4", "Two oak cleats, 2 cm",
@@ -304,6 +309,11 @@ def full():
                     "Fit the brush grommet. Pull the HDMI (active optical: the end marked \"source\" at the PC) and the Cat6 down the 38 mm conduit with its draw wire.",
                     "Take the plug off the C13 lead, feed its bare end down the 25 mm conduit, and at the bottom fit the rewireable plug: brown to L, blue to N, green-and-yellow to E, the cord grip on the outer sheath, a 13 A fuse.",
                     "At the bottom, all three run behind the skirting into the plinth's notch and the channel; the mains lead goes on to the 10-gang behind the TV.",
+                ]),
+                ("The PC's extras (v17)", [
+                    "Screw the powered USB hub under the side run's front edge, below the PC, ports facing the sofa. Its adapter plugs into the 10-gang along the PC's mains route; its lead runs up through the grommet to the PC.",
+                    "Remote power button: with the PC unplugged, push the receiver card into a spare slot and plug its lead onto the motherboard's power-switch pins (the case's own button lead plugs into the card's pass-through). Stick the push button to the wrap ledge's underside, by the sofa end.",
+                    "Lay the magnetic dust filter on the PC's top exhaust; brush it off once a month.",
                 ]),
             ]),
         11: dict(   # v15: the flip-top gate-leg table, which stays on the wall
@@ -343,6 +353,7 @@ def full():
                     f"Stand it on the floor upside down and check: folded, the legs lie flat with {g.FLIP['leaf'][1] - g.FLIP['hinge_in'] - g.LEG[0] / 2 - g.GATE_LEG_H:.1f} cm to spare before the joint.",
                 ]),
                 ("The backboard and hinge rail", [
+                    "First, knock along the stairs wall where the backboard goes (v17). A solid sound: brick, so plugs and screws as below. A hollow sound: plasterboard on studs. Then stop and find the studs with a detector before drilling anything; the screws go into the studs (or the fixings change), so tell us what you find.",
                     f"Glue and screw the hinge rail along the backboard's top edge, flush at the back, so it stands {n(g.RAIL[2] - 3)} cm proud of the backboard's face.",
                     f"Hold the backboard on its marks: centred on the wall, the rail's top at {n(g.RAIL_TOP)}, level.",
                     "Drill through it and into the wall every 20 cm in two rows, 3 cm from its top and bottom edges. Plug, then fix with 5 × 70 countersunk screws.",
@@ -387,10 +398,10 @@ def full():
                     "Unscrew each old fitting's cover. Prove dead again at its terminals. Photograph the wiring, mark the switched live (the wire from the switch) with tape, then disconnect and take the fitting down.",
                     "Fix bar 1's mounting plate to the ceiling over the rose between the TV and the sofa, the bar running from the TV towards the window (v15), with screws into the joist or the plate's fixings. Bar 2's goes on the pendant point by the stairs, running the same way, along the west wall.",
                     "Connect earth first (green-and-yellow to the bar's earth), then neutral to N and the switched live to L, in the bar's terminal block; any loop wires go back together exactly as they were. Tighten, tuck, and fit the canopy.",
-                    "Fit the smart colour bulbs and aim the heads: the table in the Paint and light tab says which goes where. Never at the TV. If a WiZ bulb shows below its shade's rim, use the shorter Hue lustre there.",
+                    "Fit the smart colour bulbs and point every head straight down, evenly spread along the bar (v17). Tilt one only if its pool lands in the TV's screen or someone's eyes. If a WiZ bulb shows below its shade's rim, use the shorter Hue lustre there.",
                 ]),
                 ("Power on and test", [
-                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the four scenes from the Paint and light tab (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
+                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the five scenes (General first) from the lighting scenes below (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
                 ]),
                 ("The low-voltage lights (nothing to isolate)", [
                     "Cut the smart strip at its marks into three lengths: one for each upright's groove and one for the side-wall run. Press each into its aluminium channel under the opal diffuser; take the uprights' leads down their grooves to the strip's power on the 10-gang (v16: smart colour).",

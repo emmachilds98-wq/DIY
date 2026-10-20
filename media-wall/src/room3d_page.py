@@ -29,6 +29,11 @@ CSS = """
   text-shadow: 0 1px 3px #000c; pointer-events: none; }
 .r3d-tools { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 6px; }
 .r3d-tools button { background: #000a; color: #fff; border: 1px solid #fff4; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: 12px; cursor: pointer; }
+/* v17: walk buttons over the canvas (keys: WASD or arrows to move, Q and E to turn) */
+.r3d-pad { position: absolute; top: 8px; right: 8px; display: grid; grid-template-columns: repeat(3, 32px); grid-auto-rows: 32px; gap: 4px; }
+.r3d-pad button { background: #000a; color: #fff; border: 1px solid #fff4; border-radius: 8px; padding: 0; font: inherit; font-size: 15px; line-height: 1; cursor: pointer; touch-action: manipulation; }
+.r3d-pad button:active { background: #000d; }
+.r3d.nogl .r3d-pad { display: none; }
 .r3d-views { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
 .r3d-views button { flex: none; }
 .r3d-ui { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 18px; }
@@ -86,7 +91,14 @@ def controls():
               + "".join(rows) + '</div>'
               '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
               '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
-              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
+              '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
+              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>'
+              # v17: the ideas (ideas.py), all off by default: suggestions, not in the plan
+              '<div class="grp"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
+              '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
+              '<button type="button" data-idea="glass" aria-pressed="false">Glass plant shelves</button>'
+              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>'
+              '<button type="button" data-idea="ladder" aria-pressed="false">Plant ladder</button></div></div>')
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
@@ -105,7 +117,8 @@ def section():
     data = json.dumps(json.loads((HERE / "scene3d.json").read_text()), separators=(",", ":"))
     return f"""<div class="r3d" id="r3d">
   <div class="r3d-views" role="group" aria-label="Camera">{views}</div>
-  <div class="r3d-stage"><canvas aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom"></canvas>
+  <div class="r3d-stage"><canvas tabindex="0" aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom; WASD or the arrow keys walk, Q and E turn"></canvas>
+    <div class="r3d-pad" role="group" aria-label="Walk"><button type="button" data-walk="tl" title="Turn left (Q)" aria-label="Turn left">↺</button><button type="button" data-walk="f" title="Forward (W)" aria-label="Forward">▲</button><button type="button" data-walk="tr" title="Turn right (E)" aria-label="Turn right">↻</button><button type="button" data-walk="l" title="Step left (A)" aria-label="Step left">◀</button><button type="button" data-walk="b" title="Back (S)" aria-label="Back">▼</button><button type="button" data-walk="r" title="Step right (D)" aria-label="Step right">▶</button></div>
     <div class="r3d-msg" id="r3d-msg">Loading the 3D room…</div>
     <p class="r3d-cap" id="r3d-cap"></p>
     <div class="r3d-tools"><button type="button" id="r3d-reset" title="Back to this view">Reset</button><button type="button" id="r3d-full" title="Full screen">Full screen</button></div></div>

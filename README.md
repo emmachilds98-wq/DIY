@@ -2,12 +2,32 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v16
+## Media wall and dining wall, v17
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the flip-top oak dining table on the stairs wall under your shelf (the default since v16) or on the chimney breast. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v16%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v17%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v17** (the room finished round your notes)
+- **The sofa's open end** is a proper ottoman end: the seat wraps round to the back, the back stops 20 cm short, and the sofa stands 13 cm off the window wall, clear of the curtains.
+- **The window's deep sill**, 22 cm into the reveal, with your plants along it; the curtains hang clear of it.
+- **Even light by default:** every spot head points straight down, evenly spread, and a new **General** scene comes first. Your red lamp's top (green) head lights the wall with your shelf.
+- **The flip-top drawn as built:** pegged breadboard ends and three brass hinges. **The stairs:** one wall all the way up in one colour, the living room ceiling's edge where it cuts off the view, and the banister on the room side only.
+- **The PC lit:** its fans and lights glow behind the glass in the 3D room ("PC lit"). The plan adds a powered USB hub by the sofa, a remote power button and a dust filter, and checks the soundbar against the TV's remote receiver.
+- **The build guide PDF stands alone:** every step carries its own cut list and pictures; the “now playing” ledge is in step 9.
+- **Ideas for later** (not in the plan or the costs): a slim glass display case on the breast, glass plant shelves in the window, an oak C-table for the sofa's open end, a plant ladder, and three small ones. They have their own tab, and buttons in the 3D room, all off until you turn them on.
+- **Walk round the 3D room:** WASD or the arrow keys (Q and E turn), or the arrows over the picture on a phone; the camera stays inside the room.
+- Your **OBEGRÄNSAD** (905.262.63) is confirmed at IKEA's 52 × 36 × 6 cm.
+- Total about £3,090–6,297 (the USB hub, power button and dust filter added; the ideas aren't costed in), no electrician on top. Fit proof: 80 checks, 55 fit, 18 tight, 7 to check on site (new: the soundbar against the TV's remote receiver), none fail.
+
+| From the window, the General light | The PC side wall, PC lit |
+|---|---|
+| ![General light](media-wall/out/Media%20wall%20v17%20-%203D%20-%20from%20the%20window%20-%20general%20light,%20every%20head%20straight%20down%20(HD).png) | ![PC lit](media-wall/out/Media%20wall%20v17%20-%203D%20-%20the%20PC%20side%20wall%20-%20PC%20lit%20-%20TV%20night%20(HD).png) |
+
+| Idea: glass plant shelves and a plant ladder | Idea: a glass case on the breast |
+|---|---|
+| ![Ideas, the window wall](media-wall/out/Media%20wall%20v17%20-%203D%20-%20IDEAS%20(not%20in%20the%20plan)%20-%20the%20window%20wall%20-%20glass%20plant%20shelves%20and%20the%20plant%20ladder%20(HD).png) | ![Idea, the glass case](media-wall/out/Media%20wall%20v17%20-%203D%20-%20IDEAS%20(not%20in%20the%20plan)%20-%20the%20glass%20case%20on%20the%20breast%20(HD).png) |
 
 **New in v16** (the whole wall redesigned round everything we now know)
 - **No dead space in the record bay:** with LPs only, bay 3 splits in two with a 12 mm divider. Under the turntable, two **snug LP crates** (a 33 cm trough, the width record shops use) still hold about 180 LPs face-out; beside them a **slim column**: two **face-out game drawers** (about 44 DVD-size cases, flipped like the records) and a drawer for the **pads and remotes** with a charging lead.
@@ -20,9 +40,9 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Every drawer out: LP crates, slim game drawer | The stairs wall: OBEGRÄNSAD, plant, pipe boxing |
 |---|---|
-| ![Every drawer out](media-wall/out/Media%20wall%20v16%20-%20every%20drawer%20out%20(HD).png) | ![The stairs wall in 3D](media-wall/out/Media%20wall%20v16%20-%203D%20-%20the%20stairs%20wall%20-%20table%20folded%20under%20the%20shelf%20-%20everyday%20evening%20(HD).png) |
+| ![Every drawer out](media-wall/out/v16/Media%20wall%20v16%20-%20every%20drawer%20out%20(HD).png) | ![The stairs wall in 3D](media-wall/out/v16/Media%20wall%20v16%20-%203D%20-%20the%20stairs%20wall%20-%20table%20folded%20under%20the%20shelf%20-%20everyday%20evening%20(HD).png) |
 
-![The room in 3D from the window](media-wall/out/Media%20wall%20v16%20-%203D%20-%20from%20the%20window%20-%20table%20by%20the%20stairs,%20folded%20-%20everyday%20evening%20(HD).png)
+![The room in 3D from the window](media-wall/out/v16/Media%20wall%20v16%20-%203D%20-%20from%20the%20window%20-%20table%20by%20the%20stairs,%20folded%20-%20everyday%20evening%20(HD).png)
 
 **New in v15** (your notes on the room as it really is)
 - **Your things, drawn as they are:** the blue corduroy sofa (two seats then the corner, the long side to about 40 cm short of the window's end, no cushion); the bright red lamp with its colour bulbs, green on top, pink, then purple; your IKEA light box at the left of the shelf by the stairs, your laser in the middle of it (its dots on the ceiling) and the plant hanging down off it; your hat on an oak peg by the stairs; your soft grey carpet; your Dunelm hessian pencil-pleat curtains to the floor on a wooden pole with rings and ball finials (open or drawn in the 3D room).
@@ -76,9 +96,9 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Option A: the flip-top on the breast, set for six | The PC side wall |
 |---|---|
-| ![Six at the table](media-wall/out/Media%20wall%20v16%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v16%20-%20the%20PC%20side%20wall%20(HD).png) |
+| ![Six at the table](media-wall/out/Media%20wall%20v17%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v17%20-%20the%20PC%20side%20wall%20(HD).png) |
 
-![Numbered key](media-wall/out/Media%20wall%20v16%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
+![Numbered key](media-wall/out/Media%20wall%20v17%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -97,7 +117,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v16%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v17%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)
@@ -113,10 +133,10 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v16.pdf`](media-wall/out/Home_Network_Plan_v16.pdf) (64 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v16.pdf`](media-wall/out/Build_Guide_v16.pdf) (42 pages: tools, techniques, order of work, step by step)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v17.pdf`](media-wall/out/Home_Network_Plan_v17.pdf) (68 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v17.pdf`](media-wall/out/Build_Guide_v17.pdf) (48 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v15/`)
-- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v16 is published there with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
+- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v17 is published there with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 
 ### Rebuilding the plan and renders

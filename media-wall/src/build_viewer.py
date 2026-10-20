@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "16"
+VERSION = "17"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -396,6 +396,8 @@ summary .pf a { color: var(--oak); }
 .opt li::marker { content: "+  "; color: var(--ok); font-weight: 700; }
 .opt li.minus::marker { content: "\u2212  "; color: var(--tight); }
 .opt .btn { justify-self: start; }
+.opt.noimg { grid-template-rows: 1fr; }
+.opt p { margin: 0; font-size: 14.5px; }
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .gallery figure { margin: 0; display: grid; gap: 6px; }
 .gallery button { padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: zoom-in; background: #0d100e; }
@@ -405,7 +407,7 @@ summary .pf a { color: var(--oak); }
 </style>"""
 
 
-TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
+TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("ideas", "Ideas"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
 CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table folded under your shelf by the stairs, the breast free",
@@ -420,7 +422,30 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_six_day": "The flip-top open for six, in daylight: three a side, your hessian curtains on their wooden pole",
          "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
          "3d_plan_B": "Bird\u2019s eye, option B set for four",
-         "3d_doll_A": "Dolls\u2019 house view, option A"}
+         "3d_doll_A": "Dolls\u2019 house view, option A",
+         "3d_window_general": "General light (v17): every spot head straight down, evenly spread, the strips and the lamp at a middle setting",
+         "3d_pc_lit": "TV night with the PC lit: its fans and the RGB strip glowing behind the glass side",
+         "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, and the oak plant ladder in the west corner",
+         "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
+         "3d_ideas_breast": "Idea, not in the plan: the slim glass display case on the chimney breast, above the \u201cnow playing\u201d ledge"}
+IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ladder": "3d_ideas_window", "ctable": "3d_ideas_ctable"}
+IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ladder": "windowwall", "ctable": "pc"}
+
+
+def ideas_panel():
+    """v17: the ideas for later (ideas.py), a card each, with a way to see the first four in the 3D room."""
+    import ideas as I
+    cards = []
+    for k, title, size, cost, why, where, in3d in I.IDEAS:
+        im = (f'<img data-art="{IDEA_SHOT[k]}" alt="{html.escape(CAP3D[IDEA_SHOT[k]])}" loading="lazy">' if in3d else "")
+        opts = json.dumps({"site": "B", "view": IDEA_VIEW.get(k, "window"), "ideas": {k: True}})
+        b = f"<button type='button' class='btn' data-r3d='{opts}'>See it in the 3D room</button>" if in3d else ""
+        cards.append(f'<article class="opt{"" if in3d else " noimg"}">{im}<div class="ob"><span class="label">{html.escape(size)} · about £{cost[0]}–{cost[1]}</span>'
+                     f'<h3>{html.escape(title)}</h3><p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>{b}</div></article>')
+    lo, hi = I.low_high()
+    return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
+            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first four are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on. All seven together would be about £{lo}–{hi}.</p>'
+            f'<div class="opts">{"".join(cards)}</div>')
 
 
 def options_card():
@@ -445,7 +470,7 @@ def options_card():
 
 def gallery3d():
     figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
-                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D)
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith("3d_ideas_"))
     return f'<div class="gallery">{figs}</div>'
 
 TABNAME = dict(TABS)
@@ -714,6 +739,10 @@ def page(site=False):
   </div>
   </section>
 
+  <section class="panel" id="ideas" role="tabpanel" aria-labelledby="tb-ideas" hidden>
+    {ideas_panel()}
+  </section>
+
   <section class="panel" id="wall" role="tabpanel" aria-labelledby="tb-wall" hidden>
     <nav class="toc" aria-label="On this tab"></nav>
     <div class="doc"><h2>The media wall</h2>{sec["3"]}<h2>The records and the turntable</h2>{sec["4"]}<h2>The side wall</h2>{sec["6"]}<h2>The oak joinery</h2>{sec["7"]}</div>
@@ -788,7 +817,7 @@ def page(site=False):
     <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
-    <div class="doc"><p class="notice">Still to confirm: the open questions, with a box for each answer, are in the {_tablink("questions")}.</p>{sec["12"]}<h2>Options we set aside</h2>{sec["appendix"]}</div>
+    <div class="doc"><p class="notice">Still to confirm: the open questions, with a box for each answer, are in the {_tablink("questions")}.</p>{sec["12"]}<h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details></div>
     <div class="block"><h2 class="ptitle">Downloads</h2><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn. {"" if site else "They open from your GitHub Pages site."}</p>{downloads_html(site)}</div>
   </section>
 </div>

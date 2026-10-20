@@ -129,13 +129,7 @@ def scene():
         bar2[f"A_{st}"] = R.spot_heads2()
         bx = (G.TABLE_B_OPEN_X[0] + G.TABLE_B_OPEN_X[1]) / 2 if st != "folded" else G.ROOM_W - 2.0   # v15: over the open flip-top
         by = G.TABLE_TOP if st != "folded" else G.FOLDED_TOP - 30.0
-        if st == "six" and G.TABLE_STYLE != "fliptop":
-            bar2[f"B_{st}"] = bar2[f"A_{st}"]
-        else:                  # v15: bar 2 runs along the west wall's table: blue and mustard on the table, sage on the folded top, pink on the shelf
-            h = R.spot_heads2()
-            bar2[f"B_{st}"] = [(h[0][0], h[0][1], h[0][2], (G.ROOM_W - 10, G.SHELF_B["top"] + 8, G.TABLE_B_CZ - 60)),
-                               (h[1][0], h[1][1], h[1][2], (G.ROOM_W - 1, G.FOLDED_TOP - 40 if st == "folded" else G.SHELF_B["top"] - 20, G.TABLE_B_CZ + 40)),
-                               (h[2][0], h[2][1], h[2][2], (bx, by, G.TABLE_B_CZ + 22)), (h[3][0], h[3][1], h[3][2], (bx, by, G.TABLE_B_CZ - 22))]
+        bar2[f"B_{st}"] = bar2[f"A_{st}"]   # v17: every head straight down, whichever wall the table is on
     state()
 
     def bar(cx, cz, heads):
@@ -143,12 +137,12 @@ def scene():
     room_spec = {
         "W": G.ROOM_W, "CEIL": G.CEIL, "ALC_W": G.ALC_W, "ALC_D": G.ALC_D, "BREAST_X": G.BREAST_X, "RECESS_Z": G.BREAST_D_WEST,
         "DOOR_X": G.DOOR_X, "DOOR_H": 198.0, "STAIR_X": G.STAIR_X, "STAIR_FRONT": G.ALC_D - G.STAIR_D,
-        "WELL_X0": G.DOOR_X[1] + 1.5, "WINDOW_Z": G.WINDOW_Z, "WINDOW_X": G.WINDOW_X, "WINDOW_Y": (88.0, 212.0),
+        "WELL_X0": G.DOOR_X[1] + 1.5, "WINDOW_Z": G.WINDOW_Z, "WINDOW_X": G.WINDOW_X, "WINDOW_Y": G.WINDOW_Y, "PC_CASE": G.PC_CASE, "PC_Z": G.PC_Z, "PC_SHELF_TOP": G.PC_SHELF_TOP, "WINDOW_REVEAL": G.WINDOW_REVEAL, "SILL": G.SILL,
         "RADIATOR_X": G.RADIATOR_X, "RADIATOR_Y": (15.0, 70.0), "SKIRT_H": G.SKIRT_H,
         "TV_X": G.TV_X, "TV_Y": (G.TV_BOTTOM, G.TV_TOP), "TV_Z": G.TV_PANEL_Z[0],
         "SHELF_B": G.SHELF_B, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},
         "TABLE_B": {"x": G.TABLE_B_X, "z": G.TABLE_B_Z, "cz": G.TABLE_B_CZ}, "SIX": {"x": G.SIX_X, "z": G.FREE_Z}, "OPEN_Z": G.OPEN_Z, "TABLE_B_OPEN_X": G.TABLE_B_OPEN_X,
-        "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
+        "IDEAS": __import__("ideas").SPOTS, "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
         "COFFEE": G.COFFEE, "LAMP": G.FLOOR_LAMP,
         "LAMP_SPOTS": {k: {"label": v[0], "x": v[1][0], "z": v[1][1]} for k, v in G.FLOOR_LAMP_SPOTS.items()},
         "SITES": G.DINING_SITES, "PAINT_OLD": R.PAINT_OLD, "PAINT_BASE": "#2d5a46",

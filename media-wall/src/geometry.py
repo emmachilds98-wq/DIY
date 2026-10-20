@@ -132,7 +132,7 @@ SOFA_W, SOFA_D, SOFA_SEAT_D, SOFA_H = 266.0, 168.0, 95.0, 80.0   # v15 client: "
 DOOR_HINGE, DOOR_OPENS_IN = "breast", True  # v12.1 client: hinged on the chimney-breast side, opens into the room
 WALLS_SOLID = True                          # v12.1 client: the side wall and the chimney breast are solid
 SOFA_X = (2.0, 2.0 + SOFA_W)               # 2 .. 249 along the window wall
-SOFA_BACK_Z = WINDOW_Z + 10.0              # -299: 10 cm off the window wall and radiator
+SOFA_BACK_Z = WINDOW_Z + 13.0              # -296: v17 13 off the window wall (was 10), clear of the curtains at 11
 SOFA_FRONT_Z = SOFA_BACK_Z + SOFA_SEAT_D   # -204: the main run's front
 CHAISE_X = (SOFA_X[0], SOFA_X[0] + SOFA_SEAT_D)   # 2 .. 97 along the side wall
 CHAISE_END_Z = SOFA_BACK_Z + SOFA_D        # -131
@@ -292,6 +292,9 @@ FLOOR_LAMP_SPOTS = {"corner": ("By the window, west corner", (ROOM_W - 62.0, WIN
 SOFA_SEATS = 2                               # seat cushions on the long side, west of the corner seat
 SOFA_CORD = ("#34507f", "#40609a", "#283f68", "#1f3354")   # blue corduroy: face, top, side, the cord's channels
 SOFA_CUSHION = False                         # the white/grey cushion is gone
+SOFA_OTTOMAN = 20.0                          # v17, client: "the end sofa seat closest to the tv ... has the seat cushion wrap around the back
+                                             # at the end there and towards the wall making that ottoman 'feet out' type space. it then just has
+                                             # no end open sofa about 20cm after that": the last 20 cm of the return has no back
 
 # "i'd like the media wall drawers for vinyl to be for vinyl large only": one trough the tray's full width, the LPs centred in it with
 # finger room either side to flip with both hands (LP 31.4 in 52.1 inside: 10.3 each side); no divider, no singles.
@@ -360,7 +363,12 @@ def side_run_depth(z):
 CARPET_COL = "#8f9194"                      # soft cool grey
 RUG = dict(x=(100.0, 330.0), z=(-198.0, -38.0), border=8.0)   # 230 × 160: from the return's seat to past the breast, sofa front to 30 short of the base
 RUG_COLS = ("#efe7d8", "#c7643a", "#d9a441", "#2f4a6e", "#7a8a6a")   # cream ground, rust, ochre, deep blue (the sofa), sage
-CURTAIN = dict(rail_y=CEIL - 7.0, drop_to=1.5, stack=44.0, ext=30.0, col="#b9a47f", folds=11, pole=2.8, finial=7.0, pole_col="#a9794b")
+CURTAIN = dict(rail_y=CEIL - 7.0, drop_to=1.5, stack=44.0, ext=30.0, col="#b9a47f", folds=11, pole=2.8, finial=7.0, pole_col="#a9794b",
+               z=ALC_D - ROOM_D + 11.0)          # v17: the panels hang 11 in front of the wall, clear of the sill's nose and the radiator
+# v17, client: "curtains should not render going through the window sill, i also have deep window sills that allow for lots of plants".
+WINDOW_Y = (88.0, 212.0)                    # the window's opening, sill to head
+WINDOW_REVEAL = 22.0                        # the frame sits back in the wall: a deep reveal
+SILL = dict(nose=3.0, t=3.0, y=WINDOW_Y[0]) # a white sill across the reveal, 3 proud of the wall, plants along it
                                             # the client's curtains (photo 20 Oct, inputs/photo_room_curtains_evening.jpg; "hessian curtains
                                             # from dunelm with a wood rail"): natural hessian, pencil pleat, to the floor (Dunelm's pencil-pleat
                                             # drops run to 228, header 3"), on a 28 mm wooden pole with rings and ball finials (Dunelm sells them
@@ -380,10 +388,14 @@ HATS = dict(board=24.0, cap_y=FLOOR_LAMP["h"] - 26.0, cap_col="#1f2a44")
 
 # the heads along each bar (offset along the bar from its centre, + towards the media wall / door), shade colour, stem colour, aim
 SAGE, BLUE, MUSTARD, PINK = ("#a9c7ab", "#8db59c"), ("#a7d0d8", "#7fbfc8"), ("#e8b53f", "#dca52f"), ("#e79c95", "#d9877f")
-BAR1_HEADS = [(31.5, *SAGE, (40.0, 212.0, 30.0)),                 # the media-wall end: books and the left of the high shelf
-              (10.5, *BLUE, (TV_CX, 172.0, 34.0)),                # the record ledge above the TV
-              (-10.5, *PINK, (160.0, 95.0, 8.0)),                 # the turntable and the Series X
-              (-31.5, *MUSTARD, (148.0, 45.0, -169.0))]           # the window end: down onto the coffee table
+BAR1_HEADS = [(31.5, *SAGE, (40.0, 212.0, 30.0)),                 # (v15 aims, kept for reference; v17 replaces them just below)
+              (10.5, *BLUE, (TV_CX, 172.0, 34.0)),
+              (-10.5, *PINK, (160.0, 95.0, 8.0)),
+              (-31.5, *MUSTARD, (148.0, 45.0, -169.0))]
+# v17, client: "make all the ceilings lamps just face downward and give the room a general average lighting on the whole room as the default":
+# every head straight down, spread a little along the bar, so the pools overlap into an even light
+HEAD_SPREAD = 1.6
+BAR1_HEADS = [(off, col, stem, (PEND_X, 0.0, PEND_Z + off * HEAD_SPREAD)) for off, col, stem, _ in BAR1_HEADS]
 
 
 def bar_head_xz(bx, bz, off):

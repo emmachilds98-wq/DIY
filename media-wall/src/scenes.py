@@ -1,7 +1,6 @@
 """v13.7: lighting scenes. Four ways to set the room's six light layers: the ceiling LED strip on its own controller, the
 uprights' grooves and the side-wall shelf's strip (smart colour since v16, in the bulbs' app), the bias light with the
-TV, and (v15) bar 1, bar 2 and the red lamp on smart colour bulbs, set in their app (the heads stay aimed as in the Paint and
-light table). Levels are 0-100. Used by diagrams.light_scene(), the plan's
+TV, and (v15) bar 1, bar 2 and the red lamp on smart colour bulbs, set in their app (v17: every head straight down). Levels are 0-100. Used by diagrams.light_scene(), the plan's
 section 8 and the viewer's scene buttons."""
 
 LAYERS = [("strip", "Ceiling LED strip", "its own controller"), ("uprights", "Uprights' grooves and the side shelf", "the strips' app (smart colour since v16)"),
@@ -9,6 +8,11 @@ LAYERS = [("strip", "Ceiling LED strip", "its own controller"), ("uprights", "Up
           ("bar2", "Bar 2, by the stairs", "smart bulbs: the app"), ("lamp", "Your red lamp", "its colour bulbs: the app")]
 
 SCENES = [
+    ("general", "General", "An even light over the whole room: every head straight down, the strips and the lamp filling in. The default (v17).",
+     {"strip": 55, "uprights": 45, "bias": 0, "bar1": 60, "bar2": 60, "lamp": 45},
+     ["All eight heads point straight down, spread a little along each bar, so the pools overlap instead of spotlighting the walls.",
+      "The ceiling strip and the uprights fill the edges; the lamp adds a low warm layer.",
+      "Tilt a head only if its pool lands badly (on the TV's screen, or in someone's eyes)."]),
     ("tv", "TV night", "Films and games: the screen is the brightest thing in the room, with a little warm light round it so your eyes don't strain.",
      {"strip": 10, "uprights": 15, "bias": 100, "bar1": 0, "bar2": 10, "lamp": 70},
      ["Bar 1 off: its heads hang in front of the screen, and even tilted away they'd catch it.",
