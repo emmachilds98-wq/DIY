@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "21"
+VERSION = "22"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -312,6 +312,16 @@ summary .part { font-weight: 400; }
 .step { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
 .step > * { min-width: 0; }
 .step.done { border-color: var(--ok); }
+/* v22: build steps one at a time: the head (number, title, who and how long, Done) always shows; the rest opens */
+.shead { cursor: pointer; }
+.sopen { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.sopen:focus-visible { outline: 2px solid var(--oak); outline-offset: 2px; }
+.sbody { display: grid; gap: 10px; min-width: 0; }
+.sbody[hidden] { display: none; }
+.step:not(.open) { padding-block: 10px; }
+.snext { margin: 0; }
+.sall { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 4px 0 10px; }
+@media (max-width: 560px) { .shead { grid-template-columns: 2.2rem minmax(0, 1fr); } .shead .sdone, .shead .sopen { grid-column: 2; justify-self: start; } .shead .sopen { margin-top: -4px; } }
 .shead { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 12px; align-items: center; }
 .sn { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--chip); display: grid; place-items: center; font-size: 1.15rem; }
 .step.done .sn { background: var(--ok); color: var(--surface); }
@@ -674,14 +684,17 @@ def page(site=False):
         step_cards.append(
             f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}" data-parts="{html.escape("|".join(s["part"]))}"><div class="shead"><span class="sn">{s["n"]}</span>'
             f'<div><p class="sparts">{part_chip(s["part"])}</p><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
-            f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label></div>'
+            f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label>'
+            f'<button type="button" class="sopen" aria-expanded="true" aria-controls="sb-{s["n"]}">Close</button></div>'
+            f'<div class="sbody" id="sb-{s["n"]}">'   # v22: each step folds to its head; one open at a time (STEP_JS)
             + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
             + need_html(s)
             + ("<details class=\"sdraw\" open><summary>" + ("Drawing" if len(s.get("draw", [])) == 1 else "Drawings") + " for this step</summary>"
                + "".join(f'<figure class="dia">{getattr(D, DIAGRAMS[d])()}</figure>' for d in s["draw"]) + "</details>" if s.get("draw") else "")
             + f'<div class="sfull">{full_html(s)}</div>'
             f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
-            f'<p class="ssee">Also see: {see}</p></li>')
+            f'<p class="ssee">Also see: {see}</p>'
+            f'<p class="snext"><button type="button" class="btn" data-next="{s["n"]}">Next step \u2192</button></p></div></li>')
     run_list = "".join(
         f'<li><a href="#build" data-go="build" data-step="{s["n"]}"><span class="rn">{s["n"]}</span>{html.escape(s["title"])}</a><span class="rp">{part_chip(s["part"])}</span>'
         f'<span class="rm">{html.escape(s["time"])}{"".join(" · " + html.escape(p["label"]) + (" £" + money(p["lo"], p["hi"]) if p["hi"] else "") for p in phases if p["name"] in s["buy"])}</span></li>'
@@ -742,7 +755,7 @@ def page(site=False):
 
   <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
     <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · scroll or pinch to zoom · right-drag or two fingers to slide</span></div>
-    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set, and where your plant stand and record shelf go; pick a lighting scene (the sliders and bulb colours fold out under it); turn the OBEGRÄNSAD panel, the laser, the PC and the plant lights on or off; pull the drawers out. <b>New in v21:</b> it opens on <b>the whole room</b>, from above with the nearest wall cut away, and under it you can turn each <b>suggested piece of furniture or decor</b> on or off. <b>Edit room</b> (top left of the picture): drag things around like a dolls' house, turn them, recolour them, take them out or add new ones, and tap a wall, the ceiling or the skirting to paint it. Walk with the arrows (or WASD, Q and E), and save any view as an HD picture.</p>
+    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Drag to look round; walk with the arrows (or WASD, Q and E). <b>Under the picture (v22):</b> <b>Views</b> (and saving an HD picture), <b>Layout</b> (the table, the chairs, the plant stand, the drawers), <b>Lights</b>, <b>Look</b> (paint and decor) and <b>Extras</b> (ideas, suggestions, and <b>Your picks</b>, which adds up what you've switched on). <b>Edit room</b> (top left of the picture) moves, turns, recolours, removes and adds things.</p>
     {room3d_page.section()}
     <h3 class="ptitle">HD pictures from the 3D room</h3>
     <p class="caption">Rendered at 2560 \u00d7 1440; tap one to see it full size. The same set is in the project folder.</p>
@@ -842,6 +855,7 @@ def page(site=False):
     <div class="group pfilter"><span class="label" id="l-part">Show one part</span>
       <div class="seg" role="group" aria-labelledby="l-part" id="part-filter"><button type="button" data-part="" aria-pressed="true">All parts</button>{part_buttons}</div>
       <p class="caption" id="pf-note" aria-live="polite"></p></div>
+    <div class="row sall"><label class="sdone" for="s-all"><input type="checkbox" id="s-all"> Show all steps open</label><span class="caption">One step at a time otherwise: it opens on the first one not done.</span></div>
     <ol class="steps-list">{"".join(step_cards)}</ol>
     <div class="block" id="cuts">
       <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
@@ -906,7 +920,7 @@ function arts(el) {{ $$("img[data-art]:not([src])", el).forEach(im => {{ const u
 arts($("header")); arts(document.getElementById("overview"));
 
 /* ---------- tabs */
-const tabBtns = $$('[role="tab"]');
+const tabBtns = $$('.tabs [role="tab"]');
 function showTab(id, focus) {{
   if (!DATA.tabs.includes(id)) id = "overview";
   tabBtns.forEach(b => {{ const on = b.getAttribute("aria-controls") === id; b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); if (on) b.scrollIntoView({{ block: "nearest", inline: "nearest" }}); }});
@@ -1304,7 +1318,32 @@ paintSteps();
   if (saved && bar.querySelector('button[data-part="' + saved.replace(/"/g, "") + '"]')) pick(saved);
 }})();
 </script>
+<script>""" + STEP_JS + """</script>
 """)
+
+
+# v22: the build steps one at a time (the plan's review: 67 phone screens long). The head always shows; one step opens; "Next step"
+# opens the next shown step; links to a step (the overview's "Next", the buy list's "before step n") open it; "Show all steps open" reads straight through.
+STEP_JS = r"""(() => {
+  const lis = $$(".steps-list > li.step"), all = document.getElementById("s-all"); if (!lis.length) return;
+  let cur = store.get("mw22-step", null), showAll = !!store.get("mw22-steps-all", false);
+  const set = n => { cur = n == null ? null : String(n); store.set("mw22-step", cur);
+    lis.forEach(li => { const on = showAll || li.dataset.s === cur, b = $(".sopen", li);
+      li.classList.toggle("open", on); $(".sbody", li).hidden = !on; b.setAttribute("aria-expanded", String(on)); b.textContent = on ? "Close" : "Open"; b.hidden = showAll; }); };
+  const firstTodo = () => (lis.find(li => !li.hidden && !li.classList.contains("done")) || lis[0]).dataset.s;
+  const go = n => { set(n); const li = document.getElementById("step-" + n); if (li) jumpTo(li); };
+  lis.forEach(li => {
+    $(".sopen", li).addEventListener("click", e => { e.stopPropagation(); set(li.classList.contains("open") ? null : li.dataset.s); });
+    $(".shead", li).addEventListener("click", e => { if (e.target.closest("label, input, button, a")) return; if (!li.classList.contains("open")) go(li.dataset.s); });
+    $("[data-next]", li).addEventListener("click", () => { const i = lis.indexOf(li), nx = lis.slice(i + 1).find(x => !x.hidden); if (nx) go(nx.dataset.s); });
+  });
+  document.addEventListener("click", e => { const a = e.target.closest("[data-step]"); if (a && !showAll) set(a.dataset.step); }, true);
+  all.checked = showAll;
+  all.addEventListener("change", () => { showAll = all.checked; store.set("mw22-steps-all", showAll); set(cur); });
+  set(cur && lis.some(li => li.dataset.s === cur) ? cur : null);
+  if (!cur && !showAll) setTimeout(() => { if (!cur) set(firstTodo()); }, 1500);   // after the saved ticks have loaded
+  $$(".step:last-child [data-next]").forEach(b => b.closest(".snext").hidden = true);
+})();"""
 
 
 def site():
@@ -1325,13 +1364,30 @@ def publish_files():
     return files
 
 
+DECK_ASSETS = HERE / "deck_assets.json"   # v22: art/ files uploaded to the deck's asset store: {name: {"sha": ..., "url": "/_blob/..."}}
+
+
+def art_sha(p):
+    import hashlib
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def deck_assets_todo():
+    """v22: the art/ files the deck's asset store doesn't hold yet (new, or changed since they were uploaded)."""
+    have = json.loads(DECK_ASSETS.read_text()) if DECK_ASSETS.exists() else {}
+    return [p for p in sorted((HERE / "art").glob("*.webp")) if have.get(p.name, {}).get("sha") != art_sha(p)]
+
+
 def inline_images(html_):
-    """The artifact refuses some image uploads from an editor outside its organisation (false "cpio archive" sniffs), so the
-    published copy carries its images as data URIs: media_wall_viewer_inline.html (gitignored), about 5 MB."""
+    """The copy published to the shared deck (media_wall_viewer_inline.html, gitignored). v22: each picture already in the deck's
+    asset store (deck_assets.json, matched by its sha256) is linked by its /_blob/ url; any other is carried as a data URI, so the
+    page always works. With everything uploaded the page is about 2 MB instead of 10.8. (Uploads through `files` were refused in
+    v13 with false "cpio archive" sniffs; the asset store takes them.)"""
     import base64
+    have = json.loads(DECK_ASSETS.read_text()) if DECK_ASSETS.exists() else {}
     for p in sorted((HERE / "art").glob("*.webp")):
-        mime = "webp"
-        uri = f"data:image/{mime};base64," + base64.b64encode(p.read_bytes()).decode()
+        a = have.get(p.name)
+        uri = a["url"] if a and a.get("sha") == art_sha(p) else "data:image/webp;base64," + base64.b64encode(p.read_bytes()).decode()
         html_ = html_.replace(f"art/{p.name}", uri)
     return html_
 
@@ -1352,4 +1408,6 @@ if __name__ == "__main__":
     (HERE / "media_wall_viewer_inline.html").write_text(inline_images(page()))
     (HERE.parent.parent / "index.html").write_text(site())
     (HERE / "publish_files.json").write_text(json.dumps(publish_files(), indent=1))
-    print("viewer ok", len(publish_files()), "files")
+    todo = deck_assets_todo()
+    print("viewer ok", len(publish_files()), "files;", len(todo), "pictures not yet in the deck's asset store" + (" (inlined)" if todo else ""))
+    (HERE / "deck_assets_todo.txt").write_text("".join(str(p) + "\n" for p in todo))
