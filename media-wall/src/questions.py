@@ -1,4 +1,4 @@
-"""v27: dropped: optc (the dining cabinet is the plan, for six) and chairs (the flip-top's chair cupboard: the cabinet keeps all six). New: rears.
+"""v27: dropped: optc (the dining cabinet is the plan, for six) and chairs (the flip-top's chair cupboard: the cabinet keeps all six). New in v27: rears (v27.1: answered by your photo, dropped).
 v20: answered and dropped: hdcrash ("no crashes"); chairs now six ideally, four fine; the ledge is 25 (as drawn).
 v18.1: answered by the listings the client sent and dropped: the plant stand (98 × 29.5 × 158) and the vinyl stand (70 × 32 × 78).
 v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
@@ -37,9 +37,6 @@ QUESTIONS = [
      "The zone takes up to 45.2 × 35.2 cm; the switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
     ("fanstand", "The Series X fan stand's make and model",
      f"The shelf takes a footprint up to about 30 cm wide; the plan assumes {_n(G.FAN_STAND[0])} × {_n(G.FAN_STAND[2])}.", "A photo of the stand is enough.", True),
-    ("rears", "Your rear speakers: a photo of them on their stands, behind the sofa",
-     f"v27: you said they stand behind the sofa. They're drawn as the soundbar's two rears ({_n(G.REAR_SPK[0])} × {_n(G.REAR_SPK[1])} × {_n(G.REAR_SPK[2])}) on slim stands in the {_n(G.SOFA_BACK_Z - G.WINDOW_Z)} cm gap behind the sofa's long side, near each end. The photo sets the stands' size, the height and the spots, and shows whether the curtains catch them.",
-     "One photo from the side of the sofa is enough; the stands' base size if you can.", True),
     ("pouf", "Your sofa's ottoman: how tall is it?",
      f"v23: drawn {_n(G.SOFA_POUF['w'])} cm square (one seat of the sofa, as you said) and {_n(G.SOFA_POUF['h'])} tall, on the rug beside the coffee table.", "A tape measure from the floor to the top of its cushion.", False),
     ("records", "Roughly how many LPs?",
@@ -65,7 +62,6 @@ QUESTIONS = [
 
 # a short line for the plan PDF's "Still to confirm" list, by id
 PDF_LINE = {
-    "rears": "Your rear speakers: a photo on their stands behind the sofa, to set the stands' size, height and spots (v27).",
     "westwall": "The stairs wall: solid, or plasterboard on studs? It decides how the dining cabinet's top is fixed to it.",
     "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
@@ -90,7 +86,6 @@ def pdf_items():
 
 # v13.8: a few words per question for the plan's one-page summary ("To confirm"), so it follows this list too
 SHORT = {
-    "rears": "the rear speakers' stands",
     "westwall": "the stairs wall's build",
     "electrics": "that you're swapping the light fittings yourselves",
     "sofa": "the sofa's return length",
@@ -118,7 +113,6 @@ def summary_line():
 # upload. The answer is saved as plain text in the same answers/<id> record, e.g. "Cupboard: For six, 31 deep · Behind the top: No".
 # The PDF ignores these. Check the wording with Emma when it's shown.
 OPTS = {
-    "rears": [("Where", ["Behind the long side, as drawn", "At the sofa's ends", "Somewhere else"]), (None, ["Add a photo of the speakers"])],
     "westwall": [(None, ["Solid: it sounds solid", "Hollow: plasterboard", "Not sure yet", "Add a photo"])],
     "electrics": [(None, ["All ours", "An electrician for the fittings", "Not sure yet"])],
     "sofa": [("Return along the side wall", ["About 150", "About 160", f"About {_n(G.SOFA_D)} (as drawn)", "Longer"])],
