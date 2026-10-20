@@ -143,7 +143,7 @@ def scene():
     room_spec = {
         "W": G.ROOM_W, "CEIL": G.CEIL, "ALC_W": G.ALC_W, "ALC_D": G.ALC_D, "BREAST_X": G.BREAST_X, "RECESS_Z": G.BREAST_D_WEST,
         "DOOR_X": G.DOOR_X, "DOOR_H": 198.0, "STAIR_X": G.STAIR_X, "STAIR_FRONT": G.ALC_D - G.STAIR_D,
-        "WELL_X0": G.DOOR_X[1] + 1.5, "WINDOW_Z": G.WINDOW_Z, "WINDOW_X": G.WINDOW_X, "WINDOW_Y": (88.0, 212.0),
+        "WELL_X0": G.DOOR_X[1] + 1.5, "WINDOW_Z": G.WINDOW_Z, "WINDOW_X": G.WINDOW_X, "WINDOW_Y": G.WINDOW_Y, "WINDOW_REVEAL": G.WINDOW_REVEAL, "SILL": G.SILL,
         "RADIATOR_X": G.RADIATOR_X, "RADIATOR_Y": (15.0, 70.0), "SKIRT_H": G.SKIRT_H,
         "TV_X": G.TV_X, "TV_Y": (G.TV_BOTTOM, G.TV_TOP), "TV_Z": G.TV_PANEL_Z[0],
         "SHELF_B": G.SHELF_B, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},

@@ -2455,7 +2455,8 @@ def sofa_solid():
     o.append(poly([P(x0, 0.05, zb), P(mx1 + 6, 0.05, zb), P(mx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, zf + 6), P(cx1 + 6, 0.05, ze + 6), P(x0, 0.05, ze + 6)],
                   "#000", 'opacity="0.25" filter="url(#soft)"'))
     # the back along the side wall and along the window wall (frames), then the plinth
-    o.append(box(x0, ph, zb, bk, bh - ph, ze - zb, C, T, SD))
+    ott = G.SOFA_OTTOMAN                              # v17: the return's last 20 cm has no back: the seat wraps round to the wall
+    o.append(box(x0, ph, zb, bk, bh - ph, ze - ott - zb, C, T, SD))
     o.append(box(x0, ph, zb, mx1 - x0, bh - ph, bk, C, T, SD))
     o.append(box(x0 + 3, 0, zb + 3, mx1 - x0 - 6, ph, zf - zb - 6, "#111214"))
     o.append(box(x0 + 3, 0, zf - 3, cx1 - x0 - 6, ph, ze - zf, "#111214"))
@@ -2470,8 +2471,9 @@ def sofa_solid():
     seat_w = (mx1 - arm - cx1) / n
     xs = [(x0 + bk + 16, cx1)] + [(cx1 + i * seat_w + 0.5, cx1 + (i + 1) * seat_w - 0.5) for i in range(n)]
     # back cushions, plump, leaning on the frames: along the side wall, then one per seat along the window
-    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - 6 - zf - 2, C, T, SD))
-    ribs_x(x0 + bk + 16, zf + 2, ze - 6, st, bh - 2)
+    o.append(box(x0 + bk, st - 2, zf + 2, 16, bh - st + 2, ze - ott - 1 - zf - 2, C, T, SD))
+    ribs_x(x0 + bk + 16, zf + 2, ze - ott - 1, st, bh - 2)
+    ribs_z(ze - ott - 1, x0, x0 + bk + 16, st, bh - 2)                                                # the back's open end
     o.append(box(x0 + bk, st - 2, zb + bk + 32, 16, bh - st + 2, zf + 1 - zb - bk - 32, C, T, SD))
     ribs_x(x0 + bk + 16, zb + bk + 32, zf + 1, st, bh - 2)
     for (xa, xb) in xs:
@@ -2482,7 +2484,8 @@ def sofa_solid():
         o.append(box(xa, sb, zb + bk + 16, xb - xa, st - sb, zf - zb - bk - 16 + 1, C, T, SD))
         ribs_z(zf + 1, xa, xb, sb, st, 2.6)
     o.append(box(x0 + bk + 16, sb, zf + 1.5, cx1 - x0 - bk - 16, st - sb, ze - 1 - zf - 1.5, C, T, SD))   # one long cushion to the end
-    o.append(box(x0 + bk, sb, ze - 6, 16, st - sb, 5, C, T, SD))                                         # ... wrapping round to the back
+    o.append(box(x0, ph, ze - ott, bk + 16, st - ph, ott - 1, C, T, SD))                                 # ... wrapping round to the wall
+    ribs_z(ze - 1, x0, x0 + bk + 16, ph, st, 2.6)
     ribs_x(cx1, zf + 1.5, ze - 1, sb, st, 2.6)
     ribs_z(ze - 1, x0 + bk, cx1, sb, st, 2.6)
     if G.SOFA_CUSHION:
@@ -2497,7 +2500,7 @@ def curtains(far=480.0):
     """v15: the client's curtains: Dunelm hessian, pencil pleat, to the floor, on a 28 mm wooden pole with rings and ball finials just under
     the ceiling strip, running 30 cm past the window each side; drawn open, stacked either side of the window (geometry.CURTAIN)."""
     c = G.CURTAIN
-    wz = G.WINDOW_Z + 6.0
+    wz = c["z"]                                  # v17: in front of the deep sill and the radiator
     wx0, wx1 = G.WINDOW_X
     y0, y1 = c["drop_to"], c["rail_y"]
     pc = c["pole_col"]
@@ -2534,6 +2537,7 @@ def side_room():
     wx0, wx1 = G.WINDOW_X
     o.append(poly([P(wx0, 88, wz0 + 0.2), P(wx0, 212, wz0 + 0.2), P(min(wx1, far), 212, wz0 + 0.2), P(min(wx1, far), 88, wz0 + 0.2)], "#d9e2dc"))
     o.append(poly([P(wx0, 88, wz0 + 0.3), P(wx0, 212, wz0 + 0.3), P(wx0 + 5, 212, wz0 + 0.3), P(wx0 + 5, 88, wz0 + 0.3)], "#f1efe9"))
+    o.append(box(wx0 - 4, G.SILL["y"] - G.SILL["t"], wz0, min(wx1, far) - wx0 + 8, G.SILL["t"], G.SILL["nose"], "#f1efe9", "#fbfaf6", "#d9d5cc"))   # v17: the deep sill's nose
     rx0, rx1 = G.RADIATOR_X
     o.append(poly([P(rx0, 15, wz0 + 4), P(rx0, 70, wz0 + 4), P(min(rx1, far), 70, wz0 + 4), P(min(rx1, far), 15, wz0 + 4)], "#ece9e2"))
     o.append(curtains(far))

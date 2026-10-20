@@ -36,7 +36,7 @@ SOURCES = {
     "case": "Corsair 4000D Airflow, a typical mid-tower gaming case: 453 × 230 × 466 mm (TechPowerUp review)",
     "fliphinge": "Lee Valley: 40574 narrow flip-top hinges, solid brass, 1/2 in × 2 3/4 in (1.27 × 7.0 cm), for card and flip-top tables (leevalley.com); their 40208 card-table hinge is 1 3/16 in (3.0 cm) wide, too wide for a 27 mm edge",
     "curtains": "Your photo (20 Oct) and note: Dunelm hessian pencil-pleat curtains; Dunelm pencil-pleat drops run 137, 182 and 228 cm with a 3 in header; Dunelm 28 mm wooden poles, 120–360 cm, rings included (one per 10 cm), finials up to 8 cm more (dunelm.com)",
-    "obegransad": "IKEA: OBEGRÄNSAD LED wall lamp, black (00526248): 52 × 36 × 6 cm, 5 W, five lighting programmes, hangs landscape or portrait (ikea.com); its face is a 16 × 16 grid of white LEDs",
+    "obegransad": "IKEA: OBEGRÄNSAD LED wall lamp, black (your 905.262.63; 005.262.48 and others by country): 52 × 36 × 6 cm, 5 W, five lighting programmes, hangs landscape or portrait, runs on a 5 V USB-A adapter sold separately (ikea.com); its face is a 16 × 16 grid of white LEDs. From the Swedish House Mafia collection (IKEA press kit, Sept 2022)",
     "pads": "Sony: DualSense controller 160 × 66 × 106 mm (W × H × D); Microsoft: Xbox Wireless Controller 153 × 61 × 104 mm",
     "crate": "Record-shop browser crates and LP storage boxes are made about 32.5–33 cm inside for 31.4 cm sleeves (31.8–32.4 in outer sleeves), flipped by the sleeves' top edges",
     "strips": "Philips Hue Lightstrip Plus V4: 2 m base kit, cuttable every 33 cm, extendable with 1 m; WiZ Wi-Fi LED strip, 2 m starter kit, cuttable; both RGB and tunable white, in the same apps as the bars' bulbs (philips-hue.com; wizconnected.com)",
@@ -144,7 +144,9 @@ def fliptop_zones():
         ("The window side's chairs", f"backs at z {r1(north_back)}", ref("terje"), f"the window wall at {r1(g.WINDOW_Z)}",
          f"{r1(north_back - g.WINDOW_Z)} behind them; your red lamp moves from the window corner to the sofa's end or by the breast while it's open", TIGHT),
         ("A seat at its end", f"one chair at x {r1(bx_end - cd + tuck)}–{r1(bx_end + tuck)}", ref("terje", "sofa"), f"the sofa's arm ends at x {r1(g.SOFA_X[1])}, front z {r1(g.SOFA_FRONT_Z)}",
-         f"one chair, centred on the table, clears the sofa's front by {r1(end_lo - g.SOFA_FRONT_Z)}: seven with three a side (a second end chair would hit the arm)", PASS if end_lo - g.SOFA_FRONT_Z >= 0 else TIGHT),
+         (f"one chair, centred on the table, clears the sofa's front by {r1(end_lo - g.SOFA_FRONT_Z)}" if end_lo >= g.SOFA_FRONT_Z else
+          f"one chair, centred on the table, meets the sofa's front ({r1(g.SOFA_FRONT_Z - end_lo)} over, with the sofa 13 off the wall since v17): tuck it 2 cm further under the table")
+         + ": seven with three a side (a second end chair would hit the arm)", PASS if end_lo - g.SOFA_FRONT_Z >= 0 else TIGHT),
         ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}, {r1(g.FOLDED_D)} off the wall", ref("photo20"), f"shelf's underside about {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
          f"{r1(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
         ("Light over the table", "the existing pendant point, for bar 2", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})", "over the open table's stair side: the bar runs along it", PASS),

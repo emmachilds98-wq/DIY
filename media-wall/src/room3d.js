@@ -26,7 +26,7 @@ const DEF = { site: "B", dining: "folded", scene: "everyday", paint: "card_room"
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
               ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false };   // v16: the table by the stairs by default; the laser off
-const KEY = "mw16-3d";
+const KEY = "mw17-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
@@ -441,14 +441,20 @@ function buildShell() {
   // the window: white frame, glass, a sill, the view out
   const white = reg(new THREE.MeshStandardMaterial({ color: "#f1efe9", roughness: 0.45 }));
   const fw = 6, mid = (wx0 + wx1) / 2;
+  // v17: the frame sits back in a deep reveal (the jambs and head in the wall paint), with a deep white sill for the plants
+  const REV = R.WINDOW_REVEAL, FZ = WZ - REV;
   [[wx0, wy0, fw, wy1 - wy0], [wx1 - fw, wy0, fw, wy1 - wy0], [wx0, wy0, wx1 - wx0, fw], [wx0, wy1 - fw, wx1 - wx0, fw], [mid - 3, wy0, 6, wy1 - wy0],
-   [wx0, wy0 + 0.68 * (wy1 - wy0), wx1 - wx0, 5]].forEach(([x, y, w, h]) => cube(x, y, WZ - 4, w, h, 7, white));
-  cube(wx0 - 4, wy0 - 3, WZ, wx1 - wx0 + 8, 3, 9, white);
+   [wx0, wy0 + 0.68 * (wy1 - wy0), wx1 - wx0, 5]].forEach(([x, y, w, h]) => cube(x, y, FZ - 4, w, h, 7, white));
+  cube(wx0 - 2, wy0, FZ, 2, wy1 - wy0, REV, wallP); cube(wx1, wy0, FZ, 2, wy1 - wy0, REV, wallP);   // the reveal's jambs
+  cube(wx0 - 2, wy1, FZ, wx1 - wx0 + 4, 2, REV, wallP);                                          // ... and its head
+  const SL = R.SILL;
+  cube(wx0 - 4, SL.y - SL.t, FZ - 1, wx1 - wx0 + 8, SL.t, REV + 1 + SL.nose, white);              // the deep sill
   const glass = reg(new THREE.MeshPhysicalMaterial({ color: "#dfe8ee", roughness: 0.02, transparent: true, opacity: 0.12, depthWrite: false }));
   const pane = new THREE.Mesh(new THREE.PlaneGeometry((wx1 - wx0) * M, (wy1 - wy0) * M), glass);
-  pane.position.copy(v3(mid, (wy0 + wy1) / 2, WZ - 1)); shell.add(pane);
+  pane.position.copy(v3(mid, (wy0 + wy1) / 2, FZ - 1)); shell.add(pane);
   view = new THREE.Mesh(new THREE.PlaneGeometry(40, 14), new THREE.MeshBasicMaterial({ map: SKY.night, toneMapped: false }));
-  view.position.copy(v3(mid, 300, WZ - 900)); shell.add(view);
+  view.position.copy(v3(mid, 300, FZ - 900)); shell.add(view);
+  sillPlants(wx0, wx1, SL.y, FZ + 2, WZ + SL.nose - 1);
   // the radiator under the window, painted in
   const [rx0, rx1] = R.RADIATOR_X, [ry0, ry1] = R.RADIATOR_Y, radP = paintMat(lum("#3b6e56") / BASE_L, true, false, "trim");
   for (let x = rx0; x < rx1 - 2; x += 5) cube(x, ry0, WZ + 3, 3.4, ry1 - ry0, 7, radP);
@@ -468,18 +474,18 @@ function buildShell() {
   const CU = R.CURTAIN, cloth = reg(new THREE.MeshStandardMaterial({ color: CU.col, roughness: 1, side: THREE.DoubleSide, map: HESSIAN, bumpMap: HESSIAN, bumpScale: 0.8 }));
   const wood = reg(new THREE.MeshStandardMaterial({ color: CU.pole_col, map: OAK_TEX, roughness: 0.5 }));
   const poleL = wx1 - wx0 + 2 * CU.ext, pole = new THREE.Mesh(new THREE.CylinderGeometry(CU.pole / 2 * M, CU.pole / 2 * M, poleL * M, 16), wood);
-  pole.rotation.z = Math.PI / 2; pole.position.copy(v3((wx0 + wx1) / 2, CU.rail_y + CU.pole / 2, WZ + 8)); shell.add(shadow(pole));
+  pole.rotation.z = Math.PI / 2; pole.position.copy(v3((wx0 + wx1) / 2, CU.rail_y + CU.pole / 2, CU.z + 1)); shell.add(shadow(pole));
   for (const xf of [wx0 - CU.ext - CU.finial / 2, wx1 + CU.ext + CU.finial / 2]) {
-    const f = new THREE.Mesh(new THREE.SphereGeometry(CU.finial / 2 * M, 16, 12), wood); f.position.copy(v3(xf, CU.rail_y + CU.pole / 2, WZ + 8)); shell.add(shadow(f));
+    const f = new THREE.Mesh(new THREE.SphereGeometry(CU.finial / 2 * M, 16, 12), wood); f.position.copy(v3(xf, CU.rail_y + CU.pole / 2, CU.z + 1)); shell.add(shadow(f));
   }
   for (let x = wx0 - CU.ext + 3; x < wx1 + CU.ext - 2; x += 10) {          // rings, one every 10 cm
-    const r = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.0035, 6, 16), wood); r.position.copy(v3(x, CU.rail_y + CU.pole / 2, WZ + 8)); r.rotation.y = Math.PI / 2; shell.add(r);
+    const r = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.0035, 6, 16), wood); r.position.copy(v3(x, CU.rail_y + CU.pole / 2, CU.z + 1)); r.rotation.y = Math.PI / 2; shell.add(r);
   }
   const panel = (x0, w, folds) => {
     const g = new THREE.PlaneGeometry(w * M, (CU.rail_y - CU.drop_to) * M, Math.round(folds * 8), 1), pos = g.attributes.position;
     for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * 0.026);
     g.computeVertexNormals();
-    const m = new THREE.Mesh(g, cloth); m.position.copy(v3(x0 + w / 2, (CU.rail_y + CU.drop_to) / 2, WZ + 7)); m.rotation.y = Math.PI;
+    const m = new THREE.Mesh(g, cloth); m.position.copy(v3(x0 + w / 2, (CU.rail_y + CU.drop_to) / 2, CU.z)); m.rotation.y = Math.PI;
     return shadow(m);
   };
   curtOpen = new THREE.Group(); curtShut = new THREE.Group();
@@ -558,6 +564,43 @@ function buildShell() {
   flushCubes(shell);
 }
 let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut;
+// v17: "i also have deep window sills that allow for lots of plants there": a row of pots along the sill, upright and trailing
+function sillPlants(x0, x1, y, zBack, zFront) {
+  const r = rnd(29), pots = [], leaves = [], vines = [];
+  const potCols = ["#d8cfc0", "#b5643f", "#2f2f2f", "#e9e4da", "#8a9a7b"], potMs = potCols.map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 })));
+  const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide })), leaf2 = reg(new THREE.MeshStandardMaterial({ color: "#5d8f45", roughness: 0.65, side: THREE.DoubleSide }));
+  const vine = reg(new THREE.MeshStandardMaterial({ color: "#4f6b3a", roughness: 0.8 }));
+  const n = 7, zc = (zBack + zFront) / 2, step = (x1 - x0 - 30) / (n - 1), leaves2 = [];
+  for (let i = 0; i < n; i++) {
+    const x = x0 + 15 + i * step + (r() - 0.5) * 6, rad = 5 + r() * 4, h = 9 + r() * 6, z = zc + (r() - 0.5) * 6;
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(rad * M, rad * 0.78 * M, h * M, 20), potMs[i % potMs.length]);
+    p.position.copy(v3(x, y + h / 2, z)); shell.add(shadow(p));
+    const tall = i % 3 !== 1, top = y + h;
+    if (tall) {                 // an upright plant: a cluster of leaves on short stems
+      const H = 14 + r() * 26;
+      for (let k = 0; k < 16; k++) {
+        const t = k / 16, g = new THREE.SphereGeometry((0.022 + r() * 0.012) * (1.2 - t * 0.5), 8, 6); g.scale(0.55, 1.3, 0.25);
+        g.rotateZ((r() - 0.5) * 1.1); g.rotateY(r() * Math.PI);
+        const q = v3(x + (r() - 0.5) * rad * 1.6, top + 3 + t * H, z + (r() - 0.5) * rad * 1.2); g.translate(q.x, q.y, q.z);
+        (k % 2 ? leaves : leaves2).push(g);
+      }
+    } else {                    // a trailing one, hanging a little over the sill's nose
+      for (let k = 0; k < 5; k++) {
+        const z0 = z + (r() - 0.5) * 6, len = 10 + r() * 14;
+        const pts = [v3(x + (r() - 0.5) * 4, top + 2, z0), v3(x + (r() - 0.5) * 6, top, zFront + 1)];
+        for (let j = 1; j <= 4; j++) pts.push(v3(x + (r() - 0.5) * 8, y - len * j / 4, zFront + 1.5 + j * 0.4));
+        const curve = new THREE.CatmullRomCurve3(pts);
+        vines.push(new THREE.TubeGeometry(curve, 24, 0.002, 5, false));
+        for (let t = 0.1; t < 1; t += 0.09 + r() * 0.04) {
+          const q = curve.getPoint(t), g = new THREE.SphereGeometry(0.02 + r() * 0.008, 8, 6); g.scale(1, 0.2, 0.8); g.rotateY(r() * Math.PI); g.translate(q.x, q.y, q.z); leaves.push(g);
+        }
+      }
+    }
+  }
+  if (leaves.length) shell.add(shadow(new THREE.Mesh(mergeGeometries(leaves), leaf)));
+  if (leaves2.length) shell.add(shadow(new THREE.Mesh(mergeGeometries(leaves2), leaf2)));
+  if (vines.length) shell.add(new THREE.Mesh(mergeGeometries(vines), vine));
+}
 
 /* ---------------------------------------------------------------- lights */
 const lights = { strip: [], uprights: [], bias: [], bar1: [], bar2: [], lamp: [], tv: [] };
@@ -851,7 +894,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v16 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v17 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
