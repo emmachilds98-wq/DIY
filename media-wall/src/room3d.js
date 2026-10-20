@@ -31,7 +31,8 @@ const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room",
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
               decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak" },
-              sugg: {} };   // v21: the suggested furniture and decor, all off   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
+              sugg: {},     // v21: the suggested furniture and decor, all off
+              seat: "off" };   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
@@ -288,9 +289,19 @@ function paintMat(ratio, eggshell, both, ch = "wall") {
 }
 function repaint() { paintMats.forEach(m => m.color.copy(paintColour(m.userData.ratio, m.userData.ch))); reshadow(); }
 const KIND = {};
+/* v23: the stairs' side wall is brick (client): 0.6 m a repeat (GRAIN), eight 7.5 cm courses of 20 cm bricks, stretcher bond */
+const BRICK_TEX = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = "#cbbca6"; g.fillRect(0, 0, w, h);
+  const r = rnd(17), ch = h / 8, bw = w / 3;
+  for (let row = 0; row < 8; row++) for (let k = -1; k < 4; k++) {
+    const x = k * bw + (row % 2 ? bw / 2 : 0), t = r();
+    g.fillStyle = `rgb(${150 + t * 30},${78 + t * 18},${55 + t * 12})`; g.fillRect(x + 2, row * ch + 2, bw - 4, ch - 4);
+  }
+});
 function kindOf(fill, flags, size) {
   if (fill === "glass") return "glass";
   if (fill === "art") return "art";
+  if (fill === "brick") return "brick";   // v23: the stairs' brick side wall
   if (PAINT_OLD.has(fill)) return "paint";
   if ((flags || "").includes("o")) return "trans";
   const c = new THREE.Color(fill), o = {}; c.getHSL(o);
@@ -308,6 +319,7 @@ function kindMat(kind) {
     led: () => new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
     glass: () => new THREE.MeshPhysicalMaterial({ color: "#ffffff", roughness: 0.04, transmission: 0, transparent: true, opacity: 0.16, depthWrite: false }),
     art: () => new THREE.MeshStandardMaterial({ map: ART_TEX, roughness: 0.5 }),
+    brick: () => new THREE.MeshStandardMaterial({ map: BRICK_TEX, bumpMap: BRICK_TEX, bumpScale: 0.6, roughness: 0.92, side: THREE.DoubleSide }),
     trans: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, transparent: true, opacity: 0.85 }),
   }[kind]();
   return KIND[kind] = reg(m);
@@ -707,7 +719,7 @@ function buildSuggest() {
   const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.6, side: THREE.DoubleSide }));
   const mat = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
   // the floor pieces: movable, shown only while switched on
-  const floor = (k, label, w, d, x, z, build, mats) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] }); };
+  const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] }); };
   { const pot = mat("#d8cfc0");
     floor("floorplant", "Floor plant (suggested)", 40, 40, 24, -92, g => {
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.32, 24), pot); p.position.y = 0.16; g.add(shadow(p));
@@ -722,7 +734,7 @@ function buildSuggest() {
     const col = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.475, 16), oak); col.position.y = 0.2375; g.add(shadow(col));
     const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.02, 32), oak); foot.position.y = 0.01; g.add(shadow(foot)); }, [oak]);
   { const knit = mat("#d9a441");
-    floor("pouffe", "Pouffe (suggested)", 50, 50, 246, -100, g => {
+    floor("pouffe", "Pouffe (suggested)", 50, 50, 175, -95, g => {
       const b = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.4, 32), knit); b.position.y = 0.2; g.add(shadow(b));
       const t = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.02, 8, 32), knit); t.rotation.x = Math.PI / 2; t.position.y = 0.39; g.add(t); }, [knit]); }
   // on the walls and the coffee table: fixed, shown only while switched on
@@ -744,9 +756,58 @@ function buildSuggest() {
     const c = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.09, 20), reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.12 })));
     c.position.copy(v3(2, 43.6 + 4.5, 2)); g.add(shadow(c));
     (coffeeG || shell).add(g); }
+  // v23: six more
+  const glow = new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false });
+  { const g = SUGG_G.fairy = new THREE.Group(), CU = R.CURTAIN, [wx0, wx1] = R.WINDOW_X, x0 = wx0 - CU.ext + 2, x1 = wx1 + CU.ext - 2, gs = [];
+    for (let x = x0; x <= x1; x += 6) { const sp = new THREE.SphereGeometry(0.0045, 6, 4), q = v3(x, CU.rail_y + CU.pole / 2 - 1.6 - 1.2 * Math.abs(Math.sin((x - x0) / 23)), CU.z + 2.6); sp.translate(q.x, q.y, q.z); gs.push(sp); }
+    g.add(new THREE.Mesh(mergeGeometries(gs), glow)); shell.add(g); }
+  { const g = SUGG_G.hanger = new THREE.Group(), CU = R.CURTAIN, x = R.WINDOW_X[0] + 34, z = CU.z + 1, yp = CU.rail_y - 72;
+    const cord = mat("#e9e1cf");
+    for (const a of [0, 2.1, 4.2]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.7, 4), cord);
+      c.position.copy(v3(x + Math.cos(a) * 4, yp + 46, z + Math.sin(a) * 4)); c.rotation.z = Math.cos(a) * 0.08; c.rotation.x = Math.sin(a) * 0.08; g.add(c); }
+    potPlant(g, x, yp, z, 7, 8, 3, rnd(81), mat("#c46c45"), leaf); shell.add(g); }
+  { const g = SUGG_G.trail = new THREE.Group(); potPlant(g, 172, 196, 22, 7, 10, 4, rnd(83), mat("#ece6da"), leaf); shell.add(g); }
+  { const g = SUGG_G.throw = new THREE.Group(), knit = reg(new THREE.MeshStandardMaterial({ color: "#efe7d8", roughness: 1, bumpMap: HESSIAN, bumpScale: 1.4 }));
+    const ze = R.SOFA.end;
+    ibox(g, 22, 52, ze - 46, 70, 2.2, 46, knit);                 // folded over the seat at the open end
+    ibox(g, 22, 18, ze - 0.2, 70, 36, 2.2, knit);                // and hanging over the end
+    shell.add(g); }
+  { const g = SUGG_G.pclamp = new THREE.Group(), y = R.PC_SHELF_TOP, z = -198, x = 13;
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.2, 20), mat("#e8e2d4")); base.position.copy(v3(x, y + 10, z)); g.add(shadow(base));
+    const shade = new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), reg(new THREE.MeshStandardMaterial({ color: "#f3e7cf", emissive: "#ffcf8a", emissiveIntensity: 0.6, roughness: 0.6 })));
+    shade.position.copy(v3(x, y + 19, z)); g.add(shadow(shade)); shell.add(g); }
+  floor("basket", "Seagrass basket (suggested)", 40, 40, 322, -70, g => {
+    const sea = mat("#b89a6c"), b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 28, 1, true), sea); sea.side = THREE.DoubleSide; b.position.y = 0.2; g.add(shadow(b));
+    lb(g, 0, 0, 0, 32, 1, 32, sea);
+    const roll = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), mat("#7a8a6a")); roll.scale.set(1, 0.6, 1); roll.position.y = 0.41; g.add(shadow(roll)); });
+}
+/* v23: the fold-down oak seat in the gap at the stair end (an option, geometry.WALL_SEAT), and your sofa's square ottoman */
+let seatUp = null, seatDown = null;
+function buildSeatAndPouf() {
+  const S_ = R.WALL_SEAT, W = R.W, [za, zb] = S_.z, w = za - zb;
+  const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
+  const steel = reg(new THREE.MeshStandardMaterial({ color: "#7c7a74", roughness: 0.5, metalness: 0.5 }));
+  seatUp = new THREE.Group(); seatDown = new THREE.Group();
+  for (const z of [zb + 6, za - 6 - 8.2]) {
+    ibox(seatUp, W - S_.fold, S_.h - 20, z, S_.fold, 30, 8.2, steel);
+    ibox(seatDown, W - S_.fold, S_.h - 32, z, S_.fold, 29, 8.2, steel);          // the bracket's wall plate, under the seat
+    const A = v3(W - 0.5, S_.h - 28, z + 4.1), B = v3(W - S_.d + 4, S_.h - S_.t, z + 4.1), dv = B.clone().sub(A);   // the bracket's arm: wall to the seat's front
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(dv.length(), 0.025, 0.025), steel);
+    arm.position.copy(A.clone().add(B).multiplyScalar(0.5)); arm.rotation.z = Math.atan2(dv.y, dv.x); seatDown.add(arm);
+  }
+  ibox(seatUp, W - S_.fold - S_.t, S_.h - 2, zb, S_.t, S_.d, w, oak);                  // folded: standing up against its brackets
+  ibox(seatDown, W - S_.d, S_.h - S_.t, zb, S_.d - 0.5, S_.t, w, oak);                // down: a seat at 46
+  shell.add(seatUp, seatDown);
+  // the ottoman: blue corduroy like the sofa, movable in Edit room
+  const P_ = R.SOFA_POUF, cord = reg(new THREE.MeshStandardMaterial({ color: R.SOFA_CORD[0], roughness: 0.9, bumpMap: CORD, bumpScale: 0.9 }));
+  const g = new THREE.Group(), body = new THREE.Mesh(new RoundedBoxGeometry(P_.w * M, (P_.h - 4) * M, P_.d * M, 4, 0.04), cord);
+  body.position.y = (P_.h - 4) / 2 * M + 0.04; g.add(shadow(body));
+  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) lb(g, x * (P_.w / 2 - 6), 0, z * (P_.d / 2 - 6), 4, 4, 4, reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.5 })));
+  movable("pouf", "Your sofa's ottoman", g, () => ({ x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }), P_.w, P_.d, [cord]);
 }
 function applySuggest() {
-  for (const k of ["art", "clock", "tray"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
+  if (seatUp) { seatUp.visible = S.seat === "up"; seatDown.visible = S.seat === "down"; }
+  for (const k of ["art", "clock", "tray", "fairy", "hanger", "trail", "throw", "pclamp"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
 }
 const CASE_FILLS = {}, cushM = [];
 const CUSHION_COLS = { rust: ["#c7643a", "#d9a441", "#efe7d8"], blues: ["#2f4a6e", "#9fb4cc", "#e9e3d3"], sage: ["#7a8a6a", "#efe7d8", "#b9a47f"] };
@@ -1787,7 +1848,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v22 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v23 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -1811,7 +1872,7 @@ const sameAsScene = () => LAYERS.every(k => (S.lv[k] ?? 0) === (SCENES[S.scene].
 function syncButtons() {
   press("site", S.site); press("dining", S.dining); press("scene", sameAsScene() ? S.scene : ""); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
-  press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs);
+  press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
   qsa("[data-sugg]").forEach(b => b.setAttribute("aria-pressed", String(!!S.sugg[b.dataset.sugg])));
@@ -1850,6 +1911,7 @@ root.addEventListener("click", e => {
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
   else if (d.chairs) S.chairs = d.chairs, applyState();
+  else if (d.seat) S.seat = d.seat, applyState();
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
   else if (b.id === "r3d-full") { const st = qs(".r3d-stage"); (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
   else if (b.id === "r3d-reset") { setView(S.view); return; }
@@ -1877,7 +1939,7 @@ function start() {
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
   gl.localClippingEnabled = true;
-  buildShell(); buildLights(); buildFurniture(); buildSuggest();
+  buildShell(); buildLights(); buildFurniture(); buildSuggest(); buildSeatAndPouf();
   bar1 = buildBar(R.BAR1, lights.bar1, "bar1");
   gl.shadowMap.enabled = S.quality === "hd";
   applyState();

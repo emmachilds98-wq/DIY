@@ -87,13 +87,30 @@ SUGGEST = [
     ("sidetable", "A round oak side table at the sofa's open end", "40 across × 50 tall", (40, 90),
      "Somewhere to put a drink down from the ottoman end, without the C-table over the seat.", "Beside the sofa's open end, towards the TV."),
     ("pouffe", "A knitted pouffe on the rug", "50 across × 40 tall", (30, 60),
-     "A footrest, a spare seat, and a third colour on the rug.", "On the rug in front of the chimney breast; it moves anywhere in Edit room."),
+     "A footrest, a spare seat, and a third colour on the rug.", "On the rug in front of the media wall, beside your ottoman; it moves anywhere in Edit room."),
     ("art", "A large framed print over the sofa's return", "80 × 55 in an oak frame", (40, 120),
      "The side wall over the sofa is the one big empty wall: one print, hung 30 above the back cushions.", "On the side wall over the sofa's return, past the oak run."),
     ("clock", "A slim wall clock over the door", "30 across", (20, 45),
      "Fits the 37 cm between the door's head and the ceiling.", "Centred over the door."),
     ("tray", "Coffee-table styling: an oak tray, two books and a candle", "a 40 × 26 tray", (20, 40),
      "Keeps the remotes' landing spot tidy and gives the coffee table a finished look.", "On the coffee table; it goes where the table goes."),
+]
+
+
+# v23, client: "add more suggestions with buttons to turn on and off of suggestions for the room"
+SUGGEST += [
+    ("fairy", "Warm fairy lights along the curtain pole", "about 4 m of warm-white micro LEDs on copper wire, USB", (12, 25),
+     "A soft line of light over the window in the evening, on the same timer as the grow lights.", "Wound along the curtain pole, end to end."),
+    ("hanger", "A macramé plant hanger from the pole", "a 75 cm hanger, a 15 cm pot, a trailing plant", (20, 40),
+     "Puts a plant in the window without taking sill space from the others.", "From the curtain pole near the window's sofa end, clear of the curtains when they're drawn back."),
+    ("trail", "A trailing pothos on the media wall's top shelf", "a 15 cm pot, trails about 60 cm", (12, 25),
+     "Softens the oak and the books, trailing down past the shelf's front edge.", "At the right-hand end of the top shelf, 196 up."),
+    ("throw", "A chunky knit throw over the sofa's open end", "about 130 × 170, cream", (30, 60),
+     "The ottoman end is where you put your feet up: a throw within reach, and a texture against the corduroy.", "Folded over the open end of the sofa's return."),
+    ("pclamp", "A mushroom lamp on the PC shelf", "about 22 across × 30 tall, warm glow", (30, 70),
+     "A low, warm light at the sofa's end for reading or gaming without the spots on.", "On the PC shelf, past the PC, 155 up."),
+    ("basket", "A seagrass basket for throws by the breast", "about 40 across × 40 tall", (20, 40),
+     "Somewhere for the throws and cushions to go when people sit at the table.", "In the corner by the chimney breast, clear of the door's swing; it moves in Edit room."),
 ]
 
 
@@ -106,5 +123,5 @@ def suggest_html():
     lo, hi = suggest_low_high()
     rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
                    for _, t, size, c, why, where in SUGGEST)
-    return (f"<p>Not in the plan or the costs: all six together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on.</p>"
+    return (f"<p>Not in the plan or the costs: all {len(SUGGEST)} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on.</p>"
             f"<table class='tight'><tr><th>Suggestion</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")

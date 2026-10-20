@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "22"
+VERSION = "23"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -95,15 +95,44 @@ STYLE = """<style>
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  /* v23, client: "make the page itself a better colour background and some customisations to make it more appealing": four page looks
+     (data-skin on the root, chosen in the header, kept on each device), a header band, and larger text. Card Room is the default. */
+  --bg: #e4eadd; --bg-top: #d3decb; --surface: #fbfaf5; --line: #ccd5c3; --chip: #dbe3d2;
+  --hero: #2f4a3c; --hero-ink: #f3f0e6; --hero-muted: #c9d6c6; --hero-chip: #ffffff1f; --hero-link: #f0c58e; --hero-note: #ffffff14;
 }
+:root[data-skin="oak"] { --bg: #f1ebe0; --bg-top: #e7dcc8; --surface: #fffdf8; --line: #ddd2bf; --chip: #ebe2d2; --note: #f7efe1;
+  --hero: #6b4a2b; --hero-ink: #fbf5ea; --hero-muted: #e6d3bb; --hero-chip: #ffffff22; --hero-link: #ffd9a8; --hero-note: #ffffff17; }
+:root[data-skin="blue"] { --bg: #e5e9f0; --bg-top: #d3dbe8; --surface: #fbfcfe; --line: #cbd3e0; --chip: #dce2ec; --note: #eef1f7;
+  --hero: #2c4466; --hero-ink: #f1f4fa; --hero-muted: #c7d2e5; --hero-chip: #ffffff1f; --hero-link: #f3c58f; --hero-note: #ffffff14; }
+:root[data-skin="plain"] { --bg: #eef0ea; --bg-top: #eef0ea; --surface: #ffffff; --line: #d4d9cd; --chip: #e3e7dd;
+  --hero: transparent; --hero-ink: #1d241e; --hero-muted: #5b6457; --hero-chip: #e3e7dd; --hero-link: #9a6634; --hero-note: #f5efe3; }
+:root.bigtext { font-size: 112.5%; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #151a16; --surface: #1d231e; --ink: #e7ebe3; --muted: #9ba596; --line: #2f3830; --oak: #d9a46c; --chip: #262d27; --note: #262219;
-  --ok: #8fd3a2; --ok-bg: #1f3325; --tight: #e8c07a; --tight-bg: #3a2f1a; --check: #9cc4ec; --check-bg: #1c2b3a; --no: #f0a59c; --no-bg: #3d211e; color-scheme: dark } }
+  --ok: #8fd3a2; --ok-bg: #1f3325; --tight: #e8c07a; --tight-bg: #3a2f1a; --check: #9cc4ec; --check-bg: #1c2b3a; --no: #f0a59c; --no-bg: #3d211e; color-scheme: dark;
+  --bg-top: #1b231d; --hero: #22352b; --hero-ink: #eef1ea; --hero-muted: #aebcad; --hero-chip: #ffffff1a; --hero-link: #e8b57c; --hero-note: #ffffff12; } }
 :root[data-theme="dark"] { --bg: #151a16; --surface: #1d231e; --ink: #e7ebe3; --muted: #9ba596; --line: #2f3830; --oak: #d9a46c; --chip: #262d27; --note: #262219;
-  --ok: #8fd3a2; --ok-bg: #1f3325; --tight: #e8c07a; --tight-bg: #3a2f1a; --check: #9cc4ec; --check-bg: #1c2b3a; --no: #f0a59c; --no-bg: #3d211e; color-scheme: dark }
-body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+  --ok: #8fd3a2; --ok-bg: #1f3325; --tight: #e8c07a; --tight-bg: #3a2f1a; --check: #9cc4ec; --check-bg: #1c2b3a; --no: #f0a59c; --no-bg: #3d211e; color-scheme: dark;
+  --bg-top: #1b231d; --hero: #22352b; --hero-ink: #eef1ea; --hero-muted: #aebcad; --hero-chip: #ffffff1a; --hero-link: #e8b57c; --hero-note: #ffffff12; }
+body { background: linear-gradient(180deg, var(--bg-top) 0, var(--bg) 520px) no-repeat, var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
 .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; display: grid; gap: 32px; }
-header { display: grid; gap: 10px; min-width: 0; }
+header { display: grid; gap: 10px; min-width: 0; background: var(--hero); color: var(--hero-ink); border-radius: 22px;
+  padding: clamp(18px, 3.2vw, 34px); position: relative; overflow: hidden; }
+:root[data-skin="plain"] header { padding: 0; border-radius: 0; }
+header::after { content: ""; position: absolute; inset: auto -60px -90px auto; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, var(--hero-chip), transparent 70%); pointer-events: none; }
+header .eyebrow, header .lede, header .caption { color: var(--hero-muted); }
+header a:not(.btn) { color: var(--hero-link); }
+header .notice { background: var(--hero-note); color: var(--hero-ink); }
+header .hlinks a.btn { background: var(--hero-chip); color: var(--hero-ink); }
+header .hlinks a.btn:first-child { background: var(--oak); color: var(--surface); }
+:root[data-skin="plain"] header .hlinks a.btn:not(:first-child) { background: var(--chip); color: var(--ink); }
+.skin { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13.5px; color: var(--hero-muted); position: relative; z-index: 1; }
+.skin button { font: inherit; font-size: 13px; border: 1px solid #ffffff33; background: transparent; color: var(--hero-ink); border-radius: 999px; padding: 4px 10px 4px 6px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.skin button[aria-pressed="true"] { background: var(--hero-chip); border-color: var(--hero-link); }
+.skin button i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid #ffffff55; }
+:root[data-skin="plain"] .skin button { border-color: var(--line); }
+.skin label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; margin-left: 6px; }
 h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.05; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
 .lede { color: var(--muted); margin: 0; max-width: 64ch; }
 .change { margin: 0; max-width: 72ch; background: var(--note); border-left: 3px solid var(--oak); border-radius: 6px; padding: 10px 14px; }
@@ -447,7 +476,8 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the records scene",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
-         "3d_suggest": "Suggested furniture and decor (v21), all on: a tall floor plant and a round side table at the sofa's open end, a pouffe on the rug, a print over the sofa, a clock over the door, a tray on the coffee table"}
+         "3d_suggest": "Suggested furniture and decor, all twelve on (v21, v23): a floor plant, side table and knit throw at the sofa's open end, a pouffe, a print over the sofa, a clock over the door, a coffee-table tray, fairy lights and a hanging plant at the window, a trailing plant on the top shelf, a mushroom lamp on the PC shelf, a seagrass basket",
+         "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
 IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
 IDEA_OPTS = {"cushions": {"decor": {"cushions": "rust"}}}   # v20: the cushions are a Decor choice, not an idea toggle
@@ -483,7 +513,7 @@ def suggest_block():
             f'<figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
             f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure>'
             f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start; the floor pieces move in Edit room. '
-            f'All six together would be about £{lo}–{hi}. Edit room\'s Add list also has a rattan armchair, an oak blanket ladder, an oak bench and an arc floor lamp (v21).</p>'
+            f'All {len(I.SUGGEST)} together would be about £{lo}–{hi}. Edit room\'s Add list also has a rattan armchair, an oak blanket ladder, an oak bench and an arc floor lamp (v21).</p>'
             f'<div class="opts">{rows}</div>'
             f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'B', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
 
@@ -523,9 +553,11 @@ def chairs_card():
     <ul><li>Its doors are hinged on the table's side and open right back (165°), so the chairs come straight out to the table.</li>
     <li>Open the table first, then take the chairs out; fold the table last.</li>
     <li class="minus">The open hooks (about £8–15) still work if you'd rather not build it.</li></ul></div></article>
-  <article class="opt noimg"><div class="ob"><span class="label">Chairs five and six · free</span><h3>The garage, or under the stairs</h3>
-    <ul><li>With the {CB['d']:.0f}-deep cupboard, the guests' two live in the garage, or flat under the stairs (about {2 * g.CHAIR_FOLDED[1]:.0f} cm stacked).</li>
-    <li class="minus">Inside the room the flight is only about {g.CHAIR_STORE['under_stairs']['h']:.0f} cm high: send a photo of the side by the door.</li></ul></div></article>
+  <article class="opt noimg"><div class="ob"><span class="label">More ways (v23) · options</span><h3>Behind the folded top, or a fold-down seat</h3>
+    <ul><li>Four more chairs can hang behind the folded top on a backboard {g.BEHIND_TOP['gap']:.0f} cm deeper: with the cupboard, all six (or eight) pack away.</li>
+    <li>A fold-down oak seat in the {g.CHAIR_STORE['stair_gap'][0] - g.CHAIR_STORE['stair_gap'][1]:.0f} cm gap at the stair end: a fifth place that's always there.</li>
+    <li class="minus">Behind the top, the table stands {g.BEHIND_TOP['gap']:.0f} cm further into the room. Under the stairs is brick: chairs five and six otherwise go in the garage.</li></ul>
+    <button type="button" class="btn" data-r3d='{json.dumps({"site": "B", "dining": "folded", "view": "dining", "seat": "down"})}'>See the seat in 3D</button></div></article>
 </div>"""
 
 
@@ -551,7 +583,7 @@ def options_card():
 
 def gallery3d():
     figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
-                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor", "3d_suggest")))
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor", "3d_suggest", "3d_seat")))
     return f'<div class="gallery">{figs}</div>'
 
 TABNAME = dict(TABS)
@@ -659,10 +691,12 @@ def page(site=False):
     q_items = "\n".join(
         f'<li class="q" id="q-{i}" data-q="{i}"><h3><span class="n">{n:02d}</span><span>{html.escape(q)}</span></h3>'
         f'<p>{html.escape(w)}</p><p><b>How:</b> {html.escape(h)}</p>'
-        f'<label class="label" for="a-{i}">Your answer</label><textarea id="a-{i}" rows="2" placeholder="Type here"></textarea>'
+        # v23, client: "take off the questions input area for me": the answer box, Save and photo upload are hidden (the page's
+        # script still finds them, so saved answers and the deck's db stay as they were); answers come in a message instead
+        f'<div class="qin" hidden><label class="label" for="a-{i}">Your answer</label><textarea id="a-{i}" rows="2" placeholder="Type here"></textarea>'
         f'<div class="row"><button class="btn primary save" type="button" data-q="{i}">Save</button>'
         f'<label class="upl" hidden>Add a photo<input type="file" accept="image/*" multiple data-q="{i}" id="f-{i}"></label>'
-        f'<span class="st" aria-live="polite"></span></div><div class="photos"></div></li>'
+        f'<span class="st" aria-live="polite"></span></div><div class="photos"></div></div></li>'
         for n, (i, q, w, h, ph) in enumerate(QUESTIONS, 1))
     ph_html = []
     for p in phases:
@@ -716,6 +750,8 @@ def page(site=False):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 {STYLE}
+<script>(() => {{ try {{ const d = document.documentElement, k = localStorage.getItem("mw23-skin"); d.dataset.skin = k || "card";
+  if (localStorage.getItem("mw23-big") === "1") d.classList.add("bigtext"); }} catch (e) {{ document.documentElement.dataset.skin = "card"; }} }})();</script>
 <div class="wrap">
   <header>
     <p class="eyebrow">Portsmouth Close · living room · v{VERSION} · 20 Oct 2026</p>
@@ -723,6 +759,7 @@ def page(site=False):
     {('<p class="notice">This is the copy on GitHub Pages: your ticks, amounts and answers are kept on this device only. To share them with each other, use <a href="' + DECK_URL + '" target="_blank" rel="noopener">the plan page on Claude</a>.</p>') if site else ""}
     <p class="lede">The whole plan in one place: the artisan oak wall in Card Room Green, the flip-top dining table (by the stairs now, or on the breast), the network and power, step-by-step build instructions and the buy list. Walk round it all in the <a href="#room" data-go="room">3D room</a>. {"Ticks, amounts and answers save for both of you." if not site else ""}</p>
     {pdfs}
+    <div class="skin" role="group" aria-label="Page look"><span>Page look</span>{SKIN_BTNS}<label for="big-text"><input type="checkbox" id="big-text"> Larger text</label></div>
     {"" if site else '<p class="caption">This page is also on <a href="' + PAGES + '" target="_blank" rel="noopener">your GitHub Pages site</a> (ticks there stay on that device).</p>'}
   </header>
   <nav class="tabs" aria-label="Plan sections"><div class="tl" role="tablist">{tabs}</div></nav>
@@ -732,7 +769,7 @@ def page(site=False):
       <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_room" alt="The whole room in 3D, from above the window side, cut away" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
       <div class="dcard"><span class="label">Build</span><strong id="d-steps">0 of {len(steps())}</strong><span class="dbar"><i id="d-steps-bar"></i></span><a class="caption" id="d-next" href="#build" data-go="build">Start with step 1</a></div>
       <div class="dcard"><span class="label">Buy list</span><strong id="d-buy">0 bought</strong><span class="dbar"><i id="d-buy-bar"></i></span><span class="caption" id="d-paid">\u00a30 paid so far, of about \u00a3{money(lo_tot, hi_tot)}</span></div>
-      <div class="dcard"><span class="label">Your answers</span><strong id="d-q">0 of {len(QUESTIONS)}</strong><span class="dbar"><i id="d-q-bar"></i></span><a class="caption" href="#questions" data-go="questions">Answer what we still need</a></div>
+      <div class="dcard"><span class="label">Still to tell us</span><strong id="d-q">{len(QUESTIONS)} questions</strong><span class="dbar" hidden><i id="d-q-bar"></i></span><a class="caption" href="#questions" data-go="questions">See what we still need</a></div>
     </div>
     <div class="block"><div class="qhead"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
       <p class="caption">Same table, same build. Since v16 it lives on the wall going up the stairs, under your 2 m shelf (B, the default); the chimney breast (A) is the alternative.</p>
@@ -887,14 +924,14 @@ def page(site=False):
   </section>
 
   <section class="panel" id="questions" role="tabpanel" aria-labelledby="tb-questions" hidden>
-    <div class="qhead"><h2 class="ptitle">What we still need from you</h2><div class="meter"><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
-    <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Answers saved here reach both of you and the next round of the plan. A photo is often quicker than words.</p>
+    <div class="qhead"><h2 class="ptitle">What we still need from you</h2><div class="meter" hidden><span class="bar"><i id="q-bar"></i></span><span id="q-count">0 of {len(QUESTIONS)} answered</span></div></div>
+    <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Tell us in your next message: a photo is often quicker than words.</p>
     <p class="notice" id="q-local" hidden>Answers can't be saved for both of you from this view: they're kept on this device. When you're done, use Copy all answers and paste them into a message.</p>
     <p class="notice" id="q-ro" hidden>You can read the answers here but not change them. Ask Emma to give you Contributor access in the Share menu.</p>
     <ul class="qs">
 {q_items}
     </ul>
-    <div class="row"><button class="btn" id="copy-all" type="button">Copy all answers</button><span class="caption" id="copy-st" aria-live="polite"></span></div>
+    <div class="row" hidden><button class="btn" id="copy-all" type="button">Copy all answers</button><span class="caption" id="copy-st" aria-live="polite"></span></div>
     <textarea id="copy-box" class="caption" rows="6" hidden readonly aria-label="All answers as text"></textarea>
   </section>
 
@@ -1031,7 +1068,7 @@ function dash() {{
   const paid = $$("#tracker .paid input").reduce((a, i) => a + (parseFloat(i.value) || 0), 0);
   $("#d-paid").textContent = "\u00a3" + Math.round(paid).toLocaleString("en-GB") + " paid so far";
   const qa = $$(".q.answered").length;
-  $("#d-q").textContent = qa + " of " + DATA.q.length + " answered";
+  $("#d-q").textContent = DATA.q.length + " questions";   // v23: no answer boxes
   $("#d-q-bar").style.width = (100 * qa / Math.max(1, DATA.q.length)) + "%";
 }}
 let dashQ = false;
@@ -1068,7 +1105,7 @@ function write(path, body) {{
   return chains[path];
 }}
 function onWriteError(e, stEl) {{
-  if (e && e.code === "invalid_argument") {{ readOnly = true; $("#q-ro").hidden = false; lockInputs(); }}
+  if (e && e.code === "invalid_argument") {{ readOnly = true; lockInputs(); }}
   if (stEl) {{ stEl.textContent = e && e.code === "quota_exceeded" ? "The page's storage is full; tell Claude." : "Couldn't save. Try again in a moment."; stEl.className = "st err"; }}
 }}
 function lockInputs() {{ $$(".q textarea, .q .save, .items input, .sdone input").forEach(el => el.disabled = true); $$(".upl").forEach(el => el.hidden = true); }}
@@ -1255,7 +1292,7 @@ paintSteps();
   const [d, u, a] = await Promise.all([use("db"), use("user"), use("assets")]);
   user = u;
   if (!d) {{
-    $("#q-local").hidden = false;
+    $("#q-local").hidden = true;   // v23: no answer boxes, so no notice about where answers are kept
     $("#t-note").textContent = "Each phase says which build step it's needed for. Ticks and amounts are kept on this device only from this view.";
     $("#s-note").textContent = "Tick each step when it's done; from this view the ticks are kept on this device only.";
     return;
@@ -1264,7 +1301,7 @@ paintSteps();
   try {{ myId = u ? await u.id() : null; }} catch (e) {{ myId = null; }}
   let canWrite = null;
   try {{ canWrite = u ? await u.can("data.write") : null; }} catch (e) {{}}
-  if (canWrite === false) {{ readOnly = true; $("#q-ro").hidden = false; lockInputs(); }}
+  if (canWrite === false) {{ readOnly = true; lockInputs(); }}
   else if (a) {{ assets = a; $$(".upl").forEach(el => el.hidden = false); }}
   $$(".q .st").forEach(st => {{ if (st.textContent === "Kept on this device") st.textContent = "Not saved yet"; }});
   db.collection("answers").onSnapshot(snap => {{
@@ -1319,7 +1356,21 @@ paintSteps();
 }})();
 </script>
 <script>""" + STEP_JS + """</script>
+<script>""" + SKIN_JS + """</script>
 """)
+
+
+# v23: the page looks (the header's "Page look" buttons) and larger text, kept on each device
+SKINS = [("card", "Card Room", "#2f4a3c"), ("oak", "Oak & linen", "#6b4a2b"), ("blue", "Sofa blue", "#2c4466"), ("plain", "Plain", "#eef0ea")]
+SKIN_BTNS = "".join(f'<button type="button" data-skin="{k}" aria-pressed="false"><i style="background:{c}"></i>{n}</button>' for k, n, c in SKINS)
+SKIN_JS = r"""(() => {
+  const d = document.documentElement, bs = [...document.querySelectorAll(".skin [data-skin]")], big = document.getElementById("big-text");
+  const sync = () => bs.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.skin === (d.dataset.skin || "card"))));
+  bs.forEach(b => b.addEventListener("click", () => { d.dataset.skin = b.dataset.skin; try { localStorage.setItem("mw23-skin", b.dataset.skin); } catch (e) {} sync(); }));
+  if (big) { big.checked = d.classList.contains("bigtext");
+    big.addEventListener("change", () => { d.classList.toggle("bigtext", big.checked); try { localStorage.setItem("mw23-big", big.checked ? "1" : "0"); } catch (e) {} }); }
+  sync();
+})();"""
 
 
 # v22: the build steps one at a time (the plan's review: 67 phone screens long). The head always shows; one step opens; "Next step"

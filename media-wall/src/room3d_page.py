@@ -120,7 +120,9 @@ DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return
   top(); addEventListener("resize", top);
 })();"""
 SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table", "pouffe": "Knitted pouffe", "art": "Print over the sofa",
-              "clock": "Clock over the door", "tray": "Coffee-table tray"}   # v21: the buttons' words for ideas.SUGGEST
+              "clock": "Clock over the door", "tray": "Coffee-table tray",
+              "fairy": "Fairy lights on the pole", "hanger": "Hanging plant in the window", "trail": "Trailing plant, top shelf",
+              "throw": "Knit throw on the sofa", "pclamp": "Mushroom lamp, PC shelf", "basket": "Seagrass basket"}   # v23   # v21: the buttons' words for ideas.SUGGEST
 # v20: decor to try in the 3D room (room3d.js S.decor; the keys match its RUG_LOOKS, CUSHION_COLS, CURTAIN_COLS, the case's PRESETS, CASE_FRAMES)
 DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatweave"), ("blue", "Deep blue"), ("stripes", "Sage stripes"), ("none", "No rug")]),
          ("cushions", "Sofa cushions", [("none", "None"), ("rust", "Rust and ochre"), ("blues", "Blues"), ("sage", "Sage and cream")]),
@@ -186,6 +188,7 @@ def controls():
             seg("chairs", [("cupboard", "Chair cupboard, shut"), ("open", "Chair cupboard, open"), ("hooks", "Open hooks instead"), ("away", "In the garage")], "Chairs, with the table folded"),
             # v18: your plant stand and record shelf, two layouts; in "Edit room" you drag the lamp, and tap the ceiling or the skirting to paint it
             seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and vinyl stand"),
+            seg("seat", [("off", "Not there"), ("up", "Folded"), ("down", "Down")], "Fold-down seat at the stair end (an option, v23)"),
             seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers")]),
         "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
         "look": seg("paint", paints, "Wall paint (or tap a wall in Edit room)", picker("r3d-custom", "#899081", "Any colour")) + decor_g,

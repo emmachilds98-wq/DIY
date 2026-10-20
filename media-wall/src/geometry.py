@@ -32,6 +32,7 @@ BREAST_X = (ALC_W, ALC_W + BREAST_W)      # 186 to 303.5
 BREAST_D_WEST = 39.0                      # 390 on its west side
 RECESS_W = 104.5      # breast to the stair box, about (to confirm)
 STAIR_X = (BREAST_X[1] + RECESS_W, ROOM_W)  # 408 .. 467, the stair box in the south-west corner (to confirm)
+STAIR_STRING = 24.0                          # v23: the closed string's board, along the rake; below it the brick side wall (client)
 STAIR_D = 79.0        # from the alcove's back-wall line into the room (to confirm)
 STAIRS_UP = True      # v13, client: the stairs by the door go UP to the first floor (v12 drew them going down)
 STAIR_RISE, STAIR_GOING = 19.5, 22.0      # typical UK domestic stair (Approved Document K: rise up to 22, going at least 22)
@@ -235,7 +236,14 @@ SCREEN_FROM_WINDOW = ROOM_D - (ALC_D - TV_PANEL_Z[0])   # 335
 VIEW_DIST = SCREEN_FROM_WINDOW - EYES_FROM_WINDOW        # 265
 CHAISE_EYES_Z = CHAISE_END_Z - 60.0        # sitting up at the chaise's end
 SOCKET = dict(x=0.0, z=-22.0, y=30.0)      # on the east wall, just in front of bay 1
-SOCKET2 = dict(x=0.0, z=-205.0, y=30.0)    # v13.6: an existing socket by the sofa, IF there is one (rears); no new socket
+# v23, client: "switchs are 1 in the corner in front of the left xbox game drawer. 2 behind the sofas shorter side slightly to the left
+# and down of the PC. and 2 behind the plant shelf when its in the corner near the lamp not on chimney": the room's sockets (switched,
+# drawn at socket height, 30 up). The first is SOCKET above (one, which the plan swaps for a double); the other two are doubles.
+SOCKET2 = dict(x=0.0, z=-140.0, y=30.0)    # behind the sofa's return, a little nearer the media wall than the PC (-134 .. -179): the rears, the PC
+SOCKET3 = dict(x=WINDOW_X[1] + 44.0, z=WINDOW_Z, y=30.0)   # 352: on the window wall behind the plant stand (layout A), near the lamp
+SOCKETS = [dict(SOCKET, gang=1, wall="x", name="in the corner in front of the left Xbox game drawer"),
+           dict(SOCKET2, gang=2, wall="x", name="behind the sofa's short side, left of and below the PC"),
+           dict(SOCKET3, gang=2, wall="z", name="behind the plant stand in the window corner, near the lamp")]
 
 
 def summary():
@@ -449,3 +457,13 @@ CHAIR_STORE = dict(
                   t=1.8, door=1.8, back=0.6, plinth=3.0, shelf_y=93.0, lip=3.0, hinge="table"),
     under_stairs=dict(x=STAIR_X, z=(ALC_D - STAIR_D + 6.0, BREAST_D_WEST), h=round((BREAST_D_WEST - (ALC_D - STAIR_D + 6.0)) // STAIR_GOING + 1) * STAIR_RISE),
 )
+
+
+# ---------------------------------------------------------------- v23 (20 Oct): more ways to build the chairs in; the sofa's ottoman
+# client: "explore any further ways we can build the chairs into the table build". Two that go with the chair cupboard:
+# four folded chairs hung behind the folded top, on a backboard 22 deeper (two side by side, two deep, on two hooks), a 10 cm oak
+# upstand under the folded top hiding their feet; and a fold-down oak seat on two folding bench brackets in the 41 gap at the stair end.
+BEHIND_TOP = dict(gap=22.0, hook=3.0, upstand=10.0, rail=RAIL[2] + 21.0)
+WALL_SEAT = dict(w=38.0, d=33.0, t=2.7, h=46.0, fold=5.0, z=(CHAIR_STORE["stair_gap"][0] - 1.5, CHAIR_STORE["stair_gap"][1] + 1.5))
+# client: "the sofa has a ottoman poufe type thing that is the size of a chair on the sofa, its square, blue corduroy matching the sofa"
+SOFA_POUF = dict(w=75.0, d=75.0, h=44.0, x=(200.5, 275.5), z=(-195.0, -120.0))   # on the rug beside the coffee table, a footrest
