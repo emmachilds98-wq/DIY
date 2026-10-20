@@ -207,6 +207,8 @@ def defs():
     <stop offset="0" stop-color="{G_LEFT0}"/><stop offset="1" stop-color="{G_LEFT1}"/></linearGradient>
   <linearGradient id="rightwall" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="{G_LEFT1}"/><stop offset="1" stop-color="{G_LEFT0}"/></linearGradient>
+  <pattern id="brick" width="22" height="15" patternUnits="userSpaceOnUse">
+    <rect width="22" height="15" fill="#9d5b3f"/><path d="M0 7.5H22M0 15H22M11 0V7.5M0 7.5V15M22 7.5V15" stroke="#c9b9a3" stroke-width="1.1"/></pattern>
   <linearGradient id="backwall" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#2c5643"/><stop offset="1" stop-color="#2a5340"/></linearGradient>
   <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
@@ -910,10 +912,8 @@ def west_end(sk):
     near.append(quad_front(hx0, CEIL, far_z, sx1 - hx0, up - CEIL, "#244a38"))                               # the far wall, painted
     # the living room's ceiling stops here: its edge shows as a shallow lip (the floor's depth) where it cuts off the view up the stairs
     near.append(quad_front(hx0, CEIL, sz + 0.1, sx1 - hx0, 22.0, "#33604a"))
-    for k_ in range(9):                                                                                       # landing balusters, seen from below
-        xx = hx0 + 4 + k_ * (sx1 - hx0 - 8) / 8
-        near.append(box(xx, CEIL + 22, sz + 2, 2.6, 88, 2.6, "#c79a6b", "#d8ad80", "#a37a50"))
-    near.append(box(hx0, CEIL + 108, sz + 1, sx1 - hx0, 5, 5, "#b07a46", "#c89060", "#8a5c33"))               # its handrail
+    # v23, client: "at the top of the stairs you have a random placed bannister end that floats above the room, remove that": the
+    # landing's balusters and handrail (drawn above the ceiling, with no landing floor in the 3D room) are gone
     near.append('</g>')
     near.append(_line(ceil_hole[0], ceil_hole[1], "#264c3a", 1.4))
     # the flight: oak treads on risers in the wall colour, the first riser 6 cm behind the stair's front edge
@@ -924,13 +924,19 @@ def west_end(sk):
         tgt = far if z0 >= zb else near
         tgt.append(box(sx0, 0, z0, sx1 - sx0, y1 - 2.2, going, "#2d5a46", "#c48c57", "#244a38"))     # v17: ends under the tread (no z-fight)
         tgt.append(box(sx0, y1 - 2.2, z0 - 1.5, sx1 - sx0, 2.2, going + 1.5, WOOD, WOOD_T, WOOD_S))
-    # the closed string on the door side, raking up with the flight
+    # the closed string on the door side, raking up with the flight. v23, client: "i think its plasterboard under the stairs and bricks on
+    # the side wall that support it": the string is a 24 cm board along the rake, and below it the flight stands on a brick side wall
+    # (url(#brick): a brick pattern here, a brick texture in the 3D room); the plasterboard underside is out of sight in the hall
     za = sz + 6
     ry = lambda z: max(rise, (z - za) / going * rise)
+    sb = lambda z: max(0.0, ry(z) - G.STAIR_STRING)
     def string(z1, z2):
-        return poly([P(sx0 - 0.6, 0, z1), P(sx0 - 0.6, 0, z2), P(sx0 - 0.6, ry(z2), z2), P(sx0 - 0.6, ry(z1), z1)], "#9c6a3f")   # v17: 0.6 off the risers
-    far.append(string(zb, far_z))
-    near.append(string(za, zb))
+        return poly([P(sx0 - 0.6, sb(z1), z1), P(sx0 - 0.6, sb(z2), z2), P(sx0 - 0.6, ry(z2), z2), P(sx0 - 0.6, ry(z1), z1)], "#9c6a3f")   # v17: 0.6 off the risers
+    def brick(z1, z2):
+        return poly([P(sx0 - 0.5, 0, z1), P(sx0 - 0.5, 0, z2), P(sx0 - 0.5, sb(z2), z2), P(sx0 - 0.5, sb(z1), z1)], "url(#brick)")
+    zbr = za + G.STAIR_STRING / rise * going        # where the string's underside leaves the floor
+    far.append(brick(zb, far_z)); far.append(string(zb, far_z))
+    near.append(brick(zbr, zb)); near.append(string(za, zb))
     # the banister (v17, client: "bannister could be improved"): a solid raking handrail 6.5 wide × 5.5 deep at 90 over the nosings, a base
     # rail capping the string, 3.2 cm square balusters at 10.5 centres (a 10 cm sphere mustn't pass: Approved Document K), and 9 × 9 newels
     # with a capped, pyramid top at the foot (the wall side has no rail or newel). Every face is a convex quad, so the 3D room builds it cleanly.
@@ -2146,13 +2152,24 @@ def pendant():
 
 
 def wall_socket():
-    """The room's socket: on the east wall just in front of bay 1, about 30 cm up; becomes a double."""
+    """The room's sockets (v23, the client's three: geometry.SOCKETS), about 30 cm up. The one in front of bay 1 becomes a double
+    and carries the media wall's leads; the doubles behind the sofa's return and behind the plant stand are drawn as they are."""
     o = []
-    zc, yc = G.SOCKET["z"], G.SOCKET["y"]
-    z1, z2, y1, y2 = zc - 7.3, zc + 7.3, yc - 4.3, yc + 4.3
-    o.append(poly([P(0.4, y1, z1), P(0.4, y1, z2), P(0.4, y2, z2), P(0.4, y2, z1)], "#f4f2ed", 'stroke="#c9c5bc" stroke-width="1"'))
+    for so in G.SOCKETS:
+        xc, zc, yc, n = so["x"], so["z"], so["y"], so["gang"]
+        half = 7.3 if n == 2 or so is G.SOCKETS[0] else 4.3
+        y1, y2 = yc - 4.3, yc + 4.3
+        if so["wall"] == "x":      # on the side wall (x = 0), facing the room
+            o.append(poly([P(0.4, y1, zc - half), P(0.4, y1, zc + half), P(0.4, y2, zc + half), P(0.4, y2, zc - half)], "#f4f2ed", 'stroke="#c9c5bc" stroke-width="1"'))
+            for zz in ((zc - 3.5, zc + 3.5) if half > 5 else (zc,)):
+                o.append(poly([P(0.9, yc - 2.5, zz - 1.6), P(0.9, yc - 2.5, zz + 1.6), P(0.9, yc + 2.0, zz + 1.6), P(0.9, yc + 2.0, zz - 1.6)], "#e9e6df", 'stroke="#b9b4aa" stroke-width="0.8"'))
+        else:                      # on the window wall (z = WINDOW_Z), facing the room
+            zf = zc + 0.4
+            o.append(poly([P(xc - half, y1, zf), P(xc + half, y1, zf), P(xc + half, y2, zf), P(xc - half, y2, zf)], "#f4f2ed", 'stroke="#c9c5bc" stroke-width="1"'))
+            for xx in (xc - 3.5, xc + 3.5):
+                o.append(poly([P(xx - 1.6, yc - 2.5, zf + 0.5), P(xx + 1.6, yc - 2.5, zf + 0.5), P(xx + 1.6, yc + 2.0, zf + 0.5), P(xx - 1.6, yc + 2.0, zf + 0.5)], "#e9e6df", 'stroke="#b9b4aa" stroke-width="0.8"'))
+    zc, yc = G.SOCKET["z"], G.SOCKET["y"]       # the media wall's two leads from the first socket
     for zz in (zc - 3.5, zc + 3.5):
-        o.append(poly([P(0.9, yc - 2.5, zz - 1.6), P(0.9, yc - 2.5, zz + 1.6), P(0.9, yc + 2.0, zz + 1.6), P(0.9, yc + 2.0, zz - 1.6)], "#e9e6df", 'stroke="#b9b4aa" stroke-width="0.8"'))
         a_, b_, c_ = P(1.2, yc - 2.5, zz), P(1.6, 6, zz + 2), P(1.2, 3, G.BASE_FRONT_Z - 0.5)
         o.append(f'<path d="M{a_[0]:.1f},{a_[1]:.1f} Q{b_[0]:.1f},{b_[1]:.1f} {c_[0]:.1f},{c_[1]:.1f}" stroke="#f0eee8" stroke-width="2.6" fill="none"/>')
     return "\n".join(o)
@@ -2511,6 +2528,7 @@ def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="j
     o.append(dining_chairs())
     o.append(services(numbered))
     o.append(sofa())
+    o.append(sofa_pouf())
     o.append(pendant())
     if with_dims:
         o.append(dimensions())
@@ -2535,6 +2553,15 @@ def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="j
 CAM_SIDE = (-125.0, 1300.0, 3.6, 60)   # eye along the wall (z), x of the wall at px, px/cm, shift
 SIDE_EYE_Y = 125.0
 SOFA_COL = ("#8c8276", "#a0968a", "#776e63")
+
+
+def sofa_pouf():
+    """v23, client: "the sofa has a ottoman poufe type thing that is the size of a chair on the sofa, its square, blue corduroy
+    matching the sofa": on the rug beside the coffee table."""
+    P_ = G.SOFA_POUF
+    C, T, SD = G.SOFA_CORD[0], G.SOFA_CORD[1], G.SOFA_CORD[2]
+    return "\n".join([box(P_["x"][0] + 4, 0, P_["z"][0] + 4, P_["w"] - 8, 4, P_["d"] - 8, "#111214"),
+                      box(P_["x"][0], 4, P_["z"][0], P_["w"], P_["h"] - 4, P_["d"], C, T, SD)])
 
 
 def sofa_solid():
@@ -2759,20 +2786,20 @@ def all_svgs():
     six_sub = ("The flip-top open on its gate leg, 110 × 160, still on the wall · both spot bars · three a side" if G.TABLE_STYLE == "fliptop" else
                "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end")
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v22, the table by the stairs", sub))
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v23, the table by the stairs", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
     out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("Option A: the flip-top on the chimney breast, set for four · v22", "Flip-top gate-leg oak table, still on the wall · " + sub))
+                                   label=("Option A: the flip-top on the chimney breast, set for four · v23", "Flip-top gate-leg oak table, still on the wall · " + sub))
     out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
-                                  label=("Option A: the flip-top on the breast, set for six · v22", six_sub))
+                                  label=("Option A: the flip-top on the breast, set for six · v23", six_sub))
     dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25, slim_open=30)
-    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v22", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
+    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v23", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
     out["v13_m_join"] = build(with_dims=False, style="joinery", measure="join")
     out["v13_m_four"] = build(with_dims=False, style="joinery", dining="four", measure="four")
     out["v13_m_six"] = build(with_dims=False, style="joinery", dining="six", measure="six")
     out["v13_m_drawers"] = build(**dkw, measure="drawers")
     out["v13_m_side"] = build_side(measure=True)
-    out["v13_side"] = build_side(label=("The PC side wall · v22", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
+    out["v13_side"] = build_side(label=("The PC side wall · v23", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
         lab = name + (" · chosen" if k == MAIN_PAINT else "")

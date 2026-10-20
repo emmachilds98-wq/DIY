@@ -47,8 +47,9 @@ SHOTS = [
     ("3d_decor", dict(view="door", site="B", dining="folded", scene="everyday", decor=dict(rug="stripes", cushions="rust", curtains="linen")),
      "DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - everyday evening"),
     # v21: the suggested furniture and decor, all on
-    ("3d_suggest", dict(view="door", site="B", dining="folded", scene="everyday", sugg={"floorplant": True, "sidetable": True, "pouffe": True, "art": True, "clock": True, "tray": True}),
-     "SUGGESTED furniture and decor, all on - floor plant, side table, pouffe, print, clock, coffee-table tray - everyday evening"),
+    ("3d_suggest", dict(view="door", site="B", dining="folded", scene="everyday", sugg={"floorplant": True, "sidetable": True, "pouffe": True, "art": True, "clock": True, "tray": True, "fairy": True, "hanger": True, "trail": True, "throw": True, "pclamp": True, "basket": True}),
+     "SUGGESTED furniture and decor, all twelve on - everyday evening"),
+    ("3d_seat", dict(view="dining", site="B", dining="folded", scene="everyday", seat="down"), "OPTION - the fold-down seat at the stair end, down - everyday evening"),
 ]
 
 
@@ -76,15 +77,15 @@ def run(test=False, only=None):
         for stem, opts, title in SHOTS:
             if only and only not in stem:
                 continue
-            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {}, "sugg": {}}, **opts, quality="hd"))
+            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {}, "sugg": {}, "seat": "off"}, **opts, quality="hd"))
             url = pg.evaluate(f"() => window.R3D.still({w}, {h})")
             im = Image.open(io.BytesIO(base64.b64decode(url.split(",", 1)[1]))).convert("RGB")
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v22 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v23 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v22_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v23_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])

@@ -2,14 +2,20 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v22
+## Media wall and dining wall, v23
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the flip-top oak dining table on the stairs wall under your shelf (the default since v16) or on the chimney breast. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v22%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v23%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v22** (the first round of the optimisation plan: quicker to use)
+**New in v23** (more ways to build the chairs in, the room as it really is, page looks, more suggestions)
+- **Chairs built into the table:** besides the chair cupboard, four chairs can hang behind the folded top on a deeper backboard, out of sight, and a fold-down oak seat can go in the gap at the stair end: a fifth place that's always there. Both are options, drawn to scale and checked.
+- **The room as it is:** the stairs stand on a brick side wall (plasterboard beneath), your sofa's square blue corduroy ottoman is on the rug, and your sockets are where they are (the rear speakers now run from the double behind the sofa). The floating banister end at the top of the stairs is gone.
+- **The page:** a new colour, four page looks to choose from (Card Room, Oak & linen, Sofa blue, Plain) and larger text; the questions are a plain list now.
+- **Six more suggestions** in the 3D room, each on or off: fairy lights on the curtain pole, a hanging plant in the window, a trailing plant on the top shelf, a knit throw on the sofa, a mushroom lamp on the PC shelf and a seagrass basket.
+
+**v22** (the first round of the optimisation plan: quicker to use)
 - **The 3D room's controls are in five drawers** under the picture: Views, Layout, Lights, Look and Extras, one open at a time; on a phone the picture stays in sight while you choose.
 - **Your picks** (in Extras): every idea, suggestion and decor choice you've switched on, with the rough cost added up, to copy as a note or save for the next round.
 - **Build steps one at a time**, opening on the first one not done, with a Next step button (or all open, to read straight through).
@@ -52,7 +58,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Layout A: your plant stand in the window corner | Layout A: your vinyl stand on the breast |
 |---|---|
-| ![Plant stand](media-wall/out/Media%20wall%20v22%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v22%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
+| ![Plant stand](media-wall/out/Media%20wall%20v23%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v23%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
 
 **New in v17** (the room finished round your notes)
 - **The sofa's open end** is a proper ottoman end: the seat wraps round to the back, the back stops 20 cm short, and the sofa stands 13 cm off the window wall, clear of the curtains.
@@ -141,9 +147,9 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Option A: the flip-top on the breast, set for six | The PC side wall |
 |---|---|
-| ![Six at the table](media-wall/out/Media%20wall%20v22%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v22%20-%20the%20PC%20side%20wall%20(HD).png) |
+| ![Six at the table](media-wall/out/Media%20wall%20v23%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v23%20-%20the%20PC%20side%20wall%20(HD).png) |
 
-![Numbered key](media-wall/out/Media%20wall%20v22%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
+![Numbered key](media-wall/out/Media%20wall%20v23%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -162,7 +168,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v22%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v23%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)

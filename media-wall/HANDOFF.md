@@ -1,9 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v23.md`** (it follows `media-wall/plans/optimisation_v21.html`, the client-facing optimisation
-  plan, published at https://claude.ai/artifact/P7D81ZQuuVKBvh8hX2k5w6 and updated for v22). v22 is built and merged (round 16, below).
-  Still open with the client: the chair cupboard (four or six), the window corner's floor gap, the stairs photo, the plan's three questions.
+- **Next agent: `media-wall/UPGRADE_PLAN_v24.md`.** v23 is built and merged (round 17, below). Waiting on the client: which ways to
+  keep the chairs (the cupboard for four or six; yes or no to four behind the folded top and to the fold-down seat), the ottoman's height,
+  the window corner's floor gap, and the optimisation plan's three questions. The client-facing optimisation plan is
+  `media-wall/plans/optimisation_v21.html` (https://claude.ai/artifact/P7D81ZQuuVKBvh8hX2k5w6).
 - **The shared deck works from this account again (round 13):** publishing to 71ff succeeded (v16 → v19). Its db (the saved answers)
   still can't be read from Claude Code ("shared with you from another organization"), so ask the client to paste answers if you need them.
 - **Branch:** round 13 ran on `claude/eloquent-johnson-pgmnud`, restarted from `main`; any session's branch works: restart it from `main` and open a PR into `main`.
@@ -15,13 +16,42 @@
   with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **v22: first upload the pictures it doesn't
   hold yet** (`src/deck_assets_todo.txt`, written by build_viewer) with the Artifact tool's `asset: true` and `file_paths` (25 a call)
   to that url, record each `{name: {sha, url}}` in `src/deck_assets.json` (sha256 of the file), and run `python3 build_viewer.py`
-  again: the inline copy then links them (about 2 MB) and inlines only what's missing. **Read the client's answers first:** ArtifactData
+  again: the inline copy then links them (about 2 MB) and inlines only what's missing.
+  If an upload is refused as a "cpio archive" (a false sniff, v23), re-save that webp at quality 85 and upload it again. **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 27 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 28 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 17: v23 (chairs into the table, the room as it is, page looks, more suggestions)
+- Client: "make the page itself a better colour background and some customisations to make it more appealing. i'd like you to explore
+  any further ways we can build the chairs into the table build. at the top of the stairs you have a random placed bannister end that
+  floats above the room, remove that. unsure about material under stairs i think its plasterboard under the stairs and bricks on the
+  side wall that support it. the sofa has a ottoman poufe type thing that is the size of a chair on the sofa, its square, blue corduroy
+  matching the sofa. switchs are 1 in the corner in front of the left xbox game drawer. 2 behind the sofas shorter side slightly to the
+  left and down of the PC. and 2 behind the plant shelf when its in the corner near the lamp not on chimney. take off the questions
+  input area for me. then add more suggestions with buttons to turn on and off of suggestions for the room. review anything else".
+- **Banister:** render.py `west_end` no longer draws the landing's balusters and handrail above the ceiling (they floated in 3D).
+- **Stairs:** the closed string is now a `STAIR_STRING` 24 board along the rake; below it a brick side wall, `url(#brick)` (an SVG
+  pattern in defs; export3d maps it to fill "brick"; room3d.js `kindOf` -> `brick`, `BRICK_TEX`). Plasterboard underneath is in the
+  text only (out of sight in the hall). Chairs five and six: the garage (fit row and text updated).
+- **Ottoman:** geometry `SOFA_POUF` 75 x 75 x 44 at x 200.5-275.5, z -195..-120 (source `pouf`, the client; height assumed, asked in
+  `questions.pouf`); render `sofa_pouf()` in the main render, diagrams living plan, room3d.js `buildSeatAndPouf()` movable "pouf";
+  `fit.pouf_zone()`. The knitted pouffe suggestion moved to (175, -95).
+- **Sockets ("switchs"):** geometry `SOCKET2` (0, -140, 30, double, behind the sofa's return) and `SOCKET3` (352, window wall, double)
+  and `SOCKETS`; render `wall_socket()` draws all three (and is in the 3D fixed group); diagrams labels; the 12-way strip buy row is
+  dropped; the socket table in section 9 has both doubles (rears; lamp and grow lights). The PC stays on the 10-gang.
+- **Chairs built in (`fit.chairs_built_in_zone`, `diagrams.chair_options`, section 5 text, viewer chairs card):** `BEHIND_TOP` (four
+  chairs hung behind the folded top on a backboard 22 deeper, a 10 upstand; the table 22 further out) and `WALL_SEAT` (38 x 33 oak
+  seat at 46 on two Buller folding bench brackets, source `fbracket`, in the 41 stair-end gap). 3D: `S.seat` off/up/down (Layout).
+- **Questions:** the answer boxes, Save, photo upload and Copy all are hidden (`.qin` hidden; the script still finds them); the
+  overview card reads "Still to tell us: N questions". 16 questions (`chairs` rewritten, new `pouf`).
+- **Page looks (build_viewer `SKINS`, `SKIN_JS`, tokens in `STYLE`):** `data-skin` card (default) / oak / blue / plain on the root,
+  `mw23-skin` and `mw23-big` (larger text, `.bigtext`) in localStorage; a header band (`--hero*` tokens) and a gradient background.
+- **Suggestions:** six more in `ideas.SUGGEST` (fairy, hanger, trail, throw, pclamp, basket) and room3d.js `buildSuggest`; twelve in
+  all. Stills `3d_suggest` (all twelve) and new `3d_seat`. Version 23; v22 outputs in `out/v22/`. Backups `*_v22_backup.*`.
 
 ## Update 20 Oct 2026, round 16: v22 (the optimisation plan's first round)
 - Client: "continue and start the upgrades" (the v22 list in the optimisation plan).

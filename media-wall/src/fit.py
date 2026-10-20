@@ -472,13 +472,69 @@ def chairs_zone():
          "£8–15 instead of the cupboard; the chairs stay on show", PASS),
         ("At the stair end instead", f"folded {r1(cw)} wide", ref("frosvi", "photo20"), f"{r1(sgap)} between the shelf's start (z {r1(sg[0])}) and the table (z {r1(sg[1])})",
          f"{r1(cw - sgap)} short: too narrow for this chair", CHECK),
-        ("Chairs five and six, with the 22-deep cupboard", "two more, folded", ref("frosvi", "room"), f"the garage, or under the stairs (about {r1(U['h'])} high inside the room: a photo will say)",
-         "the guests' chairs, fetched when six sit down; or build the 31-deep cupboard and all six pack away", CHECK),
+        ("Chairs five and six, with the 22-deep cupboard", "two more, folded", ref("frosvi", "room"), "the garage (v23: under the stairs is a brick side wall, plasterboard beneath: no way in from the room)",
+         "the guests' chairs, fetched when six sit down; or build the 31-deep cupboard, or hang four behind the folded top (below), and all of them pack away", PASS),
     ])
 
 
 def zones():
     return _zones_v18() + [chairs_zone()]
+
+
+# v23, client: "explore any further ways we can build the chairs into the table build"; "the sofa has a ottoman poufe type thing that is
+# the size of a chair on the sofa, its square, blue corduroy matching the sofa"
+SOURCES["fbracket"] = ("Buller Ltd: Folding Heavy Duty Bracket for Bench and Tables, 330 mm long, 82 mm wide, steel, grey primed, automatic lock "
+                       "when raised, 50 mm proud of the wall folded, 150 kg per pair (75 kg each), brackets at most 800 mm apart (bullerltd.co.uk)")
+SOURCES["pouf"] = ("Client, 20 Oct 2026: the sofa's ottoman, square, blue corduroy matching the sofa, \"the size of a chair on the sofa\": one seat, "
+                   "75 × 75; its height taken at the seat's 44 until measured")
+ORDER.extend(["fbracket", "pouf"])
+_zones_v20 = zones
+
+
+def chairs_built_in_zone():
+    """v23: two more ways to build the chairs into the table: four hung behind the folded top on a deeper backboard, and a fold-down
+    oak seat in the gap at the stair end (a fifth seat that's always there). Either goes with the chair cupboard."""
+    g = G
+    cw, cdep, ch = g.CHAIR_FOLDED
+    B, S = g.BEHIND_TOP, g.WALL_SEAT
+    W = g.TABLE[0]
+    sg = g.CHAIR_STORE["stair_gap"]; sgap = sg[0] - sg[1]
+    return ("More ways to build the chairs in (v23)", f"behind the folded top, and the {r1(sgap)} cm gap at the stair end", [
+        ("Behind the folded top: across", f"two folded chairs side by side, {r1(2 * cw)}", ref("frosvi", "fliphinge"), f"the top's {r1(W)} width",
+         f"{r1((W - 2 * cw) / 2)} spare each side: out of sight behind it", PASS),
+        ("Behind the folded top: deep", f"two deep, {r1(2 * cdep)}, on hooks", ref("frosvi", "slhook"), f"a backboard {r1(B['gap'])} deeper (the hinge rail stands {r1(B['rail'])} off the wall)",
+         f"{r1(B['gap'] - 2 * cdep - B['hook'])} spare; the folded table then stands {r1(B['rail'] + g.TABLE[2])} off the wall instead of {r1(g.RAIL[2] + g.TABLE[2])}", TIGHT),
+        ("Behind the folded top: tall", f"folded {r1(ch)} tall", ref("frosvi", "fliphinge"), f"the folded top, {r1(g.TABLE[1])} tall, and a {r1(B['upstand'])} oak upstand under it",
+         "the upstand hides their feet, so nothing shows when it's folded", PASS),
+        ("Behind the folded top: the open table", f"the table {r1(B['gap'])} further into the room", ref("dining", "sofa"), f"open edge at x {r1(g.TABLE_B_OPEN_X[0] - B['gap'])} (now {r1(g.TABLE_B_OPEN_X[0])})",
+         "four seats as now; the end seat comes nearer the TV but still clears the sofa's front line; take the chairs off their hooks and sit down", TIGHT),
+        ("Fold-down seat at the stair end: width", f"an oak seat {r1(S['w'])} wide", ref("fbracket", "photo20"), f"the {r1(sgap)} gap",
+         f"{r1((sgap - S['w']) / 2)} each side", TIGHT),
+        ("Fold-down seat: folded", f"bracket {r1(S['fold'])} + seat {r1(S['t'])}", ref("fbracket"), f"the folded table, {r1(g.RAIL[2] + g.TABLE[2])} off the wall",
+         f"{r1(S['fold'] + S['t'])} proud: flatter than the table beside it", PASS),
+        ("Fold-down seat: the load", "one person, about 100 kg at most", ref("fbracket"), "150 kg a pair, the brackets 30 apart",
+         "screwed into the stairs wall's studs or with wall plugs to suit (knock first)", PASS),
+        ("Fold-down seat: open", f"{r1(S['d'])} deep at {r1(S['h'])} high", ref("fbracket", "dining"), "at the table's south end, by the wall",
+         "a fifth seat for the table, and one that's always there; the stairs' foot stays clear", PASS),
+    ])
+
+
+def pouf_zone():
+    """v23: your sofa's square ottoman on the rug."""
+    g = G
+    P_ = g.SOFA_POUF
+    gap_c = P_["x"][0] - g.COFFEE["x"][1]
+    gap_s = P_["z"][0] - g.SOFA_FRONT_Z
+    return ("Your sofa's ottoman (v23)", f"{r1(P_['w'])} × {r1(P_['d'])}, on the rug", [
+        ("Beside the coffee table", f"{r1(P_['w'])} square", ref("pouf", "sofa"), f"coffee table to x {r1(g.COFFEE['x'][1])}",
+         f"{r1(gap_c)} between them; {r1(gap_s)} off the sofa's front: a footrest for the long side", PASS),
+        ("On the rug", f"x {r1(P_['x'][0])}–{r1(P_['x'][1])}", ref("pouf"), f"rug x {r1(g.RUG['x'][0])}–{r1(g.RUG['x'][1])}",
+         "inside it, clear of the door's swing and the table's walkway", PASS),
+    ])
+
+
+def zones():
+    return _zones_v20() + [chairs_built_in_zone(), pouf_zone()]
 
 
 if __name__ == "__main__":

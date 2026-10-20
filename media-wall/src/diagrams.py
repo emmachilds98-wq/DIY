@@ -765,6 +765,9 @@ def living_plan():
     cx, cz = g.COFFEE["x"], g.COFFEE["z"]
     o.append(rect(X(cx[1]), Y(cz[0]), (cx[1] - cx[0]) * k, (cz[1] - cz[0]) * k, "#f3efe6", "#c9c5bb", 6))
     o.append(t(X((cx[0] + cx[1]) / 2), Y((cz[0] + cz[1]) / 2) + 3, "coffee table", 8.5, "middle", 400, MUTED))
+    px_, pz_ = g.SOFA_POUF["x"], g.SOFA_POUF["z"]       # v23: the sofa's ottoman
+    o.append(rect(X(px_[1]), Y(pz_[0]), (px_[1] - px_[0]) * k, (pz_[1] - pz_[0]) * k, "#c9d3e6", "#34507f", 6))
+    o.append(t(X((px_[0] + px_[1]) / 2), Y((pz_[0] + pz_[1]) / 2) + 3, "your ottoman", 8.5, "middle", 600, "#34507f"))
     sx, sz = g.SUB_POS["x"], g.SUB_POS["z"]
     o.append(rect(X(sx[1]), Y(sz[0]), (sx[1] - sx[0]) * k, (sz[1] - sz[0]) * k, SND_F, SND_S, 3))
     o.append(t(X(sx[1]) - 5, Y(sz[0]) - 4, "sub", 9, "end", 600, SND_S))
@@ -778,10 +781,13 @@ def living_plan():
     # sockets
     o.append(rect(X(0) - 7, Y(g.SOCKET["z"]) - 8, 7, 16, "#fff", "#d0573b", 1))
     o.append(t(X(0) + 10, Y(g.SOCKET["z"]) + 4, "double socket", 9, "start", 600, "#d0573b"))
-    z2 = g.SOCKET2["z"]
-    o.append(rect(X(0) - 7, Y(z2) - 8, 7, 16, "none", "#d0573b", 1, 1.2, 'stroke-dasharray="3 2"'))
-    o.append(t(X(0) + 10, Y(z2) - 4, "socket by the sofa,", 8.5, "start", 600, "#d0573b"))
-    o.append(t(X(0) + 10, Y(z2) + 7, "if there is one: rears", 8.5, "start", 400, "#d0573b"))
+    z2 = g.SOCKET2["z"]                    # v23: the client's sockets, as they are
+    o.append(rect(X(0) - 7, Y(z2) - 8, 7, 16, "#fff", "#d0573b", 1))
+    o.append(t(X(0) + 10, Y(z2) - 4, "double socket behind the sofa:", 8.5, "start", 600, "#d0573b"))
+    o.append(t(X(0) + 10, Y(z2) + 7, "the rear speakers", 8.5, "start", 400, "#d0573b"))
+    x3 = g.SOCKET3["x"]
+    o.append(rect(X(x3) - 8, Y(g.WINDOW_Z), 16, 7, "#fff", "#d0573b", 1))
+    o.append(t(X(x3), Y(g.WINDOW_Z) - 8, "double socket: lamp, grow lights", 8.5, "middle", 600, "#d0573b"))
     # the two spot bars
     for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, bar_heads(1), "bar 1, existing rose"), (g.BAR2_X, g.BAR2_Z, bar_heads(2), "bar 2, existing point")]:
         rx_, ry_ = X(bx), Y(bz)
@@ -1095,7 +1101,7 @@ def power():
     o.append(t(430, 420, "one strip per socket, never one plugged into another", 10, "middle", 500, VIN_S))
     notes = ["The socket on the side wall is a single today: you swap it for a double at the same spot (like for like, your own job: step 3).",
              "The retro switch moves to the wall: with the TV 2 cm from the left upright, the 10-gang's own switches can't be reached any more.",
-             "Rear speakers: the socket by the sofa, if there is one. If not, a 12-way surge-protected strip in place of the 10-gang gives them a way.",
+             "Rear speakers: your double socket behind the sofa's short side (v23). Your lamp and the grow lights: the double behind the plant stand.",
              ("The sub plugs into the 10-gang: its lead drops through the worktop's slot to the back of bay 2. Both spot bars use existing ceiling points." if G.SUB_IN_WALL else "The sub plugs into the 10-gang: its lead runs along the channel and the breast's skirting. Both spot bars use existing ceiling points."),
              "Load check: the 10-gang about 1.55 kW with everything on, PC included (850 W at most); the 6-way up to 0.8 kW. Each under 13 A (3 kW).",
              "Check the 10-gang is surge-protected; if not, use a surge-protected one for the TV and consoles. Label both outlets."]
@@ -1160,10 +1166,10 @@ def routes():
     DATA = BLUE; MAINS = VIN_S; DC = "#2fa47a"; AUD = "#b07a1f"
     o.append(rect(F(g.SOCKET["z"]) - 4, Y(34.3), 8 * s, 8.6 * s, "#fff", MAINS, 2))
     o.append(t(F(g.SOCKET["z"]), Y(34.3) - 4, "socket", 9, "middle", 600, MAINS))
-    z2 = g.SOCKET2["z"]
-    o.append(rect(F(z2) - 4, Y(34.3), 8 * s, 8.6 * s, "none", MAINS, 2, 1.2, 'stroke-dasharray="3 2"'))
-    o.append(t(F(z2) + 8, Y(34.3) - 15, "socket by the sofa,", 8.5, "middle", 600, MAINS))
-    o.append(t(F(z2) + 8, Y(34.3) - 4, "if there is one: rears", 8.5, "middle", 400, MAINS))
+    z2 = g.SOCKET2["z"]                    # v23: the client's double socket behind the sofa's return
+    o.append(rect(F(z2) - 7, Y(34.3), 14.6 * s, 8.6 * s, "#fff", MAINS, 2))
+    o.append(t(F(z2) + 8, Y(34.3) - 15, "double socket behind the sofa:", 8.5, "middle", 600, MAINS))
+    o.append(t(F(z2) + 8, Y(34.3) - 4, "the rear speakers", 8.5, "middle", 400, MAINS))
     tz = g.PC_SHELF_Z[1] + 3
     o.append(wire([(F(tz), Y(g.PC_SHELF_TOP - 4)), (F(tz), Y(8)), (X(-1), Y(8)), (X(4), Y(5)), (X(110), Y(5)), (X(110), Y(76))], DATA, 2.2))
     o.append(t(F(tz) + 6, Y(100), "HDMI (active optical) + Cat6:", 9, "start", 500, DATA))
@@ -2203,3 +2209,69 @@ def chair_storage():
         o.append(t(0, Y(0) + 68 + i * 17, n_, 10.2, "start", 500 if i else 650, INK if i else "#2f7a4a"))
     return svg(W, H, "\n".join(o), "Keeping the dining chairs: the stairs wall from the room, all packed away",
                f"To scale (1 cm = {k} px). The table doesn't change or move; an oak cupboard beside it holds four folded chairs ({_fmt(cw)} × {_fmt(cdep)} × {_fmt(ch)}); doors drawn see-through.")
+
+
+def chair_options():
+    """v23, client: "explore any further ways we can build the chairs into the table build": three ways, each cut through the stairs
+    wall to scale (the wall on the right, the room on the left): the chair cupboard beside the table (the plan), four chairs hung behind
+    the folded top on a deeper backboard, and a fold-down oak seat in the gap at the stair end."""
+    g = G
+    k, H0 = 1.45, 450
+    cw, cdep, ch = g.CHAIR_FOLDED
+    B, S, C = g.BEHIND_TOP, g.WALL_SEAT, g.CHAIR_STORE["cupboard"]
+    rail, top_t, top_h, y_top = g.RAIL[2], g.TABLE[2], g.TABLE[1], g.RAIL_TOP
+    OAK, OAKS, CH, CHS, RED = "#d9b07a", "#9a6634", "#e8e3d8", "#8a857a", "#a3352b"
+    o = []
+    def panel(px, title, sub):
+        wx = px + 250                                  # the wall's face
+        Xp = lambda d: wx - d * k                      # d: cm out from the wall into the room
+        Yp = lambda y: H0 - y * k
+        o.append(f'<rect x="{wx}" y="{Yp(g.CEIL)}" width="14" height="{g.CEIL * k}" fill="{HATCH}" stroke="{WALL}" stroke-width="1.4"/>')
+        o.append(f'<line x1="{px}" y1="{Yp(0)}" x2="{wx + 14}" y2="{Yp(0)}" stroke="{WALL}" stroke-width="1.6"/>')
+        o.append(f'<rect x="{Xp(g.SHELF_B["d"])}" y="{Yp(g.SHELF_B["top"])}" width="{g.SHELF_B["d"] * k}" height="{g.SHELF_B["t"] * k}" fill="#2a2c2e"/>')
+        o.append(t(px, Yp(g.CEIL) - 30, title, 12.5, "start", 700))
+        for i, line in enumerate(sub):
+            o.append(t(px, Yp(g.CEIL) - 14 + i * 13, line, 10, "start", 400, MUTED))
+        return Xp, Yp
+    def table(Xp, Yp, off, label=True):                # the folded table: the rail (gate and folded half behind the top) and the top
+        o.append(rect(Xp(off), Yp(y_top + top_h), (off - (off - rail)) * k, top_h * k, "#efe2cc", OAKS, 1, 1))
+        o.append(rect(Xp(off + top_t), Yp(y_top + top_h), top_t * k, top_h * k, OAK, OAKS, 1, 1.2))
+        if label:
+            o.append(t(Xp(off + top_t) - 5, Yp(y_top + top_h / 2), "folded top", 9.5, "end", 600, OAKS))
+            o.append(t(Xp(off + top_t) - 5, Yp(y_top + top_h / 2) + 12, f"{_fmt(off + top_t)} off the wall", 9.5, "end", 400, MUTED))
+    def chair(Xp, Yp, d, y0, dashed=False):
+        o.append(rect(Xp(d + cdep), Yp(y0 + ch), cdep * k, ch * k, CH, CHS, 2, 1, 'stroke-dasharray="3 2"' if dashed else ""))
+    # 1 · the plan (v20): the chair cupboard beside the table, flush with the pipe boxing
+    Xp, Yp = panel(10, "1 · The plan: the cupboard beside", [f"{_fmt(C['d'])} deep, {_fmt(C['h'])} tall, next to the table", "four chairs inside, two on each level"])
+    o.append(rect(Xp(C["d"]), Yp(C["h"] + C["plinth"]), C["d"] * k, (C["h"] + C["plinth"]) * k, "none", OAKS, 1, 1.2, 'stroke-dasharray="5 3"'))
+    for d in (0.6, 0.6 + cdep + 0.3):
+        chair(Xp, Yp, d, C["plinth"], True); chair(Xp, Yp, d, C["shelf_y"] + C["t"], True)
+    table(Xp, Yp, rail)
+    o.append(t(Xp(C["d"]) - 4, Yp(C["h"]) + 14, "the cupboard,", 9.5, "end", 600, OAKS))
+    o.append(t(Xp(C["d"]) - 4, Yp(C["h"]) + 26, "beside it (dashed)", 9.5, "end", 400, MUTED))
+    # 2 · four chairs hung behind the folded top
+    Xp, Yp = panel(330, "2 · Behind the folded top", [f"the backboard {_fmt(B['gap'])} deeper: two chairs deep,", "two across, on hooks; an upstand hides their feet"])
+    hang = y_top - B["upstand"] + 1
+    for d in (B["hook"], B["hook"] + cdep):
+        chair(Xp, Yp, d, hang)
+    o.append(rect(Xp(B["hook"]), Yp(hang + ch + 6), B["hook"] * k, 8 * k, "#6e6a62", "#3a3a38", 1, 1))
+    table(Xp, Yp, B["rail"])
+    o.append(rect(Xp(B["rail"] + top_t), Yp(y_top), (B["rail"] + top_t) * k, B["upstand"] * k, OAK, OAKS, 1, 1))
+    o.append(t(Xp(B["rail"] / 2), Yp(y_top - B["upstand"]) + 14, f"{_fmt(B['upstand'])} oak upstand", 9.5, "middle", 600, OAKS))
+    o.append(t(Xp(B["gap"] / 2), Yp(hang + ch + 12), "4 chairs, hidden", 9.5, "middle", 700, CHS))
+    # 3 · a fold-down oak seat in the gap at the stair end
+    Xp, Yp = panel(650, "3 · A fold-down seat at the stair end", [f"oak, {_fmt(S['w'])} × {_fmt(S['d'])}, on two folding bench brackets", f"in the {_fmt(g.CHAIR_STORE['stair_gap'][0] - g.CHAIR_STORE['stair_gap'][1])} gap: a fifth seat, always there"])
+    o.append(rect(Xp(S["fold"] + S["t"]), Yp(S["h"] + S["d"] - 2), S["t"] * k, S["d"] * k, OAK, OAKS, 1, 1.2))
+    o.append(rect(Xp(S["fold"]), Yp(S["h"] + 10), S["fold"] * k, 30 * k, "#8e8a82", "#3a3a38", 1, 1))
+    o.append(t(Xp(S["fold"] + S["t"]) - 5, Yp(S["h"] + S["d"] / 2), "folded:", 9.5, "end", 600, OAKS))
+    o.append(t(Xp(S["fold"] + S["t"]) - 5, Yp(S["h"] + S["d"] / 2) + 12, f"{_fmt(S['fold'] + S['t'])} proud", 9.5, "end", 400, MUTED))
+    o.append(rect(Xp(S["d"]), Yp(S["h"]), S["d"] * k, S["t"] * k, "none", OAKS, 1, 1.2, 'stroke-dasharray="4 3"'))
+    o.append(f'<line x1="{Xp(0)}" y1="{Yp(S["h"] - 26)}" x2="{Xp(S["d"] - 3)}" y2="{Yp(S["h"])}" stroke="#8e8a82" stroke-width="2" stroke-dasharray="4 3"/>')
+    o.append(t(Xp(S["d"]) - 6, Yp(S["h"]) + 4, f"open: {_fmt(S['d'])} deep, {_fmt(S['h'])} high", 9.5, "end", 600, OAKS))
+    notes = [("1", "the plan (v20): about £120–240; six inside if it's built 31 deep"),
+             ("2", f"about £40–80 (hooks, a deeper oak backboard and an upstand); the table stands {_fmt(B['rail'] + top_t)} off the wall, {_fmt(B['gap'])} further into the room, open too"),
+             ("3", "about £50–90 (two brackets and an oak seat); goes with 1 or 2: four or six chairs put away, and a fifth seat that's always there")]
+    for i, (n, s_) in enumerate(notes):
+        o.append(t(10, H0 + 32 + i * 15, f"{n} · {s_}", 10.5, "start", 600 if i == 0 else 400, INK if i == 0 else MUTED))
+    return svg(970, H0 + 32 + 3 * 15 + 10, "\n".join(o), "Building the chairs into the table: three ways, cut through the stairs wall",
+               "To scale (1 cm = 1.45 px), the wall on the right. The plan stays as 1; 2 and 3 are options that need your say.")
