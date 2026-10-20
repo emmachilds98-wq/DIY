@@ -1681,7 +1681,7 @@ def drawer_layouts():
     o.append(t(PX(bw / 2), yb + 31, f"~{g.TRAY_LPS} LPs each · two crates", 9.5, "middle", 600, GC))
     # E, F and G · the slim drawers
     sw = g.SLIM_BOX_X[1] - g.SLIM_BOX_X[0]
-    PX, PY = plan(960, "E, F, G · Slim drawers", f"box {sw:.1f} × 40 · 400 mm runners", sw, 40)
+    PX, PY = plan(950, "E, F, G · Slim drawers", f"{sw:.1f} × 40 · 400 mm", sw, 40)
     o.append(f'<rect x="{PX(g.SLIM_SIDE)}" y="{PY(40 - g.SLIM_SIDE)}" width="{g.SLIM_INSIDE * s}" height="{(40 - 2 * g.SLIM_SIDE) * s}" fill="#f6f8fb" stroke="{GA}" stroke-opacity="0.4"/>')
     gx = g.SLIM_SIDE + (g.SLIM_INSIDE - g.GAME_CASE[0]) / 2
     for i in range(g.SLIM_DRAWERS[0]["n"]):
