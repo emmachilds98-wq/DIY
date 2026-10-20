@@ -65,6 +65,13 @@
 - **render.py:** the stairs' brick side wall is drawn in the wall paint (`url(#leftwall)`), so the 3D room paints it too.
 - **Stills:** general views now on the cabinet (site C); the flip-top stills (`3d_window_B_*`, `3d_B_folded`, `3d_chairs*`,
   `3d_dining_B_four`, `3d_plan_B`, `3d_seat`) labelled "B, THE FLIP-TOP"; `3d_c_eight` → `3d_c_six`; new `3d_window_c_six`.
+- **Outputs:** version 27; v26 outputs in `out/v26/`; 37 stills; plan 90 pages, guide 52 (step 11 is pages 35 and 41–43); fit 88 fit,
+  31 tight, 10 check, 0 don't fit; total £3,438–6,733 (the cabinet's rows £881–1,535 with six chairs; the flip-top would be £666–1,265).
+  Stale stills (`3d_c_eight`, `3d_wall_tv`, `3d_sofa_records`, `3d_window_general`, `3d_window_A_folded`) and the v25/v26 renders removed.
+- **QA (Playwright, 1280 × 800 and 390 × 844):** a saved "B / eight" opens on the cabinet for six; Edit room (from the bird's eye view):
+  the flip-top's chair cupboard selects, comes off and goes back from + Add; Back to the wall and Turn keep pieces flush; both rear
+  speakers select; the dining chapter and #step-11 open; no horizontal overflow, no console errors. Deck 71ff republished
+  (version 1792535224-ee06) with all 42 changed pictures in its asset store.
 
 ## Update 20 Oct 2026, round 20: v26 (option C, the dining cabinet; the Tools panel fixed; more in Look and Extras)
 - Client: "tools have some bugs displaying, expand more into the look section as well as extras. exploire other table config that looks

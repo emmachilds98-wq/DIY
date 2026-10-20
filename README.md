@@ -215,7 +215,7 @@ surge protection, switches and length · console model numbers · the second cei
 
 ### Documents
 - **The full plan:** [`media-wall/out/Home_Network_Plan_v27.pdf`](media-wall/out/Home_Network_Plan_v27.pdf) (90 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v27.pdf`](media-wall/out/Build_Guide_v27.pdf) (48 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
+- **The build guide:** [`media-wall/out/Build_Guide_v27.pdf`](media-wall/out/Build_Guide_v27.pdf) (52 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v15/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v16 is the last version published there: this session could not reach it with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)

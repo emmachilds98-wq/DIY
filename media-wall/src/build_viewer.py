@@ -959,7 +959,7 @@ def _page(site=False):
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
       <div class="sec-h"><h2>Chapters</h2></div>
       <div class="tilegrid">{tiles}</div>
-      <div class="sec-h"><h2>Two places for the table</h2><a class="btn" href="#dining" data-go="dining" data-find="Two places">Compare them in full</a></div>
+      <div class="sec-h"><h2>The table: the dining cabinet</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
       {options_card()}
       <details class="fold"><summary>The plan on a page</summary><div class="doc">{s1}</div></details>
       <!--keep--><details class="fold changes"><summary>What changed in v{VERSION}</summary><div class="doc"><p>{decision}</p></div></details><!--/keep-->
@@ -970,8 +970,7 @@ def _page(site=False):
         chapter("records", more(f'<div class="doc">{sec["4"]}</div>')),
         chapter("side", more(f'<div class="doc">{sec["6"]}</div>')),
         chapter("joinery", '<p><a class="btn" href="#build" data-go="build" data-find="Cutting list">Open the cutting list (copy it as text)</a></p>' + more(f'<div class="doc">{sec["7"]}</div>')),
-        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>'
-                          f'<div class="block"><h2 class="ptitle">The flip-top\'s chair cupboard (the alternative)</h2><p class="caption">With the flip-top, the chairs live beside it. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Fit proof.</p>{chairs_card()}</div>'
+        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">The table: the dining cabinet, or the flip-top</h2>{options_card()}</div>'
                           + more(f'<div class="doc">{sec["5"]}</div>') + '</div>'),
         chapter("paint", f'<div class="panel" id="paint">{preset_cards()}' + more(f'<div class="doc">{sec["8"]}</div>') + '</div>'),
         chapter("network", more(f'<div class="panel" id="network"><nav class="toc" aria-label="In this chapter"></nav><div class="doc">{sec["9"]}</div></div>')),
