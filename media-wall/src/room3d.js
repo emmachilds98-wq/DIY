@@ -25,11 +25,18 @@ const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room",
               quality: SMALL ? "fast" : "hd", view: "window",
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
-              ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true, ideas: {} };   // v17: ideas all off   // v16: the table by the stairs by default; the laser off
-const KEY = "mw17-3d";
+              ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true, ideas: {},   // v17: ideas all off
+              // v18: the plant stand and the record shelf's layout, your own moves (edit mode) and the things you've added; the grow lights
+              plants: "corner", layout: {}, added: [], grow: true };
+DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
+const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
+if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
+if (!Array.isArray(S.added)) S.added = [];
+if (!(S.plants in R.PLANT_LAYOUTS)) S.plants = DEF.plants;
+S.edit = false;
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
 
 /* ---------------------------------------------------------------- the lighting scenes (scenes.py) plus daytime */
@@ -463,14 +470,18 @@ function buildShell() {
   for (let x = rx0; x < rx1 - 2; x += 5) cube(x, ry0, WZ + 3, 3.4, ry1 - ry0, 7, radP);
   // the coffee table (its footprint from the plan; drawn as a plain low table)
   const cof = R.COFFEE, cofM = reg(new THREE.MeshStandardMaterial({ color: "#2c2a28", roughness: 0.5 }));
-  cube(cof.x[0], 38, cof.z[0], cof.x[1] - cof.x[0], 4, cof.z[1] - cof.z[0], cofM);
-  for (const [x, z] of [[cof.x[0] + 3, cof.z[0] + 3], [cof.x[1] - 7, cof.z[0] + 3], [cof.x[0] + 3, cof.z[1] - 7], [cof.x[1] - 7, cof.z[1] - 7]]) cube(x, 0, z, 4, 38, 4, cofM);
+  { const cw = cof.x[1] - cof.x[0], cd = cof.z[1] - cof.z[0], g = new THREE.Group();     // v18: movable in edit mode
+    lb(g, 0, 38, 0, cw, 4, cd, cofM);
+    for (const [x, z] of [[-cw / 2 + 5, -cd / 2 + 5], [cw / 2 - 5, -cd / 2 + 5], [-cw / 2 + 5, cd / 2 - 5], [cw / 2 - 5, cd / 2 - 5]]) lb(g, x, 0, z, 4, 38, 4, cofM);
+    movable("coffee", "Coffee table", g, () => ({ x: (cof.x[0] + cof.x[1]) / 2, z: (cof.z[0] + cof.z[1]) / 2, rot: 0 }), cw, cd, [cofM]); }
   // v15: the rug, 230 × 160 in front of the sofa (geometry.RUG), with its design and a little thickness
   const RG = R.RUG, rugW = RG.x[1] - RG.x[0], rugD = RG.z[1] - RG.z[0];
   const rug = new THREE.Mesh(new THREE.BoxGeometry(rugW * M, 0.008, rugD * M),
     [0, 1, 2, 3, 4, 5].map(i => i === 2 ? reg(new THREE.MeshStandardMaterial({ map: RUG_TEX, roughness: 0.97, bumpMap: PILE, bumpScale: 0.35 }))
                                         : reg(new THREE.MeshStandardMaterial({ color: RG.cols[3], roughness: 1 }))));
-  rug.position.copy(v3((RG.x[0] + RG.x[1]) / 2, 0.4, (RG.z[0] + RG.z[1]) / 2)); rug.rotation.y = Math.PI; rug.receiveShadow = true; shell.add(rug);
+  rug.position.y = 0.004; rug.rotation.y = Math.PI; rug.receiveShadow = true;
+  { const g = new THREE.Group(); g.add(rug);
+    movable("rug", "Rug", g, () => ({ x: (RG.x[0] + RG.x[1]) / 2, z: (RG.z[0] + RG.z[1]) / 2, rot: 0 }), rugW, rugD, [], true); }
   // v15: the curtains, from the client's photo: long pencil-pleat panels to the floor in oatmeal, on a rail just under the ceiling strip
   // running 30 past the window each side; open (stacked either side) or drawn across (S.curtains)
   // "hessian curtains from dunelm with a wood rail": a coarse natural weave, on a 28 mm wooden pole with rings and ball finials
@@ -566,6 +577,7 @@ function buildShell() {
   }
   pcLit();
   buildIdeas();
+  buildPlantsAndRecords();
   flushCubes(shell);
 }
 /* v17: the ideas (ideas.py), each its own group, all hidden until its button is on */
@@ -628,19 +640,6 @@ function buildIdeas() {
     ibox(g, x0, 0, ze - 3, x1 - x0, 1.6, zo - ze + 3 - t, oak);                    // the foot, just under the plinth's 3 cm inset
     const glassCup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.1, 16), glassM); glassCup.position.copy(v3(x0 + 14, T.top + 5, ze - 2)); g.add(glassCup);
     ibox(g, x1 - 20, T.top, ze - 6, 15, 4, 10, reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.5 })));   // a pad
-    shell.add(g); }
-  // 4. the plant ladder, leaning on the window wall in the west corner
-  { const g = IDEA_G.ladder = new THREE.Group(), L = I.ladder, [x0, x1] = L.x, wz = R.WINDOW_Z;
-    const ang = Math.atan2(L.foot, L.h);
-    for (const x of [x0, x1 - 3]) {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(3 * M, Math.hypot(L.h, L.foot) * M, 3 * M), oak);
-      s.position.copy(v3(x + 1.5, L.h / 2, wz + 1.5 + L.foot / 2)); s.rotation.x = ang; g.add(shadow(s));
-    }
-    for (let k = 1; k <= L.rungs; k++) {
-      const y = L.h * k / (L.rungs + 1), zz = wz + 1.5 + L.foot * (1 - y / L.h), dd = 10;
-      ibox(g, x0 + 1.5, y - 1, zz - dd / 2, x1 - x0 - 3, 2, dd, oak);
-      [0.25, 0.7].forEach((t, i) => plant(g, x0 + 4 + t * (x1 - x0 - 8), y + 1, zz, 4 + i, k % 2 ? 2 : 0));
-    }
     shell.add(g); }
   Object.values(IDEA_G).forEach(gr => gr.visible = false);
 }
@@ -772,8 +771,9 @@ let lamp;
 const LAMP_RED = new THREE.MeshStandardMaterial({ color: R.LAMP_BODY, roughness: 0.28, metalness: 0.35 });   // v15: "the lamp is bright red"
 function buildLamp() {   // three adjustable heads on a red pole, with colour bulbs: green on top, pink, then purple going down
   if (lamp) drop(lamp, lights.lamp);
-  const spot = R.LAMP_SPOTS[S.lamp] || R.LAMP_SPOTS.corner;
-  const g = new THREE.Group(); lamp = g;
+  const L = S.layout.lamp || {}, d0 = R.LAMP_SPOTS[S.lamp] || R.LAMP_SPOTS[DEF.lamp];
+  const spot = { x: L.x ?? d0.x, z: L.z ?? d0.z };                                    // v18: wherever you've dragged it
+  const g = new THREE.Group(); lamp = g; g.userData.movId = "lamp"; g.visible = !L.off;
   const red = LAMP_RED;
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.025, 32), red); base.position.copy(v3(spot.x, 1.25, spot.z)); g.add(shadow(base));
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, R.LAMP.h * M, 12), red); pole.position.copy(v3(spot.x, R.LAMP.h / 2, spot.z)); g.add(shadow(pole));
@@ -842,7 +842,10 @@ function applyState() {
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
   const b2 = `${S.site}_${S.dining}`;
   if (built.bar2 !== b2) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2; }
-  if (built.lamp !== S.lamp) { buildLamp(); built.lamp = S.lamp; }
+  const lk = S.lamp + JSON.stringify(S.layout.lamp || {});
+  if (built.lamp !== lk) { buildLamp(); built.lamp = lk; }
+  if (G.now_ledge) G.now_ledge.visible = S.site === "B" && S.plants !== "breast";   // v18: with the plants on the breast the ledge comes off
+  placeAll();
   repaint();
   applyLight();
   updateCaption();
@@ -860,7 +863,9 @@ function applyLight() {
   });
   const area = hd ? 1 : 0;      // Fast leaves out the area lights (the most expensive) and lifts the fill to make up
   set(lights.strip, L.strip * area); set(lights.uprights, L.uprights * area); set(lights.bias, L.bias * area); set(lights.bar1, L.bar1); set(lights.bar2, L.bar2);
-  set(lights.lamp, L.lamp);                                   // v15: the lamp's colour bulbs dim in their app
+  set(lights.lamp, (S.layout.lamp || {}).off ? 0 : L.lamp);  // v15: the lamp's colour bulbs dim in their app (v18: or it's been removed)
+  capShadows(hd ? SHADOW_CAP : 0);                            // v18: never more shadowed spots than the graphics card can take
+  if (growGlow) growGlow.forEach(m => m.visible = !!S.grow);
   set(lights.tv, L.bias > 0 && hd ? 100 : 0);
   ledMat.color.set(L.strip > 0 ? "#ffd9a8" : "#5a5248").multiplyScalar(L.strip > 0 ? 0.6 + L.strip / 100 * 1.4 : 1);
   runLed.color.set(L.uprights > 0 ? (S.col.strips || "#ffd9a8") : "#5a5248").multiplyScalar(L.uprights > 0 ? 0.6 + L.uprights / 100 * 1.4 : 1);   // v16: smart colour strips
@@ -888,6 +893,302 @@ function applyLight() {
 }
 const screenOff = new THREE.MeshStandardMaterial({ color: "#050506", roughness: 0.12, metalness: 0.2 });
 const screenOn = new THREE.MeshBasicMaterial({ map: SCREEN_TEX, toneMapped: false, color: "#d8d8d8" });
+
+/* ---------------------------------------------------------------- v18: things you can move (edit mode)
+   Each movable thing is a group built round the centre of its footprint (room cm, its front towards local +z), on a pivot that
+   edit mode drags across the floor and turns. Where it stands, its turn, its colour and whether it's removed live in S.layout[id];
+   the things you add live in S.added. The red lamp is rebuilt where you drop it, so its lights move with it. */
+const MOV = {};
+const movers = new THREE.Group(); scene.add(movers);
+function lb(g, x, y, z, w, h, d, mat, cast = true) {      // a box in a movable's own coordinates: x, z its centre, y its bottom
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat);
+  m.position.copy(v3(x, y + h / 2, z)); g.add(shadow(m, cast)); return m;
+}
+function movable(id, label, g, def, w, d, mats, flat = false, extra = {}) {
+  const pivot = new THREE.Group(); pivot.add(g); pivot.userData.movId = id;
+  movers.add(pivot);
+  MOV[id] = Object.assign({ id, label, pivot, def, w, d, mats, flat, base: mats.map(m => "#" + m.color.getHexString()) }, extra);
+  return MOV[id];
+}
+function spotOf(id) {
+  const it = MOV[id], L = S.layout[id] || {}, d0 = it.def();
+  return { x: L.x ?? d0.x, z: L.z ?? d0.z, rot: L.rot ?? d0.rot ?? 0 };
+}
+function placeAll() {
+  for (const it of Object.values(MOV)) {
+    if (it.lamp) continue;                                  // the lamp is rebuilt where it stands (buildLamp)
+    const L = S.layout[it.id] || {}, p = spotOf(it.id);
+    it.pivot.position.copy(v3(p.x, 0, p.z)); it.pivot.rotation.y = p.rot * Math.PI / 180;
+    it.pivot.visible = !L.off && (!it.when || it.when());
+    it.mats.forEach((m, i) => m.color.set(L.col && i === 0 ? L.col : it.base[i]));
+  }
+  if (selBox) selBox.update();
+  reshadow();
+}
+const SHADOW_CAP = Math.max(0, Math.min(4, (gl.capabilities.maxTextures || 16) - 10));
+function capShadows(n) {   // the brightest n spotlights cast shadows; the rest light without them
+  const sp = Object.values(lights).flat().filter(l => l.isSpotLight && l.visible).sort((a, b) => b.intensity - a.intensity);
+  sp.forEach((l, i) => { l.castShadow = i < n; });
+}
+// a pot with a plant in it, in a movable's coordinates
+function potPlant(g, x, y, z, rad, h, trail, r, potM, leafM) {
+  const p = new THREE.Mesh(new THREE.CylinderGeometry(rad * M, rad * 0.8 * M, rad * 1.5 * M, 16), potM);
+  p.position.copy(v3(x, y + rad * 0.75, z)); g.add(shadow(p));
+  const gs = [];
+  for (let k = 0; k < 9 + h; k++) {
+    const t = k / (9 + h), q = v3(x + (r() - 0.5) * rad * 2, y + rad * 1.5 + 1 + t * h * 2.2, z + (r() - 0.5) * rad * 1.6);
+    const s = new THREE.SphereGeometry((0.02 + r() * 0.014) * (1.2 - t * 0.4), 7, 5); s.scale(0.8, 0.55, 0.32); s.rotateZ((r() - 0.5) * 1.4); s.rotateY(r() * 3);
+    s.translate(q.x, q.y, q.z); gs.push(s);
+  }
+  for (let sI = 0; sI < trail; sI++) {
+    const xx = x + (r() - 0.5) * rad * 1.6, zz = z + rad * 0.7, len = 12 + r() * 20;
+    for (let t = 0; t < len; t += 3) { const s = new THREE.SphereGeometry(0.013, 6, 4); s.scale(0.8, 0.45, 0.4); const q = v3(xx + Math.sin(t / 5 + sI) * 1.5, y + rad * 1.3 - t, zz); s.translate(q.x, q.y, q.z); gs.push(s); }
+  }
+  g.add(shadow(new THREE.Mesh(mergeGeometries(gs), leafM)));
+}
+let growGlow = [];
+const GLOW_TEX = canvasTex(128, 128, (c, w, h) => { const gr = c.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2);
+  gr.addColorStop(0, "rgba(255,214,160,0.75)"); gr.addColorStop(1, "rgba(255,214,160,0)"); c.fillStyle = gr; c.fillRect(0, 0, w, h); });
+function buildPlantsAndRecords() {
+  const r = rnd(73), PS = R.PLANT_STAND, RS = R.RECORD_SHELF;
+  const leafM = reg(new THREE.MeshStandardMaterial({ color: "#4a8640", roughness: 0.65, side: THREE.DoubleSide }));
+  const pots = ["#ece6da", "#c9c2b4", "#b5643f", "#7f8f72", "#2f2f2f"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.75 })));
+  // the plant stand: bamboo, two columns, four slatted tiers, warm grow bars under the top two (from the client's photo)
+  { const g = new THREE.Group(), bam = reg(new THREE.MeshStandardMaterial({ color: PS.col, map: OAK_TEX, roughness: 0.6 }));
+    const w = PS.w, d = PS.d, h = PS.h, cw = (w - 3 * PS.post) / 2;
+    for (const x of [-w / 2 + PS.post / 2, 0, w / 2 - PS.post / 2]) for (const z of [-d / 2 + PS.post / 2, d / 2 - PS.post / 2]) lb(g, x, 0, z, PS.post, h + 6, PS.post, bam);
+    PS.tiers.forEach((ty, ti) => {
+      for (const z of [-d / 2 + PS.post / 2, d / 2 - PS.post / 2]) lb(g, 0, ty - 2.2, z, w, 2.2, 2.0, bam);
+      for (const cx of [-(cw + PS.post) / 2, (cw + PS.post) / 2]) {
+        for (let k = 0; k < 8; k++) lb(g, cx - cw / 2 + 2 + k * (cw - 4) / 7, ty, 0, 2.2, 1.2, d - 3, bam);
+        const n = ti === 3 ? 2 : 2 + (r() < 0.5 ? 1 : 0);
+        for (let j = 0; j < n; j++) {
+          const rad = 5 + r() * 4, px = cx - cw / 2 + (j + 0.5) * cw / n;
+          potPlant(g, px, ty + 1.2, (r() - 0.5) * 6, rad, ti === 0 ? 3 : Math.round(4 + r() * 8), ti < 2 && r() < 0.5 ? 2 : 0, r, pots[(ti * 2 + j) % pots.length], leafM);
+        }
+        if (PS.lights.includes(ti)) {                  // a grow bar under this tier, and its warm wash on the wall behind
+          const bar = new THREE.Mesh(new THREE.BoxGeometry((cw - 8) * M, 0.012, 0.03), new THREE.MeshBasicMaterial({ color: "#ffe0b0", toneMapped: false }));
+          bar.position.copy(v3(cx, ty - 1.4, -d / 2 + 6)); g.add(bar);
+          const glow = new THREE.Mesh(new THREE.PlaneGeometry(cw * 1.5 * M, 0.7), new THREE.MeshBasicMaterial({ map: GLOW_TEX, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+          glow.position.copy(v3(cx, ty - 22, -d / 2 - 0.6)); g.add(glow); growGlow.push(glow, bar);
+        }
+      }
+    });
+    movable("plants", "Your plant stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].plants; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [bam]); }
+  // the 2 x 2 record shelf, a tray in each cube with its LPs face-out
+  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: RS.col, map: OAK_TEX, roughness: 0.6 }));
+    const w = RS.w, d = RS.d, h = RS.h, t = RS.t, cw = (w - 3 * t) / 2, ch = (h - 3 * t) / 2;
+    lb(g, 0, 0, -d / 2 + 0.3, w, h, 0.6, wood);
+    for (const x of [-w / 2 + t / 2, 0, w / 2 - t / 2]) lb(g, x, 0, 0, t, h, d, wood);
+    for (const y of [0, h / 2 - t / 2, h - t]) lb(g, 0, y, 0, w, t, d, wood);
+    const tray = reg(new THREE.MeshStandardMaterial({ color: "#b88a5c", map: OAK_TEX, roughness: 0.6 }));
+    const sleeves = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d", "#f0c24b", "#7a4fb0", "#e8603c"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.55 })));
+    for (const y0 of [t, h / 2 + t / 2]) for (const cx of [-(cw + t) / 2, (cw + t) / 2]) {
+      lb(g, cx, y0, d / 2 - 2, cw - 1, 6, 1.2, tray);                                   // the tray's front lip
+      const lp = Math.min(R.LP, ch - 2);
+      for (let k = 0; k < 6; k++) {                                                     // the front few LPs, leaning back
+        const m = new THREE.Mesh(new THREE.BoxGeometry(lp * M, lp * M, 0.004), sleeves[Math.floor(r() * sleeves.length)]);
+        m.position.copy(v3(cx, y0 + 1 + lp / 2, d / 2 - 5 - k * 3.2)); m.rotation.x = -0.18; g.add(shadow(m));
+      }
+    }
+    movable("records", "Your record shelf", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].records; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood]); }
+  // the red lamp and the C-table idea are movable too
+  MOV.lamp = { id: "lamp", label: "Your red lamp", lamp: true, w: 30, d: 30, mats: [], base: [],
+    def: () => { const p = R.LAMP_SPOTS[S.lamp] || R.LAMP_SPOTS[DEF.lamp]; return { x: p.x, z: p.z, rot: 0 }; } };
+  Object.defineProperty(MOV.lamp, "pivot", { get: () => lamp });
+  if (IDEA_G.ctable) {
+    const T = R.IDEAS.ctable, cx = (T.x[0] + T.x[1]) / 2, cz = R.SOFA.end;
+    shell.remove(IDEA_G.ctable); IDEA_G.ctable.position.copy(v3(-cx, 0, -cz)); IDEA_G.ctable.position.x = cx * M; IDEA_G.ctable.visible = true;
+    movable("ctable", "The C-table (an idea)", IDEA_G.ctable, () => ({ x: cx, z: cz, rot: 0 }), T.x[1] - T.x[0], T.depth, [], false, { when: () => !!S.ideas.ctable });
+    delete IDEA_G.ctable;
+  }
+  S.added.forEach(a => addThing(a, false));
+}
+/* things to add: simple stand-ins at real-world sizes, each with its own colour */
+const CATALOGUE = {
+  armchair: { label: "Armchair", w: 80, d: 80, col: "#b5643f", build(g, m, oak) {
+    lb(g, 0, 10, 0, 76, 32, 76, m); lb(g, 0, 42, -30, 76, 38, 16, m); lb(g, -32, 42, 4, 12, 18, 68, m); lb(g, 32, 42, 4, 12, 18, 68, m);
+    for (const [x, z] of [[-33, -33], [33, -33], [-33, 33], [33, 33]]) lb(g, x, 0, z, 4, 10, 4, oak); } },
+  sidetable: { label: "Side table", w: 45, d: 45, col: "#c48c57", build(g, m) {
+    lb(g, 0, 48, 0, 45, 2.5, 45, m); for (const [x, z] of [[-19, -19], [19, -19], [-19, 19], [19, 19]]) lb(g, x, 0, z, 3.5, 48, 3.5, m); } },
+  plant: { label: "Tall floor plant", w: 40, d: 40, col: "#d8cfc0", build(g, m) {
+    const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide }));
+    potPlant(g, 0, 0, 0, 16, 26, 0, rnd(5), m, leaf); } },
+  bookcase: { label: "Slim bookcase", w: 60, d: 30, col: "#c48c57", build(g, m) {
+    lb(g, -29, 0, 0, 2, 180, 30, m); lb(g, 29, 0, 0, 2, 180, 30, m); lb(g, 0, 0, -14.5, 60, 180, 1, m);
+    const r = rnd(9), cols = ["#2f3e5c", "#d24b33", "#e9e3d3", "#14806d", "#f0c24b"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.6 })));
+    for (const y of [0, 36, 72, 108, 144, 178]) lb(g, 0, y, 0, 56, 2, 30, m);
+    for (const y of [2, 38, 74, 110]) { let x = -26; while (x < 22) { const bw = 2 + r() * 3, bh = 22 + r() * 9; lb(g, x + bw / 2, y, -2, bw, bh, 22, cols[Math.floor(r() * cols.length)]); x += bw + 0.3; } } } },
+  beanbag: { label: "Beanbag", w: 80, d: 80, col: "#40609a", build(g, m) {
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.4, 24, 16), m); b.scale.set(1, 0.7, 1); b.position.y = 0.28; g.add(shadow(b)); } },
+  footstool: { label: "Footstool", w: 50, d: 50, col: "#34507f", build(g, m, oak) {
+    lb(g, 0, 10, 0, 50, 30, 50, m); for (const [x, z] of [[-20, -20], [20, -20], [-20, 20], [20, 20]]) lb(g, x, 0, z, 4, 10, 4, oak); } },
+  cushion: { label: "Floor cushion", w: 60, d: 60, col: "#e2a33a", build(g, m) { lb(g, 0, 0, 0, 60, 14, 60, m); } },
+  crate: { label: "Record crate", w: 36, d: 36, col: "#c49a6c", build(g, m) {
+    lb(g, 0, 0, 0, 36, 2, 36, m); lb(g, -17, 0, 0, 2, 30, 36, m); lb(g, 17, 0, 0, 2, 30, 36, m); lb(g, 0, 0, -17, 36, 30, 2, m); lb(g, 0, 0, 17, 36, 14, 2, m);
+    const cols = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.55 })));
+    for (let k = 0; k < 5; k++) { const s = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.31, 0.004), cols[k]); s.position.copy(v3(0, 17, 12 - k * 5)); s.rotation.x = -0.15; g.add(s); } } },
+};
+function addThing(a, fresh = true) {
+  const C = CATALOGUE[a.type]; if (!C) return;
+  const m = reg(new THREE.MeshStandardMaterial({ color: C.col, roughness: 0.7 })), oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
+  const g = new THREE.Group(); C.build(g, m, oak);
+  movable(a.id, C.label, g, () => ({ x: a.x, z: a.z, rot: 0 }), C.w, C.d, [m], false, { added: true });
+  if (fresh) { S.added.push(a); placeAll(); store.set(KEY, S); }
+}
+/* ---------------------------------------------------------------- edit mode: tap to pick, drag to move, the panel to turn, colour, remove */
+const ray = new THREE.Raycaster(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+let selId = null, selBox = null, selSurf = null, drag = null, preEditView = null, downXY = null;
+function ndc(e) { const r = canvas.getBoundingClientRect(); return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); }
+function shown(o) { for (; o; o = o.parent) if (!o.visible) return false; return true; }
+function hitMovable(e) {
+  ray.setFromCamera(ndc(e), camera);
+  const roots = Object.values(MOV).map(it => it.pivot).filter(p => p && p.visible);
+  const hit = ray.intersectObjects(roots, true).find(h => shown(h.object));
+  if (!hit) return null;
+  let o = hit.object; while (o && !o.userData.movId) o = o.parent;
+  return o ? o.userData.movId : null;
+}
+function hitSurface(e) {
+  ray.setFromCamera(ndc(e), camera);
+  for (const h of ray.intersectObjects([shell, fixtures, ...Object.values(G)], true)) {
+    if (!shown(h.object)) continue;
+    const m = h.object.material; if (!m || Array.isArray(m)) return null;
+    if (m.userData && m.userData.ratio !== undefined) return m.userData.ch === "ceil" ? "ceil" : m.userData.ch === "trim" ? "skirt" : "walls";
+    return null;                                   // something else is in front
+  }
+  return null;
+}
+function floorAt(e) { ray.setFromCamera(ndc(e), camera); const p = new THREE.Vector3(); return ray.ray.intersectPlane(floorPlane, p) ? { x: -p.x / M, z: p.z / M } : null; }
+function clampItem(it, x, z, rot) {
+  const q = ((rot % 180) + 180) % 180, hx = q === 90 ? it.d / 2 : q === 0 ? it.w / 2 : Math.max(it.w, it.d) / 2, hz = q === 90 ? it.w / 2 : q === 0 ? it.d / 2 : hx;
+  x = Math.min(Math.max(x, hx), R.W - hx);
+  const zmax = x + hx <= R.ALC_W ? R.ALC_D : x - hx >= R.BREAST_X[1] ? R.RECESS_Z : 0;
+  z = Math.min(Math.max(z, R.WINDOW_Z + hz), zmax - hz);
+  return { x: Math.round(x), z: Math.round(z) };
+}
+function setLayout(id, patch) { S.layout[id] = Object.assign({}, S.layout[id], patch); if (MOV[id] && MOV[id].added) { const a = S.added.find(a => a.id === id); if (a) Object.assign(a, patch); } }
+function select(id) {
+  selId = id; selSurf = null;
+  if (selBox) { scene.remove(selBox); selBox = null; }
+  if (id && MOV[id] && MOV[id].pivot) { selBox = new THREE.BoxHelper(MOV[id].pivot, 0xffc46b); scene.add(selBox); }
+  editPanel(); dirty();
+}
+function editPanel() {
+  const P = qs("#r3d-sel"); if (!P) return;
+  P.hidden = !(selId || selSurf);
+  if (selSurf) {
+    const lab = { walls: "Walls", ceil: "Ceiling", skirt: "Skirting, door and radiator" }[selSurf];
+    qs("#r3d-selname").textContent = lab;
+    const wallHex = S.paint === "custom" ? S.custom : R.PAINTS[S.paint].hex, key = selSurf === "ceil" ? "ceil" : "skirt";
+    const cur = selSurf === "walls" || S[key] === "match" ? wallHex : S[key];
+    qs("#r3d-selcol").value = cur; qs("#r3d-swatches").hidden = false;
+    qs("#r3d-swatches").innerHTML = (selSurf === "walls" ? Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("")
+      : `<button type="button" class="chip" data-swatch="match">Same as the walls</button><button type="button" class="chip" data-swatch="${selSurf === "ceil" ? "#f2f0ea" : "#ece8dd"}">${selSurf === "ceil" ? "White" : "Off-white"}</button>`);
+    qsa("[data-sel=turn],[data-sel=remove]").forEach(b => b.hidden = true);
+    return;
+  }
+  if (!selId) return;
+  const it = MOV[selId], L = S.layout[selId] || {};
+  qs("#r3d-selname").textContent = it.label;
+  qs("#r3d-swatches").hidden = true;
+  qsa("[data-sel=turn]").forEach(b => b.hidden = !!it.lamp);
+  qsa("[data-sel=remove]").forEach(b => b.hidden = false);
+  qs("#r3d-selcol").parentElement.hidden = !it.mats.length;
+  if (it.mats.length) qs("#r3d-selcol").value = L.col || it.base[0];
+}
+function setEdit(on) {
+  S.edit = on; root.classList.toggle("editing", on);
+  qs("#r3d-editbtn").setAttribute("aria-pressed", String(on));
+  qs("#r3d-editbar").hidden = !on;
+  if (on) { preEditView = S.view; if (!(VIEWS[S.view] || {}).above) setView("doll"); }
+  else { select(null); qs("#r3d-addlist").hidden = true; if (preEditView && preEditView !== S.view) setView(preEditView); }
+  dirty();
+}
+function addList() {
+  const removed = Object.values(MOV).filter(it => !it.added && (S.layout[it.id] || {}).off);
+  qs("#r3d-addlist").innerHTML = removed.map(it => `<button type="button" class="chip" data-putback="${it.id}">↩ ${it.label}</button>`).join("")
+    + Object.entries(CATALOGUE).map(([k, c]) => `<button type="button" class="chip" data-add="${k}">${c.label}</button>`).join("");
+}
+canvas.addEventListener("pointerdown", e => {
+  if (!S.edit || e.button > 0) return;
+  downXY = [e.clientX, e.clientY];
+  const id = hitMovable(e);
+  if (!id) return;
+  select(id);
+  const it = MOV[id], p = spotOf(id), f = floorAt(e);
+  if (!f) return;
+  drag = { id, dx: p.x - f.x, dz: p.z - f.z, x0: p.x, z0: p.z, moved: false };
+  controls.enabled = false; canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const f = floorAt(e); if (!f) return;
+  const it = MOV[drag.id], p = spotOf(drag.id), c = clampItem(it, f.x + drag.dx, f.z + drag.dz, p.rot);
+  drag.moved = true; drag.x = c.x; drag.z = c.z;
+  if (it.lamp) { lamp.position.set(-(c.x - drag.x0) * M, 0, (c.z - drag.z0) * M); }
+  else it.pivot.position.copy(v3(c.x, 0, c.z));
+  if (selBox) selBox.update(); dirty();
+});
+function endDrag(e) {
+  if (drag) {
+    const d = drag; drag = null; controls.enabled = true;
+    if (d.moved) { setLayout(d.id, { x: d.x, z: d.z }); if (MOV[d.id].lamp) { lamp.position.set(0, 0, 0); built.lamp = null; applyState(); select(d.id); } else { placeAll(); store.set(KEY, S); } }
+    return;
+  }
+  if (S.edit && downXY && Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]) < 6) {   // a tap on nothing movable: a surface to paint?
+    const surf = hitSurface(e);
+    select(null); selSurf = surf; editPanel();
+  }
+  downXY = null;
+}
+canvas.addEventListener("pointerup", endDrag);
+canvas.addEventListener("pointercancel", () => { if (drag) { drag = null; controls.enabled = true; placeAll(); } });
+qs("#r3d-editbtn").addEventListener("click", () => setEdit(!S.edit));
+qs(".r3d-edit").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || b.closest("#r3d-sel") || b.id === "r3d-editbtn") return;
+  if (b.id === "r3d-add") { addList(); const l = qs("#r3d-addlist"); l.hidden = !l.hidden; return; }
+  if (b.id === "r3d-layreset") { if (!confirm("Put everything back where the plan has it, and take out what you've added?")) return;
+    S.added.forEach(a => { const it = MOV[a.id]; if (it) { movers.remove(it.pivot); delete MOV[a.id]; } }); S.added = []; S.layout = {};
+    select(null); built.lamp = null; applyState(); return; }
+  if (b.dataset.putback) { setLayout(b.dataset.putback, { off: false }); qs("#r3d-addlist").hidden = true; if (MOV[b.dataset.putback].lamp) built.lamp = null; applyState(); select(b.dataset.putback); return; }
+  if (b.dataset.add) {
+    const t = controls.target, c = clampItem(CATALOGUE[b.dataset.add], -t.x / M, Math.min(t.z / M, -40), 0);
+    const a = { id: "a" + Date.now().toString(36), type: b.dataset.add, x: c.x, z: c.z };
+    addThing(a); qs("#r3d-addlist").hidden = true; select(a.id); applyState();
+  }
+});
+qs("#r3d-sel").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const k = b.dataset.sel;
+  if (b.dataset.swatch) {
+    const v = b.dataset.swatch;
+    if (selSurf === "walls") S.paint = v; else S[selSurf === "ceil" ? "ceil" : "skirt"] = v;
+    repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); editPanel(); return;
+  }
+  if (k === "done") { select(null); return; }
+  if (!selId) return;
+  const it = MOV[selId];
+  if (k === "turn") { const p = spotOf(selId), rot = (p.rot + 45) % 360, c = clampItem(it, p.x, p.z, rot); setLayout(selId, { rot, x: c.x, z: c.z }); placeAll(); store.set(KEY, S); }
+  if (k === "remove") {
+    if (it.added) { movers.remove(it.pivot); delete MOV[selId]; S.added = S.added.filter(a => a.id !== selId); delete S.layout[selId]; }
+    else { setLayout(selId, { off: true }); if (it.lamp) built.lamp = null; }
+    select(null); applyState();
+  }
+});
+qs("#r3d-selcol").addEventListener("input", e => {
+  const v = e.target.value;
+  if (selSurf === "walls") { S.paint = "custom"; S.custom = v; repaint(); syncButtons(); updateCaption(); }
+  else if (selSurf) { S[selSurf === "ceil" ? "ceil" : "skirt"] = v; repaint(); }
+  else if (selId) { setLayout(selId, { col: v }); placeAll(); }
+  store.set(KEY, S); dirty();
+});
+/* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast */
+canvas.addEventListener("webglcontextlost", e => {
+  e.preventDefault(); S.quality = "fast"; S.picked = true; store.set(KEY, S);
+  msg.hidden = false; root.classList.remove("ready");
+  msg.innerHTML = 'The 3D room ran out of graphics memory (HD with shadows asks a lot of a phone). <button type="button" class="btn" onclick="location.reload()">Reload it in Fast</button>';
+});
 
 /* ---------------------------------------------------------------- views */
 const VIEWS = {
@@ -1020,7 +1321,9 @@ function still(w, h) {
   gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
   const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
   if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
-  Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(2048, 2048); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
+  const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
+  Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(big, big); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
+  capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
   MATS.forEach(m => m.needsUpdate = true);
   reshadow();
   gl.render(scene, camera);
@@ -1035,13 +1338,14 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v17 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v18 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
-  st.textContent = "Rendering 3840 × 2160…";
+  const [sw, sh] = SMALL ? [2560, 1440] : [3840, 2160];   // v18: phones save at 2560 × 1440 so the picture doesn't take the room down
+  st.textContent = `Rendering ${sw} × ${sh}…`;
   await new Promise(r => setTimeout(r, 30));
-  const url = still(3840, 2160);
+  const url = still(sw, sh);
   const blob = await (await fetch(url)).blob();
   const dl = (window.claude && window.claude.use) ? await window.claude.use("downloads") : null;
   if (dl) {
@@ -1058,12 +1362,12 @@ const sameAsScene = () => LAYERS.every(k => (S.lv[k] ?? 0) === (SCENES[S.scene].
 function syncButtons() {
   press("site", S.site); press("dining", S.dining); press("scene", sameAsScene() ? S.scene : ""); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
-  press("ceil", S.ceil); press("skirt", S.skirt);
+  press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants);
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
   qs("#r3d-custom").value = S.custom;
-  if (S.ceil !== "match") qs("#r3d-ceil").value = S.ceil;
-  if (S.skirt !== "match") qs("#r3d-skirt").value = S.skirt;
+  if (S.ceil !== "match" && qs("#r3d-ceil")) qs("#r3d-ceil").value = S.ceil;
+  if (S.skirt !== "match" && qs("#r3d-skirt")) qs("#r3d-skirt").value = S.skirt;
   qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : (S.lv[k] ?? 0); i.value = v; qs(`[data-lvout="${k}"]`).textContent = `${Math.round(v)}%`; });
   qsa("[data-col]").forEach(i => { i.value = S.col[i.dataset.col] || WARM; });
 }
@@ -1079,7 +1383,10 @@ root.addEventListener("click", e => {
   else if (d.skirt) S.skirt = d.skirt, repaint(), store.set(KEY, S), dirty();
   else if (d.colreset) S.col[d.colreset] = WARM, applyLight(), store.set(KEY, S);
   else if (d.tog) S[d.tog] = !S[d.tog], applyLight(), store.set(KEY, S);
-  else if (d.idea) S.ideas = Object.assign({}, S.ideas, { [d.idea]: !S.ideas[d.idea] }), applyLight(), updateCaption(), store.set(KEY, S);
+  else if (d.idea) S.ideas = Object.assign({}, S.ideas, { [d.idea]: !S.ideas[d.idea] }), applyLight(), placeAll(), updateCaption(), store.set(KEY, S);
+  else if (d.plants) {           // v18: the layout puts the stand and the shelf back on their spots for it
+    S.plants = d.plants; for (const k of ["plants", "records"]) if (S.layout[k]) { delete S.layout[k].x; delete S.layout[k].z; delete S.layout[k].rot; }
+    applyState(); }
   else if (d.paint) S.paint = d.paint, repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();

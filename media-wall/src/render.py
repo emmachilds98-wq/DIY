@@ -1273,11 +1273,18 @@ def wrap():
 
     if VIEW == "side" and not G.PLAIN:       # from the side the screen is beyond the case: draw it first
         o.append(screen())
-    o.append(box(cx1, st, cz0, cw, ch, cd, "#121314", "#1d1f21", "#0d0e0f"))
+    # v18, client: "PC internals still not visible, there is a clear side panel": the case is drawn as its five steel panels (wall side,
+    # top, bottom, the alcove end with the front fans, the rear) and a clear glass side to the room, so the parts inside show
+    PCK = ("#121314", "#1d1f21", "#0d0e0f")
+    o.append(box(cx1, st, cz0, 0.8, ch, cd, *PCK))                       # the wall side
+    o.append(box(cx1, st, cz0, cw, 0.8, cd, *PCK))                       # the floor of the case
+    o.append(box(cx1, st, cz0, cw, ch, 0.8, *PCK))                       # the rear, by the window
+    o.append(box(cx1, st, cz1 - 1.5, cw, ch, 1.5, *PCK))                 # the front, towards the alcove
     o.append(pc_internals(cx1, st, cz0, cz1, cw, ch))
+    o.append(box(cx1, st + ch - 1.0, cz0, cw, 1.0, cd, *PCK))            # the top, drawn after the parts so it sits over them
     gx = cx1 + cw + 0.02
     side = [P(gx, st + 1, cz0 + 1), P(gx, st + 1, cz1 - 1), P(gx, st + ch - 1, cz1 - 1), P(gx, st + ch - 1, cz0 + 1)]
-    o.append(poly(side, "#0c1714"))
+    o.append(poly(side, "url(#glass)"))
     squash = 1.0 if VIEW == "side" else 0.42
     for (yy, zz) in [(st + 36, cz1 - 5.5), (st + 23.5, cz1 - 5.5), (st + 11, cz1 - 5.5)]:
         pc = P(gx, yy, zz); k = K(zz, gx)
@@ -1694,11 +1701,44 @@ def now_playing():
     return "\n".join(o)
 
 
+def record_shelf():
+    """v18, client: "i could keep the vinyl shelf i have ... 4 trays in 2x2 square wood shelf". In layout A (the recommendation) it stands
+    on the breast under the “now playing” ledge: a 2 × 2 wooden cube shelf (drawn at KALLAX 2 × 2's size until measured), a tray in each
+    cube with its LPs face-out, the front sleeve showing."""
+    lay = G.PLANT_LAYOUTS[G.PLANT_LAYOUT]
+    cx, cz, facing = lay["records"]
+    if facing != -1:                     # in the window corner: out of these views
+        return ""
+    Rs = G.RECORD_SHELF
+    w, d, h, t = Rs["w"], Rs["d"], Rs["h"], Rs["t"]
+    x0, z0 = cx - w / 2, cz - d / 2
+    W_ = (Rs["col"], "#d4ac80", "#a57a50")
+    o = [box(x0, 0, z0 + d - 0.6, w, h, 0.6, "#8a6844")]                                  # the back
+    o.append(box(x0, 0, z0, t, h, d, *W_)); o.append(box(x0 + w - t, 0, z0, t, h, d, *W_))
+    o.append(box(x0 + w / 2 - t / 2, t, z0, t, h - 2 * t, d, *W_))
+    arts = [[("#e9e3d3", 0, 1, 0, 1), ("#2f3e5c", 0.15, 0.85, 0.15, 0.7)], [("#d24b33", 0, 1, 0, 1), ("#f3d27a", 0.1, 0.9, 0.62, 0.9)],
+            [("#1f1f1f", 0, 1, 0, 1), ("#e8e1cf", 0.3, 0.7, 0.3, 0.7)], [("#14806d", 0, 1, 0, 1), ("#efe6d2", 0.1, 0.9, 0.1, 0.45)]]
+    cw = (w - 3 * t) / 2
+    k = 0
+    for yb in (t, h / 2 + t / 2):
+        for xb in (x0 + t, x0 + t + cw + t):
+            ch_ = h / 2 - 1.5 * t
+            lp = min(G.LP, ch_ - 2.0)
+            q = [P(xb + (cw - lp) / 2, yb + 1.0, z0 + 3.0), P(xb + (cw + lp) / 2, yb + 1.0, z0 + 3.0),
+                 P(xb + (cw + lp) / 2, yb + 1.0 + lp * 0.98, z0 + 3.0 + lp * 0.17), P(xb + (cw - lp) / 2, yb + 1.0 + lp * 0.98, z0 + 3.0 + lp * 0.17)]
+            o.append(art_on(q, arts[k % 4]))
+            o.append(poly(q, "none", 'stroke="#000" stroke-opacity="0.3" stroke-width="0.8"'))
+            o.append(box(xb + 0.5, yb, z0 + 1.0, cw - 1.0, 6.0, 1.2, "#b88a5c", "#cfa274", "#94683f"))   # the tray's front lip
+            k += 1
+    o.append(box(x0, 0, z0, w, t, d, *W_)); o.append(box(x0 + t, h / 2 - t / 2, z0, w - 2 * t, t, d, *W_)); o.append(box(x0, h - t, z0, w, t, d, *W_))
+    return "\n".join(o)
+
+
 def dining_wall():
     """An oak backboard on the breast carries a 110 × 80 solid oak top on lift-off hinges and two Hebgo folding
     brackets. Everyday it stands folded up against the breast; down, it seats four at the wall."""
     if SITE_NOW == "stairs":            # v16: the table is on the stairs wall (out of these views): the breast has its ledge and frames
-        return now_playing() + "\n" + breast_frames()
+        return record_shelf() + "\n" + now_playing() + "\n" + breast_frames()
     if G.TABLE_STYLE == "fliptop":
         return fliptop_wall()
     o = []
@@ -2702,20 +2742,20 @@ def all_svgs():
     six_sub = ("The flip-top open on its gate leg, 110 × 160, still on the wall · both spot bars · three a side" if G.TABLE_STYLE == "fliptop" else
                "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end")
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v16, the table by the stairs", sub))
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v18, the table by the stairs", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
     out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("Option A: the flip-top on the chimney breast, set for four · v16", "Flip-top gate-leg oak table, still on the wall · " + sub))
+                                   label=("Option A: the flip-top on the chimney breast, set for four · v18", "Flip-top gate-leg oak table, still on the wall · " + sub))
     out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
-                                  label=("Option A: the flip-top on the breast, set for six · v16", six_sub))
+                                  label=("Option A: the flip-top on the breast, set for six · v18", six_sub))
     dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25, slim_open=30)
-    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v16", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
+    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v18", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
     out["v13_m_join"] = build(with_dims=False, style="joinery", measure="join")
     out["v13_m_four"] = build(with_dims=False, style="joinery", dining="four", measure="four")
     out["v13_m_six"] = build(with_dims=False, style="joinery", dining="six", measure="six")
     out["v13_m_drawers"] = build(**dkw, measure="drawers")
     out["v13_m_side"] = build_side(measure=True)
-    out["v13_side"] = build_side(label=("The PC side wall · v16", "One oak run sweeping out to the PC, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
+    out["v13_side"] = build_side(label=("The PC side wall · v18", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
         lab = name + (" · chosen" if k == MAIN_PAINT else "")

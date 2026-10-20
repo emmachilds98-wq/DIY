@@ -401,3 +401,20 @@ BAR1_HEADS = [(off, col, stem, (PEND_X, 0.0, PEND_Z + off * HEAD_SPREAD)) for of
 def bar_head_xz(bx, bz, off):
     """Where a head hangs: bars run along z since v15 (TV to window), along x before."""
     return (bx, bz + off) if BAR_AXIS == "z" else (bx + off, bz)
+
+
+# ---------------------------------------------------------------- v18 (20 Oct): the client's plant stand and their 2 x 2 record shelf
+# "ive bought a plant shelf something very similar to this image" (a bamboo stand, two columns, four tiers, LED grow bars under the top two)
+# "and i could keep the vinyl shelf i have ... 4 trays in 2x2 square wood shelf". Both drawn at assumed sizes until measured (questions).
+PLANT_STAND = dict(w=90.0, d=30.0, h=120.0, tiers=(4.0, 42.0, 80.0, 118.0), cols=2, post=2.4, col="#a8703f", lights=(2, 3))
+RECORD_SHELF = dict(w=77.0, d=39.0, h=77.0, t=1.6, cubes=(2, 2), col="#c49a6c", lps_each=40)   # as IKEA KALLAX 2x2 until measured
+# where each goes, by layout: (centre x, centre z, facing: +1 = faces into the room from the window wall, -1 = from the breast)
+_BREAST_CX = (BREAST_X[0] + BREAST_X[1]) / 2
+PLANT_LAYOUTS = {
+    "corner": dict(name="Plants in the window corner, records on the breast", plants=(390.0, WINDOW_Z + 1.0 + PLANT_STAND["d"] / 2, 1),
+                   records=(_BREAST_CX, -1.0 - RECORD_SHELF["d"] / 2, -1)),
+    "breast": dict(name="Records in the window corner, plants on the breast", plants=(_BREAST_CX, -1.0 - PLANT_STAND["d"] / 2, -1),
+                   records=(383.5, WINDOW_Z + 1.0 + RECORD_SHELF["d"] / 2, 1)),
+}
+PLANT_LAYOUT = "corner"          # the recommendation: daylight for the plants, the records beside the turntable
+LAMP_DEFAULT = "sofa"            # v18: the window corner is taken either way, so the red lamp starts at the sofa's west end
