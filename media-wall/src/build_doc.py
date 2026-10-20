@@ -217,7 +217,7 @@ def optc_html():
     rows = [r for r in TRACK if r[2] == "6 Dining wall" and any(r[1].startswith(k) for k in _FLIPTOP_KEYS)]
     plo, phi = sum(r[4] or 0 for r in rows), sum(r[5] or 0 for r in rows)
     seats = "".join(f"<tr><td>{a}</td><td>{b}</td><td>{d}</td><td>{e}</td></tr>" for a, b, _s, d, e, _r in F.max_seats_zone()[2])
-    cost = "".join(f"<tr><td>{a}</td><td>£{money(b, c)}</td></tr>" for a, b, c in OPTC_COST)
+    cost = "".join(f"<tr><td>{a}</td><td style='white-space:nowrap'>£{money(b, c)}</td></tr>" for a, b, c in OPTC_COST)
     return f"""
 <h3>Option C: the dining cabinet, the table and the chairs in one (a second option)</h3>
 <p>You asked us to explore "other table config that looks more tidy and includes the chairs, this is a second option build not replacing the current", and to "assess the max number of seatings you can fit". The flip-top by the stairs stays the plan. Option C is the other way to build that wall, drawn and checked so you can choose.</p>
@@ -247,8 +247,8 @@ def optc_html():
 </ul>
 <h3>What option C costs</h3>
 <table class="tight"><tr><th>Item</th><th>Cost</th></tr>{cost}
-<tr><td><b>Option C in all</b></td><td><b>£{money(lo, hi)}</b></td></tr>
-<tr><td>The flip-top, its fittings, the chairs and the chair cupboard it would replace</td><td>£{money(plo, phi)}</td></tr></table>
+<tr><td><b>Option C in all</b></td><td style="white-space:nowrap"><b>£{money(lo, hi)}</b></td></tr>
+<tr><td>The flip-top, its fittings, the chairs and the chair cupboard it would replace</td><td style="white-space:nowrap">£{money(plo, phi)}</td></tr></table>
 <p>Option C costs about £{money(lo - plo, hi - phi)} more than the flip-top and the chair cupboard, and it seats one more with all eight chairs packed away. Its rows aren't in the buy list's totals, so the plan's total doesn't change unless you choose it.</p>
 <h3>Option C: cut list</h3>
 <table class="tight"><tr><th>Part</th><th>Material</th><th>Size (cm)</th><th>Qty</th></tr>
