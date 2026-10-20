@@ -125,12 +125,12 @@ def scene():
         chairs = encode(rec(R.dining_chairs))
         groups[f"A_{st}"] = wall + chairs
         groups[f"B_{st}"] = to_site_b(wall) + (to_site_b(chairs) if st == "four" or G.TABLE_STYLE == "fliptop" else chairs)   # v15: the flip-top stays on its wall
-    groups["now_ledge"] = encode(rec(R.now_playing))   # v16: with the table by the stairs, the breast's "now playing" ledge (v18: its own group)
         bar2[f"A_{st}"] = R.spot_heads2()
         bx = (G.TABLE_B_OPEN_X[0] + G.TABLE_B_OPEN_X[1]) / 2 if st != "folded" else G.ROOM_W - 2.0   # v15: over the open flip-top
         by = G.TABLE_TOP if st != "folded" else G.FOLDED_TOP - 30.0
         bar2[f"B_{st}"] = bar2[f"A_{st}"]   # v17: every head straight down, whichever wall the table is on
     state()
+    groups["now_ledge"] = encode(rec(R.now_playing))   # v16: with the table by the stairs, the breast's "now playing" ledge (v18: its own group)
 
     def bar(cx, cz, heads):
         return {"x": cx, "z": cz, "axis": G.BAR_AXIS, "heads": [{"dx": dx, "col": col, "stem": stem, "tgt": list(tgt)} for dx, col, stem, tgt in heads]}

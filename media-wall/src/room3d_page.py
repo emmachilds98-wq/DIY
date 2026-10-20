@@ -29,6 +29,22 @@ CSS = """
   text-shadow: 0 1px 3px #000c; pointer-events: none; }
 .r3d-tools { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 6px; }
 .r3d-tools button { background: #000a; color: #fff; border: 1px solid #fff4; border-radius: 8px; padding: 6px 9px; font: inherit; font-size: 12px; cursor: pointer; }
+/* v18: edit mode over the canvas: the Edit button, its bar (add, reset, a hint) and the panel for what you've picked */
+.r3d-edit { position: absolute; top: 8px; left: 8px; right: 128px; display: grid; gap: 6px; justify-items: start; pointer-events: none; }
+.r3d-edit > * { pointer-events: auto; }
+.r3d-edit button, .r3d-edit .chip { background: #000b; color: #fff; border: 1px solid #fff5; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+.r3d-edit button[aria-pressed=true] { background: #c9893f; border-color: #c9893f; color: #111; }
+.r3d-editbar, .r3d-sel, .r3d-addlist { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: #0009; padding: 6px; border-radius: 10px; max-width: 100%; }
+.r3d-editbar[hidden], .r3d-sel[hidden], .r3d-addlist[hidden], .r3d-sel [hidden] { display: none; }
+.r3d-hint { color: #f3efe6; font-size: 12.5px; line-height: 1.3; max-width: 34em; }
+.r3d-sel b { color: #fff; font-size: 13.5px; margin-right: 4px; }
+.r3d-sel label { color: #fff; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+.r3d-sel input[type=color] { width: 34px; height: 28px; padding: 0; border: 1px solid #fff5; border-radius: 6px; background: none; }
+.r3d-sel .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.r3d.editing canvas { cursor: pointer; }
+@media (max-width: 600px) { .r3d-edit button, .r3d-edit .chip { padding: 5px 8px; font-size: 12px; } .r3d-hint { display: none; } }
+details.r3d-more > summary { cursor: pointer; font-size: 14px; color: var(--muted); padding: 4px 0; }
+details.r3d-more[open] > summary { margin-bottom: 8px; }
 /* v17: walk buttons over the canvas (keys: WASD or arrows to move, Q and E to turn) */
 .r3d-pad { position: absolute; top: 8px; right: 8px; display: grid; grid-template-columns: repeat(3, 32px); grid-auto-rows: 32px; gap: 4px; }
 .r3d-pad button { background: #000a; color: #fff; border: 1px solid #fff4; border-radius: 8px; padding: 0; font: inherit; font-size: 15px; line-height: 1; cursor: pointer; touch-action: manipulation; }
@@ -87,12 +103,14 @@ def controls():
     lights = (f'<div class="grp r3d-wide"><span class="label">Lights: pick a scene, then slide any light</span>'
               f'<div class="seg" role="group" aria-label="Lighting scene">' + "".join(f'<button type="button" data-scene="{k}" aria-pressed="false">{n}</button>' for k, n, *_ in scenes.SCENES)
               + '<button type="button" data-scene="day" aria-pressed="false">Daytime</button></div>'
+              '<details class="r3d-more"><summary>Fine-tune each light: sliders and bulb colours</summary>'
               f'<div class="r3d-lvs"><div class="r3d-lv r3d-master"><label for="lv-master">All lights</label><input type="range" id="lv-master" min="0" max="100" step="1" data-lv="master"><output data-lvout="master">100%</output><span></span></div>'
-              + "".join(rows) + '</div>'
+              + "".join(rows) + '</div></details>'
               '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
               '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
-              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>'
+              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button>'
+              '<button type="button" data-tog="grow" aria-pressed="false">Plant stand lights</button></div></div>'
               # v17: the ideas (ideas.py), all off by default: suggestions, not in the plan
               '<div class="grp"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
@@ -101,11 +119,11 @@ def controls():
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
+        # v18: your plant stand and record shelf, two layouts; the lamp, the ceiling and the skirting menus went: in "Edit room" you
+        # drag the lamp, and tap the ceiling or the skirting to paint it
+        seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Your plant stand and record shelf"),
         lights,
-        seg("paint", paints, "Wall paint", picker("r3d-custom", "#899081", "Any colour")),
-        seg("ceil", CEIL_PRESETS, "Ceiling paint", picker("r3d-ceil", "#f2f0ea", "Any colour")),
-        seg("skirt", SKIRT_PRESETS, "Skirting, door and radiator", picker("r3d-skirt", "#ece8dd", "Any colour")),
-        seg("lamp", [(k, v[0]) for k, v in G.FLOOR_LAMP_SPOTS.items()], "Where the red lamp stands"),
+        seg("paint", paints, "Wall paint (or tap a wall in Edit room)", picker("r3d-custom", "#899081", "Any colour")),
         seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers"),
         seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
     ])
@@ -117,6 +135,13 @@ def section():
     return f"""<div class="r3d" id="r3d">
   <div class="r3d-views" role="group" aria-label="Camera">{views}</div>
   <div class="r3d-stage"><canvas tabindex="0" aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom; WASD or the arrow keys walk, Q and E turn"></canvas>
+    <div class="r3d-edit"><button type="button" id="r3d-editbtn" aria-pressed="false" title="Move, turn, recolour, remove and add things; tap a wall to paint it">✎ Edit room</button>
+      <div class="r3d-editbar" id="r3d-editbar" hidden><button type="button" id="r3d-add">+ Add</button><button type="button" id="r3d-layreset">Reset layout</button>
+        <span class="r3d-hint">Drag a thing to move it; tap it to turn, recolour or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
+      <div class="r3d-addlist" id="r3d-addlist" hidden></div>
+      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><button type="button" data-sel="turn">⟳ Turn</button>
+        <label>Colour <input type="color" id="r3d-selcol" value="#888888"></label><span id="r3d-swatches" hidden></span>
+        <button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
     <div class="r3d-pad" role="group" aria-label="Walk"><button type="button" data-walk="tl" title="Turn left (Q)" aria-label="Turn left">↺</button><button type="button" data-walk="f" title="Forward (W)" aria-label="Forward">▲</button><button type="button" data-walk="tr" title="Turn right (E)" aria-label="Turn right">↻</button><button type="button" data-walk="l" title="Step left (A)" aria-label="Step left">◀</button><button type="button" data-walk="b" title="Back (S)" aria-label="Back">▼</button><button type="button" data-walk="r" title="Step right (D)" aria-label="Step right">▶</button></div>
     <div class="r3d-msg" id="r3d-msg">Loading the 3D room…</div>
     <p class="r3d-cap" id="r3d-cap"></p>
