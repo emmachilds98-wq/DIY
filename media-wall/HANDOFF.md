@@ -58,7 +58,8 @@
 - **Questions:** `questions.OPTS` (rows of choices per id; the PDF ignores it). The page writes the composed text through each card's
   hidden textarea and Save, so `answers/<id>` and `mw12-drafts` are as before; "Add a photo" opens that card's upload. Old answers light
   the matching chips.
-- Not done this round (the plan's step 9 text pass): Network's Part P note and the plant stand as short lists; the reference designs'
+- Text pass (the plan's step 9, a follow-up PR): the plan's Part P note and the plant stand section are short lists now (backup
+  `build_doc_v25_backup.py`). The reference designs'
   exact suggested question wording (`QS` in Plan Sheet.dc.html) wasn't available, so `questions.OPTS` is our own: check it with Emma.
 - **Kept:** localStorage keys (`mw13-view`, `mw22-*`, `mw23-*` untouched, `mw18-3d`, `mw12-*`, `mw13-steps`), tracker ids (one row's words
   changed: `TRACK_KEEP_ID` keeps its old id), question ids, step numbers. Ids removed on purpose: `big-text`, `data-skin`, `data-theme`,
