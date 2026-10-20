@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "20"
+VERSION = "21"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -410,7 +410,8 @@ summary .pf a { color: var(--oak); }
 TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("ideas", "Ideas"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
-CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table folded under your shelf by the stairs, the breast free",
+CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above the window side with the window wall cut away, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture",
+         "3d_window_B_folded": "From the window, everyday evening: the table folded under your shelf by the stairs, the breast free",
          "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
          "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the strips low",
          "3d_wall_drawers": "Every drawer out, the records scene: the LP crates under the turntable, a slim game drawer beside them",
@@ -435,7 +436,8 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_ideas_breast": "Idea, not in the plan: the tall glass display case (v20: 85 tall, three glass shelves) on the chimney breast, oak, with collectibles, above the \u201cnow playing\u201d ledge",
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the records scene",
-         "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains"}
+         "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
+         "3d_suggest": "Suggested furniture and decor (v21), all on: a tall floor plant and a round side table at the sofa's open end, a pouffe on the rug, a print over the sofa, a clock over the door, a tray on the coffee table"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
 IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
 IDEA_OPTS = {"cushions": {"decor": {"cushions": "rust"}}}   # v20: the cushions are a Decor choice, not an idea toggle
@@ -454,7 +456,26 @@ def ideas_panel():
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
             f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on; the cushions are under “Decor”. All of them together would be about £{lo}–{hi}.</p>'
-            f'<div class="opts">{"".join(cards)}</div>' + decor_block())
+            f'<div class="opts">{"".join(cards)}</div>' + suggest_block() + decor_block())
+
+
+def suggest_block():
+    """v21, client: "i also want expansion of the suggested furniture and decor making sure i can choose to have it or not"."""
+    import ideas as I
+    allon = {k: True for k, *_ in I.SUGGEST}
+    rows = "".join(
+        f'<article class="opt noimg"><div class="ob"><span class="label">{html.escape(size)} · about £{c[0]}–{c[1]}</span><h3>{html.escape(t)}</h3>'
+        f'<p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>'
+        f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'B', 'view': 'door', 'sugg': {k: True}})}'>See it in the 3D room</button></div></article>"
+        for k, t, size, c, why, where in I.SUGGEST)
+    lo, hi = I.suggest_low_high()
+    return (f'<div class="qhead"><h2 class="ptitle">Suggested furniture and decor</h2><span class="caption">Each one on or off, in the 3D room: none are in the plan or the costs</span></div>'
+            f'<figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
+            f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure>'
+            f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start; the floor pieces move in Edit room. '
+            f'All six together would be about £{lo}–{hi}. Edit room\'s Add list also has a rattan armchair, an oak blanket ladder, an oak bench and an arc floor lamp (v21).</p>'
+            f'<div class="opts">{rows}</div>'
+            f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'B', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
 
 
 def decor_block():
@@ -520,7 +541,7 @@ def options_card():
 
 def gallery3d():
     figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
-                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor")))
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor", "3d_suggest")))
     return f'<div class="gallery">{figs}</div>'
 
 TABNAME = dict(TABS)
@@ -695,7 +716,7 @@ def page(site=False):
 
   <section class="panel" id="overview" role="tabpanel" aria-labelledby="tb-overview">
     <div class="dash">
-      <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_window_B_folded" alt="The room in 3D, from the window" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
+      <a class="dcard d3d" href="#room" data-go="room"><img data-art="3d_room" alt="The whole room in 3D, from above the window side, cut away" loading="lazy"><span>Walk round your room in 3D \u2192</span></a>
       <div class="dcard"><span class="label">Build</span><strong id="d-steps">0 of {len(steps())}</strong><span class="dbar"><i id="d-steps-bar"></i></span><a class="caption" id="d-next" href="#build" data-go="build">Start with step 1</a></div>
       <div class="dcard"><span class="label">Buy list</span><strong id="d-buy">0 bought</strong><span class="dbar"><i id="d-buy-bar"></i></span><span class="caption" id="d-paid">\u00a30 paid so far, of about \u00a3{money(lo_tot, hi_tot)}</span></div>
       <div class="dcard"><span class="label">Your answers</span><strong id="d-q">0 of {len(QUESTIONS)}</strong><span class="dbar"><i id="d-q-bar"></i></span><a class="caption" href="#questions" data-go="questions">Answer what we still need</a></div>
@@ -721,7 +742,7 @@ def page(site=False):
 
   <section class="panel" id="room" role="tabpanel" aria-labelledby="tb-room" hidden>
     <div class="qhead"><h2 class="ptitle">Your room in 3D</h2><span class="caption">Drag to look round · scroll or pinch to zoom · right-drag or two fingers to slide</span></div>
-    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set, and where your plant stand and record shelf go; pick a lighting scene (the sliders and bulb colours fold out under it); turn the OBEGRÄNSAD panel, the laser, the PC and the plant lights on or off; pull the drawers out. <b>New in v18: Edit room</b> (top left of the picture): drag things around like a dolls' house, turn them, recolour them, take them out or add new ones, and tap a wall, the ceiling or the skirting to paint it. Walk with the arrows (or WASD, Q and E), and save any view as an HD picture.</p>
+    <p class="caption">Built from the plan's own measurements: every shelf, drawer, console and record in the wall is the HD renders' geometry, in your real room (alcove 186 \u00d7 38, ceiling 235). Choose where the table goes and how it's set, and where your plant stand and record shelf go; pick a lighting scene (the sliders and bulb colours fold out under it); turn the OBEGRÄNSAD panel, the laser, the PC and the plant lights on or off; pull the drawers out. <b>New in v21:</b> it opens on <b>the whole room</b>, from above with the nearest wall cut away, and under it you can turn each <b>suggested piece of furniture or decor</b> on or off. <b>Edit room</b> (top left of the picture): drag things around like a dolls' house, turn them, recolour them, take them out or add new ones, and tap a wall, the ceiling or the skirting to paint it. Walk with the arrows (or WASD, Q and E), and save any view as an HD picture.</p>
     {room3d_page.section()}
     <h3 class="ptitle">HD pictures from the 3D room</h3>
     <p class="caption">Rendered at 2560 \u00d7 1440; tap one to see it full size. The same set is in the project folder.</p>

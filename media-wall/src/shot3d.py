@@ -13,6 +13,7 @@ ART = HERE / "art"
 
 # (file stem, options, title for ../out)
 SHOTS = [
+    ("3d_room", dict(view="room", site="B", dining="folded", scene="everyday"), "the whole room - from above the window side, cut away - everyday evening"),   # v21: the new default view
     ("3d_window_B_folded", dict(view="window", site="B", dining="folded", scene="everyday"), "from the window - table by the stairs, folded - everyday evening"),
     ("3d_window_B_four", dict(view="window", site="B", dining="four", scene="dinner"), "from the window - table by the stairs, down for four - dinner"),
     ("3d_wall_tv", dict(view="wall", site="B", dining="folded", scene="tv"), "the media wall - TV night"),
@@ -45,6 +46,9 @@ SHOTS = [
      "IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - records"),
     ("3d_decor", dict(view="door", site="B", dining="folded", scene="everyday", decor=dict(rug="stripes", cushions="rust", curtains="linen")),
      "DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - everyday evening"),
+    # v21: the suggested furniture and decor, all on
+    ("3d_suggest", dict(view="door", site="B", dining="folded", scene="everyday", sugg={"floorplant": True, "sidetable": True, "pouffe": True, "art": True, "clock": True, "tray": True}),
+     "SUGGESTED furniture and decor, all on - floor plant, side table, pouffe, print, clock, coffee-table tray - everyday evening"),
 ]
 
 
@@ -72,15 +76,15 @@ def run(test=False, only=None):
         for stem, opts, title in SHOTS:
             if only and only not in stem:
                 continue
-            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {}}, **opts, quality="hd"))
+            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {}, "sugg": {}}, **opts, quality="hd"))
             url = pg.evaluate(f"() => window.R3D.still({w}, {h})")
             im = Image.open(io.BytesIO(base64.b64decode(url.split(",", 1)[1]))).convert("RGB")
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v20 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v21 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v20_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v21_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])
