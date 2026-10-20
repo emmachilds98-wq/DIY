@@ -436,8 +436,9 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the records scene",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains"}
-IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable"}
-IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc"}
+IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
+IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
+IDEA_OPTS = {"cushions": {"decor": {"cushions": "rust"}}}   # v20: the cushions are a Decor choice, not an idea toggle
 
 
 def ideas_panel():
@@ -446,13 +447,13 @@ def ideas_panel():
     cards = []
     for k, title, size, cost, why, where, in3d in I.IDEAS:
         im = (f'<img data-art="{IDEA_SHOT[k]}" alt="{html.escape(CAP3D[IDEA_SHOT[k]])}" loading="lazy">' if in3d else "")
-        opts = json.dumps({"site": "B", "view": IDEA_VIEW.get(k, "window"), "ideas": {k: True}})
+        opts = json.dumps(dict({"site": "B", "view": IDEA_VIEW.get(k, "window")}, **IDEA_OPTS.get(k, {"ideas": {k: True}})))
         b = f"<button type='button' class='btn' data-r3d='{opts}'>See it in the 3D room</button>" if in3d else ""
         cards.append(f'<article class="opt{"" if in3d else " noimg"}">{im}<div class="ob"><span class="label">{html.escape(size)} · about £{cost[0]}–{cost[1]}</span>'
                      f'<h3>{html.escape(title)}</h3><p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>{b}</div></article>')
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
-            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on. All of them together would be about £{lo}–{hi}.</p>'
+            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on; the cushions are under “Decor”. All of them together would be about £{lo}–{hi}.</p>'
             f'<div class="opts">{"".join(cards)}</div>' + decor_block())
 
 
