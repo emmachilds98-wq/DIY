@@ -2,6 +2,10 @@
 
 ## START HERE (next agent)
 - **v26 is built (round 20, below): option C (the dining cabinet, up to eight), the Tools panel fixed, more in Look and Extras.**
+  **Shipped (round 20b):** PR #20 merged into main (GitHub Pages is current) and the shared deck 71ff republished at v26
+  (version 1792532174-e30e; all 32 new stills uploaded to its asset store and recorded in `src/deck_assets.json`). The plan PDF's
+  option C costs: £961–1,650 against £666–1,265 for the flip-top rows it would replace (about £295–385 more); the money cells carry
+  the £ sign and don't wrap.
   v25 (round 19) made the page "Demma Home Improvements", option 1c, from `media-wall/UPGRADE_PLAN_v25_UI.md`. Still to
   do from `UPGRADE_PLAN_v25.md` (the earlier plan): the guided tour and "copy link to this view", choices for each suggestion, re-render only
   the stills that changed. v24 is in round 18. Still waiting on the client: which ways
