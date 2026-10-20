@@ -19,7 +19,8 @@ SHOTS = [
     ("3d_wall_drawers", dict(view="wall", site="B", dining="folded", scene="records", drawers=True), "the media wall - every drawer out - records"),
     ("3d_sofa_records", dict(view="sofa", site="B", dining="folded", scene="records"), "from the sofa - records"),
     ("3d_B_folded", dict(view="dining", site="B", dining="folded", scene="everyday"), "the stairs wall - table folded under the shelf - everyday evening"),
-    ("3d_chairs", dict(view="chairs", site="B", dining="folded", scene="everyday", chairs="hooks"), "two folded chairs on hooks at the table's window end - everyday evening"),
+    ("3d_chairs", dict(view="chairs", site="B", dining="folded", scene="everyday", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}), "the chair cupboard beside the table, doors open, four chairs inside (plant stand and lamp hidden) - everyday evening"),
+    ("3d_chairs_shut", dict(view="dining", site="B", dining="folded", scene="everyday", chairs="cupboard", layout={}), "the stairs wall packed away - the table folded and the chair cupboard shut - everyday evening"),
     ("3d_stairs_A_four", dict(view="stairs", site="A", dining="four", scene="dinner"), "from the stairs - table on the breast, down for four - dinner"),
     ("3d_dining_A_four", dict(view="dining", site="A", dining="four", scene="dinner"), "the dining table on the breast, down for four - dinner"),
     ("3d_dining_B_four", dict(view="dining", site="B", dining="four", scene="dinner"), "the dining table by the stairs, down for four - dinner"),
@@ -36,7 +37,14 @@ SHOTS = [
     ("3d_plants_breast", dict(view="breast", site="B", dining="folded", scene="everyday", plants="breast"), "layout B - your plant stand on the breast - everyday evening"),
     ("3d_ideas_window", dict(view="windowwall", site="B", dining="folded", scene="everyday", ideas=dict(glass=True)), "IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand"),
     ("3d_ideas_ctable", dict(view="pc", site="B", dining="folded", scene="everyday", ideas=dict(ctable=True)), "IDEAS (not in the plan) - the C-table at the sofa's open end"),
-    ("3d_ideas_breast", dict(view="breast", site="B", dining="folded", scene="everyday", ideas=dict(case=True)), "IDEAS (not in the plan) - the glass case on the breast"),
+    ("3d_ideas_breast", dict(view="breast", site="B", dining="folded", scene="everyday", ideas=dict(case=True)), "IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles"),
+    # v20: the taller case with other things in it, and decor to try
+    ("3d_case_mixed", dict(view="breast", site="B", dining="folded", scene="everyday", ideas=dict(case=True), decor=dict(fill="mixed", frame="black")),
+     "IDEAS (not in the plan) - the tall glass case, black frame, a bit of each"),
+    ("3d_case_singles", dict(view="breast", site="B", dining="folded", scene="records", ideas=dict(case=True), decor=dict(fill="singles", frame="white")),
+     "IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - records"),
+    ("3d_decor", dict(view="door", site="B", dining="folded", scene="everyday", decor=dict(rug="stripes", cushions="rust", curtains="linen")),
+     "DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - everyday evening"),
 ]
 
 
@@ -64,15 +72,15 @@ def run(test=False, only=None):
         for stem, opts, title in SHOTS:
             if only and only not in stem:
                 continue
-            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True}, **opts, quality="hd"))
+            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {}}, **opts, quality="hd"))
             url = pg.evaluate(f"() => window.R3D.still({w}, {h})")
             im = Image.open(io.BytesIO(base64.b64decode(url.split(",", 1)[1]))).convert("RGB")
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v19 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v20 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v19_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v20_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])

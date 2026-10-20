@@ -430,35 +430,50 @@ def zones():
 # v19: somewhere to keep the dining chairs, without changing the table
 SOURCES["frosvi"] = ("IKEA UK: FRÖSVI folding chair (TERJE's successor, the same 43 W × 49 D × 78 H, seat 48, tested for 110 kg); the hole in the back "
                      "is made to hang it on a wall hook, hooks not included; flat-packed (folded) 89 × 43 × 9 cm (ikea.com/gb, ikea.com.tw product pages)")
-SOURCES["bjarnum"] = "IKEA: BJÄRNUM folding hook, aluminium, 3 W × 8 D × 8 H cm, 3-pack; it folds flat against the wall when nothing hangs on it"
-ORDER.extend(["frosvi", "bjarnum"])
+SOURCES["slhook"] = ("Screwfix: Smith & Locke Mid Duty Anti-Slip Storage Hook, 200 × 200 mm, steel, 60 kg maximum load, £3.59 (8882J); "
+                     "FRÖSVI padded weighs 3.61 kg net (ikea.com.tw)")
+ORDER.extend(["frosvi", "slhook"])
 _zones_v18 = zones
 
 
 def chairs_zone():
+    """v19: the dining chairs off the table; v20: "ideally 6 folding chairs but 4 is fine" and "a fully pack away setup": an oak chair
+    cupboard built in beside the table, in the window-end gap, flush with the pipe boxing."""
     g = G
     cw, cdep, ch = g.CHAIR_FOLDED
-    H = g.CHAIR_STORE["hooks"]
-    gap = H["z"][0] - H["z"][1]
-    (lo0, lo1), (up0, up1) = H["chair_y"]
+    C = g.CHAIR_STORE["cupboard"]
+    gap = C["z"][0] - C["z"][1]
+    in_w = gap - 2 * C["t"]
+    in_d, in_d6 = C["d"] - C["door"] - C["back"], C["d6"] - C["door"] - C["back"]
+    lo_top = C["plinth"] + ch                                   # the lower pair, standing on the cupboard's floor
+    up0 = C["shelf_y"] + C["t"]; up_top = up0 + ch               # the upper pair, on the shelf
+    in_top = C["h"] - C["t"]
     sg = g.CHAIR_STORE["stair_gap"]
     sgap = sg[0] - sg[1]
     U = g.CHAIR_STORE["under_stairs"]
-    out = max(cdep, g.HOOK[1]) + 1.0                           # the hook goes through the hole in the chair's back: about 10 off the wall
-    return ("Keeping the dining chairs (v19)", f"the stairs wall either side of the table; under the stairs; the garage. Folded chairs {r1(cw)} × {r1(cdep)} × {r1(ch)}", [
-        ("Two chairs on hooks at the table's window end (recommended)", f"folded {r1(cw)} wide", ref("frosvi", "bjarnum"),
-         f"{r1(gap)} between the table's end (z {r1(H['z'][0])}) and the pipe boxing (z {r1(H['z'][1])})", f"{r1((gap - cw) / 2)} each side", PASS),
-        ("One above the other", f"each {r1(ch)} tall; hooks at {r1(H['hook_y'][0])} and {r1(H['hook_y'][1])}", ref("frosvi", "bjarnum", "photo20"),
-         f"the shelf's underside at {r1(H['under_shelf'])}", f"lower chair {r1(lo0)}–{r1(lo1)} off the floor, upper {r1(up0)}–{r1(up1)}: {r1(H['under_shelf'] - up1)} under the shelf; the top hook is at head height, so lift that chair on from the side", PASS),
-        ("How far they stand out", f"{r1(cdep)} folded, on an {r1(g.HOOK[1])} hook", ref("frosvi", "bjarnum"), f"the folded table stands {r1(g.FOLDED_D)} off the wall",
-         f"about {r1(out)} out: no further than the folded table, so the walk past is unchanged; empty, the hooks fold flat", PASS if out <= g.FOLDED_D else TIGHT),
-        ("When the table's open", "the window side's chairs sit in front of the hooks", ref("frosvi"), "the hooks are behind the window-side diners",
-         "they're the chairs you're sitting on, so the hooks are empty at dinner: take both down before opening the table", TIGHT),
-        ("At the stair end instead", f"folded {r1(cw)} wide", ref("frosvi", "photo20"), f"{r1(sgap)} between the shelf's start (z {r1(sg[0])}) and the table (z {r1(sg[1])}); nearer the stairs the foot of the flight must stay clear",
-         f"{r1(cw - sgap)} short: too narrow for this chair; fine for one under {r1(sgap - 2)} wide", CHECK),
-        ("Under the stairs", f"{r1(ch)} × {r1(cw)} lying flat, {r1(cdep)} each", ref("room", "frosvi"), f"inside the room the flight is only about {r1(U['h'])} high at the door wall, {r1(U['x'][1] - U['x'][0])} wide",
-         f"four chairs lying flat make a stack about {r1(4 * cdep)} high: it fits only if the side by the door is open; a photo of it will say", CHECK),
-        ("In the garage", "any number", ref("room"), "nothing changes in the room", "carry them through the house for each meal; fine for guests' chairs, a chore for everyday ones", PASS),
+    first = (g.ROOM_W - g.RAIL[2]) - (g.ROOM_W - C["d"])         # how far the cupboard's face stands past the open table's wall end
+    win6 = (g.OPEN_LEN - first) / 3
+    return ("Keeping the dining chairs: the chair cupboard (v20)", f"an oak cupboard built in beside the table, {r1(gap)} × {r1(C['d'])} × {r1(C['h'])}, between the table's window end and the pipe boxing. Folded chairs {r1(cw)} × {r1(cdep)} × {r1(ch)}", [
+        ("Its width, between the table and the pipe boxing", f"{r1(gap)} wide, {r1(C['t'])} sides", ref("photo20", "room"), f"z {r1(C['z'][0])} to {r1(C['z'][1])}",
+         f"{r1(in_w)} inside for a {r1(cw)} chair: {r1((in_w - cw) / 2)} each side", TIGHT),
+        ("Its depth: four chairs, two deep", f"2 × {r1(cdep)} folded", ref("frosvi"), f"{r1(C['d'])} deep, the same as the pipe boxing; {r1(in_d)} inside behind the doors",
+         f"{r1(in_d - 2 * cdep)} spare: snug, so they can't rattle; it stands no further out than the boxing beside it", TIGHT),
+        ("Its height: a pair on the floor, a pair on the shelf", f"each {r1(ch)} tall", ref("frosvi", "photo20"), f"{r1(C['h'])} tall, the shelf at {r1(C['shelf_y'])}; your shelf's underside at {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
+         f"lower pair {r1(C['plinth'])}–{r1(lo_top)} under the shelf at {r1(C['shelf_y'])}; upper pair {r1(up0)}–{r1(up_top)} under the top at {r1(in_top)}; the cupboard stops {r1(g.SHELF_B['top'] - g.SHELF_B['t'] - C['h'])} under your shelf", TIGHT),
+        ("Six instead of four", f"three deep, 3 × {r1(cdep)}", ref("frosvi"), f"the {r1(C['d6'])}-deep version, {r1(in_d6)} inside",
+         f"{r1(in_d6 - 3 * cdep)} spare; it stands {r1(C['d6'] - C['d'])} proud of the pipe boxing's face", TIGHT),
+        ("Weight on the wall", f"four chairs, about {r1(4 * 3.61)} kg, and an oak carcass of about 18 kg", ref("frosvi"), "it stands on the floor, held to the wall at the top",
+         "the floor takes the weight; two screws through the top rail into the wall (or studs) stop it tipping", PASS),
+        ("The doors", f"two oak doors, {r1(gap)} × about {r1(C['shelf_y'])}, hinged on the table's side", ref("room"), "they swing towards the table's end",
+         "open the doors and take the chairs out before you open the table; folded, the table and the cupboard are one run of oak, nothing left out", PASS),
+        ("With the table open: the window side's first chair", f"the cupboard's face {r1(first)} past the table's wall end", ref("terje", "dining"),
+         f"window side {r1(g.OPEN_LEN)} long", f"for four, two a side, nothing changes; for six the window side's three get {round(win6, 1):g} each instead of {round(g.OPEN_LEN / 3, 1):g}: elbows in", TIGHT),
+        ("Open hooks instead (the cheaper option)", "two 200 mm storage hooks, two chairs on each", ref("slhook"), "the same gap, no cupboard",
+         "£8–15 instead of the cupboard; the chairs stay on show", PASS),
+        ("At the stair end instead", f"folded {r1(cw)} wide", ref("frosvi", "photo20"), f"{r1(sgap)} between the shelf's start (z {r1(sg[0])}) and the table (z {r1(sg[1])})",
+         f"{r1(cw - sgap)} short: too narrow for this chair", CHECK),
+        ("Chairs five and six, with the 22-deep cupboard", "two more, folded", ref("frosvi", "room"), f"the garage, or under the stairs (about {r1(U['h'])} high inside the room: a photo will say)",
+         "the guests' chairs, fetched when six sit down; or build the 31-deep cupboard and all six pack away", CHECK),
     ])
 
 

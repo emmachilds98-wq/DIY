@@ -11,12 +11,13 @@ WZ = G.WINDOW_Z
 
 # (id, title, size, rough cost £, why it suits the room, where it goes, in 3D)
 IDEAS = [
-    ("case", "A slim glass display case on the chimney breast",
-     "90 wide × 50 tall × 12 deep", (60, 120),
-     "For the hats or collectibles, lit from inside, without a cabinet on the floor: 12 deep, so it stands no further out than a picture "
-     "ledge. Oak frame from the offcuts, a 4 mm toughened glass front that lifts off, an LED strip under the top on the strips' app. "
-     "It takes the place of the two framed LPs, above the “now playing” ledge.",
-     "On the breast, centred, from 137 to 187 (just clear of the sleeves on the “now playing” ledge); with the table by the stairs only.", True),
+    ("case", "A tall glass display case on the chimney breast (v20: taller)",
+     "90 wide × 85 tall × 12 deep, three glass shelves", (90, 170),
+     "For collectibles, boxed games, 7-inch singles, small plants or ceramics, lit from inside, without a cabinet on the floor: 12 deep, so it "
+     "stands no further out than a picture ledge. Oak frame from the offcuts (or painted black or white), a 4 mm toughened glass front that "
+     "lifts off, three 6 mm glass shelves on pins, an LED strip under the top on the strips' app. Hung on a French cleat: about 16 kg empty. "
+     "It takes the place of the two framed LPs, above the “now playing” ledge. In the 3D room, try what's inside it and its frame.",
+     "On the breast, centred, from 137 to 222 (just clear of the sleeves on the “now playing” ledge, 13 under the ceiling); with the table by the stairs only.", True),
     ("glass", "Glass plant shelves across the window reveal",
      "two 10 mm toughened shelves, 235 × 18, at 130 and 170", (120, 200),
      "Your deep sill already takes a row of plants; two glass shelves above it make the window a green screen that still lets the light "
@@ -33,7 +34,8 @@ IDEAS = [
      "Behind the TV, on the bias light's place; the box sits by the HDMI switch in bay 1.", False),
     ("cushions", "Cushions and a throw in the rug's rust and ochre",
      "two or three 45 × 45 cushions and a throw", (40, 90),
-     "They tie the blue corduroy sofa to the rug and the oak, and soften the ottoman end.", "The sofa.", False),
+     "They tie the blue corduroy sofa to the rug and the oak, and soften the ottoman end. v20: the 3D room has three colourways to try "
+     "(rust and ochre, blues, sage and cream) under Decor.", "The sofa.", True),
     ("plantlight", "A small uplight under the plant stand's bottom tier",
      "a plug-in spot, about 10 cm", (10, 20),
      "Throws the leaves' shadows up the wall at night, so the plants are part of the evening lighting with the room lights low.",
@@ -54,7 +56,8 @@ IDEAS = [
 ]
 
 # where each 3D idea is drawn (room cm)
-CASE = dict(x=((G.BREAST_X[0] + G.BREAST_X[1]) / 2 - 45.0, (G.BREAST_X[0] + G.BREAST_X[1]) / 2 + 45.0), y=(137.0, 187.0), d=12.0, frame=2.0)
+CASE = dict(x=((G.BREAST_X[0] + G.BREAST_X[1]) / 2 - 45.0, (G.BREAST_X[0] + G.BREAST_X[1]) / 2 + 45.0), y=(137.0, 222.0), d=12.0, frame=2.0,
+            shelves=(158.0, 179.0, 200.0))   # v20, client: "make glass display cabinet on wall taller": 85 tall (was 50), three glass shelves
 GLASS = dict(x=G.WINDOW_X, ys=(130.0, 170.0), d=18.0, t=1.0)
 CTABLE = dict(x=(40.0, 85.0), top=60.0, depth=30.0, over=16.0, t=2.0)   # "over": how far the top reaches over the seat's end
 SPOTS = dict(case=CASE, glass=GLASS, ctable=CTABLE)   # v18: the plant ladder is dropped: your new plant stand does its job

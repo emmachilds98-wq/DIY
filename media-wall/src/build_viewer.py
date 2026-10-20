@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "19"
+VERSION = "20"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -415,7 +415,8 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the strips low",
          "3d_wall_drawers": "Every drawer out, the records scene: the LP crates under the turntable, a slim game drawer beside them",
          "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the LP crates",
-         "3d_chairs": "v19: two folded chairs on hooks, one above the other, between the folded table and the pipe boxing, under your shelf",
+         "3d_chairs": "The chair cupboard (v20) beside the folded table, doors open: four folded chairs inside, two on its floor and two on its shelf (plant stand and lamp hidden for the view)",
+         "3d_chairs_shut": "The stairs wall packed away (v20): the table folded under your shelf and the oak chair cupboard shut beside it, flush with the pipe boxing",
          "3d_B_folded": "The stairs wall: your shelf with the black OBEGRÄNSAD panel, the laser (off) and the plant hanging at the end by the pipe boxing, the red lamp, the table folded under it",
          "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
          "3d_dining_A_four": "Option A: down for four on the chimney breast",
@@ -431,7 +432,10 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up), the vinyl stand back in the window corner",
          "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
-         "3d_ideas_breast": "Idea, not in the plan: the slim glass display case on the chimney breast, above the \u201cnow playing\u201d ledge"}
+         "3d_ideas_breast": "Idea, not in the plan: the tall glass display case (v20: 85 tall, three glass shelves) on the chimney breast, oak, with collectibles, above the \u201cnow playing\u201d ledge",
+         "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
+         "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the records scene",
+         "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable"}
 IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc"}
 
@@ -449,24 +453,47 @@ def ideas_panel():
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
             f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on. All of them together would be about £{lo}–{hi}.</p>'
-            f'<div class="opts">{"".join(cards)}</div>')
+            f'<div class="opts">{"".join(cards)}</div>' + decor_block())
+
+
+def decor_block():
+    """v20, client: "give more decor variation and options": what the 3D room's Decor buttons do, with three looks."""
+    import room3d_page as RP
+    rows = "".join(f'<li><b>{html.escape(lab)}:</b> {html.escape(", ".join(n for _, n in opts))}</li>' for _, lab, opts in RP.DECOR)
+    figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k in ("3d_case_mixed", "3d_case_singles", "3d_decor"))
+    b = ("<button type='button' class='btn' data-r3d='" + json.dumps({"site": "B", "view": "door", "decor": {"rug": "stripes", "cushions": "rust", "curtains": "linen"}})
+         + "'>Try decor in the 3D room</button>")
+    return (f'<div class="qhead"><h2 class="ptitle">Decor to try</h2><span class="caption">In the 3D room, under “Decor”: your choices are kept on this device</span></div>'
+            f'<ul>{rows}</ul><p class="caption">Picking what goes in the glass case turns the case on (it hangs with the table by the stairs). '
+            f'In Edit room, “Add” now has a floor vase with grasses, a knitted pouffe, a seagrass basket for throws, an oak floor mirror and a lantern, as well as the armchair, bookcase and the rest.</p>'
+            f'<div class="gallery">{figs}</div>{b}')
 
 
 def chairs_card():
-    """v19: where the dining chairs live when they're not round the table: hooks by it, under the stairs, the garage."""
+    """v20, client: "is it not possible to build the chair storage into the table setup. i want it to be a fully pack away setup": the chair
+    cupboard built in beside the table, flush with the pipe boxing; the open hooks stay as the cheap way; chairs five and six."""
     g = G
-    H = g.CHAIR_STORE["hooks"]
-    gap = H["z"][0] - H["z"][1]
-    b = f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'hooks', 'view': 'chairs', 'scene': 'everyday'})}'>See them in 3D</button>"
+    CB = g.CHAIR_STORE["cupboard"]
+    w = CB["z"][0] - CB["z"][1]
+    sh = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'cupboard', 'view': 'dining', 'scene': 'everyday'})
+    op = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'open', 'view': 'chairs', 'scene': 'everyday'})
     return f"""<div class="opts">
-  <article class="opt"><img data-art="3d_chairs" alt="Two folded chairs on hooks beside the folded table" loading="lazy">
-    <div class="ob"><span class="label">1 · the plan · about £8–15</span><h3>Two on hooks, by the table</h3>
-    <ul><li>The {gap:.0f} cm gap at the table's window end takes two folded chairs, one above the other.</li><li>No change to the table; the hooks fold flat when they're empty.</li>
-    <li class="minus">Take both down before you open the table: they're the window side's chairs.</li></ul>{b}</div></article>
-  <article class="opt noimg"><div class="ob"><span class="label">2 · if it's open · free</span><h3>Under the stairs</h3>
-    <ul><li>Four folded chairs lie flat in a stack about {4 * g.CHAIR_FOLDED[1]:.0f} cm high.</li><li class="minus">Inside the room the flight is only about {g.CHAIR_STORE['under_stairs']['h']:.0f} cm high: send a photo of the side by the door.</li></ul></div></article>
-  <article class="opt noimg"><div class="ob"><span class="label">3 · no change · free</span><h3>The garage</h3>
-    <ul><li>Any number, any chair.</li><li class="minus">A carry through the house for every meal: fine for guests' chairs, a chore for everyday ones.</li></ul></div></article>
+  <article class="opt"><img data-art="3d_chairs_shut" alt="{html.escape(CAP3D['3d_chairs_shut'])}" loading="lazy">
+    <div class="ob"><span class="label">1 · the plan (v20) · about £120–240</span><h3>A chair cupboard, built in beside the table</h3>
+    <ul><li>Oak, {w:.0f} wide × {CB['d']:.0f} deep × {CB['h']:.0f} tall, in the gap at the table's window end, flush with the pipe boxing and under your shelf.</li>
+    <li>Four folded chairs inside: two on its floor, two on its shelf, one behind the other. Two doors on push latches.</li>
+    <li>The table and its chairs pack away together: the wall reads as one built-in piece.</li>
+    <li class="minus">Six fit if it's built {CB['d6']:.0f} deep: it then stands {CB['d6'] - CB['d']:.0f} cm proud of the boxing.</li></ul>
+    <button type="button" class="btn" data-r3d='{sh}'>See it shut in 3D</button> <button type="button" class="btn" data-r3d='{op}'>See it open</button></div></article>
+  <article class="opt"><img data-art="3d_chairs" alt="{html.escape(CAP3D['3d_chairs'])}" loading="lazy">
+    <div class="ob"><span class="label">Using it</span><h3>Doors open, four chairs inside</h3>
+    <ul><li>Its doors are hinged on the table's side and open right back (165°), so the chairs come straight out to the table.</li>
+    <li>Open the table first, then take the chairs out; fold the table last.</li>
+    <li class="minus">The open hooks (about £8–15) still work if you'd rather not build it.</li></ul></div></article>
+  <article class="opt noimg"><div class="ob"><span class="label">Chairs five and six · free</span><h3>The garage, or under the stairs</h3>
+    <ul><li>With the {CB['d']:.0f}-deep cupboard, the guests' two live in the garage, or flat under the stairs (about {2 * g.CHAIR_FOLDED[1]:.0f} cm stacked).</li>
+    <li class="minus">Inside the room the flight is only about {g.CHAIR_STORE['under_stairs']['h']:.0f} cm high: send a photo of the side by the door.</li></ul></div></article>
 </div>"""
 
 
@@ -492,7 +519,7 @@ def options_card():
 
 def gallery3d():
     figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
-                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith("3d_ideas_"))
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor")))
     return f'<div class="gallery">{figs}</div>'
 
 TABNAME = dict(TABS)
@@ -773,7 +800,7 @@ def page(site=False):
   <section class="panel" id="dining" role="tabpanel" aria-labelledby="tb-dining" hidden>
     <nav class="toc" aria-label="On this tab"></nav>
     <div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>
-    <div class="block"><h2 class="ptitle">Keeping the chairs (v19)</h2><p class="caption">The table doesn't change. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Checks tab.</p>{chairs_card()}</div>
+    <div class="block"><h2 class="ptitle">Keeping the chairs: a cupboard built in beside the table, so it all packs away</h2><p class="caption">The table doesn't change. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Checks tab.</p>{chairs_card()}</div>
     <div class="doc"><h2>The dining wall</h2>{sec["5"]}</div>
   </section>
 
