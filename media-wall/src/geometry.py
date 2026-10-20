@@ -388,10 +388,14 @@ HATS = dict(board=24.0, cap_y=FLOOR_LAMP["h"] - 26.0, cap_col="#1f2a44")
 
 # the heads along each bar (offset along the bar from its centre, + towards the media wall / door), shade colour, stem colour, aim
 SAGE, BLUE, MUSTARD, PINK = ("#a9c7ab", "#8db59c"), ("#a7d0d8", "#7fbfc8"), ("#e8b53f", "#dca52f"), ("#e79c95", "#d9877f")
-BAR1_HEADS = [(31.5, *SAGE, (40.0, 212.0, 30.0)),                 # the media-wall end: books and the left of the high shelf
-              (10.5, *BLUE, (TV_CX, 172.0, 34.0)),                # the record ledge above the TV
-              (-10.5, *PINK, (160.0, 95.0, 8.0)),                 # the turntable and the Series X
-              (-31.5, *MUSTARD, (148.0, 45.0, -169.0))]           # the window end: down onto the coffee table
+BAR1_HEADS = [(31.5, *SAGE, (40.0, 212.0, 30.0)),                 # (v15 aims, kept for reference; v17 replaces them just below)
+              (10.5, *BLUE, (TV_CX, 172.0, 34.0)),
+              (-10.5, *PINK, (160.0, 95.0, 8.0)),
+              (-31.5, *MUSTARD, (148.0, 45.0, -169.0))]
+# v17, client: "make all the ceilings lamps just face downward and give the room a general average lighting on the whole room as the default":
+# every head straight down, spread a little along the bar, so the pools overlap into an even light
+HEAD_SPREAD = 1.6
+BAR1_HEADS = [(off, col, stem, (PEND_X, 0.0, PEND_Z + off * HEAD_SPREAD)) for off, col, stem, _ in BAR1_HEADS]
 
 
 def bar_head_xz(bx, bz, off):

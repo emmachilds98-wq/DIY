@@ -387,10 +387,10 @@ def full():
                     "Unscrew each old fitting's cover. Prove dead again at its terminals. Photograph the wiring, mark the switched live (the wire from the switch) with tape, then disconnect and take the fitting down.",
                     "Fix bar 1's mounting plate to the ceiling over the rose between the TV and the sofa, the bar running from the TV towards the window (v15), with screws into the joist or the plate's fixings. Bar 2's goes on the pendant point by the stairs, running the same way, along the west wall.",
                     "Connect earth first (green-and-yellow to the bar's earth), then neutral to N and the switched live to L, in the bar's terminal block; any loop wires go back together exactly as they were. Tighten, tuck, and fit the canopy.",
-                    "Fit the smart colour bulbs and aim the heads: the table in the Paint and light tab says which goes where. Never at the TV. If a WiZ bulb shows below its shade's rim, use the shorter Hue lustre there.",
+                    "Fit the smart colour bulbs and point every head straight down, evenly spread along the bar (v17). Tilt one only if its pool lands in the TV's screen or someone's eyes. If a WiZ bulb shows below its shade's rim, use the shorter Hue lustre there.",
                 ]),
                 ("Power on and test", [
-                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the four scenes from the Paint and light tab (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
+                    "Remove the lock-off and switch on, wall switches on. In the bulbs' app, add all eight, group them as bar 1 and bar 2, set warm white at about half, then save the five scenes (General first) from the lighting scenes below (levels, and colours if you want them). Your red lamp's colour bulbs go in the same scenes.",
                 ]),
                 ("The low-voltage lights (nothing to isolate)", [
                     "Cut the smart strip at its marks into three lengths: one for each upright's groove and one for the side-wall run. Press each into its aluminium channel under the opal diffuser; take the uprights' leads down their grooves to the strip's power on the 10-gang (v16: smart colour).",

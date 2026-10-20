@@ -129,13 +129,7 @@ def scene():
         bar2[f"A_{st}"] = R.spot_heads2()
         bx = (G.TABLE_B_OPEN_X[0] + G.TABLE_B_OPEN_X[1]) / 2 if st != "folded" else G.ROOM_W - 2.0   # v15: over the open flip-top
         by = G.TABLE_TOP if st != "folded" else G.FOLDED_TOP - 30.0
-        if st == "six" and G.TABLE_STYLE != "fliptop":
-            bar2[f"B_{st}"] = bar2[f"A_{st}"]
-        else:                  # v15: bar 2 runs along the west wall's table: blue and mustard on the table, sage on the folded top, pink on the shelf
-            h = R.spot_heads2()
-            bar2[f"B_{st}"] = [(h[0][0], h[0][1], h[0][2], (G.ROOM_W - 10, G.SHELF_B["top"] + 8, G.TABLE_B_CZ - 60)),
-                               (h[1][0], h[1][1], h[1][2], (G.ROOM_W - 1, G.FOLDED_TOP - 40 if st == "folded" else G.SHELF_B["top"] - 20, G.TABLE_B_CZ + 40)),
-                               (h[2][0], h[2][1], h[2][2], (bx, by, G.TABLE_B_CZ + 22)), (h[3][0], h[3][1], h[3][2], (bx, by, G.TABLE_B_CZ - 22))]
+        bar2[f"B_{st}"] = bar2[f"A_{st}"]   # v17: every head straight down, whichever wall the table is on
     state()
 
     def bar(cx, cz, heads):

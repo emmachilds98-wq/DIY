@@ -21,7 +21,7 @@ const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? 
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
-const DEF = { site: "B", dining: "folded", scene: "everyday", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
+const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
               quality: SMALL ? "fast" : "hd", view: "window",
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
@@ -683,7 +683,10 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.025, 32), red); base.position.copy(v3(spot.x, 1.25, spot.z)); g.add(shadow(base));
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, R.LAMP.h * M, 12), red); pole.position.copy(v3(spot.x, R.LAMP.h / 2, spot.z)); g.add(shadow(pole));
   const toward = new THREE.Vector3(...[233 - spot.x, 0, -135 - spot.z]).normalize();      // the room's middle, in room coords
-  const aims = [[R.LAMP.h - 8, [toward.x * 60, 110, toward.z * 60]], [R.LAMP.h - 45, [toward.x * 160, -40, toward.z * 160]], [R.LAMP.h - 80, [toward.x * 90, -110, toward.z * 90]]];
+  // v17, client: "green lamp should face down more slightly, its looking at the ceiling, face at the shelf wall": the top head aims at a
+  // point on the stairs wall 30 below its own height, along the shelf (it was aimed 110 up, at the ceiling)
+  const sbz = R.SHELF_B.z, wz = Math.min(Math.max(spot.z + 30, Math.min(sbz[0], sbz[1])), Math.max(sbz[0], sbz[1]));
+  const aims = [[R.LAMP.h - 8, [R.W - spot.x, -22, wz - spot.z]], [R.LAMP.h - 45, [toward.x * 160, -40, toward.z * 160]], [R.LAMP.h - 80, [toward.x * 90, -110, toward.z * 90]]];
   aims.forEach(([y, off], i) => {
     const apex = v3(spot.x + toward.x * 9, y, spot.z + toward.z * 9);
     const tgt = v3(spot.x + off[0], y + off[1], spot.z + off[2]);
