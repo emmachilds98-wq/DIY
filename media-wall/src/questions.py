@@ -1,4 +1,6 @@
-"""v14: answered by the client's photos (20 Oct) and dropped: the stairs' direction (a straight flight rising towards the door).
+"""v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
+New: hat, lightbox. The curtains and the carpet came with the client's photo the same day (asked and answered).
+v14: answered by the client's photos (20 Oct) and dropped: the stairs' direction (a straight flight rising towards the door).
 New: site, westwall, lamp.
 v13.6: ONE list of what we still need from Emma and Dave, most consequential first. The plan PDF's "Still to confirm"
 (build_doc.py) and the viewer's Questions tab (build_viewer.py) both read it, so they can't drift apart.
@@ -22,11 +24,8 @@ QUESTIONS = [
     ("westwall", "The stairs wall under your shelf: solid, or plasterboard on studs?",
      "Only matters if you choose that spot: the table's brackets are rated 500 kg a pair, and the fixings depend on the wall.",
      "Knock along it: a hollow sound is plasterboard. Or look at how the shelf is fixed.", False),
-    ("lamp", "The floor lamp: does it stay (we read \"the lamp is only 100%\" as yes, and it can move)? Where would you like it?",
-     "It's drawn as your three-headed lamp, on or off only (no dimmer), as in the lighting scenes; the 3D room can stand it by the window, at the sofa's end or beside the breast. If \"100%\" meant it only ever runs at full brightness, that's how it's drawn already.",
-     "Yes or no, and a spot; its height if it isn't about 165 cm.", False),
-    ("electrics", "The electrics: are you swapping the light fittings, the dimmers and the socket yourselves?",
-     "v13.6 plans all three as your own job (like for like, not notifiable), with the safe routine and the stop list. You said \"other than maybe changing a few fixtures\": if you'd rather an electrician did just the fittings, say so and we'll add that visit back.",
+    ("electrics", "The electrics: are you swapping the two light fittings and the socket yourselves?",
+     "The plan has both as your own job (like for like, not notifiable), with the safe routine and the stop list. Since v15 there are no dimmers to fit: the bars take smart bulbs. If you'd rather an electrician did the fittings, say so and we'll add that visit back.",
      "Yes, all ours; or: an electrician for the fittings only.", False),
     ("sofa", "Your L-sofa's return: how far does it run along the side wall?",
      f"The long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}. It sets the PC shelf, the walkway and the dining clearances.",
@@ -38,13 +37,13 @@ QUESTIONS = [
      "The zone takes up to 45.2 × 35.2 cm; the switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
     ("fanstand", "The Series X fan stand's make and model",
      f"The shelf takes a footprint up to about 30 cm wide; the plan assumes {_n(G.FAN_STAND[0])} × {_n(G.FAN_STAND[2])}.", "A photo of the stand is enough.", True),
-    ("chairs", "Dining chairs: ones you have, or four folding ones? And where will they be kept?",
-     "The plan draws IKEA TERJE (seat 48); any chair with a 45–48 cm seat works. The leaf, with all eight legs inside it, stores with the chairs.",
+    ("chairs", "Dining chairs: ones you have, or folding ones? How many, and where will they be kept?",
+     "The plan draws IKEA TERJE (seat 48); any chair with a 45–48 cm seat works. The flip-top seats up to six on the breast, seven by the stairs: how many chairs do you want to own?",
      "Seat height of yours, and the spot you have in mind (the garage?).", False),
     ("box", "The 23 × 22 cm box in the window's west corner: what is it?",
      "If it's pipe boxing it stays; if not, it might go.", "A photo is quickest.", True),
-    ("records", "Roughly how many LPs and singles, and are most in thick outer sleeves?",
-     f"The wall holds about {LPS} LPs and {SINGLES} singles, all face-out. Thick sleeves need a wider trough.", "A rough count is fine.", False),
+    ("records", "Roughly how many LPs?",
+     f"The wall holds about {LPS} LPs, all face-out (the trays take LPs only since v15). If there are more, the neatest overflow is a matching tray unit.", "A rough count is fine.", False),
     ("games", "Roughly how many PS2, Xbox 360 and Xbox One games?",
      "The game drawer holds about 48, 12 of them face-out; more needs an overflow spot.", "A count of each is plenty.", False),
     ("ports", "Wired ports for the projector (master) and the music room (bedroom 2)?",
@@ -57,6 +56,10 @@ QUESTIONS = [
     ("point2", "The pendant point by the stairs wall: its exact spot",
      "From your photo it hangs about 55 cm out from the stairs wall, a quarter of the way along the shelf from the stair end. Bar 2 goes on it, over the table if you choose that spot.",
      "Measure from the stairs wall and from the window wall.", False),
+    ("hat", "Your hat: a photo, and is an oak peg on the wall by the stairs the way you'd like to show it?",
+     f"It's drawn as a felt hat on a small oak peg {_n(G.HAT_PEG['y'])} cm up between the stairs and your shelf. A deeper oak shelf, a hat stand or a frame are the other options.", "A photo of the hat; say if you'd prefer another way.", True),
+    ("lightbox", "Your IKEA light box: which one is it?",
+     f"It's drawn from your photo as the box at the shelf's stair end, about {_n(G.LIGHTBOX['z'][0] - G.LIGHTBOX['z'][1])} × {_n(G.LIGHTBOX['h'])} cm, its face lit warm. Its name (on the label) gives its true size and whether its light changes colour.", "The name on its label, or a photo.", True),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
@@ -65,15 +68,16 @@ QUESTIONS = [
 PDF_LINE = {
     "site": "Where the dining table goes: on the chimney breast, or under your shelf by the stairs (both are drawn and checked).",
     "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the bracket fixings if the table goes there.",
-    "lamp": "The floor lamp stays (we read \"only 100%\" as yes) and can move: by the window, at the sofa's end or beside the breast?",
-    "electrics": "The electrics: you're swapping the light fittings, the dimmers and the socket yourselves (as planned), or an electrician for the fittings only?",
+    "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
+    "hat": "Your hat: a photo, and whether an oak peg by the stairs is how you'd like it shown.",
+    "lightbox": "Your IKEA light box: its name, for its true size.",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
     "westend": "The stairs wall's length and the shelf's ends and height (the photo gives about 257–268 cm, shelf 41 from the stairs, 16 from the corner, top about 200).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
     "fanstand": "The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.",
-    "chairs": "Dining chairs: use ones you have (seat 45–48), or four folding ones? And where they'll be kept: the leaf, legs inside, goes with them.",
+    "chairs": "Dining chairs: use ones you have (seat 45–48), or folding ones (the flip-top seats up to six or seven)? And where they'll be kept.",
     "box": "The 23 × 22 cm box in the window's west corner.",
-    "records": f"Records: roughly how many LPs and singles (the wall holds about {LPS} and {SINGLES}), and are most in thick outer sleeves?",
+    "records": f"Records: roughly how many LPs (the wall holds about {LPS}, all face-out; the trays take LPs only)?",
     "games": "Games: roughly how many PS2, Xbox 360 and Xbox One games? The drawer holds about 48.",
     "ports": "Wired ports for the projector (master) and the music room (bedroom 2)?",
     "surge": "The 10-gang: is it surge-protected, where are its two switches, and how long is it? It now feeds the PC too.",
@@ -91,7 +95,6 @@ def pdf_items():
 SHORT = {
     "site": "which dining spot",
     "westwall": "the stairs wall's build",
-    "lamp": "the floor lamp's spot",
     "electrics": "that you're swapping the light fittings yourselves",
     "sofa": "the sofa's return length",
     "westend": "the stairs wall's sizes",
@@ -100,6 +103,8 @@ SHORT = {
     "chairs": "chairs",
     "box": "the 23 × 22 cm box by the window",
     "records": "record counts",
+    "hat": "the hat",
+    "lightbox": "the light box's name",
     "games": "game counts",
     "ports": "extra wired ports",
     "surge": "the 10-gang",

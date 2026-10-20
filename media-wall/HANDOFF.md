@@ -1,21 +1,60 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Branch:** `claude/sharp-franklin-lrray1` (PR https://github.com/emmachilds98-wq/DIY/pull/4) now carries every round, v10 to v13.8: in round 7i
-  it was fast-forwarded to `claude/eloquent-johnson-pgmnud` (v13.7, PR #5, which was stacked on it). Keep working here. `main` is still at v9.
-- **Viewer artifact (the deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's sessions run
-  as), version 14 = v14.1 (published 20 Oct 2026; v13 was v14, v12 was v13.8). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to
-  that URL with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:**
-  ArtifactData `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck (v13.6) belongs to another account and isn't
-  readable from this one: don't use it. Rounds 7b–7h ran from a session outside the deck's org, which is why they reported "no write access";
-  from this account the deck, its db and its comments all work.
-- **`main` now carries everything (v14.1) and is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root
-  `index.html` is `build_viewer.site()`; `.nojekyll` skips Jekyll). The client asked for the latest version on main so they can view it there:
-  work on a branch, open a PR into `main`, and merge it once checked so Pages stays current. The Claude deck (below) is the shared copy.
+- **Branch:** `claude/sharp-franklin-lrray1`, restarted from `main` (v14.1) in round 9 after PR #4 merged; work there and open a PR into `main`.
+- **`main` is published with GitHub Pages: https://emmachilds98-wq.github.io/DIY/** (the root `index.html` is `build_viewer.site()`; `.nojekyll`
+  skips Jekyll). The client wants the latest version on main so they can view it there: work on the branch, open a PR into `main`, merge it
+  once checked so Pages stays current.
+- **Viewer artifact (the shared deck): https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2**, owned by Emma's account (the one this repo's
+  sessions run as). Update it in place: `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` (images inlined) to that URL
+  with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData
+  `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 12 stills headless in SwiftShader WebGL: about 10 minutes; `python3 shot3d.py test <name>` makes quick 1280 × 720 ones).
+  (shot3d renders 12 stills headless in SwiftShader WebGL: about 10 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 9: v15 (the room as it really is, smart lights, one oak run on the side wall)
+- Client: "my sofa goes to around 40cm before the end of the window ... 2 seats then corner ... blue corduroy and you can remove the white
+  cushion. the lamp is bright red, it has rgb lights mainly stay on green on top then pink then purple going down. either add my hat there or
+  give it a wallstand ... make the hanging plant on the wall shelf actually hang and add my small laser from the middle. on the left of that
+  shelf is my ikea light box. ... vinyl large only no extra small slot ... look better especially on the left wall side ... bar lights to run
+  in the other direction ie tv to window on both fixtures ... make lighting less spotty ... slide lighting strength via slider ... smart rgb
+  ... colour adjustors for not only wall paint but ceiling paint and skirting paint ... curtains (photo to come) ... soft grey carpet and a
+  nice design rug that fits".
+- Geometry (v15 block at the end of `geometry.py`): `SOFA_W` 266 (x 2..268), `SOFA_SEATS`, `SOFA_CORD`, `SOFA_CUSHION`; `TRAY_SINGLES` 0,
+  `TRAY_LP_ONLY`, `TRAY_INSIDE`; `BAR_AXIS = "z"`, `BAR1_HEADS` (one list for renders, plans and 3D), `bar_head_xz()`; `SMART_BARS`,
+  `BULB_E14` (the Wolston takes E14, 6 W max per Dunelm; WiZ Colour P45 4.9 W 4.5 × 10.1, Hue lustre 5.1 W 4.5 × 7.7; source `e14`);
+  `LAMP_BODY`, `LAMP_HEADS_RGB`; the side run `SIDE_RUN_Z`, `SIDE_RUN_T`, `SIDE_SWEEP`, `side_run_depth(z)`, `SIDE_GLOW`; `CARPET_COL`,
+  `RUG`, `RUG_COLS`, `CURTAIN`, `LIGHTBOX`, `LASER`, `PLANT_B`, `HAT_PEG`.
+- Drawn renders: `render.side_run()` (one board, convex quads so the 3D fan triangulation works), `rug()`, `curtains()` (side view),
+  `sofa_solid()` rewritten, LP-only `record_tier`, `spot_bar()` along z with wider, fainter pools; grey floor gradient.
+- 3D (`room3d.js`, backup `room3d_v14_1_backup.js`): state key `mw15-3d`; `S.lv` per-layer levels (scene buttons fill them) × `S.master`;
+  `S.col` colours for bar1/bar2/lamp0-2 (smart bulbs; glow discs follow); spot cones 0.66 rad, penumbra 1; paint channels wall/ceil/trim
+  (`chHex`, `S.ceil`, `S.skirt`); grey carpet + pile bump, `RUG_TEX`, corduroy bump, curtains, light box (`LBOX_TEX`), laser dots
+  (`THREE.Points`, `S.laser`), trailing plant (tubes + leaves), oak hat peg with a felt hat, red lamp with per-head colours, the side run's LED
+  strip + a RectAreaLight wash (in the uprights layer). Controls in `room3d_page.py` (`LIGHTS`, `CEIL_PRESETS`, `SKIRT_PRESETS`).
+- Docs: buy list (no dimmers; 8 smart E14 bulbs £100–360; side-run LED; optional smart button; rug £120–300; hat peg), step 10 (cut the run
+  from one 225 × 30 × 4 board to a template), step 12 and its instructions (no dimmers, set up the app), section 8 lighting, section 9
+  electrics, scenes.py (layers' controls; lamp levels dimmable). Questions: dropped `lamp` (answered); new `hat`, `lightbox`. The deck's db: `answers/sofa` (v2) and `answers/lamp` written from the client's notes.
+- Fit proof 70: 51 fit, 14 tight, 5 check. New checks: the six-seat window-side chair backs onto the sofa's longer arm; option B's walk
+  behind the chairs is 67 (TIGHT). Rows for the sweep, the bars turned, the smart bulbs.
+- Then the client's photo (20 Oct, `inputs/photo_room_curtains_evening.jpg`, evening, purple RGB light): the curtains are long pencil-pleat panels
+  to the floor, oatmeal, on a rail just under the ceiling strip (`CURTAIN` redone; 3D toggle `S.curtains`); the carpet is already soft grey.
+  Questions 18 (curtains and carpet answered and dropped). Still to come: the hat's photo, the light box's name.
+- Then: "hessian curtains from dunelm with a wood rail" (`CURTAIN` col/pole/finials; 3D `HESSIAN` weave, wooden pole, rings, finials; source
+  `curtains`) and "an improved table design that could maybe stay attached to the wall and maybe even seat more people": the **flip-top
+  gate-leg table** (`TABLE_STYLE = "fliptop"`, `FLIP`, `FLIP_SPACER`, `RAIL` now 10.3 deep with its hinge rail, `OPEN_Z`, `OPEN_LEN`,
+  `GATE_LEG_H`, `TABLE_B_OPEN_X`). The half hinges on three Lee Valley 40574 flip-top hinges (source `fliphinge`; their 40208 needs a 30 mm
+  edge). `render.fliptop_wall()`, `dining_chairs()` (2 or 3 a side), `table_settings(n_side=)`; DINING states folded / four (open, 2 a side)
+  / six (open, 3 a side); the free-standing table and the leaf's leg case are kept behind `TABLE_STYLE` but unused. export3d rotates the
+  chairs to B for every state. `fit.fliptop_zones()` replaces the dining zone and `stairs_zone()` (A: up to 6, no end seat (sofa: CHECK);
+  B: up to 7). `diagrams.fliptop()` (section, folded/open) replaces `dining_section()` and `leaf_case()` in the plan; `seating()` and
+  `dining_sites()` redrawn. Section 5, step 11 + its instructions, buy list and cut lists rewritten. Fit proof 69: 50 fit, 14 tight, 5 check.
+- Full rebuild done (total £2,965–5,992; plan 62 pages, build guide 41); QA at 390 and 1280 px, no console errors. Published v15 to 71ff
+  (version 15, id 1792466792-e7af) over the v14.1 deck another session had put up; v15 contains v14.1, and the tracker had no ticks to lose
+  (13 buy/step lines changed text, so their tick ids changed). v14 outputs moved to `out/v14/`.
 
 ## Update 20 Oct 2026, round 8b: v14.1 (a faster 3D room, GitHub Pages)
 - Client: "ive activated pages on github, do another full upgrade wherever necessary. it runs very slow on the renders but it looks great so

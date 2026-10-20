@@ -6,12 +6,12 @@ import base64, pathlib
 import geometry as G
 import fit
 import questions
-from diagrams import (light_scene, leaf_case, sub_box, drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
+from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, storage, network, front, drawer, sound, game_drawer, av, power, routes, pc_shelf, section, joints, house,
                       living_plan, why_layout, seating, dining_section, dining_sites)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "14"
-REVISION = "14.1: a faster 3D room, on GitHub Pages"
+VERSION = "15"
+REVISION = "15: your notes on the room as it is, smart lights, one oak run on the side wall"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -21,8 +21,8 @@ DECK_ART = {"render_v13_join_clean.png": "art_join_card_room", "render_v13_join_
             "render_v13_drawers.png": "art_drawers_card_room", "render_v13_dining_four.png": "art_four_card_room",
             "render_v13_dining_six.png": "art_six_card_room", "render_v13_side.png": "art_side_card_room",
             "paint_grid.png": "doc_paint", "skirting_options.png": "doc_skirt",
-            "render_v14_3d_window_A_folded.png": "3d_window_A_folded", "render_v14_3d_dining_B_four.png": "3d_dining_B_four",
-            "render_v14_3d_B_folded.png": "3d_B_folded"}
+            "render_v15_3d_window_A_folded.png": "3d_window_A_folded", "render_v15_3d_dining_B_four.png": "3d_dining_B_four",
+            "render_v15_3d_B_folded.png": "3d_B_folded"}
 
 
 def img(name, alt=""):
@@ -38,7 +38,7 @@ def n(x):
 
 
 LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS             # 188
-SINGLES = 2 * G.TRAY_SINGLES                               # 240
+SINGLES = 2 * G.TRAY_SINGLES                               # 0 since v15: LPs only
 
 # ---------------------------------------------------------------- buy list and jobs, in build order
 # (status, item, phase, qty, lo, hi)  lo/hi None = no cost
@@ -84,27 +84,27 @@ TRACK = [
     ("To buy", "Game drawer kit: 12 mm birch ply cut to size, 350 mm full-extension soft-close runners (35–49 kg), oak lip, follower block, felt", "4 Base unit", "1", 50, 90),
     ("To do", "Build the plinth and bay 3, fix everything to the wall, fit the shelves, drawers and trays; place the TV and soundbar", "4 Base unit", "", None, None),
     ("To buy", "Two solid oak uprights, 165 × 30 × 4.5 cm (cut to 159), quarter-sawn if possible", "5 Oak joinery", "2", 150, 300),
-    ("To buy", "Solid oak for the shelves: high shelf in two lengths (128.9 and 51.7 × 30 × 4), Series X shelf 55 × 30 × 4, record ledge 128.9 × 7 × 2.4, wrap ledge 134 × 7 × 2.4, PC shelf 82 × 28 × 4, lips <b>(changed)</b>", "5 Oak joinery", "1 set", 200, 340),
+    ("To buy", "Solid oak for the shelves: high shelf in two lengths (128.9 and 51.7 × 30 × 4), Series X shelf 55 × 30 × 4, record ledge 128.9 × 7 × 2.4, the side-wall run from one board 225 × 30 × 4 (cut to its sweep), lips <b>(changed in v15: one run for the ledge and the PC shelf)</b>", "5 Oak joinery", "1 set", 230, 380),
     ("To buy", "Oak wedges, 10 mm oak dowel for pegs and dowels, concealed upright brackets; two concealed shelf brackets for the PC shelf, rated 40 kg+ a pair", "5 Oak joinery", "1", 30, 60),
     ("To buy", "One solid oak worktop, 300 × 62 cm, full stave: the alcove top (186 × 46) and the dining wall's backboard (110 × 22) from the offcut, chamfered fronts <b>(changed)</b>", "5 Oak joinery", "1", 250, 450),
     ("To buy", "Oak face frame, 20 mm, 186 cm for the base", "5 Oak joinery", "1", 60, 120),
     ("To buy", "Keyboard tray for the PC shelf: 7 cm oak housing under it, 12 mm ply tray 54 × 26 with an oak lip, 300 mm light-duty runners <b>(new: back from v6.1)</b>", "5 Oak joinery", "1", 25, 45),
     ("To do", "Cut the joints and fit the uprights, shelves, ledges and face frame; notch the uprights for the ceiling strip", "5 Oak joinery", "", None, None),
-    ("To buy", "Solid oak table top 110 × 80 × 2.7 with pegged breadboard ends, and a 60 × 80 × 2.7 leaf (edge-glued staves from a timber merchant, who can also radius the corners) <b>(new)</b>", "6 Dining wall", "1 set", 220, 400),
+    ("To buy", "Solid oak for the flip-top: two panels 110 × 80 × 2.7 with pegged breadboard ends, the top and the half (edge-glued staves from a timber merchant, who can also radius the corners) <b>(changed in v15: the half replaces the leaf)</b>", "6 Dining wall", "1 set", 280, 480),
     ("To buy", "Two Häfele Hebgo heavy-duty folding brackets, 287.43.428 (580 arm, 500 kg a pair) <b>(new)</b>", "6 Dining wall", "2", 70, 120),
     ("To buy", "Union PowerLoad lift-off hinges, 100 × 88, one 3-pack (all the same hand) <b>(new)</b>", "6 Dining wall", "1", 16, 20),
-    ("To buy", "Eight tapered oak legs, 71 cm, 4.5 tapering to 3, each with an M8 hanger bolt (made from the cutting list, or bought ready-tapered): four for the top, four for the leaf <b>(changed in v13.6: oak only, so they store in the leaf)</b>", "6 Dining wall", "8", 70, 160),
-    ("To buy", "The leaf's leg case: oak for its frame (two rails 77 × 5.5 × 1.8, two 50.4 × 5.5 × 1.8), eight RS PRO 45 mm spring clips, felt <b>(new in v13.6)</b>", "6 Dining wall", "1", 25, 45),
-    ("To buy", "Two oak turn buttons, two leaf-alignment dowels and two table clips for the leaf, felt pads <b>(new)</b>", "6 Dining wall", "1", 10, 20),
-    ("To buy", "Four folding chairs, IKEA TERJE or similar (skip if yours fit: seat about 45–48) <b>(new)</b>", "6 Dining wall", "4", 100, 160),
+    ("To buy", "Three Lee Valley 40574 narrow flip-top hinges (solid brass, 1.27 × 7.0 cm) for the joint <b>(new in v15)</b>", "6 Dining wall", "3", 25, 45),
+    ("To buy", "The gate leg: two tapered oak legs 73.3 × 4.5 to 3 and a 94 × 7 × 2 oak apron (from the cutting list), two 75 mm butt hinges, two folding locking stays <b>(new in v15: instead of eight legs and the leaf's leg case)</b>", "6 Dining wall", "1", 40, 90),
+    ("To buy", "Oak for the hinge rail (110 × 4 × 7.3), two oak turn buttons, a magnetic catch, felt pads <b>(changed in v15)</b>", "6 Dining wall", "1", 15, 30),
+    ("To buy", "Folding chairs, IKEA TERJE or similar, as many as you'll seat (skip if yours fit: seat about 45–48) <b>(new)</b>", "6 Dining wall", "4–7", 100, 280),
     ("To buy", "Two LP frames for the chimney breast, hung from 165 cm", "6 Dining wall", "2", 20, 40),
-    ("To buy", "Eight M8 brass threaded inserts for the legs, four in the top's breadboard ends and four in the leaf, set into the underside instead of plates <b>(changed in v13.5: the leaf's four)</b>", "6 Dining wall", "8", 12, 20),
-    ("To do", "Fix the backboard to the breast, hang the brackets and the top, check it folds and locks; set the legs to the right height", "6 Dining wall", "", None, None),
-    ("To do", "Swap both ceiling fittings for the spot bars and both light switches for LED-compatible dimmers: like for like, your own job; step 12 has the safe way <b>(changed: no electrician)</b>", "7 Lighting", "", None, None),
-    ("To buy", "Two LED-compatible dimmers (trailing edge), in your switches' finish, rated for the bars' LED load and your back boxes' depth <b>(new: on the buy list now)</b>", "7 Lighting", "2", 30, 60),
-    ("To buy", "LED for the upright grooves: 2700K strip, two aluminium channels, a plug-in driver with an inline dimmer (on the 10-gang, so no fused spur); 6500K bias light for the TV <b>(changed)</b>", "7 Lighting", "1", 40, 90),
-    ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars (£49 each), plus eight warm-white (2700K) dimmable E14 LED bulbs, 6 W max <b>(changed: two)</b>", "7 Lighting", "2", 120, 160),
-    ("To buy", "A floor or table lamp by the sofa with a 2700K warm LED bulb: the low layer a green room needs <b>(new: from v6.1)</b>", "7 Lighting", "1", 30, 80),
+    ("To do", "Fix the backboard and hinge rail, hang the brackets and the top, fit the half on its flip-top hinges and the gate leg under it; check it opens, locks, folds and folds up", "6 Dining wall", "", None, None),
+    ("To do", "Swap both ceiling fittings for the spot bars, turned to run from the TV towards the window: like for like, your own job; step 12 has the safe way. The light switches stay as they are (smart bulbs need full power) <b>(changed in v15: no dimmers)</b>", "7 Lighting", "", None, None),
+    ("To buy", "Eight smart colour E14 bulbs for the bars: WiZ Colour P45 E14, 4.9 W (Wi-Fi, no hub), or Philips Hue White and Colour E14 lustre, 5.1 W, if a WiZ shows below its shade; both under the bar's 6 W <b>(new in v15)</b>", "7 Lighting", "8", 100, 360),
+    ("To buy", "LED for the upright grooves and under the side-wall shelf: 2700K strip (about 4.5 m), three aluminium channels, a plug-in driver with an inline dimmer (on the 10-gang, so no fused spur); 6500K bias light for the TV <b>(changed in v15: the side shelf too)</b>", "7 Lighting", "1", 50, 110),
+    ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars, £49 each (bulbs above) <b>(changed: two)</b>", "7 Lighting", "2", 98, 110),
+    ("To buy", "Optional: a smart button for the bars, so a scene is one press rather than the app (WiZ remote or Hue dimmer switch) <b>(new in v15)</b>", "7 Lighting", "1", 0, 25),
+    ("To do", "Set up the smart bulbs in their app: group them as bar 1 and bar 2, then save the four scenes (Paint and light) with their levels and colours; your red lamp's bulbs go in the same scenes <b>(new in v15)</b>", "7 Lighting", "", None, None),
     ("To buy", "Later: aluminium channel and opal diffuser for the existing ceiling LED strip (optional)", "7 Lighting", "1", 0, 80),
     ("To buy", "5-in-1 4K60 HDMI switch with remote", "8 TV, consoles and AV", "1", 20, 35),
     ("To do", "Measure the PC-to-TV cable route (about 4–5 m along the skirting)", "8 TV, consoles and AV", "", None, None),
@@ -124,6 +124,8 @@ TRACK = [
     ("To do", "Deco app: prioritise the Series X and PC, guest Wi-Fi, automatic firmware", "10 Finishing", "", None, None),
     ("To do", "Label both outlets of the double socket (left: everything, right: retro) and each HDMI switch input", "10 Finishing", "", None, None),
     ("To do", "Set the sub and rear speaker levels from the sofa", "10 Finishing", "", None, None),
+    ("To buy", "A rug about 230 × 160 in front of the sofa: cream with deep blue, rust and ochre goes with the green, the oak and the blue sofa (the plan draws one as a guide) <b>(new in v15)</b>", "10 Finishing", "1", 120, 300),
+    ("To do", "Make an oak hat peg from a worktop offcut (a 3.5 cm round, 9 cm long, on a hanger bolt) and fix it by the stairs, 165 up <b>(new in v15)</b>", "10 Finishing", "", None, None),
 ]
 PHASES = []
 for r in TRACK:
@@ -131,7 +133,7 @@ for r in TRACK:
         PHASES.append(r[2])
 BIGGEST = {"1 Network, now": "two 8-port switches", "2 Cables and power": "the electrical safety kit and Cat6", "3 Paint": "paint",
            "4 Base unit": "record trays and the BESTÅ frames", "5 Oak joinery": "the solid oak worktop", "6 Dining wall": "the oak table top",
-           "7 Lighting": "two spot bars", "8 TV, consoles and AV": "RetroTINK-6X CE", "9 Vinyl kit": "phono preamp", "10 Finishing": "—"}
+           "7 Lighting": "the eight smart bulbs", "8 TV, consoles and AV": "RetroTINK-6X CE", "9 Vinyl kit": "phono preamp", "10 Finishing": "the rug"}
 
 
 # v13.6, client: "make the build plan easy to tell how to find which part ie network/media wall/table etc".
@@ -158,7 +160,7 @@ def scenes_html():
                    for k, name, ctl in SC.LAYERS)
     figs = "".join(f"<figure>{light_scene(s[0])}</figure><ul>" + "".join(f"<li>{x}</li>" for x in s[4]) + "</ul>" for s in SC.SCENES)
     return (f"<table class='tight'>{head}{rows}</table>"
-            "<p class='note'>Levels are roughly how far up each dimmer goes. One dimmer per bar, so its four heads stay aimed as in the table above; a scene changes how bright they are, not where they point.</p>"
+            "<p class='note'>Levels are brightness in the app for the smart bars and the lamp, and roughly how far up the strip's controller and the uprights' inline dimmer go. A scene changes how bright the heads are (and their colour), not where they point.</p>"
             f"<!--scenes-->{figs}<!--/scenes-->")
 
 
@@ -259,7 +261,7 @@ TOOLS = [
         ("Two-pole voltage tester to GS38, with its proving unit", "proving every wire dead before you touch it: non-negotiable", "Buy", "35–70"),
         ("MCB lock-off and a small padlock", "keeping the circuit off while you work on it", "Buy", "8–15"),
         ("Plug-in socket tester", "checking the new double socket is wired the right way round", "Buy", "8–15"),
-        ("Insulated (VDE) screwdrivers, wire strippers, side cutters", "the socket, the dimmers and the ceiling fittings", "Buy", "20–40"),
+        ("Insulated (VDE) screwdrivers, wire strippers, side cutters", "the socket and the ceiling fittings", "Buy", "20–40"),
         ("Wall chaser with dust extraction (or a bolster and club hammer)", "the PC's two conduits in the side wall", "Hire", "25–45 a day"),
         ("Cat6 punch-down tool and a cable tester", "terminating and checking the Cat6 runs", "Buy", "20–35"),
     ]),
@@ -278,6 +280,7 @@ def tools_html():
         out += [f"<tr><td>{a}</td><td>{b}</td><td>{c}</td><td class='num'>{d}</td></tr>" for a, b, c, d in items]
     out.append("</table>")
     return "\n".join(out)
+
 
 
 def steps():
@@ -349,28 +352,27 @@ def steps():
                  "Stand the uprights on their dowels and fix the concealed brackets to the back wall.",
                  "Fit the high shelf and the ledge, then the Series X shelf: wedge its tenons, and peg the housings."],
              check="Uprights plumb, shelves level, and the TV slides in with 2 cm each side."),
-        dict(n=10, part=["Media wall"], title="Side wall and PC shelf", who="You", time="1 day", buy=[], see=[("wall", "The side wall")],
-             do=["Screw the oak cleat for the wrap ledge and the PC shelf to the side wall.",
-                 "Dowel the wrap ledge to the left upright's front edge.",
-                 "Fit the concealed PC shelf brackets, then the shelf.",
+        dict(n=10, part=["Media wall"], title="The side-wall run and the PC end", who="You", time="1 day", buy=[], see=[("wall", "The side wall")],
+             do=["Cut the run from its 225 × 30 × 4 board: mark the front edge from the full-size template (7 cm deep along the LPs, sweeping out to 28 under the PC, a 5 cm radius on the end), jigsaw just outside the line and rout to it with a bearing-guided bit; rout the LED groove under the front edge.",
+                 "Screw the oak cleat along the side wall and fit the concealed brackets for the PC end.",
+                 "Lift the run on, dowel its end to the left upright's front edge, and screw it down to the cleat from above (plugged).",
                  "Screw the keyboard tray's housing under it and fit its runners.",
                  "Fit the brush grommet and pull the PC's leads down the two chased conduits with the draw wires: data in the big one, its mains lead in the small one."],
-             check="One level line with the ledge over the TV, and the PC shelf holds your weight leaning on it."),
-        dict(n=11, part=["Dining table"], title="The dining wall and the leaf's leg case", who="You + a helper", time="1 day", buy=["6 Dining wall"], see=[("dining", "The dining wall")],
-             do=["Screw the backboard to the breast, plugs every 20 cm.",
-                 "Fit the two Hebgo brackets on its face, 80 cm apart, arm tops level with its top.",
-                 "Screw the lift-off hinges to the backboard's top edge and the table's back edge, all the same hand.",
-                 "On the bench: oil the table's underside and set the four brass inserts for the legs.",
-                 "Hang the table and fit the two turn buttons above it.",
-                 "The leaf's leg case: glue and screw the slim oak frame under the leaf, fit the eight spring clips, and clip all eight legs in."],
-             check="It folds up and down without binding, both brackets click and lock, and it doesn't move when you lean on it; all eight legs clip into the leaf and nothing rattles when you carry it."),
-        dict(n=12, part=["Lighting"], title="Lighting: dimmers and spot bars, your own job", who="You + a helper", time="1 day", buy=["7 Lighting"], see=[("network", "Electrics: your own job"), ("paint", "Light")],
-             do=["Isolate the lighting circuit at the consumer unit, lock it off and prove it dead at each switch and each ceiling point.",
-                 "Swap both light switches for the LED-compatible dimmers, wire for wire, and take down the two old fittings.",
-                 "Hang bar 1 on the rose between the TV and the sofa and bar 2 on the point by the door, earth first; fit the 2700K bulbs and aim the heads (the table in the Paint and light tab).",
-                 "The LED strips in the uprights' grooves on their plug-in driver (on the 10-gang), the ceiling strip through its notches, the bias light on the TV, the lamp by the sofa.",
-                 "Power back on: each dimmer runs smoothly from low to high with no flicker or buzz. Then try the four lighting scenes (Paint and light)."],
-             check="No flicker at any dimmer setting, and from the sofa no spot head shows in the screen or shines in your eyes."),
+             check="One level line with the ledge over the TV, the sweep runs smooth with no flat spots, and the PC end holds your weight leaning on it."),
+        dict(n=11, part=["Dining table"], title="The flip-top dining table", who="You + a helper", time="1–2 days", buy=["6 Dining wall"], see=[("dining", "The dining wall")],
+             do=["Screw the backboard to the wall, plugs every 20 cm, and glue and screw the 7.3 cm hinge rail along its top.",
+                 "Fit the two Hebgo brackets on its face, 80 cm apart, arm tops level with the rail's top.",
+                 "On the bench: rout the three flip-top hinges into the meeting edges of the top and the half, and fit them; hinge the gate leg under the half, 3 cm in from its far edge, with its two stays.",
+                 "Screw the lift-off hinges to the rail's front edge and the top's back edge, all the same hand, and hang the pair.",
+                 "Fit the two turn buttons and the magnetic catch above it."],
+             check="It opens onto both brackets with a click each side, the half flips out flush and its gate leg locks upright; it folds back flat and swings up to the wall without binding, and nothing moves when you lean on it open."),
+        dict(n=12, part=["Lighting"], title="Lighting: smart spot bars and the LED strips, your own job", who="You + a helper", time="1 day", buy=["7 Lighting"], see=[("network", "Electrics: your own job"), ("paint", "Light")],
+             do=["Isolate the lighting circuit at the consumer unit, lock it off and prove it dead at each ceiling point.",
+                 "Take down the two old fittings. The light switches stay as they are: the smart bulbs need full power, so no dimmers.",
+                 "Hang bar 1 on the rose between the TV and the sofa and bar 2 on the pendant point by the stairs, earth first, both running from the TV towards the window; fit the smart colour bulbs and aim the heads (the table in the Paint and light tab).",
+                 "The LED strips in the uprights' grooves and under the side-wall shelf on their plug-in driver (on the 10-gang), the ceiling strip through its notches, the bias light on the TV; your red lamp in its spot.",
+                 "Power back on, switches on: add the eight bulbs to the app, group them as bar 1 and bar 2, and save the four lighting scenes (Paint and light)."],
+             check="Every bulb answers the app, the scenes recall, and from the sofa no spot head shows in the screen or shines in your eyes."),
         dict(n=13, part=["AV", "Network"], title="Connect and finish", who="You", time="1 day", buy=["8 TV, consoles and AV", "9 Vinyl kit", "10 Finishing"], see=[("network", "AV"), ("network", "Network")],
              do=["TV inputs: HDMI 1 the PC, HDMI 2 the soundbar (eARC), HDMI 3 the Series X, HDMI 4 the HDMI switch (Xbox One, 360, PS3, RetroTINK).",
                  "The PS2 by component into the RetroTINK and by optical to the soundbar; the PS1 by RGB SCART.",
@@ -383,7 +385,7 @@ def steps():
 
 DIAGRAMS = {"front": "front", "section": "section", "drawer_layouts": "drawer_layouts", "game_drawer": "game_drawer", "drawer": "drawer",
             "storage": "storage", "joints": "joints", "pc_shelf": "pc_shelf", "dining_section": "dining_section", "seating": "seating",
-            "av": "av", "power": "power", "network": "network", "routes": "routes", "leaf_case": "leaf_case"}
+            "av": "av", "power": "power", "network": "network", "routes": "routes", "leaf_case": "leaf_case", "fliptop": "fliptop"}
 
 
 def need_html(st):
@@ -438,7 +440,7 @@ Sizes are finished sizes in centimetres.</p>
 <li><b>Check every wall before you drill.</b> Run the cable and pipe detector over the spot, and never drill straight above, below or beside a socket or switch: cables run vertically and horizontally from them.</li>
 <li><b>Measure twice, mark once, cut once.</b> Walls are rarely square: measure the alcove at the floor, 76, 134, 155, 196 and the ceiling, and cut to the smallest.</li>
 <li><b>Two people for anything over 15 kg</b>: the uprights, the worktop, the table top, the TV.</li>
-<li><b>The electrics are yours, within limits.</b> Swapping the socket for a double, the two dimmers and the two ceiling fittings are like-for-like jobs, not notifiable under Part P in England, as long as they meet the wiring regulations. Isolate, lock off and prove dead every time. Anything new (a new circuit, the consumer unit, work by a bath or shower) is an electrician's, and so is anything on the stop list in section 9.</li>
+<li><b>The electrics are yours, within limits.</b> Swapping the socket for a double and the two ceiling fittings are like-for-like jobs, not notifiable under Part P in England, as long as they meet the wiring regulations. Isolate, lock off and prove dead every time. Anything new (a new circuit, the consumer unit, work by a bath or shower) is an electrician's, and so is anything on the stop list in section 9.</li>
 <li><b>Dry-fit everything</b> (assemble without glue or screws) before the final fix.</li>
 </ul></div>
 """
@@ -485,23 +487,20 @@ def cuts():
             ("High shelf, long length", "128.9 × 30 × 4", "1", "Housed 1.2 into both uprights and pegged", "Media wall"),
             ("High shelf, short length", "51.7 × 30 × 4", "1", "Housed into the right upright; cleat on the reveal", "Media wall"),
             ("Series X shelf", "55 × 30 × 4", "1", "Two through-tenons 6 × 2.4, wedged flush", "Media wall"),
-            ("Record ledge · wrap ledge", "128.9 × 7 × 2.4 · 134 × 7 × 2.4", "1 · 1", "Housed and pegged · on a cleat, dowelled to the left upright", "Media wall"),
-            ("Ledge lips", "128.9 × 1.5 × 0.9 · 134 × 1.5 × 0.9", "1 · 1", "Glued along the ledges' front edges", "Media wall"),
-            ("PC shelf", f"{n(pc_len)} × {n(g.PC_SHELF_D)} × 4", "1", "Oak cleat and two concealed brackets", "Media wall"),
+            ("Record ledge", "128.9 × 7 × 2.4", "1", "Housed and pegged", "Media wall"),
+            ("Side-wall run (v15)", f"{n(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long × 7 sweeping to {n(g.PC_SHELF_D)} × {n(g.SIDE_RUN_T)}, from one 225 × 30 × 4 board", "1", "On an oak cleat, concealed brackets under the PC end, dowelled to the left upright; LED groove under the front edge", "Media wall"),
+            ("Ledge lips", f"128.9 × 1.5 × 0.9 · {n(G.WRAP_Z[0] - G.SIDE_SWEEP[0])} × 1.5 × 0.9", "1 · 1", "Glued along the ledge's and the run's front edges", "Media wall"),
             ("Keyboard tray housing", "70 × 28 × 7, sides 7 × 2", "1", "Screwed under the PC shelf", "Media wall"),
             ("Worktop", f"{n(g.ALC_W)} × {n(g.BASE_D)} × 3", "1", "From one 300 × 62 full-stave worktop; chamfered front", "Media wall"),
-            ("Dining backboard", f"{n(g.RAIL[0])} × {n(g.RAIL[1])} × {n(g.RAIL[2])}", "1", "From the same worktop's offcut", "Dining table"),
+            ("Dining backboard · hinge rail", f"{n(g.RAIL[0])} × {n(g.RAIL[1])} × 3 · {n(g.RAIL[0])} × 4 × {n(g.RAIL[2] - 3)}", "1 · 1", "From the same worktop's offcut", "Dining table"),
             ("Face frame", "186 × 73 overall, 2 thick, stiles about 5 wide", "1 set", "End stiles scribed to the walls", "Media wall"),
-            ("Table top, centre", "101 × 80 × 2.7", "1", "Edge-glued staves: 96 between the shoulders, plus a 2.5 tongue each end", "Dining table"),
-            ("Breadboard ends", "80 × 7 × 2.7", "2", "Pegged with three 10 mm pegs each, in slotted holes", "Dining table"),
-            ("Leaf", f"{n(g.LEAF[0])} × {n(g.LEAF[1])} × {n(g.LEAF[2])}", "1", "Two alignment dowels and two table clips", "Dining table"),
-            ("Leaf frame, long rails", f"{n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}", "2", f"Under the leaf's joint edge and west end, {n(g.LEAF_FRAME['inset_x'])} in; glued along the middle 10 cm only, screwed in slotted holes elsewhere (v13.6)", "Dining table"),
-            ("Leaf frame, side rails", f"{n(g.LEAF_FRAME_IN[0])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}", "2", f"Between the long rails, {n(g.LEAF_FRAME['inset_z'])} in from the leaf's sides; one has eight 10 mm holes for the legs' bolts, {n(g.LEG_PITCH)} apart (v13.6)", "Dining table"),
-            ("Legs", f"{n(g.LEG_H)} × {n(g.LEG[0])}, tapering to {n(g.LEG[1])}", "8", "Tapered on the two inside faces; an M8 hanger bolt in each top; they store in the leaf's frame", "Dining table"),
+            ("Table top and the half, centres", "101 × 80 × 2.7", "2", "Edge-glued staves: 96 between the shoulders, plus a 2.5 tongue each end (v15: the half matches the top)", "Dining table"),
+            ("Breadboard ends", "80 × 7 × 2.7", "4", "Pegged with three 10 mm pegs each, in slotted holes", "Dining table"),
+            ("Gate legs", f"{n(g.GATE_LEG_H)} × {n(g.LEG[0])}, tapering to {n(g.LEG[1])}", "2", "Tapered on the two inside faces; tenoned into the apron (v15)", "Dining table"),
+            ("Gate apron", f"{n(g.TABLE[0] - 2 * g.FLIP['inset'])} × 7 × 2", "1", "Between the legs; two butt hinges along its top edge, under the half", "Dining table"),
             ("Turn buttons", "6 × 2.5 × 2.2", "2", "On a single screw each", "Dining table"),
             ("Drawer fronts", "game drawer 56.8 × 6.5 × 2 · plinth drawer 54 × 6 × 2", "1 · 1", "Finger pull cut underneath", "Media wall"),
             ("Record tray lips", "about 56 × 5 × 1.5", "2", "Cut to the face frame's opening, less 3 mm", "Media wall"),
-            ("Record tray dividers", "38.2 × 8 × 0.6", "2", "Between the LP and singles troughs", "Media wall"),
             ("Follower blocks · Xbox One lift block", "19 × 12 × 2 · 15 × 12 × 2", "2 · 1", "Offcuts, felted underneath", "Media wall"),
             ("Wedges · pegs · dowels", "6 × 3, tapering · 10 mm dowel, 5 long · 10 mm dowel", "2 + spares · 6 + 6 · 8", "Glued", "Media wall"),
         ]),
@@ -534,9 +533,8 @@ def cuts():
             ("Plinth drawer and keyboard tray runners", "300 mm full extension · 300 mm light duty", "1 pair · 1 pair", "", "Media wall"),
             ("Häfele Hebgo folding brackets", "287.43.428, 580 arm", "2", "500 kg a pair", "Dining table"),
             ("Lift-off hinges", "Union PowerLoad 100 × 88, all the same hand", "3", "", "Dining table"),
-            ("Brass M8 threaded inserts", "for the legs", "8", "Four in the top's breadboard ends, four in the leaf", "Dining table"),
-            ("M8 hanger bolts", "M8, about 50 long", "8", "One in each leg's top, 1.5 left showing", "Dining table"),
-            ("Spring clips for the stored legs", "RS PRO 45 mm, 42.1 × 56 × 12.7 mm", "8", f"Screwed under the leaf, {n(g.LEG_CLIP_FROM_FOOT)} cm up from each stored leg's foot", "Dining table"),
+            ("Flip-top hinges", "Lee Valley 40574, solid brass, 1.27 × 7.0", "3", "Routed into the meeting edges of the top and the half", "Dining table"),
+            ("Gate hinges · folding stays", "75 mm steel butt hinges · locking stays", "2 · 2", "The gate swings down and locks; folds flat inside the half", "Dining table"),
             ("Sub isolation riser", "dense foam or sorbothane, about 22 × 28 × 3", "1", "Under the sub in bay 2", "Media wall"),
             ("Concealed brackets", "for the uprights; two for the PC shelf, 40 kg+ a pair", "1 set", "", "Media wall"),
         ]),
@@ -588,7 +586,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 20, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).<br><b>v13.5:</b> the sub is back in the media wall. The two Xbox bricks lie flat at the back of their shelves by the power leads, the RetroTINK and the HDMI switch move into the space that frees in bay 1, and the sub takes the lower left of bay 2, under the TV, on an isolation riser beside the PS2 and PS1 (section 3). The dining wall has nothing under it now, so eight can sit down without moving anything.<br><b>v13.7:</b> four <b>lighting scenes</b> (TV night, dinner, records, everyday evening), each drawn on the room plan with every light's level, so you know where to set each dimmer (section 8).<br><b>v13.8:</b> the whole plan is back on your own deck (the one you can edit, with your saved answers), and the summaries now follow the fit proof and the questions list, so they can't fall out of date: the PC case is answered and off the list, and the three checks on site are the TV's plugs, the RetroTINK's size and the sub's vibration.<br><b>v13.6:</b> the <b>leaf carries the legs</b>: a slim oak frame underneath holds all eight oak legs in clips, so the folded table stays a plain panel, nothing new stands in the room, and the leaf goes wherever the chairs are kept (section 5). <b>The electrics are your own job</b>: swapping the socket for a double, the two dimmers and the two spot bars are like-for-like and not notifiable in England, so there's no electrician's visit; there is a safe routine and a clear point to stop and call one (section 9). The PC now runs from the 10-gang. Every step and every buy-list phase carries a <b>coloured label</b> for its part (Network, Media wall, Dining table and so on), and one list says what we still need from you.<br><b>v14:</b> a <b>second place for the table</b>: on the wall by the stairs, under your 2 m shelf (section 5 compares the two). The plan page now has a <b>3D room</b> you can walk round: switch the table's wall, fold it or set it for four or six, change the paint, the lighting scene and where the floor lamp stands, and save any view as an HD picture.</div>
+<div class="decision"><b>What changed in v15.</b> Your notes on the room as it really is: <b>your sofa</b> is drawn in blue corduroy, two seats then the corner, its long side running to about 40 cm short of the window's end, with no cushion; <b>your red lamp</b> with its colour bulbs (green on top, pink, then purple); on your shelf by the stairs, <b>your IKEA light box</b> at the left end, <b>your laser</b> in the middle (its dots on the ceiling) and the <b>plant hanging</b> down off the shelf; <b>your hat</b> on an oak peg by the stairs; <b>soft grey carpet</b> (your photo shows it already is), a <b>designed rug</b> that fits in front of the sofa (230 × 160), and <b>your curtains</b> from your photo: long hessian pencil-pleat panels to the floor on a wooden pole just under the ceiling strip (open or drawn in the 3D room). The <b>record trays take LPs only</b>: one trough the full width, with room to flip with both hands. The <b>side wall</b> looks better: the ledge and the PC shelf become <b>one oak run</b> that sweeps out in a curve to the PC, with a warm LED glow underneath. <b>Both spot bars now run from the TV towards the window</b> and take <b>smart colour bulbs</b> (E14, under the bar's 6 W), so there are no dimmers to fit; the light is set softer and aimed at walls and shelves, for less spotty light. In the 3D room every light has a <b>slider</b>, the bars and the lamp a <b>colour</b>, and the <b>walls, ceiling and skirting</b> each have their own paint colour. And a <b>new dining table that stays on the wall and seats more</b>: a flip-top gate-leg table. Its second half flips out on brass hinges to make 110 × 160, on a folding oak gate leg: four with room, six elbows-in, seven by the stairs; no lifting off, no leaf or legs to store (section 5). Your <b>curtains</b> are Dunelm hessian on a wooden pole with rings and ball finials.<br><b>v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).<br><b>v13.5:</b> the sub is back in the media wall. The two Xbox bricks lie flat at the back of their shelves by the power leads, the RetroTINK and the HDMI switch move into the space that frees in bay 1, and the sub takes the lower left of bay 2, under the TV, on an isolation riser beside the PS2 and PS1 (section 3). The dining wall has nothing under it now, so eight can sit down without moving anything.<br><b>v13.7:</b> four <b>lighting scenes</b> (TV night, dinner, records, everyday evening), each drawn on the room plan with every light's level, so you know where to set each dimmer (section 8).<br><b>v13.8:</b> the whole plan is back on your own deck (the one you can edit, with your saved answers), and the summaries now follow the fit proof and the questions list, so they can't fall out of date: the PC case is answered and off the list, and the three checks on site are the TV's plugs, the RetroTINK's size and the sub's vibration.<br><b>v13.6:</b> the <b>leaf carries the legs</b>: a slim oak frame underneath holds all eight oak legs in clips, so the folded table stays a plain panel, nothing new stands in the room, and the leaf goes wherever the chairs are kept (section 5). <b>The electrics are your own job</b>: swapping the socket for a double, the two dimmers and the two spot bars are like-for-like and not notifiable in England, so there's no electrician's visit; there is a safe routine and a clear point to stop and call one (section 9). The PC now runs from the 10-gang. Every step and every buy-list phase carries a <b>coloured label</b> for its part (Network, Media wall, Dining table and so on), and one list says what we still need from you.<br><b>v14:</b> a <b>second place for the table</b>: on the wall by the stairs, under your 2 m shelf (section 5 compares the two). The plan page now has a <b>3D room</b> you can walk round: switch the table's wall, fold it or set it for four or six, change the paint, the lighting scene and where the floor lamp stands, and save any view as an HD picture.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -597,13 +595,13 @@ def _plan(deck=False):
 <div class="summary">
 <div><b>£{money(tl, th)}</b><span>the whole plan, item by item in section 11; no electrician on top</span></div>
 <div><b>{c[fit.PASS]} of {nfit}</b><span>fit checks pass outright; {c[fit.TIGHT]} are tight, {c[fit.CHECK]} need a check on site (section 3)</span></div>
-<div><b>{LPS} · {SINGLES} · 4–8</b><span>LPs and singles, all face-out · seats at the table</span></div>
+<div><b>{LPS} · 4–8</b><span>LPs, all face-out · seats at the table</span></div>
 </div></div>
 <table><tr><th>Area</th><th>Decision</th></tr>
 <tr><td>Alcove</td><td>The TV between two oak uprights, the left one now a corner post on the side wall; on the right, the turntable on the worktop and the Series X on a shelf at {n(g.RZ_SHELF_TOP)}; below, three 60 cm bays: the Xbox consoles, the PlayStations with the sub, and the two record trays.</td></tr>
-<tr><td>Side wall</td><td>The record ledge wraps the corner with four more LPs, then an oak shelf for the PC above the end of the sofa, clear of the TV's sightlines.</td></tr>
-<tr><td>Dining wall</td><td>A 110 × 80 solid oak table on an oak backboard: folded flat every day, down on two Häfele Hebgo brackets for four, lifted off with its leaf for six or eight. The leaf carries all eight oak legs in a slim frame underneath.</td></tr>
-<tr><td>Records</td><td>Every record face-out: about {LPS} LPs (180 in the trays, 8 on the two ledges) and {SINGLES} singles.</td></tr>
+<tr><td>Side wall</td><td>One oak run from the corner: a 7 cm ledge with four more LPs that sweeps out into the PC's shelf above the end of the sofa, a warm LED strip underneath, clear of the TV's sightlines.</td></tr>
+<tr><td>Dining wall</td><td>A flip-top gate-leg oak table that stays on the wall (v15): folded flat every day; down on two Häfele Hebgo brackets with its second half flipped out on a gate leg, 110 × 160, for four or six (seven by the stairs).</td></tr>
+<tr><td>Records</td><td>Every LP face-out: about {LPS} (180 in the trays, LPs only, and 8 on the two ledges).</td></tr>
 <tr><td>Heights</td><td>Worktop and table {n(g.WORKTOP)} · TV centre 116.5 · Series X shelf {n(g.RZ_SHELF_TOP)} · ledges and PC shelf {n(g.LEDGE_TOP)} · high shelf {n(g.HIGH_TOP)}, {n(g.CEIL - g.HIGH_TOP)} under the {n(g.CEIL)} ceiling.</td></tr>
 <tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, LED grooves in the uprights, a bias light, and two Wolston-style spot bars on your two existing ceiling points: between the TV and the sofa, and between the door and the wall.</td></tr>
 <tr><td>Power and network</td><td>Your own job: the side-wall socket becomes a double, left for the 10-gang (everything modern, the PC included), right for the retro set, switched at the wall. Deco A in bedroom 3, Cat6 down the airing cupboard.</td></tr>
@@ -614,8 +612,8 @@ def _plan(deck=False):
 <h2 class="pb">2 · The room</h2>
 <p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is drawn from your photo<sup>{fit.ORDER.index("sofa") + 1}</sup>: its long side ends in line with the breast's reveal (about {n(g.SOFA_W)} cm); the return along the side wall is a typical {n(g.SOFA_D)} until you measure it.</p>
 <figure>{living_plan()}</figure>
-<figure class="render">{img("render_v14_3d_window_A_folded.png", "The room in 3D from the window, everyday evening")}
-<figcaption>New in v14: the whole room in 3D, from the window on an everyday evening, the table folded on the breast. On the plan page you can walk round it, switch the table's wall, the paint, the lights and the lamp's spot, and save any view in HD.</figcaption></figure>
+<figure class="render">{img("render_v15_3d_window_A_folded.png", "The room in 3D from the window, everyday evening")}
+<figcaption>The whole room in 3D, from the window on an everyday evening, the table folded on the breast: your blue sofa, the rug, the bars running towards the window, the laser's dots on the ceiling. On the plan page you can walk round it, switch the table's wall, slide every light, colour the smart bulbs, paint the walls, ceiling and skirting separately, and save any view in HD.</figcaption></figure>
 <table class="tight"><tr><th>From your sketch</th><th>mm</th><th>Notes</th></tr>
 <tr><td>Room, east to west along the window</td><td class="num">{n(g.ROOM_W*10)}</td><td>The media wall is the south wall, shared with the hall and garage</td></tr>
 <tr><td>Window wall to the alcove's back wall</td><td class="num">{n(g.ROOM_D*10)}</td><td>To the chimney breast's face: {n((g.ROOM_D - g.ALC_D)*10)}</td></tr>
@@ -671,7 +669,7 @@ def _plan(deck=False):
 </ul>
 
 <h3>The fit proof: every item against its published size</h3>
-<p>Each zone below lists what goes in it, its size and where that size comes from (numbered sources, section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail. {c[fit.TIGHT]} are tight: the deck's 2.65 cm sides and the preamp over the open lid; the sub's column, its port gap, the PS2 over the PS1 and the switch channel in bay 2; the dining seats at 55–57 cm each, the door's swing and the clearances for six and eight; and, if you choose the stairs wall for the table, its two end chairs. {c[fit.CHECK]} need a check on site: the TV's plugs by the corner post, the RetroTINK's size when it arrives, whether the sub's vibration reaches the consoles and the deck (test it before fixing the shelves; the fallback is the dining wall), and, for the stairs option only, what the west wall is built of.</p>
+<p>Each zone below lists what goes in it, its size and where that size comes from (numbered sources, section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail. {c[fit.TIGHT]} are tight: the deck's 2.65 cm sides and the preamp over the open lid; the sub's column, its port gap, the PS2 over the PS1 and the switch channel in bay 2; the flip-top's six at 53 cm each, its weight to fold up, the coffee table and the door's swing on the breast, and the side chairs by the stairs. {c[fit.CHECK]} need a check on site: the TV's plugs by the corner post, the RetroTINK's size when it arrives, whether the sub's vibration reaches the consoles and the deck (test it before fixing the shelves), the flip-top's end on the breast (the sofa leaves no room for a chair there), and, for the stairs wall only, what that wall is built of.</p>
 <!--fit-->{fit.tables_html()}<!--/fit-->
 
 <h3>Console sizes, every version</h3>
@@ -704,16 +702,15 @@ def _plan(deck=False):
 <figure>{drawer()}</figure>
 <h3>How the record trays work</h3>
 <ul>
-<li><b>LP trough:</b> 32.6 cm wide, so a bare 31.4 cm sleeve has 6 mm each side. Records lean back 10° like a record shop browser; the last one leans on a raked oak rest.</li>
-<li><b>Singles trough:</b> 18.9 cm wide, the same lean.</li>
-<li><b>Capacity:</b> about 90 LPs and 120 singles per tray; two trays, about 180 LPs and 240 singles.</li>
+<li><b>LPs only (v15):</b> one trough the tray's full 52.1 cm, the LPs centred in it with 10.3 cm either side, so you can flip with both hands; no divider, no singles slot. Records lean back 10° like a record shop browser; the last one leans on a raked oak rest.</li>
+<li><b>Capacity:</b> about 90 LPs per tray; two trays, about 180 LPs.</li>
 <li><b>Runners:</b> 400 mm full extension, 68–70 kg per pair, screwed straight into bay 3's 18 mm ply sides. A full tray weighs about 32 kg: open one at a time, and fit the anti-tip brackets before loading.</li>
-<li><b>Outer sleeves:</b> if most LPs live in thick outer sleeves (up to 32.3 cm), widen the LP trough to 33.4 cm; the singles trough then drops to 18.1, too narrow for face-out singles.</li>
+<li><b>Outer sleeves:</b> thick outer sleeves (up to 32.3 cm) fit with room to spare now the trough is the tray's full width.</li>
 </ul>
 <table class="tight"><tr><th>Dimension</th><th>Figure</th><th>How it adds up</th></tr>
 <tr><td>Bay 3 carcass</td><td>60 × 40 × 73 outside, 56.4 × 69.4 inside</td><td>18 mm birch ply; back open to the channel</td></tr>
 <tr><td>Tray</td><td>53.9 × 40 outside, 52.1 × 38.2 inside</td><td>56.4 − 2 × 1.25 runners; 9 mm sides and ends</td></tr>
-<tr><td>Inside layout</td><td>32.6 + 0.6 + 18.9</td><td>LP trough, oak divider, singles trough</td></tr>
+<tr><td>Inside layout</td><td>10.3 + 31.4 + 10.3</td><td>Finger room, the LPs, finger room (v15: LPs only)</td></tr>
 <tr><td>Lower tray · upper tray</td><td>Undersides 2.3 · 37.0; sleeves to 34.4 · 69.1</td><td>2.6 and 2.1 cm finger room; top panel at 71.2</td></tr>
 </table>
 <h3>The turntable zone</h3>
@@ -728,83 +725,72 @@ def _plan(deck=False):
 <figure>{storage()}</figure>
 <h3>Where every record lives</h3>
 <table class="tight"><tr><th>Where</th><th>What</th><th>How many</th></tr>
-<tr><td>Bay 3, upper and lower trays</td><td>LPs and singles, face-out</td><td>About 180 LPs + 240 singles</td></tr>
+<tr><td>Bay 3, upper and lower trays</td><td>LPs, face-out</td><td>About 180 LPs</td></tr>
 <tr><td>Above the TV</td><td>Oak record ledge, the "now playing" wall</td><td>4 LPs</td></tr>
 <tr><td>Side wall</td><td>The ledge wrapped round the corner</td><td>4 LPs</td></tr>
 <tr><td>High shelf, right</td><td>A framed 7-inch</td><td>1</td></tr>
-<tr class="total"><td>Total</td><td></td><td>About {LPS} LPs and {SINGLES} singles, every one face-out</td></tr>
+<tr class="total"><td>Total</td><td></td><td>About {LPS} LPs, every one face-out</td></tr>
 </table>
 <p>That's fewer than v10's cabinet held (it had a 50-LP browser and a singles drawer). If the collection is bigger than this, tell me the counts. The neatest overflow is a matching face-out tray unit under the window at the end of the sofa.</p>
 
 <h2 class="pb">5 · The dining wall</h2>
-<p>The chimney breast becomes the dining wall. A solid oak table, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard. Every day it stands folded flat against the breast, about {n(g.FOLDED_D)} cm deep. Down, it's a table for four at the same 76 cm as the alcove's worktop. Lifted off with its matching 60 cm leaf, which carries all eight oak legs in a slim frame underneath, it makes a 170 × 80 table in the room: six with room to spare, or eight at a squeeze.</p>
-<figure class="render">{img("render_v13_dining_four.png", "The dining wall down and set for four")}
-<figcaption>Down and set for four: two on the room side, one at each end, nothing under the wall now. The second spot bar, on the point by the door just out of view here, lights the table and the framed LPs.</figcaption></figure>
-<figure class="render">{img("render_v13_dining_six.png", "The table lifted off and set for six, with both spot bars")}
-<figcaption>Lifted off with its leaf (170 × 80, on eight tapered oak legs; the leaf's slim frame shows under its end) and set for six, {n(-g.FREE_Z[0])} cm off the breast: two a side with {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm each, one at each end. The camera stands back in line with the alcove's edge, so both spot bars show: bar 1 on the rose over the coffee table, bar 2 on the point by the door, two heads on the table. The backboard and the folded brackets stay on the breast. The stairs (going up) and the door are drawn roughly until you confirm the west end.</figcaption></figure>
-<figure>{dining_section()}</figure>
-<h3>Two places for the table: the chimney breast, or under your shelf by the stairs (v14)</h3>
-<p>You asked what it would look like with the table on the wall going up the stairs, under your 2 m shelf, with everything else free to move and the floor lamp staying but able to shift. Your photos put that wall at about {n(g.STAIRS_WALL_Z[0] - g.WINDOW_Z)} cm from the stair box to the window corner, with the shelf about {n(g.SHELF_B['top'])} cm up. The same table, backboard, brackets and leaf work on either wall: only the backboard's fixings change. Option B is drawn in the 3D room on the plan page, from every angle and in each lighting scene.</p>
+<p>The dining table is a <b>flip-top gate-leg table that never leaves the wall</b> (new in v15: you asked for one that stays attached and seats more). A solid oak top, {n(g.TABLE[0])} × {n(g.TABLE[1])} cm, hangs on lift-off hinges on an oak backboard and rests on two folding brackets, as before. A second {n(g.FLIP['leaf'][0])} × {n(g.FLIP['leaf'][1])} oak half is hinged to its front edge on three brass flip-top hinges<sup>{fit.ORDER.index("fliphinge") + 1}</sup>: flip it out and the table runs {n(g.OPEN_LEN)} cm into the room, its far end on a folding oak gate leg, at the same {n(g.TABLE_TOP)} cm as the worktop. Four sit with room to spare, six elbows-in; by the stairs a seventh sits at its end. Every day it folds flat against the wall, about {n(g.FOLDED_D)} cm deep, the half and its gate tucked behind the top. Nothing comes off the wall, there's no leaf to store, and no legs to screw in.</p>
+<figure class="render">{img("render_v13_dining_four.png", "The flip-top open and set for four on the chimney breast")}
+<figcaption>Open on the breast and set for four: the top on its brackets, the half flipped out beyond it on its gate leg, two down each side. Bar 2, on the pendant point by the stairs just out of view, lights the table and the framed LPs.</figcaption></figure>
+<figure class="render">{img("render_v13_dining_six.png", "The flip-top open and set for six, with both spot bars")}
+<figcaption>Set for six, three down each side ({n(g.OPEN_LEN / 3)} cm each: elbows in). The camera stands back in line with the alcove's edge, so both spot bars show. The table's end stops {n(g.OPEN_Z[1] - g.SOFA_FRONT_Z)} cm short of the sofa, so on the breast nobody sits at its end.</figcaption></figure>
+<figure>{fliptop()}</figure>
+<h3>Two places for it: the chimney breast, or under your shelf by the stairs</h3>
+<p>You asked (v14) what it would look like on the wall going up the stairs, under your 2 m shelf. Your photos put that wall at about {n(g.STAIRS_WALL_Z[0] - g.WINDOW_Z)} cm from the stair box to the window corner, with the shelf about {n(g.SHELF_B['top'])} cm up. The flip-top works on either wall: only the backboard's fixings change. Both are drawn in the 3D room on the plan page, folded and open, from every angle and in each lighting scene.</p>
 <figure>{dining_sites()}</figure>
-<figure class="render">{img("render_v14_3d_dining_B_four.png", "Option B in 3D: the table down for four under the shelf by the stairs")}
-<figcaption>Option B in the 3D room, set for dinner: bar 2 hangs on the existing pendant point over the table's stair end, your shelf stays above it, the stairs are behind the end chair.</figcaption></figure>
-<figure class="render">{img("render_v14_3d_B_folded.png", "Option B folded under the shelf")}
-<figcaption>Option B folded on an everyday evening: about 6 cm deep against the wall, 42 cm under the shelf, with the floor lamp beside it and the chimney breast left clear.</figcaption></figure>
+<figure class="render">{img("render_v15_3d_dining_B_four.png", "Option B in 3D: the flip-top open under the shelf by the stairs")}
+<figcaption>Option B in the 3D room, set for dinner: the flip-top open into the room under your shelf, bar 2 on the existing pendant point over it, the stairs behind the first chairs.</figcaption></figure>
+<figure class="render">{img("render_v15_3d_B_folded.png", "Option B folded under the shelf")}
+<figcaption>Option B folded on an everyday evening: {n(g.FOLDED_D)} cm deep against the wall, {n(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)} cm under the shelf with its light box, laser and hanging plant, your hat on its peg and the red lamp beside it.</figcaption></figure>
 <ul>
-<li><b>B fits:</b> centred on the wall it leaves {n(g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0])} cm to the stair box and {n(g.TABLE_B_Z[1] - g.WINDOW_Z)} cm to the window. Folded, its top edge ({n(g.FOLDED_TOP)}) is {n(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)} cm under the shelf, so the shelf and what's on it stay.</li>
-<li><b>B's wins:</b> nobody sits in the door's swing; the existing pendant point is right over the table, so spot bar 2 lights it directly; the chimney breast is left clear (framed LPs, the lamp, or an armchair); and with the dresser gone the room's west half opens up.</li>
-<li><b>B's costs:</b> the two end chairs are tight ({n(g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0] - g.CHAIR[1])} cm behind the stair end's, {n(g.TABLE_B_Z[1] - g.WINDOW_Z - g.CHAIR[1])} behind the window end's), so tuck them in after a meal to keep the stair's foot clear; six and eight still happen in the middle of the room, as on the breast. The west wall's build is unknown: knock on it before choosing (solid takes plugs; studwork means fixing the backboard into the studs).</li>
-<li><b>What moves for B:</b> the dresser goes (its turntable and records already have homes in the media wall: face-out and spine-up); the floor lamp moves to one of the spots in the 3D room's options; the sofa stays where it is, with a clear walk behind the chairs.</li>
-</ul>
-<h3>Where the legs live: inside the leaf (v13.6)</h3>
-<p>You asked for the legs to be part of the table's build, maybe in a box, so they don't become one more thing to store. The leaf is the box. A slim oak frame, {n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME_OUT[0])} with rails {n(g.LEAF_FRAME['h'])} deep, is glued and screwed under the 60 × 80 leaf. All eight legs lie side by side inside it: each one's bolt sits in a hole in the end rail and its foot snaps into a sprung clip<sup>{fit.ORDER.index("clip") + 1}</sup>. Leaf, frame and legs come to about 16 kg and go wherever the chairs are kept.</p>
-<figure>{leaf_case()}</figure>
-<ul>
-<li><b>Why this way:</b> the folded table stays a plain oak panel, nothing new stands in the room, and the frame stiffens the leaf like an apron. With the table up for six, the frame's underside is {n(g.LEG_H - g.LEAF_FRAME['h'])} cm from the floor, {n(g.LEG_H - g.LEAF_FRAME['h'] - g.CHAIR[3])} above a chair seat: the same as an ordinary table's apron.</li>
-<li><b>What we set aside:</b> folding legs fixed under the table (they'd show on the folded panel and stand it about 5 cm further off the wall); a box under the dining wall (it sits where the breast-side chairs push back with six seated); the plinth drawer (too short for 71 cm legs).</li>
-<li><b>The legs are oak now,</b> not the steel option: they match the wall, and the case is sized to them ({n(g.LEG[0])} tapering to {n(g.LEG[1])}, {n(g.LEG_H)} long).</li>
+<li><b>A, on the breast: up to six.</b> It opens towards the window, {n(-g.OPEN_Z[1])} cm out, three a side. Its end stops {n(g.OPEN_Z[1] - g.SOFA_FRONT_Z)} cm short of the sofa, so there's no seat at the end; for six, slide the coffee table towards the TV first; the west side's first chair sits in the door's swing, so keep the door shut while you eat (or rehang it to open into the hall).</li>
+<li><b>B, by the stairs: up to seven.</b> It opens into the room from the stairs wall, three a side and one at the end, right under the existing pendant point and out of the door's swing; it frees the chimney breast. The side chairs are tight ({n(g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0] - g.CHAIR[1] + 8)} cm to the stair box behind the stair side, {n(g.TABLE_B_Z[1] - g.WINDOW_Z - g.CHAIR[1] + 8)} to the window wall), so tuck them in after a meal; your red lamp moves from the window corner while it's open. The west wall's build is unknown: knock on it before choosing (solid takes plugs; studwork means fixing the backboard into the studs).</li>
+<li><b>What moves for B:</b> the dresser goes (its turntable and records already have homes in the media wall, all face-out); the sofa stays where it is.</li>
 </ul>
 <h3>How it works</h3>
 <ul>
-<li><b>The top:</b> solid oak with <b>pegged breadboard ends</b>, 7 cm oak strips across each end on a tongue, pinned with three oak pegs in slotted holes so the top can move. They stop it cupping when it lives upright, and they frame it like the uprights frame the TV. The corners are rounded to a 5 cm radius (kinder on hips by a door), and the underside edges are chamfered 1 cm so it reads slim.</li>
-<li><b>Backboard:</b> oak, {n(g.RAIL[0])} × {n(g.RAIL[1])} × {n(g.RAIL[2])}, from the worktop's offcut, screwed to the breast with plugs every 20 cm, top at {n(g.RAIL_TOP)}.</li>
-<li><b>Brackets:</b> two Häfele Hebgo heavy-duty folding brackets (287.43.428: 580 mm arm, 500 kg a pair<sup>{fit.ORDER.index("hebgo") + 1}</sup>), {n(g.HEBGO_X[1] - g.HEBGO_X[0])} cm apart on the backboard's face. Raised, they lock on their own; a light lift on the arm releases them, and they fold flat down the breast.</li>
-<li><b>Hinges:</b> three 100 mm lift-off hinges<sup>{fit.ORDER.index("liftoff") + 1}</sup>, all the same hand, along the backboard's top edge. Slide the table 5 cm sideways and it comes off.</li>
-<li><b>Folded:</b> two oak turn buttons on the breast, plus a magnetic catch, hold the top edge at {n(g.FOLDED_TOP)}. The underside faces the room: plain oiled oak between the pegged breadboard ends, the same finish as the worktop, so folded up it reads as a calm oak panel under the two framed LPs (v13: no reeding). The legs screw into four small brass threaded inserts in the breadboard ends instead of black plates.</li>
-<li><b>For six or eight:</b> lift it off (two people, about 18 kg) and lay it face down on a blanket. Unclip the eight tapered oak legs from the leaf (4.5 cm to 3 cm, 71 long, the standard dining leg height<sup>{fit.ORDER.index("legs") + 1}</sup>), screw four into the table's brass inserts and four into the leaf's, and stand both up: the top is at {n(g.LEG_H + g.TABLE[2])}. Butt the 60 × 80 leaf against the table's west end, joined by two alignment dowels and two table clips: six and eight both use it (v13.1: 110 × 80 alone gives six only 55 cm each, under the 60 a diner needs). Felt glides take up an uneven floor.</li>
+<li><b>The top and the half:</b> solid oak with <b>pegged breadboard ends</b>, 7 cm oak strips across each end on a tongue, pinned with three oak pegs in slotted holes so the boards can move. They stop the panels cupping when they live upright, and they frame them like the uprights frame the TV. Rounded 5 cm corners on the half's free end, 1 cm chamfers underneath so it reads slim.</li>
+<li><b>Backboard and hinge rail:</b> oak, {n(g.RAIL[0])} × {n(g.RAIL[1])} × 3 from the worktop's offcut, screwed to the wall with plugs every 20 cm; along its top, a {n(g.RAIL[0])} × 4 × {n(g.RAIL[2] - 3)} oak hinge rail stands it out so the folded half and its gate fit behind the top. The rail's top is flush with the open table, at {n(g.RAIL_TOP)} under the top.</li>
+<li><b>Brackets:</b> two Häfele Hebgo heavy-duty folding brackets (287.43.428: 580 mm arm, 500 kg a pair<sup>{fit.ORDER.index("hebgo") + 1}</sup>), {n(g.HEBGO_X[1] - g.HEBGO_X[0])} cm apart on the backboard's face, under the top. Raised, they lock on their own; a light lift on the arm releases them.</li>
+<li><b>Hinges:</b> three 100 mm lift-off hinges<sup>{fit.ORDER.index("liftoff") + 1}</sup> along the rail's front edge carry the top; three brass flip-top hinges, {n(g.FLIP['hinge'][0])} × {n(g.FLIP['hinge'][1])} cm, set into the meeting edges of the top and the half, open to 180°, so the half lies flat on the top to fold and flush with it open.</li>
+<li><b>The gate leg:</b> two tapered oak legs ({n(g.LEG[0])} to {n(g.LEG[1])} cm, {n(g.GATE_LEG_H)} long<sup>{fit.ORDER.index("legs") + 1}</sup>) joined by a 7 cm oak apron, hinged under the half {n(g.FLIP['hinge_in'])} cm in from its far edge on two butt hinges, with a folding stay each side to lock it upright. It folds flat inside the half, along its 80 cm.</li>
+<li><b>Folded:</b> two oak turn buttons on the wall, plus a magnetic catch, hold the top edge at {n(g.FOLDED_TOP)}. The top's underside faces the room: plain oiled oak between the pegged breadboard ends, so folded up it reads as a calm oak panel under the two framed LPs. It's about {g.TABLE[0] * g.TABLE[1] * g.TABLE[2] * 0.72 / 500 + 3:.0f} kg to swing up or down: two people, one at each corner.</li>
 <li><b>Chairs:</b> drawn at IKEA TERJE size (43 × 49, seat 48<sup>{fit.ORDER.index("terje") + 1}</sup>), which folds flat. Any dining chair with a 45–48 cm seat works.</li>
 </ul>
 <figure>{seating()}</figure>
-<table class="tight"><tr><th>Seats</th><th>Where the table stands</th><th>Per diner</th><th>Clearances</th></tr>
-<tr><td>Four</td><td>Down at the wall, on its brackets</td><td>55 on the room side (60 is ideal); the ends are 80 wide</td><td>{n(g.TABLE_Z[1] - g.SOFA_FRONT_Z)} to the sofa: room to walk behind</td></tr>
-<tr><td>Six</td><td>Lifted off with the leaf: 170 × 80 at x {n(g.SIX_X[0])}–{n(g.SIX_X[1])}, {n(-g.FREE_Z[0])} off the breast</td><td>{n((g.TABLE[0] + g.LEAF[0]) / 2)}, two a side; 80 at each end</td><td>{n(-g.FREE_Z[0])} to the breast (the figure to aim for), {n(g.FREE_Z[1] - g.WINDOW_Z)} to the window, {n(g.ROOM_W - g.SIX_X[1])} to the west wall</td></tr>
-<tr><td>Eight</td><td>The same 170 × 80, in the same place</td><td>57, three a side</td><td>As for six: nothing to move, the wall is clear underneath</td></tr>
+<table class="tight"><tr><th>Seats</th><th>Where</th><th>Per diner</th><th>Clearances</th></tr>
+<tr><td>Four</td><td>Either wall, open: two down each side</td><td>{n(g.OPEN_LEN / 2)} each</td><td>On the breast its end is {n(g.OPEN_Z[1] - g.SOFA_FRONT_Z)} from the sofa; by the stairs the side chairs tuck in</td></tr>
+<tr><td>Six</td><td>Either wall, open: three down each side</td><td>{n(g.OPEN_LEN / 3)} each (55 is a squeeze)</td><td>On the breast slide the coffee table towards the TV and keep the door shut</td></tr>
+<tr><td>Seven</td><td>By the stairs only: three a side and one at the end</td><td>{n(g.OPEN_LEN / 3)} each; the end has the full 110</td><td>The end chair clears the sofa's front; the lamp moves</td></tr>
 </table>
-<p>Clearances from a UK planning guide: 60 cm of table edge per diner, 60 cm from the table to a wall as a tight minimum, 75 to aim for, 100–110 to walk behind someone seated<sup>{fit.ORDER.index("dining") + 1}</sup>. For six or eight, slide the coffee table to the window first, and keep the door to the hall shut while you eat if it opens into the room: the chairs on that side sit in its swing.</p>
+<p>Clearances from a UK planning guide: 60 cm of table edge per diner, 60 cm from the table to a wall as a tight minimum, 75 to aim for, 100–110 to walk behind someone seated<sup>{fit.ORDER.index("dining") + 1}</sup>.</p>
 <h3>Cut list and hardware</h3>
 <table class="tight"><tr><th>Part</th><th>Material</th><th>Size (cm)</th><th>Qty</th></tr>
-<tr><td>Table top · leaf</td><td>Solid oak, edge-glued staves</td><td>96 × 80 × 2.7 centre + two 7 × 80 breadboard ends (110 overall) · 60 × 80 × 2.7</td><td>1 · 1</td></tr>
-<tr><td>Breadboard pegs</td><td>10 mm oak dowel, slotted holes in the tongue</td><td>3 per end</td><td>6</td></tr>
-<tr><td>Legs</td><td>Solid oak, tapered on two inside faces</td><td>71 × 4.5 tapering to 3, an M8 hanger bolt in each</td><td>8</td></tr>
-<tr><td>Leaf frame (the leg case)</td><td>Solid oak</td><td>long rails {n(g.LEAF_FRAME_OUT[1])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}; side rails {n(g.LEAF_FRAME_IN[0])} × {n(g.LEAF_FRAME['h'])} × {n(g.LEAF_FRAME['t'])}, one with eight 10 mm holes</td><td>2 + 2</td></tr>
-<tr><td>Leg clips</td><td>RS PRO 45 mm steel spring clips</td><td>42.1 × 56 × 12.7 mm</td><td>8</td></tr>
-<tr><td>Backboard</td><td>Solid oak, from the worktop offcut</td><td>110 × 22 × 3</td><td>1</td></tr>
+<tr><td>Table top · the half</td><td>Solid oak, edge-glued staves</td><td>96 × 80 × 2.7 centre + two 7 × 80 breadboard ends (110 overall), each</td><td>1 · 1</td></tr>
+<tr><td>Breadboard pegs</td><td>10 mm oak dowel, slotted holes in the tongue</td><td>3 per end</td><td>12</td></tr>
+<tr><td>Gate legs · apron</td><td>Solid oak, the legs tapered on two inside faces</td><td>{n(g.GATE_LEG_H)} × 4.5 tapering to 3 · {n(g.TABLE[0] - 2 * g.FLIP['inset'])} × 7 × 2</td><td>2 · 1</td></tr>
+<tr><td>Backboard · hinge rail</td><td>Solid oak, from the worktop offcut</td><td>110 × 22 × 3 · 110 × 4 × {n(g.RAIL[2] - 3)}</td><td>1 · 1</td></tr>
 <tr><td>Turn buttons</td><td>Oak offcut</td><td>6 × 2.5 × 2.2, on a single screw</td><td>2</td></tr>
-<tr><td>Leg inserts</td><td>Brass M8 threaded inserts, in the breadboard ends and the leaf</td><td>—</td><td>8</td></tr>
 <tr><td>Folding brackets</td><td>Häfele Hebgo 287.43.428</td><td>arm 58, height 22</td><td>2</td></tr>
 <tr><td>Lift-off hinges</td><td>Union PowerLoad, 100 × 88</td><td>one 3-pack, same hand</td><td>3</td></tr>
-<tr><td>Leaf joint</td><td>Alignment dowels, table clips</td><td>—</td><td>2 + 2</td></tr>
+<tr><td>Flip-top hinges</td><td>Lee Valley 40574, solid brass</td><td>{n(g.FLIP['hinge'][0])} × {n(g.FLIP['hinge'][1])}</td><td>3</td></tr>
+<tr><td>Gate hinges · stays</td><td>Steel butt hinges, 75 mm · folding (locking) stays</td><td>—</td><td>2 · 2</td></tr>
 </table>
-<p class="note">Safety: never fold it up with anything on it, keep both turn buttons turned when it's up, and check the brackets have locked (a click each side) before you load it.</p>
+<p class="note">Safety: never fold it up with anything on it, keep both turn buttons turned when it's up, check the brackets have locked (a click each side) and the gate's stays are locked before you load it.</p>
 
 <h2 class="pb">6 · The side wall</h2>
-<p>One oak line at {n(g.LEDGE_TOP)} cm runs from the ledge over the TV, round the corner on the left upright, and along the side wall: first a 7 cm record ledge with four more LPs face-out, then an oak shelf for the PC over the end of the sofa. It ties the alcove to the rest of the room and moves the PC out of the TV's sightlines.</p>
+<p>One oak line at {n(g.LEDGE_TOP)} cm runs from the ledge over the TV, round the corner on the left upright, and along the side wall. New in v15, the side wall's part is <b>one run</b>, {n(g.SIDE_RUN_T)} cm thick all along: a 7 cm record ledge with four more LPs face-out that <b>sweeps out in one smooth curve</b> to the 28 cm shelf the PC sits on, ending in a 5 cm radius like the table's corners. A warm LED strip in a groove under its front edge washes the wall below it, on the uprights' driver and dimmer. Two separate shelves at two depths become one piece of furniture, and it moves the PC out of the TV's sightlines.</p>
 <figure class="render">{img("render_v13_side.png", "The PC side wall")}
-<figcaption>The side wall from the room: the ledge round the corner with its four LPs, the PC on its shelf with the keyboard tray's housing underneath, and nothing else on the wall: the leads run inside it, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on; its outline is dashed, with the depths marked: the alcove is 38 deep, so 38 of the 46 cm base sits inside it and 8 stands proud (picked out in gold), and the 30 cm uprights and shelves sit wholly inside.</figcaption></figure>
+<figcaption>The side wall from the room: the oak run round the corner with its four LPs, sweeping out under the PC, the keyboard tray's housing underneath and the LED's glow below it, the curtains at the window, and nothing else on the wall: the leads run inside it, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on; its outline is dashed, with the depths marked: the alcove is 38 deep, so 38 of the 46 cm base sits inside it and 8 stands proud (picked out in gold), and the 30 cm uprights and shelves sit wholly inside.</figcaption></figure>
 <figure>{pc_shelf()}</figure>
 <ul>
-<li><b>Wrap ledge:</b> 134 × 7 × 2.4 cm with a 1.5 cm lip, on an oak cleat screwed to the side wall, butt-jointed to the left upright's front edge on two 10 mm dowels.</li>
-<li><b>PC shelf:</b> {n(g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1])} × {n(g.PC_SHELF_D)} × 4 cm, on an oak cleat with two concealed heavy-duty brackets (40 kg+ a pair), {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.SOFA_H)} cm above the sofa's back. The case sits with its glass to the room and its front towards the alcove. The ports face the window and stay open to the air (v13: no screen, so nothing traps the exhaust); from the sofa you look at the glass side, not the ports. The pad dock sits beyond the case.</li>
+<li><b>The run:</b> {n(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} cm long, {n(g.SIDE_RUN_T)} thick, cut from one 225 × 30 × 4 oak board to a full-size template: 7 deep along the LPs (with a 1.5 cm lip), easing out to {n(g.PC_SHELF_D)} over {n(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} cm just past the last LP. It sits on an oak cleat screwed to the side wall, dowelled to the left upright's front edge.</li>
+<li><b>The PC end:</b> {n(g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1])} × {n(g.PC_SHELF_D)} cm, on two concealed heavy-duty brackets (40 kg+ a pair) as well as the cleat, {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.SOFA_H)} cm above the sofa's back. The case sits with its glass to the room and its front towards the alcove. The ports face the window and stay open to the air (v13: no screen, so nothing traps the exhaust); from the sofa you look at the glass side, not the ports. The pad dock sits beyond the case.</li>
 <li><b>Cables:</b> through a brush grommet at the shelf's back corner straight into a 25 mm conduit chased into the side wall (it's solid, as you confirmed), down to skirting height and behind the skirting to the base's plinth; you chase it yourselves in step 3, with a second, smaller conduit beside it for the PC's mains lead, then it's filled and painted, so nothing shows. A draw wire left in it pulls the next lead through. The HDMI is an active optical cable (about 5 m), "source" end at the PC.</li>
 <li><b>Power:</b> the PC plugs into the 10-gang behind the TV: its lead (a 5 m C13 lead with a rewireable plug, fed down bare and the plug fitted at the bottom) runs in its own 25 mm conduit beside the data one. The 10-gang's load check, with the PC, is in section 9. No new socket.</li>
 <li><b>Keyboard tray (back from v6.1):</b> the shelf sits on a 7 cm oak housing with a tray on 300 mm light-duty runners that rolls 25 cm out towards the room. It holds a full-size wireless keyboard and mouse: pull it out, lift the keyboard onto your lap, park it again. The housing stops 12 cm short of the sofa end so the cables drop past it; its underside is {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.KB_TRAY["h"])}, {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.KB_TRAY["h"] - g.SOFA_H)} above the sofa's back.</li>
@@ -826,9 +812,9 @@ def _plan(deck=False):
 <table class="tight"><tr><th>Part</th><th>Material</th><th>Finished size (cm)</th><th>Joints</th><th>Qty</th></tr>
 <tr><td>Uprights</td><td>Solid oak, quarter-sawn if you can</td><td>{n(g.UPRIGHT_LEN)} × 30 × 4.5 (buy 165 and scribe)</td><td>Housings for the high shelf and ledge; mortises for the Series X shelf in the right one; LED groove inside; cable groove at the back of the right one</td><td>2</td></tr>
 <tr><td>High shelf</td><td>Solid oak</td><td>128.9 × 30 × 4 and 51.7 × 30 × 4</td><td>Housed 1.2 into the uprights, pegged; the short length on a cleat on the reveal</td><td>2</td></tr>
-<tr><td>Record ledge · wrap ledge</td><td>Solid oak</td><td>128.9 × 7 × 2.4 · 134 × 7 × 2.4; lips 0.9 × 1.5</td><td>Housed and pegged · cleat and two dowels</td><td>1 · 1</td></tr>
+<tr><td>Record ledge</td><td>Solid oak</td><td>128.9 × 7 × 2.4; lip 0.9 × 1.5</td><td>Housed and pegged</td><td>1</td></tr>
 <tr><td>Series X shelf</td><td>Solid oak</td><td>55 × 30 × 4 ({n(g.RZ_W)} + 4.5 through)</td><td>Two through-tenons 6 × 2.4, wedged flush; cleat on the reveal</td><td>1</td></tr>
-<tr><td>PC shelf</td><td>Solid oak</td><td>{n(g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1])} × {n(g.PC_SHELF_D)} × 4</td><td>Oak cleat and two concealed brackets</td><td>1</td></tr>
+<tr><td>Side-wall run (v15)</td><td>Solid oak, one 225 × 30 × 4 board</td><td>{n(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long, 7 deep sweeping to {n(g.PC_SHELF_D)}, {n(g.SIDE_RUN_T)} thick; lip 0.9 × 1.5 along the 7 cm part</td><td>Cleat, two concealed brackets under the PC end, two dowels to the left upright; LED groove under the front edge</td><td>1</td></tr>
 <tr><td>Worktop and backboard</td><td>One solid oak worktop, 300 × 62</td><td>{n(g.ALC_W)} × {n(g.BASE_D)} × 3 and 110 × 22 × 3</td><td>Chamfered fronts; cut edges sealed</td><td>1 board</td></tr>
 <tr><td>Face frame</td><td>Oak, 20 mm</td><td>186 × 73, stiles about 5 wide</td><td>Glued and pinned; end stiles scribed</td><td>1 set</td></tr>
 <tr><td>Wedges · pegs · dowels</td><td>Oak · 10 mm oak dowel</td><td>6 × 3, tapering · 5 long</td><td>Glued</td><td>2 + spares · 6 · 8</td></tr>
@@ -850,9 +836,9 @@ def _plan(deck=False):
 <h3>Light, in three warm layers</h3>
 <ul>
 <li><b>The LED strip on the ceiling</b> (as now): round the room's edge, into the alcove and across the breast; 2700K on a dimmer.</li>
-<li><b>Built into the oak:</b> a 2700K strip in each upright's groove, on a plug-in driver with an inline dimmer, on the 10-gang (no fused spur); a 6500K bias light on the back of the TV from its USB port.</li>
-<li><b>A lamp by the sofa (from v6.1):</b> a floor or table lamp with a 2700K bulb at the sofa's west end. A deep green room needs a low, warm layer as well as the light from above; it's also the one to leave on for a film.</li>
-<li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>), parallel to the media wall, on your two existing ceiling points. Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa. Bar 2 hangs on the point between the door and the west wall, and its heads swing to the table. Each gets an LED-compatible dimmer in place of its switch: like-for-like swaps you do yourselves (step 12), with no new wiring. Bar 1 sits in front of the screen, so tilt its heads up and away: none should be visible in the screen from the sofa.</li>
+<li><b>Built into the oak:</b> a 2700K strip in each upright's groove and (new in v15) one under the side-wall shelf's front edge, washing the wall below it, all on one plug-in driver with an inline dimmer, on the 10-gang (no fused spur); a 6500K bias light on the back of the TV from its USB port.</li>
+<li><b>Your red lamp:</b> the three-headed floor lamp you have, its colour bulbs green at the top, pink in the middle and purple at the bottom. A deep green room needs a low layer as well as the light from above; it's also the one to leave on for a film. It can stand in any of the three spots in the 3D room.</li>
+<li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>) on your two existing ceiling points, <b>both running from the TV towards the window</b> (v15). Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa; bar 2 on the pendant point by the stairs, along the west wall, so its end no longer comes near that wall. <b>Smart colour bulbs</b> (v15): eight E14 bulbs under the bar's 6 W, the WiZ Colour P45 (4.9 W, 4.5 × 10.1 cm) or, if it shows below a shade, the shorter Philips Hue lustre (5.1 W, 4.5 × 7.7 cm)<sup>{fit.ORDER.index("e14") + 1}</sup>. Smart bulbs need full power, so <b>no dimmers</b>: the wall switches stay as they are and stay on; level and colour come from the app (or an optional smart button). Bar 1 sits in front of the screen, so tilt its heads up and away: none should be visible in the screen from the sofa.</li>
 </ul>
 <table class="tight"><tr><th>Head</th><th>Bar 1, on the existing rose</th><th>Bar 2, over the dining area</th></tr>
 <tr><td>Sage</td><td>The books and the left of the high shelf</td><td>The framed LPs above the table</td></tr>
@@ -860,9 +846,9 @@ def _plan(deck=False):
 <tr><td>Mustard</td><td>Down onto the coffee table</td><td>The table</td></tr>
 <tr><td>Dusty pink</td><td>The turntable and the Series X</td><td>Down onto the way in, by the door</td></tr>
 </table>
-<p>Never point a head at the TV. For six or eight the table stands right under bar 2: point its blue and mustard heads straight down onto it. Use warm-white (2700K) dimmable E14 LED bulbs throughout.</p>
-<h3>Lighting scenes (v13.7)</h3>
-<p>Four ways to set the room with the controls it already has: the strip's controller, the inline dimmer on the uprights' LED driver, the two wall dimmers and the lamp's switch. No smart kit needed; if you add smart dimmers later, these are the scenes to save.</p>
+<p>Never point a head at the TV. For six or eight the table stands right under bar 2: point its blue and mustard heads straight down onto it. For everyday light, set the bars' bulbs to warm white (about 2700K) and soft: aim the heads at walls and shelves rather than the floor, and the room reads evenly lit rather than as pools of light. Save colours for the scenes you want them in.</p>
+<h3>Lighting scenes (v13.7; smart since v15)</h3>
+<p>Four ways to set the room: the strip's controller, the inline dimmer on the uprights' LED driver, and the bars' and the lamp's smart bulbs in their app. Save these four as scenes in the app (and on the smart button if you get one). In the 3D room each light has a slider, the bars and the lamp a colour, and the scene buttons fill the sliders in.</p>
 {scenes_html()}
 
 <h2 class="pb">9 · Power, cables and network</h2>
@@ -879,17 +865,17 @@ def _plan(deck=False):
 <tr><td>Side wall, double, left outlet</td><td>The 10-gang behind the TV: TV, soundbar, sub, Series X, USB charger (fan stand, pad dock, bias light, HDMI switch), Deco B, Switch 2, the turntable, the preamp, the PC and the uprights' LED driver</td><td>Always on: about 1.55 kW with everything running, PC included</td></tr>
 <tr><td>Side wall, double, right outlet</td><td>The retro 6-way in the channel: Xbox One, Xbox 360, PS3, PS2, PS1, the RetroTINK's USB plug</td><td>The wall switch is the retro switch: off between sessions; up to about 0.8 kW with a launch PS3</td></tr>
 <tr><td>By the sofa, if there is one</td><td>The rear speakers (if there's no socket there, a 12-way strip in place of the 10-gang gives them a way)</td><td>On</td></tr>
-<tr><td>Ceiling points 1 and 2</td><td>The two spot bars, each on an LED-compatible dimmer</td><td>Dimmed</td></tr>
+<tr><td>Ceiling points 1 and 2</td><td>The two spot bars, with smart colour bulbs (v15)</td><td>Switches left on; level and colour from the app</td></tr>
 </table>
 <p class="note">One strip per outlet, never one plugged into another, and each under its 13 A (3 kW) limit: about 1.55 kW on the 10-gang and up to 0.8 kW on the retro 6-way, about 10 A together.</p>
 <h3>Electrics: your own job</h3>
-<p>You're doing the electrics yourselves. In England, Part P of the Building Regulations makes only three kinds of work notifiable: a new circuit, a replacement consumer unit, and any addition or alteration to a circuit in a special location (round a bath or shower). Replacing an accessory like for like, and adding to an existing circuit anywhere else, isn't notifiable, though it must still be done to the wiring regulations (BS 7671). So the jobs here need no electrician and no building control: the socket swapped for a double, the two dimmers, and the two spot bars in place of the old fittings. The Cat6 and the conduits aren't mains work at all.</p>
+<p>You're doing the electrics yourselves. In England, Part P of the Building Regulations makes only three kinds of work notifiable: a new circuit, a replacement consumer unit, and any addition or alteration to a circuit in a special location (round a bath or shower). Replacing an accessory like for like, and adding to an existing circuit anywhere else, isn't notifiable, though it must still be done to the wiring regulations (BS 7671). So the jobs here need no electrician and no building control: the socket swapped for a double, and the two spot bars in place of the old fittings (the light switches stay: the bars' smart bulbs need full power, so there are no dimmers to fit). The Cat6 and the conduits aren't mains work at all.</p>
 <div class="callout"><b>The safe routine, every time</b><ol>
-<li><b>Isolate:</b> switch off that circuit's breaker at the consumer unit (the lighting circuit for the dimmers and bars, the socket circuit for the socket). If the labels aren't clear, switch off the main switch.</li>
+<li><b>Isolate:</b> switch off that circuit's breaker at the consumer unit (the lighting circuit for the bars, the socket circuit for the socket). If the labels aren't clear, switch off the main switch.</li>
 <li><b>Lock off:</b> fit the MCB lock-off and padlock, keep the key in your pocket, and tape a note on the board.</li>
 <li><b>Prove dead:</b> check the tester lights on its proving unit, test between every pair of terminals (live–neutral, live–earth, neutral–earth), then check the tester on the proving unit again.</li>
 <li><b>Photograph</b> the wiring before you disconnect anything, and connect the new one wire for wire: brown (or red) to L, blue (or black) to N, green-and-yellow to earth, sleeved, no copper showing, every screw tight.</li>
-<li><b>Test:</b> power back on, then the socket tester in both outlets; each dimmer from low to high with no flicker.</li></ol></div>
+<li><b>Test:</b> power back on, then the socket tester in both outlets; each bar's four bulbs come on and join the app.</li></ol></div>
 <div class="callout"><b>Stop and call an electrician if…</b><ul>
 <li>the tester shows anything live after you've isolated;</li>
 <li>the wiring is old (rubber or fabric sheath, or red and black with no earth), or there's no earth at a ceiling point (the spot bars need one);</li>
@@ -1003,6 +989,7 @@ def _plan(deck=False):
 <tr><td>Records spine-up in one drawer</td><td>Showed only a handful of covers; face-out trays show every one</td></tr>
 <tr><td>A green feature wall only · white skirting</td><td>The drench ties the room together; white cuts a bright line round it</td></tr>
 <tr><td>Bluetooth from the turntable</td><td>Compresses the sound; the AUX lead keeps full quality</td></tr>
+<tr><td>Lifting the table off onto eight legs, with a 60 cm leaf that stores the legs (v13.1–v14)</td><td>You wanted it to stay on the wall and seat more: the flip-top's half and gate leg do both (v15)</td></tr>
 <tr><td>Folding legs fixed under the table · a box for the legs under the dining wall · the plinth drawer (v13.6)</td><td>They'd show on the folded panel and stand it 5 cm off the wall · it sits where the chairs push back with six · too short for 71 cm legs. The leaf carries them instead.</td></tr>
 <tr><td>An electrician's visit for the socket, dimmers and fittings (v13.6)</td><td>You're doing them yourselves: like-for-like, not notifiable; a new socket behind the sofa and a fused spur are dropped</td></tr>
 </table>

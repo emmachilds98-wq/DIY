@@ -38,6 +38,17 @@ CSS = """
 .r3d-ui input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: none; vertical-align: middle; }
 .r3d-save { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .r3d.nogl .r3d-ui, .r3d.nogl .r3d-views { display: none; }
+.r3d-wide { grid-column: 1 / -1; display: grid; gap: 10px; }
+.r3d-lvs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 8px 22px; }
+.r3d-lv { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "lab out" "range range" "cols cols"; gap: 2px 10px; align-items: center; min-width: 0; }
+.r3d-lv label { grid-area: lab; font-size: 14px; }
+.r3d-lv input[type=range] { grid-area: range; width: 100%; accent-color: var(--oak, #9a6634); }
+.r3d-lv output { grid-area: out; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+.r3d-lv .r3d-cols { grid-area: cols; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.r3d-lv .r3d-cols:empty { display: none; }
+.r3d-lv input[type=color] { width: 34px; height: 26px; }
+.r3d-master label { font-weight: 700; }
+.r3d-pick { padding: 4px 8px !important; }
 """
 
 
@@ -45,17 +56,45 @@ def scenes_json():
     return json.dumps({k: {"name": n, "levels": lv} for k, n, _, lv, _ in scenes.SCENES})
 
 
+LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves and the side shelf", None), ("bias", "TV bias light", None),
+          ("bar1", "Bar 1, TV to window (smart colour)", "bar1"), ("bar2", "Bar 2, by the stairs (smart colour)", "bar2"),
+          ("lamp", "Red lamp: top, middle, bottom", "lamp")]
+CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
+SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
+
+
 def controls():
-    seg = lambda attr, items, lab: (f'<div class="grp"><span class="label">{lab}</span><div class="seg" role="group" aria-label="{html.escape(lab)}">'
-                                    + "".join(f'<button type="button" data-{attr}="{k}" aria-pressed="false">{v}</button>' for k, v in items) + "</div></div>")
+    seg = lambda attr, items, lab, extra="": (f'<div class="grp"><span class="label">{lab}</span><div class="seg" role="group" aria-label="{html.escape(lab)}">'
+                                              + "".join(f'<button type="button" data-{attr}="{k}" aria-pressed="false">{v}</button>' for k, v in items) + extra + "</div></div>")
     paints = [(k, f'<span class="dot" style="background:{h}"></span>{html.escape(n.split(" No.")[0].replace("Farrow & Ball ", "").replace("Little Greene ", ""))}')
               for k, (h, n) in R.PAINTS.items()]
+    picker = lambda pid, val, lab: f'<label class="btn r3d-pick">{lab} <input type="color" id="{pid}" value="{val}" aria-label="{html.escape(lab)}"></label>'
+    # v15: every light on a slider, the smart bars and the lamp's three bulbs in any colour; the scene buttons fill the sliders in
+    rows = []
+    for k, lab, col in LIGHTS:
+        cols = ""
+        if col == "lamp":
+            cols = "".join(f'<input type="color" data-col="lamp{i}" value="{c}" aria-label="Lamp bulb {n} colour">' for i, (c, n) in enumerate(zip(G.LAMP_HEADS_RGB, ("top", "middle", "bottom"))))
+        elif col:
+            cols = f'<input type="color" data-col="{col}" value="#ffe2b8" aria-label="{html.escape(lab)} colour"><button type="button" class="chip" data-colreset="{col}">Warm white</button>'
+        rows.append(f'<div class="r3d-lv"><label for="lv-{k}">{html.escape(lab)}</label><input type="range" id="lv-{k}" min="0" max="100" step="1" data-lv="{k}">'
+                    f'<output data-lvout="{k}">0%</output><span class="r3d-cols">{cols}</span></div>')
+    lights = (f'<div class="grp r3d-wide"><span class="label">Lights: pick a scene, then slide any light</span>'
+              f'<div class="seg" role="group" aria-label="Lighting scene">' + "".join(f'<button type="button" data-scene="{k}" aria-pressed="false">{n}</button>' for k, n, *_ in scenes.SCENES)
+              + '<button type="button" data-scene="day" aria-pressed="false">Daytime</button></div>'
+              f'<div class="r3d-lvs"><div class="r3d-lv r3d-master"><label for="lv-master">All lights</label><input type="range" id="lv-master" min="0" max="100" step="1" data-lv="master"><output data-lvout="master">100%</output><span></span></div>'
+              + "".join(rows) + '</div>'
+              '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
+              '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
+              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     return "".join([
         seg("site", [("A", "On the chimney breast"), ("B", "Under the shelf, by the stairs")], "Where the table goes"),
-        seg("dining", [("folded", "Folded"), ("four", "Down for four"), ("six", "Out for six")], "The table"),
-        seg("scene", [(k, n) for k, n, *_ in scenes.SCENES] + [("day", "Daytime")], "Lighting scene"),
-        seg("paint", paints, "Paint").replace("</div></div>", '<label class="btn" style="padding:4px 8px">Any colour <input type="color" id="r3d-custom" value="#899081" aria-label="Pick any paint colour"></label></div></div>'),
-        seg("lamp", [(k, v[0]) for k, v in G.FLOOR_LAMP_SPOTS.items()], "Floor lamp (on or off)"),
+        seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
+        lights,
+        seg("paint", paints, "Wall paint", picker("r3d-custom", "#899081", "Any colour")),
+        seg("ceil", CEIL_PRESETS, "Ceiling paint", picker("r3d-ceil", "#f2f0ea", "Any colour")),
+        seg("skirt", SKIRT_PRESETS, "Skirting, door and radiator", picker("r3d-skirt", "#ece8dd", "Any colour")),
+        seg("lamp", [(k, v[0]) for k, v in G.FLOOR_LAMP_SPOTS.items()], "Where the red lamp stands"),
         seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers"),
         seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
     ])

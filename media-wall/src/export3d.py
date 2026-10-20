@@ -123,20 +123,21 @@ def scene():
         wall = strip(encode(rec(R.dining_wall)), frames)
         chairs = encode(rec(R.dining_chairs))
         groups[f"A_{st}"] = wall + chairs
-        groups[f"B_{st}"] = to_site_b(wall) + (to_site_b(chairs) if st == "four" else chairs)
+        groups[f"B_{st}"] = to_site_b(wall) + (to_site_b(chairs) if st == "four" or G.TABLE_STYLE == "fliptop" else chairs)   # v15: the flip-top stays on its wall
         bar2[f"A_{st}"] = R.spot_heads2()
-        bx = (G.TABLE_B_X[0] + G.TABLE_B_X[1]) / 2 if st == "four" else G.ROOM_W - 2.0
-        by = G.TABLE_TOP if st == "four" else G.FOLDED_TOP - 30.0
-        if st == "six":
+        bx = (G.TABLE_B_OPEN_X[0] + G.TABLE_B_OPEN_X[1]) / 2 if st != "folded" else G.ROOM_W - 2.0   # v15: over the open flip-top
+        by = G.TABLE_TOP if st != "folded" else G.FOLDED_TOP - 30.0
+        if st == "six" and G.TABLE_STYLE != "fliptop":
             bar2[f"B_{st}"] = bar2[f"A_{st}"]
-        else:                  # bar 2 is over the table's stair end on the west wall: blue and mustard on the table, pink on the shelf
+        else:                  # v15: bar 2 runs along the west wall's table: blue and mustard on the table, sage on the folded top, pink on the shelf
             h = R.spot_heads2()
-            bar2[f"B_{st}"] = [h[0], (h[1][0], h[1][1], h[1][2], (bx, by, G.TABLE_B_CZ + 22)), (h[2][0], h[2][1], h[2][2], (bx, by, G.TABLE_B_CZ - 22)),
-                               (h[3][0], h[3][1], h[3][2], (G.ROOM_W - 10, G.SHELF_B["top"] + 8, G.TABLE_B_CZ - 60))]
+            bar2[f"B_{st}"] = [(h[0][0], h[0][1], h[0][2], (G.ROOM_W - 10, G.SHELF_B["top"] + 8, G.TABLE_B_CZ - 60)),
+                               (h[1][0], h[1][1], h[1][2], (G.ROOM_W - 1, G.FOLDED_TOP - 40 if st == "folded" else G.SHELF_B["top"] - 20, G.TABLE_B_CZ + 40)),
+                               (h[2][0], h[2][1], h[2][2], (bx, by, G.TABLE_B_CZ + 22)), (h[3][0], h[3][1], h[3][2], (bx, by, G.TABLE_B_CZ - 22))]
     state()
 
     def bar(cx, cz, heads):
-        return {"x": cx, "z": cz, "heads": [{"dx": dx, "col": col, "stem": stem, "tgt": list(tgt)} for dx, col, stem, tgt in heads]}
+        return {"x": cx, "z": cz, "axis": G.BAR_AXIS, "heads": [{"dx": dx, "col": col, "stem": stem, "tgt": list(tgt)} for dx, col, stem, tgt in heads]}
     room_spec = {
         "W": G.ROOM_W, "CEIL": G.CEIL, "ALC_W": G.ALC_W, "ALC_D": G.ALC_D, "BREAST_X": G.BREAST_X, "RECESS_Z": G.BREAST_D_WEST,
         "DOOR_X": G.DOOR_X, "DOOR_H": 198.0, "STAIR_X": G.STAIR_X, "STAIR_FRONT": G.ALC_D - G.STAIR_D,
@@ -144,7 +145,7 @@ def scene():
         "RADIATOR_X": G.RADIATOR_X, "RADIATOR_Y": (15.0, 70.0), "SKIRT_H": G.SKIRT_H,
         "TV_X": G.TV_X, "TV_Y": (G.TV_BOTTOM, G.TV_TOP), "TV_Z": G.TV_PANEL_Z[0],
         "SHELF_B": G.SHELF_B, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},
-        "TABLE_B": {"x": G.TABLE_B_X, "z": G.TABLE_B_Z, "cz": G.TABLE_B_CZ}, "SIX": {"x": G.SIX_X, "z": G.FREE_Z},
+        "TABLE_B": {"x": G.TABLE_B_X, "z": G.TABLE_B_Z, "cz": G.TABLE_B_CZ}, "SIX": {"x": G.SIX_X, "z": G.FREE_Z}, "OPEN_Z": G.OPEN_Z, "TABLE_B_OPEN_X": G.TABLE_B_OPEN_X,
         "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
         "COFFEE": G.COFFEE, "LAMP": G.FLOOR_LAMP,
         "LAMP_SPOTS": {k: {"label": v[0], "x": v[1][0], "z": v[1][1]} for k, v in G.FLOOR_LAMP_SPOTS.items()},
@@ -152,6 +153,12 @@ def scene():
         "PAINTS": {k: {"hex": v[0], "name": v[1]} for k, v in R.PAINTS.items()},
         "BAR1": bar(G.PEND_X, G.PEND_Z, R.SPOT_HEADS), "BAR2": {k: bar(G.BAR2_X, G.BAR2_Z, v) for k, v in bar2.items()},
         "LED_Y": G.CEIL - 0.6, "RZ": G.RZ, "HIGH_UNDER": G.HIGH_UNDER, "WORKTOP": G.WORKTOP,
+        # v15: the side run's front edge (for its LED strip), the soft furnishings and the stairs wall's things
+        "SIDE_RUN": {"under": G.LEDGE_TOP - G.SIDE_RUN_T,
+                     "edge": [[round(G.side_run_depth(z), 2), z] for z in range(int(G.SIDE_RUN_Z[0]), int(G.SIDE_RUN_Z[1]) - 1, -4)]},
+        "SOFA_CORD": G.SOFA_CORD, "CARPET": G.CARPET_COL, "RUG": {**G.RUG, "cols": G.RUG_COLS}, "CURTAIN": G.CURTAIN,
+        "LIGHTBOX": G.LIGHTBOX, "LASER": G.LASER, "PLANT_B": G.PLANT_B, "HAT_PEG": G.HAT_PEG,
+        "LAMP_BODY": G.LAMP_BODY, "LAMP_RGB": G.LAMP_HEADS_RGB,
     }
     return {"room": room_spec, "groups": groups}
 

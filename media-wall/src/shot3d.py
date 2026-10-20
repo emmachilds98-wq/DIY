@@ -58,9 +58,9 @@ def run(test=False, only=None):
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v14 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v15 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v14_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v15_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])

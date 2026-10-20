@@ -26,6 +26,23 @@ def wire(points, color=LINE, sw=1.4, dash=None):
     d = "M" + " L".join(f"{a},{b}" for a, b in points)
     da = f'stroke-dasharray="{dash}"' if dash else ""
     return f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{sw}" {da}/>'
+
+def bar_heads(n):
+    """v15: each bar's heads for the plans, from the same list as the renders: (offset along the bar, colour, (aim x, aim z))."""
+    import render as R
+    hs = G.BAR1_HEADS if n == 1 else R.spot_heads2()
+    return [(h[0], h[1], (h[3][0], h[3][2])) for h in hs]
+
+
+def _bar_rect(X, Y, bx, bz, w, fill="#ddd9d0", stroke="#999", rx=0):
+    """A spot bar seen from above (84 long, w px wide), along z since v15."""
+    if G.BAR_AXIS == "z":
+        x0, x1 = X(bx), X(bx)
+        y0, y1 = sorted((Y(bz - 42), Y(bz + 42)))
+        return f'<rect x="{x0 - w / 2:.1f}" y="{y0:.1f}" width="{w}" height="{y1 - y0:.1f}" rx="{rx}" fill="{fill}" stroke="{stroke}"/>'
+    xa, xb = sorted((X(bx - 42), X(bx + 42)))
+    return f'<rect x="{xa:.1f}" y="{Y(bz) - w / 2:.1f}" width="{xb - xa:.1f}" height="{w}" rx="{rx}" fill="{fill}" stroke="{stroke}"/>'
+
 def svg(w, h, body, title=None, sub=None):
     head = []
     top = 0
@@ -133,22 +150,20 @@ def drawer():
         o.append(f'<rect x="{PX(x0_)}" y="{PY(39.5)}" width="{1.25*k}" height="{39.5*k}" fill="#e4e4e4" stroke="#999" stroke-width="0.8"/>')
     o.append(f'<rect x="{PX(0)}" y="{PY(40)}" width="{53.9*k}" height="{40*k}" fill="{VIN_F}" stroke="{VIN_S}"/>')
     o.append(f'<rect x="{PX(0.9)}" y="{PY(39.1)}" width="{52.1*k}" height="{38.2*k}" fill="#fff7f1" stroke="{VIN_S}" stroke-opacity="0.4"/>')
+    lx = 0.9 + (G.TRAY_INSIDE - G.LP) / 2                   # v15: LPs only, centred in the full width
     for i in range(26):
         zz = 2.6 + i * 1.2
-        o.append(f'<rect x="{PX(1.5)}" y="{PY(zz + 0.4)}" width="{31.4*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
-    o.append(f'<rect x="{PX(33.5)}" y="{PY(39.1)}" width="{0.6*k}" height="{38.2*k}" fill="#c48c57"/>')
-    for i in range(30):
-        zz = 2.6 + i * 1.1
-        o.append(f'<rect x="{PX(34.4)}" y="{PY(zz + 0.3)}" width="{18.3*k}" height="{0.4*k}" fill="#6f86a8" opacity="{0.8 - i*0.015}"/>')
-    o.append(t(PX(17.2), PY(22), "LP trough 32.6", 11, "middle", 650))
-    o.append(t(PX(17.2), PY(22) + 13, "~90 face-out", 10, "middle", 400, MUTED))
-    o.append(t(PX(43.5), PY(22), "singles 18.9", 10.5, "middle", 650))
-    o.append(t(PX(43.5), PY(22) + 13, "~120 face-out", 10, "middle", 400, MUTED))
+        o.append(f'<rect x="{PX(lx)}" y="{PY(zz + 0.4)}" width="{G.LP*k}" height="{0.5*k}" fill="{VIN_S}" opacity="{0.75 - i*0.02}"/>')
+    o.append(t(PX(26.95), PY(22) - 4, "LPs only, centred", 11, "middle", 650, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
+    o.append(t(PX(26.95), PY(22) + 10, "~90 face-out", 10, "middle", 400, MUTED, extra='paint-order="stroke" stroke="#fff7f1" stroke-width="4"'))
+    for x_ in (0.9, 0.9 + lx - 0.9 + G.LP):
+        o.append(t(PX(x_ + (lx - 0.9) / 2), PY(36), f"{(G.TRAY_INSIDE - G.LP) / 2:g}", 9.5, "middle", 600, VIN_S))
+    o.append(t(PX(26.95), PY(36) + 12, "finger room either side to flip", 9.5, "middle", 400, MUTED))
     o.append(f'<rect x="{PX(-1.45)}" y="{PY(0)}" width="{56.8*k}" height="{1.5*k}" fill="#e9c9a4" stroke="{VIN_S}"/>')
     o.append(t(PX(26.95), PY(0) + 26, "tray 53.9 × 40 outside, 52.1 × 38.2 inside", 10, "middle", 400, MUTED))
-    o.append(t(PX(26.95), PY(0) + 40, "9 mm sides · 6 mm oak divider · 5 cm oak lip", 10, "middle", 400, MUTED))
+    o.append(t(PX(26.95), PY(0) + 40, "9 mm sides · 5 cm oak lip · no divider", 10, "middle", 400, MUTED))
     o.append(t(PX(26.95), PY(0) + 54, "about 32 kg full: open one tray at a time", 10, "middle", 500, VIN_S))
-    return svg(W, H, "\n".join(o), "The record trays: every LP and single face-out, two tiers in bay 3",
+    return svg(W, H, "\n".join(o), "The record trays: LPs only, every one face-out, two tiers in bay 3",
                "Bay 3 of the alcove base, right under the turntable. Section left, plan right. Pull a tray and flip through the covers like a record shop browser")
 
 
@@ -584,8 +599,8 @@ def front():
         cell(i1, i2, P_ + 20.4, P_ + 36.9, "PS2 + HDMI switch", "16.5 row", "g")
         cell(i1, i2, P_ + 1.6, P_ + 18.6, "PS1 + RetroTINK", "17 row", "g")
     i1, i2 = b3a + 1.8, b3b - 1.8
-    cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "Upper record tray", "~90 LPs + ~120 singles", "v")
-    cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "Lower record tray", "~90 LPs + ~120 singles", "v")
+    cell(i1, i2, g.TRAY_UPPER[0], g.TRAY_TOP_PANEL, "Upper record tray", "~90 LPs, face-out", "v")
+    cell(i1, i2, 1.8, g.TRAY_UPPER[0] - 2, "Lower record tray", "~90 LPs, face-out", "v")
     for a in (b1a, b2a):
         o.append(f'<rect x="{X(a)}" y="{Y(73)}" width="{60*s}" height="{64*s}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
     o.append(f'<rect x="{X(b3a)}" y="{Y(73)}" width="{60*s}" height="{73*s}" fill="none" stroke="#8f8a80" stroke-width="1.3"/>')
@@ -708,7 +723,7 @@ def _sofa(o, X, Y, k, label=True):
     back = [(x0, zb), (x1, zb), (x1, zb + 22), (x0 + 22, zb + 22), (x0 + 22, ze), (x0, ze)]
     o.append('<polygon points="' + " ".join(f"{X(a):.1f},{Y(b):.1f}" for a, b in back) + '" fill="#dfddd6" stroke="none"/>')
     if label:
-        o.append(t((X(cx1) + X(x1)) / 2, Y((zb + zf) / 2) + 4, f"L-sofa, about {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} (from your photo)", 9.5, "middle", 650))
+        o.append(t((X(cx1) + X(x1)) / 2, Y((zb + zf) / 2) + 4, f"L-sofa, about {_fmt(g.SOFA_W)} × {_fmt(g.SOFA_D)} (blue cord)", 9.5, "middle", 650))
 
 
 def living_plan():
@@ -722,8 +737,9 @@ def living_plan():
     _side_wall(o, X, Y, k)
 
     x0, x1 = g.TABLE_X
-    o.append(f'<rect x="{X(x1):.1f}" y="{Y(g.TABLE_Z[1]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.TABLE[1]*k:.1f}" fill="none" stroke="#9c6a3f" stroke-dasharray="5 3"/>')
-    o.append(t(X(g.TABLE_CX), Y(g.TABLE_Z[1]) - 8, "down, for four", 8.5, "middle", 500, "#9c6a3f"))
+    zo = g.OPEN_Z[1] if g.TABLE_STYLE == "fliptop" else g.TABLE_Z[1]
+    o.append(f'<rect x="{X(x1):.1f}" y="{Y(zo):.1f}" width="{g.TABLE[0]*k:.1f}" height="{(g.TABLE_Z[0] - zo)*k:.1f}" fill="none" stroke="#9c6a3f" stroke-dasharray="5 3"/>')
+    o.append(t(X(g.TABLE_CX), Y(zo) - 8, "flip-top open, 110 × 160" if g.TABLE_STYLE == "fliptop" else "down, for four", 8.5, "middle", 500, "#9c6a3f"))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 22, "media wall, 46 deep", 9, "middle", 650, "#7a5130"))
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 34, "TV 25 cm nearer the side wall · deck right", 8.5, "middle", 400, "#7a5130"))
     o.append(t(X(g.TABLE_CX), Y(0) + 26, "breast · dining wall", 9.5, "middle", 650, "#8f5b45"))
@@ -754,18 +770,18 @@ def living_plan():
     o.append(t(X(0) + 10, Y(z2) - 4, "socket by the sofa,", 8.5, "start", 600, "#d0573b"))
     o.append(t(X(0) + 10, Y(z2) + 7, "if there is one: rears", 8.5, "start", 400, "#d0573b"))
     # the two spot bars
-    for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1, existing rose"),
-                                  (g.BAR2_X, g.BAR2_Z, [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "second bar, existing point")]:
+    for (bx, bz, heads, lab) in [(g.PEND_X, g.PEND_Z, bar_heads(1), "bar 1, existing rose"), (g.BAR2_X, g.BAR2_Z, bar_heads(2), "bar 2, existing point")]:
         rx_, ry_ = X(bx), Y(bz)
-        o.append(f'<rect x="{rx_ - 42*k:.1f}" y="{ry_ - 2:.1f}" width="{84*k:.1f}" height="4" fill="#ddd9d0" stroke="#999"/>')
+        o.append(_bar_rect(X, Y, bx, bz, 4))
         for dx, col, (tx_, tz_) in heads:
-            hx_ = X(bx + dx)
+            hxz = g.bar_head_xz(bx, bz, dx)
+            hx_, hy_ = X(hxz[0]), Y(hxz[1])
             tx, ty = X(tx_), Y(tz_)
-            ln = max(((tx - hx_) ** 2 + (ty - ry_) ** 2) ** 0.5, 1)
-            ex, ey = hx_ + (tx - hx_) / ln * min(48, ln), ry_ + (ty - ry_) / ln * min(48, ln)
-            o.append(f'<circle cx="{hx_:.1f}" cy="{ry_:.1f}" r="5" fill="{col}" stroke="#555" stroke-width="0.6"/>')
-            o.append(arrow(hx_, ry_, ex, ey, col, 1.4))
-        o.append(t(rx_, ry_ - 10, lab, 9, "middle", 600, "#8a6a1a"))
+            ln = max(((tx - hx_) ** 2 + (ty - hy_) ** 2) ** 0.5, 1)
+            ex, ey = hx_ + (tx - hx_) / ln * min(48, ln), hy_ + (ty - hy_) / ln * min(48, ln)
+            o.append(f'<circle cx="{hx_:.1f}" cy="{hy_:.1f}" r="5" fill="{col}" stroke="#555" stroke-width="0.6"/>')
+            o.append(arrow(hx_, hy_, ex, ey, col, 1.4))
+        o.append(t(rx_, min(Y(bz - 42), Y(bz + 42)) - 8 if g.BAR_AXIS == "z" else ry_ - 10, lab, 9, "middle", 600, "#8a6a1a"))
     # LED strip round the ceiling (dotted)
     sd = g.ALC_D - g.STAIR_D
     pts_ = [(0, g.WINDOW_Z), (g.ROOM_W, g.WINDOW_Z), (g.ROOM_W, sd), (g.STAIR_X[0], sd), (g.STAIR_X[0], g.BREAST_D_WEST), (g.BREAST_X[1], g.BREAST_D_WEST),
@@ -792,7 +808,7 @@ def living_plan():
     o.append(t(X(g.ROOM_W) - 36, Y(-150), f"{_fmt(g.ROOM_D*10)} mm", 9.5, "end", 400, MUTED))
     o.append(t(X(g.ROOM_W) - 36, Y(-150) + 12, "window to alcove back", 9, "end", 400, MUTED))
     o.append(t(X((g.WINDOW_X[0] + g.WINDOW_X[1]) / 2), Y(g.WINDOW_Z) - 10, f"window {_fmt(g.WINDOW_X[1]-g.WINDOW_X[0])} · radiator below", 9.5, "middle", 400, MUTED))
-    o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. Sofa from your photo (long side to the reveal; return {_fmt(g.SOFA_D)} assumed). The stairs go up; their direction is drawn roughly.", 9, "start", 400, MUTED))
+    o.append(t(150, H - 10, f"Ceiling {_fmt(g.CEIL*10)} mm. Sofa from your notes (long side to 40 cm short of the window's end; return {_fmt(g.SOFA_D)} assumed). Both spot bars run from the TV towards the window.", 9, "start", 400, MUTED))
     return svg(W, H, "\n".join(o), "The living room from above, as you measured it",
                "To scale, north at the top. Media wall in the alcove, the ledge and PC shelf on the side wall over the sofa, the dining wall on the chimney breast, two spot bars")
 
@@ -812,9 +828,12 @@ def seating():
             x0, z0 = cx - cd / 2, cz - cw / 2
             w_, d_ = cd, cw
         o.append(f'<rect x="{X(x0 + w_):.1f}" y="{Y(z0):.1f}" width="{w_*k:.1f}" height="{d_*k:.1f}" rx="3" fill="#f1e1c8" stroke="#b88a55"/>')
-    panels = [("Four, at the wall", "everyday: the table down on its brackets", "four"),
-              ("Six, in the room", "lifted off, with the leaf: 170 × 80 on eight legs", "six"),
-              ("Eight, with the leaf", "plus a 60 × 80 leaf on four more legs", "eight")]
+    panels = ([("Four, on the breast", "the flip-top open: two down each side", "A4"),
+               ("Six, on the breast", "three down each side, elbows in", "A6"),
+               ("Seven, by the stairs", "three a side and one at the end", "B7")] if g.TABLE_STYLE == "fliptop" else
+              [("Four, at the wall", "everyday: the table down on its brackets", "four"),
+               ("Six, in the room", "lifted off, with the leaf: 170 × 80 on eight legs", "six"),
+               ("Eight, with the leaf", "plus a 60 × 80 leaf on four more legs", "eight")])
     for i, (title, sub, mode) in enumerate(panels):
         ox = 6 + i * 288
         oy = 108
@@ -843,7 +862,26 @@ def seating():
             bxx_, bzz_ = (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["x"], (g.SUB_HOOD if g.PLAIN else g.SUB_BOX)["z"]
             o.append(f'<rect x="{X(bxx_[1]):.1f}" y="{Y(bzz_[0]):.1f}" width="{(bxx_[1]-bxx_[0])*k:.1f}" height="{(bzz_[1]-bzz_[0])*k:.1f}" fill="none" stroke="#b88a55" stroke-width="1.3" stroke-dasharray="3 2"/>')
         # the table and chairs
-        if mode == "four":
+        if mode in ("A4", "A6"):          # v15: the flip-top on the breast, open towards the window
+            tx0, tx1 = g.TABLE_X
+            tz0, tz1 = g.OPEN_Z[1], g.OPEN_Z[0]
+            zm = (tz0 + tz1) / 2
+            n = 2 if mode == "A4" else 3
+            step = (tz1 - tz0) / n
+            seats = []
+            for j in range(n):
+                cz = tz1 - step * (j + 0.5)
+                seats += [(tx0 - cd / 2 + 8, cz, "+x"), (tx1 + cd / 2 - 8, cz, "-x")]
+        elif mode == "B7":                # v15: the flip-top on the stairs wall, open into the room
+            tz0, tz1 = g.TABLE_B_Z[1], g.TABLE_B_Z[0]
+            tx0, tx1 = g.TABLE_B_OPEN_X
+            zm = (tz0 + tz1) / 2
+            step = (tx1 - tx0) / 3
+            seats = [(tx0 - cd / 2 + 8, zm, "+x")]
+            for j in range(3):
+                cx = tx1 - step * (j + 0.5)
+                seats += [(cx, tz1 + cd / 2 - 8, "-z"), (cx, tz0 - cd / 2 + 8, "+z")]
+        elif mode == "four":
             tx0, tx1 = g.TABLE_X
             tz0, tz1 = g.TABLE_Z[1], g.TABLE_Z[0]
             zm = (tz0 + tz1) / 2
@@ -862,10 +900,14 @@ def seating():
         for (cx_, cz_, f_) in seats:
             chair(X, Y, cx_, cz_, f_)
         o.append(f'<rect x="{X(tx1):.1f}" y="{Y(tz0):.1f}" width="{(tx1-tx0)*k:.1f}" height="{(tz1-tz0)*k:.1f}" fill="#d9b48a" stroke="#9c6a3f" stroke-width="1.4"/>')
-        if mode == "eight" or (mode == "six" and g.SIX_LEAF):
+        if mode in ("A4", "A6"):
+            o.append(f'<line x1="{X(tx0):.1f}" y1="{Y(g.TABLE_Z[1]):.1f}" x2="{X(tx1):.1f}" y2="{Y(g.TABLE_Z[1]):.1f}" stroke="#7a5130" stroke-dasharray="3 2"/>')
+        elif mode == "B7":
+            o.append(f'<line x1="{X(g.TABLE_B_X[0]):.1f}" y1="{Y(tz0):.1f}" x2="{X(g.TABLE_B_X[0]):.1f}" y2="{Y(tz1):.1f}" stroke="#7a5130" stroke-dasharray="3 2"/>')
+        elif mode == "eight" or (mode == "six" and g.SIX_LEAF):
             xj = tx0 + g.TABLE[0]
             o.append(f'<line x1="{X(xj):.1f}" y1="{Y(tz0):.1f}" x2="{X(xj):.1f}" y2="{Y(tz1):.1f}" stroke="#7a5130" stroke-dasharray="3 2"/>')
-        o.append(t((X(tx0) + X(tx1)) / 2, Y(zm) + 4, f"{_fmt(tx1 - tx0)} × {_fmt(g.TABLE[1])}", 9, "middle", 650, "#5a3a20"))
+        o.append(t((X(tx0) + X(tx1)) / 2, Y(zm) + 4, "110 × 160" if mode in ("A4", "A6", "B7") else f"{_fmt(tx1 - tx0)} × {_fmt(g.TABLE[1])}", 9, "middle", 650, "#5a3a20"))
         # the clearances that matter
         def vdim(x, za, zb_, lab, col=BLUE):
             o.append(f'<line x1="{X(x):.1f}" y1="{Y(za):.1f}" x2="{X(x):.1f}" y2="{Y(zb_):.1f}" stroke="{col}" stroke-width="1.2"/>')
@@ -873,7 +915,12 @@ def seating():
         def hdim2(xa, xb, z, lab, col=BLUE):
             o.append(f'<line x1="{X(xa):.1f}" y1="{Y(z):.1f}" x2="{X(xb):.1f}" y2="{Y(z):.1f}" stroke="{col}" stroke-width="1.2"/>')
             o.append(t((X(xa) + X(xb)) / 2, Y(z) - 4, lab, 8.5, "middle", 600, col))
-        if mode == "four":
+        if mode in ("A4", "A6"):
+            vdim(g.TABLE_CX, tz0, g.SOFA_FRONT_Z, f"{_fmt(tz0 - g.SOFA_FRONT_Z)} to the sofa", "#9a5f0c")
+        elif mode == "B7":
+            vdim(tx0 + 12, tz1, g.STAIRS_WALL_Z[0], f"{_fmt(g.STAIRS_WALL_Z[0] - tz1)} to the stairs")
+            vdim(tx0 + 12, tz0, g.WINDOW_Z, f"{_fmt(tz0 - g.WINDOW_Z)} to the window")
+        elif mode == "four":
             vdim(g.TABLE_CX + 50, tz0, g.SOFA_FRONT_Z, f"{_fmt(tz0 - g.SOFA_FRONT_Z)} to the sofa")
         else:
             vdim(tx1 - 10, tz1, 0, f"{_fmt(-tz1)} to the breast")
@@ -887,11 +934,12 @@ def seating():
              '<path d="M0,3 H10 M5,0 V3 M0,3 V6 M10,3 V6" stroke="#b5785e" stroke-width="0.8"/></pattern>'
              '<pattern id="hatch3" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#c9c3b5" stroke-width="2"/></pattern></defs>')
     notes = [f"Per diner: {_fmt(g.DINE_W)} cm of table edge (55 at a squeeze). Table edge to a wall: {_fmt(g.CLEAR_MIN)} cm is a tight minimum, {_fmt(g.CLEAR_OK)} to aim for, {_fmt(g.CLEAR_WALK)}+ to walk behind someone seated.",
-             "Six and eight: slide the coffee table to the window first. The dashed red arc is the door's swing if it opens into the room: the chairs on that side need it shut while you eat.",
+             ("The flip-top never leaves the wall; the dashed line is the joint where the half flips out on its gate leg. Red: the door's swing." if g.TABLE_STYLE == "fliptop" else
+              "Six and eight: slide the coffee table to the window first. The dashed red arc is the door's swing if it opens into the room: the chairs on that side need it shut while you eat."),
              f"Chairs drawn at IKEA TERJE size ({_fmt(cw)} × {_fmt(cd)}, seat {_fmt(g.CHAIR[3])}): {_fmt(g.TABLE_TOP - g.CHAIR[3])} cm from seat to table top, the usual 25–30."]
     for i, n in enumerate(notes):
         o.append(t(0, 432 + i * 20, "• " + n, 9.8, "start", 400, INK))
-    return svg(W, H, "\n".join(o), "The dining table for four, six or eight",
+    return svg(W, H, "\n".join(o), "The flip-top table for four, six or seven" if g.TABLE_STYLE == "fliptop" else "The dining table for four, six or eight",
                "To scale, the west half of the room from above, window at the top. Red: the door's swing. Blue: the clearances that matter")
 
 
@@ -1307,7 +1355,7 @@ def why_layout():
     o.append(t(0, 62, "v10: the TV in the middle, the vinyl cabinet on the breast", 12, "start", 650))
     strip(74, [(0, 25.25, "Series X", "g"), (25.25, 29.75, "", "o"), (29.75, 156.25, "TV gap 126.5", "w"), (156.25, 160.75, "", "o"), (160.75, 186, "dock", "w"),
                (186, 286, "vinyl cabinet: deck + browser on top", "v")])
-    strip(112, [(0, 3, "", "w"), (3, 63, "Xbox 60", "g"), (63, 123, "PlayStation 60", "g"), (123, 183, "sub 60", "s"), (183, 186, "", "w"), (186, 286, "record trays · singles", "v")])
+    strip(112, [(0, 3, "", "w"), (3, 63, "Xbox 60", "g"), (63, 123, "PlayStation 60", "g"), (123, 183, "sub 60", "s"), (183, 186, "", "w"), (186, 286, "record trays · LPs", "v")])
     o.append(t(X(g.BREAST_X[1]) + 8, 95, "above the worktop", 9.5, "start", 400, MUTED))
     o.append(t(X(g.BREAST_X[1]) + 8, 133, "below the worktop", 9.5, "start", 400, MUTED))
     o.append(t(0, 172, f"v11: the TV {_fmt(g.TV_SHIFT)} cm nearer the side wall, the dining wall on the breast", 12, "start", 650))
@@ -1407,12 +1455,12 @@ def storage():
     for i in range(5):
         item(tx + 1.5 * k, ty + (3 + i * 6.5) * k, 31.4, 5.2, LP_C[i % 6])
         item(tx + (35.1) * k, ty + (3 + i * 6.5) * k, 18.4, 5.2, LP_C[(i + 2) % 6])
-    o.append(t(tx + 27 * k, ty + 40 * k + 14, "LP trough 32.6 · singles 18.9", 9.5, "middle", 500, MUTED))
-    o.append(t(x0 + 200, y0 + 92, "≈ 90 LPs + 120 singles a tray", 12, "start", 650))
-    o.append(t(x0 + 200, y0 + 110, "× 2 trays = 180 LPs, 240 singles", 10.5, "start", 400, MUTED))
+    o.append(t(tx + 27 * k, ty + 40 * k + 14, "one LP trough, 52.1 wide", 9.5, "middle", 500, MUTED))
+    o.append(t(x0 + 200, y0 + 92, "≈ 90 LPs a tray, LPs only", 12, "start", 650))
+    o.append(t(x0 + 200, y0 + 110, "× 2 trays = 180 LPs, all face-out", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 200, y0 + 128, "sleeves lean back 10°, flip like a shop", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 200, y0 + 146, "thick outer sleeves: widen the LP", 10.5, "start", 400, MUTED))
-    o.append(t(x0 + 200, y0 + 160, "trough to 33.4; singles drop to 18.1", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 200, y0 + 160, "the trough takes them: 52.1 wide", 10.5, "start", 400, MUTED))
 
     # C · plinth drawer, from above
     x0, y0 = 0, 326
@@ -1478,7 +1526,7 @@ def storage():
     o.append(t(x0 + 14, y0 + 66, "1 · LPs spine-out on the high shelf: about 380 more", 11.5, "start", 650))
     o.append(t(x0 + 14, y0 + 82, "No building; books move to the second option's top.", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 14, y0 + 110, "2 · A second record unit, west of the sofa, under the window", 11.5, "start", 650))
-    o.append(t(x0 + 14, y0 + 126, "Bay 3 again (60 × 46 × 73, two face-out trays): 180 LPs, 240 singles.", 10.5, "start", 400, MUTED))
+    o.append(t(x0 + 14, y0 + 126, "Bay 3 again (60 × 46 × 73, two face-out trays): 180 LPs.", 10.5, "start", 400, MUTED))
     o.append(t(x0 + 14, y0 + 142, "At x 300–360 it leaves 123 cm to the table set for six (100 to walk).", 10.5, "start", 400, MUTED))
     space(x0 + 30, y0 + 158, 60, 20)
     item(x0 + 30 + 2 * k, y0 + 158 + 3 * k, 26.6, 14, "#efe6d6", "tray", INK, 7.5)
@@ -1611,12 +1659,12 @@ def drawer_layouts():
         zz = 2.6 + i * 1.15
         o.append(f'<rect x="{PX(34.4)}" y="{PY(zz + 0.35)}" width="{18.3 * s}" height="{0.42 * s}" fill="{LP_C[(i + 3) % 6]}" opacity="0.8"/>')
     o.append(t(PX(17.2), PY(20), "LPs", 11, "middle", 700, "#fff", 'paint-order="stroke" stroke="#3b3833" stroke-width="3"'))
-    o.append(t(PX(43.5), PY(20), "singles", 10.5, "middle", 700, "#fff", 'paint-order="stroke" stroke="#3b3833" stroke-width="3"'))
+    
     o.append(f'<rect x="{PX(-1.45)}" y="{PY(1.5)}" width="{56.8 * s}" height="{1.5 * s}" fill="#e9c9a4" stroke="{VIN_S}"/>')
     yb = PY(0) + 22
-    dim(PX(0.9), PX(33.5), yb, "LP trough 32.6"); dim(PX(34.1), PX(53.0), yb, "singles 18.9")
+    dim(PX(0.9), PX(53.0), yb, "one LP trough, 52.1 (LPs centred, 10.3 to flip either side)")
     o.append(t(PX(26.95), yb + 18, "every sleeve face-out, leaning back 10°: flip like a shop", 9.5, "middle", 400, MUTED))
-    o.append(t(PX(26.95), yb + 31, f"~{g.TRAY_LPS} LPs + ~{g.TRAY_SINGLES} singles each · two trays", 9.5, "middle", 600, GC))
+    o.append(t(PX(26.95), yb + 31, f"~{g.TRAY_LPS} LPs each, LPs only · two trays", 9.5, "middle", 600, GC))
 
     o.append(t(0, H - 26, "Plans drawn from above at 5 px per cm, front (the room) at the bottom; the elevation at 3.6 px per cm. Sizes: BESTÅ frame 60 × 40 × 64 (IKEA);", 10, "start", 400, MUTED))
     o.append(t(0, H - 12, "game cases 19 × 13.5 × 1.4 and 17 × 13.5 × 1.2; jewel case 14.2 × 12.5 × 1; sleeves 31.4 and 18.3; runners Emuca 400 mm 68 kg, Accuride 350 mm (see the fit proof).", 10, "start", 400, MUTED))
@@ -1828,7 +1876,8 @@ def light_scene(key):
     _side_wall(o, X, Y, k)
     if key == "dinner":   # the table set for four at the wall
         x0, x1 = g.TABLE_X
-        o.append(f'<rect x="{X(x1):.1f}" y="{Y(g.TABLE_Z[1]):.1f}" width="{g.TABLE[0]*k:.1f}" height="{g.TABLE[1]*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
+        zo = g.OPEN_Z[1] if g.TABLE_STYLE == "fliptop" else g.TABLE_Z[1]
+        o.append(f'<rect x="{X(x1):.1f}" y="{Y(zo):.1f}" width="{g.TABLE[0]*k:.1f}" height="{(g.TABLE_Z[0] - zo)*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
     # dim the room by the scene's overall light
     total = (lv["strip"] * 1.0 + lv["bar1"] * 0.8 + lv["bar2"] * 0.6 + lv["uprights"] * 0.4 + lv["lamp"] * 0.3) / 3.1
     dark = 0.62 * (1 - total)
@@ -1853,16 +1902,17 @@ def light_scene(key):
     if lv["bias"] > 0:
         glow(g.TV_CX, g.TV_PANEL_Z[1] + 2, 60, lv["bias"], "bglow")
     # the bars: beams to their aims, glows where they land
-    bars = [(g.PEND_X, g.PEND_Z, lv["bar1"], [(-31.5, "#a9c7ab", (40, 30)), (-10.5, "#a7d0d8", (g.TV_CX, 34)), (10.5, "#e8b53f", (148, -169)), (31.5, "#e79c95", (160, 8))], "bar 1"),
-            (g.BAR2_X, g.BAR2_Z, lv["bar2"], [(-31.5, "#a9c7ab", (g.TABLE_CX, -2)), (-10.5, "#a7d0d8", (g.TABLE_CX - 22, -45)), (10.5, "#e8b53f", (g.TABLE_CX + 22, -45)), (31.5, "#e79c95", (g.BAR2_X, g.BAR2_Z + 40))], "bar 2")]
+    bars = [(g.PEND_X, g.PEND_Z, lv["bar1"], bar_heads(1), "bar 1"), (g.BAR2_X, g.BAR2_Z, lv["bar2"], bar_heads(2), "bar 2")]
     for bx, bz, v, heads, name in bars:
         for dx, col, (ax, az) in heads:
+            hx, hz = g.bar_head_xz(bx, bz, dx)
             if v > 0:
-                o.append(f'<line x1="{X(bx + dx):.1f}" y1="{Y(bz):.1f}" x2="{X(ax):.1f}" y2="{Y(az):.1f}" stroke="{col}" stroke-width="{1 + 3 * v:.1f}" stroke-opacity="{0.25 + 0.6 * v:.2f}"/>')
-                glow(ax, az, 26, v)
-        o.append(f'<rect x="{X(bx + 42):.1f}" y="{Y(bz) - 3:.1f}" width="{84 * k:.1f}" height="6" rx="3" fill="#f4f1ea" stroke="#8a857a"/>')
+                o.append(f'<line x1="{X(hx):.1f}" y1="{Y(hz):.1f}" x2="{X(ax):.1f}" y2="{Y(az):.1f}" stroke="{col}" stroke-width="{1 + 3 * v:.1f}" stroke-opacity="{0.25 + 0.6 * v:.2f}"/>')
+                glow(ax, az, 34, v * 0.8)
+        o.append(_bar_rect(X, Y, bx, bz, 6, '#f4f1ea', '#8a857a', 3))
         for dx, col, _ in heads:
-            o.append(f'<circle cx="{X(bx + dx):.1f}" cy="{Y(bz):.1f}" r="5.5" fill="{col}" stroke="#555" stroke-width="0.8" opacity="{1 if v > 0 else 0.45}"/>')
+            hx, hz = g.bar_head_xz(bx, bz, dx)
+            o.append(f'<circle cx="{X(hx):.1f}" cy="{Y(hz):.1f}" r="5.5" fill="{col}" stroke="#555" stroke-width="0.8" opacity="{1 if v > 0 else 0.45}"/>')
     lx, lz = g.SOFA_X[1] + 16, g.SOFA_BACK_Z + 22
     glow(lx, lz, 46, lv["lamp"])
     o.append(f'<circle cx="{X(lx):.1f}" cy="{Y(lz):.1f}" r="6" fill="#f4f1ea" stroke="#8a857a"/>')
@@ -1883,7 +1933,7 @@ def light_scene(key):
 
 
 def dining_sites():
-    """v14: the two places the fold-down table can live, side by side, each set for four at the wall, to scale."""
+    """v14: the two places the fold-down table can live, side by side, to scale. v15: the flip-top, open, at each."""
     W, H = 900, 600
     g = G
     k = 1.05
@@ -1926,48 +1976,115 @@ def dining_sites():
         def dim(a, b, lab, col=BLUE, anchor="middle", dx=0, dy=-4):
             o.append(f'<line x1="{X(a[0]):.1f}" y1="{Y(a[1]):.1f}" x2="{X(b[0]):.1f}" y2="{Y(b[1]):.1f}" stroke="{col}" stroke-width="1.2"/>')
             o.append(t((X(a[0]) + X(b[0])) / 2 + dx, (Y(a[1]) + Y(b[1])) / 2 + dy, lab, 8.5, anchor, 650, col))
+        tuck = 8
+        def gate(xa, xb, za, zb_):       # the joint (dashed) and the gate leg's two feet
+            o.append(f'<line x1="{X(xa):.1f}" y1="{Y(za):.1f}" x2="{X(xb):.1f}" y2="{Y(zb_):.1f}" stroke="#7a5130" stroke-dasharray="3 2"/>')
         if site == "breast":
             tx0, tx1 = g.TABLE_X
-            tz0, tz1 = g.TABLE_Z[1], g.TABLE_Z[0]
-            zm = (tz0 + tz1) / 2
-            for c in [(tx0 - cd / 2 + 8, zm, "+x"), (tx1 + cd / 2 - 8, zm, "-x"), (g.TABLE_CX - 27.5, tz0 - cd / 2 + 8, "+z"), (g.TABLE_CX + 27.5, tz0 - cd / 2 + 8, "+z")]:
-                chair(*c)
+            tz0, tz1 = g.OPEN_Z[1], g.OPEN_Z[0]
+            step = (tz1 - tz0) / 3
+            for j in range(3):
+                cz = tz1 - step * (j + 0.5)
+                chair(tx0 - cd / 2 + tuck, cz, "+x"); chair(tx1 + cd / 2 - tuck, cz, "-x")
             o.append(f'<rect x="{X(tx1):.1f}" y="{Y(tz0):.1f}" width="{(tx1-tx0)*k:.1f}" height="{(tz1-tz0)*k:.1f}" fill="{TAB}" stroke="{TABS}" stroke-width="1.4"/>')
-            o.append(t(X(g.TABLE_CX), Y(zm) + 4, "110 × 80", 9, "middle", 650, "#5a3a20"))
-            o.append(t(X(tx1 + cd / 2), Y(zm) + 44, "this chair is in", 8, "middle", 600, "#d0573b"))
-            o.append(t(X(tx1 + cd / 2), Y(zm) + 54, "the door's swing", 8, "middle", 600, "#d0573b"))
+            gate(tx0, tx1, g.TABLE_Z[1], g.TABLE_Z[1])
+            o.append(t(X(g.TABLE_CX), Y((tz0 + tz1) / 2) + 4, "110 × 160", 9, "middle", 650, "#5a3a20"))
+            o.append(t(X(tx1 + cd) - 4, Y(tz1 - 20), "first chair:", 8, "end", 600, "#d0573b"))
+            o.append(t(X(tx1 + cd) - 4, Y(tz1 - 20) + 10, "in the door's swing", 8, "end", 600, "#d0573b"))
             o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2), "your 2 m shelf (high),", 8.5, "start", 600, "#33302b"))
-            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2) + 11, "the dresser and lamp stay", 8.5, "start", 400, MUTED))
+            o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y((s0 + s1) / 2) + 11, "light box, laser, plant", 8.5, "start", 400, MUTED))
             pendant()
-            dim((g.TABLE_CX, tz0), (g.TABLE_CX, g.SOFA_FRONT_Z), f"{_fmt(g.TABLE_Z[1] - g.SOFA_FRONT_Z)} to the sofa", dx=4, anchor="start", dy=4)
-            title, sub = "A · On the chimney breast", "the plan so far: down at 76 for four, folded flat every day"
-            notes = ["+ in line with the worktop at 76; next to the media wall",
-                     "+ the stairs wall keeps your shelf, dresser and lamp",
-                     "− the west end's chair sits in the door's swing",
-                     "− the breast's framed LPs sit above a busy wall"]
+            dim((g.TABLE_CX, tz0), (g.TABLE_CX, g.SOFA_FRONT_Z), f"{_fmt(tz0 - g.SOFA_FRONT_Z)} to the sofa: no end seat", dx=4, anchor="start", dy=4, col="#9a5f0c")
+            title, sub = "A · On the chimney breast: up to six", "the flip-top open towards the window, three a side; folded flat every day"
+            notes = ["+ next to the media wall; the stairs wall keeps the shelf, lamp and hat",
+                     "+ four sit with room to spare, six elbows-in",
+                     "− no seat at the end: the sofa is 34 beyond it",
+                     "− the west side's first chair sits in the door's swing"]
         else:
             tz0, tz1 = g.TABLE_B_Z[1], g.TABLE_B_Z[0]
-            tx0, tx1 = g.TABLE_B_X
-            zm = (tz0 + tz1) / 2
-            for c in [(tx0 - cd / 2 + 8, zm - 27.5, "+x"), (tx0 - cd / 2 + 8, zm + 27.5, "+x"),
-                      ((tx0 + tx1) / 2, tz1 + cd / 2 - 8, "-z"), ((tx0 + tx1) / 2, tz0 - cd / 2 + 8, "+z")]:
-                chair(*c)
+            tx0, tx1 = g.TABLE_B_OPEN_X
+            step = (tx1 - tx0) / 3
+            for j in range(3):
+                cx = tx1 - step * (j + 0.5)
+                chair(cx, tz1 + cd / 2 - tuck, "-z"); chair(cx, tz0 - cd / 2 + tuck, "+z")
+            chair(tx0 - cd / 2 + tuck, (tz0 + tz1) / 2, "+x")
             o.append(f'<rect x="{X(tx1):.1f}" y="{Y(tz0):.1f}" width="{(tx1-tx0)*k:.1f}" height="{(tz1-tz0)*k:.1f}" fill="{TAB}" stroke="{TABS}" stroke-width="1.4"/>')
-            o.append(t(X((tx0 + tx1) / 2), Y(zm) + 4, "110 × 80", 9, "middle", 650, "#5a3a20"))
+            gate(g.TABLE_B_X[0], g.TABLE_B_X[0], tz0, tz1)
+            o.append(t(X((tx0 + tx1) / 2), Y((tz0 + tz1) / 2) + 4, "110 × 160", 9, "middle", 650, "#5a3a20"))
             pendant()
-            dx_ = tx0 - 4
-            dim((dx_, g.STAIRS_WALL_Z[0]), (dx_, tz1), f"{_fmt(g.STAIRS_WALL_Z[0] - tz1)} to the stairs", anchor="start", dx=6, dy=4)
-            dim((dx_, tz0), (dx_, g.WINDOW_Z), f"{_fmt(tz0 - g.WINDOW_Z)} to the window", anchor="start", dx=6, dy=4)
-            dim((tx0 - cd, zm), (g.SOFA_X[1], zm), f"{_fmt(tx0 - cd - g.SOFA_X[1])} to walk behind", dy=-5)
             o.append(t(X(g.ROOM_W) + g.SHELF_B["d"] * k + 6, Y(s1) + 10, "your 2 m shelf above it", 8.5, "start", 600, "#33302b"))
-            title, sub = "B · Under your shelf, by the stairs", "the same table and brackets on the stairs wall; the dresser moves out"
-            notes = ["+ right under the pendant point; out of the door's swing",
-                     "+ frees the chimney breast (frames, the lamp or a bench)",
-                     "− the end chairs are tight: 35 to the stairs' foot, 25 to the window",
-                     "− the wall's build is unknown: check it before fixing 500 kg brackets"]
+            title, sub = "B · Under your shelf, by the stairs: up to seven", "the flip-top open into the room, three a side and one at the end"
+            notes = ["+ seven at a squeeze, five with room; right under the pendant point",
+                     "+ out of the door's swing; frees the chimney breast",
+                     "− the side chairs are tight: 43 to the stairs' foot, 33 to the window",
+                     "− the lamp moves while it's open; check the wall before fixing the brackets"]
         o.append(t(ox, 70, title, 13, "start", 700))
         o.append(t(ox, 86, sub, 9.5, "start", 400, MUTED))
         for j, n_ in enumerate(notes):
             o.append(t(ox, oy + (g.ALC_D - g.WINDOW_Z) * k + 22 + j * 15, n_, 9.5, "start", 500, "#2f7a4a" if n_.startswith("+") else "#a3352b"))
     return svg(W, H, "\n".join(o), "Where the dining table can live: the chimney breast or the stairs wall",
-               "Both to scale, set for four at the wall, the west half of the room from above (window at the top). Six and eight lift it off onto legs in the same spot either way.")
+               "Both to scale, the flip-top open at its fullest, the west half of the room from above (window at the top). It never comes off the wall: four, six or seven sit at the same table.")
+
+def fliptop():
+    """v15: the flip-top gate-leg table in section through its centre line, to scale: folded on the wall (left) and open (right),
+    with the three moves between them."""
+    W, H = 900, 560
+    g = G
+    s = 1.55
+    o = []
+    tw, td, tt = g.TABLE
+    lw_, ld_, lt_ = g.FLIP["leaf"]
+    Dr, rt, Hr = g.RAIL[2], g.RAIL_TOP, g.RAIL[1]
+    gt = g.FLIP["gate_t"]
+    OAKF, OAKS = "#e9cfa8", "#9c6a3f"
+    def panel(ox, oy, title, sub):
+        Z = lambda cm: ox - cm * s
+        Y = lambda cm: oy - cm * s
+        o.append(f'<line x1="{Z(185)}" y1="{Y(0)}" x2="{Z(-10)}" y2="{Y(0)}" stroke="#8f8a80" stroke-width="1.6"/>')
+        o.append(rect(Z(0), Y(200), 10 * s, 200 * s, "url(#brick5)", "#8f5b45", 0))
+        o.append(rect(Z(3), Y(rt), 3 * s, Hr * s, OAKF, OAKS, 0))                       # backboard
+        o.append(rect(Z(Dr), Y(rt), (Dr - 3) * s, 4 * s, "#dcb98d", OAKS, 0))             # hinge rail
+        o.append(t(ox - 90 * s, oy - 205 * s, title, 12, "middle", 650))
+        o.append(t(ox - 90 * s, oy - 205 * s + 15, sub, 9.5, "middle", 400, MUTED))
+        return Z, Y
+    # folded
+    Z, Y = panel(300, 520, "Folded on the wall, every day", f"{_fmt(g.FOLDED_D)} off the wall, top edge {_fmt(g.FOLDED_TOP)}")
+    o.append(rect(Z(3 + gt), Y(rt + td - 6), gt * s, (td - 8) * s, "#d6b48a", OAKS, 0, 1, 'stroke-dasharray="3 2"'))
+    o.append(rect(Z(3 + gt + lt_), Y(rt + ld_), lt_ * s, ld_ * s, OAKF, OAKS, 0))
+    o.append(rect(Z(Dr + tt), Y(rt + td), tt * s, td * s, "#f1e1c8", OAKS, 0, 1.4))
+    arm, bh = g.HEBGO
+    o.append(rect(Z(3.6), Y(rt), 0.6 * s, (bh - 5) * s, "#9a9c9f", "#6f7174", 0))
+    for (y, z, txt) in [(rt + td - 10, Dr + tt, "the top: its plain oak underside to the room"), (rt + 50, 3 + gt + lt_, "the half, flipped onto the top"),
+                        (rt + 25, 3 + gt, "its gate leg, folded flat"), (rt - 2, Dr, f"hinge rail {_fmt(Dr - 3)} on the backboard")]:
+        o.append(f'<line x1="{Z(z)}" y1="{Y(y)}" x2="{Z(z) - 24}" y2="{Y(y)}" stroke="#b9b4a8"/>')
+        o.append(t(Z(z) - 28, Y(y) + 3.5, txt, 9.5, "end", 500))
+    # open
+    Z, Y = panel(870, 520, "Open: 110 × 160, still on the wall", f"top {_fmt(g.TABLE_TOP)} all along; the gate leg at the far end")
+    z0, z1 = -g.OPEN_Z[0], -g.OPEN_Z[1]
+    zj = -g.TABLE_Z[1]
+    o.append(rect(Z(zj), Y(g.TABLE_TOP), (zj - z0) * s, tt * s, "#f1e1c8", OAKS, 0, 1.4))
+    o.append(rect(Z(z1), Y(g.TABLE_TOP), (z1 - zj) * s, lt_ * s, OAKF, OAKS, 0, 1.4))
+    o.append(f'<line x1="{Z(zj)}" y1="{Y(g.TABLE_TOP) - 4}" x2="{Z(zj)}" y2="{Y(g.TABLE_TOP - tt) + 4}" stroke="#5a3a20" stroke-width="2"/>')
+    o.append(f'<path d="M{Z(3.6)},{Y(rt - 2.4)} L{Z(3 + arm)},{Y(rt - 2.4)} M{Z(3.6)},{Y(rt - bh + 2)} L{Z(31)},{Y(rt - 2.4)}" stroke="#6f7174" stroke-width="2.4" fill="none"/>')
+    lz = z1 - g.FLIP["hinge_in"] - g.LEG[0] / 2
+    o.append(rect(Z(lz + g.LEG[0] / 2), Y(g.GATE_LEG_H), g.LEG[0] * s, g.GATE_LEG_H * s, "#dcb98d", OAKS, 0))
+    o.append(rect(Z(lz + 1), Y(g.GATE_LEG_H), 2 * s, g.FLIP["apron"][0] * s, "#c99d6b", OAKS, 0))
+    for (y, z, txt, anc, dx) in [(g.TABLE_TOP + 8, (z0 + zj) / 2, f"the top {_fmt(tw)} × {_fmt(td)}", "middle", 0),
+                                 (g.TABLE_TOP - 14, (z0 + zj) / 2 - 6, "on two Hebgo brackets", "middle", 0),
+                                 (g.TABLE_TOP + 8, (zj + z1) / 2, f"the half {_fmt(lw_)} × {_fmt(ld_)}", "middle", 0),
+                                 (g.TABLE_TOP + 22, zj, f"{g.FLIP['hinges']} brass flip-top hinges at the joint", "middle", 0),
+                                 (g.GATE_LEG_H / 2 + 6, lz, "the gate leg:", "start", 10),
+                                 (g.GATE_LEG_H / 2 - 6, lz, "two oak legs and an apron,", "start", 10),
+                                 (g.GATE_LEG_H / 2 - 18, lz, "hinged under the half", "start", 10)]:
+        o.append(t(Z(z) + dx, Y(y), txt, 9.5, anc, 500))
+    o.append(f'<line x1="{Z(z0)}" y1="{Y(-8)}" x2="{Z(z1)}" y2="{Y(-8)}" stroke="{BLUE}" stroke-width="1.2"/>')
+    o.append(t(Z((z0 + z1) / 2), Y(-8) + 14, f"{_fmt(z1 - z0)} of table, {_fmt(z1)} out from the wall", 9.5, "middle", 600, BLUE))
+    o.append('<defs><pattern id="brick5" width="10" height="6" patternUnits="userSpaceOnUse"><rect width="10" height="6" fill="#e2b9a4"/>'
+             '<path d="M0,3 H10 M5,0 V3 M0,3 V6 M10,3 V6" stroke="#c08a72" stroke-width="0.8"/></pattern></defs>')
+    steps = ["To open: turn the two buttons and lower the pair onto the brackets as they swing out and lock (two people: about 37 kg).",
+             "Flip the half over onto the room side: it opens on its hinges to lie flush with the top. Swing the gate leg down until it stops.",
+             "To fold: gate leg up flat, half back over onto the top, then lift the pair up to the wall and turn the buttons."]
+    for i, n in enumerate(steps):
+        o.append(t(0, 62 + i * 17, f"{i + 1}. " + n, 9.8, "start", 400, INK))
+    return svg(W, H, "\n".join(o), "The flip-top table: folded, and open",
+               "In section through its centre line, to scale, the wall on the right of each. It never comes off the wall, and there's no leaf to store.")
