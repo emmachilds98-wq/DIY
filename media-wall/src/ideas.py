@@ -75,3 +75,36 @@ def pdf_html():
     return (f"<p>Suggestions only, for later: they aren't in the plan, the buy list or the costs (all of them together would be about "
             f"£{lo}–{hi}). The first three can be seen in the 3D room with the “Ideas (not in the plan)” buttons, all off until you turn them on.</p>"
             f"<table class='tight'><tr><th>Idea</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")
+
+
+# v21, client: "i also want expansion of the suggested furniture and decor making sure i can choose to have it or not": pieces placed
+# where they'd go, each its own on/off button in the 3D room (room3d.js SUGGEST, the same keys), all off until you turn them on.
+# (key, title, size, (low, high) £, why, where)
+SUGGEST = [
+    ("floorplant", "A tall floor plant at the sofa's open end", "a fiddle-leaf fig or rubber plant, about 150 tall in a 30 cm pot", (40, 90),
+     "Height and green in the one corner with nothing tall in it, between the media wall and the sofa's open end.",
+     "On the floor by the side wall, clear of the media wall's drawers when they're pulled out."),
+    ("sidetable", "A round oak side table at the sofa's open end", "40 across × 50 tall", (40, 90),
+     "Somewhere to put a drink down from the ottoman end, without the C-table over the seat.", "Beside the sofa's open end, towards the TV."),
+    ("pouffe", "A knitted pouffe on the rug", "50 across × 40 tall", (30, 60),
+     "A footrest, a spare seat, and a third colour on the rug.", "On the rug in front of the chimney breast; it moves anywhere in Edit room."),
+    ("art", "A large framed print over the sofa's return", "80 × 55 in an oak frame", (40, 120),
+     "The side wall over the sofa is the one big empty wall: one print, hung 30 above the back cushions.", "On the side wall over the sofa's return, past the oak run."),
+    ("clock", "A slim wall clock over the door", "30 across", (20, 45),
+     "Fits the 37 cm between the door's head and the ceiling.", "Centred over the door."),
+    ("tray", "Coffee-table styling: an oak tray, two books and a candle", "a 40 × 26 tray", (20, 40),
+     "Keeps the remotes' landing spot tidy and gives the coffee table a finished look.", "On the coffee table; it goes where the table goes."),
+]
+
+
+def suggest_low_high():
+    return sum(i[3][0] for i in SUGGEST), sum(i[3][1] for i in SUGGEST)
+
+
+def suggest_html():
+    """v21: the plan PDF's table of the suggested furniture and decor."""
+    lo, hi = suggest_low_high()
+    rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
+                   for _, t, size, c, why, where in SUGGEST)
+    return (f"<p>Not in the plan or the costs: all six together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on.</p>"
+            f"<table class='tight'><tr><th>Suggestion</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")

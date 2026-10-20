@@ -2,21 +2,29 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v20
+## Media wall and dining wall, v21
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the flip-top oak dining table on the stairs wall under your shelf (the default since v16) or on the chimney breast. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v20%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v21%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v20** (the table packs away with its chairs, a taller glass case, decor to try, the door white)
+**New in v21** (the whole room first in 3D, every view re-aimed, suggested furniture and decor you can turn on or off)
+- **The 3D room opens on the whole room:** from above the window side, with the wall nearest you cut away like a dolls' house, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture. In the views from above, whatever stands along the nearest wall is cut off above 95 cm, and the cut follows you as you turn the room.
+- **Every view checked:** From the window no longer stands behind the red lamp; the chair cupboard, dining table, sofa, bird's eye and dolls' house views were re-aimed; the chimney breast and the window wall have their own buttons; phones now see as much of the room across as computers.
+- **Suggested furniture and decor, each on or off** (all off to start): a tall floor plant, a round oak side table, a knitted pouffe, a print over the sofa, a clock over the door and a coffee-table tray. Edit room's Add list gains a rattan armchair, a blanket ladder, an oak bench and an arc floor lamp.
+- **The optimisation plan** (user flow, the 3D room's speed, what to do next, in order) is in `media-wall/plans/optimisation_v21.html`.
+
+![The whole room in 3D, cut away](media-wall/out/Media%20wall%20v21%20-%203D%20-%20the%20whole%20room%20-%20from%20above%20the%20window%20side,%20cut%20away%20-%20everyday%20evening%20(HD).png)
+
+**v20** (the table packs away with its chairs, a taller glass case, decor to try, the door white)
 - **A chair cupboard built in beside the table:** oak, 51 wide × 22 deep × 189 tall, in the gap at the table's window end, flush with the pipe boxing and under your shelf. Four folded chairs go inside (two on its floor, two on its shelf) behind two doors on push latches, about £120–240. Fold the table, shut the doors, and the whole wall is packed away. Built 31 deep it takes six (9 cm proud of the boxing); otherwise chairs five and six live in the garage. The open hooks stay as the cheap way.
 - **The window ledge's 25 cm** matches the drawing (22 into the reveal, 3 of nose). **No HD crashes**, so that question is gone. **The door and its frame are white.**
 - **The glass display case** (an idea) is now **85 tall** with three glass shelves. In the 3D room, a new **Decor** group tries what goes in it (collectibles, retro games, 7-inch singles and tapes, plants and ceramics, a bit of each) and its frame (oak, black, white), plus four rugs, three cushion colourways for the sofa and five curtain colours. Edit room's Add list has a floor vase, a pouffe, a seagrass basket, a floor mirror and a lantern.
 
-![The chair cupboard beside the folded table, doors open](media-wall/out/Media%20wall%20v20%20-%203D%20-%20the%20chair%20cupboard%20beside%20the%20table,%20doors%20open,%20four%20chairs%20inside%20(plant%20stand%20and%20lamp%20hidden)%20-%20everyday%20evening%20(HD).png)
+![The chair cupboard beside the folded table, doors open](media-wall/out/v20/Media%20wall%20v20%20-%203D%20-%20the%20chair%20cupboard%20beside%20the%20table,%20doors%20open,%20four%20chairs%20inside%20(plant%20stand%20and%20lamp%20hidden)%20-%20everyday%20evening%20(HD).png)
 
-| ![Packed away](media-wall/out/Media%20wall%20v20%20-%203D%20-%20the%20stairs%20wall%20packed%20away%20-%20the%20table%20folded%20and%20the%20chair%20cupboard%20shut%20-%20everyday%20evening%20(HD).png) | ![Decor to try](media-wall/out/Media%20wall%20v20%20-%203D%20-%20DECOR%20to%20try%20-%20sage-stripe%20rug,%20rust%20and%20ochre%20cushions,%20white%20linen%20curtains%20-%20everyday%20evening%20(HD).png) |
+| ![Packed away](media-wall/out/v20/Media%20wall%20v20%20-%203D%20-%20the%20stairs%20wall%20packed%20away%20-%20the%20table%20folded%20and%20the%20chair%20cupboard%20shut%20-%20everyday%20evening%20(HD).png) | ![Decor to try](media-wall/out/v20/Media%20wall%20v20%20-%203D%20-%20DECOR%20to%20try%20-%20sage-stripe%20rug,%20rust%20and%20ochre%20cushions,%20white%20linen%20curtains%20-%20everyday%20evening%20(HD).png) |
 |---|---|
 | Packed away: the table folded, the cupboard shut | Decor to try: sage-stripe rug, rust and ochre cushions, white linen curtains |
 
@@ -38,7 +46,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Layout A: your plant stand in the window corner | Layout A: your vinyl stand on the breast |
 |---|---|
-| ![Plant stand](media-wall/out/Media%20wall%20v20%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v20%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
+| ![Plant stand](media-wall/out/Media%20wall%20v21%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v21%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
 
 **New in v17** (the room finished round your notes)
 - **The sofa's open end** is a proper ottoman end: the seat wraps round to the back, the back stops 20 cm short, and the sofa stands 13 cm off the window wall, clear of the curtains.
@@ -127,9 +135,9 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 | Option A: the flip-top on the breast, set for six | The PC side wall |
 |---|---|
-| ![Six at the table](media-wall/out/Media%20wall%20v20%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v20%20-%20the%20PC%20side%20wall%20(HD).png) |
+| ![Six at the table](media-wall/out/Media%20wall%20v21%20-%20option%20A,%20flip-top%20set%20for%20six%20(HD).png) | ![PC side wall](media-wall/out/Media%20wall%20v21%20-%20the%20PC%20side%20wall%20(HD).png) |
 
-![Numbered key](media-wall/out/Media%20wall%20v20%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
+![Numbered key](media-wall/out/Media%20wall%20v21%20-%20artisan%20oak%20-%20numbered%20key%20(HD).png)
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -148,7 +156,7 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v20%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v21%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)

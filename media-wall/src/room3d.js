@@ -22,7 +22,7 @@ const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? 
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
 const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
-              quality: SMALL ? "fast" : "hd", view: "window",
+              quality: SMALL ? "fast" : "hd", view: "room",   // v21: the whole room first
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
               ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true, ideas: {},   // v17: ideas all off
@@ -30,17 +30,20 @@ const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room",
               plants: "corner", layout: {}, added: [], grow: true,
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
-              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak" } };   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
+              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak" },
+              sugg: {} };   // v21: the suggested furniture and decor, all off   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
+if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
 S.decor = Object.assign({}, DEF.decor, (S.decor && typeof S.decor === "object") ? S.decor : {});
 if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
 if (!Array.isArray(S.added)) S.added = [];
 if (!(S.plants in R.PLANT_LAYOUTS)) S.plants = DEF.plants;
 S.edit = false;
+if (!S.seen21) { S.view = "room"; S.seen21 = true; }   // v21: everyone starts once on the new whole-room view
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
 
 /* ---------------------------------------------------------------- the lighting scenes (scenes.py) plus daytime */
@@ -253,7 +256,13 @@ const SKY = { day: skyTex(true), night: skyTex(false) };
 
 /* ---------------------------------------------------------------- materials */
 const MATS = [];
-const reg = m => (MATS.push(m), m);
+/* v21: the dolls'-house cutaway. From outside the room (the views from above), whatever stands along the wall nearest the camera (curtains,
+   the window frame, the plant stand, the stairs) is cut off above CUT_H, like a section drawing, so nothing blocks the room. Every material
+   carries the same two planes; clipIntersection cuts only where both agree (near that wall AND above CUT_H); updateCut() moves plane 0. */
+const CUT_H = 95, CUT_IN = 32;
+const CLIP = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 1e3), new THREE.Plane(new THREE.Vector3(0, -1, 0), CUT_H * 0.01)];
+const clipMat = m => { m.clippingPlanes = CLIP; m.clipIntersection = true; m.clipShadows = true; return m; };
+const reg = m => (MATS.push(clipMat(m)), m);
 const OAKS = new Set(["#c48c57", "#d9a46c", "#9c6a3f", "#a87443", "#cfa575", "#ddb78a", "#b08756", "#c79a6b", "#d8ad80", "#a37a50",
   "#b07a46", "#c89060", "#8a5c33", "#c08a52", "#c9a26a", "#c79a63", "#a8834f", "#d8c39f", "#e6d2ae", "#b99e78", "#cdb38a", "#d9c09a"]);
 const PAINT_OLD = new Set(R.PAINT_OLD);
@@ -506,7 +515,7 @@ function buildShell() {
   for (let x = rx0; x < rx1 - 2; x += 5) cube(x, ry0, WZ + 3, 3.4, ry1 - ry0, 7, radP);
   // the coffee table (its footprint from the plan; drawn as a plain low table)
   const cof = R.COFFEE, cofM = reg(new THREE.MeshStandardMaterial({ color: "#2c2a28", roughness: 0.5 }));
-  { const cw = cof.x[1] - cof.x[0], cd = cof.z[1] - cof.z[0], g = new THREE.Group();     // v18: movable in edit mode
+  { const cw = cof.x[1] - cof.x[0], cd = cof.z[1] - cof.z[0], g = coffeeG = new THREE.Group();     // v18: movable in edit mode
     lb(g, 0, 38, 0, cw, 4, cd, cofM);
     for (const [x, z] of [[-cw / 2 + 5, -cd / 2 + 5], [cw / 2 - 5, -cd / 2 + 5], [-cw / 2 + 5, cd / 2 - 5], [cw / 2 - 5, cd / 2 - 5]]) lb(g, x, 0, z, 4, 38, 4, cofM);
     movable("coffee", "Coffee table", g, () => ({ x: (cof.x[0] + cof.x[1]) / 2, z: (cof.z[0] + cof.z[1]) / 2, rot: 0 }), cw, cd, [cofM]); }
@@ -682,7 +691,62 @@ function placeChairs() {
 const IDEA_G = {};
 let ideaLed;
 /* v20: the decor to try (S.decor): set by applyDecor() */
-let rugMesh, curtCloth, caseFrameM, cushG;
+let rugMesh, curtCloth, caseFrameM, cushG, coffeeG;
+/* v21: suggested furniture and decor (ideas.SUGGEST, the same keys), each on or off (S.sugg); the floor pieces move in Edit room */
+const SUGG_G = {};
+const PRINT_TEX = canvasTex(720, 500, (g, w, h) => {      // a mid-century print: an ochre sun, a rust hill, a sage arch on cream
+  g.fillStyle = "#efe7d8"; g.fillRect(0, 0, w, h);
+  g.fillStyle = "#d9a441"; g.beginPath(); g.arc(w * 0.68, h * 0.34, 82, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "#c7643a"; g.beginPath(); g.ellipse(w * 0.36, h, 260, 230, 0, Math.PI, 0); g.fill();
+  g.strokeStyle = "#7a8a6a"; g.lineWidth = 34; g.beginPath(); g.arc(w * 0.74, h, 150, Math.PI, 0); g.stroke();
+  g.fillStyle = "#2f4a6e"; g.fillRect(0, h - 26, w, 26);
+});
+function buildSuggest() {
+  const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
+  const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.6, side: THREE.DoubleSide }));
+  const mat = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
+  // the floor pieces: movable, shown only while switched on
+  const floor = (k, label, w, d, x, z, build, mats) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] }); };
+  { const pot = mat("#d8cfc0");
+    floor("floorplant", "Floor plant (suggested)", 40, 40, 24, -92, g => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.32, 24), pot); p.position.y = 0.16; g.add(shadow(p));
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 1.0, 8), mat("#6b5238")); trunk.position.y = 0.8; g.add(trunk);
+      const r = rnd(61), gs = [];
+      for (let i = 0; i < 34; i++) { const y = 0.62 + r() * 0.85, a = r() * Math.PI * 2, rr = 0.06 + r() * 0.2 * (1.5 - (y - 0.6));
+        const lg = new THREE.SphereGeometry(0.075 + r() * 0.03, 8, 6); lg.scale(1, 0.25, 0.75); lg.rotateZ((r() - 0.5) * 0.9); lg.rotateY(a);
+        lg.translate(Math.cos(a) * rr, y, Math.sin(a) * rr); gs.push(lg); }
+      g.add(shadow(new THREE.Mesh(mergeGeometries(gs), leaf))); }, [pot]); }
+  floor("sidetable", "Side table (suggested)", 40, 40, 76, -108, g => {
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 32), oak); top.position.y = 0.4875; g.add(shadow(top));
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.475, 16), oak); col.position.y = 0.2375; g.add(shadow(col));
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.02, 32), oak); foot.position.y = 0.01; g.add(shadow(foot)); }, [oak]);
+  { const knit = mat("#d9a441");
+    floor("pouffe", "Pouffe (suggested)", 50, 50, 246, -100, g => {
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.4, 32), knit); b.position.y = 0.2; g.add(shadow(b));
+      const t = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.02, 8, 32), knit); t.rotation.x = Math.PI / 2; t.position.y = 0.39; g.add(t); }, [knit]); }
+  // on the walls and the coffee table: fixed, shown only while switched on
+  { const g = SUGG_G.art = new THREE.Group(), z0 = -298;
+    ibox(g, 0, 110, z0, 3, 55, 80, oak);
+    const print = reg(new THREE.MeshStandardMaterial({ map: PRINT_TEX, roughness: 0.8 }));
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.47), print); pl.position.copy(v3(3.1, 137.5, z0 + 40)); pl.rotation.y = -Math.PI / 2; g.add(pl);
+    shell.add(g); }
+  { const g = SUGG_G.clock = new THREE.Group(), cx = (R.DOOR_X[0] + R.DOOR_X[1]) / 2, cy = R.DOOR_H + (R.CEIL - R.DOOR_H) / 2, zf = R.RECESS_Z;
+    const face = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.03, 40), mat("#f3f1eb")); face.rotation.x = Math.PI / 2; face.position.copy(v3(cx, cy, zf - 1.5)); g.add(face);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.008, 8, 40), oak); rim.position.copy(v3(cx, cy, zf - 3)); g.add(rim);
+    const ink = mat("#1f1f21");
+    for (const [len, a] of [[10, 0.6], [7, 2.4]]) { const h = new THREE.Mesh(new THREE.BoxGeometry(0.006, len * M, 0.003), ink);
+      h.geometry.translate(0, len * M / 2, 0); h.position.copy(v3(cx, cy, zf - 3.2)); h.rotation.z = a; g.add(h); }
+    shell.add(g); }
+  { const g = SUGG_G.tray = new THREE.Group();
+    lb(g, 12, 42, 0, 40, 1.6, 26, oak);
+    lb(g, 18, 43.6, 0, 22, 3, 16, mat("#2f4a6e")); lb(g, 18, 46.6, 0, 20, 2.4, 15, mat("#c7643a"));
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.09, 20), reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.12 })));
+    c.position.copy(v3(2, 43.6 + 4.5, 2)); g.add(shadow(c));
+    (coffeeG || shell).add(g); }
+}
+function applySuggest() {
+  for (const k of ["art", "clock", "tray"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
+}
 const CASE_FILLS = {}, cushM = [];
 const CUSHION_COLS = { rust: ["#c7643a", "#d9a441", "#efe7d8"], blues: ["#2f4a6e", "#9fb4cc", "#e9e3d3"], sage: ["#7a8a6a", "#efe7d8", "#b9a47f"] };
 const CURTAIN_COLS = { hessian: R.CURTAIN.col, linen: "#e6e0d2", sage: "#8b9878", blue: "#34507f", rust: "#a65a38" };
@@ -711,6 +775,7 @@ function applyDecor() {
     if (top.map !== t) { top.map = t; top.needsUpdate = true; } rugMesh.material.forEach((m, i) => { if (i !== 2) m.color.set(edge); }); }
   if (curtCloth) curtCloth.color.set(CURTAIN_COLS[D.curtains] || CURTAIN_COLS.hessian);
   if (cushG) { const c = CUSHION_COLS[D.cushions]; cushG.visible = !!c; if (c) cushM.forEach((m, i) => m.color.set(c[i])); }
+  applySuggest();
   for (const [k, g] of Object.entries(CASE_FILLS)) g.visible = k === (D.fill in CASE_FILLS ? D.fill : "collect");
   if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : null;
     caseFrameM.color.set(col); caseFrameM.roughness = ro; if (caseFrameM.map !== mp) { caseFrameM.map = mp; caseFrameM.needsUpdate = true; } }
@@ -1227,8 +1292,27 @@ const CATALOGUE = {
     const cols = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.55 })));
     for (let k = 0; k < 5; k++) { const s = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.31, 0.004), cols[k]); s.position.copy(v3(0, 17, 12 - k * 5)); s.rotation.x = -0.15; g.add(s); } } },
 };
-/* v20: more decor to add */
+/* v20: more decor to add; v21: more furniture */
 Object.assign(CATALOGUE, {
+  rattan: { label: "Rattan armchair", w: 70, d: 72, col: "#c7a26e", build(g, m, oak) {
+    const seat = reg(new THREE.MeshStandardMaterial({ color: "#efe7d8", roughness: 0.95 }));
+    lb(g, 0, 38, 2, 62, 10, 60, seat);
+    const shell = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.3, 0.42, 28, 1, true, Math.PI * 0.15, Math.PI * 1.7), m);
+    shell.material.side = THREE.DoubleSide; shell.position.set(0, 0.6, 0.03); shell.rotation.y = Math.PI; g.add(shadow(shell));
+    for (const [x, z] of [[-26, -26], [26, -26], [-26, 26], [26, 26]]) lb(g, x, 0, z, 3, 38, 3, oak); } },
+  ladder: { label: "Blanket ladder (oak)", w: 45, d: 30, col: "#c48c57", build(g, m) {
+    const f = new THREE.Group(); lb(f, -20, 0, 0, 3, 165, 3, m); lb(f, 20, 0, 0, 3, 165, 3, m);
+    for (const y of [30, 70, 110, 150]) lb(f, 0, y, 0, 40, 2.5, 2.5, m);
+    const th = reg(new THREE.MeshStandardMaterial({ color: "#7a8a6a", roughness: 1 })); lb(f, 0, 96, 1.5, 36, 26, 1.2, th);
+    f.rotation.x = 0.16; f.position.z = -0.1; g.add(f); } },
+  bench: { label: "Oak bench", w: 100, d: 35, col: "#c48c57", build(g, m) {
+    lb(g, 0, 40, 0, 100, 4, 35, m); for (const x of [-44, 44]) lb(g, x, 0, 0, 4, 40, 31, m); } },
+  arclamp: { label: "Arc floor lamp", w: 40, d: 40, col: "#1f1f21", build(g, m) {
+    lb(g, 0, 0, 0, 34, 3, 34, m);
+    const pts = []; for (let i = 0; i <= 16; i++) { const t = i / 16; pts.push(new THREE.Vector3(Math.sin(t * 1.4) * 0.9, 0.03 + Math.sin(t * Math.PI * 0.62) * 1.8, 0)); }
+    const arc = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.009, 8), m); g.add(arc);
+    const end = pts[pts.length - 1], shade = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.2, 28, 1, true), reg(new THREE.MeshStandardMaterial({ color: "#e9e3d3", side: THREE.DoubleSide, emissive: "#ffd9a8", emissiveIntensity: 0.25 })));
+    shade.position.set(end.x, end.y - 0.12, 0); g.add(shade); } },
   vase: { label: "Floor vase with grasses", w: 30, d: 30, col: "#d9cfbf", build(g, m) {
     const v = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.13, 0.55, 24), m); v.position.y = 0.275; g.add(shadow(v));
     const stem = reg(new THREE.MeshStandardMaterial({ color: "#c9b48a", roughness: 0.9 })), r = rnd(13);
@@ -1344,7 +1428,7 @@ function setEdit(on) {
   S.edit = on; root.classList.toggle("editing", on);
   qs("#r3d-editbtn").setAttribute("aria-pressed", String(on));
   qs("#r3d-editbar").hidden = !on;
-  if (on) { preEditView = S.view; if (!(VIEWS[S.view] || {}).above) setView("doll"); }
+  if (on) { preEditView = S.view; if (!(VIEWS[S.view] || {}).above) setView("room"); }   // v21: edit from the whole room, cut away
   else { select(null); qs("#r3d-addlist").hidden = true; if (preEditView && preEditView !== S.view) setView(preEditView); }
   dirty();
 }
@@ -1469,18 +1553,23 @@ canvas.addEventListener("webglcontextlost", e => {
 
 /* ---------------------------------------------------------------- views */
 const VIEWS = {
-  window:  { label: "From the window", eye: [292, 158, -298], at: [196, 96, 10], fov: 66 },
+  // v21, client: "the default 3D room render to be at the best viewing to see most if not all the room without clipping or obstruction":
+  // from above the window side, the window wall cut away (updateCut): the media wall, the breast, the door, the stairs, the table's wall,
+  // the PC wall, the sofa and the rug in one picture
+  room:    { label: "The whole room", eye: [250, 440, -540], at: [238, 60, -118], fov: 50, above: true },
+  // v21: the window view moved to the window's middle, over the sofa's back (it stood behind your red lamp)
+  window:  { label: "From the window", eye: [190, 192, -298], at: [214, 82, -10], fov: 68 },
   wall:    { label: "The media wall", eye: [140, 128, -285], at: [93, 108, 20], fov: 52 },
-  sofa:    { label: "From the sofa", eye: [62, 104, -255], at: [72, 112, 20], fov: 58 },
+  sofa:    { label: "From the sofa", eye: [85, 108, -250], at: [72, 112, 20], fov: 58 },
   door:    { label: "From the door", eye: [372, 165, -6], at: [110, 85, -210], fov: 64 },
   stairs:  { label: "From the stairs", eye: [438, 205, 4], at: [190, 70, -205], fov: 62 },
-  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [190, 150, -172], at: [467, 126, -182] }, fov: 56 },
-  chairs:  { label: "The chair cupboard", eye: [262, 120, -268], at: [464, 100, -252], fov: 50 },   // v20
+  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [250, 150, -150], at: [467, 112, -185] }, fov: 60 },   // v21: back from the lamp
+  chairs:  { label: "The chair cupboard", eye: [255, 200, -190], at: [460, 95, -262], fov: 52 },   // v20; v21 clear of the lamp
   windowwall: { label: "The window wall", eye: [236, 150, -70], at: [236, 120, -309], fov: 66 },   // v17: for the ideas' stills
   breast:  { label: "The chimney breast", eye: [246, 140, -250], at: [246, 120, 0], fov: 54 },   // v17: for the ideas' stills
   pc:      { label: "The PC side wall", eye: [345, 135, -168], at: [0, 112, -168], fov: 56 },
-  plan:    { label: "Bird’s eye", eye: [233.5, 1150, -135], at: [233.5, 0, -134.9], fov: 30, above: true },
-  doll:    { label: "Dolls’ house", eye: [780, 560, -700], at: [230, 60, -120], fov: 40, above: true },
+  plan:    { label: "Bird’s eye", eye: [233.5, 1050, -135], at: [233.5, 0, -134.9], fov: 30, above: true },   // v21: closer, the room fills it
+  doll:    { label: "Dolls’ house", eye: [610, 450, -560], at: [228, 55, -125], fov: 44, above: true },      // v21: closer, cut away
 };
 let tween = null;
 /* v17: the camera stays in the room: x, y and z inside its walls, in front of the chimney breast, the alcove only within it */
@@ -1525,10 +1614,28 @@ function setView(name, instant) {
   const eye = v3(...p.eye), at = v3(...p.at);
   const from = { eye: camera.position.clone(), at: controls.target.clone(), fov: camera.fov };
   setAbove(!v.above);
-  if (instant) { camera.position.copy(eye); controls.target.copy(at); camera.fov = v.fov; camera.updateProjectionMatrix(); controls.update(); dirty(); }
-  else tween = { t0: performance.now(), from, to: { eye, at, fov: v.fov } };
+  baseFov = v.fov;
+  if (instant) { camera.position.copy(eye); controls.target.copy(at); camera.fov = fitFov(v.fov); camera.updateProjectionMatrix(); controls.update(); dirty(); }
+  else tween = { t0: performance.now(), from, to: { eye, at, fov: fitFov(v.fov) } };
   qsa("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === name)));
   store.set(KEY, S); updateCaption();
+}
+let cutSide = "";
+function updateCut() {        // which wall the camera is outside of, if any (only in the views from above, before you walk)
+  let side = "", best = 0;
+  if (freeAbove()) {
+    const x = -camera.position.x / M, z = camera.position.z / M;
+    for (const [k, v] of Object.entries({ win: R.WINDOW_Z - z, stairs: x - R.W, pc: -x, wall: z - R.ALC_D })) if (v > best) { best = v; side = k; }
+  }
+  if (side === cutSide) return false;
+  cutSide = side; const A = CLIP[0], n = A.normal;
+  if (side === "win") { n.set(0, 0, 1); A.constant = -(R.WINDOW_Z + CUT_IN) * M; }
+  else if (side === "stairs") { n.set(1, 0, 0); A.constant = (R.W - CUT_IN) * M; }
+  else if (side === "pc") { n.set(-1, 0, 0); A.constant = -CUT_IN * M; }
+  else if (side === "wall") { n.set(0, 0, -1); A.constant = -12 * M; }
+  else { n.set(0, 0, 1); A.constant = 1e3; }
+  reshadow();
+  return true;
 }
 function setAbove(show) {   // the floor above (the stairwell's upper walls) hides in the views from above
   scene.traverse(o => { if (o.name === "above") o.visible = show; });
@@ -1539,6 +1646,9 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 let need = 2, moving = false, still_t = 0, lowRes = false;
 function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
+/* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
+let baseFov = 50;
+const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (16 / 9) / asp) * 180 / Math.PI);
 function sizeRenderer() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
@@ -1546,7 +1656,7 @@ function sizeRenderer() {
   // v14.1: while you drag, the picture renders at a lower resolution; it sharpens again as soon as you stop
   gl.setPixelRatio(lowRes ? Math.max(0.5, fullRatio() * 0.5) : fullRatio());
   gl.setSize(w, h, false);
-  camera.aspect = w / h; camera.updateProjectionMatrix(); dirty();
+  camera.aspect = w / h; if (!tween) camera.fov = fitFov(baseFov); camera.updateProjectionMatrix(); dirty();
 }
 new ResizeObserver(sizeRenderer).observe(canvas);
 controls.addEventListener("start", () => { moving = true; });
@@ -1568,6 +1678,7 @@ function frame(now) {
   const active = moving || changed || !!tween;
   if (active) { still_t = now; if (!lowRes) { lowRes = true; sizeRenderer(); } }
   else if (lowRes && now - still_t > 180) { lowRes = false; sizeRenderer(); }
+  if (updateCut()) need = 2;
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
     gl.render(scene, camera); need--;
@@ -1591,19 +1702,20 @@ function updateCaption() {
   const din = { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
   const paint = S.paint === "custom" ? `your colour ${S.custom}` : R.PAINTS[S.paint].name;
   const lights = sameAsScene() && S.master === 100 ? sc.name : `your lighting (from ${sc.name})`;
-  qs("#r3d-cap").textContent = `${(VIEWS[S.view] || VIEWS.window).label} · ${site}, ${din} · ${lights} · ${paint}${S.drawers ? " · drawers out" : ""}${Object.values(S.ideas).some(Boolean) ? " · ideas shown (not in the plan)" : ""}${Object.keys(DEF.decor).some(k => S.decor[k] !== DEF.decor[k]) ? " · decor tried" : ""}`;
+  qs("#r3d-cap").textContent = `${(VIEWS[S.view] || VIEWS.window).label} · ${site}, ${din} · ${lights} · ${paint}${S.drawers ? " · drawers out" : ""}${Object.values(S.ideas).some(Boolean) ? " · ideas shown (not in the plan)" : ""}${Object.keys(DEF.decor).some(k => S.decor[k] !== DEF.decor[k]) ? " · decor tried" : ""}${Object.values(S.sugg).some(Boolean) ? " · suggestions shown" : ""}`;
 }
 function still(w, h) {
   if (!started) start();
   const pr = gl.getPixelRatio(), size = gl.getSize(new THREE.Vector2()), asp = camera.aspect;
-  gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  const fov0 = camera.fov;
+  gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.fov = fitFov(baseFov); camera.updateProjectionMatrix();
   const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
   if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
   const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(big, big); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
   MATS.forEach(m => m.needsUpdate = true);
-  reshadow();
+  updateCut(); reshadow();
   gl.render(scene, camera);
   const url = canvas.toDataURL("image/png");
   gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
@@ -1611,12 +1723,12 @@ function still(w, h) {
   MATS.forEach(m => m.needsUpdate = true);
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(1024, 1024); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   applyLight();
-  gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.updateProjectionMatrix(); dirty();
+  gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.fov = fov0; camera.updateProjectionMatrix(); dirty();
   return url;
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v20 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v21 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -1643,6 +1755,7 @@ function syncButtons() {
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs);
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
+  qsa("[data-sugg]").forEach(b => b.setAttribute("aria-pressed", String(!!S.sugg[b.dataset.sugg])));
   qsa("[data-decor]").forEach(b => { const [k, v] = b.dataset.decor.split(":"); b.setAttribute("aria-pressed", String(S.decor[k] === v)); });
   qs("#r3d-custom").value = S.custom;
   if (S.ceil !== "match" && qs("#r3d-ceil")) qs("#r3d-ceil").value = S.ceil;
@@ -1662,6 +1775,10 @@ root.addEventListener("click", e => {
   else if (d.skirt) S.skirt = d.skirt, repaint(), store.set(KEY, S), dirty();
   else if (d.colreset) S.col[d.colreset] = WARM, applyLight(), store.set(KEY, S);
   else if (d.tog) S[d.tog] = !S[d.tog], applyLight(), store.set(KEY, S);
+  else if (d.sugg || d.suggall) {     // v21: a suggestion on or off (a piece you'd removed in Edit room comes back), or all of them
+    const keys = d.sugg ? [d.sugg] : qsa("[data-sugg]").map(x => x.dataset.sugg), on = d.sugg ? !S.sugg[d.sugg] : d.suggall === "on";
+    S.sugg = Object.assign({}, S.sugg); keys.forEach(k => { S.sugg[k] = on; if (S.layout["sg_" + k]) delete S.layout["sg_" + k].off; });
+    applyState(); }
   else if (d.decor) {           // v20: decor; picking what's in the case (or its frame) shows the case, which hangs with the table by the stairs
     const [k, v] = d.decor.split(":"), was = S.ideas.case && S.site === "B"; S.decor = Object.assign({}, S.decor, { [k]: v });
     if (k === "fill" || k === "frame") { S.ideas = Object.assign({}, S.ideas, { case: true }); if (S.site !== "B") S.site = "B"; }
@@ -1700,11 +1817,13 @@ function start() {
   const pmrem = new THREE.PMREMGenerator(gl);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
-  buildShell(); buildLights(); buildFurniture();
+  gl.localClippingEnabled = true;
+  buildShell(); buildLights(); buildFurniture(); buildSuggest();
   bar1 = buildBar(R.BAR1, lights.bar1, "bar1");
   gl.shadowMap.enabled = S.quality === "hd";
   applyState();
   syncButtons();
+  scene.traverse(o => { if (o.isMesh || o.isPoints || o.isLine) [].concat(o.material).forEach(m => m && !m.clippingPlanes && clipMat(m)); });   // v21: the cutaway
   setView(S.view, true);
   sizeRenderer();
   gl.compile(scene, camera);
@@ -1714,7 +1833,7 @@ function start() {
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
     set(o) { Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, VIEWS },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }

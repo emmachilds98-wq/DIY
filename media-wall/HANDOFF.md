@@ -1,8 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **Next agent: `media-wall/UPGRADE_PLAN_v21.md`.** v20 is built and merged (round 14, below). It waits on the client's answers
-  (the chair cupboard: four at 22 deep or six at 31; the window corner's gap at floor level; a photo of the side of the stairs by the door).
+- **Next agent: `media-wall/UPGRADE_PLAN_v22.md`** (it follows `media-wall/plans/optimisation_v21.html`, the client-facing optimisation
+  plan, also published as an artifact). v21 is built and merged (round 15, below). Still open with the client: the chair cupboard (four at 22
+  deep or six at 31), the window corner's gap at floor level, a photo of the side of the stairs by the door, and the plan's three questions.
 - **The shared deck works from this account again (round 13):** publishing to 71ff succeeded (v16 → v19). Its db (the saved answers)
   still can't be read from Claude Code ("shared with you from another organization"), so ask the client to paste answers if you need them.
 - **Branch:** round 13 ran on `claude/eloquent-johnson-pgmnud`, restarted from `main`; any session's branch works: restart it from `main` and open a PR into `main`.
@@ -14,10 +15,32 @@
   with no files map, omitting `capabilities` (it keeps db + user + assets + downloads). **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 25 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 27 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 15: v21 (the whole room first in 3D, every view re-aimed, suggestions on or off, the optimisation plan)
+- Client: "review all of it now and write a plan of how we can optimise the whole thing especially with the user flow and the 3D room
+  render ... i want the default 3D room render to be at the best viewing to see most if not all the room without clipping or obstruction.
+  can you review viewing points and update for better view of everything we've done. i also want expansion of the suggested furniture and
+  decor making sure i can choose to have it or not."
+- **Cutaway (room3d.js `CLIP`, `clipMat`, `updateCut`):** every material carries two clipping planes with `clipIntersection`; in the
+  views from above (`freeAbove()`), plane 0 moves to whichever wall the camera is outside of (window, stairs, PC, media wall), so what stands
+  within `CUT_IN` 32 of it above `CUT_H` 95 is cut away. `gl.localClippingEnabled`; a traversal after build covers non-`reg` materials.
+- **Views:** new `room` ("The whole room", above the window side, cut away) is the default (`DEF.view`, and `S.seen21` moves everyone to it
+  once). Re-aimed: `window` (the window's middle, clear of the lamp at the sofa's end), `chairs` (from above, 200 high), `dining` B, `sofa`,
+  `plan` (1050 high, fills the frame), `doll` (closer). `breast` and `windowwall` got buttons. `fitFov()` widens the field of view on
+  screens narrower than 16:9 (phones are 4:3) using `baseFov`; `still()` saves and restores it. Edit room opens on `room`.
+  `R3D._dbg.VIEWS` is exposed for testing views headless.
+- **Suggestions (`ideas.SUGGEST`, room3d.js `buildSuggest`, `SUGG_G`, `S.sugg`, `applySuggest`, room3d_page `SUGG_SHORT`):** floor plant,
+  side table, pouffe (movable `sg_*` with `when`), print over the sofa, clock over the door (fixed), coffee-table tray (a child of
+  `coffeeG`). Buttons `data-sugg` and `data-suggall`; turning one on clears its `layout.off`. Ideas tab `suggest_block()`, PDF
+  `ideas.suggest_html()`. Add list: rattan armchair, blanket ladder, oak bench, arc floor lamp.
+- **Stills:** `3d_room` (the overview's 3D card too) and `3d_suggest` added (27). Version 21 everywhere; v20 outputs in `out/v20/`.
+  Backups `*_v20_backup.*`.
+- **Review numbers (for the plan):** tab lengths on a 390 px phone (Build steps 67.5 screens, Media wall 26.2, Checks 14.2, Dining 12.5);
+  3D: 433 draw calls, 747 meshes, 23 lights, 66 programs; the inline deck is 10.8 MB.
 
 ## Update 20 Oct 2026, round 14: v20 (a chair cupboard so it all packs away, a taller glass case, decor to try, the door white)
 - Client: "ideally 6 folding chairs but 4 is fine. 25cm on window ledge and no crashes. make glass display cabinet on wall taller and

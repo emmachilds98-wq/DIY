@@ -2,6 +2,7 @@
 the headless stills (shot3d.py). Three.js comes from jsDelivr, pinned."""
 import html, json, pathlib
 import scenes
+import ideas
 import render as R
 import geometry as G
 
@@ -10,9 +11,9 @@ THREE = "https://cdn.jsdelivr.net/npm/three@0.160.0/"
 IMPORTMAP = ('<script type="importmap">' + json.dumps({"imports": {"three": THREE + "build/three.module.js",
                                                                    "three/addons/": THREE + "examples/jsm/"}}) + "</script>")
 
-VIEWS = [("window", "From the window"), ("wall", "The media wall"), ("sofa", "From the sofa"), ("door", "From the door"),
-         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "The chair cupboard"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"),
-         ("doll", "Dolls’ house")]
+VIEWS = [("room", "The whole room"), ("window", "From the window"), ("wall", "The media wall"), ("sofa", "From the sofa"), ("door", "From the door"),
+         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "The chair cupboard"), ("breast", "The chimney breast"),
+         ("windowwall", "The window wall"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"), ("doll", "Dolls’ house")]   # v21: the whole room first
 
 CSS = """
 .r3d { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
@@ -88,6 +89,8 @@ LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves an
           ("lamp", "Red lamp: top, middle, bottom", "lamp")]
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
+SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table", "pouffe": "Knitted pouffe", "art": "Print over the sofa",
+              "clock": "Clock over the door", "tray": "Coffee-table tray"}   # v21: the buttons' words for ideas.SUGGEST
 # v20: decor to try in the 3D room (room3d.js S.decor; the keys match its RUG_LOOKS, CUSHION_COLS, CURTAIN_COLS, the case's PRESETS, CASE_FRAMES)
 DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatweave"), ("blue", "Deep blue"), ("stripes", "Sage stripes"), ("none", "No rug")]),
          ("cushions", "Sofa cushions", [("none", "None"), ("rust", "Rust and ochre"), ("blues", "Blues"), ("sage", "Sage and cream")]),
@@ -131,7 +134,12 @@ def controls():
               '<div class="grp r3d-wide r3d-decor"><span class="label">Decor: try a look (only the case and cushions are in the ideas, not the plan)</span>'
               + "".join(f'<div class="r3d-decrow"><span>{html.escape(lab)}</span><div class="seg" role="group" aria-label="{html.escape(lab)}">'
                         + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in opts) + '</div></div>'
-                        for k, lab, opts in DECOR) + '</div>')
+                        for k, lab, opts in DECOR) + '</div>'
+              # v21: suggested furniture and decor (ideas.SUGGEST), each on or off, all off to start
+              '<div class="grp r3d-wide"><span class="label">Suggested furniture and decor: turn each on or off (not in the plan)</span>'
+              '<div class="seg" role="group" aria-label="Suggested furniture and decor">'
+              + "".join(f'<button type="button" data-sugg="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(SUGG_SHORT[k])}</button>' for k, _t, size, *_ in ideas.SUGGEST)
+              + '<button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>')
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),
