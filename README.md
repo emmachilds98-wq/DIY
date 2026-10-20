@@ -10,13 +10,13 @@ with a fold-down oak dining table on the chimney breast, or (new option) on the 
 ![The media wall, main view](media-wall/out/Media%20wall%20v15%20-%20artisan%20oak%20-%20Card%20Room%20Green%20(HD).png)
 
 **New in v15** (your notes on the room as it really is)
-- **Your things, drawn as they are:** the blue corduroy sofa (two seats then the corner, the long side to about 40 cm short of the window's end, no cushion); the bright red lamp with its colour bulbs, green on top, pink, then purple; your IKEA light box at the left of the shelf by the stairs, your laser in the middle of it (its dots on the ceiling) and the plant hanging down off it; your hat on an oak peg by the stairs; soft grey carpet; curtains (plain until your photo arrives).
+- **Your things, drawn as they are:** the blue corduroy sofa (two seats then the corner, the long side to about 40 cm short of the window's end, no cushion); the bright red lamp with its colour bulbs, green on top, pink, then purple; your IKEA light box at the left of the shelf by the stairs, your laser in the middle of it (its dots on the ceiling) and the plant hanging down off it; your hat on an oak peg by the stairs; your soft grey carpet; your curtains from your photo (long oatmeal pencil-pleat panels to the floor, open or drawn in the 3D room).
 - **A rug that fits:** 230 × 160 in front of the sofa, cream with deep blue, rust, ochre and sage arches.
 - **The left wall looks better:** the ledge and the PC shelf become one oak run that sweeps out in a curve to the PC, with a warm LED strip glowing underneath.
 - **Record trays for LPs only:** one trough the full width, room to flip with both hands.
 - **The spot bars run from the TV towards the window** and take **smart colour bulbs** (E14, under the bar's 6 W: WiZ Colour P45 or Philips Hue lustre), so there are no dimmers to fit; set softer and aimed at walls and shelves, so the light is less spotty.
 - **In the 3D room:** a slider for every light (and one for all of them), colour pickers for both bars and the lamp's three bulbs, and separate paint colours for the walls, the ceiling and the skirting.
-- Fit proof: 70 checks, 51 fit, 14 tight, 5 to check on site, none fail. The longer sofa tightens two dining layouts (see the plan, section 5). 20 questions: new are a photo of the curtains, the hat, the light box's name and whether the grey carpet is new.
+- Fit proof: 70 checks, 51 fit, 14 tight, 5 to check on site, none fail. The longer sofa tightens two dining layouts (see the plan, section 5). 18 questions: new are the hat and the light box's name (the curtains and the carpet came with your photo).
 
 | The side wall: one oak run | The stairs wall: light box, laser, hanging plant, hat, red lamp |
 |---|---|

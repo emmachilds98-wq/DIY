@@ -25,7 +25,7 @@ const DEF = { site: "A", dining: "folded", scene: "everyday", paint: "card_room"
               quality: SMALL ? "fast" : "hd", view: "window",
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
-              ceil: "match", skirt: "match", laser: true, lbox: true };
+              ceil: "match", skirt: "match", laser: true, lbox: true, curtains: false };
 const KEY = "mw15-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
@@ -437,16 +437,22 @@ function buildShell() {
     [0, 1, 2, 3, 4, 5].map(i => i === 2 ? reg(new THREE.MeshStandardMaterial({ map: RUG_TEX, roughness: 0.97, bumpMap: PILE, bumpScale: 0.35 }))
                                         : reg(new THREE.MeshStandardMaterial({ color: RG.cols[3], roughness: 1 }))));
   rug.position.copy(v3((RG.x[0] + RG.x[1]) / 2, 0.4, (RG.z[0] + RG.z[1]) / 2)); rug.rotation.y = Math.PI; rug.receiveShadow = true; shell.add(rug);
-  // v15: the curtains (photo to come): a rail over the window, two sill-length panels in soft folds, stacked either side
+  // v15: the curtains, from the client's photo: long pencil-pleat panels to the floor in oatmeal, on a rail just under the ceiling strip
+  // running 30 past the window each side; open (stacked either side) or drawn across (S.curtains)
   const CU = R.CURTAIN, cloth = reg(new THREE.MeshStandardMaterial({ color: CU.col, roughness: 0.95, side: THREE.DoubleSide, bumpMap: WALL_BUMP, bumpScale: 0.3 }));
-  cube(wx0 - CU.stack - 6, CU.rail_y, WZ + 4, wx1 - wx0 + 2 * CU.stack + 12, 2, 2, white);
-  for (const xa of [wx0 - CU.stack + 4, wx1 - 4]) {
-    const g = new THREE.PlaneGeometry(CU.stack * M, (CU.rail_y - CU.drop_to) * M, 48, 1), pos = g.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (CU.stack * M) * Math.PI * 2 * CU.folds / 2) * 0.022);
+  cube(wx0 - CU.ext, CU.rail_y, WZ + 4, wx1 - wx0 + 2 * CU.ext, 2, 2, white);
+  const panel = (x0, w, folds) => {
+    const g = new THREE.PlaneGeometry(w * M, (CU.rail_y - CU.drop_to) * M, Math.round(folds * 8), 1), pos = g.attributes.position;
+    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * 0.026);
     g.computeVertexNormals();
-    const m = new THREE.Mesh(g, cloth); m.position.copy(v3(xa + CU.stack / 2, (CU.rail_y + CU.drop_to) / 2, WZ + 7)); m.rotation.y = Math.PI;
-    shell.add(shadow(m));
-  }
+    const m = new THREE.Mesh(g, cloth); m.position.copy(v3(x0 + w / 2, (CU.rail_y + CU.drop_to) / 2, WZ + 7)); m.rotation.y = Math.PI;
+    return shadow(m);
+  };
+  curtOpen = new THREE.Group(); curtShut = new THREE.Group();
+  curtOpen.add(panel(wx0 - CU.ext, CU.stack, CU.folds), panel(wx1 + CU.ext - CU.stack, CU.stack, CU.folds));
+  const half = (wx1 - wx0) / 2 + CU.ext;
+  curtShut.add(panel(wx0 - CU.ext, half, CU.folds * 2.2), panel(wx0 - CU.ext + half, half, CU.folds * 2.2));
+  shell.add(curtOpen, curtShut);
   // shelf B: the client's 2 m black floating shelf on the stairs wall
   const sb = R.SHELF_B, black = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
   cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black);
@@ -513,7 +519,7 @@ function buildShell() {
   }
   flushCubes(shell);
 }
-let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed;
+let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut;
 
 /* ---------------------------------------------------------------- lights */
 const lights = { strip: [], uprights: [], bias: [], bar1: [], bar2: [], lamp: [], tv: [] };
@@ -658,6 +664,7 @@ function applyLight() {
   tvScreen.material = L.bias > 0 ? screenOn : screenOff;
   lboxFace.material.color.set(S.lbox && !day ? "#ffffff" : "#8a8580");
   laserDots.visible = S.laser && !day;
+  curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
   win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
   view.material.map = day ? SKY.day : SKY.night; view.material.needsUpdate = true;
   // bounce light: a real room's walls relight it; this stands in for that, in proportion to what's on. v15: more of it, so the room

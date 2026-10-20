@@ -2290,19 +2290,18 @@ def sofa_solid():
 
 
 def curtains(far=480.0):
-    """v15: the client's curtains (photo to come): a slim rail over the window, two sill-length panels stacked either side, clear of the
-    radiator below; plain pale grey with soft folds until the photo arrives (geometry.CURTAIN)."""
+    """v15: the client's curtains, from their photo: long pencil-pleat panels to the floor in oatmeal, on a slim rail just under the
+    ceiling strip that runs 30 cm past the window each side; drawn open, stacked either side of the window (geometry.CURTAIN)."""
     c = G.CURTAIN
     wz = G.WINDOW_Z + 6.0
     wx0, wx1 = G.WINDOW_X
     y0, y1 = c["drop_to"], c["rail_y"]
-    o = [box(wx0 - c["stack"] - 6, y1, wz - 1, wx1 - wx0 + 2 * c["stack"] + 12, 2.0, 2.0, "#d8d4cc", "#ebe8e1", "#bdb8ae")]
-    base = c["col"]
+    o = [box(wx0 - c["ext"], y1, wz - 1, wx1 - wx0 + 2 * c["ext"], 2.0, 2.0, "#d8d4cc", "#ebe8e1", "#bdb8ae")]
     import colorsys
-    r, g_, b_ = [int(base[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    r, g_, b_ = [int(c["col"][i:i + 2], 16) / 255 for i in (1, 3, 5)]
     h, l, s_ = colorsys.rgb_to_hls(r, g_, b_)
     shade = lambda k: "#%02x%02x%02x" % tuple(round(v * 255) for v in colorsys.hls_to_rgb(h, max(0, min(1, l * k)), s_))
-    for xa in (wx0 - c["stack"] + 4, wx1 - 4):
+    for xa in (wx0 - c["ext"], wx1 + c["ext"] - c["stack"]):
         n = c["folds"]
         w = c["stack"] / n
         for i in range(n):
@@ -2310,7 +2309,9 @@ def curtains(far=480.0):
             if xl > far:
                 continue
             q = [P(xl, y0, wz), P(min(xr, far), y0, wz), P(min(xr, far), y1, wz), P(xl, y1, wz)]
-            o.append(poly(q, shade(1.06 if i % 2 else 0.86)))
+            o.append(poly(q, shade(1.07 if i % 2 else 0.84)))
+        hq = [P(xa, y1 - 9, wz - 0.1), P(min(xa + c["stack"], far), y1 - 9, wz - 0.1), P(min(xa + c["stack"], far), y1 - 1, wz - 0.1), P(xa, y1 - 1, wz - 0.1)]
+        o.append(poly(hq, shade(0.95), 'opacity="0.6"'))   # the pencil-pleat heading
     return "\n".join(o)
 
 

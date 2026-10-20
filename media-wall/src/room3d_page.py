@@ -84,8 +84,9 @@ def controls():
               + '<button type="button" data-scene="day" aria-pressed="false">Daytime</button></div>'
               f'<div class="r3d-lvs"><div class="r3d-lv r3d-master"><label for="lv-master">All lights</label><input type="range" id="lv-master" min="0" max="100" step="1" data-lv="master"><output data-lvout="master">100%</output><span></span></div>'
               + "".join(rows) + '</div>'
-              '<div class="seg" role="group" aria-label="On the stairs-wall shelf"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
-              '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button></div></div>')
+              '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
+              '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
+              '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     return "".join([
         seg("site", [("A", "On the chimney breast"), ("B", "Under the shelf, by the stairs")], "Where the table goes"),
         seg("dining", [("folded", "Folded"), ("four", "Down for four"), ("six", "Out for six")], "The table"),

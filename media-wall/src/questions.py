@@ -1,5 +1,5 @@
 """v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
-New: curtains, hat, lightbox, carpet.
+New: hat, lightbox. The curtains and the carpet came with the client's photo the same day (asked and answered).
 v14: answered by the client's photos (20 Oct) and dropped: the stairs' direction (a straight flight rising towards the door).
 New: site, westwall, lamp.
 v13.6: ONE list of what we still need from Emma and Dave, most consequential first. The plan PDF's "Still to confirm"
@@ -56,14 +56,10 @@ QUESTIONS = [
     ("point2", "The pendant point by the stairs wall: its exact spot",
      "From your photo it hangs about 55 cm out from the stairs wall, a quarter of the way along the shelf from the stair end. Bar 2 goes on it, over the table if you choose that spot.",
      "Measure from the stairs wall and from the window wall.", False),
-    ("curtains", "A photo of your curtains",
-     "They're drawn plain pale grey, sill-length either side of the window, until the photo arrives: their colour, pattern, length and rail will go into every view.", "A photo with them drawn and one open.", True),
     ("hat", "Your hat: a photo, and is an oak peg on the wall by the stairs the way you'd like to show it?",
      f"It's drawn as a felt hat on a small oak peg {_n(G.HAT_PEG['y'])} cm up between the stairs and your shelf. A deeper oak shelf, a hat stand or a frame are the other options.", "A photo of the hat; say if you'd prefer another way.", True),
     ("lightbox", "Your IKEA light box: which one is it?",
      f"It's drawn from your photo as the box at the shelf's stair end, about {_n(G.LIGHTBOX['z'][0] - G.LIGHTBOX['z'][1])} × {_n(G.LIGHTBOX['h'])} cm, its face lit warm. Its name (on the label) gives its true size and whether its light changes colour.", "The name on its label, or a photo.", True),
-    ("carpet", "The soft grey carpet: is that the one you have, or a new carpet to add to the buy list?",
-     "It's drawn soft grey either way. A new carpet for this room (about 16 m²) would go in before the media wall is built.", "Have it, or new.", False),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
@@ -73,10 +69,8 @@ PDF_LINE = {
     "site": "Where the dining table goes: on the chimney breast, or under your shelf by the stairs (both are drawn and checked).",
     "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the bracket fixings if the table goes there.",
     "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
-    "curtains": "A photo of your curtains: they're drawn plain pale grey until it arrives.",
     "hat": "Your hat: a photo, and whether an oak peg by the stairs is how you'd like it shown.",
     "lightbox": "Your IKEA light box: its name, for its true size.",
-    "carpet": "The soft grey carpet: the one you have, or a new one for the buy list?",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
     "westend": "The stairs wall's length and the shelf's ends and height (the photo gives about 257–268 cm, shelf 41 from the stairs, 16 from the corner, top about 200).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
@@ -109,10 +103,8 @@ SHORT = {
     "chairs": "chairs",
     "box": "the 23 × 22 cm box by the window",
     "records": "record counts",
-    "curtains": "a photo of the curtains",
     "hat": "the hat",
     "lightbox": "the light box's name",
-    "carpet": "the carpet",
     "games": "game counts",
     "ports": "extra wired ports",
     "surge": "the 10-gang",

@@ -320,8 +320,10 @@ def side_run_depth(z):
 CARPET_COL = "#8f9194"                      # soft cool grey
 RUG = dict(x=(100.0, 330.0), z=(-198.0, -38.0), border=8.0)   # 230 × 160: from the return's seat to past the breast, sofa front to 30 short of the base
 RUG_COLS = ("#efe7d8", "#c7643a", "#d9a441", "#2f4a6e", "#7a8a6a")   # cream ground, rust, ochre, deep blue (the sofa), sage
-CURTAIN = dict(rail_y=CEIL - 8.0, drop_to=82.0, stack=34.0, col="#b9b6ae", folds=7)   # sill-length over the radiator, stacked either
-                                            # side of the window; drawn plain until the client's photo arrives
+CURTAIN = dict(rail_y=CEIL - 6.0, drop_to=1.5, stack=44.0, ext=30.0, col="#cbbfae", folds=11)   # from the client's photo (20 Oct,
+                                            # inputs/photo_room_curtains_evening.jpg): long pencil-pleat panels to the floor, oatmeal (the
+                                            # photo's purple light makes them look mauve), on a rail just under the ceiling strip that runs
+                                            # 30 past the window each side; drawn open (stacked either side), or drawn across in the 3D room
 # shelf B (the 2 m shelf on the stairs wall): "make the hanging plant on the wall shelf actually hang and add my small laser from the middle.
 # on the left of that shelf is my ikea light box"
 LIGHTBOX = dict(z=(SHELF_B["z"][0] - 4.0, SHELF_B["z"][0] - 60.0), h=42.0, d=12.0)   # the box in the photo, at the shelf's stair (left) end

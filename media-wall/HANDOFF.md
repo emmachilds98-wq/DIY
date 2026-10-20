@@ -37,11 +37,12 @@
   strip + a RectAreaLight wash (in the uprights layer). Controls in `room3d_page.py` (`LIGHTS`, `CEIL_PRESETS`, `SKIRT_PRESETS`).
 - Docs: buy list (no dimmers; 8 smart E14 bulbs £100–360; side-run LED; optional smart button; rug £120–300; hat peg), step 10 (cut the run
   from one 225 × 30 × 4 board to a template), step 12 and its instructions (no dimmers, set up the app), section 8 lighting, section 9
-  electrics, scenes.py (layers' controls; lamp levels dimmable). Questions 20: dropped `lamp` (answered); new `curtains`, `hat`, `lightbox`,
-  `carpet`. The deck's db: `answers/sofa` (v2) and `answers/lamp` written from the client's notes.
+  electrics, scenes.py (layers' controls; lamp levels dimmable). Questions: dropped `lamp` (answered); new `hat`, `lightbox`. The deck's db: `answers/sofa` (v2) and `answers/lamp` written from the client's notes.
 - Fit proof 70: 51 fit, 14 tight, 5 check. New checks: the six-seat window-side chair backs onto the sofa's longer arm; option B's walk
   behind the chairs is 67 (TIGHT). Rows for the sweep, the bars turned, the smart bulbs.
-- Still to do when the client sends it: the curtains' photo (colour, length, rail), the hat's photo; the carpet (have or new).
+- Then the client's photo (20 Oct, `inputs/photo_room_curtains_evening.jpg`, evening, purple RGB light): the curtains are long pencil-pleat panels
+  to the floor, oatmeal, on a rail just under the ceiling strip (`CURTAIN` redone; 3D toggle `S.curtains`); the carpet is already soft grey.
+  Questions 18 (curtains and carpet answered and dropped). Still to come: the hat's photo, the light box's name.
 
 ## Update 20 Oct 2026, round 8b: v14.1 (a faster 3D room, GitHub Pages)
 - Client: "ive activated pages on github, do another full upgrade wherever necessary. it runs very slow on the renders but it looks great so
