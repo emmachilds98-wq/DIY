@@ -36,7 +36,7 @@ IDEAS = [
      "They tie the blue corduroy sofa to the rug and the oak, and soften the ottoman end.", "The sofa.", False),
     ("plantlight", "A small uplight under the plant stand's bottom tier",
      "a plug-in spot, about 10 cm", (10, 20),
-     "Throws the leaves' shadows up the wall at night, so the plants are part of the evening lighting even with their grow bars off.",
+     "Throws the leaves' shadows up the wall at night, so the plants are part of the evening lighting with the room lights low.",
      "On the floor, under the stand.", False),
     ("rugpad", "A non-slip pad under the rug",
      "220 × 150, trimmed to fit", (15, 30),

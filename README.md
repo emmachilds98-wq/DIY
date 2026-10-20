@@ -9,17 +9,17 @@ with the flip-top oak dining table on the stairs wall under your shelf (the defa
 
 ![The media wall, main view](media-wall/out/Media%20wall%20v18%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v18** (your plant stand, your record shelf, and a room you can rearrange)
-- **Your plant stand and your 2 × 2 record shelf**, in two layouts. **A (recommended):** the plant stand in the window's west corner, with daylight beside it and its grow lights under the top two tiers; the record shelf on the chimney breast under the “now playing” ledge, a step from the turntable (about 160 more LPs face-out). **B:** the other way round. Your red lamp moves to the sofa's end. Both are drawn at assumed sizes until you measure them.
+**New in v18** (your plant stand, your vinyl stand, and a room you can rearrange)
+- **Your plant stand (98 × 29.5 × 158) and your vinyl stand (70 × 32 × 78)**, at the sizes on the listings you sent (v18.1), in two layouts. **A (recommended):** the plant stand in the window's west corner, with daylight beside it (4.5 cm each side between the curtains and the pipe boxing: measure first); the vinyl stand on the chimney breast under the “now playing” ledge, a step from the turntable (about 100 more LPs). **B:** the other way round; the frames go up 30. Your red lamp moves to the sofa's end.
 - **The PC's clear side** now shows its graphics card, cooler, memory and fans, in the renders and in 3D.
 - **Edit room** in the 3D room: drag things around like a dolls' house, turn them, recolour them, take them out, or add an armchair, side table, floor plant, bookcase, beanbag, footstool, floor cushion or record crate. Tap a wall, the ceiling or the skirting to paint it. Shorter menus: the light sliders fold away; the lamp, ceiling and skirting menus are gone (drag the lamp, tap to paint).
 - **HD with shadows** is lighter on the graphics card (at most four shadowed lights), phones save their HD pictures at 2560 × 1440, and if a phone does give up, the room offers to reload in Fast.
 - **More ideas for later:** TV backlight that follows the picture, cushions in the rug's colours, a plant uplight, a rug pad. Next round: somewhere to keep the dining chairs, if it's easy without changing the table.
-- Total about £3,110–6,337 (a smart plug and drip trays for the plants, felt pads and a strap for the record shelf), no electrician on top. Fit proof: 87 checks, 59 fit, 20 tight, 8 to check on site, none fail.
+- Total about £3,103–6,323 (drip trays for the plants, felt pads for the vinyl stand), no electrician on top. Fit proof: 87 checks, 59 fit, 21 tight, 7 to check on site, none fail.
 
-| Layout A: your plant stand in the window corner | Layout A: your record shelf on the breast |
+| Layout A: your plant stand in the window corner | Layout A: your vinyl stand on the breast |
 |---|---|
-| ![Plant stand](media-wall/out/Media%20wall%20v18%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Record shelf](media-wall/out/Media%20wall%20v18%20-%203D%20-%20your%20record%20shelf%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
+| ![Plant stand](media-wall/out/Media%20wall%20v18%20-%203D%20-%20your%20plant%20stand%20in%20the%20window%20corner%20-%20layout%20A%20-%20everyday%20evening%20(HD).png) | ![Vinyl stand](media-wall/out/Media%20wall%20v18%20-%203D%20-%20your%20vinyl%20stand%20on%20the%20breast%20-%20layout%20A%20-%20records%20(HD).png) |
 
 **New in v17** (the room finished round your notes)
 - **The sofa's open end** is a proper ottoman end: the seat wraps round to the back, the back stops 20 cm short, and the sofa stands 13 cm off the window wall, clear of the curtains.

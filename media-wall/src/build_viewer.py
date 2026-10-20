@@ -425,9 +425,9 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_doll_A": "Dolls\u2019 house view, option A",
          "3d_window_general": "General light (v17): every spot head straight down, evenly spread, the strips and the lamp at a middle setting",
          "3d_pc_lit": "TV night with the PC lit: its fans and the RGB strip glowing behind the glass side",
-         "3d_plants_corner": "Your plant stand in the window's west corner (layout A, recommended): daylight beside it, its grow bars glowing under the top two tiers",
-         "3d_records_breast": "Your 2 \u00d7 2 record shelf on the chimney breast (layout A), its four trays face-out under the \u201cnow playing\u201d ledge",
-         "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off), the record shelf back in the window corner",
+         "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended): two towers of five tiers and a taller plant in the open middle",
+         "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top, LPs between the wires below, under the \u201cnow playing\u201d ledge",
+         "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up), the vinyl stand back in the window corner",
          "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
          "3d_ideas_breast": "Idea, not in the plan: the slim glass display case on the chimney breast, above the \u201cnow playing\u201d ledge"}

@@ -29,9 +29,9 @@ SHOTS = [
     # v17: the general scene, the lit PC, and the ideas (not in the plan)
     ("3d_window_general", dict(view="window", site="B", dining="folded", scene="general"), "from the window - general light, every head straight down"),
     ("3d_pc_lit", dict(view="pc", site="B", dining="folded", scene="tv", pc=True), "the PC side wall - PC lit - TV night"),
-    # v18: your plant stand and your record shelf, both layouts
+    # v18: your plant stand and your vinyl stand, both layouts
     ("3d_plants_corner", dict(view="windowwall", site="B", dining="folded", scene="everyday"), "your plant stand in the window corner - layout A - everyday evening"),
-    ("3d_records_breast", dict(view="breast", site="B", dining="folded", scene="records"), "your record shelf on the breast - layout A - records"),
+    ("3d_records_breast", dict(view="breast", site="B", dining="folded", scene="records"), "your vinyl stand on the breast - layout A - records"),
     ("3d_plants_breast", dict(view="breast", site="B", dining="folded", scene="everyday", plants="breast"), "layout B - your plant stand on the breast - everyday evening"),
     ("3d_ideas_window", dict(view="windowwall", site="B", dining="folded", scene="everyday", ideas=dict(glass=True)), "IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand"),
     ("3d_ideas_ctable", dict(view="pc", site="B", dining="folded", scene="everyday", ideas=dict(ctable=True)), "IDEAS (not in the plan) - the C-table at the sofa's open end"),

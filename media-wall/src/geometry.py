@@ -405,15 +405,19 @@ def bar_head_xz(bx, bz, off):
 
 # ---------------------------------------------------------------- v18 (20 Oct): the client's plant stand and their 2 x 2 record shelf
 # "ive bought a plant shelf something very similar to this image" (a bamboo stand, two columns, four tiers, LED grow bars under the top two)
-# "and i could keep the vinyl shelf i have ... 4 trays in 2x2 square wood shelf". Both drawn at assumed sizes until measured (questions).
-PLANT_STAND = dict(w=90.0, d=30.0, h=120.0, tiers=(4.0, 42.0, 80.0, 118.0), cols=2, post=2.4, col="#a8703f", lights=(2, 3))
-RECORD_SHELF = dict(w=77.0, d=39.0, h=77.0, t=1.6, cubes=(2, 2), col="#c49a6c", lps_each=40)   # as IKEA KALLAX 2x2 until measured
+# "and i could keep the vinyl shelf i have ... 4 trays in 2x2 square wood shelf". v18.1: both now from the listings the client sent.
+PLANT_STAND = dict(w=98.0, d=29.5, h=158.0, cols=(33.5, 31.0, 33.5), post=2.4, col="#8a5a36",   # v18.1: the client's listing, 98 x 29.5 x 158
+                   tower=(3.0, 41.0, 79.0, 117.0, 155.0), middle=(22.0, 98.0), lights=())       # five tiers each side, two in the open middle
+# v18.1: the "vinyl stand" from the client's listing: 70 x 32 x 78, a black steel frame and rustic wood; two face-out bays on top
+# (32.3 each, split by a wooden divider, LPs leaning on a sloped back), a bottom shelf with four wire dividers 19.5 tall
+RECORD_SHELF = dict(w=70.0, d=32.0, h=78.0, bay=32.3, shelf_y=46.0, lip=10.0, frame_top=63.0, bottom_y=8.0, wire_h=19.5, wires=4,
+                    col="#7a5232", steel="#1c1c1e", lps_top=50, lps_bottom=50)
 # where each goes, by layout: (centre x, centre z, facing: +1 = faces into the room from the window wall, -1 = from the breast)
 _BREAST_CX = (BREAST_X[0] + BREAST_X[1]) / 2
 PLANT_LAYOUTS = {
-    "corner": dict(name="Plants in the window corner, records on the breast", plants=(390.0, WINDOW_Z + 1.0 + PLANT_STAND["d"] / 2, 1),
+    "corner": dict(name="Plants in the window corner, vinyl stand on the breast", plants=(391.5, WINDOW_Z + 1.0 + PLANT_STAND["d"] / 2, 1),
                    records=(_BREAST_CX, -1.0 - RECORD_SHELF["d"] / 2, -1)),
-    "breast": dict(name="Records in the window corner, plants on the breast", plants=(_BREAST_CX, -1.0 - PLANT_STAND["d"] / 2, -1),
+    "breast": dict(name="Vinyl stand in the window corner, plants on the breast", plants=(_BREAST_CX, -1.0 - PLANT_STAND["d"] / 2, -1),
                    records=(383.5, WINDOW_Z + 1.0 + RECORD_SHELF["d"] / 2, 1)),
 }
 PLANT_LAYOUT = "corner"          # the recommendation: daylight for the plants, the records beside the turntable

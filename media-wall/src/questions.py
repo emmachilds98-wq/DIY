@@ -1,4 +1,5 @@
-"""v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
+"""v18.1: answered by the listings the client sent and dropped: the plant stand (98 × 29.5 × 158) and the vinyl stand (70 × 32 × 78).
+v15: answered by the client's notes (20 Oct) and dropped: the lamp (it stays: bright red, colour bulbs green, pink, purple).
 New: hat, lightbox. The curtains and the carpet came with the client's photo the same day (asked and answered).
 v14: answered by the client's photos (20 Oct) and dropped: the stairs' direction (a straight flight rising towards the door).
 New: site, westwall, lamp.
@@ -27,12 +28,6 @@ QUESTIONS = [
     ("sofa", "Your L-sofa's return: how far does it run along the side wall?",
      f"The long side is about {_n(G.SOFA_W)} from your photo; the return, with its open ottoman-style end towards the TV (v16), is drawn at {_n(G.SOFA_D)}, the sofa standing {_n(G.SOFA_BACK_Z - G.WINDOW_Z)} off the window wall (v17). It sets the PC shelf, the walkway and the dining clearances.",
      "Overall depth with the return, from the window wall; back height and seat depth too if you can.", False),
-    ("plantstand", "Your new plant stand: its width, depth and height (or the listing's link)",
-     "It's drawn at 90 × 30 × 120 from your photo (two columns, four tiers). In the window corner it has 107 between the curtains and the pipe boxing, so its width matters.",
-     "Tape across the front, front to back, and to the top tier; or paste the listing.", True),
-    ("recordshelf", "Your 2 × 2 record shelf: its outside size, and how many LPs each tray holds",
-     "It's drawn at IKEA KALLAX 2 × 2's 77 × 39 × 77, about 40 LPs a tray. On the breast it must clear the “now playing” ledge at 101.6.",
-     "Width, depth and height; a rough count per tray.", True),
     ("westend", "The stairs wall's sizes: its length, and where your shelf sits on it",
      "Your photos give about 257–268 cm from the stair box to the window corner, the shelf starting about 41 cm from the stairs; it's drawn stopping 2 short of the pipe boxing, its top at 196. Your OBEGRÄNSAD (36 tall) only stands on it under the 235 ceiling if the top is 198 or lower. The table under it is drawn from these.",
      "Tape along the wall at floor level; the shelf's two ends from the corner, and its height from the floor.", True),
@@ -66,8 +61,6 @@ PDF_LINE = {
     "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the table's bracket fixings.",
     "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
-    "plantstand": "Your new plant stand's width, depth and height (drawn at 90 × 30 × 120 from your photo).",
-    "recordshelf": "Your 2 × 2 record shelf's size and LPs per tray (drawn at KALLAX 2 × 2's 77 × 39 × 77, about 40 a tray).",
     "westend": "The stairs wall's length and your shelf's height (drawn at 196: the OBEGRÄNSAD needs 198 or lower to stand on it).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
     "fanstand": "The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.",
@@ -91,8 +84,6 @@ SHORT = {
     "westwall": "the stairs wall's build",
     "electrics": "that you're swapping the light fittings yourselves",
     "sofa": "the sofa's return length",
-    "plantstand": "the plant stand's size",
-    "recordshelf": "the record shelf's size",
     "westend": "the shelf's height",
     "turntable": "the turntable's model",
     "fanstand": "the fan stand's model",
