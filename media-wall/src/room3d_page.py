@@ -97,8 +97,7 @@ def controls():
               '<div class="grp"><span class="label">Ideas (not in the plan): off until you turn them on</span>'
               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
               '<button type="button" data-idea="glass" aria-pressed="false">Glass plant shelves</button>'
-              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>'
-              '<button type="button" data-idea="ladder" aria-pressed="false">Plant ladder</button></div></div>')
+              '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button>''</div></div>')
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),
         seg("dining", [("folded", "Folded on the wall"), ("four", "Open, four"), ("six", "Open, six")], "The flip-top table"),

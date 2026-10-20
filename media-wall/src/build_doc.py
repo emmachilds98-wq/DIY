@@ -11,7 +11,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       living_plan, why_layout, seating, dining_section, dining_sites)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "17"
+VERSION = "18"
 REVISION = "17: the room finished round your notes: the sofa's ottoman end, the deep sill, even light, a lit PC, an ideas tab"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
@@ -22,8 +22,8 @@ DECK_ART = {"render_v13_join_clean.png": "art_join_card_room", "render_v13_join_
             "render_v13_drawers.png": "art_drawers_card_room", "render_v13_dining_four.png": "art_four_card_room",
             "render_v13_dining_six.png": "art_six_card_room", "render_v13_side.png": "art_side_card_room",
             "paint_grid.png": "doc_paint", "skirting_options.png": "doc_skirt",
-            "render_v17_3d_window_B_folded.png": "3d_window_B_folded", "render_v17_3d_dining_B_four.png": "3d_dining_B_four",
-            "render_v17_3d_B_folded.png": "3d_B_folded", "render_v17_3d_ideas_window.png": "3d_ideas_window", "render_v17_3d_ideas_breast.png": "3d_ideas_breast"}
+            "render_v18_3d_window_B_folded.png": "3d_window_B_folded", "render_v18_3d_dining_B_four.png": "3d_dining_B_four",
+            "render_v18_3d_B_folded.png": "3d_B_folded", "render_v18_3d_ideas_window.png": "3d_ideas_window", "render_v18_3d_ideas_breast.png": "3d_ideas_breast"}
 
 
 def img(name, alt=""):
@@ -130,6 +130,8 @@ TRACK = [
     ("To do", "Deco app: prioritise the Series X and PC, guest Wi-Fi, automatic firmware", "10 Finishing", "", None, None),
     ("To do", "Label both outlets of the double socket (left: everything, right: retro) and each HDMI switch input", "10 Finishing", "", None, None),
     ("To do", "Set the sub and rear speaker levels from the sofa", "10 Finishing", "", None, None),
+    ("To buy", "A smart plug with a schedule for the plant stand's grow bars (about 12 hours a day), and drip trays or a waterproof mat under the pots on its slatted tiers <b>(new in v18)</b>", "10 Finishing", "1", 15, 30),
+    ("To buy", "Felt pads under the 2 × 2 record shelf, and one anti-tip strap to the breast (it holds about 160 LPs, about 35 kg) <b>(new in v18)</b>", "10 Finishing", "1", 5, 10),
     ("To buy", "A rug about 230 × 160 in front of the sofa: cream with deep blue, rust and ochre goes with the green, the oak and the blue sofa (the plan draws one as a guide) <b>(new in v15)</b>", "10 Finishing", "1", 120, 300),
 ]
 PHASES = []
@@ -425,8 +427,8 @@ SEE_FIG = {("wall", "Front view"): ("render_v13_join_key_scene.png", "The media 
            ("wall", "Drawer layouts"): ("render_v13_drawers.png", "Every drawer out, in place"),
            ("wall", "Built to your alcove"): ("render_v13_join_clean.png", "The finished media wall"),
            ("wall", "The side wall"): ("render_v13_side.png", "The side-wall run and the PC end"),
-           ("dining", "The dining wall"): ("render_v17_3d_dining_B_four.png", "The flip-top open under the shelf by the stairs"),
-           ("overview", "The room"): ("render_v17_3d_window_B_folded.png", "The whole room, from the window")}
+           ("dining", "The dining wall"): ("render_v18_3d_dining_B_four.png", "The flip-top open under the shelf by the stairs"),
+           ("overview", "The room"): ("render_v18_3d_window_B_folded.png", "The whole room, from the window")}
 
 
 def step_cuts(k):
@@ -662,7 +664,7 @@ def _plan(deck=False):
 <h2 class="pb">2 · The room</h2>
 <p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is drawn from your photo<sup>{fit.ORDER.index("sofa") + 1}</sup>: its long side ends in line with the breast's reveal (about {n(g.SOFA_W)} cm); the return along the side wall is a typical {n(g.SOFA_D)} until you measure it. Since v17 its end towards the TV is an <b>ottoman end</b> (no arm; the seat wraps round, the back stops {n(g.SOFA_OTTOMAN)} short) and it stands {n(g.SOFA_BACK_Z - g.WINDOW_Z)} cm off the window wall, clear of the curtains. The window has a <b>deep sill</b>, {n(g.WINDOW_REVEAL)} cm into the reveal at {n(g.SILL["y"])} from the floor, with your plants along it.</p>
 <figure>{living_plan()}</figure>
-<figure class="render">{img("render_v17_3d_window_B_folded.png", "The room in 3D from the window, everyday evening")}
+<figure class="render">{img("render_v18_3d_window_B_folded.png", "The room in 3D from the window, everyday evening")}
 <figcaption>The whole room in 3D, from the window on an everyday evening, the table folded by the stairs: your blue sofa with its open end, the rug, the bars running towards the window, the “now playing” ledge on the breast. On the plan page you can walk round it, switch the table's wall, slide every light, colour the smart bulbs, paint the walls, ceiling and skirting separately, and save any view in HD.</figcaption></figure>
 <table class="tight"><tr><th>From your sketch</th><th>mm</th><th>Notes</th></tr>
 <tr><td>Room, east to west along the window</td><td class="num">{n(g.ROOM_W*10)}</td><td>The media wall is the south wall, shared with the hall and garage</td></tr>
@@ -801,9 +803,9 @@ def _plan(deck=False):
 <h3>Two places for it: under your shelf by the stairs (the default), or the chimney breast</h3>
 <p>You asked (v14) what it would look like on the wall going up the stairs, under your 2 m shelf. Your photos put that wall at about {n(g.STAIRS_WALL_Z[0] - g.WINDOW_Z)} cm from the stair box to the window corner, with the shelf about {n(g.SHELF_B['top'])} cm up. The flip-top works on either wall: only the backboard's fixings change. Both are drawn in the 3D room on the plan page, folded and open, from every angle and in each lighting scene.</p>
 <figure>{dining_sites()}</figure>
-<figure class="render">{img("render_v17_3d_dining_B_four.png", "Option B in 3D: the flip-top open under the shelf by the stairs")}
+<figure class="render">{img("render_v18_3d_dining_B_four.png", "Option B in 3D: the flip-top open under the shelf by the stairs")}
 <figcaption>Option B in the 3D room, set for dinner: the flip-top open into the room under your shelf, bar 2 on the existing pendant point over it, the stairs behind the first chairs.</figcaption></figure>
-<figure class="render">{img("render_v17_3d_B_folded.png", "Option B folded under the shelf")}
+<figure class="render">{img("render_v18_3d_B_folded.png", "Option B folded under the shelf")}
 <figcaption>Option B folded on an everyday evening: {n(g.FOLDED_D)} cm deep against the wall, {n(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)} cm under the shelf with your black OBEGRÄNSAD panel, the laser (off) and the plant hanging from the window end beside the pipe boxing; your red lamp in the corner.</figcaption></figure>
 <ul>
 <li><b>A, on the breast (the alternative): up to six.</b> It opens towards the window, {n(-g.OPEN_Z[1])} cm out, three a side. Its end stops {n(g.OPEN_Z[1] - g.SOFA_FRONT_Z)} cm short of the sofa, so there's no seat at the end; for six, slide the coffee table towards the TV first; the west side's first chair sits in the door's swing, so keep the door shut while you eat (or rehang it to open into the hall).</li>
@@ -1040,9 +1042,9 @@ def _plan(deck=False):
 
 <h2 class="pb">Appendix · Ideas for later (not in the plan or the costs)</h2>
 {ideas.pdf_html()}
-<figure class="render">{img("render_v17_3d_ideas_window.png", "Ideas: glass plant shelves in the window and the plant ladder")}
+<figure class="render">{img("render_v18_3d_ideas_window.png", "Ideas: glass plant shelves in the window and the plant ladder")}
 <figcaption>Ideas only, from the 3D room: glass plant shelves across the window's reveal, and the oak plant ladder in the west corner.</figcaption></figure>
-<figure class="render">{img("render_v17_3d_ideas_breast.png", "Idea: the glass display case on the breast")}
+<figure class="render">{img("render_v18_3d_ideas_breast.png", "Idea: the glass display case on the breast")}
 <figcaption>Idea only: the slim glass display case on the chimney breast, lit inside, above the “now playing” ledge.</figcaption></figure>
 
 <h2 class="pb">Appendix · Earlier rounds</h2>

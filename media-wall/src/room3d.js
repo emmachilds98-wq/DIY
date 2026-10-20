@@ -26,7 +26,7 @@ const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room",
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
               ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true, ideas: {} };   // v17: ideas all off   // v16: the table by the stairs by default; the laser off
-const KEY = "mw17-3d";
+const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
@@ -629,19 +629,6 @@ function buildIdeas() {
     const glassCup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.1, 16), glassM); glassCup.position.copy(v3(x0 + 14, T.top + 5, ze - 2)); g.add(glassCup);
     ibox(g, x1 - 20, T.top, ze - 6, 15, 4, 10, reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.5 })));   // a pad
     shell.add(g); }
-  // 4. the plant ladder, leaning on the window wall in the west corner
-  { const g = IDEA_G.ladder = new THREE.Group(), L = I.ladder, [x0, x1] = L.x, wz = R.WINDOW_Z;
-    const ang = Math.atan2(L.foot, L.h);
-    for (const x of [x0, x1 - 3]) {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(3 * M, Math.hypot(L.h, L.foot) * M, 3 * M), oak);
-      s.position.copy(v3(x + 1.5, L.h / 2, wz + 1.5 + L.foot / 2)); s.rotation.x = ang; g.add(shadow(s));
-    }
-    for (let k = 1; k <= L.rungs; k++) {
-      const y = L.h * k / (L.rungs + 1), zz = wz + 1.5 + L.foot * (1 - y / L.h), dd = 10;
-      ibox(g, x0 + 1.5, y - 1, zz - dd / 2, x1 - x0 - 3, 2, dd, oak);
-      [0.25, 0.7].forEach((t, i) => plant(g, x0 + 4 + t * (x1 - x0 - 8), y + 1, zz, 4 + i, k % 2 ? 2 : 0));
-    }
-    shell.add(g); }
   Object.values(IDEA_G).forEach(gr => gr.visible = false);
 }
 let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut, pcGlow, pcLight;
@@ -1035,7 +1022,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v17 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v18 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");

@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "17"
+VERSION = "18"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -425,15 +425,15 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_doll_A": "Dolls\u2019 house view, option A",
          "3d_window_general": "General light (v17): every spot head straight down, evenly spread, the strips and the lamp at a middle setting",
          "3d_pc_lit": "TV night with the PC lit: its fans and the RGB strip glowing behind the glass side",
-         "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, and the oak plant ladder in the west corner",
+         "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
          "3d_ideas_breast": "Idea, not in the plan: the slim glass display case on the chimney breast, above the \u201cnow playing\u201d ledge"}
-IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ladder": "3d_ideas_window", "ctable": "3d_ideas_ctable"}
-IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ladder": "windowwall", "ctable": "pc"}
+IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable"}
+IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc"}
 
 
 def ideas_panel():
-    """v17: the ideas for later (ideas.py), a card each, with a way to see the first four in the 3D room."""
+    """v17: the ideas for later (ideas.py), a card each, with a way to see the first three in the 3D room."""
     import ideas as I
     cards = []
     for k, title, size, cost, why, where, in3d in I.IDEAS:
@@ -444,7 +444,7 @@ def ideas_panel():
                      f'<h3>{html.escape(title)}</h3><p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>{b}</div></article>')
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
-            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first four are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on. All seven together would be about £{lo}–{hi}.</p>'
+            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on. All of them together would be about £{lo}–{hi}.</p>'
             f'<div class="opts">{"".join(cards)}</div>')
 
 

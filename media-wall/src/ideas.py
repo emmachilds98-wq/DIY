@@ -1,4 +1,6 @@
-"""v17: ideas for later. These are suggestions only: they're not in the plan, the buy list or the costs. The viewer's Ideas tab, the
+"""v18: the plant ladder is dropped (the client bought a plant stand); new: TV backlight sync, cushions, a plant uplight, a rug pad.
+Next round (the client, "put in next run"): somewhere to keep the dining chairs, only if it's easy without changing the table much.
+v17: ideas for later. These are suggestions only: they're not in the plan, the buy list or the costs. The viewer's Ideas tab, the
 3D room's "Ideas (not in the plan)" buttons (all off by default) and the plan PDF's appendix all read this list.
 Client (round 11): ideas welcome, but "small enough for this room" (the glass cabinet worry), so nothing here stands on the floor
 bigger than a side table. Sizes are our own suggestions, in cm; positions are room coordinates (x from the side wall, z negative
@@ -25,11 +27,20 @@ IDEAS = [
      "The ottoman end has no arm to put a drink on. A C-table's top slides over the end of the seat and its foot sits flat on the floor "
      "beside it, so drinks and pads are at hand and it moves away when someone lies along the seat. Made from the oak offcuts.",
      "At the sofa's open end, towards the TV.", True),
-    ("ladder", "A slim oak plant ladder in the window's west corner",
-     "40 wide × 150 tall, 30 deep at the foot", (40, 90),
-     "Four rungs for pots, leaning on the window wall between the curtains' stack and the floor lamp, so the plants step down from the "
-     "sill's height. (The plan's first idea, at the sofa's end, would sit over the radiator, so it moved along the wall.)",
-     "Against the window wall, x 345–385, clear of the curtains' stack (to 338) and the floor lamp (from 391).", True),
+    ("sync", "TV backlight that follows the picture",
+     "a sync box on the HDMI line and a strip behind the TV (in place of the plain bias light)", (60, 130),
+     "The wall behind the TV glows with the colours on screen, in the same app as the bars and strips, so a film can tint the room.",
+     "Behind the TV, on the bias light's place; the box sits by the HDMI switch in bay 1.", False),
+    ("cushions", "Cushions and a throw in the rug's rust and ochre",
+     "two or three 45 × 45 cushions and a throw", (40, 90),
+     "They tie the blue corduroy sofa to the rug and the oak, and soften the ottoman end.", "The sofa.", False),
+    ("plantlight", "A small uplight under the plant stand's bottom tier",
+     "a plug-in spot, about 10 cm", (10, 20),
+     "Throws the leaves' shadows up the wall at night, so the plants are part of the evening lighting even with their grow bars off.",
+     "On the floor, under the stand.", False),
+    ("rugpad", "A non-slip pad under the rug",
+     "220 × 150, trimmed to fit", (15, 30),
+     "Keeps the rug flat and square on the carpet where the sofa's open end and the coffee table push it.", "Under the rug.", False),
     ("button", "A smart scene button by the door",
      "a small wireless button, about 5 × 5", (15, 25),
      "One press for the General scene coming in, a long press for everything off, in the same app as the bars' bulbs and the strips.",
@@ -46,8 +57,7 @@ IDEAS = [
 CASE = dict(x=((G.BREAST_X[0] + G.BREAST_X[1]) / 2 - 45.0, (G.BREAST_X[0] + G.BREAST_X[1]) / 2 + 45.0), y=(137.0, 187.0), d=12.0, frame=2.0)
 GLASS = dict(x=G.WINDOW_X, ys=(130.0, 170.0), d=18.0, t=1.0)
 CTABLE = dict(x=(40.0, 85.0), top=60.0, depth=30.0, over=16.0, t=2.0)   # "over": how far the top reaches over the seat's end
-LADDER = dict(x=(345.0, 385.0), h=150.0, foot=30.0, rungs=4)
-SPOTS = dict(case=CASE, glass=GLASS, ctable=CTABLE, ladder=LADDER)
+SPOTS = dict(case=CASE, glass=GLASS, ctable=CTABLE)   # v18: the plant ladder is dropped: your new plant stand does its job
 
 
 def low_high():
@@ -60,5 +70,5 @@ def pdf_html():
     rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
                    for _, t, size, c, why, where, _3d in IDEAS)
     return (f"<p>Suggestions only, for later: they aren't in the plan, the buy list or the costs (all of them together would be about "
-            f"£{lo}–{hi}). The first four can be seen in the 3D room with the “Ideas (not in the plan)” buttons, all off until you turn them on.</p>"
+            f"£{lo}–{hi}). The first three can be seen in the 3D room with the “Ideas (not in the plan)” buttons, all off until you turn them on.</p>"
             f"<table class='tight'><tr><th>Idea</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")

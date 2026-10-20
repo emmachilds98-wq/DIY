@@ -29,7 +29,7 @@ SHOTS = [
     # v17: the general scene, the lit PC, and the ideas (not in the plan)
     ("3d_window_general", dict(view="window", site="B", dining="folded", scene="general"), "from the window - general light, every head straight down"),
     ("3d_pc_lit", dict(view="pc", site="B", dining="folded", scene="tv", pc=True), "the PC side wall - PC lit - TV night"),
-    ("3d_ideas_window", dict(view="windowwall", site="B", dining="folded", scene="everyday", ideas=dict(glass=True, ladder=True)), "IDEAS (not in the plan) - the window wall - glass plant shelves and the plant ladder"),
+    ("3d_ideas_window", dict(view="windowwall", site="B", dining="folded", scene="everyday", ideas=dict(glass=True)), "IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand"),
     ("3d_ideas_ctable", dict(view="pc", site="B", dining="folded", scene="everyday", ideas=dict(ctable=True)), "IDEAS (not in the plan) - the C-table at the sofa's open end"),
     ("3d_ideas_breast", dict(view="breast", site="B", dining="folded", scene="everyday", ideas=dict(case=True)), "IDEAS (not in the plan) - the glass case on the breast"),
 ]
@@ -65,9 +65,9 @@ def run(test=False, only=None):
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v17 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v18 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v17_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v18_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])
