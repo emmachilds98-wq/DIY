@@ -47,9 +47,17 @@ SHOTS = [
     ("3d_decor", dict(view="door", site="B", dining="folded", scene="bright", decor=dict(rug="stripes", cushions="rust", curtains="linen")),
      "DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright"),
     # v21: the suggested furniture and decor, all on
-    ("3d_suggest", dict(view="door", site="B", dining="folded", scene="bright", sugg={"floorplant": True, "sidetable": True, "pouffe": True, "art": True, "clock": True, "tray": True, "fairy": True, "hanger": True, "trail": True, "throw": True, "pclamp": True, "basket": True}),
-     "SUGGESTED furniture and decor, all twelve on - bright"),
+    ("3d_suggest", dict(view="door", site="B", dining="folded", scene="bright", sugg={k: True for k, *_ in __import__("ideas").SUGGEST}),
+     "SUGGESTED furniture and decor, all of them on - bright"),
     ("3d_seat", dict(view="dining", site="B", dining="folded", scene="bright", seat="down"), "OPTION - the fold-down seat at the stair end, down - bright"),
+    # v26: option C, the dining cabinet (a second option; the flip-top stays the plan)
+    ("3d_c_folded", dict(view="dining", site="C", dining="folded", scene="bright"), "OPTION C - the dining cabinet, packed away - bright"),
+    ("3d_c_eight", dict(view="dining", site="C", dining="eight", scene="bright"), "OPTION C - the dining cabinet open for eight - bright, table rule"),
+    ("3d_c_chairs", dict(view="chairs", site="C", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}),
+     "OPTION C - the chair bay open, eight chairs inside (plant stand and lamp hidden) - bright"),
+    ("3d_c_plan", dict(view="plan", site="C", dining="eight", scene="bright", tod="day", master=0), "OPTION C - birds eye, open for eight"),
+    ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
+     "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
 
 
@@ -83,9 +91,9 @@ def run(test=False, only=None):
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v25 - 3D - {title} (HD).png")
+                im.save(OUT / f"Media wall v26 - 3D - {title} (HD).png")
                 im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v25_{stem}.png")
+                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v26_{stem}.png")
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])

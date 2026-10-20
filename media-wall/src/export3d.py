@@ -108,7 +108,10 @@ def scene():
     state()
     fixed = []
     sk = ("#346650", "#3d7259", "#2b5643", "#2d5a46", "#3b6e56")
-    fixed += [i for i in encode(rec(R.west_end, sk)) if i[0] == "b" or i[2] != "#2c5643"]   # the stairs; the shell is built in 3D
+    stairs = [i for i in encode(rec(R.west_end, sk)) if i[0] == "b" or i[2] != "#2c5643"]   # the stairs; the shell is built in 3D
+    for i in stairs:                                                                          # v26: flagged "s", so Look's oak finish leaves them be
+        i[-1] = (i[-1] or "") + "s"
+    fixed += stairs
     for fn in (R.high_shelf, R.tv, R.uprights, R.rz_shelf, R.worktop_items, R.wrap, R.wall_socket):   # v23: the sockets
         fixed += encode(rec(fn))
     groups = {"fixed": fixed, "sofa": encode(rec(R.sofa_solid))}   # v19: the sofa is its own group, so edit mode can move it
@@ -156,6 +159,8 @@ def scene():
         "LIGHTBOX": G.LIGHTBOX, "LASER": G.LASER, "PIPE_BOX": G.PIPE_BOX, "PLANT_B": G.PLANT_B, "HAT_PEG": G.HAT_PEG, "HATS": G.HATS,
         "LAMP_BODY": G.LAMP_BODY, "LAMP_RGB": G.LAMP_HEADS_RGB,
     }
+    room_spec["OPTC"] = G.OPTC                 # v26: option C, the dining cabinet (built in the browser)
+    room_spec["CHAIR"] = G.CHAIR; room_spec["SOFA_POUF"] = G.SOFA_POUF
     return {"room": room_spec, "groups": groups}
 
 

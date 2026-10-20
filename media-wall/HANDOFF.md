@@ -1,7 +1,8 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v25 is built (round 19, below): the page is "Demma Home Improvements", option 1c, from `media-wall/UPGRADE_PLAN_v25_UI.md`.** Still to
+- **v26 is built (round 20, below): option C (the dining cabinet, up to eight), the Tools panel fixed, more in Look and Extras.**
+  v25 (round 19) made the page "Demma Home Improvements", option 1c, from `media-wall/UPGRADE_PLAN_v25_UI.md`. Still to
   do from `UPGRADE_PLAN_v25.md` (the earlier plan): the guided tour and "copy link to this view", choices for each suggestion, re-render only
   the stills that changed. v24 is in round 18. Still waiting on the client: which ways
   to keep the chairs (the cupboard for four or six; yes or no to four behind the folded top and to the fold-down seat), the ottoman's
@@ -24,10 +25,50 @@
   If an upload is refused as a "cpio archive" (a false sniff, v23), re-save that webp at quality 85 and upload it again. **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 28 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 36 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 20 Oct 2026, round 20: v26 (option C, the dining cabinet; the Tools panel fixed; more in Look and Extras)
+- Client: "tools have some bugs displaying, expand more into the look section as well as extras. exploire other table config that looks
+  more tidy and includes the chairs, this is a second option build not replacing the current", "can you make an option clear to remove
+  the tabs on the render", and "with the table option assess the max number of seatings you can fit and try to execute in the plan,
+  remembering the chairs also".
+- Backups: `*_v25_backup.*` (room3d_page, room3d.js, build_viewer, page.css/js, page_router, ideas, geometry, fit, diagrams, build_doc,
+  shot3d, render, questions, instructions, export3d).
+- **Tools panel (room3d_page CSS + DRAWER_JS):** the panel is a column: a sticky title with a close button (`.r3d-px`, `data-tools-toggle`),
+  a scrolling middle (`.r3d-pscroll`, reset to the top on every tab change) and a fixed foot. On a laptop (≥ 900) it docks to the right,
+  full height. The HD pictures under Views were a 6,000 px column of broken images (their `.gallery` class wasn't styled as `.r3d-gal`, and
+  `arts()` never ran for the panel): now a 3-up strip, loaded when the tab opens. The Lights tiles' second line is whole (`TILE_SUB`).
+- **The room beside the panel (room3d.js `applyShift`/`measureShift`):** `camera.setViewOffset` slides the room left of the docked panel
+  (laptop) or a quarter up (phone) on the `demma-tools` event (now sent on close too); stills clear it. Stickers hide under the panel
+  (`cover`), keep clear of the rail (`railR`), and push apart so none overlaps another; on phones they're smaller and don't wrap.
+- **Labels switch:** `#r3d-lbl` (top right; "Hide labels" / "Show labels") and Views' "The numbered labels on the room" (`data-labels`);
+  `setLabels()`, remembered in localStorage `mw26-labels`. Hidden in Edit room.
+- **Option C, the dining cabinet (a second option; the flip-top stays the plan):** geometry `OPTC` (cabinet z -86..-284 under the shelf,
+  24 deep, 189 tall; table bay at the stair end, chair bay at the window end; top 2 × 112.5 × 90 × 2.7 on a piano hinge at 73.3, flip-top
+  hinges at the joint, legs `OPTC["legs"]`, seats `OPTC["seats"]` for four/six/eight), `DINE_SQUEEZE` 55, `CHAIR_TUCK` 8. Sources
+  `pianohinge`, `legbracket`, `foldtable`, `hinge170`. fit `optc_zone()` (17 rows) and `max_seats_zone()` ("How many can sit down":
+  A six, B seven, C eight at a squeeze / six in comfort; a ninth and longer halves "Doesn't fit", kept out of `counts()`).
+  3D: `S.site = "C"`, `S.dining` folded/four/six/eight (eight switches to C; A and B fall back to six), `buildOptC()`/`placeOptC()`,
+  the flip-top's cupboard, hooks and seat hidden, the ottoman hidden and the coffee table 12 towards the TV while C is open, bar 2 as B's.
+  Layout's "The table: which option" (B, A, C) and "Folded or open". Views `dining` and `chairs` have C eyes. diagrams
+  `option_c_elevation/section/plan`; build_doc `optc_html()` at the end of section 5 (seats table, costs `OPTC_COST`, not in the totals,
+  against the flip-top rows it replaces, cut list). Question `optc` (17 questions). Stills `3d_c_folded`, `3d_c_eight`, `3d_c_chairs`, `3d_c_plan`.
+- **Look:** the ceiling and the skirting/door paints are back (`data-ceil`, `data-skirt`, `#r3d-ceil`, `#r3d-skirt`); decor rows grouped
+  (`DECOR_GROUPS`) with three new keys: `oak` (artisan, pale, smoked, walnut: an sRGB tint on every `OAK_TEX` material except `noTint`
+  ones: your plant stand, vinyl stand, curtain pole and the stairs, flagged "s" in export3d), `floor` (carpet, oatmeal, oak boards),
+  `shelf` (black, oak, white). Still `3d_look`.
+- **Extras:** six more suggestions (`ideas.SUGGEST`: candles, runner, floorcush, lantern, mirror, shelfled; 18 in all; the runner follows
+  whichever table is open) and "Add a piece of furniture" (`#r3d-addfrom`: Edit room with its list open).
+- **Edit room** has a **✓ Done** button (`#r3d-editdone`): with the Tools panel shut there was no way out.
+- **Outputs:** version 26; v25 outputs moved to `out/v25/`. 36 stills (new: `3d_c_folded`, `3d_c_eight`, `3d_c_chairs`, `3d_c_plan`,
+  `3d_look`; `3d_suggest` turns every suggestion on), plan 90 pages, guide 48; fit 81 fit, 34 tight, 9 check, 0 don't fit (the seat
+  count's two limit rows aren't counted); total £3,223–6,463 (option C isn't in it).
+- **QA (Playwright, 390 × 844, 768 × 1024, 1280 × 800):** every Tools tab opens at the top; option C through Layout (eight switches to C;
+  back to B falls to six); Look's oak, floor, shelf, ceiling and skirting; Extras all on and off; Add a piece and Done; Hide/Show labels
+  (6 → 0 → 6); every sheet and chapter (the v25 run): no horizontal overflow, no console errors.
 
 ## Update 20 Oct 2026, round 19: v25 (Demma Home Improvements, option 1c "Room as map"; three lighting presets)
 - Brief: `media-wall/UPGRADE_PLAN_v25_UI.md` (the client's design round; the reference designs `Demma Home.dc.html` 1c, `Room Tools.dc.html`,

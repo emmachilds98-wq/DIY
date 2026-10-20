@@ -114,6 +114,23 @@ SUGGEST += [
 ]
 
 
+# v26, client: "expand more into the look section as well as extras": six more, each with its own button
+SUGGEST += [
+    ("candles", "LED pillar candles on your black shelf", "three, 7.5 across × 10, 12.5 and 15 tall, warm flicker, on a timer", (15, 30),
+     "A warm glow by the table in the evening without a flame near the shelf's things.", "On your black shelf by the stairs, at the window end."),
+    ("runner", "A linen runner and a bud vase for the table", "a runner about 33 × 180, a 20 cm vase", (20, 40),
+     "Dresses the table when it's open; folds into the drawer (option C) or the chair cupboard when it isn't.", "Down the middle of the open table, whichever option."),
+    ("floorcush", "Two floor cushions by the coffee table", "60 × 60 × 12 each, mustard and rust", (40, 80),
+     "Extra seats for a film night, and two more colours from the rug.", "Stacked on the rug at the TV end of the coffee table; they move in Edit room."),
+    ("lantern", "A rattan floor lantern with an LED candle", "about 30 across × 55 tall", (25, 50),
+     "A low glow by the window that the curtains can't catch.", "On the floor between the sofa's arm and your plant stand; it moves in Edit room."),
+    ("mirror", "A tall arched mirror behind the sofa's corner", "about 50 × 90, oak frame", (60, 120),
+     "Bounces the window's light back into the room, in the strip of wall beside the window.", "On the window wall in the corner behind the sofa's return, its foot above the back cushions."),
+    ("shelfled", "A warm LED strip under your black shelf", "2 m warm-white strip, USB or plug-in", (15, 30),
+     "Lights the table (or option C's cabinet) from above, softly, for an everyday supper.", "Under the shelf's front edge, the full 2 m."),
+]
+
+
 def suggest_low_high():
     return sum(i[3][0] for i in SUGGEST), sum(i[3][1] for i in SUGGEST)
 

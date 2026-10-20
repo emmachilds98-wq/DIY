@@ -30,7 +30,7 @@ const DEF = { site: "B", dining: "folded", scene: "bright", tod: "evening", pain
               plants: "corner", layout: {}, added: [], grow: true,
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
-              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak" },
+              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black" },   // v26: the oak, the floor, your shelf
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off" };   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
@@ -141,6 +141,25 @@ const CARPET = canvasTex(512, 512, (g, w, h) => {   // v15: "soft grey carpet": 
   g.putImageData(im, 0, 0);
 });
 CARPET.repeat.set(7, 7);
+/* v26: Look's floors: an oatmeal carpet and oak boards, besides your grey carpet */
+const OATMEAL = canvasTex(512, 512, (g, w, h) => {
+  const r = rnd(5); g.fillStyle = "#cdbfa8"; g.fillRect(0, 0, w, h);
+  const im = g.getImageData(0, 0, w, h), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * 26; d[i] += n; d[i + 1] += n * 0.95; d[i + 2] += n * 0.85; }
+  g.putImageData(im, 0, 0);
+});
+OATMEAL.repeat.set(7, 7);
+const BOARDS = canvasTex(1024, 1024, (g, w, h) => {   // 14 cm boards, staggered joints, a little colour from board to board
+  const r = rnd(12), bw = w / 8;
+  for (let i = 0; i < 8; i++) {
+    let y = -r() * h;
+    while (y < h) { const len = h * (0.35 + r() * 0.4), t = r();
+      g.fillStyle = `rgb(${152 + t * 30},${104 + t * 22},${64 + t * 16})`; g.fillRect(i * bw + 1, y + 1, bw - 2, len - 2);
+      g.globalAlpha = 0.12; for (let k = 0; k < 9; k++) { g.fillStyle = r() < 0.5 ? "#7a5232" : "#e8c79c"; g.fillRect(i * bw + 2 + r() * (bw - 6), y, 1 + r() * 2, len); } g.globalAlpha = 1;
+      y += len; }
+  }
+});
+BOARDS.repeat.set(3.4, 2.5);
 const PILE = canvasTex(256, 256, (g, w, h) => {      // the carpet's pile, for its bump
   const r = rnd(8); const im = g.createImageData(w, h), d = im.data;
   for (let i = 0; i < d.length; i += 4) { const n = 110 + r() * 40; d[i] = d[i + 1] = d[i + 2] = n; d[i + 3] = 255; }
@@ -316,6 +335,7 @@ function kindOf(fill, flags, size) {
   if (fill === "glass") return "glass";
   if (fill === "art") return "art";
   if (fill === "brick") return "brick";   // v23: the stairs' brick side wall
+  if ((flags || "").includes("s") && ((flags || "").includes("g") || OAKS.has(fill))) return "stairs";   // v26: the stairs' wood keeps its own colour
   if (PAINT_OLD.has(fill)) return "paint";
   if ((flags || "").includes("o")) return "trans";
   const c = new THREE.Color(fill), o = {}; c.getHSL(o);
@@ -327,6 +347,7 @@ function kindMat(kind) {
   if (KIND[kind]) return KIND[kind];
   const m = {
     oak: () => new THREE.MeshStandardMaterial({ vertexColors: true, map: OAK_TEX, bumpMap: OAK_BUMP, bumpScale: 0.35, roughness: 0.58 }),
+    stairs: () => Object.assign(new THREE.MeshStandardMaterial({ vertexColors: true, map: OAK_TEX, bumpMap: OAK_BUMP, bumpScale: 0.35, roughness: 0.58 }), { userData: { noTint: true } }),
     plain: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.72 }),
     dark: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0.05 }),
     fabric: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, bumpMap: CORD, bumpScale: 0.9 }),
@@ -487,7 +508,7 @@ function buildShell() {
   const PX = R.PIPE_BOX;
   cube(PX.x[0], 0, PX.z[0], PX.x[1] - PX.x[0], C, PX.z[1] - PX.z[0], wallP);
   // floor (carpet) and ceiling (painted, with the opening over the stairs)
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(Wd * M, (RZ - WZ) * M), reg(new THREE.MeshStandardMaterial({ map: CARPET, roughness: 1, bumpMap: PILE, bumpScale: 0.5 })));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(Wd * M, (RZ - WZ) * M), floorMat = reg(new THREE.MeshStandardMaterial({ map: CARPET, roughness: 1, bumpMap: PILE, bumpScale: 0.5 })));
   floor.rotation.x = -Math.PI / 2; floor.position.copy(v3(Wd / 2, 0, (RZ + WZ) / 2)); floor.receiveShadow = true; shell.add(floor);
   const wx = R.WELL_X0, front = R.STAIR_FRONT;
   ceilGlow = canvasTex(512, 512, (g, w, h) => {     // the strip's glow on the ceiling, brightest at the edges
@@ -544,7 +565,7 @@ function buildShell() {
   { const cw = cof.x[1] - cof.x[0], cd = cof.z[1] - cof.z[0], g = coffeeG = new THREE.Group();     // v18: movable in edit mode
     lb(g, 0, 38, 0, cw, 4, cd, cofM);
     for (const [x, z] of [[-cw / 2 + 5, -cd / 2 + 5], [cw / 2 - 5, -cd / 2 + 5], [-cw / 2 + 5, cd / 2 - 5], [cw / 2 - 5, cd / 2 - 5]]) lb(g, x, 0, z, 4, 38, 4, cofM);
-    movable("coffee", "Coffee table", g, () => ({ x: (cof.x[0] + cof.x[1]) / 2, z: (cof.z[0] + cof.z[1]) / 2, rot: 0 }), cw, cd, [cofM]); }
+    movable("coffee", "Coffee table", g, () => ({ x: (cof.x[0] + cof.x[1]) / 2 - (S.site === "C" && S.dining === "eight" ? 12 : 0), z: (cof.z[0] + cof.z[1]) / 2, rot: 0 }), cw, cd, [cofM]); }   // v26: 12 towards the TV for C's eighth seat
   // v15: the rug, 230 × 160 in front of the sofa (geometry.RUG), with its design and a little thickness
   const RG = R.RUG, rugW = RG.x[1] - RG.x[0], rugD = RG.z[1] - RG.z[0];
   const rug = new THREE.Mesh(new THREE.BoxGeometry(rugW * M, 0.008, rugD * M),
@@ -557,7 +578,7 @@ function buildShell() {
   // running 30 past the window each side; open (stacked either side) or drawn across (S.curtains)
   // "hessian curtains from dunelm with a wood rail": a coarse natural weave, on a 28 mm wooden pole with rings and ball finials
   const CU = R.CURTAIN, cloth = curtCloth = reg(new THREE.MeshStandardMaterial({ color: CU.col, roughness: 1, side: THREE.DoubleSide, map: HESSIAN, bumpMap: HESSIAN, bumpScale: 0.8 }));
-  const wood = reg(new THREE.MeshStandardMaterial({ color: CU.pole_col, map: OAK_TEX, roughness: 0.5 }));
+  const wood = reg(new THREE.MeshStandardMaterial({ color: CU.pole_col, map: OAK_TEX, roughness: 0.5 }));  wood.userData.noTint = true;   // v26: yours, not the new oak
   const poleL = wx1 - wx0 + 2 * CU.ext, pole = new THREE.Mesh(new THREE.CylinderGeometry(CU.pole / 2 * M, CU.pole / 2 * M, poleL * M, 16), wood);
   pole.rotation.z = Math.PI / 2; pole.position.copy(v3((wx0 + wx1) / 2, CU.rail_y + CU.pole / 2, CU.z + 1)); shell.add(shadow(pole));
   for (const xf of [wx0 - CU.ext - CU.finial / 2, wx1 + CU.ext + CU.finial / 2]) {
@@ -580,7 +601,7 @@ function buildShell() {
   curtShut.add(panel(wx0 - CU.ext, half, CU.folds * 2.2), panel(wx0 - CU.ext + half, half, CU.folds * 2.2));
   shell.add(curtOpen, curtShut);
   // shelf B: the client's 2 m black floating shelf on the stairs wall
-  const sb = R.SHELF_B, black = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
+  const sb = R.SHELF_B, black = shelfMat = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
   cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black);
   // v16: "on the left of that shelf is my ikea light box" ... "black not white": the OBEGRÄNSAD panel, black, standing landscape against
   // the wall at the shelf's stair end; its 16 x 16 LEDs fill a square in the middle of the face
@@ -651,6 +672,7 @@ function buildShell() {
   buildIdeas();
   buildPlantsAndRecords();
   buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
+  buildOptC();                                                                                 // v26
   flushCubes(shell);
 }
 /* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
@@ -709,16 +731,125 @@ function buildChairStore() {
 function placeChairs() {
   if (!chairCab) return;
   const mode = S.chairs || "cupboard", folded = S.dining === "folded";
+  placeOptC();
+  if (S.site === "C") { chairCab.visible = chairsIn.visible = chairsHook.visible = false; return; }   // v26: option C keeps its chairs in its own bay
   chairCab.visible = mode === "cupboard" || mode === "open";
   chairDoors.forEach(d => { d.rotation.y = mode === "open" ? -2.88 : 0; });   // 165° hinges: open, the doors fold back against the folded table
   chairsIn.visible = chairCab.visible && folded;                 // with the table open, they're round it
   chairsHook.visible = mode === "hooks" && folded;
 }
+
+/* v26: option C, the dining cabinet (a second option; the flip-top stays the plan). One flush oak cabinet under your shelf: at the
+   stair end the table bay, where a 225 × 90 top folded double stands up behind its framed oak underside (a drawer under it); at the
+   window end the chair bay, eight FRÖSVI folded behind two doors. S.site "C"; S.dining folded / four / six / eight (the table always
+   opens to its full 225: four, six or eight round it). */
+let optC = null, optCFold = null, optCOpen = null, optCChairsIn = null, optCDoors = [], optCSeats = {};
+function buildOptC() {
+  const C = R.OPTC; if (!C) return;
+  const [cw, cdep, ch] = R.CHAIR_FOLDED, W = R.W, xf = C.front, t = C.t;
+  const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
+  const oakD = reg(new THREE.MeshStandardMaterial({ color: "#b07f50", map: OAK_TEX, roughness: 0.6 }));
+  const pad = reg(new THREE.MeshStandardMaterial({ color: "#77736b", roughness: 0.92 }));
+  const wood = reg(new THREE.MeshStandardMaterial({ color: "#c9a77c", roughness: 0.6 }));
+  const alu = reg(new THREE.MeshStandardMaterial({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }));
+  const plate = reg(new THREE.MeshStandardMaterial({ color: "#f4f1ea", roughness: 0.35 }));
+  const bx = (g, x, y, z, w, h, d, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
+  const z0 = C.z[1], z1 = C.z[0];                                   // the cabinet's window end and stair end (z0 < z1)
+  optC = new THREE.Group(); optC.name = "optc";
+  // the carcass: ends, top, plinth, the partition, the chair bay's shelf, the back; the hinge rail and the drawer in the table bay
+  bx(optC, xf + C.door, 0, z0, C.d - C.door, C.h, t, oak); bx(optC, xf + C.door, 0, z1 - t, C.d - C.door, C.h, t, oak);
+  bx(optC, xf + C.door, C.h - t, z0 + t, C.d - C.door, t, z1 - z0 - 2 * t, oak);
+  bx(optC, xf + C.door + 1, 0, z0 + t, C.d - C.door - 2, C.plinth, z1 - z0 - 2 * t, oakD);
+  const [bt0, bt1] = C.bay_t, [bc0, bc1] = C.bay_c;
+  bx(optC, xf + C.door, 0, bt1 - t, C.d - C.door, C.h - t, t, oak);                      // the partition
+  bx(optC, xf + C.door, C.shelf_y, bc1, C.d - C.door, t, bc0 - bc1, oak);                // the chair bay's shelf
+  bx(optC, W - C.back, C.plinth, z0 + t, C.back, C.h - C.plinth - t, z1 - z0 - 2 * t, oakD);
+  const rail = C.pivot[1] - 7;
+  bx(optC, xf, rail, bt1, C.d - C.back, 7, bt0 - bt1, oak);                              // the hinge rail, flush with the doors
+  bx(optC, xf, C.plinth + 0.3, bt1 + 0.15, C.door, rail - C.plinth - 0.6, bt0 - bt1 - 0.3, oak);   // the drawer's front
+  const knob = (g, x, y, z) => { const k = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); k.rotation.z = Math.PI / 2; k.position.copy(v3(x - 1, y, z)); g.add(k); };
+  knob(optC, xf, (C.plinth + rail) / 2, (bt0 + bt1) / 2);
+  bx(optC, xf, C.folded_top + 0.3, bt1, C.door, C.h - C.folded_top - 0.3, bt0 - bt1, oak);   // the strip over the folded table
+  // the chair bay's two doors, meeting in the middle, each a pivot on its outer edge (open: back past flat on 170° hinges)
+  optCDoors = [];
+  const zm = (bc0 + bc1) / 2;
+  for (const [zh, za, zb, sgn] of [[bt1 - t, zm + 0.15, bt1 - t, 1], [z0, z0, zm - 0.15, -1]]) {
+    const piv = new THREE.Group(); piv.position.copy(v3(xf, 0, zh)); piv.userData.sgn = sgn;
+    const w = Math.abs(zb - za), d = new THREE.Mesh(new THREE.BoxGeometry(C.door * M, (C.h - C.plinth - 0.3) * M, (w - 0.3) * M), oak);
+    d.position.set(-C.door / 2 * M, (C.plinth + 0.3 + C.h) / 2 * M, ((za + zb) / 2 - zh) * M);
+    piv.add(shadow(d));
+    const k = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); k.rotation.z = Math.PI / 2;
+    k.position.set(0.01, 1.0, ((sgn > 0 ? za + 5 : zb - 5) - zh) * M); piv.add(k);
+    optC.add(piv); optCDoors.push(piv);
+  }
+  // the table folded: standing up in its bay, the oak underside in an apron frame flush with the doors, the legs folded inside it
+  optCFold = new THREE.Group();
+  const [tw, tl, tt] = C.top, [tz0, tz1] = C.tz, ap = C.apron, px = C.pivot[0], py = C.pivot[1];
+  bx(optCFold, px, py, tz1, tt, tl, tw, oak);                                         // the inner half, standing
+  bx(optCFold, px + tt + 0.3, py, tz1, tt, tl, tw, oakD);                             // the outer half behind it, face to face
+  for (const [a, b] of [[tz1, tz1 + 2], [tz0 - 2, tz0]]) bx(optCFold, xf, py, a, ap, tl, b - a, oak);   // the apron's sides
+  for (const y of [py, py + tl - 2]) bx(optCFold, xf, y, tz1 + 2, ap, 2, tw - 4, oak);                  // its ends
+  for (const z of [C.cz - 15, C.cz + 11]) bx(optCFold, xf + 0.6, py + 5, z, C.leg[1], tl - 12, 4, oakD);  // the inner legs, folded
+  const pull = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); pull.rotation.z = Math.PI / 2; pull.position.copy(v3(xf - 1, py + tl - 9, C.cz)); optCFold.add(pull);
+  optC.add(optCFold);
+  // the table open: 225 × 90, the inner half on its legs under the joint, the outer half flipped onto its pair at the far end
+  optCOpen = new THREE.Group();
+  const [tx0, tx1] = C.tx, jx = C.joint_x, top = py + tt;
+  bx(optCOpen, jx, py, tz1, tx1 - jx, tt, tw, oak); bx(optCOpen, tx0, py, tz1, jx - tx0 - 0.3, tt, tw, oak);
+  for (const [a, b] of [[jx + 0.2, tx1 - ap], [tx0 + 0.3, jx - 0.5]]) {                // each half's apron frame
+    for (const z of [tz1 + 2, tz0 - 4]) bx(optCOpen, a, py - ap, z, b - a, ap, 2, oakD);
+    for (const x of [a, b - 2]) bx(optCOpen, x, py - ap, tz1 + 4, 2, ap, tw - 8, oakD);
+  }
+  for (const [lx, lz] of C.legs) bx(optCOpen, lx - C.leg[0] / 2, 0, lz - C.leg[1] / 2, C.leg[0], C.leg_h, C.leg[1], oakD);
+  optC.add(optCOpen);
+  // the chairs at the table, by count; plates in front of each
+  const chairOpen = (g, x, z, face) => {
+    const c = new THREE.Group(), sw = R.CHAIR[0], sd = R.CHAIR[1] - 7, sh = R.CHAIR[3];
+    lb(c, 0, sh - 3, 0, sw - 2, 3, sd, wood);                                          // the seat
+    lb(c, 0, sh - 2.5, 0.5, sw - 6, 1.5, sd - 6, pad);                                // its pad
+    for (const xx of [-sw / 2 + 2, sw / 2 - 2]) { lb(c, xx, 0, -sd / 2 + 3, 2.5, sh - 3, 2.5, wood); lb(c, xx, 0, sd / 2 - 3, 2.5, R.CHAIR[2], 2.5, wood); }
+    lb(c, 0, R.CHAIR[2] - 22, sd / 2 - 3, sw - 6, 20, 2, wood);                       // the back
+    c.position.copy(v3(x, 0, z));
+    c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                    // the back away from the table (local +z is the back)
+    g.add(c);
+  };
+  for (const [k, list] of Object.entries(C.seats)) {
+    const g = new THREE.Group();
+    for (const [x, z, f] of list) {
+      chairOpen(g, x, z, f);
+      const pz = f === "n" ? tz0 - 16 : f === "w" ? tz1 + 16 : C.cz, pxp = f === "e" ? tx0 + 16 : x;
+      const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.008, 28), plate); pl.position.copy(v3(pxp, top + 0.4, pz)); g.add(pl);
+    }
+    optCSeats[k] = g; optC.add(g);
+  }
+  // eight chairs inside the chair bay: two across, two deep, four on the floor and four on the shelf
+  optCChairsIn = new THREE.Group();
+  const fchair = (g, x0, y0, cz) => {
+    for (const sd of [-1, 1]) bx(g, x0, y0, cz + sd * (cw / 2 - 1.5) - 1.5, cdep, ch, 3, wood);
+    bx(g, x0 + 1.5, y0 + 28, cz - (cw / 2 - 3), 2.2, 38, cw - 6, pad);
+    bx(g, x0 + 4, y0 + ch - 27, cz - (cw / 2 - 3), 3, 22, cw - 6, pad);
+  };
+  for (const y0 of [C.plinth, C.shelf_y + t]) for (const cz of [zm + cw / 2 + 2, zm - cw / 2 - 2]) for (let j = 0; j < 2; j++)
+    fchair(optCChairsIn, W - C.back - 0.4 - cdep - j * (cdep + 0.3), y0, cz);
+  optC.add(optCChairsIn);
+  scene.add(optC);
+}
+function placeOptC() {
+  if (!optC) return;
+  const on = S.site === "C", folded = S.dining === "folded", n = S.dining === "eight" ? "eight" : S.dining === "six" ? "six" : "four";
+  optC.visible = on;
+  if (!on) return;
+  optCFold.visible = folded; optCOpen.visible = !folded;
+  for (const [k, g] of Object.entries(optCSeats)) g.visible = !folded && k === n;
+  optCChairsIn.visible = folded;
+  const open = folded && S.chairs === "open";
+  optCDoors.forEach(d => { d.rotation.y = open ? d.userData.sgn * -2.97 : 0; });
+}
 /* v17: the ideas (ideas.py), each its own group, all hidden until its button is on */
 const IDEA_G = {};
 let ideaLed;
 /* v20: the decor to try (S.decor): set by applyDecor() */
-let rugMesh, curtCloth, caseFrameM, cushG, coffeeG;
+let rugMesh, curtCloth, caseFrameM, cushG, coffeeG, floorMat, shelfMat;
 /* v21: suggested furniture and decor (ideas.SUGGEST, the same keys), each on or off (S.sugg); the floor pieces move in Edit room */
 const SUGG_G = {};
 const PRINT_TEX = canvasTex(720, 500, (g, w, h) => {      // a mid-century print: an ochre sun, a rust hill, a sage arch on cream
@@ -790,6 +921,38 @@ function buildSuggest() {
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.2, 20), mat("#e8e2d4")); base.position.copy(v3(x, y + 10, z)); g.add(shadow(base));
     const shade = new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), reg(new THREE.MeshStandardMaterial({ color: "#f3e7cf", emissive: "#ffcf8a", emissiveIntensity: 0.6, roughness: 0.6 })));
     shade.position.copy(v3(x, y + 19, z)); g.add(shadow(shade)); shell.add(g); }
+  // v26: six more
+  { const g = SUGG_G.candles = new THREE.Group(), sb = R.SHELF_B, wax = reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.18 }));
+    [[10, -262], [12.5, -252], [15, -243]].forEach(([h, z]) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.0375, 0.0375, h * M, 20), wax); c.position.copy(v3(R.W - sb.d / 2 - 2, sb.top + h / 2, z)); g.add(shadow(c));
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.008, 8, 6), glow); f.scale.y = 1.8; f.position.copy(v3(R.W - sb.d / 2 - 2, sb.top + h + 1.2, z)); g.add(f); });
+    shell.add(g); }
+  { const g = SUGG_G.runner = new THREE.Group(), linen = mat("#e6dccb");
+    lb(g, 0, 0, 0, 180, 0.4, 33, linen);
+    const v = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.2, 18), reg(new THREE.MeshStandardMaterial({ color: "#7a8a6a", roughness: 0.35 }))); v.position.copy(v3(0, 10.4, 0)); g.add(shadow(v));
+    for (let i = 0; i < 5; i++) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.18, 4), leaf); st.position.copy(v3((i - 2) * 1.2, 27, (i % 2) * 1.5)); st.rotation.z = (i - 2) * 0.12; g.add(st);
+      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), mat(["#efe7d8", "#d9a441", "#c7643a"][i % 3])); fl.position.copy(v3((i - 2) * 3.4, 36, (i % 2) * 1.5)); g.add(fl); }
+    shell.add(g); }
+  { const a = mat("#d9a441"), b = mat("#c7643a");
+    floor("floorcush", "Floor cushions (suggested)", 60, 60, 118, -98, g => {
+      const c1 = new THREE.Mesh(new RoundedBoxGeometry(0.6, 0.12, 0.6, 3, 0.04), a); c1.position.y = 0.06; g.add(shadow(c1));
+      const c2 = new THREE.Mesh(new RoundedBoxGeometry(0.58, 0.12, 0.58, 3, 0.04), b); c2.position.y = 0.18; c2.rotation.y = 0.2; g.add(shadow(c2)); }, [a, b]); }
+  { const rattan = mat("#b98f5c");
+    floor("lantern", "Rattan lantern (suggested)", 30, 30, 325, -283, g => {
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.48, 24, 1, true), reg(new THREE.MeshStandardMaterial({ color: "#b98f5c", roughness: 0.9, transparent: true, opacity: 0.82, side: THREE.DoubleSide })));
+      body.position.y = 0.26; g.add(body);
+      const top = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.07, 24), rattan); top.position.y = 0.535; g.add(shadow(top));
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.12, 16), reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", emissive: "#ffb35a", emissiveIntensity: 0.9 }))); c.position.y = 0.08; g.add(c); }, [rattan]); }
+  { const g = SUGG_G.mirror = new THREE.Group(), z = R.WINDOW_Z + 1.2, x0 = 14, w = 50, y0 = 108, h = 90;
+    const glass = reg(new THREE.MeshStandardMaterial({ color: "#cfdbe0", roughness: 0.05, metalness: 0.6 }));
+    const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(w, 0); sh.lineTo(w, h - w / 2); sh.absarc(w / 2, h - w / 2, w / 2, 0, Math.PI, false); sh.lineTo(0, 0);
+    const fr = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 2.2, bevelEnabled: false }), oak); fr.scale.set(-M, M, M); fr.position.copy(v3(x0, y0, z)); g.add(shadow(fr));
+    const inner = new THREE.Shape(); const iw = w - 6, ih = h - 6; inner.moveTo(0, 0); inner.lineTo(iw, 0); inner.lineTo(iw, ih - iw / 2); inner.absarc(iw / 2, ih - iw / 2, iw / 2, 0, Math.PI, false); inner.lineTo(0, 0);
+    const gl_ = new THREE.Mesh(new THREE.ShapeGeometry(inner), glass); gl_.scale.set(-M, M, M); gl_.position.copy(v3(x0 + 3, y0 + 3, z + 2.4)); g.add(gl_);
+    shell.add(g); }
+  { const g = SUGG_G.shelfled = new THREE.Group(), sb = R.SHELF_B;
+    const strip = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.004, (sb.z[0] - sb.z[1] - 4) * M), glow); strip.position.copy(v3(R.W - sb.d + 2, sb.top - sb.t - 0.3, (sb.z[0] + sb.z[1]) / 2)); g.add(strip);
+    const pl = new THREE.PointLight("#ffd29a", 1.2, 2.2, 2); pl.position.copy(v3(R.W - sb.d / 2, sb.top - sb.t - 8, (sb.z[0] + sb.z[1]) / 2)); g.add(pl);
+    shell.add(g); }
   floor("basket", "Seagrass basket (suggested)", 40, 40, 322, -70, g => {
     const sea = mat("#b89a6c"), b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 28, 1, true), sea); sea.side = THREE.DoubleSide; b.position.y = 0.2; g.add(shadow(b));
     lb(g, 0, 0, 0, 32, 1, 32, sea);
@@ -817,11 +980,21 @@ function buildSeatAndPouf() {
   const g = new THREE.Group(), body = new THREE.Mesh(new RoundedBoxGeometry(P_.w * M, (P_.h - 4) * M, P_.d * M, 4, 0.04), cord);
   body.position.y = (P_.h - 4) / 2 * M + 0.04; g.add(shadow(body));
   for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) lb(g, x * (P_.w / 2 - 6), 0, z * (P_.d / 2 - 6), 4, 4, 4, reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.5 })));
-  movable("pouf", "Your sofa's ottoman", g, () => ({ x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }), P_.w, P_.d, [cord]);
+  movable("pouf", "Your sofa's ottoman", g, () => ({ x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }), P_.w, P_.d, [cord], false,
+          { when: () => !(S.site === "C" && S.dining !== "folded") });   // v26: it moves aside while option C's table is out
 }
 function applySuggest() {
-  if (seatUp) { seatUp.visible = S.seat === "up"; seatDown.visible = S.seat === "down"; }
-  for (const k of ["art", "clock", "tray", "fairy", "hanger", "trail", "throw", "pclamp"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
+  if (seatUp) { seatUp.visible = S.seat === "up" && S.site !== "C"; seatDown.visible = S.seat === "down" && S.site !== "C"; }
+  for (const k of ["art", "clock", "tray", "fairy", "hanger", "trail", "throw", "pclamp", "candles", "mirror", "shelfled"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
+  // v26: the runner lies down the middle of whichever table is open
+  const rn = SUGG_G.runner;
+  if (rn) {
+    rn.visible = !!S.sugg.runner && S.dining !== "folded";
+    const y = 76.3;
+    if (S.site === "C") { rn.position.copy(v3((R.OPTC.tx[0] + R.OPTC.tx[1]) / 2, y, R.OPTC.cz)); rn.rotation.y = 0; rn.scale.set(1, 1, 1); }
+    else if (S.site === "B") { rn.position.copy(v3((R.TABLE_B_OPEN_X[0] + R.TABLE_B_OPEN_X[1]) / 2, y, R.TABLE_B.cz)); rn.rotation.y = 0; rn.scale.set(0.78, 1, 1); }
+    else { rn.position.copy(v3(R.TABLE_A.cx, y, (R.OPEN_Z[0] + R.OPEN_Z[1]) / 2)); rn.rotation.y = Math.PI / 2; rn.scale.set(0.78, 1, 1); }
+  }
 }
 const CASE_FILLS = {}, cushM = [];
 const CUSHION_COLS = { rust: ["#c7643a", "#d9a441", "#efe7d8"], blues: ["#2f4a6e", "#9fb4cc", "#e9e3d3"], sage: ["#7a8a6a", "#efe7d8", "#b9a47f"] };
@@ -855,7 +1028,20 @@ function applyDecor() {
   for (const [k, g] of Object.entries(CASE_FILLS)) g.visible = k === (D.fill in CASE_FILLS ? D.fill : "collect");
   if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : null;
     caseFrameM.color.set(col); caseFrameM.roughness = ro; if (caseFrameM.map !== mp) { caseFrameM.map = mp; caseFrameM.needsUpdate = true; } }
+  // v26: the oak's finish on every new oak piece (not your plant stand, vinyl stand, curtain pole or the stairs)
+  const tint = OAK_TINTS[D.oak] || OAK_TINTS.artisan;
+  for (const m of MATS) if (m.map === OAK_TEX && !m.userData.noTint && m !== caseFrameM) {
+    if (!m.userData.oakBase) m.userData.oakBase = m.color.clone();
+    m.color.copy(m.userData.oakBase).multiply(tint);
+  }
+  if (floorMat) { const f = FLOORS[D.floor] || FLOORS.carpet; if (floorMat.map !== f[0]) { floorMat.map = f[0]; floorMat.bumpMap = f[1]; floorMat.roughness = f[2]; floorMat.needsUpdate = true; } }
+  if (shelfMat) { const [c, ro, oakM] = SHELF_COLS[D.shelf] || SHELF_COLS.black, mp = oakM ? OAK_TEX : null;
+    shelfMat.color.set(c).multiply(oakM ? tint : new THREE.Color(1, 1, 1)); shelfMat.roughness = ro; if (shelfMat.map !== mp) { shelfMat.map = mp; shelfMat.needsUpdate = true; } }
 }
+const srgb = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace);   // the tints as you'd see them, not in linear light
+const OAK_TINTS = { artisan: srgb(1, 1, 1), pale: srgb(1.12, 1.09, 1.03), smoked: srgb(0.66, 0.57, 0.5), walnut: srgb(0.55, 0.42, 0.34) };
+const FLOORS = { carpet: [CARPET, PILE, 1], oatmeal: [OATMEAL, PILE, 1], boards: [BOARDS, null, 0.55] };
+const SHELF_COLS = { black: ["#1a1a1b", 0.55, false], oak: ["#c48c57", 0.55, true], white: ["#eeebe4", 0.5, false] };
 function ibox(grp, x, y, z, w, h, d, mat, cast = true) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat);
   m.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); grp.add(shadow(m, cast)); return m;
@@ -1162,13 +1348,14 @@ function drop(group, list) {   // take a fixture and its lights out of the scene
 }
 let built = {};
 function applyState() {
+  if (S.site !== "C" && S.dining === "eight") S.dining = "six";                     // v26: eight is option C's
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
-  const b2 = `${S.site}_${S.dining}`;
+  const b2 = `${S.site === "C" ? "B" : S.site}_${S.site === "C" ? (S.dining === "folded" ? "folded" : "six") : S.dining}`;   // v26: C lights like B
   if (built.bar2 !== b2) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2; }
   const lk = S.lamp + JSON.stringify(S.layout.lamp || {});
   if (built.lamp !== lk) { buildLamp(); built.lamp = lk; }
-  if (G.now_ledge) G.now_ledge.visible = S.site === "B" && S.plants !== "breast";   // v18: with the plants on the breast the ledge comes off
+  if (G.now_ledge) G.now_ledge.visible = S.site !== "A" && S.plants !== "breast";   // v18: with the plants on the breast the ledge comes off
   placeChairs();                                                                   // v20: the chair cupboard, its doors, the chairs in it
   applyDecor();                                                                    // v20: the rug, cushions, curtains, the case's fill and frame
   placeAll();
@@ -1202,9 +1389,9 @@ function applyLight() {
   lboxFace.material.color.set(S.lbox && !day ? "#ffffff" : "#5a5a5e");
   laserDots.visible = S.laser && !day;
   if (pcGlow) { pcGlow.visible = !!S.pc; pcLight.visible = !!S.pc; }
-  for (const [k, g] of Object.entries(IDEA_G)) g.visible = !!S.ideas[k] && (k !== "case" || S.site === "B");   // v17: ideas, off by default
-  if (G.frames) G.frames.visible = !(S.ideas.case && S.site === "B");                                         // the case replaces the frames
-  if (G.frames) G.frames.position.y = S.site === "B" && S.plants === "breast" ? 0.3 : 0;                        // v18.1: up 30 over the 158 plant stand
+  for (const [k, g] of Object.entries(IDEA_G)) g.visible = !!S.ideas[k] && (k !== "case" || S.site !== "A");   // v17: ideas, off by default
+  if (G.frames) G.frames.visible = !(S.ideas.case && S.site !== "A");                                         // the case replaces the frames
+  if (G.frames) G.frames.position.y = S.site !== "A" && S.plants === "breast" ? 0.3 : 0;                        // v18.1: up 30 over the 158 plant stand
   if (ideaLed) ideaLed.color.set(day ? "#8a8578" : "#fff1d6");
   curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
   win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
@@ -1304,7 +1491,7 @@ function buildPlantsAndRecords() {
   const leafM = reg(new THREE.MeshStandardMaterial({ color: "#4a8640", roughness: 0.65, side: THREE.DoubleSide }));
   const pots = ["#ece6da", "#c9c2b4", "#b5643f", "#7f8f72", "#2f2f2f"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.75 })));
   // v18.1: the plant stand from the client's listing: 98 × 29.5 × 158, slatted wood, two five-tier towers and an open middle with two shelves
-  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: PS.col, map: OAK_TEX, roughness: 0.6 }));
+  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: PS.col, map: OAK_TEX, roughness: 0.6 })); wood.userData.noTint = true;
     const w = PS.w, d = PS.d, h = PS.h, [cl, cm, cr] = PS.cols, pt = PS.post;
     const xs = [-w / 2 + pt / 2, -w / 2 + cl, w / 2 - cr, w / 2 - pt / 2];                  // the four post lines across
     for (const x of xs) for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, x, 0, z, pt, h, pt, wood);
@@ -1324,7 +1511,7 @@ function buildPlantsAndRecords() {
     potPlant(g, 0, PS.middle[0] + 1.2, 0, 9, 22, 0, r, pots[0], leafM);
     movable("plants", "Your plant stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].plants; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood]); }
   // v18.1: the client's vinyl stand (their listing): 70 × 32 × 78, black steel, rustic wood; two face-out bays on top, wires below
-  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: RS.col, map: OAK_TEX, roughness: 0.65 }));
+  { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: RS.col, map: OAK_TEX, roughness: 0.65 })); wood.userData.noTint = true;
     const steel = reg(new THREE.MeshStandardMaterial({ color: RS.steel, roughness: 0.45, metalness: 0.6 }));
     const w = RS.w, d = RS.d, h = RS.h, ft = RS.frame_top, p = 2, sy = RS.shelf_y, yb = RS.bottom_y;
     for (const x of [-w / 2 + p / 2, w / 2 - p / 2]) {
@@ -1571,6 +1758,9 @@ function endDrag(e) {
 canvas.addEventListener("pointerup", endDrag);
 canvas.addEventListener("pointercancel", () => { if (drag) { drag = null; controls.enabled = true; placeAll(); } });
 qs("#r3d-editbtn").addEventListener("click", () => setEdit(!S.edit));
+qs("#r3d-editdone")?.addEventListener("click", () => setEdit(false));   // v26: a way out of Edit room with the Tools panel shut
+qs("#r3d-addfrom")?.addEventListener("click", () => {   // v26: Extras' "Add a piece of furniture": Edit room, its list open
+  if (window.DemmaTools) window.DemmaTools.close(); if (!S.edit) setEdit(true); addList(); qs("#r3d-addlist").hidden = false; });
 qs(".r3d-edit").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || b.closest("#r3d-sel") || b.id === "r3d-editbtn") return;
   if (b.id === "r3d-add") { addList(); const l = qs("#r3d-addlist"); l.hidden = !l.hidden; return; }
@@ -1696,8 +1886,8 @@ const VIEWS = {
   sofa:    { label: "From the sofa", eye: [85, 108, -250], at: [72, 112, 20], fov: 58 },
   door:    { label: "From the door", eye: [372, 165, -6], at: [110, 85, -210], fov: 64 },
   stairs:  { label: "From the stairs", eye: [438, 205, 4], at: [190, 70, -205], fov: 62 },
-  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [250, 150, -150], at: [467, 112, -185] }, fov: 60 },   // v21: back from the lamp
-  chairs:  { label: "The chair cupboard", eye: [255, 200, -190], at: [460, 95, -262], fov: 52 },   // v20; v21 clear of the lamp
+  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [250, 150, -150], at: [467, 112, -185] }, C: { eye: [196, 175, -232], at: [430, 78, -130] }, fov: 60 },   // v21: back from the lamp
+  chairs:  { label: "The chair cupboard", eye: [255, 200, -190], at: [460, 95, -262], C: { eye: [228, 178, -150], at: [462, 92, -232] }, fov: 54 },   // v20; v21 clear of the lamp
   windowwall: { label: "The window wall", eye: [236, 150, -70], at: [236, 120, -309], fov: 66 },   // v17: for the ideas' stills
   breast:  { label: "The chimney breast", eye: [246, 140, -250], at: [246, 120, 0], fov: 54 },   // v17: for the ideas' stills
   pc:      { label: "The PC side wall", eye: [345, 135, -168], at: [0, 112, -168], fov: 56 },
@@ -1779,16 +1969,35 @@ const stickEls = {}; qsa(".stk").forEach(b => { stickEls[b.dataset.hot] = b; });
 const pop = qs("#r3d-pop"), stage = qs(".r3d-stage");
 let popId = null;
 const _p = new THREE.Vector3();
+let labelsOn = true; try { labelsOn = localStorage.getItem("mw26-labels") !== "off"; } catch (e) {}
+function setLabels(on) {
+  labelsOn = on; try { localStorage.setItem("mw26-labels", on ? "on" : "off"); } catch (e) {}
+  if (!on) { closePop(); Object.values(stickEls).forEach(el => { el.hidden = true; }); }
+  document.getElementById("r3d")?.classList.toggle("nolabels", !on);
+  qsa("[data-labels]").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.labels === "on") === on)));
+  const t = qs("#r3d-lbl"); if (t) { t.setAttribute("aria-pressed", String(on)); t.querySelector(".ms").textContent = on ? "label_off" : "label"; t.querySelector(".t").textContent = on ? "Hide labels" : "Show labels"; }
+  dirty();
+}
+document.addEventListener("click", e => { const b = e.target.closest("#r3d-lbl, [data-labels]"); if (!b) return; setLabels(b.id === "r3d-lbl" ? !labelsOn : b.dataset.labels === "on"); });
 function placeStickers() {
-  if (!HOTS.length || !started) return;
+  if (!HOTS.length || !started || !labelsOn) return;
   const w = stage.clientWidth, h = stage.clientHeight, cx = -camera.position.x / M, cz = camera.position.z / M;
+  const placed = [];   // v26: labels never sit on top of each other (each one moves down clear of those already placed)
   for (const H of HOTS) {
     const el = stickEls[H.id]; if (!el) continue;
     _p.copy(v3(...H.at)).project(camera);
     const off = _p.z > 1 || _p.z < -1 || Math.abs(_p.x) > 1.02 || Math.abs(_p.y) > 1.02;
     el.hidden = off;
     if (off) { if (popId === H.id) closePop(); continue; }
-    const hw = (el.offsetWidth || 140) / 2 + 6, x = Math.max(hw, Math.min(w - hw, (_p.x + 1) / 2 * w)), y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
+    const hw = (el.offsetWidth || 140) / 2 + 6, x = Math.max(hw + railR, Math.min(w - hw, (_p.x + 1) / 2 * w)); let y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
+    if (cover && x + hw > cover.left && x - hw < cover.right && y + 20 > cover.top && y - 20 < cover.bottom) { el.hidden = true; if (popId === H.id) closePop(); continue; }   // v26: not under the Tools panel
+    const ew = el.offsetWidth || 140, eh = el.offsetHeight || 40;
+    for (let k = 0; k < 8; k++) {
+      const hit = placed.find(q => Math.abs(x - q.x) < (ew + q.w) / 2 + 4 && Math.abs(y - q.y) < (eh + q.h) / 2 + 4);
+      if (!hit) break;
+      y = hit.y + (eh + hit.h) / 2 + 4;
+    }
+    placed.push({ x, y, w: ew, h: eh });
     el.style.left = x + "px"; el.style.top = y + "px";
     const behind = H.nrm && !(H.cut && H.cut === cutSide) && ((cx - H.at[0]) * H.nrm[0] + (cz - H.at[2]) * H.nrm[1]) < 0;
     el.classList.toggle("behind", !!behind);
@@ -1842,8 +2051,30 @@ function sizeRenderer() {
   // v14.1: while you drag, the picture renders at a lower resolution; it sharpens again as soon as you stop
   gl.setPixelRatio(lowRes ? Math.max(0.5, fullRatio() * 0.5) : fullRatio());
   gl.setSize(w, h, false);
-  camera.aspect = w / h; if (!tween) camera.fov = fitFov(baseFov); camera.updateProjectionMatrix(); dirty();
+  camera.aspect = w / h; if (!tween) camera.fov = fitFov(baseFov); applyShift(); dirty();
 }
+/* v26: with the Tools panel open, the room slides into the space beside it (laptop: left of the panel; phone: above it, half way) */
+const shift = { x: 0, y: 0 }; let cover = null;   // cover: the open panel's box, so stickers under it hide
+function applyShift() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (w && h && (shift.x || shift.y)) camera.setViewOffset(w, h, shift.x, shift.y, w, h); else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
+}
+let railR = 0;   // the right edge of the page's section rail (laptop), so stickers stay clear of it
+function measureShift(open) {
+  const p = document.getElementById("r3d-panel"), w = canvas.clientWidth, h = canvas.clientHeight, rail = document.querySelector(".rail");
+  railR = rail && getComputedStyle(rail).display !== "none" ? rail.getBoundingClientRect().right + 6 : 0;
+  shift.x = shift.y = 0; cover = null;
+  if (open && p && !p.hidden && w) {
+    const r = p.getBoundingClientRect(); cover = r;
+    if (innerWidth >= 900) shift.x = Math.round(Math.max(0, w - r.left - railR) / 2);
+    else shift.y = Math.round(Math.max(0, h - r.top) / 4);
+  }
+  applyShift(); dirty();
+}
+addEventListener("demma-tools", e => requestAnimationFrame(() => measureShift(!!e.detail)));
+addEventListener("resize", () => measureShift(!!(window.DemmaTools && window.DemmaTools.isOpen())));
+requestAnimationFrame(() => { measureShift(false); setLabels(labelsOn); });
 new ResizeObserver(sizeRenderer).observe(canvas);
 controls.addEventListener("start", () => { moving = true; });
 controls.addEventListener("end", () => { moving = false; });
@@ -1885,8 +2116,9 @@ function autoQuality() {
 function updateCaption() {
   try { updatePicks(); } catch (e) {}   // v22
   const sc = SCENES[S.scene];
-  const site = S.site === "A" ? "Table on the chimney breast" : "Table under the shelf by the stairs";
-  const din = { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
+  const site = S.site === "A" ? "Table on the chimney breast" : S.site === "C" ? "Option C, the dining cabinet" : "Table under the shelf by the stairs";
+  const din = S.site === "C" ? { folded: "folded away, the chairs inside", four: "open, 225 long, for four", six: "open, for six", eight: "open, for eight" }[S.dining]
+    : { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
   const paint = S.paint === "custom" ? `your colour ${S.custom}` : R.PAINTS[S.paint].name;
   const lights = sameAsScene() && S.master === 100 ? sc.name : `your lighting (from ${sc.name})`;
   qs("#r3d-cap").textContent = `${(VIEWS[S.view] || VIEWS.window).label} · ${site}, ${din} · ${lights} · ${paint}${S.drawers ? " · drawers out" : ""}${Object.values(S.ideas).some(Boolean) ? " · ideas shown (not in the plan)" : ""}${Object.keys(DEF.decor).some(k => S.decor[k] !== DEF.decor[k]) ? " · decor tried" : ""}${Object.values(S.sugg).some(Boolean) ? " · suggestions shown" : ""}`;
@@ -1895,7 +2127,7 @@ function still(w, h) {
   if (!started) start();
   const pr = gl.getPixelRatio(), size = gl.getSize(new THREE.Vector2()), asp = camera.aspect;
   const fov0 = camera.fov;
-  gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.fov = fitFov(baseFov); camera.updateProjectionMatrix();
+  gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.fov = fitFov(baseFov); camera.clearViewOffset(); camera.updateProjectionMatrix();
   const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
   if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
   const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
@@ -1910,12 +2142,12 @@ function still(w, h) {
   MATS.forEach(m => m.needsUpdate = true);
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(1024, 1024); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   applyLight();
-  gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.fov = fov0; camera.updateProjectionMatrix(); dirty();
+  gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.fov = fov0; applyShift(); dirty();
   return url;
 }
 function stillName() {
-  const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v25 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  const site = S.site === "A" ? "breast" : S.site === "C" ? "stairs wall (option C)" : "stairs wall";
+  return `Media wall v26 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -1960,7 +2192,7 @@ root.addEventListener("click", e => {
   if (d.view) { setView(d.view); return; }
   if (d.walk) { walk(d.walk); return; }
   if (d.site) { S.site = d.site; applyState(); if (S.view === "dining") setView("dining"); }
-  else if (d.dining) S.dining = d.dining, applyState();
+  else if (d.dining) { S.dining = d.dining; if (d.dining === "eight" && S.site !== "C") S.site = "C"; applyState(); if (S.view === "dining") setView("dining"); }   // v26: eight is option C
   else if (d.scene) S.scene = d.scene, S.lv = Object.assign({}, SCENES[d.scene].levels), S.master = 100, applyLight(), updateCaption(), store.set(KEY, S);   // tapping the tile again resets it
   else if (d.tod) S.tod = d.tod, applyLight(), updateCaption(), store.set(KEY, S);
   else if (d.ceil) S.ceil = d.ceil, repaint(), store.set(KEY, S), dirty();
@@ -2027,7 +2259,7 @@ function start() {
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
     set(o) { oldScene(o); Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, VIEWS },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, VIEWS, MATS, OAK_TEX },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }
