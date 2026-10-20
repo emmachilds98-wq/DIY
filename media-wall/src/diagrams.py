@@ -1896,12 +1896,15 @@ def leaf_case():
                "To scale. A from underneath, B in section, C the steps from folded to six")
 
 
-def light_scene(key):
+def light_scene(key, table=False):
     """v13.7: one lighting scene on the room plan, from above: every light layer drawn at the scene's level (glow size and
-    strength), the room dimmed by how much light there is overall. Levels from scenes.py."""
+    strength), the room dimmed by how much light there is overall. Levels from scenes.py. v25: the three presets; table=True draws
+    the flip-top open by the stairs with the table rule on top (scenes.TABLE_BOOST). The old five (SCENES_V24) still draw."""
     import scenes as SC
     g = G
-    sc = next(s for s in SC.SCENES if s[0] == key)
+    sc = next(s for s in SC.SCENES + SC.SCENES_V24 if s[0] == key)
+    if table:
+        sc = (sc[0], sc[1], sc[2], SC.boosted(sc[3]), sc[4])
     lv = {k: v / 100 for k, v in sc[3].items()}
     W, H = 860, 560
     k = 1.25
@@ -1909,6 +1912,10 @@ def light_scene(key):
     X, Y = _room(o, k, 16, 74)
     _sofa(o, X, Y, k, label=False)
     _side_wall(o, X, Y, k)
+    if table:             # v25: the flip-top open by the stairs (the default place), under bar 2
+        ox0, ox1 = g.TABLE_B_OPEN_X
+        za, zb = sorted(g.TABLE_B_Z)
+        o.append(f'<rect x="{X(ox1):.1f}" y="{Y(za):.1f}" width="{(ox1 - ox0)*k:.1f}" height="{(zb - za)*k:.1f}" fill="#d9b48a" stroke="#9c6a3f"/>')
     if key == "dinner":   # the table set for four at the wall
         x0, x1 = g.TABLE_X
         zo = g.OPEN_Z[1] if g.TABLE_STYLE == "fliptop" else g.TABLE_Z[1]
@@ -1964,7 +1971,9 @@ def light_scene(key):
     o.append(t(X(g.ALC_W / 2), Y(g.BASE_FRONT_Z) + 18, "media wall", 9, "middle", 650, "#7a5130"))
     o.append(t(X(g.TABLE_CX), Y(0) + 22, "dining wall", 9, "middle", 650, "#8f5b45"))
     o.append(t(X(g.ROOM_W), Y(g.ALC_D) + 34, "From above, to scale: the window at the top, the media wall bottom right. Glows show each light's level.", 9.5, "start", 400, MUTED))
-    return svg(W, H, "\n".join(o), f"Lighting scene: {sc[1]}", sc[2])
+    if table:
+        return svg(W, H, "\n".join(o), f"Lighting: {sc[1]}, with the table open", "The table rule on top of the preset: bar 2 at least 80, bar 1 at most 15, the TV's bias light off")
+    return svg(W, H, "\n".join(o), f"Lighting {'preset' if key in ('bright', 'cosy', 'film') else 'scene'}: {sc[1]}", sc[2])
 
 
 def dining_sites():
