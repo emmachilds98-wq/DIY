@@ -86,6 +86,7 @@ def controls():
               + "".join(rows) + '</div>'
               '<div class="seg" role="group" aria-label="Light box, laser and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box on</button>'
               '<button type="button" data-tog="laser" aria-pressed="false">Laser on</button>'
+              '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     return "".join([
         seg("site", [("B", "Under the shelf, by the stairs"), ("A", "On the chimney breast")], "Where the table goes"),

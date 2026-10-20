@@ -305,6 +305,11 @@ def full():
                     "Take the plug off the C13 lead, feed its bare end down the 25 mm conduit, and at the bottom fit the rewireable plug: brown to L, blue to N, green-and-yellow to E, the cord grip on the outer sheath, a 13 A fuse.",
                     "At the bottom, all three run behind the skirting into the plinth's notch and the channel; the mains lead goes on to the 10-gang behind the TV.",
                 ]),
+                ("The PC's extras (v17)", [
+                    "Screw the powered USB hub under the side run's front edge, below the PC, ports facing the sofa. Its adapter plugs into the 10-gang along the PC's mains route; its lead runs up through the grommet to the PC.",
+                    "Remote power button: with the PC unplugged, push the receiver card into a spare slot and plug its lead onto the motherboard's power-switch pins (the case's own button lead plugs into the card's pass-through). Stick the push button to the wrap ledge's underside, by the sofa end.",
+                    "Lay the magnetic dust filter on the PC's top exhaust; brush it off once a month.",
+                ]),
             ]),
         11: dict(   # v15: the flip-top gate-leg table, which stays on the wall
             parts=["Solid oak: two panels, each a centre 101 × 80 × 2.7 (edge-glued staves) with two breadboard ends 80 × 7 × 2.7: the top and the half; the backboard 110 × 22 × 3 and the hinge rail 110 × 4 × 7.3 (from step 7), two turn buttons 6 × 2.5 × 2.2",

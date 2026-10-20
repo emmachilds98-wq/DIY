@@ -64,6 +64,9 @@ TRACK = [
     ("To buy", "Conduit: 38 mm and 25 mm oval, about 4 m each, two draw wires, one oak-coloured brush grommet; a 5 m C13 lead with a rewireable 13 A plug for the PC <b>(changed)</b>", "2 Cables and power", "1", 15, 35),
     ("To buy", "For the chase: a wall chaser with dust extraction for a day (or a bolster chisel and club hammer), one-coat filler <b>(new)</b>", "2 Cables and power", "1", 20, 45),
     ("To buy", "PC tidy kit: braided sleeve, shelf-notch grommet", "2 Cables and power", "1", 5, 15),
+    ("To buy", "A powered USB 3 hub, 4-port with its own adapter, screwed under the side run's front edge below the PC: pads, the keyboard and a stick within reach of the sofa <b>(new in v17)</b>", "2 Cables and power", "1", 15, 30),
+    ("To buy", "A remote power button for the PC: a wireless switch on the motherboard's power header (card in a spare slot), its push button on the wrap ledge <b>(new in v17)</b>", "2 Cables and power", "1", 10, 30),
+    ("To buy", "A magnetic mesh dust filter cut to the PC's top exhaust <b>(new in v17)</b>", "2 Cables and power", "1", 5, 10),
     ("To buy", "Only if there's no socket by the sofa: a 12-way surge-protected strip in place of the 10-gang, so the rear speakers get a way <b>(new)</b>", "2 Cables and power", "1", 0, 60),
     ("To do", "Sample Farrow & Ball Card Room Green No. 79 on an A4 board; check it by day and with the LED strip on", "3 Paint", "", None, None),
     ("To buy", "Card Room Green: Estate (or Modern) Emulsion for walls, ceiling, alcove and chimney breast; Estate Eggshell for skirting, door and frame; primer and undercoat", "3 Paint", "", 200, 500),
@@ -358,7 +361,8 @@ def steps():
                  "Screw the oak cleat along the side wall and fit the concealed brackets for the PC end.",
                  "Lift the run on, dowel its end to the left upright's front edge, and screw it down to the cleat from above (plugged).",
                  "Screw the keyboard tray's housing under it and fit its runners.",
-                 "Fit the brush grommet and pull the PC's leads down the two chased conduits with the draw wires: data in the big one, its mains lead in the small one."],
+                 "Fit the brush grommet and pull the PC's leads down the two chased conduits with the draw wires: data in the big one, its mains lead in the small one.",
+                 "The PC's extras (v17): screw the powered USB hub under the run's front edge below the PC, fit the remote power button's card and stick its button under the wrap ledge by the sofa, and lay the magnetic filter on the top exhaust."],
              check="One level line with the ledge over the TV, the sweep runs smooth with no flat spots, and the PC end holds your weight leaning on it."),
         dict(n=11, part=["Dining table"], title="The flip-top dining table", who="You + a helper", time="1–2 days", buy=["6 Dining wall"], see=[("dining", "The dining wall")],
              do=["Screw the backboard to the wall, plugs every 20 cm, and glue and screw the 7.3 cm hinge rail along its top.",
@@ -659,6 +663,12 @@ def _plan(deck=False):
 <li><b>Bay 2 with the sub (v13.5):</b> the PS3 keeps the top row. Below its shelf the bay splits: on the left the sub's column, {n(g.SUB_COL[1] - g.SUB_COL[0])} cm wide, then a 12 mm ply divider, then {n(g.PS_COL[1] - g.PS_COL[0])} cm for the PS2 over the PS1 on a part shelf. The sub stands on a {n(g.SUB_RISER_H)} cm isolation riser with 1 cm each side and {n(g.SUB_COL_TOP - g.SUB_IN["y"][1])} above. Its front is flush with the face frame, so its driver faces the room and its rear port has {n(g.SUB_PORT_GAP)} cm to the wall.</li>
 <li><b>Power:</b> the side-wall socket in front of bay 1 becomes a double. Its two leads enter through a notch at the left end of the face frame's bottom rail and run back through the plinth to the channel.</li>
 </ul>
+<div class="why"><b>The media wall, looked over again (v17)</b>
+<ul>
+<li><b>The TV's remote:</b> the soundbar's top is 0.6 above the screen's bottom edge, right where LG puts the remote's receiver. Sit the bar 2 cm proud of the stand's foot so the beam from the sofa clears it; LG's Magic Remote works by radio once paired, so it doesn't mind either way (a check in the fit proof).</li>
+<li><b>Heat:</b> every console bay is open front and back, the bricks lie flat at the back with nothing on top, and the Series X has 15 cm each side and 21 above. Nothing changed in v17.</li>
+<li><b>One remote for most of it:</b> HDMI-CEC (SIMPLINK) lets the TV's remote work the soundbar and the modern consoles (step 13); the HDMI switch has its own remote for the retro side.</li>
+</ul></div>
 <figure>{front()}</figure>
 <figure>{section()}</figure>
 <h3>The sub in the media wall</h3>
@@ -673,7 +683,7 @@ def _plan(deck=False):
 </ul>
 
 <h3>The fit proof: every item against its published size</h3>
-<p>Each zone below lists what goes in it, its size and where that size comes from (numbered sources, section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail. {c[fit.TIGHT]} are tight: the deck's 2.65 cm sides and the preamp over the open lid; the sub's column, its port gap, the PS2 over the PS1 and the switch channel in bay 2; the LP crates, the game drawers and the pads drawer in bay 3, each snug by design; the flip-top's six at 53 cm each and its weight to fold up; the side chairs by the stairs; and, for option A, the coffee table and the door's swing. {c[fit.CHECK]} need a check on site: the TV's plugs by the corner post, the RetroTINK's size when it arrives, whether the sub's vibration reaches the consoles and the deck (test it before fixing the shelves), what the stairs wall is built of, your shelf's height (the OBEGRÄNSAD needs it at 198 or lower to stand on it), and, for option A, the flip-top's end on the breast.</p>
+<p>Each zone below lists what goes in it, its size and where that size comes from (numbered sources, section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail. {c[fit.TIGHT]} are tight: the deck's 2.65 cm sides and the preamp over the open lid; the sub's column, its port gap, the PS2 over the PS1 and the switch channel in bay 2; the LP crates, the game drawers and the pads drawer in bay 3, each snug by design; the flip-top's six at 53 cm each and its weight to fold up; the side chairs by the stairs; and, for option A, the coffee table and the door's swing. {c[fit.CHECK]} need a check on site: the TV's plugs by the corner post, the RetroTINK's size when it arrives, whether the sub's vibration reaches the consoles and the deck (test it before fixing the shelves), that the soundbar sits clear of the TV's remote receiver (v17), what the stairs wall is built of, your shelf's height (the OBEGRÄNSAD needs it at 198 or lower to stand on it), and, for option A, the flip-top's end on the breast.</p>
 <!--fit-->{fit.tables_html()}<!--/fit-->
 
 <h3>Console sizes, every version</h3>
@@ -802,6 +812,13 @@ def _plan(deck=False):
 <li><b>Keyboard tray (back from v6.1):</b> the shelf sits on a 7 cm oak housing with a tray on 300 mm light-duty runners that rolls 25 cm out towards the room. It holds a full-size wireless keyboard and mouse: pull it out, lift the keyboard onto your lap, park it again. The housing stops 12 cm short of the sofa end so the cables drop past it; its underside is {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.KB_TRAY["h"])}, {n(g.PC_SHELF_TOP - g.PC_SHELF_T - g.KB_TRAY["h"] - g.SOFA_H)} above the sofa's back.</li>
 <li><b>Headroom:</b> the shelf's underside is at {n(g.PC_SHELF_TOP - g.PC_SHELF_T)}, and it covers only the 28 cm of the sofa nearest the wall.</li>
 </ul>
+<div class="why"><b>The PC end, looked over again (v17)</b>
+<ul>
+<li><b>Air:</b> a mid-tower draws in at the front (towards the alcove) and blows out at the back and top. Both stay open: the case's top is at {n(g.PC_SHELF_TOP + g.PC_CASE[1])}, {n(g.CEIL - g.PC_SHELF_TOP - g.PC_CASE[1])} clear of the ceiling; a magnetic dust filter on the top exhaust keeps the dust out while it's off.</li>
+<li><b>Reach from the sofa:</b> the PC's own power button is on its top, behind your head. A remote power button (a small card on the motherboard's power pins and a push button under the wrap ledge by the sofa end) starts it from the seat, and a powered USB 3 hub under the run's front edge puts pads, the keyboard's dongle and a stick within reach.</li>
+<li><b>Lit, and seen:</b> the glass side faces the room, so its fans and lights read as part of the wall at night (the 3D view's "PC lit" button shows it). Keep its lights on a slow single colour if they pull the eye from the TV.</li>
+<li><b>Leads:</b> labelled at both ends (step 13), all three down the chased conduits; nothing hangs below the shelf.</li>
+</ul></div>
 
 <h2 class="pb">7 · The oak joinery</h2>
 <p>Above the worktop the wall is furniture rather than cladding: two solid oak uprights, shelves carried on joints you can see, and the Card Room Green wall showing between them.</p>

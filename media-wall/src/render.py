@@ -1274,6 +1274,7 @@ def wrap():
     if VIEW == "side" and not G.PLAIN:       # from the side the screen is beyond the case: draw it first
         o.append(screen())
     o.append(box(cx1, st, cz0, cw, ch, cd, "#121314", "#1d1f21", "#0d0e0f"))
+    o.append(pc_internals(cx1, st, cz0, cz1, cw, ch))
     gx = cx1 + cw + 0.02
     side = [P(gx, st + 1, cz0 + 1), P(gx, st + 1, cz1 - 1), P(gx, st + ch - 1, cz1 - 1), P(gx, st + ch - 1, cz0 + 1)]
     o.append(poly(side, "#0c1714"))
@@ -1564,6 +1565,27 @@ def worktop_items():
 
 
 # ------------------------------------------------------------- the dining wall on the chimney breast
+def pc_internals(cx1, st, cz0, cz1, cw, ch):
+    """v17, client: "add a lit up PC internals to make it clear of what it is, it has a clear side window". Seen through the glass (the
+    case's +x side faces the room): the motherboard on the far side, the PSU shroud along the bottom, a graphics card across the middle,
+    a tower cooler and four RAM sticks above it, three front fans (alcove end) and one rear fan. Boxes, so the 3D room has them too; the
+    3D room lights the fan rings and an RGB strip, and puts a small light inside."""
+    o = []
+    gin = cx1 + cw - 1.0                                                                     # just inside the glass
+    o.append(box(cx1 + 1.0, st + 9.5, cz0 + 2.0, 0.8, ch - 12.0, cz1 - cz0 - 10.0, "#16201f", "#1d2a28", "#101716"))     # motherboard
+    o.append(box(cx1 + 1.0, st + 0.8, cz0 + 1.0, cw - 2.4, 8.5, cz1 - cz0 - 2.0, "#1b1d20", "#26292d", "#141518"))        # PSU shroud
+    o.append(box(cx1 + 2.0, st + 16.5, cz0 + 3.0, 12.0, 4.2, 30.0, "#24272b", "#34383d", "#1a1c1f"))                     # graphics card
+    o.append(box(cx1 + 13.8, st + 16.9, cz0 + 4.0, 0.3, 3.4, 26.0, "#d6d9dc"))                                           # its backplate edge
+    o.append(box(cx1 + 2.0, st + 25.5, cz0 + 11.0, 13.0, 12.0, 7.0, "#8d9196", "#a4a8ad", "#6f7378"))                    # tower cooler
+    o.append(box(cx1 + 2.0, st + 25.5, cz0 + 18.0, 13.0, 12.0, 2.5, "#1b1c1e", "#2a2b2e", "#141516"))                    # its fan
+    for k in range(4):                                                                                                   # RAM
+        o.append(box(cx1 + 2.0, st + 26.0, cz0 + 21.5 + k * 1.3, 4.0, 11.0, 0.7, "#2a2d31", "#d94bd0", "#1e2023"))
+    for yy in (st + 11.0, st + 23.5, st + 36.0):                                                                          # front fans
+        o.append(box(cx1 + 3.0, yy - 6.0, cz1 - 4.0, cw - 6.0, 12.0, 2.5, "#151617", "#1f2022", "#0f1011"))
+    o.append(box(cx1 + 3.0, st + 30.0, cz0 + 0.8, cw - 6.0, 12.0, 2.5, "#151617", "#1f2022", "#0f1011"))                 # rear fan
+    return "\n".join(o)
+
+
 def fliptop_wall():
     """v15: the flip-top gate-leg table. The oak backboard carries a 7.3 cm hinge rail; the 110 × 80 top hinges on its front edge and sits
     on two Hebgo brackets; a second 110 × 80 oak half is hinged to the top's front edge on three brass card-table hinges and opens out on

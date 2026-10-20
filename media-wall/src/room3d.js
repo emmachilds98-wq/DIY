@@ -25,7 +25,7 @@ const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room",
               quality: SMALL ? "fast" : "hd", view: "window",
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
-              ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false };   // v16: the table by the stairs by default; the laser off
+              ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true };   // v16: the table by the stairs by default; the laser off
 const KEY = "mw17-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
@@ -561,9 +561,24 @@ function buildShell() {
     const [d1, z1] = SR.edge[i], [d2, z2] = SR.edge[i + 1];
     cube(Math.min(d1, d2) - 2, SR.under - 0.5, z2, Math.abs(d1 - d2) + 0.8, 0.5, z1 - z2, runLed, false);
   }
+  pcLit();
   flushCubes(shell);
 }
-let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut;
+let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut, pcGlow, pcLight;
+// v17: the PC lit up behind its clear side window: glowing fan rings (three front, one rear), an RGB strip along the top, a light inside
+function pcLit() {
+  const [cw, ch, cd] = R.PC_CASE, [cz1, cz0] = R.PC_Z, st = R.PC_SHELF_TOP, x = 2.5 + cw - 4.2;
+  pcGlow = new THREE.Group();
+  const ringM = new THREE.MeshBasicMaterial({ color: "#3fe3b0", toneMapped: false }), rgbM = new THREE.MeshBasicMaterial({ color: "#b46cff", toneMapped: false });
+  const ring = (y, z, r) => { const m = new THREE.Mesh(new THREE.TorusGeometry(r * M, 0.0035, 8, 32), ringM); m.position.copy(v3(x, y, z)); m.rotation.y = Math.PI / 2; pcGlow.add(m); };
+  for (const y of [st + 11, st + 23.5, st + 36]) ring(y, cz1 - 2.6, 5.2);
+  ring(st + 36, cz0 + 2.2, 4.8);
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.006, (cd - 6) * M), rgbM); strip.position.copy(v3(2.5 + cw - 1.5, st + ch - 2, (cz0 + cz1) / 2)); pcGlow.add(strip);
+  const ramM = new THREE.MeshBasicMaterial({ color: "#ff5ad1", toneMapped: false });
+  for (let k = 0; k < 4; k++) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.004, 0.007), ramM); r.position.copy(v3(4.5, st + 37.2, cz0 + 21.85 + k * 1.3)); pcGlow.add(r); }
+  shell.add(pcGlow);
+  pcLight = new THREE.PointLight("#9d7bff", 3, 0.6, 2); pcLight.position.copy(v3(2.5 + cw / 2, st + ch / 2, (cz0 + cz1) / 2)); shell.add(pcLight);
+}
 // v17: "i also have deep window sills that allow for lots of plants there": a row of pots along the sill, upright and trailing
 function sillPlants(x0, x1, y, zBack, zFront) {
   const r = rnd(29), pots = [], leaves = [], vines = [];
@@ -773,6 +788,7 @@ function applyLight() {
   tvScreen.material = L.bias > 0 ? screenOn : screenOff;
   lboxFace.material.color.set(S.lbox && !day ? "#ffffff" : "#5a5a5e");
   laserDots.visible = S.laser && !day;
+  if (pcGlow) { pcGlow.visible = !!S.pc; pcLight.visible = !!S.pc; }
   curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
   win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
   view.material.map = day ? SKY.day : SKY.night; view.material.needsUpdate = true;
