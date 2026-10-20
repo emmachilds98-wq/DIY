@@ -45,6 +45,9 @@
   step 12, section 8, scenes.py); buy list adds the divider, the slim drawers, the ledge, drops the hat peg; cut list and step 8 rewritten for
   the crates and slim drawers. Questions 15: `site`, `box` and `lightbox` answered (write them to the deck's db), hat waits for the photo,
   westend asks the shelf's height.
+- Then the client's hat photo: both hats hang on the red lamp (a black graduation cap on the pole's top, a navy baseball cap with a poem
+  printed under its peak on the pole below the top head). `G.HATS`; `buildLamp()` draws them (`POEM_TEX`); the `hat` question is answered and
+  dropped (14 questions); the hat to-do is gone from the buy list.
 
 ## Update 20 Oct 2026, round 9: v15 (the room as it really is, smart lights, one oak run on the side wall)
 - Client: "my sofa goes to around 40cm before the end of the window ... 2 seats then corner ... blue corduroy and you can remove the white

@@ -374,6 +374,9 @@ LASER = dict(z=sum(SHELF_B["z"]) / 2, size=(9.0, 6.0, 9.0), on=False)   # v16: "
 PLANT_B = dict(z=SHELF_B["z"][1] + 9.0, pot=14.0, trail=(55.0, 110.0), strands=7)   # v16: "move plant to edge of the shelf": the window end
 # "either add my hat there or give it a wallstand or something to display it": an oak hat peg on the stairs wall by the lamp
 HAT_PEG = None                                       # v16: "youve put a random hat on the wall, ill resend the picture": off until the photo
+# v16, the client's photo ("Hat"): the hats hang on the red lamp: a black graduation cap on the pole's top, a navy baseball cap with a poem
+# printed under its peak hung on the pole below the top head
+HATS = dict(board=24.0, cap_y=FLOOR_LAMP["h"] - 26.0, cap_col="#1f2a44")
 
 # the heads along each bar (offset along the bar from its centre, + towards the media wall / door), shade colour, stem colour, aim
 SAGE, BLUE, MUSTARD, PINK = ("#a9c7ab", "#8db59c"), ("#a7d0d8", "#7fbfc8"), ("#e8b53f", "#dca52f"), ("#e79c95", "#d9877f")

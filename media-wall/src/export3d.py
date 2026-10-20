@@ -159,7 +159,7 @@ def scene():
         "SIDE_RUN": {"under": G.LEDGE_TOP - G.SIDE_RUN_T,
                      "edge": [[round(G.side_run_depth(z), 2), z] for z in range(int(G.SIDE_RUN_Z[0]), int(G.SIDE_RUN_Z[1]) - 1, -4)]},
         "SOFA_CORD": G.SOFA_CORD, "CARPET": G.CARPET_COL, "RUG": {**G.RUG, "cols": G.RUG_COLS}, "CURTAIN": G.CURTAIN,
-        "LIGHTBOX": G.LIGHTBOX, "LASER": G.LASER, "PIPE_BOX": G.PIPE_BOX, "PLANT_B": G.PLANT_B, "HAT_PEG": G.HAT_PEG,
+        "LIGHTBOX": G.LIGHTBOX, "LASER": G.LASER, "PIPE_BOX": G.PIPE_BOX, "PLANT_B": G.PLANT_B, "HAT_PEG": G.HAT_PEG, "HATS": G.HATS,
         "LAMP_BODY": G.LAMP_BODY, "LAMP_RGB": G.LAMP_HEADS_RGB,
     }
     return {"room": room_spec, "groups": groups}

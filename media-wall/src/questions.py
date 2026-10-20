@@ -51,8 +51,6 @@ QUESTIONS = [
     ("point2", "The pendant point by the stairs wall: its exact spot",
      "From your photo it hangs about 55 cm out from the stairs wall, a quarter of the way along the shelf from the stair end. Bar 2 goes on it, over the table if you choose that spot.",
      "Measure from the stairs wall and from the window wall.", False),
-    ("hat", "Your hat: a photo, please",
-     "It's off the wall in v16 until we can see it; then we'll draw the way to show it: an oak peg, a hat stand, or a small shelf.", "A photo of the hat, and anywhere you'd like it.", True),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
@@ -61,7 +59,6 @@ QUESTIONS = [
 PDF_LINE = {
     "westwall": "The stairs wall: solid, or plasterboard on studs? It decides the table's bracket fixings.",
     "electrics": "The electrics: you're swapping the two light fittings and the socket yourselves (as planned; no dimmers since v15), or an electrician for the fittings?",
-    "hat": "Your hat: a photo, so we can draw the way to show it.",
     "sofa": f"The sofa's return: how far it runs along the side wall (the long side is about {_n(G.SOFA_W)} from your photo; the return is drawn at {_n(G.SOFA_D)}).",
     "westend": "The stairs wall's length and your shelf's height (drawn at 196: the OBEGRÄNSAD needs 198 or lower to stand on it).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
@@ -91,7 +88,6 @@ SHORT = {
     "fanstand": "the fan stand's model",
     "chairs": "chairs",
     "records": "record counts",
-    "hat": "the hat",
     "games": "game counts",
     "ports": "extra wired ports",
     "surge": "the 10-gang",

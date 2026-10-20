@@ -176,6 +176,12 @@ const HESSIAN = canvasTex(256, 256, (g, w, h) => {   // v15: hessian's coarse, o
 HESSIAN.repeat.set(3, 9);
 // v16: the client's light box is an IKEA OBEGRÄNSAD: a black panel with a 16 x 16 grid of white LEDs that shows blocky black-and-white
 // pictures, "like pharmacy LED ads". Drawn showing a pixel music note; the unlit LEDs are dark grey dots on the black face.
+// v16: the navy cap's poem, printed in pale lines under its peak
+const POEM_TEX = canvasTex(256, 140, (g, w, h) => {
+  g.fillStyle = "#1f2a44"; g.fillRect(0, 0, w, h);
+  g.fillStyle = "#d9d2b8";
+  for (let i = 0; i < 9; i++) { const lw = 150 + ((i * 37) % 70); g.fillRect((w - lw) / 2, 12 + i * 13, lw, 4); }
+});
 const NOTE = ["................", "......#######...", "......#######...", "......##....#...", "......#.....#...", "......#.....#...",
               "......#.....#...", "......#.....#...", "......#.....#...", "..####....####..", ".######..######.", ".######..######.",
               "..####....####..", "................", "................", "................"];
@@ -642,6 +648,31 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
     arm.rotation.z = Math.PI / 2; arm.rotation.y = Math.atan2(toward.z, -toward.x); g.add(arm);
     spotHead(g, apex, tgt.clone().sub(apex).normalize(), R.LAMP_BODY, lights.lamp, 55, "lamp" + i, red);
   });
+  // v16, the client's photo ("Hat"): the hats live on the lamp: the graduation cap sits on the pole's top, tipped, and the navy cap with
+  // the poem printed under its peak hangs on the pole below the top head, peak down, crown out
+  if (R.HATS) {
+    const H = R.HATS, felt = reg(new THREE.MeshStandardMaterial({ color: "#16171b", roughness: 0.85 }));
+    const mb = new THREE.Group();
+    const skull = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.09, 0.07, 28), felt); skull.position.y = -0.035;
+    const board = new THREE.Mesh(new THREE.BoxGeometry(H.board * M, 0.008, H.board * M), felt); board.rotation.y = Math.PI / 4;
+    const button = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.006, 12), felt); button.position.y = 0.007;
+    const tassel = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.006, 0.11, 8), reg(new THREE.MeshStandardMaterial({ color: "#1d1e22", roughness: 0.9 })));
+    tassel.position.set(0.1, -0.05, 0.02);
+    mb.add(shadow(skull), shadow(board), button, tassel);
+    mb.position.copy(v3(spot.x, R.LAMP.h + 5, spot.z)); mb.rotation.z = -0.22; mb.rotation.x = 0.12; g.add(mb);
+    const perp = new THREE.Vector3(-toward.z, 0, toward.x);                         // room coords: across the heads
+    const out = new THREE.Vector3(-perp.x, 0, perp.z).normalize(), up = new THREE.Vector3(0, 1, 0);   // world
+    const cap = new THREE.Group(), navy = reg(new THREE.MeshStandardMaterial({ color: H.cap_col, roughness: 0.8 }));
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(0.095, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2), navy); crown.scale.set(1, 0.85, 1.08);
+    const peak = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.006, 28, 1, false, -Math.PI * 0.32, Math.PI * 0.64), navy);
+    peak.position.set(0, 0.0, -0.055); peak.scale.set(1, 1, 0.9);
+    const poem = new THREE.Mesh(new THREE.PlaneGeometry(0.11, 0.06), new THREE.MeshStandardMaterial({ map: POEM_TEX, roughness: 0.9 }));
+    poem.rotation.x = Math.PI / 2; poem.position.set(0, -0.004, -0.115);
+    cap.add(shadow(crown), shadow(peak), poem);
+    const xAxis = new THREE.Vector3().crossVectors(out, up);
+    cap.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, out, up));
+    cap.position.copy(v3(spot.x, H.cap_y, spot.z)).add(out.clone().multiplyScalar(0.02)); g.add(cap);
+  }
   fixtures.add(g);
 }
 
