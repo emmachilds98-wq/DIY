@@ -27,7 +27,8 @@ const DEF = { site: "B", dining: "folded", scene: "general", paint: "card_room",
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
               ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true, ideas: {},   // v17: ideas all off
               // v18: the plant stand and the record shelf's layout, your own moves (edit mode) and the things you've added; the grow lights
-              plants: "corner", layout: {}, added: [], grow: true };
+              plants: "corner", layout: {}, added: [], grow: true,
+              chairs: "hooks" };   // v19: two folded chairs on hooks at the table's window end ("away": in the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
@@ -578,7 +579,27 @@ function buildShell() {
   pcLit();
   buildIdeas();
   buildPlantsAndRecords();
+  buildChairStore();
   flushCubes(shell);
+}
+/* v19: two folded FRÖSVI chairs on BJÄRNUM hooks, one above the other, between the table's window end and the pipe boxing */
+let chairStore = null;
+function buildChairStore() {
+  const CS = R.CHAIR_STORE, H = CS.hooks, [cw, cdep, ch] = R.CHAIR_FOLDED;
+  const g = new THREE.Group(); g.name = "chairs";
+  const wood = reg(new THREE.MeshStandardMaterial({ color: "#b07f50", map: OAK_TEX, roughness: 0.6 }));
+  const pad = reg(new THREE.MeshStandardMaterial({ color: "#77736b", roughness: 0.92 }));
+  const alu = reg(new THREE.MeshStandardMaterial({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }));
+  const bx = (x, y, z, w, h, d, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); };
+  const cz = (H.z[0] + H.z[1]) / 2, x0 = H.x - 1 - cdep;                       // each chair's face: 9 thick, its back an inch off the wall
+  H.chair_y.forEach(([y0, y1], i) => {
+    for (const sd of [-1, 1]) bx(x0, y0, cz + sd * (cw / 2 - 1.5) - 1.5, cdep, ch, 3, wood);   // the frames, legs folded together
+    bx(x0 + 1.5, y0 + 28, cz - (cw / 2 - 3), 2.2, 38, cw - 6, pad);                             // the seat, folded up
+    bx(x0 + 4, y1 - 27, cz - (cw / 2 - 3), 3, 22, cw - 6, pad);                                  // the padded back
+    bx(x0 + 2, y0 + 12, cz - (cw / 2 - 3), 1.8, 3, cw - 6, wood);                                // a stretcher low down
+    bx(H.x - R.HOOK[1], H.hook_y[i] - 1, cz - R.HOOK[0] / 2, R.HOOK[1], 1.6, R.HOOK[0], alu);   // the hook through the hole in its back
+  });
+  scene.add(g); chairStore = g;
 }
 /* v17: the ideas (ideas.py), each its own group, all hidden until its button is on */
 const IDEA_G = {};
@@ -826,6 +847,11 @@ function buildFurniture() {
   const [tx0, tx1] = R.TV_X, [ty0, ty1] = R.TV_Y;
   tvScreen = new THREE.Mesh(new THREE.PlaneGeometry((tx1 - tx0 - 1.2) * M, (ty1 - ty0 - 1.2) * M), new THREE.MeshStandardMaterial({ color: "#050506", roughness: 0.12, metalness: 0.2 }));
   tvScreen.position.copy(v3((tx0 + tx1) / 2, (ty0 + ty1) / 2, R.TV_Z - 0.1)); tvScreen.rotation.y = Math.PI; scene.add(tvScreen);
+  if (G.sofa) {      // v19: the sofa moves too: its group recentred on its footprint and handed to edit mode
+    const so = R.SOFA, cx = (so.x[0] + so.x[1]) / 2, cz = (so.back + so.end) / 2, g = G.sofa;
+    scene.remove(g); g.position.set(cx * M, 0, -cz * M); g.visible = true; delete G.sofa;
+    movable("sofa", "Your sofa", g, () => ({ x: cx, z: cz, rot: 0 }), so.x[1] - so.x[0], so.end - so.back, []);
+  }
 }
 let bar1, bar2;
 
@@ -845,6 +871,7 @@ function applyState() {
   const lk = S.lamp + JSON.stringify(S.layout.lamp || {});
   if (built.lamp !== lk) { buildLamp(); built.lamp = lk; }
   if (G.now_ledge) G.now_ledge.visible = S.site === "B" && S.plants !== "breast";   // v18: with the plants on the breast the ledge comes off
+  if (chairStore) chairStore.visible = S.chairs !== "away" && S.dining === "folded";  // v19: at dinner they're the chairs you're sitting on
   placeAll();
   repaint();
   applyLight();
@@ -1078,8 +1105,25 @@ function clampItem(it, x, z, rot) {
   x = Math.min(Math.max(x, hx), R.W - hx);
   const zmax = x + hx <= R.ALC_W ? R.ALC_D : x - hx >= R.BREAST_X[1] ? R.RECESS_Z : 0;
   z = Math.min(Math.max(z, R.WINDOW_Z + hz), zmax - hz);
+  // v19: within 5 cm of a wall, it goes flush against it
+  if (x - hx < SNAP) x = hx; else if (R.W - hx - x < SNAP) x = R.W - hx;
+  if (z - hz - R.WINDOW_Z < SNAP) z = R.WINDOW_Z + hz; else if (zmax - hz - z < SNAP) z = zmax - hz;
   return { x: Math.round(x), z: Math.round(z) };
 }
+const SNAP = 5;
+/* v19: undo, the last ten changes to the layout (moves, turns, colours, removals, additions) */
+const UNDO = [];
+function snapshot() { return JSON.stringify({ layout: S.layout, added: S.added }); }
+function pushUndo() { UNDO.push(snapshot()); if (UNDO.length > 10) UNDO.shift(); undoBtn(); }
+function undoBtn() { const b = qs("#r3d-undo"); if (b) b.disabled = !UNDO.length; }
+function restoreLayout(o) {
+  S.added.forEach(a => { const it = MOV[a.id]; if (it) { movers.remove(it.pivot); delete MOV[a.id]; } });
+  S.added = []; S.layout = JSON.parse(JSON.stringify(o.layout || {}));
+  (o.added || []).forEach(a => addThing(Object.assign({}, a), true));
+  if (o.plants && R.PLANT_LAYOUTS[o.plants]) S.plants = o.plants;
+  select(null); built.lamp = null; applyState(); syncButtons();
+}
+function undo() { const prev = UNDO.pop(); if (!prev) return; restoreLayout(JSON.parse(prev)); undoBtn(); }
 function setLayout(id, patch) { S.layout[id] = Object.assign({}, S.layout[id], patch); if (MOV[id] && MOV[id].added) { const a = S.added.find(a => a.id === id); if (a) Object.assign(a, patch); } }
 function select(id) {
   selId = id; selSurf = null;
@@ -1098,12 +1142,14 @@ function editPanel() {
     qs("#r3d-selcol").value = cur; qs("#r3d-swatches").hidden = false;
     qs("#r3d-swatches").innerHTML = (selSurf === "walls" ? Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("")
       : `<button type="button" class="chip" data-swatch="match">Same as the walls</button><button type="button" class="chip" data-swatch="${selSurf === "ceil" ? "#f2f0ea" : "#ece8dd"}">${selSurf === "ceil" ? "White" : "Off-white"}</button>`);
-    qsa("[data-sel=turn],[data-sel=remove]").forEach(b => b.hidden = true);
+    qsa("[data-sel=turn],[data-sel=remove],[data-sel=copy]").forEach(b => b.hidden = true); qs("#r3d-selsize").textContent = "";
     return;
   }
   if (!selId) return;
   const it = MOV[selId], L = S.layout[selId] || {};
   qs("#r3d-selname").textContent = it.label;
+  qs("#r3d-selsize").textContent = it.w && it.d ? `${Math.round(it.w)} × ${Math.round(it.d)} cm` : "";   // v19: its footprint
+  qsa("[data-sel=copy]").forEach(b => b.hidden = !it.added);
   qs("#r3d-swatches").hidden = true;
   qsa("[data-sel=turn]").forEach(b => b.hidden = !!it.lamp);
   qsa("[data-sel=remove]").forEach(b => b.hidden = false);
@@ -1131,7 +1177,7 @@ canvas.addEventListener("pointerdown", e => {
   select(id);
   const it = MOV[id], p = spotOf(id), f = floorAt(e);
   if (!f) return;
-  drag = { id, dx: p.x - f.x, dz: p.z - f.z, x0: p.x, z0: p.z, moved: false };
+  drag = { id, dx: p.x - f.x, dz: p.z - f.z, x0: p.x, z0: p.z, moved: false, before: snapshot() };
   controls.enabled = false; canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener("pointermove", e => {
@@ -1146,7 +1192,7 @@ canvas.addEventListener("pointermove", e => {
 function endDrag(e) {
   if (drag) {
     const d = drag; drag = null; controls.enabled = true;
-    if (d.moved) { setLayout(d.id, { x: d.x, z: d.z }); if (MOV[d.id].lamp) { lamp.position.set(0, 0, 0); built.lamp = null; applyState(); select(d.id); } else { placeAll(); store.set(KEY, S); } }
+    if (d.moved) { UNDO.push(d.before); if (UNDO.length > 10) UNDO.shift(); undoBtn(); setLayout(d.id, { x: d.x, z: d.z }); if (MOV[d.id].lamp) { lamp.position.set(0, 0, 0); built.lamp = null; applyState(); select(d.id); } else { placeAll(); store.set(KEY, S); } }
     return;
   }
   if (S.edit && downXY && Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]) < 6) {   // a tap on nothing movable: a surface to paint?
@@ -1161,14 +1207,18 @@ qs("#r3d-editbtn").addEventListener("click", () => setEdit(!S.edit));
 qs(".r3d-edit").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || b.closest("#r3d-sel") || b.id === "r3d-editbtn") return;
   if (b.id === "r3d-add") { addList(); const l = qs("#r3d-addlist"); l.hidden = !l.hidden; return; }
+  if (b.id === "r3d-undo") { undo(); return; }
+  if (b.id === "r3d-share") { shareLayout(); return; }
+  if (b.id === "r3d-useshared") { if (sharedDoc) { pushUndo(); restoreLayout(sharedDoc); qs("#r3d-sharest").textContent = "Using the shared layout (↶ Undo goes back)."; } return; }
   if (b.id === "r3d-layreset") { if (!confirm("Put everything back where the plan has it, and take out what you've added?")) return;
+    pushUndo();
     S.added.forEach(a => { const it = MOV[a.id]; if (it) { movers.remove(it.pivot); delete MOV[a.id]; } }); S.added = []; S.layout = {};
     select(null); built.lamp = null; applyState(); return; }
-  if (b.dataset.putback) { setLayout(b.dataset.putback, { off: false }); qs("#r3d-addlist").hidden = true; if (MOV[b.dataset.putback].lamp) built.lamp = null; applyState(); select(b.dataset.putback); return; }
+  if (b.dataset.putback) { pushUndo(); setLayout(b.dataset.putback, { off: false }); qs("#r3d-addlist").hidden = true; if (MOV[b.dataset.putback].lamp) built.lamp = null; applyState(); select(b.dataset.putback); return; }
   if (b.dataset.add) {
     const t = controls.target, c = clampItem(CATALOGUE[b.dataset.add], -t.x / M, Math.min(t.z / M, -40), 0);
     const a = { id: "a" + Date.now().toString(36), type: b.dataset.add, x: c.x, z: c.z };
-    addThing(a); qs("#r3d-addlist").hidden = true; select(a.id); applyState();
+    pushUndo(); addThing(a); qs("#r3d-addlist").hidden = true; select(a.id); applyState();
   }
 });
 qs("#r3d-sel").addEventListener("click", e => {
@@ -1182,6 +1232,12 @@ qs("#r3d-sel").addEventListener("click", e => {
   if (k === "done") { select(null); return; }
   if (!selId) return;
   const it = MOV[selId];
+  if (k === "turn" || k === "remove" || k === "copy") pushUndo();
+  if (k === "copy" && it.added) {     // v19: another of the same, a little way off, turned and coloured the same
+    const src = S.added.find(a => a.id === selId), p = spotOf(selId), L = S.layout[selId] || {}, c = clampItem(it, p.x + 25, p.z + 25, p.rot);
+    const a = { id: "a" + Date.now().toString(36), type: src.type, x: c.x, z: c.z };
+    addThing(a); setLayout(a.id, { rot: p.rot, col: L.col }); placeAll(); store.set(KEY, S); select(a.id); applyState(); return;
+  }
   if (k === "turn") { const p = spotOf(selId), rot = (p.rot + 45) % 360, c = clampItem(it, p.x, p.z, rot); setLayout(selId, { rot, x: c.x, z: c.z }); placeAll(); store.set(KEY, S); }
   if (k === "remove") {
     if (it.added) { movers.remove(it.pivot); delete MOV[selId]; S.added = S.added.filter(a => a.id !== selId); delete S.layout[selId]; }
@@ -1189,6 +1245,7 @@ qs("#r3d-sel").addEventListener("click", e => {
     select(null); applyState();
   }
 });
+qs("#r3d-selcol").addEventListener("pointerdown", () => { if (selId) pushUndo(); });   // one undo step per colour pick
 qs("#r3d-selcol").addEventListener("input", e => {
   const v = e.target.value;
   if (selSurf === "walls") { S.paint = "custom"; S.custom = v; repaint(); syncButtons(); updateCaption(); }
@@ -1196,6 +1253,29 @@ qs("#r3d-selcol").addEventListener("input", e => {
   else if (selId) { setLayout(selId, { col: v }); placeAll(); }
   store.set(KEY, S); dirty();
 });
+document.addEventListener("keydown", e => { if (S.edit && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); } });
+/* v19: one layout for both of you, kept in the plan page's shared database (only where the page has one: the Claude deck) */
+let ldb = null, sharedDoc = null, sharing = Promise.resolve();
+(async () => {
+  try { ldb = (window.claude && window.claude.use) ? await window.claude.use("db") : null; } catch (e) { ldb = null; }
+  if (!ldb) return;
+  qsa(".r3d-share").forEach(b => b.hidden = false);
+  ldb.doc("layouts/shared").onSnapshot(snap => { sharedDoc = snap.exists ? snap.data() : null; shareStatus(); }, () => { qsa(".r3d-share").forEach(b => b.hidden = true); });
+})();
+function shareStatus() {
+  const st = qs("#r3d-sharest"), use = qs("#r3d-useshared"); if (!st) return;
+  use.disabled = !sharedDoc;
+  if (!sharedDoc) { st.textContent = "No shared layout yet."; return; }
+  let when = ""; try { when = new Date(sharedDoc.at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch (e) {}
+  st.textContent = `Shared layout saved ${when}.`;
+}
+function shareLayout() {
+  if (!ldb) return;
+  const st = qs("#r3d-sharest"); st.textContent = "Saving…";
+  const body = JSON.parse(JSON.stringify({ layout: S.layout, added: S.added, plants: S.plants, at: new Date().toISOString() }));
+  sharing = sharing.then(() => ldb.doc("layouts/shared").set(body)).then(() => { st.textContent = "Saved: you'll both see this layout under “Use the shared layout”."; },
+    e => { st.textContent = e && e.code === "invalid_argument" ? "This view can't save (read-only)." : "Couldn't save. Try again in a moment."; });
+}
 /* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast */
 canvas.addEventListener("webglcontextlost", e => {
   e.preventDefault(); S.quality = "fast"; S.picked = true; store.set(KEY, S);
@@ -1211,6 +1291,7 @@ const VIEWS = {
   door:    { label: "From the door", eye: [372, 165, -6], at: [110, 85, -210], fov: 64 },
   stairs:  { label: "From the stairs", eye: [438, 205, 4], at: [190, 70, -205], fov: 62 },
   dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [190, 150, -172], at: [467, 126, -182] }, fov: 56 },
+  chairs:  { label: "The chairs on their hooks", eye: [300, 168, -140], at: [467, 98, -258], fov: 42 },   // v19
   windowwall: { label: "The window wall", eye: [236, 150, -70], at: [236, 120, -309], fov: 66 },   // v17: for the ideas' stills
   breast:  { label: "The chimney breast", eye: [246, 140, -250], at: [246, 120, 0], fov: 54 },   // v17: for the ideas' stills
   pc:      { label: "The PC side wall", eye: [345, 135, -168], at: [0, 112, -168], fov: 56 },
@@ -1351,7 +1432,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : "stairs wall";
-  return `Media wall v18 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v19 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -1375,7 +1456,7 @@ const sameAsScene = () => LAYERS.every(k => (S.lv[k] ?? 0) === (SCENES[S.scene].
 function syncButtons() {
   press("site", S.site); press("dining", S.dining); press("scene", sameAsScene() ? S.scene : ""); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
-  press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants);
+  press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs);
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
   qs("#r3d-custom").value = S.custom;
@@ -1403,6 +1484,7 @@ root.addEventListener("click", e => {
   else if (d.paint) S.paint = d.paint, repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
+  else if (d.chairs) S.chairs = d.chairs, applyState();
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
   else if (b.id === "r3d-full") { const st = qs(".r3d-stage"); (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
   else if (b.id === "r3d-reset") { setView(S.view); return; }
@@ -1443,7 +1525,7 @@ function start() {
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
     set(o) { Object.assign(S, o); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }

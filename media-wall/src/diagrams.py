@@ -2119,3 +2119,82 @@ def fliptop():
         o.append(t(0, 62 + i * 17, f"{i + 1}. " + n, 9.8, "start", 400, INK))
     return svg(W, H, "\n".join(o), "The flip-top table: folded, and open",
                "In section through its centre line, to scale, the wall on the right of each. It never comes off the wall, and there's no leaf to store.")
+
+
+def chair_storage():
+    """v19: the stairs wall seen from the room, to scale: the table folded under your shelf, two folded chairs on hooks in the gap at its
+    window end, and why the gap at the stair end and the space under the stairs are only maybes."""
+    g = G
+    W, H = 900, 850
+    k = 2.55
+    z0, z1 = 0.0, g.WINDOW_Z                       # left edge: the door wall's line; right edge: the window wall
+    ox, oy = 30, 120
+    X = lambda z: ox + (z0 - z) * k
+    Y = lambda y: oy + (g.CEIL - y) * k
+    cw, cdep, ch = g.CHAIR_FOLDED
+    CS = g.CHAIR_STORE
+    hz0, hz1 = CS["hooks"]["z"]
+    sg0, sg1 = CS["stair_gap"]
+    o = []
+    o.append(f'<rect x="{X(z0)}" y="{Y(g.CEIL)}" width="{(z0 - z1) * k}" height="{g.CEIL * k}" fill="#f4f1ea" stroke="{WALL}" stroke-width="2"/>')
+    # the stairs: the flight rising away from the room, seen end-on past the stair box's face
+    sz = g.STAIRS_WALL_Z[0]
+    o.append(f'<rect x="{X(z0)}" y="{Y(g.CEIL)}" width="{(z0 - sz) * k}" height="{g.CEIL * k}" fill="#e6e0d3" stroke="#9a958b"/>')
+    for i in range(10):
+        y = (i + 1) * g.STAIR_RISE
+        o.append(f'<line x1="{X(z0)}" y1="{Y(y)}" x2="{X(sz)}" y2="{Y(y)}" stroke="#b8b09f" stroke-width="1"/>')
+    o.append(t(X((z0 + sz) / 2), Y(130), "stairs", 11, "middle", 650, MUTED))
+    o.append(t(X((z0 + sz) / 2), Y(130) + 14, "(up)", 10, "middle", 400, MUTED))
+    # the stair's foot: keep clear
+    o.append(f'<rect x="{X(sz)}" y="{Y(g.CEIL)}" width="{(sz - sg0) * k}" height="{g.CEIL * k}" fill="#fbe7e1" fill-opacity="0.55"/>')
+    o.append(t(X((sz + sg0) / 2), Y(40), "keep clear:", 9.5, "middle", 650, "#a3352b"))
+    o.append(t(X((sz + sg0) / 2), Y(40) + 12, "the stairs' foot", 9.5, "middle", 400, "#a3352b"))
+    # the pipe boxing in the window corner
+    pb = g.PIPE_BOX
+    o.append(f'<rect x="{X(pb["z"][1])}" y="{Y(g.CEIL)}" width="{(pb["z"][1] - pb["z"][0]) * k}" height="{g.CEIL * k}" fill="#d8d3c8" stroke="{WALL}" stroke-width="1.4"/>')
+    o.append(t(X((pb["z"][0] + pb["z"][1]) / 2), Y(120), "pipe", 9.5, "middle", 600, MUTED))
+    o.append(t(X((pb["z"][0] + pb["z"][1]) / 2), Y(120) + 12, "boxing", 9.5, "middle", 600, MUTED))
+    # your shelf
+    sb = g.SHELF_B
+    o.append(f'<rect x="{X(sb["z"][0])}" y="{Y(sb["top"])}" width="{(sb["z"][0] - sb["z"][1]) * k}" height="{sb["t"] * k}" fill="#2a2a2b"/>')
+    o.append(t(X((sb["z"][0] + sb["z"][1]) / 2), Y(sb["top"]) - 6, "your 2 m shelf (underside at " + _fmt(sb["top"] - sb["t"]) + ")", 10, "middle", 600))
+    # the table, folded
+    tz0, tz1 = g.TABLE_B_Z
+    o.append(f'<rect x="{X(tz0)}" y="{Y(g.FOLDED_TOP)}" width="{(tz0 - tz1) * k}" height="{(g.FOLDED_TOP - g.RAIL_TOP + g.RAIL[1]) * k}" fill="#e9d3b4" stroke="#b88a55" stroke-width="1.4"/>')
+    o.append(t(X((tz0 + tz1) / 2), Y(115), "the flip-top, folded", 11, "middle", 650, "#5a3a20"))
+    o.append(t(X((tz0 + tz1) / 2), Y(115) + 14, f"{_fmt(g.FOLDED_D)} off the wall", 9.5, "middle", 400, "#5a3a20"))
+    # the two chairs on hooks
+    cz = (hz0 + hz1) / 2
+    for (ya, yb), hy in zip(CS["hooks"]["chair_y"], CS["hooks"]["hook_y"]):
+        xa, xb = X(cz + cw / 2), X(cz - cw / 2)
+        o.append(f'<rect x="{xa}" y="{Y(yb)}" width="{cw * k}" height="{ch * k}" rx="4" fill="#efe2cc" stroke="#9c6a3f" stroke-width="1.4"/>')
+        o.append(f'<rect x="{xa + 5 * k}" y="{Y(yb - 6)}" width="{(cw - 10) * k}" height="{24 * k}" rx="3" fill="#e2cfae" stroke="#b88a55"/>')   # the back
+        o.append(f'<ellipse cx="{(xa + xb) / 2}" cy="{Y(hy)}" rx="{6 * k}" ry="{2.2 * k}" fill="#f4f1ea" stroke="#9c6a3f"/>')                # its hole
+        o.append(f'<rect x="{(xa + xb) / 2 - 1.5 * k}" y="{Y(hy + 4)}" width="{3 * k}" height="{8 * k}" fill="#8a8c8f"/>')                  # the hook
+        o.append(f'<line x1="{xa + 4 * k}" y1="{Y((ya + yb) / 2)}" x2="{xb - 4 * k}" y2="{Y((ya + yb) / 2)}" stroke="#b88a55"/>')           # the folded seat
+    o.append(t(X(hz0) - 6, Y(165), "two folded chairs →", 10.5, "end", 700, "#2f7a4a"))
+    o.append(t(X(hz0) - 6, Y(165) + 12, "on folding hooks", 9.5, "end", 500, "#2f7a4a"))
+    # dimensions
+    def dz(za, zb, y, lab, col=BLUE, dy=-5):
+        o.append(f'<line x1="{X(za)}" y1="{Y(y)}" x2="{X(zb)}" y2="{Y(y)}" stroke="{col}" stroke-width="1.3"/>')
+        for zz in (za, zb):
+            o.append(f'<line x1="{X(zz)}" y1="{Y(y) - 5}" x2="{X(zz)}" y2="{Y(y) + 5}" stroke="{col}" stroke-width="1.3"/>')
+        o.append(t((X(za) + X(zb)) / 2, Y(y) + dy, lab, 10, "middle", 700, col))
+    def dy_(z, ya, yb, lab, col=BLUE):
+        o.append(f'<line x1="{X(z)}" y1="{Y(ya)}" x2="{X(z)}" y2="{Y(yb)}" stroke="{col}" stroke-width="1.3"/>')
+        o.append(t(X(z) + 5, (Y(ya) + Y(yb)) / 2 + 4, lab, 9.5, "start", 700, col))
+    dz(hz0, hz1, -6, f"{_fmt(hz0 - hz1)} gap · chairs {_fmt(cw)} wide", dy=14)
+    dz(sg0, sg1, -6, f"{_fmt(sg0 - sg1)}: {_fmt(cw - (sg0 - sg1))} too narrow", "#a3352b", dy=14)
+    dy_(hz1 + 3, CS["hooks"]["chair_y"][1][1], sb["top"] - sb["t"], f"{_fmt(sb['top'] - sb['t'] - CS['hooks']['chair_y'][1][1])}")
+    for hy in CS["hooks"]["hook_y"]:
+        o.append(t(X(hz0) - 6, Y(hy) + 4, f"hook at {_fmt(hy)} →", 9, "end", 600, BLUE))
+    o.append(f'<line x1="{X(z0) - 8}" y1="{Y(0)}" x2="{X(z1) + 8}" y2="{Y(0)}" stroke="{WALL}" stroke-width="2.4"/>')
+    o.append(t(X(z0), Y(0) + 40, "← door wall (south)", 9.5, "start", 500, MUTED))
+    o.append(t(X(z1), Y(0) + 40, "window wall (north) →", 9.5, "end", 500, MUTED))
+    notes = ["1 · On hooks by the table (the plan): two chairs, £8–15 of hooks; empty, the hooks fold flat. Take both down before you open the table.",
+             f"2 · Under the stairs: inside the room the flight is only about {_fmt(CS['under_stairs']['h'])} high; four chairs lying flat stack about {_fmt(4 * cdep)}. Send a photo of the side by the door.",
+             "3 · The garage: no change in the room, any number of chairs; a carry through the house for every meal."]
+    for i, n_ in enumerate(notes):
+        o.append(t(0, Y(0) + 68 + i * 17, n_, 10.2, "start", 500 if i else 650, INK if i else "#2f7a4a"))
+    return svg(W, H, "\n".join(o), "Keeping the dining chairs: the stairs wall from the room",
+               f"To scale (1 cm = {k} px). The table and its build don't change; folded FRÖSVI chairs ({_fmt(cw)} × {_fmt(cdep)} × {_fmt(ch)}) hang in the gap at its window end.")

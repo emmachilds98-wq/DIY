@@ -9,7 +9,7 @@ Ids are kept from earlier rounds: answers already saved in the viewer's db stay 
 Answered and dropped in v13.6: the door, the walls, the PC case (v12.1), and where the leaf and legs live (the leaf carries them)."""
 import geometry as G
 
-LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS + G.NOW_LEDGE["n"]   # v16: 191, with the "now playing" ledge
+LPS = G.ALL_LPS   # v19: 291: the wall's 191 (all face-out) and the vinyl stand's 100
 SINGLES = 2 * G.TRAY_SINGLES
 
 
@@ -35,11 +35,11 @@ QUESTIONS = [
      "The zone takes up to 45.2 × 35.2 cm; the switch decides whether you need the separate preamp.", "The model is usually on the plinth or underneath.", True),
     ("fanstand", "The Series X fan stand's make and model",
      f"The shelf takes a footprint up to about 30 cm wide; the plan assumes {_n(G.FAN_STAND[0])} × {_n(G.FAN_STAND[2])}.", "A photo of the stand is enough.", True),
-    ("chairs", "Dining chairs: ones you have, or folding ones? How many, and where will they be kept?",
-     "The plan draws IKEA TERJE (seat 48); any chair with a 45–48 cm seat works. The flip-top seats up to six on the breast, seven by the stairs: how many chairs do you want to own?",
-     "Seat height of yours, and the spot you have in mind (the garage?).", False),
+    ("chairs", "Dining chairs: how many, folding or not, and is the space under the stairs open?",
+     f"v19: two folded chairs (IKEA FRÖSVI, TERJE's successor) hang on hooks at the table's window end, one above the other; the flip-top seats up to seven by the stairs. Chairs that don't fold won't hang: they'd go under the stairs (inside the room the flight is only about {_n(G.CHAIR_STORE['under_stairs']['h'])} cm high) or the garage.",
+     "How many you want to own, whether they fold, their seat height, and a photo of the side of the stairs by the door.", True),
     ("records", "Roughly how many LPs?",
-     f"The wall holds about {LPS} LPs, all face-out (two snug LP crates in bay 3 since v16). If there are more, the neatest overflow is another LP column like bay 3's.", "A rough count is fine.", False),
+     f"About {LPS} in all (v19): {G.WALL_LPS} in the wall, all face-out (two snug LP crates in bay 3 since v16), and {G.STAND_LPS} in your vinyl stand ({G.RECORD_SHELF['lps_top']} face-out on top, {G.RECORD_SHELF['lps_bottom']} spine-up between the wires). If there are more, the neatest overflow is another LP column like bay 3's.", "A rough count is fine.", False),
     ("games", "Roughly how many PS2, Xbox 360 and Xbox One games?",
      f"The game drawer in bay 1 holds about 48 and the two slim drawers in bay 3 about {G.SLIM_GAMES} more, face-out (v16): about {48 + G.SLIM_GAMES} in all.", "A count of each is plenty.", False),
     ("ports", "Wired ports for the projector (master) and the music room (bedroom 2)?",
@@ -52,6 +52,12 @@ QUESTIONS = [
     ("point2", "The pendant point by the stairs wall: its exact spot",
      "From your photo it hangs about 55 cm out from the stairs wall, a quarter of the way along the shelf from the stair end. Bar 2 goes on it, over the table if you choose that spot.",
      "Measure from the stairs wall and from the window wall.", False),
+    ("cornergap", "The window corner: tape the gap at floor level",
+     f"v19: your plant stand ({_n(G.PLANT_STAND['w'])} wide) is drawn with only {_n((G.PIPE_BOX['x'][0] - G.WINDOW_X[1] - G.CURTAIN['ext'] - G.PLANT_STAND['w']) / 2)} cm a side between the curtains' stack and the pipe boxing. If the gap is short, the curtain pole's west end can come in, or swap to layout B (the vinyl stand there, the plants on the breast).",
+     "Measure from the pipe boxing to where the curtains bunch when they're open, at floor level.", True),
+    ("hdcrash", "Does HD in the 3D room still crash, and on which phone?",
+     "v18 capped the shadows and saves phone pictures smaller. If it still crashes, the next step is to turn off the area lights (the costliest) in HD on phones.",
+     "The phone's model, and whether it was looking round or saving a picture.", False),
     ("retrotink", "The RetroTINK-6X CE's size, when it arrives",
      "RetroTINK publishes no size; bay 1 allows 23 × 23 × 8 beside the Xbox 360.", "Width, depth and height, or a photo with a tape measure.", True),
 ]
@@ -64,8 +70,10 @@ PDF_LINE = {
     "westend": "The stairs wall's length and your shelf's height (drawn at 196: the OBEGRÄNSAD needs 198 or lower to stand on it).",
     "turntable": "The turntable's model (the zone takes up to 45.2 × 35.2 cm) and whether it has a PHONO/LINE switch.",
     "fanstand": "The Series X fan stand's model: the shelf takes a footprint up to about 30 cm wide.",
-    "chairs": "Dining chairs: use ones you have (seat 45–48), or folding ones (the flip-top seats up to six or seven)? And where they'll be kept.",
-    "records": f"Records: roughly how many LPs (the wall holds about {LPS}, all face-out)?",
+    "chairs": "Dining chairs: how many, and do they fold? Two folded ones hang on hooks by the table (v19); a photo of the side of the stairs by the door says whether more fit under them.",
+    "cornergap": "The window corner: tape from the pipe boxing to the curtains' stack at floor level (the plant stand is drawn with 4.5 cm a side).",
+    "hdcrash": "The 3D room's HD: does it still crash, and on which phone?",
+    "records": f"Records: roughly how many LPs (the wall and the vinyl stand hold about {LPS}: {G.WALL_LPS} in the wall, all face-out, and {G.STAND_LPS} in the stand)?",
     "games": f"Games: roughly how many PS2, Xbox 360 and Xbox One games? The drawers hold about {48 + G.SLIM_GAMES}.",
     "ports": "Wired ports for the projector (master) and the music room (bedroom 2)?",
     "surge": "The 10-gang: is it surge-protected, where are its two switches, and how long is it? It now feeds the PC too.",
@@ -87,7 +95,9 @@ SHORT = {
     "westend": "the shelf's height",
     "turntable": "the turntable's model",
     "fanstand": "the fan stand's model",
-    "chairs": "chairs",
+    "chairs": "chairs (how many, under the stairs)",
+    "cornergap": "the window corner's gap",
+    "hdcrash": "whether HD still crashes",
     "records": "record counts",
     "games": "game counts",
     "ports": "extra wired ports",

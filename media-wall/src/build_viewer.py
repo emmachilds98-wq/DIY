@@ -12,12 +12,12 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "18"
+VERSION = "19"
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
 DECK_URL = "https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2"
-LPS = 2 * G.TRAY_LPS + G.LEDGE_LPS + G.WRAP_LPS + G.NOW_LEDGE["n"]   # v16: 191, with the "now playing" ledge
+LPS = G.ALL_LPS   # v19: 291, the wall's 191 and the vinyl stand's 100
 SINGLES = 2 * G.TRAY_SINGLES
 
 # ---------------------------------------------------------------- the open questions, most consequential first
@@ -415,6 +415,7 @@ CAP3D = {"3d_window_B_folded": "From the window, everyday evening: the table fol
          "3d_wall_tv": "The media wall on TV night: bias light on, bar 1 off, the strips low",
          "3d_wall_drawers": "Every drawer out, the records scene: the LP crates under the turntable, a slim game drawer beside them",
          "3d_sofa_records": "From the sofa, the records scene: light on the deck, the ledge and the LP crates",
+         "3d_chairs": "v19: two folded chairs on hooks, one above the other, between the folded table and the pipe boxing, under your shelf",
          "3d_B_folded": "The stairs wall: your shelf with the black OBEGRÄNSAD panel, the laser (off) and the plant hanging at the end by the pipe boxing, the red lamp, the table folded under it",
          "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
          "3d_dining_A_four": "Option A: down for four on the chimney breast",
@@ -449,6 +450,24 @@ def ideas_panel():
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
             f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on. All of them together would be about £{lo}–{hi}.</p>'
             f'<div class="opts">{"".join(cards)}</div>')
+
+
+def chairs_card():
+    """v19: where the dining chairs live when they're not round the table: hooks by it, under the stairs, the garage."""
+    g = G
+    H = g.CHAIR_STORE["hooks"]
+    gap = H["z"][0] - H["z"][1]
+    b = f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'hooks', 'view': 'chairs', 'scene': 'everyday'})}'>See them in 3D</button>"
+    return f"""<div class="opts">
+  <article class="opt"><img data-art="3d_chairs" alt="Two folded chairs on hooks beside the folded table" loading="lazy">
+    <div class="ob"><span class="label">1 · the plan · about £8–15</span><h3>Two on hooks, by the table</h3>
+    <ul><li>The {gap:.0f} cm gap at the table's window end takes two folded chairs, one above the other.</li><li>No change to the table; the hooks fold flat when they're empty.</li>
+    <li class="minus">Take both down before you open the table: they're the window side's chairs.</li></ul>{b}</div></article>
+  <article class="opt noimg"><div class="ob"><span class="label">2 · if it's open · free</span><h3>Under the stairs</h3>
+    <ul><li>Four folded chairs lie flat in a stack about {4 * g.CHAIR_FOLDED[1]:.0f} cm high.</li><li class="minus">Inside the room the flight is only about {g.CHAIR_STORE['under_stairs']['h']:.0f} cm high: send a photo of the side by the door.</li></ul></div></article>
+  <article class="opt noimg"><div class="ob"><span class="label">3 · no change · free</span><h3>The garage</h3>
+    <ul><li>Any number, any chair.</li><li class="minus">A carry through the house for every meal: fine for guests' chairs, a chore for everyday ones.</li></ul></div></article>
+</div>"""
 
 
 def options_card():
@@ -733,9 +752,9 @@ def page(site=False):
     <section>
       <h2>In the wall</h2>
       <div class="counts">
-        <div><strong>~{LPS}</strong><span>LPs, all face-out</span></div>
+        <div><strong>~{LPS}</strong><span>LPs: {G.WALL_LPS} face-out in the wall, {G.STAND_LPS} in your vinyl stand</span></div>
         <div><strong>LPs</strong><span>only, in the trays: room to flip</span></div>
-        <div><strong>4–8</strong><span>at the dining table</span></div>
+        <div><strong>4–7</strong><span>at the dining table; two spare chairs hang by it</span></div>
       </div>
       <p class="caption">The numbered key works on the main view. Measurements are rough, in pale yellow, for checking against the real room; the drawings in the other tabs are the exact ones.</p>
     </section>
@@ -754,6 +773,7 @@ def page(site=False):
   <section class="panel" id="dining" role="tabpanel" aria-labelledby="tb-dining" hidden>
     <nav class="toc" aria-label="On this tab"></nav>
     <div class="block"><h2 class="ptitle">Two places for the table</h2>{options_card()}</div>
+    <div class="block"><h2 class="ptitle">Keeping the chairs (v19)</h2><p class="caption">The table doesn't change. Folded chairs are about {G.CHAIR_FOLDED[0]:g} × {G.CHAIR_FOLDED[1]:g} × {G.CHAIR_FOLDED[2]:g}; the full fit check is in the Checks tab.</p>{chairs_card()}</div>
     <div class="doc"><h2>The dining wall</h2>{sec["5"]}</div>
   </section>
 

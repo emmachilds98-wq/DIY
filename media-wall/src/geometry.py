@@ -422,3 +422,23 @@ PLANT_LAYOUTS = {
 }
 PLANT_LAYOUT = "corner"          # the recommendation: daylight for the plants, the records beside the turntable
 LAMP_DEFAULT = "sofa"            # v18: the window corner is taken either way, so the red lamp starts at the sofa's west end
+
+# ---------------------------------------------------------------- v19 (20 Oct): LP totals and storing the dining chairs
+WALL_LPS = 2 * TRAY_LPS + LEDGE_LPS + WRAP_LPS + NOW_LEDGE["n"]   # 191 in the media wall, all face-out
+STAND_LPS = RECORD_SHELF["lps_top"] + RECORD_SHELF["lps_bottom"]  # 100 in the vinyl stand (either layout): 50 face-out, 50 spine-up
+ALL_LPS = WALL_LPS + STAND_LPS                                    # 291
+# The client: "chair storage can be added somewhere also for the dining chairs, optional not essential unless easily done to the original
+# table without many changes". The table isn't changed. The chairs are IKEA FRÖSVI (TERJE's UK successor, the same 43 x 49 x 78), which
+# fold flat and have a hole in the back made to hang on a hook; folded they're about 43 W x 9 D x 89 H (their flat-pack size).
+CHAIR_FOLDED = (43.0, 9.0, 89.0)
+HOOK = (3.0, 8.0, 8.0)                       # IKEA BJÄRNUM folding hook (3-pack): W x D x H; it folds flat against the wall when empty
+_hook_top = SHELF_B["top"] - SHELF_B["t"]    # the shelf's underside, 191
+CHAIR_STORE = dict(
+    # the window end of the stairs wall: from the table's end (z -235) to the pipe boxing's face (z -286), two chairs one above the other
+    hooks=dict(z=(TABLE_B_Z[1], PIPE_BOX["z"][1]), x=ROOM_W, chairs=2,
+               chair_y=((3.0, 3.0 + CHAIR_FOLDED[2]), (96.0, 96.0 + CHAIR_FOLDED[2])), hook_y=(86.0, 179.0), under_shelf=_hook_top),
+    # the stair end: from the shelf's start (z -84, past it the stair's foot has to stay clear) to the table's other end (z -125)
+    stair_gap=(SHELF_B["z"][0], TABLE_B_Z[0]),
+    # under the stairs, inside the room: the flight rises from z -35 to the door wall at z 39, so it's only about 78 tall there
+    under_stairs=dict(x=STAIR_X, z=(ALC_D - STAIR_D + 6.0, BREAST_D_WEST), h=round((BREAST_D_WEST - (ALC_D - STAIR_D + 6.0)) // STAIR_GOING + 1) * STAIR_RISE),
+)
