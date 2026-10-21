@@ -565,7 +565,7 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c_tdoor": "The table door open with the table still folded: the six seat pads on the door's back, the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
          "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
          "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
-         "3d_c_sit": "Sitting at the open table's far end: three a side on the beech chairs, their tie-on pads on, the table door folded back flat behind them",
+         "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
          "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet: the table, the six chairs and the table door's swing",
          "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
          "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that wheels out to the table's far end for dinner",

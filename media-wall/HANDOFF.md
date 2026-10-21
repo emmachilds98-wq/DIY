@@ -3,7 +3,8 @@
 ## START HERE (next agent)
 - **v31 (round 25, below): the compact cabinet reviewed for a smaller build (now 22 deep, flush with the pipe boxing), the beech
   FRÖSVI with Dunelm Esme tie-on pads hung on the table door, four options beside the cabinet, an easier 3D camera and a regrouped
-  Layout panel.** Next: `media-wall/UPGRADE_PLAN_v32.md`.
+  Layout panel.** Fit 110/39/15/0, total £3,397–6,547, plan 102 pages, guide 53. Deck 71ff published at v31 (version 1792596482-fd0a,
+  35 changed pictures in its store). Next: `media-wall/UPGRADE_PLAN_v32.md`.
 - **v30 (round 24, below): the compact dining cabinet is the plan, the sliding one the alternative; the questions are gone; tap
   things in the 3D room to work them.** Fit 107/37/14/0, total £3,373–6,603, plan 97 pages, guide 53. The deck 71ff is published at
   v30 (version 1792577704-36b4, the 14 changed pictures in its asset store). Next: `media-wall/UPGRADE_PLAN_v31.md` (waiting on the
@@ -87,6 +88,11 @@
   (`MOMENTS`: dinner for six, lunch for four, film night, everyday morning); Beside the cabinet; the flip-top's own choices folded.
 - New stills: `3d_c_sit`, `3d_c_foot`, `3d_beside_mirror`, `3d_beside_trolley`, `3d_beside_dresser`. Backups `*_v30_backup.*`.
   v30 outputs in `out/v30/`.
+- Rebuilt: all 44 stills (room3d.js changed; about 70 minutes); a later toast-only edit to room3d.js re-keyed `shot3d_prints.json`
+  instead of re-rendering. QA: `qa.py` fails and errors [] at 390 and 1280; `taptest.py` every tap works at both; the Views and Layout
+  panels fit a 390 screen. A first-run toast for returning visitors points at Move round (localStorage `mw31-camhint`).
+- Gotcha: `RoundedBoxGeometry` reports `type` "BoxGeometry" and BoxGeometry's (1, 1, 1) parameters (it scales its vertices): find
+  meshes by material, not by geometry type.
 
 ## Update 21 Oct 2026, round 24: v30 (the compact cabinet; answers in, questions gone; tap to work things)
 - Client: "the wall on the stairs is solid. electrics done ourselves, remove all other questions and that section. ask. then i asked

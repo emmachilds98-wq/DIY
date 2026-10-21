@@ -282,7 +282,7 @@ def cab_html():
 <li><b>The padded FRÖSVI</b> (£30) has a foam seat already, but its cover can't be washed: the beech chair with a washable pad costs about the same and matches the oak.</li>
 </ul>
 <figure class="render">{img("render_v31_3d_c_sit.png", "Sitting at the open table, the tie-on pads on the chairs")}
-<figcaption>Sitting at the table's far end: three a side on the beech chairs with their olive pads tied on, the table door turned back flat behind them.</figcaption></figure>
+<figcaption>Sitting at the table's far end, at a seated eye height: three a side, the linen shelf and the table door, turned back flat, behind them.</figcaption></figure>
 <p class="note">The idea is a proven one: fold-down tables built into wall units are made this way{sup("foldtable")}. Your stairs wall is solid (your answer){sup("solidwall")}, so the boxes stand on the floor and are screwed to the wall at the top with plugs and screws so they can't tip.</p>
 <figure>{cab_elevation()}</figure>
 <figure class="render">{img("render_v31_3d_c_tdoor.png", "The compact cabinet: the table door open, the table still folded")}
@@ -294,7 +294,7 @@ def cab_html():
 <table class="tight"><tr><th>Table</th><th>Seats</th><th>How</th><th>Notes</th></tr>{seats}</table>
 <figure>{cab_plan()}</figure>
 <figure class="render">{img("render_v31_3d_c_six.png", "The compact dining cabinet open for six")}
-<figcaption>Open for six in the 3D room: the table door turned back flat over the chair door, three a side, with bar 2 turned up over the table by the table rule.</figcaption></figure>
+<figcaption>Open for six in the 3D room: the table door turned back flat over the chair door, three a side on the beech chairs with their olive pads tied on, and bar 2 turned up over the table by the table rule.</figcaption></figure>
 <h3>How it's built</h3>
 <p>Step 11 of the build guide builds it in order, with every size. You build the two boxes and screw them together and to the wall. Then the hinge rail, the two halves with their aprons and legs, and the joint. Then you hang the table, the catches, and the two doors on their piano hinges. The drawings below are the ones to have open on the bench.</p>
 <figure>{cab_carcass()}</figure>
@@ -303,7 +303,7 @@ def cab_html():
 <ul>
 <li><b>The two boxes:</b> oak-faced ply, cut to size by the merchant. Each has two ends {n(C['h'])} tall and {n(C['d'])} deep, a top and a floor between them, a 6 mm back and a shelf set back behind the door. The table box is {n(C['bay_t'])} inside and the chair box {n(C['bay_c'])}. They're screwed to each other through their meeting ends, so they read as one cabinet.</li>
 <li><b>The doors:</b> {n(C['door_tw'])} and {n(C['door_cw'])} wide, {n(C['door_h'])} tall, 18 mm oak-faced ply, about {C['door_kg'][0]:.0f} and {C['door_kg'][1]:.0f} kg. They're inset flush with the front edges, the grain upright, each on a 1800 mm stainless piano hinge (1.9 short of each end) on the boxes' meeting ends. A stop with a magnetic catch sits behind each free edge.</li>
-<li><b>The hinge rail:</b> solid oak, {n(C['bay_t'])} × {n(C['in_d'])} × 7, across the table box with its top at {n(C['pivot'][1])}. The table's piano hinge sits {n(C['pivot'][0] - C['inner'])} back from its front, leaving room for the pads on the door. It carries the table's whole weight when it's open.</li>
+<li><b>The hinge rail:</b> solid oak, {n(C['bay_t'])} × {n(C['rail_x'][1] - C['rail_x'][0])} × 7, across the table box with its top at {n(C['pivot'][1])}, its front {n(C['pads'])} behind the door so the pads hang past it. The table's piano hinge sits {n(C['pivot'][0] - C['rail_x'][0])} back from its front. It carries the table's whole weight when it's open.</li>
 <li><b>The halves and the joint</b> are as before: edge-glued oak with pegged breadboard ends, each on an apron frame, the legs folding flat inside on self-locking brackets, three brass flip-top hinges at the joint.</li>
 </ul>
 <p>It costs about £{money(lo, hi)}, the chairs included: the "6 Dining wall" rows of the buy list (section 11). The sliding cabinet would be about £{money(slo, shi)}.</p>

@@ -2946,7 +2946,8 @@ function start() {
   requestAnimationFrame(frame);
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
-    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); }
+    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
+    else if (!localStorage.getItem("mw31-camhint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("New: Tools → Views → Move round sets your eye height and adds move buttons"), 1800); localStorage.setItem("mw31-camhint", "1"); }   // v31
   } catch (e) {}
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
