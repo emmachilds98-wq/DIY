@@ -300,3 +300,12 @@ dl.cmp dt { color: var(--mut2); } dl.cmp dd { margin: 0; }
   .dcopts { grid-template-columns: 1fr; } .dcopts button { flex-direction: row; } .dcopts img, .dcopts .sw { width: 112px; aspect-ratio: auto; height: 84px; flex: none; }
 }
 body.ov-open .r3d-dock, body.ov-open .r3d-phone { visibility: hidden; }
+/* v33: the Plan home's next three things (one to decide, one to build, one to buy) */
+.next3 { margin: 14px 0 6px; } .next3 h2 { margin: 0 0 10px; font-size: 20px; }
+.n3s { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 899px) { .n3s { grid-template-columns: 1fr; } }
+.n3 { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 22px; background: oklch(0.92 0.06 var(--h)); }
+.n3 > .ms { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: oklch(0.8 0.11 var(--h)); font-size: 22px; }
+.n3 > div { flex: 1; min-width: 0; display: grid; gap: 1px; } .n3 .label { font: 600 11.5px var(--body); text-transform: uppercase; letter-spacing: .05em; color: var(--mut2); }
+.n3 b { font: 600 16px/1.25 var(--display); } .n3 > div > span:last-child { font-size: 13px; color: var(--muted); }
+.n3 .btn { flex: none; background: var(--ink) !important; color: var(--page) !important; }

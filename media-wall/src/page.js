@@ -349,6 +349,22 @@ window.PICKS = (() => {
       const pic = first.art && DATA.img[first.art] ? `<img src="${DATA.img[first.art]}" alt="" loading="lazy">` : first.swatch ? `<span class="sw" style="background:${first.swatch}"></span>` : `<span class="sw ic"><span class="ms" aria-hidden="true">toggle_on</span></span>`;
       return `<li class="${o ? "made" : ""}"><button type="button" data-decide-open="${i}">${pic}<span class="wt"><b>${esc(d.title)}</b><span>${o ? "Your pick: " + esc(o.label) : esc(d.q)}</span></span><span class="go">${o ? "Change" : "Choose"}</span></button></li>`; }).join("");
     const made = D.filter(d => st.decide[d.key]).length;
+    // v33, client: "optimise the workflow and ensure we complete the plan": the next three things, one from each part of the plan
+    const n3 = $("#next3");
+    if (n3) {
+      const di0 = D.findIndex(d => !st.decide[d.key]), step = BD.find(s => !$("#step-" + s.n + ".done"));
+      const need = step ? DATA.track.filter(r => r.kind === "buy" && step.buy.includes(r.phase) && !(tget(r.id) ? tget(r.id).done : r.done)) : [];
+      const lo = need.reduce((a, r) => a + (r.lo || 0), 0), hi = need.reduce((a, r) => a + (r.hi || 0), 0);
+      const card = (h, ic, k, t, sub, btn, attrs) => `<div class="n3" style="--h:${h}"><span class="ms" aria-hidden="true">${ic}</span><div><span class="label">${k}</span><b>${esc(t)}</b><span>${esc(sub)}</span></div><button type="button" class="btn" ${attrs}>${btn}</button></div>`;
+      n3.innerHTML = '<h2>Your next three</h2><div class="n3s">'
+        + (di0 >= 0 ? card(280, "how_to_vote", "Decide", D[di0].title, `${D.length - made} of ${D.length} choices still open`, "Choose", `data-decide-open="${di0}"`)
+                    : card(280, "how_to_vote", "Decide", "Every choice made", "Change any of them from Waiting on you", "Review", 'data-decide-open="0"'))
+        + (step ? card(50, "construction", `Build · step ${step.n} of ${BD.length}`, step.title, `${step.who} · ${step.time}`, "Build day", `data-bday="${step.n}"`)
+                : card(50, "construction", "Build", "Every step done", "Enjoy the room", "Steps", 'data-go="build"'))
+        + (step && need.length ? card(165, "shopping_bag", `Buy before step ${step.n}`, `${need.length} ${need.length === 1 ? "thing" : "things"} to buy`, `about ${rng(lo, hi)}`, "The list", `data-go="buy" data-phase="${(DATA.phases.find(p => step.buy.includes(p.name)) || {}).idx ?? ""}"`)
+                               : card(165, "shopping_bag", "Buy", step ? `Nothing to buy for step ${step.n}` : "Everything bought", `${DATA.track.filter(r => r.kind === "buy").length} things on the list`, "The list", 'data-go="buy"'))
+        + "</div>";
+    }
     txt("#d-choice", made + "/" + D.length); ring("d-choice-bar", made, D.length);
     $$("[data-decide=\"cabw\"]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === (st.decide.cabw || ""))));
   }
