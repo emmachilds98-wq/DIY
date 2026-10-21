@@ -9,11 +9,11 @@
  },
  "3d_c_chairs": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - the chair door open, four chairs inside (plant stand and lamp hidden) - bright (HD).png",
    "src/art/3d_c_chairs.webp",
-   "src/render_v29_3d_c_chairs.png"
+   "src/render_v30_3d_c_chairs.png"
   ],
-  "print": "3944557c170b9599982f3b57"
+  "print": "3e742d122dba5b116d72e2f9"
  },
  "3d_c_folded": {
   "files": [
@@ -25,19 +25,27 @@
  },
  "3d_c_plan": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - birds eye, open for six (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - birds eye, open for six (HD).png",
    "src/art/3d_c_plan.webp",
-   "src/render_v29_3d_c_plan.png"
+   "src/render_v30_3d_c_plan.png"
   ],
-  "print": "a7325d282a6394b8f7261a29"
+  "print": "9d8c1314fc49145808369cf3"
  },
  "3d_c_six": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - open for six - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - open for six, the table door back flat - bright, table rule (HD).png",
    "src/art/3d_c_six.webp",
-   "src/render_v29_3d_c_six.png"
+   "src/render_v30_3d_c_six.png"
   ],
-  "print": "be2dee245b55ff2c19b757e1"
+  "print": "77494a0b4a046dc428b41131"
+ },
+ "3d_c_tdoor": {
+  "files": [
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - the table door open - the folded table, the pads on the door, two chairs in the base - bright (HD).png",
+   "src/art/3d_c_tdoor.webp",
+   "src/render_v30_3d_c_tdoor.png"
+  ],
+  "print": "d005ddb3833d784ba323952c"
  },
  "3d_case_mixed": {
   "files": [
@@ -191,6 +199,14 @@
   ],
   "print": "f16d466d1aba0ca9270ac2ea"
  },
+ "3d_s_folded": {
+  "files": [
+   "out/Media wall v30 - 3D - THE SLIDING CABINET (the alternative) - packed away - bright (HD).png",
+   "src/art/3d_s_folded.webp",
+   "src/render_v30_3d_s_folded.png"
+  ],
+  "print": "7ed908710174811db9de3380"
+ },
  "3d_seat": {
   "files": [
    "out/Media wall v30 - 3D - B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright (HD).png",
@@ -273,10 +289,10 @@
  },
  "3d_window_c_six": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - from the window, open for six - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - from the window, open for six - bright, table rule (HD).png",
    "src/art/3d_window_c_six.webp",
-   "src/render_v29_3d_window_c_six.png"
+   "src/render_v30_3d_window_c_six.png"
   ],
-  "print": "b30021a39eb31f711530dbc9"
+  "print": "28a818a46dbd8fb248710ebc"
  }
 }
