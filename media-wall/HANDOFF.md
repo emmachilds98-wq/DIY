@@ -3,8 +3,8 @@
 ## START HERE (next agent)
 - **v32 (round 26, below): "Watch it open" slow and jointed, every idea, suggestion and Add-list piece with its own HD render and
   in the 3D room, three new suggestions, a cost overview by piece, and the plan page's menus reworked (tools always on, a Menu
-  button for the rest).** Fit 110/39/15/0, total £3,397–6,547 (unchanged: nothing new is in the plan), plan PLANPAGES pages
-  (PLANMB MB), guide GUIDEPAGES. Deck 71ff published at v32. Next: `media-wall/UPGRADE_PLAN_v33.md`.
+  button for the rest).** Fit 110/39/15/0, total £3,397–6,547 (unchanged: nothing new is in the plan), plan 108 pages
+  (17.5 MB), guide 53. Deck 71ff published at v32 (version 1792605072-79a2, 57 new pictures in its store). Next: `media-wall/UPGRADE_PLAN_v33.md`.
 - **v31 (round 25, below): the compact cabinet reviewed for a smaller build (now 22 deep, flush with the pipe boxing), the beech
   FRÖSVI with Dunelm Esme tie-on pads hung on the table door, four options beside the cabinet, an easier 3D camera and a regrouped
   Layout panel.** Fit 110/39/15/0, total £3,397–6,547, plan 102 pages (14.7 MB: the 3D stills go in as JPEG since v31; as PNG it was 50.5 MB, over GitHub's 50 MB advice), guide 53. Deck 71ff published at v31 (version 1792596482-fd0a,
@@ -97,7 +97,7 @@
 - **Cost overview** (`costs.py`): `PIECES` and a short name for every "To buy" row (`SHORT`, matched on the row's start; anything
   unnamed lands in "Other"); the estimates are the buy list's own, so the totals match. In the Buy sheet (cards by piece, a table each,
   Copy the shopping list) and in the plan (section 1, piece by piece; section 11, the full list).
-- Backups `*_v31_backup.*`; v31 outputs in `out/v31/`. Rebuilt: all stills (room3d.js changed). QA: QARESULT.
+- Backups `*_v31_backup.*`; v31 outputs in `out/v31/`. Rebuilt: all stills (room3d.js changed). QA: `qa.py` fails and errors [] at 390 and 1280; `taptest.py` every tap works at both (the cabinet's card has "Watch it open, step by step"); the Ideas sheet's 48 cards all have their render, "Show it in my room" and "Add it to my room" work, the step card fits a 390 screen; both cabinets' shows run headless without errors. The deck's store took 57 new pictures (`deck_assets.json`).
 
 ## Update 21 Oct 2026, round 25: v31 (a smaller cabinet checked, cushions, beside it, an easier camera, Views and Layout)
 - Client (after merging PR #27): "can you please review if there's any further optimisation we can do to the dining cabinet, we want the
