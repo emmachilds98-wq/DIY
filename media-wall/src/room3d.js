@@ -40,6 +40,7 @@ const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
+if (!S.svar || typeof S.svar !== "object" || Array.isArray(S.svar)) S.svar = {};   // v28: each suggestion's version (its first by default)
 S.decor = Object.assign({}, DEF.decor, (S.decor && typeof S.decor === "object") ? S.decor : {});
 if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
 if (!Array.isArray(S.added)) S.added = [];
@@ -865,6 +866,18 @@ let ideaLed;
 let rugMesh, curtCloth, caseFrameM, cushG, coffeeG, floorMat, shelfMat;
 /* v21: suggested furniture and decor (ideas.SUGGEST, the same keys), each on or off (S.sugg); the floor pieces move in Edit room */
 const SUGG_G = {};
+/* v28: the suggestions' versions (ideas.SUGG_VARS): colour i goes on SVAR_MATS[k][i], a material or a light of that piece's own */
+const SVAR = JSON.parse((document.getElementById("svar-data") || {}).textContent || "{}");
+const SVAR_MATS = {};
+const svarOf = k => (SVAR[k] && SVAR[k].some(x => x[0] === S.svar[k])) ? S.svar[k] : (SVAR[k] ? SVAR[k][0][0] : "");
+function applySvar() {
+  for (const [k, mats] of Object.entries(SVAR_MATS)) {
+    const ver = (SVAR[k] || []).find(x => x[0] === svarOf(k)); if (!ver) continue;
+    const it = MOV["sg_" + k];
+    mats.forEach((m, i) => { const c = ver[2][Math.min(i, ver[2].length - 1)]; m.color.set(c);
+      const j = it ? it.mats.indexOf(m) : -1; if (j >= 0) it.base[j] = c; });   // a floor piece: placeAll recolours it (and Edit room's colour still wins)
+  }
+}
 const PRINT_TEX = canvasTex(720, 500, (g, w, h) => {      // a mid-century print: an ochre sun, a rust hill, a sage arch on cream
   g.fillStyle = "#efe7d8"; g.fillRect(0, 0, w, h);
   g.fillStyle = "#d9a441"; g.beginPath(); g.arc(w * 0.68, h * 0.34, 82, 0, Math.PI * 2); g.fill();
@@ -878,7 +891,9 @@ function buildSuggest() {
   const mat = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
   // the floor pieces: movable, shown only while switched on
   const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] }); };
-  { const pot = mat("#d8cfc0");
+  const ownOak = () => reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));   // v28: each piece's own, for its versions
+  const ownGlow = c => new THREE.MeshBasicMaterial({ color: c, toneMapped: false });
+  { const pot = mat("#d8cfc0"); SVAR_MATS.floorplant = [pot];
     floor("floorplant", "Floor plant (suggested)", 40, 40, 24, -92, g => {
       const p = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.32, 24), pot); p.position.y = 0.16; g.add(shadow(p));
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 1.0, 8), mat("#6b5238")); trunk.position.y = 0.8; g.add(trunk);
@@ -887,28 +902,29 @@ function buildSuggest() {
         const lg = new THREE.SphereGeometry(0.075 + r() * 0.03, 8, 6); lg.scale(1, 0.25, 0.75); lg.rotateZ((r() - 0.5) * 0.9); lg.rotateY(a);
         lg.translate(Math.cos(a) * rr, y, Math.sin(a) * rr); gs.push(lg); }
       g.add(shadow(new THREE.Mesh(mergeGeometries(gs), leaf))); }, [pot]); }
+  { const oak = ownOak(); SVAR_MATS.sidetable = [oak];
   floor("sidetable", "Side table (suggested)", 40, 40, 76, -108, g => {
     const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 32), oak); top.position.y = 0.4875; g.add(shadow(top));
     const col = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.475, 16), oak); col.position.y = 0.2375; g.add(shadow(col));
-    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.02, 32), oak); foot.position.y = 0.01; g.add(shadow(foot)); }, [oak]);
-  { const knit = mat("#d9a441");
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, 0.02, 32), oak); foot.position.y = 0.01; g.add(shadow(foot)); }, [oak]); }
+  { const knit = mat("#d9a441"); SVAR_MATS.pouffe = [knit];
     floor("pouffe", "Pouffe (suggested)", 50, 50, 175, -95, g => {
       const b = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.4, 32), knit); b.position.y = 0.2; g.add(shadow(b));
       const t = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.02, 8, 32), knit); t.rotation.x = Math.PI / 2; t.position.y = 0.39; g.add(t); }, [knit]); }
   // on the walls and the coffee table: fixed, shown only while switched on
-  { const g = SUGG_G.art = new THREE.Group(), z0 = -298;
+  { const g = SUGG_G.art = new THREE.Group(), z0 = -298, oak = ownOak(); SVAR_MATS.art = [oak];
     ibox(g, 0, 110, z0, 3, 55, 80, oak);
     const print = reg(new THREE.MeshStandardMaterial({ map: PRINT_TEX, roughness: 0.8 }));
     const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.47), print); pl.position.copy(v3(3.1, 137.5, z0 + 40)); pl.rotation.y = -Math.PI / 2; g.add(pl);
     shell.add(g); }
   { const g = SUGG_G.clock = new THREE.Group(), cx = (R.DOOR_X[0] + R.DOOR_X[1]) / 2, cy = R.DOOR_H + (R.CEIL - R.DOOR_H) / 2, zf = R.RECESS_Z;
     const face = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.03, 40), mat("#f3f1eb")); face.rotation.x = Math.PI / 2; face.position.copy(v3(cx, cy, zf - 1.5)); g.add(face);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.008, 8, 40), oak); rim.position.copy(v3(cx, cy, zf - 3)); g.add(rim);
+    const rimM = SVAR_MATS.clock = [ownOak()], rim = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.008, 8, 40), rimM[0]); rim.position.copy(v3(cx, cy, zf - 3)); g.add(rim);
     const ink = mat("#1f1f21");
     for (const [len, a] of [[10, 0.6], [7, 2.4]]) { const h = new THREE.Mesh(new THREE.BoxGeometry(0.006, len * M, 0.003), ink);
       h.geometry.translate(0, len * M / 2, 0); h.position.copy(v3(cx, cy, zf - 3.2)); h.rotation.z = a; g.add(h); }
     shell.add(g); }
-  { const g = SUGG_G.tray = new THREE.Group();
+  { const g = SUGG_G.tray = new THREE.Group(), oak = ownOak(); SVAR_MATS.tray = [oak];
     lb(g, 12, 42, 0, 40, 1.6, 26, oak);
     lb(g, 18, 43.6, 0, 22, 3, 16, mat("#2f4a6e")); lb(g, 18, 46.6, 0, 20, 2.4, 15, mat("#c7643a"));
     const c = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.09, 20), reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.12 })));
@@ -918,58 +934,61 @@ function buildSuggest() {
   const glow = new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false });
   { const g = SUGG_G.fairy = new THREE.Group(), CU = R.CURTAIN, [wx0, wx1] = R.WINDOW_X, x0 = wx0 - CU.ext + 2, x1 = wx1 + CU.ext - 2, gs = [];
     for (let x = x0; x <= x1; x += 6) { const sp = new THREE.SphereGeometry(0.0045, 6, 4), q = v3(x, CU.rail_y + CU.pole / 2 - 1.6 - 1.2 * Math.abs(Math.sin((x - x0) / 23)), CU.z + 2.6); sp.translate(q.x, q.y, q.z); gs.push(sp); }
-    g.add(new THREE.Mesh(mergeGeometries(gs), glow)); shell.add(g); }
+    SVAR_MATS.fairy = [ownGlow("#ffd59a")]; g.add(new THREE.Mesh(mergeGeometries(gs), SVAR_MATS.fairy[0])); shell.add(g); }
   { const g = SUGG_G.hanger = new THREE.Group(), CU = R.CURTAIN, x = R.WINDOW_X[0] + 34, z = CU.z + 1, yp = CU.rail_y - 72;
     const cord = mat("#e9e1cf");
     for (const a of [0, 2.1, 4.2]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.7, 4), cord);
       c.position.copy(v3(x + Math.cos(a) * 4, yp + 46, z + Math.sin(a) * 4)); c.rotation.z = Math.cos(a) * 0.08; c.rotation.x = Math.sin(a) * 0.08; g.add(c); }
-    potPlant(g, x, yp, z, 7, 8, 3, rnd(81), mat("#c46c45"), leaf); shell.add(g); }
-  { const g = SUGG_G.trail = new THREE.Group(); potPlant(g, 172, 196, 22, 7, 10, 4, rnd(83), mat("#ece6da"), leaf); shell.add(g); }
-  { const g = SUGG_G.throw = new THREE.Group(), knit = reg(new THREE.MeshStandardMaterial({ color: "#efe7d8", roughness: 1, bumpMap: HESSIAN, bumpScale: 1.4 }));
+    SVAR_MATS.hanger = [mat("#c46c45")]; potPlant(g, x, yp, z, 7, 8, 3, rnd(81), SVAR_MATS.hanger[0], leaf); shell.add(g); }
+  { const g = SUGG_G.trail = new THREE.Group(); SVAR_MATS.trail = [mat("#ece6da")]; potPlant(g, 172, 196, 22, 7, 10, 4, rnd(83), SVAR_MATS.trail[0], leaf); shell.add(g); }
+  { const g = SUGG_G.throw = new THREE.Group(), knit = reg(new THREE.MeshStandardMaterial({ color: "#efe7d8", roughness: 1, bumpMap: HESSIAN, bumpScale: 1.4 })); SVAR_MATS.throw = [knit];
     const ze = R.SOFA.end;
     ibox(g, 22, 52, ze - 46, 70, 2.2, 46, knit);                 // folded over the seat at the open end
     ibox(g, 22, 18, ze - 0.2, 70, 36, 2.2, knit);                // and hanging over the end
     shell.add(g); }
   { const g = SUGG_G.pclamp = new THREE.Group(), y = R.PC_SHELF_TOP, z = -198, x = 13;
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.2, 20), mat("#e8e2d4")); base.position.copy(v3(x, y + 10, z)); g.add(shadow(base));
-    const shade = new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), reg(new THREE.MeshStandardMaterial({ color: "#f3e7cf", emissive: "#ffcf8a", emissiveIntensity: 0.6, roughness: 0.6 })));
+    const pm = SVAR_MATS.pclamp = [mat("#e8e2d4"), reg(new THREE.MeshStandardMaterial({ color: "#f3e7cf", emissive: "#ffcf8a", emissiveIntensity: 0.6, roughness: 0.6 }))];
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 0.2, 20), pm[0]); base.position.copy(v3(x, y + 10, z)); g.add(shadow(base));
+    const shade = new THREE.Mesh(new THREE.SphereGeometry(0.11, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), pm[1]);
     shade.position.copy(v3(x, y + 19, z)); g.add(shadow(shade)); shell.add(g); }
   // v26: six more
-  { const g = SUGG_G.candles = new THREE.Group(), sb = R.SHELF_B, wax = reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.18 }));
+  { const g = SUGG_G.candles = new THREE.Group(), sb = R.SHELF_B, wax = reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.18 })); SVAR_MATS.candles = [wax];
     [[10, -262], [12.5, -252], [15, -243]].forEach(([h, z]) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.0375, 0.0375, h * M, 20), wax); c.position.copy(v3(R.W - sb.d / 2 - 2, sb.top + h / 2, z)); g.add(shadow(c));
       const f = new THREE.Mesh(new THREE.SphereGeometry(0.008, 8, 6), glow); f.scale.y = 1.8; f.position.copy(v3(R.W - sb.d / 2 - 2, sb.top + h + 1.2, z)); g.add(f); });
     shell.add(g); }
-  { const g = SUGG_G.runner = new THREE.Group(), linen = mat("#e6dccb");
+  { const g = SUGG_G.runner = new THREE.Group(), linen = mat("#e6dccb"); SVAR_MATS.runner = [linen];
     lb(g, 0, 0, 0, 180, 0.4, 33, linen);
     const v = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.2, 18), reg(new THREE.MeshStandardMaterial({ color: "#7a8a6a", roughness: 0.35 }))); v.position.copy(v3(0, 10.4, 0)); g.add(shadow(v));
     for (let i = 0; i < 5; i++) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.18, 4), leaf); st.position.copy(v3((i - 2) * 1.2, 27, (i % 2) * 1.5)); st.rotation.z = (i - 2) * 0.12; g.add(st);
       const fl = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 6), mat(["#efe7d8", "#d9a441", "#c7643a"][i % 3])); fl.position.copy(v3((i - 2) * 3.4, 36, (i % 2) * 1.5)); g.add(fl); }
     shell.add(g); }
-  { const a = mat("#d9a441"), b = mat("#c7643a");
+  { const a = mat("#d9a441"), b = mat("#c7643a"); SVAR_MATS.floorcush = [a, b];
     floor("floorcush", "Floor cushions (suggested)", 60, 60, 118, -98, g => {
       const c1 = new THREE.Mesh(new RoundedBoxGeometry(0.6, 0.12, 0.6, 3, 0.04), a); c1.position.y = 0.06; g.add(shadow(c1));
       const c2 = new THREE.Mesh(new RoundedBoxGeometry(0.58, 0.12, 0.58, 3, 0.04), b); c2.position.y = 0.18; c2.rotation.y = 0.2; g.add(shadow(c2)); }, [a, b]); }
-  { const rattan = mat("#b98f5c");
+  { const rattan = mat("#b98f5c"), weave = reg(new THREE.MeshStandardMaterial({ color: "#b98f5c", roughness: 0.9, transparent: true, opacity: 0.82, side: THREE.DoubleSide }));
+    SVAR_MATS.lantern = [rattan, weave];
     floor("lantern", "Rattan lantern (suggested)", 30, 30, 325, -283, g => {
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.48, 24, 1, true), reg(new THREE.MeshStandardMaterial({ color: "#b98f5c", roughness: 0.9, transparent: true, opacity: 0.82, side: THREE.DoubleSide })));
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.48, 24, 1, true), weave);
       body.position.y = 0.26; g.add(body);
       const top = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.07, 24), rattan); top.position.y = 0.535; g.add(shadow(top));
-      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.12, 16), reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", emissive: "#ffb35a", emissiveIntensity: 0.9 }))); c.position.y = 0.08; g.add(c); }, [rattan]); }
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.12, 16), reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", emissive: "#ffb35a", emissiveIntensity: 0.9 }))); c.position.y = 0.08; g.add(c); }, [rattan, weave]); }
   { const g = SUGG_G.mirror = new THREE.Group(), z = R.WINDOW_Z + 1.2, x0 = 14, w = 50, y0 = 108, h = 90;
     const glass = reg(new THREE.MeshStandardMaterial({ color: "#cfdbe0", roughness: 0.05, metalness: 0.6 }));
     const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(w, 0); sh.lineTo(w, h - w / 2); sh.absarc(w / 2, h - w / 2, w / 2, 0, Math.PI, false); sh.lineTo(0, 0);
-    const fr = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 2.2, bevelEnabled: false }), oak); fr.scale.set(-M, M, M); fr.position.copy(v3(x0, y0, z)); g.add(shadow(fr));
+    SVAR_MATS.mirror = [ownOak()]; const fr = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 2.2, bevelEnabled: false }), SVAR_MATS.mirror[0]); fr.scale.set(-M, M, M); fr.position.copy(v3(x0, y0, z)); g.add(shadow(fr));
     const inner = new THREE.Shape(); const iw = w - 6, ih = h - 6; inner.moveTo(0, 0); inner.lineTo(iw, 0); inner.lineTo(iw, ih - iw / 2); inner.absarc(iw / 2, ih - iw / 2, iw / 2, 0, Math.PI, false); inner.lineTo(0, 0);
     const gl_ = new THREE.Mesh(new THREE.ShapeGeometry(inner), glass); gl_.scale.set(-M, M, M); gl_.position.copy(v3(x0 + 3, y0 + 3, z + 2.4)); g.add(gl_);
     shell.add(g); }
   { const g = SUGG_G.shelfled = new THREE.Group(), sb = R.SHELF_B;
-    const strip = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.004, (sb.z[0] - sb.z[1] - 4) * M), glow); strip.position.copy(v3(R.W - sb.d + 2, sb.top - sb.t - 0.3, (sb.z[0] + sb.z[1]) / 2)); g.add(strip);
-    const pl = new THREE.PointLight("#ffd29a", 1.2, 2.2, 2); pl.position.copy(v3(R.W - sb.d / 2, sb.top - sb.t - 8, (sb.z[0] + sb.z[1]) / 2)); g.add(pl);
+    SVAR_MATS.shelfled = [ownGlow("#ffd59a")]; const strip = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.004, (sb.z[0] - sb.z[1] - 4) * M), SVAR_MATS.shelfled[0]); strip.position.copy(v3(R.W - sb.d + 2, sb.top - sb.t - 0.3, (sb.z[0] + sb.z[1]) / 2)); g.add(strip);
+    const pl = new THREE.PointLight("#ffd29a", 1.2, 2.2, 2); SVAR_MATS.shelfled.push(pl); pl.position.copy(v3(R.W - sb.d / 2, sb.top - sb.t - 8, (sb.z[0] + sb.z[1]) / 2)); g.add(pl);
     shell.add(g); }
+  SVAR_MATS.basket = [mat("#b89a6c")];
   floor("basket", "Seagrass basket (suggested)", 40, 40, 322, -70, g => {
-    const sea = mat("#b89a6c"), b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 28, 1, true), sea); sea.side = THREE.DoubleSide; b.position.y = 0.2; g.add(shadow(b));
+    const sea = SVAR_MATS.basket[0], b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 28, 1, true), sea); sea.side = THREE.DoubleSide; b.position.y = 0.2; g.add(shadow(b));
     lb(g, 0, 0, 0, 32, 1, 32, sea);
-    const roll = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), mat("#7a8a6a")); roll.scale.set(1, 0.6, 1); roll.position.y = 0.41; g.add(shadow(roll)); });
+    const roll = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), mat("#7a8a6a")); roll.scale.set(1, 0.6, 1); roll.position.y = 0.41; g.add(shadow(roll)); }, SVAR_MATS.basket);
 }
 /* v23: the fold-down oak seat in the gap at the stair end (an option, geometry.WALL_SEAT), and your sofa's square ottoman */
 let seatUp = null, seatDown = null;
@@ -1385,6 +1404,7 @@ function applyState() {
   if (G.now_ledge) G.now_ledge.visible = S.site !== "A" && S.plants !== "breast";   // v18: with the plants on the breast the ledge comes off
   placeChairs();                                                                   // v20: the chair cupboard, its doors, the chairs in it
   applyDecor();                                                                    // v20: the rug, cushions, curtains, the case's fill and frame
+  applySvar();                                                                     // v28: the suggestions' versions
   placeAll();
   repaint();
   applyLight();
@@ -1893,7 +1913,9 @@ const PD = (() => { try { return JSON.parse(document.getElementById("picks-data"
 function picks() {
   const items = [];
   for (const [k, on] of Object.entries(S.ideas)) if (on && PD.ideas[k]) items.push({ kind: "Idea", name: PD.ideas[k][0], lo: PD.ideas[k][1], hi: PD.ideas[k][2] });
-  for (const [k, on] of Object.entries(S.sugg)) if (on && PD.sugg[k]) items.push({ kind: "Suggestion", name: PD.sugg[k][0], lo: PD.sugg[k][1], hi: PD.sugg[k][2] });
+  for (const [k, on] of Object.entries(S.sugg)) if (on && PD.sugg[k]) {
+    const ver = PD.svar && PD.svar[k] && PD.svar[k][svarOf(k)];   // v28: which version
+    items.push({ kind: "Suggestion", name: PD.sugg[k][0] + (ver ? ` (${ver.toLowerCase()})` : ""), lo: PD.sugg[k][1], hi: PD.sugg[k][2] }); }
   for (const k of Object.keys(DEF.decor)) if (S.decor[k] !== DEF.decor[k] && PD.decor[k]) {
     const [lab, names] = PD.decor[k], c = k === "cushions" && PD.ideas.cushions;
     items.push({ kind: "Decor", name: `${lab}: ${names[S.decor[k]] || S.decor[k]}`, lo: c ? c[1] : 0, hi: c ? c[2] : 0 });
@@ -1983,8 +2005,8 @@ root.addEventListener("keydown", e => {
   const k = WALK_KEYS[e.key.toLowerCase()]; if (!k) return;
   e.preventDefault(); walk(k);
 });
-canvas.addEventListener("pointerdown", () => canvas.focus({ preventScroll: true }));
-function setView(name, instant) {
+canvas.addEventListener("pointerdown", () => { canvas.focus({ preventScroll: true }); if (tourSt) tourEnd(); });   // v28: touching the room ends the tour
+function setView(name, instant, dur) {
   const v = VIEWS[name] || VIEWS.window; S.view = name;
   walked = false; controls.maxDistance = v.above ? 16 : 6;
   const p = v[S.site] || v;
@@ -1993,10 +2015,131 @@ function setView(name, instant) {
   setAbove(!v.above);
   baseFov = v.fov;
   if (instant) { camera.position.copy(eye); controls.target.copy(at); camera.fov = fitFov(v.fov); camera.updateProjectionMatrix(); controls.update(); dirty(); }
-  else tween = { t0: performance.now(), from, to: { eye, at, fov: fitFov(v.fov) } };
+  else tween = { t0: performance.now(), from, to: { eye, at, fov: fitFov(v.fov) }, dur: dur || 900 };
   qsa("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === name)));
   store.set(KEY, S); updateCaption();
 }
+/* ---------------------------------------------------------------- v28: the guided tour (room3d_page.tour)
+   Each stop flies to its view (slower than a tap) and shows its caption; a stop's own choices (the cabinet open) are put back after it.
+   Touching the room, Esc or End stops it. Reduced motion: no flying, the same stops. */
+const TOURD = JSON.parse((document.getElementById("tour-data") || {}).textContent || '{"stops":[]}');
+const REDUCE = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const FLY = 2200, DWELL = 5200;
+let tourSt = null;
+function tourStart() {
+  if (!TOURD.stops.length) return;
+  if (S.edit) qs("#r3d-editdone")?.click();
+  window.DemmaTools?.close(); closePop();
+  tourSt = { i: -1, keep: {}, timer: 0, paused: false, t0: 0 };
+  root.classList.add("touring"); qs("#r3d-tour").hidden = false;
+  tourGo(0);
+}
+function tourGo(i) {
+  if (!tourSt) return;
+  const stops = TOURD.stops; clearTimeout(tourSt.timer);
+  if (i >= stops.length) { tourEnd(); return; }
+  i = Math.max(0, i); tourSt.i = i;
+  const st = stops[i], keep = tourSt.keep;
+  for (const k of Object.keys(keep)) if (!(st.set && k in st.set)) { S[k] = keep[k]; delete keep[k]; }   // put back the last stop's choices
+  if (st.set) for (const [k, v] of Object.entries(st.set)) { if (!(k in keep)) keep[k] = S[k]; S[k] = v; }
+  applyState(); syncButtons();
+  setView(st.view, REDUCE, FLY);
+  qs("#r3d-tourn").textContent = `Stop ${i + 1} of ${stops.length}`;
+  qs("#r3d-tourh").textContent = st.title; qs("#r3d-tourp").textContent = st.text;
+  qs("#r3d-tourbar").style.width = `${(i + 1) / stops.length * 100}%`;
+  tourSt.t0 = performance.now();
+  if (!tourSt.paused) tourSt.timer = setTimeout(() => tourGo(i + 1), (REDUCE ? 0 : FLY) + DWELL);
+}
+function tourCtl(c) {
+  if (!tourSt) return;
+  if (c === "stop") { tourEnd(); return; }
+  if (c === "next") { tourGo(tourSt.i + 1); return; }
+  if (c === "prev") { tourGo(tourSt.i - 1); return; }
+  if (c === "pause") {
+    tourSt.paused = !tourSt.paused; const b = qs('[data-tour="pause"]');
+    b.setAttribute("aria-label", tourSt.paused ? "Carry on" : "Pause"); b.querySelector(".ms").textContent = tourSt.paused ? "play_arrow" : "pause";
+    clearTimeout(tourSt.timer); if (!tourSt.paused) tourSt.timer = setTimeout(() => tourGo(tourSt.i + 1), DWELL);
+  }
+}
+function tourEnd() {
+  if (!tourSt) return;
+  clearTimeout(tourSt.timer);
+  const keep = tourSt.keep; tourSt = null;
+  if (Object.keys(keep).length) { Object.assign(S, keep); applyState(); syncButtons(); }
+  root.classList.remove("touring"); qs("#r3d-tour").hidden = true;
+  qs("#r3d-tourbtn")?.focus({ preventScroll: true });
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && tourSt) { e.preventDefault(); tourEnd(); } });
+
+/* ---------------------------------------------------------------- v28: "copy link to this view"
+   The look (where you stand and every choice, not Edit room's moves) as a plain #look-<token> (base64url JSON), which the page's
+   router leaves alone. The link is always the GitHub Pages page, so anyone can open it. */
+const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null };
+const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow"];
+const HEX = /^#[0-9a-f]{6}$/i;
+const cm = v => [-v.x / M, v.y / M, v.z / M].map(n => Math.round(n));
+function lookOf() {
+  const o = { v: S.view, c: [...cm(camera.position), ...cm(controls.target), Math.round(baseFov)] };
+  for (const k of Object.keys(LOOK_STR)) o[k] = S[k];
+  for (const k of LOOK_BOOL) if (S[k] !== DEF[k]) o[k] = S[k] ? 1 : 0;
+  if (S.paint === "custom") o.custom = S.custom;
+  if (S.ceil !== "match") o.ceil = S.ceil;
+  if (S.skirt !== "match") o.skirt = S.skirt;
+  const dd = {}; for (const k of Object.keys(DEF.decor)) if (S.decor[k] !== DEF.decor[k]) dd[k] = S.decor[k];
+  if (Object.keys(dd).length) o.decor = dd;
+  const on = m => Object.keys(m).filter(k => m[k]);
+  if (on(S.sugg).length) o.sugg = on(S.sugg);
+  if (on(S.ideas).length) o.ideas = on(S.ideas);
+  const sv = {}; for (const k of on(S.sugg)) if (svarOf(k) !== SVAR[k]?.[0][0]) sv[k] = svarOf(k);
+  if (Object.keys(sv).length) o.svar = sv;
+  if (!(sameAsScene() && S.master === 100)) { o.lv = S.lv; o.master = S.master; o.col = S.col; }
+  return o;
+}
+const b64u = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64u = t => decodeURIComponent(escape(atob(t.replace(/-/g, "+").replace(/_/g, "/"))));
+function lookUrl() {
+  const here = location.href.split("#")[0], local = location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || /github\.io$/.test(location.hostname);
+  return (local ? here : TOURD.pages) + "#look-" + b64u(JSON.stringify(lookOf()));
+}
+function toast(t) {   // the clock starts once two frames have drawn (applying a look can recompile the room first)
+  const el = qs("#r3d-toast"); if (!el) return; el.textContent = t; el.hidden = false; clearTimeout(toast.t);
+  requestAnimationFrame(() => requestAnimationFrame(() => { clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 3200); }));
+}
+function copyLook() {
+  const url = lookUrl(), st = qs("#r3d-linkst");
+  const shown = () => { st.innerHTML = ""; const i = document.createElement("input"); i.readOnly = true; i.value = url; i.className = "r3d-linkbox"; i.setAttribute("aria-label", "The link to this view"); st.append("Copy this link: ", i); i.focus(); i.select(); };
+  const done = () => { st.textContent = "Copied. Paste it into a message: it opens the room just like this."; toast("Link copied"); };
+  try { navigator.clipboard.writeText(url).then(done, shown); } catch (e) { shown(); }
+}
+function applyLook(tok) {
+  let o; try { o = JSON.parse(unb64u(tok)); } catch (e) { return false; }
+  if (!o || typeof o !== "object") return false;
+  const ok = (k, v) => typeof v === "string" && (LOOK_STR[k] ? LOOK_STR[k].includes(v) : k === "scene" ? v in SCENES : k === "plants" ? v in R.PLANT_LAYOUTS : k === "paint" ? (v in R.PAINTS || v === "custom") : /^[a-z0-9_]{1,24}$/i.test(v));
+  for (const k of Object.keys(LOOK_STR)) if (ok(k, o[k])) S[k] = o[k];
+  for (const k of LOOK_BOOL) if (k in o) S[k] = !!o[k];
+  if (HEX.test(o.custom || "")) S.custom = o.custom;
+  S.ceil = HEX.test(o.ceil || "") ? o.ceil : "match"; S.skirt = HEX.test(o.skirt || "") ? o.skirt : "match";
+  S.decor = Object.assign({}, DEF.decor); if (o.decor && typeof o.decor === "object") for (const k of Object.keys(DEF.decor)) if (typeof o.decor[k] === "string") S.decor[k] = o.decor[k];
+  const set = a => Object.fromEntries((Array.isArray(a) ? a : []).filter(k => typeof k === "string").map(k => [k, true]));
+  S.sugg = set(o.sugg); S.ideas = set(o.ideas);
+  S.svar = {}; if (o.svar && typeof o.svar === "object") for (const [k, v] of Object.entries(o.svar)) if (SVAR[k]?.some(x => x[0] === v)) S.svar[k] = v;
+  if (o.lv && typeof o.lv === "object") { S.lv = Object.assign({}, SCENES[S.scene].levels); for (const k of LAYERS) if (Number.isFinite(+o.lv[k])) S.lv[k] = Math.max(0, Math.min(100, +o.lv[k])); S.master = Number.isFinite(+o.master) ? Math.max(0, Math.min(100, +o.master)) : 100; }
+  else { S.lv = Object.assign({}, SCENES[S.scene].levels); S.master = 100; }
+  if (o.col && typeof o.col === "object") for (const k of Object.keys(DEF.col)) if (HEX.test(o.col[k] || "")) S.col[k] = o.col[k];
+  applyState(); syncButtons();
+  setView(o.v in VIEWS ? o.v : "room", true);
+  const c = Array.isArray(o.c) && o.c.length === 7 && o.c.every(Number.isFinite) ? o.c : null;
+  if (c) { camera.position.copy(v3(c[0], c[1], c[2])); controls.target.copy(v3(c[3], c[4], c[5])); baseFov = Math.max(20, Math.min(90, c[6])); camera.fov = fitFov(baseFov); camera.updateProjectionMatrix(); controls.update(); updateCut(); dirty(); }
+  store.set(KEY, S);
+  return true;
+}
+function lookFromHash() {
+  const m = (location.hash || "").match(/^#look-([A-Za-z0-9_-]+)$/); if (!m) return;
+  if (applyLook(m[1])) toast("Opened the shared view");
+  try { history.replaceState(history.state, "", "#room"); } catch (e) {}
+}
+addEventListener("hashchange", () => { if (started) lookFromHash(); });
+
 let cutSide = "";
 function updateCut() {        // which wall the camera is outside of, if any (only in the views from above, before you walk)
   let side = "", best = 0;
@@ -2136,7 +2279,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   if (!canvas.clientWidth) return;
   if (tween) {
-    const k = Math.min(1, (now - tween.t0) / 900), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const k = Math.min(1, (now - tween.t0) / (tween.dur || 900)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
     camera.position.lerpVectors(tween.from.eye, tween.to.eye, e);
     controls.target.lerpVectors(tween.from.at, tween.to.at, e);
     camera.fov = tween.from.fov + (tween.to.fov - tween.from.fov) * e; camera.updateProjectionMatrix();
@@ -2201,7 +2344,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : S.site === "C" ? "stairs wall (the cabinet)" : "stairs wall";
-  return `Media wall v26 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v28 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -2232,6 +2375,9 @@ function syncButtons() {
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
   qsa("[data-sugg]").forEach(b => b.setAttribute("aria-pressed", String(!!S.sugg[b.dataset.sugg])));
+  qsa("[data-svar]").forEach(b => { const [k, v] = b.dataset.svar.split(":"); b.setAttribute("aria-pressed", String(svarOf(k) === v)); });   // v28
+  let anyOn = false; qsa("[data-svrow]").forEach(r => { const on = !!S.sugg[r.dataset.svrow]; r.hidden = !on; anyOn = anyOn || on; });
+  const svn = qs("#r3d-svnone"); if (svn) svn.hidden = anyOn;
   qsa("[data-decor]").forEach(b => { const [k, v] = b.dataset.decor.split(":"); b.setAttribute("aria-pressed", String(S.decor[k] === v)); });
   qs("#r3d-custom").value = S.custom;
   qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase())));
@@ -2257,6 +2403,10 @@ root.addEventListener("click", e => {
     const keys = d.sugg ? [d.sugg] : qsa("[data-sugg]").map(x => x.dataset.sugg), on = d.sugg ? !S.sugg[d.sugg] : d.suggall === "on";
     S.sugg = Object.assign({}, S.sugg); keys.forEach(k => { S.sugg[k] = on; if (S.layout["sg_" + k]) delete S.layout["sg_" + k].off; });
     applyState(); }
+  else if (d.svar) { const [k, v] = d.svar.split(":"); S.svar = Object.assign({}, S.svar, { [k]: v }); applySvar(); placeAll(); updateCaption(); store.set(KEY, S); dirty(); }   // v28
+  else if (d.tour) { tourCtl(d.tour); return; }
+  else if (b.id === "r3d-tourbtn") { tourStart(); return; }
+  else if (b.id === "r3d-link") { copyLook(); return; }
   else if (d.decor) {           // v20: decor; picking what's in the case (or its frame) shows the case, which hangs with the table by the stairs
     const [k, v] = d.decor.split(":"), was = S.ideas.case && S.site !== "A"; S.decor = Object.assign({}, S.decor, { [k]: v });
     if (k === "fill" || k === "frame") { S.ideas = Object.assign({}, S.ideas, { case: true }); if (S.site === "A") S.site = "C"; }   // v27: the case needs the breast free
@@ -2310,6 +2460,7 @@ function start() {
   msg.hidden = true;
   root.classList.add("ready");
   requestAnimationFrame(frame);
+  lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
     set(o) { oldScene(o); Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },

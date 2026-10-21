@@ -2,21 +2,27 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v27: the dining cabinet, for six
+## Media wall and dining wall, v28: the dining cabinet, for six
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the dining cabinet under your shelf by the stairs: the table and the six chairs in one oak cabinet (the flip-top is the alternative). Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v27%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v28%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v27** (the dining cabinet is the plan, for six; your rear speakers; easier Edit room)
+**New in v28** (a tour of the 3D room, a link to any view, versions of every suggestion)
+- **Take the tour** (Tools → Views): the 3D room flies round itself in eight stops with a line about each, from the whole room to the media wall, the breast, the dining cabinet opened for six and the sofa. Pause, skip or end it; touching the room stops it.
+- **Copy link to this view** (Tools → Views): a link that opens the room just as you have it, with the view, the table, the lights, the paint, the decor and the suggestions. Send it to each other.
+- **Every suggestion has two or three versions** (Tools → Extras, once it's on): a cream, terracotta or black pot, an oak, black or brass frame, mustard, sage or cream, and so on. Your picks names the one you chose.
+- The plan page's PDF buttons work again (they pointed at last round's files).
+
+**v27** (the dining cabinet is the plan, for six; your rear speakers; easier Edit room)
 - **The dining cabinet is now the plan:** one oak cabinet under your shelf with the table and all six chairs inside it. The table (two 90 × 90 oak halves) swings down out of its bay and opens to 180 × 90: **six in comfort**, three a side, with the coffee table left where it is. Four chairs stand on the chair bay's floor and two on its shelf, the seat pads beside them; a drawer under the table holds the mats and a lift-up linen flap over it holds the cloth.
 - **Clear build instructions:** step 11 of the build guide is the cabinet's build in sixteen stages, every size from the plan: marking out, the carcass, fixing it to the wall, the hinge rail, the two halves with their breadboard ends, aprons and folding legs, the flip-top hinges, hanging the table on its piano hinge, the catches, the drawer, the linen flap, the doors, levelling and loading the chairs. Two new drawings: the carcass from the front with every height, and the halves from underneath with every leg and hinge. The cutting list and the buy list carry the cabinet; the flip-top (by the stairs or on the breast) stays in section 5 as the alternative.
 - **Your rear speakers** (v27.1, from your photos) stand where they are now: directly behind the sofa, one at each end of its long side, both just above the sofa's back. In the 3D room and the plan, movable in Edit room.
 - **The brick under the stairs is painted**, as it has a wall in front of it.
 - **Edit room:** the flip-top's chair cupboard can come off the wall (select it, Remove; + Add puts it back). Things clip to a wall from 15 cm away (was 5), a quarter turn keeps a piece against its wall, and **Back to the wall** turns a piece and pushes it flat against the nearest wall.
 
-![The dining cabinet open for six](media-wall/out/Media%20wall%20v27%20-%203D%20-%20THE%20DINING%20CABINET%20-%20open%20for%20six%20-%20bright,%20table%20rule%20(HD).png)
+![The dining cabinet open for six](media-wall/out/Media%20wall%20v28%20-%203D%20-%20THE%20DINING%20CABINET%20-%20open%20for%20six%20-%20bright,%20table%20rule%20(HD).png)
 
 **v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
 - **Option C, a second way to build the dining wall** (the flip-top stays the plan): one oak cabinet under your shelf. The table, 225 × 90 open, stands up in one bay; all eight folding chairs fold into the other, behind two doors. Packed away, nothing shows. In the 3D room: Tools, Layout, "C: the dining cabinet".

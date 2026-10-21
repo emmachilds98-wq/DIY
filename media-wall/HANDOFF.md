@@ -1,7 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v27.1 is built (round 21b, below): the rear speakers stand behind each end of the sofa**, from the client's two photos
+- **v28 is built (round 22, below): the last three items of `UPGRADE_PLAN_v25.md` are done** (the guided tour and "copy link to
+  this view", versions for every suggestion, stills re-rendered only when they change). Next: `media-wall/UPGRADE_PLAN_v29.md`.
+- **v27.1 (round 21b): the rear speakers stand behind each end of the sofa**, from the client's two photos
   (`inputs/room_photo_rears_20oct.jpg`, `inputs/room_photo_west_20oct.jpg`) and their answer. v27 (round 21): the dining cabinet is the
   plan, made for six with the chairs inside; step 11 is its full build; the stairs' brick painted; Edit room clips to walls and the
   flip-top's chair cupboard comes off.
@@ -11,8 +13,7 @@
   option C costs: £961–1,650 against £666–1,265 for the flip-top rows it would replace (about £295–385 more); the money cells carry
   the £ sign and don't wrap.
   v25 (round 19) made the page "Demma Home Improvements", option 1c, from `media-wall/UPGRADE_PLAN_v25_UI.md`. Still to
-  do from `UPGRADE_PLAN_v25.md` (the earlier plan): the guided tour and "copy link to this view", choices for each suggestion, re-render only
-  the stills that changed. v24 is in round 18. Still waiting on the client: which ways
+  do from `UPGRADE_PLAN_v25.md`: nothing (v28 did the last three). v24 is in round 18. Still waiting on the client: which ways
   to keep the chairs (the cupboard for four or six; yes or no to four behind the folded top and to the fold-down seat), the ottoman's
   height, the window corner's floor gap, and the optimisation plan's three questions. The client-facing optimisation plan is
   `media-wall/plans/optimisation_v21.html` (https://claude.ai/artifact/P7D81ZQuuVKBvh8hX2k5w6).
@@ -33,10 +34,35 @@
   If an upload is refused as a "cpio archive" (a false sniff, v23), re-save that webp at quality 85 and upload it again. **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 36 stills headless in SwiftShader WebGL: about 15 minutes; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders 37 stills headless in SwiftShader WebGL: about 15 minutes for all, and since v28 only the ones whose fingerprint changed, `force` for all; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 21 Oct 2026, round 22: v28 (the tour, a link to any view, versions of every suggestion, stills only when they change)
+- Client: "continue the current upgrade from the last agent in the repo": the three items left in `UPGRADE_PLAN_v25.md`.
+- **The tour (room3d_page `tour()`, room3d.js `tourStart`/`tourGo`/`tourCtl`/`tourEnd`, `#r3d-tour`):** Tools → Views → Take the tour.
+  Eight stops (room, wall, pc, breast, dining with `set: {site: "C", dining: "six"}`, sofa, window, plan), captions built from geometry;
+  each flies in 2.2 s (`setView(name, instant, dur)`; the tween has a `dur`) and dwells 5.2 s; back, pause, next, End; touching the
+  room or Esc ends it; a stop's `set` choices are put back after it. `.r3d.touring` hides the dock and the labels switch. Reduced
+  motion: no flying.
+- **Copy link to this view (room3d.js `lookOf`/`applyLook`/`lookFromHash`/`copyLook`, `#r3d-link`):** `#look-<base64url JSON>` with the
+  view, the camera (cm and fov), the table, chairs, plants, seat, scene, time of day, paint, trims, toggles, decor diffs, suggestions on,
+  their versions, ideas, and the light levels only if adjusted (Edit room's moves are not in it). The link is always the Pages URL
+  (`room3d_page.PAGES_URL`), or the page's own on file://, localhost and Pages. `page_router.js` leaves the hash alone; after it's
+  applied (after the first compile) the hash becomes `#room` and a toast says "Opened the shared view". Values are whitelisted on read.
+- **Versions of every suggestion (`ideas.SUGG_VARS`, room3d.js `SVAR`/`SVAR_MATS`/`applySvar`, `S.svar`, `data-svar`):** two or three
+  each (pots, frames, rims, colours, light colours), the size and price unchanged; colour i goes on the piece's own material i (several
+  pieces shared one oak material before, so Edit room's recolour of the side table also changed the art frame and the clock); a floor
+  piece's version is its `MOV.base` so Edit room's own colour still wins. Rows under Extras → "Choose a version", one per suggestion
+  that's on; Your picks names the version; the PDF's suggestions table lists them. `R3D.set` takes `svar`.
+- **Stills only when they change (shot3d.py):** `shot3d_prints.json` holds each still's fingerprint (`shot_print`: its options with
+  `BASE`, the size, and `room_print()` of room3d.js, scene3d.json, the presets, the light rules and the versions) and its three files.
+  A match is skipped; if only the version moved on, last round's files are copied to the new names (found where they were or in
+  `out/vNN/`). `python3 shot3d.py force` renders all; `python3 shot3d.py <name>` always renders those.
+- **Fixed:** build_viewer's `VERSION` had stuck at "26", so the page's PDF buttons pointed at v26 files that had moved to `out/v26/`
+  (404 on Pages); build_viewer and shot3d now import `build_doc.VERSION`. The 3D room's "Save as HD picture" file name said v26.
+- Version 28; v27 outputs in `out/v27/`. Backups `*_v27_backup.*` (room3d_page, ideas, shot3d, build_viewer, build_doc, render, room3d.js).
 
 ## Update 20 Oct 2026, round 21b: v27.1 (the rear speakers from the client's photos)
 - Two photos of the room (saved as `inputs/room_photo_rears_20oct.jpg`, from the breast end looking east, window on the left, TV on

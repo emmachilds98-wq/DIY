@@ -131,6 +131,32 @@ SUGGEST += [
 ]
 
 
+# v28, from the optimisation plan: "choices for each suggestion (two or three versions, like the decor rows)". The same piece in two or
+# three finishes; the size and the price stay. key: [(value, name, [colours])]; the first is the default. room3d.js (SVAR_MATS) puts
+# colour i on the piece's material i.
+SUGG_VARS = {
+    "floorplant": [("cream", "Cream pot", ["#d8cfc0"]), ("terra", "Terracotta pot", ["#c46c45"]), ("black", "Black pot", ["#2a2a2c"])],
+    "sidetable": [("oak", "Oak", ["#c48c57"]), ("black", "Black-stained", ["#3a3634"]), ("white", "White-oiled", ["#efe6d6"])],
+    "pouffe": [("mustard", "Mustard", ["#d9a441"]), ("sage", "Sage", ["#8b9878"]), ("cream", "Cream", ["#e9e1cf"])],
+    "art": [("oak", "Oak frame", ["#c48c57"]), ("black", "Black frame", ["#2a2a2c"]), ("white", "White frame", ["#efe9df"])],
+    "clock": [("oak", "Oak rim", ["#c48c57"]), ("black", "Black rim", ["#2a2a2c"]), ("brass", "Brass rim", ["#b8913f"])],
+    "tray": [("oak", "Oak tray", ["#c48c57"]), ("black", "Black tray", ["#2a2a2c"]), ("rattan", "Rattan tray", ["#b98f5c"])],
+    "fairy": [("warm", "Warm white", ["#ffd59a"]), ("gold", "Golden", ["#ffb347"]), ("cool", "Cool white", ["#eef3ff"])],
+    "hanger": [("terra", "Terracotta pot", ["#c46c45"]), ("white", "White pot", ["#ece6da"]), ("sage", "Sage pot", ["#8b9878"])],
+    "trail": [("cream", "Cream pot", ["#ece6da"]), ("terra", "Terracotta pot", ["#c46c45"]), ("black", "Black pot", ["#2a2a2c"])],
+    "throw": [("cream", "Cream", ["#efe7d8"]), ("rust", "Rust", ["#a65a38"]), ("sage", "Sage", ["#8b9878"])],
+    "pclamp": [("cream", "Cream", ["#e8e2d4", "#f3e7cf"]), ("mustard", "Mustard", ["#d9a441", "#f0c860"]), ("sage", "Sage", ["#8b9878", "#cfd8c0"])],
+    "basket": [("sea", "Seagrass", ["#b89a6c"]), ("dark", "Dark rattan", ["#6e5235"]), ("rope", "White cotton rope", ["#ece6da"])],
+    "candles": [("cream", "Cream", ["#f3ecdc"]), ("sage", "Sage", ["#b8c4a8"]), ("terra", "Terracotta", ["#d08a68"])],
+    "runner": [("linen", "Natural linen", ["#e6dccb"]), ("sage", "Sage linen", ["#9aa889"]), ("rust", "Rust linen", ["#b66a48"])],
+    "floorcush": [("mustard", "Mustard and rust", ["#d9a441", "#c7643a"]), ("sage", "Sage and cream", ["#8b9878", "#e9e1cf"]), ("blues", "Two blues", ["#34507f", "#7d9cc0"])],
+    "lantern": [("natural", "Natural rattan", ["#b98f5c", "#b98f5c"]), ("dark", "Dark rattan", ["#6e5235", "#6e5235"]), ("black", "Black metal", ["#2a2a2c", "#2a2a2c"])],
+    "mirror": [("oak", "Oak frame", ["#c48c57"]), ("black", "Black frame", ["#2a2a2c"]), ("brass", "Brass frame", ["#b8913f"])],
+    "shelfled": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("amber", "Amber", ["#ffb347", "#ffb347"]), ("cool", "Cool white", ["#eef3ff", "#eef3ff"])],
+}
+assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
+
+
 def suggest_low_high():
     return sum(i[3][0] for i in SUGGEST), sum(i[3][1] for i in SUGGEST)
 
@@ -138,7 +164,8 @@ def suggest_low_high():
 def suggest_html():
     """v21: the plan PDF's table of the suggested furniture and decor."""
     lo, hi = suggest_low_high()
-    rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
-                   for _, t, size, c, why, where in SUGGEST)
-    return (f"<p>Not in the plan or the costs: all {len(SUGGEST)} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on.</p>"
+    vers = lambda k: ", ".join(n for _v, n, _c in SUGG_VARS[k]).lower().capitalize()
+    rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span><br><span class='note'>{vers(k)}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
+                   for k, t, size, c, why, where in SUGGEST)
+    return (f"<p>Not in the plan or the costs: all {len(SUGGEST)} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on, and two or three versions to try.</p>"
             f"<table class='tight'><tr><th>Suggestion</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")
