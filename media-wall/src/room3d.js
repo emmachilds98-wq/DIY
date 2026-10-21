@@ -34,7 +34,7 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive" },   // v26: the oak, the floor, your shelf; v31: the seat pads
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
-              cab: "compact", tdoor: false,
+              cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
               cam: "orbit", pad: false, foot: false, beside: "clear" };   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
@@ -761,7 +761,7 @@ function placeChairs() {
    the compact cabinet (CAB) is the plan, the sliding one the alternative. S.site "C"; S.cab "compact" / "sliding"; S.dining folded /
    four / six; S.chairs "open" opens the chair door (the table folded); S.tdoor opens the table door with the table still folded.
    The doors move by tween (cabTween), so a tap in the room swings or slides them; a still (R3D.set) snaps them. */
-const cabC = () => (S.cab === "sliding" ? R.OPTC : R.CAB);   // v30: the cabinet on show
+const cabC = () => (S.cab === "sliding" ? R.OPTC : S.cabw === "80" && R.CAB80 ? R.CAB80 : R.CAB);   // v30: the cabinet on show; v33: its 80-wide version
 /* v32: everything in the cabinets that moves is an "anim": one number p, 0 to 1, and what it does to the model (a door's swing or
    slide, a chair drawn out, the table's joints); twTo eases p, the show sets it from its own clock */
 const ease = k => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
@@ -953,11 +953,11 @@ function buildOptC() {
    door turns 180° towards the window and lies back over the chair door and the wall beyond; the chair door turns 180° towards the
    stairs and lies back over the table door. */
 let cab = null, cabRig = null, cabSeats = {}, cabIn = null, cabDoor = {}, cabPads = null, cabLit = [];
-function buildCab() {
-  const C = R.CAB; if (!C) return;
+function buildCab(C = cabC()) {
+  if (!C) return;
   const K = cabKit(), bx = K.bx, W = R.W, t = C.t, xf = C.front, xi = C.inner, deepIn = C.in_d;
   const [cw, cdep] = R.CHAIR_FOLDED;
-  cab = new THREE.Group(); cab.name = "cab";
+  cab = new THREE.Group(); cab.name = "cab"; cab.userData.w = C.top[0];
   // two carcasses: each two ends, a top, a floor on a plinth set 2.5 back (a shadow line), a back; the boxes screwed together
   for (const [a, b] of [C.z_t, C.z_c]) {
     const span = a - b - 2 * t;
@@ -1023,6 +1023,13 @@ function buildCab() {
                    stand, base, pads: anim(v => { cabPads.position.x = -0.25 * v; cabPads.visible = v < 0.999; }), rig: cabRig.userData.rig,
                    seats: { four: cabSeats.four.userData.chairs, six: cabSeats.six.userData.chairs } };
   scene.add(cab);
+}
+/* v33: the 80-wide version is the same build round a narrower table: swap the whole cabinet when the width changes */
+function rebuildCab() {
+  CAB_TW.clear();
+  scene.remove(cab); cab.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+  buildCab(cabC()); clipGroup(cab); applySuggest();
+  const was = cabSnap; cabSnap = true; cabGo(CABP.compact); cabSnap = was;
 }
 /* the cabinets' tween: each entry eases an anim's p to a target, after a wait (delay) if it has one; a still snaps them (cabSnap) */
 const CAB_TW = new Map();
@@ -1146,6 +1153,7 @@ function placeBeside() {
   if (!beside) return;
   const on = S.site === "C" && S.cab === "compact";
   for (const [k, g] of Object.entries(BES)) g.visible = on && S.beside === k;
+  beside.position.z = S.cabw === "80" && R.CAB80 ? (R.CAB.z[1] - R.CAB80.z[1]) / 2 * M : 0;   // v33: centred in the longer gap
 }
 /* v31: "Show the space it needs, open": with the table folded, the floor it takes when it's out for six: the table, the six chairs
    and (the compact one) the table door's swing, drawn flat on the floor */
@@ -1168,7 +1176,8 @@ function buildFoot(C) {
 }
 function placeFoot() {
   const want = !!S.foot && S.site === "C" && S.dining === "folded";
-  if (want && footKey !== S.cab) { if (foot) scene.remove(foot); foot = buildFoot(cabC()); clipGroup(foot); scene.add(foot); footKey = S.cab; }
+  const fk = S.cab + S.cabw;
+  if (want && footKey !== fk) { if (foot) scene.remove(foot); foot = buildFoot(cabC()); clipGroup(foot); scene.add(foot); footKey = fk; }
   if (foot) foot.visible = want;
 }
 function clipGroup(g) { g.traverse(o => { if (o.isMesh || o.isLine) [].concat(o.material).forEach(m => m && !m.clippingPlanes && clipMat(m)); }); }
@@ -1916,6 +1925,8 @@ function drop(group, list) {   // take a fixture and its lights out of the scene
 }
 let built = {};
 function applyState() {
+  S.site = "C"; S.cab = "compact"; if (S.cabw !== "80") S.cabw = "90";   // v33, client: "the compact cabinet is our only choice for the table now"
+  if (cab && cab.userData.w !== cabC().top[0]) rebuildCab();
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
   const b2 = `${S.site === "C" ? "B" : S.site}_${S.site === "C" ? (S.dining === "folded" ? "folded" : "six") : S.dining}`;   // v26: C lights like B
@@ -2682,7 +2693,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && tourSt) { 
 /* ---------------------------------------------------------------- v28: "copy link to this view"
    The look (where you stand and every choice, not Edit room's moves) as a plain #look-<token> (base64url JSON), which the page's
    router leaves alone. The link is always the GitHub Pages page, so anyone can open it. */
-const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], beside: null };   // v30: which cabinet; v31: beside it
+const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], cabw: ["90", "80"], beside: null };   // v30: which cabinet; v31: beside it
 const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor", "foot"];   // v31: the open table's floor
 const HEX = /^#[0-9a-f]{6}$/i;
 const cm = v => [-v.x / M, v.y / M, v.z / M].map(n => Math.round(n));
@@ -2819,12 +2830,12 @@ function openPop(id) {
   if (popId) stickEls[popId].setAttribute("aria-expanded", "false");
   popId = id; const el = stickEls[id]; el.setAttribute("aria-expanded", "true");
   pop.style.setProperty("--h", H.hue);
-  qs("#r3d-pop-h").textContent = H.name;
+  qs("#r3d-pop-h").textContent = `${H.n} · ${H.name}`;
   const ul = qs(".facts", pop); ul.textContent = "";
   H.facts.forEach(f => { const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); });
-  pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true });
+  pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true }); syncPlaces();
 }
-function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; }
+function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; try { syncPlaces(); } catch (e) {} }
 qsa(".stk").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); popId === b.dataset.hot ? closePop() : openPop(b.dataset.hot); }));
 if (pop) pop.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -2835,6 +2846,17 @@ if (pop) pop.addEventListener("click", e => {
   else if (b.dataset.popgo === "plan") { closePop(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: H.chapter } })); }
 });
 canvas.addEventListener("pointerdown", () => { if (popId) closePop(); });
+/* v33, the phone home: the places strip under the room; a tap flies to the place and opens its card, docked above the dock */
+qsa("[data-place]").forEach(b => b.addEventListener("click", e => {
+  e.stopPropagation(); const H = HOTS.find(h => h.id === b.dataset.place); if (!H) return;
+  if (popId === H.id) { closePop(); return; }
+  if (SH) showStop(true); setView(H.view); if (!labelsOn) setLabels(true);
+  setTimeout(() => { placeStickers(); if (stickEls[H.id] && !stickEls[H.id].hidden) openPop(H.id); else openPopAt(H.id); }, 950);
+}));
+function openPopAt(id) {    // the place's pin is off the picture: the card still opens (docked on a phone)
+  const el = stickEls[id]; if (!el) return; el.style.left = (stage.clientWidth / 2) + "px"; el.style.top = "60px"; openPop(id);
+}
+function syncPlaces() { qsa("[data-place]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.place === popId))); root.classList.toggle("popped", !!popId); }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && popId) { const was = popId; closePop(); stickEls[was].focus(); } });
 new ResizeObserver(() => placeStickers()).observe(stage);
 /* ---------------------------------------------------------------- v30, client: "make function so say i click the dining cabinet i can
@@ -2880,14 +2902,14 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id === "table" && S.site === "C") id = "cab";
   if (id === "cab") {
     const sl = S.cab === "sliding", d = cabDoors();
-    const st = !folded ? `Open for ${S.dining}: the table is out` : d.table ? "Packed away, the table door open" : d.chairs ? "Packed away, the chair door open" : "Packed away: the table and the six chairs inside";
-    return [sl ? "The sliding dining cabinet (the alternative)" : "The dining cabinet", st, [
+    const st = !folded ? `Open for ${S.dining}: the table is out` : d.table ? "Packed away, the table door open" : d.chairs ? "Packed away, the chair door open" : (S.cabw === "80" ? "Packed away: the table and four of the six chairs inside" : "Packed away: the table and the six chairs inside");
+    return [S.cabw === "80" ? "The dining cabinet, 80-wide table" : "The dining cabinet", st, [
       btn("Open for six", { dining: "six" }, S.dining === "six"), btn("Open for four", { dining: "four" }, S.dining === "four"),
       btn(folded ? "Folded away" : "Fold it away", { dining: "folded" }, folded),
       ...(folded ? [btn(d.table ? "Shut the table door" : "Open the table door", { tdoor: d.table ? "shut" : "open" }),
                     btn(d.chairs ? "Shut the chair door" : "Open the chair door", { chairs: d.chairs ? "cupboard" : "open" })] : []),
       btn("Watch it open, step by step", { showopen: "1" }),
-      btn(sl ? "Show the compact one" : "Show the sliding one", { cab: sl ? "compact" : "sliding" }),
+      btn(S.cabw === "80" ? "Show the 90-wide table (the plan)" : "Show the 80-wide version (10 shorter)", { cabw: S.cabw === "80" ? "90" : "80" }),
       btn("Look at it", { view: "dining" }), btn("Read about it", { actgo: "dining" })]];
   }
   if (id === "table") return [S.site === "A" ? "The flip-top on the breast (the alternative)" : "The flip-top by the stairs (the alternative)", folded ? "Folded" : `Open for ${S.dining}`, [
@@ -2973,7 +2995,7 @@ function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
 let baseFov = 50;
-const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (16 / 9) / asp) * 180 / Math.PI);
+const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (asp < 0.8 ? 1.45 : 16 / 9) / asp) * 180 / Math.PI);   // v33: portrait, tighter
 function sizeRenderer() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
@@ -3048,9 +3070,9 @@ function autoQuality() {
 function updateCaption() {
   try { updatePicks(); } catch (e) {}   // v22
   const sc = SCENES[S.scene];
-  const site = S.site === "A" ? "Table on the chimney breast" : S.site === "C" ? (S.cab === "sliding" ? "The sliding dining cabinet (the alternative)" : "The compact dining cabinet") : "Table under the shelf by the stairs";
+  const site = S.cabw === "80" ? "The compact dining cabinet, its 80-wide table" : "The compact dining cabinet";   // v33: the only table
   const cl = (cabC().len_open || cabC().len);
-  const din = S.site === "C" ? { folded: "folded away, the six chairs inside", four: `open, ${cl} long, for four`, six: `open, ${cl} long, for six` }[S.dining]
+  const din = S.site === "C" ? { folded: S.cabw === "80" ? "folded away, four chairs inside" : "folded away, the six chairs inside", four: `open, ${cl} long, for four`, six: `open, ${cl} long, for six` }[S.dining]
     : { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
   const paint = S.paint === "custom" ? `your colour ${S.custom}` : R.PAINTS[S.paint].name;
   const lights = sameAsScene() && S.master === 100 ? sc.name : `your lighting (from ${sc.name})`;
@@ -3079,7 +3101,7 @@ function still(w, h) {
   return url;
 }
 function stillName() {
-  const site = S.site === "A" ? "breast" : S.site === "C" ? `stairs wall (the ${S.cab === "sliding" ? "sliding" : "compact"} cabinet)` : "stairs wall";
+  const site = `stairs wall (the compact cabinet${S.cabw === "80" ? ", 80 wide" : ""})`;
   return `Media wall v${R.VERSION || ""} - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
@@ -3108,7 +3130,7 @@ function syncButtons() {
   const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
-  press("cab", S.cab); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
+  press("cab", S.cab); press("cabw", S.cabw); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
   press("cam", S.cam); press("pad", S.pad ? "on" : "off"); press("foot", S.foot ? "on" : "off"); press("beside", S.beside); syncEye();   // v31
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
@@ -3137,6 +3159,7 @@ root.addEventListener("click", e => {
   if (d.site) { S.site = d.site; applyState(); if (S.view === "dining") setView("dining"); }
   else if (d.dining) { S.dining = d.dining; S.tdoor = false; applyState(); if (S.view === "dining") setView("dining"); }   // v30: folding it shuts the door too
   else if (d.cab) { S.cab = d.cab; S.site = "C"; applyState(); if (S.view === "dining" || S.view === "chairs") setView(S.view); }   // v30: the compact or the sliding cabinet
+  else if (d.cabw) { S.cabw = d.cabw; applyState(); if (S.view === "dining" || S.view === "chairs") setView(S.view); }              // v33: the table 90 or 80 wide
   else if (d.tdoor) { S.tdoor = d.tdoor === "open"; if (S.tdoor && S.chairs === "open") S.chairs = "cupboard"; applyState(); }
   else if (d.scene) S.scene = d.scene, S.lv = Object.assign({}, SCENES[d.scene].levels), S.master = 100, applyLight(), updateCaption(), store.set(KEY, S);   // tapping the tile again resets it
   else if (d.tod) S.tod = d.tod, applyLight(), updateCaption(), store.set(KEY, S);

@@ -848,6 +848,80 @@ def zones():
     return zs[:i] + [cab_zone(), beside_zone()] + zs[i:]
 
 
+# v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version for this as we're trying to
+# optimise space": the sliding cabinet and the flip-top leave the fit proof; the compact cabinet with an 80-wide table is checked beside it.
+def cab80_zone():
+    """The more compact version: the same cabinet round a 185 × 80 table, 10 shorter. Its base is too narrow for the two chairs lying in it."""
+    g, C, P = G, G.CAB80, G.CAB
+    cw, cdep, ch = g.CHAIR_FOLDED
+    st = optc_seats(C)
+    plate = 27.0
+    mid80, mid90 = C["top"][0] - 2 * plate, P["top"][0] - 2 * plate
+    pl = g.PLANT_LAYOUTS["corner"]["plants"]
+    plant_face = pl[1] + g.PLANT_STAND["d"] / 2
+    pw = C["pad"][0]
+    return ("The more compact version: an 80-wide table (an option)", f"the same two boxes, {r1(C['len'])} long, the table {r1(C['len_open'])} × {r1(C['top'][0])} open", [
+        ("Its length", f"z {r1(C['z'][0])} to {r1(C['z'][1])}", ref("photo20", "room"), f"{r1(P['len'])} for the plan's",
+         f"{r1(P['len'] - C['len'])} shorter: {r1(C['freed'])} of bare wall by the pipe boxing instead of {r1(P['freed'])}", PASS),
+        ("At the table", f"{st['comfort']} in comfort", ref("dining", "frosvi"), f"{st['stair'][0]} a side, {st['stair'][1]:.0f} of edge each: the length doesn't change",
+         f"the window edge {r1(C['tz'][1] - g.SOFA_FRONT_Z)} from the sofa's front (the plan's: {r1(P['tz'][1] - g.SOFA_FRONT_Z)})", PASS),
+        ("Across the table", f"{r1(C['top'][0])} wide, a 27 plate at each place", ref("plates", "dining"), f"{r1(P['top'][0])} in the plan",
+         f"{r1(mid80)} down the middle for dishes (the plan: {r1(mid90)}): a jug and one dish at a time", TIGHT),
+        ("Six chairs inside", f"four standing in the chair box; two lying on their sides need {r1(ch)} + 2", ref("frosvi"), f"the base is {r1(C['bay_t'])} wide (the plan's {r1(P['bay_t'])})",
+         "the two don't fit lying down: four go inside, two live elsewhere (the garage, or folded behind a door)", NO),
+        ("The table door", f"{r1(C['door_tw'])} wide, open over the chair door", ref("piano32"), f"your plant stand's front at z {r1(plant_face)}",
+         f"its far end at z {r1(C['door_t_open'][1])}: {r1(C['door_t_open'][1] - plant_face)} clear", PASS),
+        ("The six pads on the door", f"two across, {r1(pw)} each", ref("esme"), f"the door {r1(C['door_tw'])} wide",
+         f"{r1(C['door_tw'] - 2 * pw)} spare across: two pads hang touching", TIGHT),
+    ])
+
+
+def max_seats_zone():
+    """v33: the compact cabinet only, in its two widths."""
+    g, C, C8 = G, G.CAB, G.CAB80
+    st, s8 = optc_seats(C), optc_seats(C8)
+    seat = lambda t: (f"{t['stair'][1]:.1f} and {t['window'][1]:.1f} of edge each; a seventh at the far end with a spare chair" if t["end"]
+                      else f"{t['stair'][1]:.1f} and {t['window'][1]:.1f} each")
+    return ("How many can sit down", "the compact cabinet's table, in this room, with chairs a person wide and backs 41 behind the edge", [
+        ("The compact cabinet (the plan)", f"{st['comfort']} in comfort", ref("dining", "frosvi"), f"{st['stair'][0]} on the stair side, {st['window'][0]} on the window side", seat(st), PASS),
+        ("The 80-wide version", f"{s8['comfort']} in comfort", ref("dining", "frosvi"), f"{s8['stair'][0]} on the stair side, {s8['window'][0]} on the window side", seat(s8) + "; four chairs inside, not six", PASS),
+        ("A fourth chair a side", "eight round it", ref("dining", "sofa", "room"), f"{r1(st['stair'][2])} and {r1(st['window'][2])} of edge",
+         f"{st['stair'][2] / 4:.1f} each: under the 55 squeeze", NO),
+        ("A longer table in the cabinet", f"halves over {r1(C['h'] - C['t_top'] - C['pivot'][1])}", ref("photo20"), "they must stand up under your shelf",
+         f"{r1(C['h'] - C['t_top'] - C['pivot'][1])} is the most that folds away; {r1(C['top'][1])} leaves the linen shelf's space", PASS),
+    ])
+
+
+_zones_v32 = zones
+_SET_ASIDE = ("The sliding dining cabinet", "The flip-top table", "Option A: the flip-top", "The flip-top's chair cupboard", "More ways to keep the chairs with the flip-top")
+
+
+def zones():
+    """v33: the compact cabinet only (the sliding cabinet and the flip-top are set aside), with its 80-wide version after it."""
+    out = []
+    for z in _zones_v32():
+        if z[0].startswith(_SET_ASIDE):
+            continue
+        if z[0] == "How many can sit down":
+            z = max_seats_zone()
+        z = (z[0], z[1], [r for r in z[2] if not r[0].startswith("If you choose option A")])
+        out.append(z)
+        if z[0].startswith("The compact dining cabinet"):
+            out.append(cab80_zone())
+    return out
+
+
+def counts():
+    """v33: the plan's checks only: the seat count's limits and the 80-wide option's rows stay out of the totals."""
+    c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
+    for title, _, rows in zones():
+        if title == "How many can sit down" or title.startswith("The more compact version"):
+            continue
+        for r in rows:
+            c[r[-1]] += 1
+    return c
+
+
 if __name__ == "__main__":
     for title, space, rows in zones():
         print("==", title, "|", space)

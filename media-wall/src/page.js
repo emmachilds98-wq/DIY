@@ -24,7 +24,7 @@ $$(".toc").forEach(nav => {
 });
 /* ---------- the render viewer */
 const NAMES = { card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" };
-const VIEWS = { join: "Artisan oak media wall", four: "The alternative: the flip-top open and set for four", six: "The alternative: the flip-top open and set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" };
+const VIEWS = { join: "Artisan oak media wall", side: "The PC side wall, seen from the room", drawers: "Every drawer out" };
 const view = Object.assign({ style: "join", paint: "card_room", key: false, dims: false }, store.get("mw13-view", {}));
 const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key"), dims = $("#dims"), dimsBtn = $("#k-dims");
 function draw() {
@@ -92,6 +92,7 @@ function dash() {
   $("#d-buy").textContent = bd.length + "/" + bi.length; ring("d-buy-bar", bd.length, bi.length);
   const paid = $$("#tracker .paid input").reduce((a, i) => a + (parseFloat(i.value) || 0), 0);
   $("#d-paid").textContent = "\u00a3" + Math.round(paid).toLocaleString("en-GB") + " paid so far";
+  if (window.PICKS) PICKS.paint();
 }
 let dashQ = false;
 const dashSoon = () => { if (!dashQ) { dashQ = true; requestAnimationFrame(() => { dashQ = false; dash(); }); } };
@@ -140,18 +141,18 @@ const local = store.get("mw12-tracker", {});
 const money = v => "£" + (Math.round(v * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
 function tget(id) { return (db ? tstate[id] : local[id]) || null; }
 function paintTracker() {
-  let done = 0, paid = 0, leftLo = 0, leftHi = 0;
+  let done = 0, paid = 0, leftLo = 0, leftHi = 0, jobs = 0, jobsDone = 0, buys = 0;   // v33: one count, the things to buy; the jobs apart
   const phPaid = {};
   DATA.track.forEach(r => {
     const s = tget(r.id), isDone = s ? !!s.done : r.done;
     const li = document.querySelector('[data-t="' + r.id + '"]'), cb = li.querySelector("input[type=checkbox]"), pd = li.querySelector("input[type=number]");
     cb.checked = isDone; li.classList.toggle("done", isDone);
     if (pd && document.activeElement !== pd) pd.value = s && typeof s.paid === "number" ? s.paid : "";
-    if (isDone) done++; else { leftLo += r.lo; leftHi += r.hi; }
+    if (r.kind === "buy") { buys++; if (isDone) done++; else { leftLo += r.lo || 0; leftHi += r.hi || 0; } } else { jobs++; if (isDone) jobsDone++; }
     if (s && typeof s.paid === "number") { paid += s.paid; phPaid[r.phase] = (phPaid[r.phase] || 0) + s.paid; }
   });
   $$("details.phase").forEach(d => {
-    const lis = $$(".items li", d), n = lis.filter(li => li.classList.contains("done")).length;
+    const lis = $$(".items li[data-t]", d), n = lis.filter(li => li.classList.contains("done")).length;
     $(".pd", d).textContent = n + " of " + lis.length + " done";
   });
   DATA.phases.forEach(p => {
@@ -159,9 +160,10 @@ function paintTracker() {
     $(".cpaid", row).style.width = Math.min(100, 100 * v / DATA.top) + "%";
     $(".cpv", row).textContent = v ? "paid " + money(v) : "";
   });
-  $("#t-done").textContent = done + " of " + DATA.track.length;
+  $("#t-done").textContent = done + " of " + buys;
+  $("#t-jobs").textContent = jobsDone + " of " + jobs;
   $("#t-paid").textContent = money(paid);
-  $("#t-left").textContent = leftHi ? money(leftLo) + "–" + money(leftHi).slice(1) : "£0";
+  $("#t-left").textContent = !done ? "nothing ticked yet" : leftHi ? "about " + money(leftLo) + "–" + money(leftHi).slice(1) + " still to buy" : "everything bought";
 }
 function saveTrack(id, patch) {
   const r = DATA.track.find(x => x.id === id);
@@ -186,6 +188,7 @@ $$("[data-filter]").forEach(b => b.addEventListener("click", () => {
   const t = $("#tracker");
   t.classList.toggle("f-left", b.dataset.filter === "left");
   t.classList.toggle("f-jobs", b.dataset.filter === "jobs");
+  t.classList.toggle("f-buys", b.dataset.filter === "buys");   // v33
   if (b.dataset.filter !== "all") $$("details.phase", t).forEach(d => d.open = true);
 }));
 paintTracker();
@@ -301,3 +304,124 @@ document.addEventListener("click", e => {
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, () => { prompt("Copy the list:", t); });
   else prompt("Copy the list:", t);
 });
+
+/* ---------- v33, from the design review (plan_ui.py): the open choices (Decide), the ideas shortlist, and build day. The picks are kept
+   on this device and, on the plan page on Claude, for both of you (the "picks" collection); the plan's totals and the buy list follow. */
+window.PICKS = (() => {
+  const K = "mw33-picks", TK = "mw33-tasks", D = DATA.decide, SH = DATA.short, BD = DATA.bday;
+  const st = Object.assign({ decide: {}, short: {} }, store.get(K, {}));
+  let tasks = store.get(TK, {});
+  const fm = v => "£" + Math.round(v).toLocaleString("en-GB");
+  const rng = (lo, hi) => Math.round(lo) === Math.round(hi) ? fm(lo) : fm(lo) + "–" + fm(hi).slice(1);
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const txt = (sel, t) => { const el = $(sel); if (el) el.textContent = t; };
+  function save(part) {
+    store.set(K, st);
+    if (db && !readOnly) write("picks/" + part, { v: st[part], by: myId || "", at: new Date().toISOString() }).catch(e => onWriteError(e));
+  }
+  function toRoom(o) { if (window.R3D) window.dispatchEvent(new CustomEvent("r3d-set", { detail: o })); else window.__r3dPending = o; }
+  // what the picks add to the plan: the piece beside the cabinet, and each idea moved in
+  function added() {
+    const out = [];
+    D.forEach(d => { const o = d.options.find(x => x.v === st.decide[d.key]); if (o && o.cost[1] > 0) out.push({ key: "decide:" + d.key, name: o.label + " beside the cabinet", lo: o.cost[0], hi: o.cost[1] }); });
+    Object.keys(st.short).forEach(k => { if (st.short[k] && SH[k]) out.push({ key: k, name: SH[k].name, lo: SH[k].lo, hi: SH[k].hi, idea: true }); });
+    return out;
+  }
+  function paint() {
+    const ad = added(), lo = ad.reduce((a, x) => a + x.lo, 0), hi = ad.reduce((a, x) => a + x.hi, 0), tot = rng(DATA.plan[0] + lo, DATA.plan[1] + hi);
+    const ideas = ad.filter(x => x.idea), ilo = ideas.reduce((a, x) => a + x.lo, 0), ihi = ideas.reduce((a, x) => a + x.hi, 0);
+    txt("#d-total", tot); txt("#t-plan", tot);
+    txt("#sb-count", ideas.length ? `${ideas.length} ${ideas.length === 1 ? "idea" : "ideas"} moved into the plan: +${rng(ilo, ihi)}` : "Nothing added to the plan yet");
+    txt("#sb-total", "The plan: " + tot);
+    $$("[data-short]").forEach(b => { const on = !!st.short[b.dataset.short]; b.setAttribute("aria-pressed", String(on));
+      const t = $(".t", b), i = $(".ms", b); if (t) t.textContent = on ? "In the plan" : "Add to plan"; if (i) i.textContent = on ? "check" : "add"; });
+    const pk = $("#picked");
+    if (pk) { pk.hidden = !ad.length; txt("#picked-sum", ad.length ? `+${rng(lo, hi)} · the plan with them: ${tot}` : "");
+      $("#picked-l").innerHTML = ad.map(x => `<li><span>${esc(x.name)}</span><span class="m">${rng(x.lo, x.hi)}</span><button type="button" class="btn" data-unpick="${esc(x.key)}">Take out</button></li>`).join(""); }
+    const ma = $("#mo-added"); if (ma) { ma.hidden = !ad.length; txt("#mo-addv", "+" + rng(lo, hi)); }
+    // the buy list follows the picks
+    const pads = $("[data-pickpads]"); if (pads) { const v = st.decide.pads; pads.textContent = v ? `in ${v[0].toUpperCase() + v.slice(1)} (your pick)` : "in Olive (or Honey or Ivory)"; }
+    $$('[data-picknote="cabw"]').forEach(n => { n.hidden = st.decide.cabw !== "80"; });
+    // waiting on you, and the third ring
+    const wl = $("#waitl");
+    if (wl) wl.innerHTML = D.map((d, i) => { const o = d.options.find(x => x.v === st.decide[d.key]), first = o || d.options.find(x => x.art) || d.options[0];
+      const pic = first.art && DATA.img[first.art] ? `<img src="${DATA.img[first.art]}" alt="" loading="lazy">` : first.swatch ? `<span class="sw" style="background:${first.swatch}"></span>` : `<span class="sw ic"><span class="ms" aria-hidden="true">toggle_on</span></span>`;
+      return `<li class="${o ? "made" : ""}"><button type="button" data-decide-open="${i}">${pic}<span class="wt"><b>${esc(d.title)}</b><span>${o ? "Your pick: " + esc(o.label) : esc(d.q)}</span></span><span class="go">${o ? "Change" : "Choose"}</span></button></li>`; }).join("");
+    const made = D.filter(d => st.decide[d.key]).length;
+    txt("#d-choice", made + "/" + D.length); ring("d-choice-bar", made, D.length);
+    $$("[data-decide=\"cabw\"]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === (st.decide.cabw || ""))));
+  }
+  /* Decide: one choice per screen */
+  const ov = $("#decide"); let di = 0, back = null;
+  function show(el, on) { el.hidden = !on; document.body.classList.toggle("ov-open", !!$(".ov:not([hidden])")); }
+  function openDecide(i) { back = document.activeElement; di = Math.max(0, Math.min(D.length - 1, +i || 0)); renderDecide(); show(ov, true); const f = $("[aria-checked=true]", ov) || $(".dcopts button", ov); if (f) f.focus(); }
+  function renderDecide() {
+    const d = D[di], v = st.decide[d.key];
+    txt("#dc-n", `${di + 1} of ${D.length}`); txt("#dc-h", d.title); txt("#dc-q", d.q); txt("#dc-buy", d.buy);
+    $("#dc-opts").innerHTML = d.options.map(o => {
+      const pic = o.art && DATA.img[o.art] ? `<img src="${DATA.img[o.art]}" alt="">` : o.swatch ? `<span class="sw" style="background:${o.swatch}"></span>` : `<span class="sw ic"><span class="ms" aria-hidden="true">toggle_on</span></span>`;
+      return `<button type="button" role="radio" aria-checked="${o.v === v}" data-dv="${esc(o.v)}">${pic}<span class="dt"><b>${esc(o.label)}</b><span>${esc(o.note)}</span>${o.cost[1] > 0 ? `<em>+${rng(o.cost[0], o.cost[1])}</em>` : ""}</span></button>`; }).join("");
+    $("#dc-prev").disabled = di === 0; txt("#dc-next", di === D.length - 1 ? "Done" : "Next");
+  }
+  function pick(v) {
+    const d = D[di], o = d.options.find(x => x.v === v); if (!o) return;
+    st.decide[d.key] = v; save("decide"); renderDecide(); paint();
+    const room = { pads: { decor: { pads: v }, merge: true }, cabw: { cabw: v }, beside: { beside: v } }[d.key];   // the room follows, without moving the camera
+    if (room) toRoom(room);
+    cheer(`${d.title}: ${o.label}`, $(`[data-dv="${v}"]`, ov));
+  }
+  function closeOv(el) { show(el, false); if (back && back.focus) back.focus({ preventScroll: true }); }
+  $("#dc-opts").addEventListener("click", e => { const b = e.target.closest("[data-dv]"); if (b) pick(b.dataset.dv); });
+  $("#dc-opts").addEventListener("keydown", e => {   // a radio group: the arrows move through the options
+    const bs = $$("[data-dv]", ov), i = bs.indexOf(document.activeElement); if (i < 0) return;
+    const j = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (!j) return;
+    e.preventDefault(); bs[(i + j + bs.length) % bs.length].focus();
+  });
+  $("#dc-prev").addEventListener("click", () => { if (di > 0) { di--; renderDecide(); } });
+  $("#dc-next").addEventListener("click", () => { if (di < D.length - 1) { di++; renderDecide(); } else closeOv(ov); });
+  $("#dc-room").addEventListener("click", () => { const d = D[di], o = d.options.find(x => x.v === st.decide[d.key]) || d.options[0]; show(ov, false); closeSheets(); toRoom(o.r3d); });
+  document.addEventListener("click", e => {
+    const a = e.target.closest("[data-decide-open], #d-choice-bar"); if (a) { e.preventDefault(); e.stopImmediatePropagation(); openDecide(a.dataset.decideOpen || 0); return; }
+    const c = e.target.closest("[data-decide]"); if (c) { const i = D.findIndex(d => d.key === c.dataset.decide); if (i >= 0) { di = i; pick(c.dataset.v); } return; }
+    const s = e.target.closest("[data-short]");
+    if (s) { const k = s.dataset.short, on = !st.short[k]; if (on) st.short[k] = true; else delete st.short[k]; save("short"); paint();
+      if (on && SH[k]) cheer(`Added to the plan: +${rng(SH[k].lo, SH[k].hi)}`, s); return; }
+    const u = e.target.closest("[data-unpick]");
+    if (u) { const k = u.dataset.unpick; if (k.startsWith("decide:")) delete st.decide[k.slice(7)]; else delete st.short[k]; save(k.startsWith("decide:") ? "decide" : "short"); paint(); return; }
+    const x = e.target.closest("[data-ov-close]"); if (x) closeOv(x.closest(".ov"));
+  }, true);
+  document.addEventListener("keydown", e => { if (e.key !== "Escape") return; const o = $(".ov:not([hidden])"); if (o) { e.stopPropagation(); closeOv(o); } }, true);
+  /* build day: one step on one screen */
+  const bd = $("#bday"); let cur = null;
+  function openDay(n) { back = document.activeElement; cur = BD.find(s => s.n === +n); if (!cur) return; renderDay(); show(bd, true); $(".bdtasks button", bd)?.focus(); }
+  function renderDay() {
+    const s = cur, t = tasks[s.n] || [], done = !!$("#step-" + s.n + ".done");
+    const im = $("#bd-img"); im.src = DATA.img[s.art] || ""; im.alt = "The room for step " + s.n;
+    txt("#bd-n", `Step ${s.n} of ${BD.length} · ${s.who} · ${s.time}`); txt("#bd-h", s.title); txt("#bd-watcht", s.watch);
+    $("#bd-bar").innerHTML = BD.map(x => `<i class="${$("#step-" + x.n + ".done") ? "on" : x.n === s.n ? "cur" : ""}"></i>`).join("");
+    $("#bd-tasks").innerHTML = s.do.map((d, i) => `<li><button type="button" aria-pressed="${!!t[i]}" data-task="${i}"><span class="bx" aria-hidden="true">${t[i] ? "✓" : ""}</span><span class="tx">${d}</span></button></li>`).join("");
+    $("#bd-tools").innerHTML = s.tools.map(x => `<span class="chip">${x}</span>`).join("");
+    const rows = DATA.track.filter(r => r.kind === "buy" && s.buy.includes(r.phase)), got = rows.filter(r => { const v = tget(r.id); return v ? !!v.done : r.done; }).length;
+    txt("#bd-parts", rows.length ? `Its ${rows.length} things to buy · ${got} bought` : "Nothing to buy for it");
+    $("#bd-parts").disabled = !rows.length;
+    const k = t.filter(Boolean).length;
+    txt("#bd-done", done ? `Step ${s.n} done ✓` : k === s.do.length ? `Mark step ${s.n} done` : `${k} of ${s.do.length} tasks · Mark done`);
+  }
+  $("#bd-tasks").addEventListener("click", e => { const b = e.target.closest("[data-task]"); if (!b) return; const i = +b.dataset.task, t = tasks[cur.n] = tasks[cur.n] || [];
+    t[i] = !t[i]; store.set(TK, tasks); renderDay(); const nb = $(`[data-task="${i}"]`, bd); if (nb) nb.focus(); });
+  $("#bd-done").addEventListener("click", e => { const cb = document.getElementById("sd-" + cur.n); if (cb && !cb.disabled) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change", { bubbles: true })); } setTimeout(renderDay, 50); });
+  $("#bd-watch").addEventListener("click", () => { show(bd, false); closeSheets(); toRoom(cur.r3d); });
+  $("#bd-parts").addEventListener("click", () => { const a = $(`#step-${cur.n} .sbuy a`); show(bd, false); if (a) a.click(); });
+  document.addEventListener("click", e => { const b = e.target.closest("[data-bday]"); if (b) openDay(b.dataset.bday); });
+  /* the picks from the shared store, when there is one */
+  (async () => {
+    for (let i = 0; i < 40 && !db; i++) await new Promise(r => setTimeout(r, 250));
+    if (!db) return;
+    db.collection("picks").onSnapshot(snap => {
+      snap.docChanges().forEach(ch => { if (ch.type !== "removed" && (ch.doc.id === "decide" || ch.doc.id === "short")) st[ch.doc.id] = (ch.doc.data() || {}).v || {}; });
+      store.set(K, st); paint(); if (!ov.hidden) renderDecide();
+    }, () => {});
+  })();
+  return { paint, openDecide, openDay };
+})();
+PICKS.paint();

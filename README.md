@@ -2,14 +2,23 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v32: the table opens slowly, every idea rendered, a cost overview
+## Media wall and dining wall, v33: one table, a more compact version, a plan page that keeps count
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
-with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing (the long sliding cabinet and the flip-top are the alternatives). Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
+with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v32%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v33%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v32** (the table opens slowly, every idea and suggestion rendered and in the room, a cost overview)
+**New in v33** (one table, a more compact version of it, and the six upgrades from the design review)
+- **The compact cabinet is the only table.** The long sliding cabinet and the flip-top are set aside: out of the 3D room, the choices and the plan's dining section (a short note on each stays in the appendix).
+- **A more compact version:** the same two boxes round a 185 × 80 table, 134.2 cm long, 10 cm shorter, with 65.8 cm of bare wall by the pipe boxing. Six still sit, but its base is too narrow for the two chairs that lie in it, so four chairs go inside, not six. It's drawn, checked and rendered; swap the width in the 3D room (Layout, or tap the cabinet), or pick it in Decide.
+- **On a phone the room fills the screen:** numbered pins instead of labels, a strip of the places under the room (tap one to fly there and open its card), the set-ups (dinner for six, lunch for four, film night, morning) as chips, and Menu in the bottom dock.
+- **One count:** 66 things to buy and 13 steps, the same in Plan and Buy (the jobs counted apart). The Plan home shows what's waiting on you, the checks on site and where the money goes.
+- **Decide:** the four open choices (what goes beside the cabinet, the pads' colour, 90 or 80 wide, where the light switch is), one per screen with its render, saved for both of you. The buy list and the room follow your pick.
+- **Ideas into the plan:** "Add to plan" on each idea and suggestion, with a running total and the plan's new total.
+- **90 or 80 side by side**, and **build day:** a step on one screen with its room, its tasks to tick, its tools, its things to buy and Done.
+
+**v32** (the table opens slowly, every idea and suggestion rendered and in the room, a cost overview)
 - **Watch it open, slowly:** about forty seconds in thirteen steps, each on a card you can pause or step back and on. The doors and chairs first, then the table jointed as it's built: the folded pair tilts out on its piano hinge, the first legs fold down, it lowers onto them, the second half flips over on its flip-top hinges, its legs fold down, it lies flat, and the six chairs come in. You can look round while it plays.
 - **A full 3D render of every idea, every suggestion and every piece in Edit room's Add list** (48), each on its own card in the plan page's Ideas with "Show it in my room", which switches it on and takes you to it. Every idea is now in the 3D room too: the TV backlight, a plant uplight, the rug pad, a scene button, stair nightlights and a record-care caddy.
 - **Three new suggestions:** picture lights over your two framed LPs, a blackout roller blind, and lights inside the dining cabinet that come on as a door opens.
@@ -50,7 +59,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **The brick under the stairs is painted**, as it has a wall in front of it.
 - **Edit room:** the flip-top's chair cupboard can come off the wall (select it, Remove; + Add puts it back). Things clip to a wall from 15 cm away (was 5), a quarter turn keeps a piece against its wall, and **Back to the wall** turns a piece and pushes it flat against the nearest wall.
 
-![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v32%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
+![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v33%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
 
 **v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
 - **Option C, a second way to build the dining wall** (the flip-top stays the plan): one oak cabinet under your shelf. The table, 225 × 90 open, stands up in one bay; all eight folding chairs fold into the other, behind two doors. Packed away, nothing shows. In the 3D room: Tools, Layout, "C: the dining cabinet".
