@@ -1091,7 +1091,7 @@ def _page(site=False):
 {STYLE_V25}
 <button type="button" class="skip" data-tools-toggle>Open the room's controls</button>
 <div class="brand"><span class="mark" aria-hidden="true"><i style="background:var(--peach)"></i><i style="background:var(--mint)"></i><i style="background:var(--lilac)"></i><i style="background:var(--butter)"></i></span>
-  <span><b>Demma</b><small>Home Improvements</small></span></div>
+  <span><b>Demma<span class="ver" title="This page is version {VERSION}">v{VERSION}</span></b><small>Home Improvements</small></span></div>
 {rail}
 <main id="room" aria-label="Your room in 3D">{room3d_page.section(gallery3d())}</main>
 {sheet("plan", "Your plan", "map", 300, plan_home + chapters)}
