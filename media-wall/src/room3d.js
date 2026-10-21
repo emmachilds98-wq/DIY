@@ -132,6 +132,8 @@ const OAK_TEX = canvasTex(1024, 512, (g, w, h) => {
   }
   for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(70,40,15,${0.08 + r() * 0.12})`; g.fillRect(r() * w, r() * h, 2 + r() * 5, 0.8); }
 });
+const OAK_TEX_V = (() => { const tx = OAK_TEX.clone(); tx.rotation = Math.PI / 2; tx.center.set(0.5, 0.5); tx.needsUpdate = true; return tx; })();   // v29: upright grain, for tall doors
+
 const OAK_BUMP = canvasTex(512, 256, (g, w, h) => {
   const r = rnd(5);
   g.fillStyle = "#808080"; g.fillRect(0, 0, w, h);
@@ -752,76 +754,95 @@ function placeChairs() {
    bay, where a 180 × 90 top folded double stands up behind its framed oak underside (a drawer under it, the linen flap over it); at the
    window end the chair bay, six FRÖSVI folded behind two doors (four on the floor, two on the shelf, their seat pads beside them).
    S.site "C"; S.dining folded / four / six (the table always opens to its full 180). */
-let optC = null, optCFold = null, optCOpen = null, optCChairsIn = null, optCDoors = [], optCSeats = {};
+let optC = null, optCFold = null, optCOpen = null, optCChairsIn = null, optCDoors = {}, optCSeats = {};
 function buildOptC() {
+  /* v29, client: "i asked for a full upgrade of the tables design". Shut, the cabinet is one tidy run of oak: two sliding doors between
+     its ends (Häfele Slido Classic 40 IF C), a shadow-gap plinth, nothing of the table or the chairs on show. Door A (the stair end, front
+     track) slides over door B to open the table bay; B slides behind A to open the chair bay. Inside: the table standing up on its hinge
+     rail, the drawer under it, the linen shelf over it; six folding chairs and their pads beside it. */
   const C = R.OPTC; if (!C) return;
-  const [cw, cdep, ch] = R.CHAIR_FOLDED, W = R.W, xf = C.front, t = C.t;
+  const [cw, cdep, ch] = R.CHAIR_FOLDED, W = R.W, xf = C.front, xi = C.inner, t = C.t;
   const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
-  const oakD = reg(new THREE.MeshStandardMaterial({ color: "#b07f50", map: OAK_TEX, roughness: 0.6 }));
-  const pad = reg(new THREE.MeshStandardMaterial({ color: "#77736b", roughness: 0.92 }));
-  const wood = reg(new THREE.MeshStandardMaterial({ color: "#c9a77c", roughness: 0.6 }));
+  const oakV = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX_V, roughness: 0.55 }));   // the doors and the ends: the grain upright
+  const oakIn = reg(new THREE.MeshStandardMaterial({ color: "#b5845a", map: OAK_TEX, roughness: 0.65 }));
+  const oakEnd = reg(new THREE.MeshStandardMaterial({ color: "#b98250", map: OAK_TEX, roughness: 0.55 }));   // the breadboard ends, a touch darker
+  const dark = reg(new THREE.MeshStandardMaterial({ color: "#241f1b", roughness: 0.9 }));
+  const beech = reg(new THREE.MeshStandardMaterial({ color: "#d4b58c", map: OAK_TEX, roughness: 0.6 }));        // the folding chairs
+  const pad = reg(new THREE.MeshStandardMaterial({ color: "#8e9a80", roughness: 0.95 }));                        // sage linen seat pads
   const alu = reg(new THREE.MeshStandardMaterial({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }));
   const plate = reg(new THREE.MeshStandardMaterial({ color: "#f4f1ea", roughness: 0.35 }));
+  const cloth = ["#efe7d8", "#8e9a80", "#c7643a"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.95 })));
   const bx = (g, x, y, z, w, h, d, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
-  const z0 = C.z[1], z1 = C.z[0];                                   // the cabinet's window end and stair end (z0 < z1)
+  const rbx = (g, x, y, z, w, h, d, m, r = 0.6) => { const me = new THREE.Mesh(new RoundedBoxGeometry(w * M, h * M, d * M, 2, Math.min(r, Math.min(w, h, d) / 2.2) * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
+  const z0 = C.z[1], z1 = C.z[0], span = z1 - z0 - 2 * t, deepIn = W - C.back - xi;   // the window end, the stair end (z0 < z1)
   optC = new THREE.Group(); optC.name = "optc";
-  // the carcass: ends, top, plinth, the partition, the chair bay's shelf, the back; the hinge rail and the drawer in the table bay
-  bx(optC, xf + C.door, 0, z0, C.d - C.door, C.h, t, oak); bx(optC, xf + C.door, 0, z1 - t, C.d - C.door, C.h, t, oak);
-  bx(optC, xf + C.door, C.h - t, z0 + t, C.d - C.door, t, z1 - z0 - 2 * t, oak);
-  bx(optC, xf + C.door + 1, 0, z0 + t, C.d - C.door - 2, C.plinth, z1 - z0 - 2 * t, oakD);
+  // the carcass: two ends the full depth (the doors run between them), the 19 mm top with the track in its groove, the floor on a
+  // plinth set 2.5 back (a shadow line), the back
+  bx(optC, xf, 0, z0, C.d, C.h, t, oakV); bx(optC, xf, 0, z1 - t, C.d, C.h, t, oakV);
+  bx(optC, xf, C.h - C.t_top, z0 + t, C.d, C.t_top, span, oak);
+  bx(optC, xf, C.plinth - t, z0 + t, C.d, t, span, oak);
+  bx(optC, xf + 2.5, 0, z0 + t, C.d - 2.5, C.plinth - t, span, dark);
+  bx(optC, W - C.back, C.plinth, z0 + t, C.back, C.h - C.plinth - C.t_top, span, oakIn);
+  bx(optC, xf + 0.3, C.h - C.t_top - 0.7, z0 + t, C.slide - 0.6, 0.7, span, alu);            // the double top track
+  bx(optC, xf + 0.3, C.plinth, z0 + t, C.slide - 0.6, 0.25, span, alu);                      // the bottom guide track
+  // inside, behind the doors: the partition, the chair shelf, the linen shelf, the hinge rail, the drawer
   const [bt0, bt1] = C.bay_t, [bc0, bc1] = C.bay_c;
-  bx(optC, xf + C.door, 0, bt1 - t, C.d - C.door, C.h - t, t, oak);                      // the partition
-  bx(optC, xf + C.door, C.shelf_y, bc1, C.d - C.door, t, bc0 - bc1, oak);                // the chair bay's shelf
-  bx(optC, W - C.back, C.plinth, z0 + t, C.back, C.h - C.plinth - t, z1 - z0 - 2 * t, oakD);
+  bx(optC, xi, C.plinth, bt1 - t, deepIn, C.h - C.t_top - C.plinth, t, oakIn);
+  bx(optC, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, oakIn);
+  bx(optC, xi, C.flap[0] - t, bt1, deepIn, t, bt0 - bt1, oakIn);
   const rail = C.pivot[1] - 7;
-  bx(optC, xf, rail, bt1, C.d - C.back, 7, bt0 - bt1, oak);                              // the hinge rail, flush with the doors
-  bx(optC, xf, C.plinth + 0.3, bt1 + 0.15, C.door, rail - C.plinth - 0.6, bt0 - bt1 - 0.3, oak);   // the drawer's front
-  const knob = (g, x, y, z) => { const k = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); k.rotation.z = Math.PI / 2; k.position.copy(v3(x - 1, y, z)); g.add(k); };
-  knob(optC, xf, (C.plinth + rail) / 2, (bt0 + bt1) / 2);
-  bx(optC, xf + C.door, C.flap[0] - t, bt1, C.d - C.door - C.back, t, bt0 - bt1, oak);      // v27: the linen flap's floor
-  bx(optC, xf, C.folded_top + 0.3, bt1, C.door, C.h - C.folded_top - 0.3, bt0 - bt1, oak);   // the linen flap, over the folded table
-  knob(optC, xf, C.folded_top + 0.3 + 4, (bt0 + bt1) / 2);
-  // the chair bay's two doors, meeting in the middle, each a pivot on its outer edge (open: back past flat on 170° hinges)
-  optCDoors = [];
-  const zm = (bc0 + bc1) / 2;
-  for (const [zh, za, zb, sgn] of [[bt1 - t, zm + 0.15, bt1 - t, 1], [z0, z0, zm - 0.15, -1]]) {
-    const piv = new THREE.Group(); piv.position.copy(v3(xf, 0, zh)); piv.userData.sgn = sgn;
-    const w = Math.abs(zb - za), d = new THREE.Mesh(new THREE.BoxGeometry(C.door * M, (C.h - C.plinth - 0.3) * M, (w - 0.3) * M), oak);
-    d.position.set(-C.door / 2 * M, (C.plinth + 0.3 + C.h) / 2 * M, ((za + zb) / 2 - zh) * M);
-    piv.add(shadow(d));
-    const k = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); k.rotation.z = Math.PI / 2;
-    k.position.set(0.01, 1.0, ((sgn > 0 ? za + 5 : zb - 5) - zh) * M); piv.add(k);
-    optC.add(piv); optCDoors.push(piv);
+  bx(optC, xi, rail, bt1, deepIn, 7, bt0 - bt1, oak);
+  bx(optC, xi, C.plinth + 0.3, bt1 + 0.15, t, rail - C.plinth - 0.6, bt0 - bt1 - 0.3, oak);   // the drawer's front, inside
+  bx(optC, xi - 0.6, (C.plinth + rail) / 2 - 0.8, C.cz - 6, 0.6, 1.6, 12, dark);              // its finger slot
+  [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(optC, xi + 3 + i * 0.4, C.flap[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - 6, 3, 34, cloth[c]));   // the cloth, napkins and runner
+  // the two sliding doors: A on the front track over the table bay, B on the back track over the chair bay; a routed finger slot near
+  // each one's outer end. Each is a group placed at its stair-side edge (placeOptC slides it).
+  optCDoors = {};
+  for (const k of ["A", "B"]) {
+    const D = C.doors[k], [dx0] = C.door_x[D.track], g = new THREE.Group();
+    bx(g, dx0, C.plinth + 0.3, -C.door_w, C.door, C.door_h, C.door_w, oakV);
+    const zs = k === "A" ? -7 : -C.door_w + 4;
+    bx(g, dx0 - 0.05, 92, zs, 0.12, 26, 3, dark);
+    optC.add(g); optCDoors[k] = g;
   }
-  // the table folded: standing up in its bay, the oak underside in an apron frame flush with the doors, the legs folded inside it
+  // the table folded: standing up in its bay behind door A, the inner half's apron to the front, the legs folded inside it
   optCFold = new THREE.Group();
   const [tw, tl, tt] = C.top, [tz0, tz1] = C.tz, ap = C.apron, px = C.pivot[0], py = C.pivot[1];
-  bx(optCFold, px, py, tz1, tt, tl, tw, oak);                                         // the inner half, standing
-  bx(optCFold, px + tt + 0.3, py, tz1, tt, tl, tw, oakD);                             // the outer half behind it, face to face
-  for (const [a, b] of [[tz1, tz1 + 2], [tz0 - 2, tz0]]) bx(optCFold, xf, py, a, ap, tl, b - a, oak);   // the apron's sides
-  for (const y of [py, py + tl - 2]) bx(optCFold, xf, y, tz1 + 2, ap, 2, tw - 4, oak);                  // its ends
-  for (const z of [C.cz - 15, C.cz + 11]) bx(optCFold, xf + 0.6, py + 5, z, C.leg[1], tl - 12, 4, oakD);  // the inner legs, folded
-  const pull = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); pull.rotation.z = Math.PI / 2; pull.position.copy(v3(xf - 1, py + tl - 9, C.cz)); optCFold.add(pull);
+  bx(optCFold, px, py, tz1, tt, tl, tw, oak);
+  bx(optCFold, px + tt + 0.3, py, tz1, tt, tl, tw, oakEnd);
+  for (const [a, b] of [[tz1, tz1 + 2], [tz0 - 2, tz0]]) bx(optCFold, xi, py, a, ap, tl, b - a, oakIn);
+  for (const y of [py, py + tl - 2]) bx(optCFold, xi, y, tz1 + 2, ap, 2, tw - 4, oakIn);
+  for (const z of [C.cz - 15, C.cz + 11]) bx(optCFold, xi + 0.6, py + 5, z, C.leg[1], tl - 12, 4, oakIn);
   optC.add(optCFold);
-  // the table open: 225 × 90, the inner half on its legs under the joint, the outer half flipped onto its pair at the far end
+  // the table open: two halves flush at the joint, each a centre of staves between two breadboard ends, the corners eased; its aprons;
+  // four tapered legs
   optCOpen = new THREE.Group();
-  const [tx0, tx1] = C.tx, jx = C.joint_x, top = py + tt;
-  bx(optCOpen, jx, py, tz1, tx1 - jx, tt, tw, oak); bx(optCOpen, tx0, py, tz1, jx - tx0 - 0.3, tt, tw, oak);
-  for (const [a, b] of [[jx + 0.2, tx1 - ap], [tx0 + 0.3, jx - 0.5]]) {                // each half's apron frame
-    for (const z of [tz1 + 2, tz0 - 4]) bx(optCOpen, a, py - ap, z, b - a, ap, 2, oakD);
-    for (const x of [a, b - 2]) bx(optCOpen, x, py - ap, tz1 + 4, 2, ap, tw - 8, oakD);
+  const [tx0, tx1] = C.tx, jx = C.joint_x;
+  for (const [a, b] of [[jx, tx1], [tx0, jx - 0.15]]) {
+    rbx(optCOpen, a + 7, py, tz1, b - a - 14, tt, tw, oak, 0.5);
+    for (const e of [a, b - 7]) rbx(optCOpen, e, py, tz1, 7, tt, tw, oakEnd, 0.6);
   }
-  for (const [lx, lz] of C.legs) bx(optCOpen, lx - C.leg[0] / 2, 0, lz - C.leg[1] / 2, C.leg[0], C.leg_h, C.leg[1], oakD);
+  for (const [a, b] of [[jx + 0.2, tx1 - ap], [tx0 + 3, jx - 3]]) {
+    for (const z of [tz1 + 4, tz0 - 6]) bx(optCOpen, a, py - ap, z, b - a, ap, 2, oakIn);
+    for (const x of [a, b - 2]) bx(optCOpen, x, py - ap, tz1 + 6, 2, ap, tw - 12, oakIn);
+  }
+  const legGeo = (() => { const g = new THREE.CylinderGeometry(3.9 * M, 2.7 * M, C.leg_h * M, 4, 1); g.rotateY(Math.PI / 4); g.scale(C.leg[0] / 5.5, 1, C.leg[1] / 5.5); return g; })();
+  for (const [lx, lz] of C.legs) { const l = new THREE.Mesh(legGeo, oakIn); l.position.copy(v3(lx, C.leg_h / 2, lz)); optCOpen.add(shadow(l)); }
   optC.add(optCOpen);
-  // the chairs at the table, by count; plates in front of each
+  // the chairs at the table: slatted beech folding chairs with sage pads, the back legs rising to a two-rail back
   const chairOpen = (g, x, z, face) => {
-    const c = new THREE.Group(), sw = R.CHAIR[0], sd = R.CHAIR[1] - 7, sh = R.CHAIR[3];
-    lb(c, 0, sh - 3, 0, sw - 2, 3, sd, wood);                                          // the seat
-    lb(c, 0, sh - 2.5, 0.5, sw - 6, 1.5, sd - 6, pad);                                // its pad
-    for (const xx of [-sw / 2 + 2, sw / 2 - 2]) { lb(c, xx, 0, -sd / 2 + 3, 2.5, sh - 3, 2.5, wood); lb(c, xx, 0, sd / 2 - 3, 2.5, R.CHAIR[2], 2.5, wood); }
-    lb(c, 0, R.CHAIR[2] - 22, sd / 2 - 3, sw - 6, 20, 2, wood);                       // the back
+    const c = new THREE.Group(), sw = R.CHAIR[0], sd = R.CHAIR[1], sh = R.CHAIR[3], bh = R.CHAIR[2];
+    for (let i = 0; i < 4; i++) lb(c, 0, sh - 2.2, -sd / 2 + 6 + i * 9.4, sw - 4, 2.2, 8.2, beech);          // the seat's slats
+    for (const xx of [-sw / 2 + 1.5, sw / 2 - 1.5]) {
+      const back = lb(c, xx, 0, sd / 2 - 5, 2.6, bh, 3, beech); back.rotation.x = -0.06;                // the back legs, rising to the back
+      lb(c, xx, 0, -sd / 2 + 4, 2.6, sh - 2.2, 2.6, beech);                                             // the front legs
+      lb(c, xx, sh - 5, 0, 2.2, 3, sd - 6, beech);                                                      // the seat's side rails
+    }
+    for (const y of [bh - 9, bh - 21]) lb(c, 0, y, sd / 2 - 5.5, sw - 3, 7, 1.8, beech);               // two back rails
+    lb(c, 0, 14, -sd / 2 + 4, sw - 5, 2.2, 2.2, beech);                                                 // the stretcher
+    const p = new THREE.Mesh(new RoundedBoxGeometry((sw - 7) * M, 3 * M, (sd - 14) * M, 2, 0.012), pad); p.position.copy(v3(0, sh + 1.5, -2)); c.add(shadow(p));
     c.position.copy(v3(x, 0, z));
-    c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                    // the back away from the table (local +z is the back)
+    c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                                     // the back away from the table (local +z is the back)
     g.add(c);
   };
   for (const [k, list] of Object.entries(C.seats)) {
@@ -829,35 +850,41 @@ function buildOptC() {
     for (const [x, z, f] of list) {
       chairOpen(g, x, z, f);
       const pz = f === "n" ? tz0 - 16 : f === "w" ? tz1 + 16 : C.cz, pxp = f === "e" ? tx0 + 16 : x;
-      const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.008, 28), plate); pl.position.copy(v3(pxp, top + 0.4, pz)); g.add(pl);
+      const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.008, 28), plate); pl.position.copy(v3(pxp, py + tt + 0.4, pz)); g.add(pl);
     }
     optCSeats[k] = g; optC.add(g);
   }
-  // v27: six chairs inside the chair bay: two across, two deep, four on the floor; two on the shelf at the back, the pads in front
+  // six chairs folded in the chair bay: two across, two deep on the floor and one deep on the shelf, each a folded slatted chair; the six
+  // pads on edge in front of the two on the shelf
   optCChairsIn = new THREE.Group();
   const fchair = (g, x0, y0, cz) => {
-    for (const sd of [-1, 1]) bx(g, x0, y0, cz + sd * (cw / 2 - 1.5) - 1.5, cdep, ch, 3, wood);
-    bx(g, x0 + 1.5, y0 + 28, cz - (cw / 2 - 3), 2.2, 38, cw - 6, pad);
-    bx(g, x0 + 4, y0 + ch - 27, cz - (cw / 2 - 3), 3, 22, cw - 6, pad);
+    for (const sd of [-1, 1]) {
+      bx(g, x0 + cdep - 3, y0, cz + sd * (cw / 2 - 1.3) - 1.3, 2.6, ch, 2.6, beech);                   // the back legs
+      bx(g, x0 + 0.4, y0 + 2, cz + sd * (cw / 2 - 4) - 1.3, 2.6, ch - 14, 2.6, beech);                // the front legs, folded up against them
+    }
+    for (let i = 0; i < 4; i++) bx(g, x0 + 3.2, y0 + 30 + i * 9.4, cz - (cw / 2 - 5), 2.2, 8.2, cw - 10, beech);   // the seat, folded up
+    for (const y of [ch - 9, ch - 21]) bx(g, x0 + cdep - 3.4, y0 + y, cz - (cw / 2 - 3), 1.8, 7, cw - 6, beech);  // the back rails
   };
-  for (const cz of [zm + cw / 2 + 2, zm - cw / 2 - 2]) {
-    for (let j = 0; j < 2; j++) fchair(optCChairsIn, W - C.back - 0.4 - cdep - j * (cdep + 0.3), C.plinth, cz);
-    fchair(optCChairsIn, W - C.back - 0.4 - cdep, C.shelf_y + t, cz);
-    for (let k = 0; k < 3; k++) bx(optCChairsIn, xf + C.door + 1, C.shelf_y + t + k * 3.2, cz - 19, 7.5, 3, 38, pad);   // three seat pads stacked in front
+  for (const cz of C.chair_z) {
+    for (let j = 0; j < 2; j++) fchair(optCChairsIn, W - C.back - 0.3 - cdep - j * (cdep + 0.3), C.plinth, cz);
+    fchair(optCChairsIn, W - C.back - 0.3 - cdep, C.shelf_y + t, cz);
+    for (let k = 0; k < 3; k++) bx(optCChairsIn, xi + 0.6 + k * 3.1, C.shelf_y + t, cz - 19, 3, 38, 38, pad);
   }
   optC.add(optCChairsIn);
   scene.add(optC);
 }
 function placeOptC() {
   if (!optC) return;
-  const on = S.site === "C", folded = S.dining === "folded", n = S.dining === "six" ? "six" : "four";
+  const C = R.OPTC, on = S.site === "C", folded = S.dining === "folded", n = S.dining === "six" ? "six" : "four";
   optC.visible = on;
   if (!on) return;
   optCFold.visible = folded; optCOpen.visible = !folded;
   for (const [k, g] of Object.entries(optCSeats)) g.visible = !folded && k === n;
   optCChairsIn.visible = folded;
-  const open = folded && S.chairs === "open";
-  optCDoors.forEach(d => { d.rotation.y = open ? d.userData.sgn * -2.97 : 0; });
+  // v29: the doors slide: the table out, door A over door B; the chairs out (the table folded), door B behind door A
+  const slidA = !folded, slidB = folded && S.chairs === "open";
+  optCDoors.A.position.copy(v3(0, 0, (slidA ? C.doors.A.slid : C.doors.A.shut)[0]));
+  optCDoors.B.position.copy(v3(0, 0, (slidB ? C.doors.B.slid : C.doors.B.shut)[0]));
 }
 /* v17: the ideas (ideas.py), each its own group, all hidden until its button is on */
 const IDEA_G = {};
@@ -1077,7 +1104,7 @@ function applyDecor() {
     caseFrameM.color.set(col); caseFrameM.roughness = ro; if (caseFrameM.map !== mp) { caseFrameM.map = mp; caseFrameM.needsUpdate = true; } }
   // v26: the oak's finish on every new oak piece (not your plant stand, vinyl stand, curtain pole or the stairs)
   const tint = OAK_TINTS[D.oak] || OAK_TINTS.artisan;
-  for (const m of MATS) if (m.map === OAK_TEX && !m.userData.noTint && m !== caseFrameM) {
+  for (const m of MATS) if ((m.map === OAK_TEX || m.map === OAK_TEX_V) && !m.userData.noTint && m !== caseFrameM) {
     if (!m.userData.oakBase) m.userData.oakBase = m.color.clone();
     m.color.copy(m.userData.oakBase).multiply(tint);
   }
@@ -2344,7 +2371,7 @@ function still(w, h) {
 }
 function stillName() {
   const site = S.site === "A" ? "breast" : S.site === "C" ? "stairs wall (the cabinet)" : "stairs wall";
-  return `Media wall v28 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  return `Media wall v29 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");

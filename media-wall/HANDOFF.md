@@ -1,7 +1,14 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **v28 is built (round 22, below): the last three items of `UPGRADE_PLAN_v25.md` are done** (the guided tour and "copy link to
+- **NEXT AGENT, DO THIS FIRST: v29 is built (the full rebuild finished: fit 91/32/12/0, total £3,518–6,858, PDFs and the page at v29)
+  but NOT yet checked, merged or published.** Look at the cabinet stills (`art/3d_c_folded`, `3d_c_six`, `3d_c_chairs`) and the PDF's
+  section 5 and step 11; upload the 10 pictures in `src/deck_assets_todo.txt` to the deck's asset store, record them in
+  `src/deck_assets.json`, run `python3 build_viewer.py` again; QA at 390 and 1280; then mark PR #25 ready, merge into `main`, publish the
+  deck 71ff (`src/media_wall_viewer_inline.html`).
+- **v29 (round 23, below): the dining cabinet fully upgraded** (two sliding oak doors, a 185 table, proper folding chairs) and the
+  whole plan made consistent with it (no more "the flip-top is the default" anywhere). Next: `media-wall/UPGRADE_PLAN_v30.md`.
+- **v28 (round 22): the last three items of `UPGRADE_PLAN_v25.md` are done** (the guided tour and "copy link to
   this view", versions for every suggestion, stills re-rendered only when they change). Next: `media-wall/UPGRADE_PLAN_v29.md`.
 - **v27.1 (round 21b): the rear speakers stand behind each end of the sofa**, from the client's two photos
   (`inputs/room_photo_rears_20oct.jpg`, `inputs/room_photo_west_20oct.jpg`) and their answer. v27 (round 21): the dining cabinet is the
@@ -38,6 +45,42 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 21 Oct 2026, round 23: v29 (the dining cabinet, fully upgraded; the plan around it)
+- Client: "whats left in the plan there seems to be missing things from what i requested" and "i asked for a full upgrade of the tables
+  design" (v27's ask: "use the cabinet version as our primary table model now and improve on its current design to have a seating of 6 ...
+  remember to adjust the plan with very clear instructions on how to build the table and chair design"). v27 made the cabinet the plan
+  but left its front as the folded table's underside (legs and apron on show), block chairs, and many places still calling the flip-top
+  the default (the floor plan, the dining layouts drawing, the chair cupboard "(the plan)", the page's buttons opening site B, steps 5
+  and 7 marking and cutting the flip-top's backboard, the worktop row, "eight at a squeeze" in the What changed box).
+- **Sliding doors (geometry.OPTC):** `d` 24.8 (wall to the doors' face; v27 24 with no doors on the table bay), `slide` 5.0 (the doors'
+  zone), `inner` 447.2 (the inside's front line), `in_d` 19.2, `t_top` 1.9 (the top carries the track). `door_w` 98.7 × `door_h` 183.3,
+  `doors` A (front track: shut over the table bay, slid over B) and B (back track: shut over the chair bay, slid behind A), `door_x`,
+  `open_t`/`open_c` (the openings), `chair_z` (two chairs centred in B's opening), `door_kg`. Hinged doors can't work: at the stair end a
+  door would fold back into the first chair. The doors' face can't come further out: the window side's chairs stop at the sofa's arm
+  (x 268), and three need 174 of edge for 58 each. `top` (90, 92.5, 2.7): 185 open (stair side 58.5, window 58.1; a seventh at the end).
+- **fit:** source `slido` (Häfele Slido Classic 40 IF C: 16–19 mm doors, ≤ 40 kg, ≤ 1250 × 2200; set 402.33.027, track 402.33.652, guide
+  402.30.802; the track's section isn't published, so "The doors' depth" is a CHECK). New rows: the doors, their depth, the top's panel,
+  the table bay with A slid, the chair bay with B slid, your trailing plant (`PLANT_B`) by the doors' face (CHECK); chairs two deep TIGHT
+  (1.2 spare); the pads on edge on the shelf. Fit 91 fit, 32 tight, 12 check, 0 don't fit.
+- **3D (room3d.js `buildOptC`/`placeOptC` rewritten):** the ends full depth, a 19 mm top, the floor on a set-back plinth (a shadow line),
+  the tracks; the inside behind `inner`; two door groups slid by state (table open: A slid; folded with `S.chairs` "open": B slid); a
+  finger slot in each; `OAK_TEX_V` (the grain upright, also tinted by the oak decor); the table halves as staves between breadboard ends
+  (`oakEnd`), eased corners, tapered legs; slatted beech folding chairs with sage pads at the table and folded in the bay; cloths on the
+  linen shelf. `optCDoors` is now `{A, B}`.
+- **The plan (build_doc):** `cabinet_html()` (the doors first, using it in the new order, the carcass and doors), TRACK rows reworded with
+  their ids kept (`build_viewer.TRACK_KEEP_ID`: the halves, the ply, the hinge rail, the sliding gear, the build row, the worktop), the cut
+  list (ends, top and floor full depth; inside 19.2; the doors; drawer box 16 deep), step 11 summary; steps 5 and 7 and the joinery table
+  without the flip-top's backboard. `instructions.full()[11]` (14 stages): the track grooves first, the inside on the 5 cm line, "Hang
+  the two sliding doors", no linen flap. diagrams: `option_c_elevation` (doors see-through, which way each goes), `option_c_section`
+  (door A, the doors' 5 cm), `option_c_plan` (A slid over B), `option_c_carcass` (the 19 mm top, the tracks); `_room` and `living_plan`
+  draw the cabinet; `light_scene(table=True)` the cabinet's table; the flip-top drawings titled the alternative.
+- **The page (build_viewer):** the dining card (doors, a "See it shut" button), the flip-top's chair cupboard labelled the alternative,
+  the dining chapter's subtitle and facts, CAP3D's cabinet captions; ideas, suggestions and decor buttons open on site C; page.js's drawn
+  flip-top views say "The alternative". The tour's dining caption names the doors.
+- **What changed box:** v29 and v28 only; v27 and older moved to the top of "Earlier rounds".
+- Version 29; v28 outputs in `out/v28/`. Backups `*_v28_backup.*` (geometry, fit, diagrams, build_doc, instructions, build_viewer,
+  shot3d, room3d_page, export3d, questions, room3d.js).
 
 ## Update 21 Oct 2026, round 22: v28 (the tour, a link to any view, versions of every suggestion, stills only when they change)
 - Client: "continue the current upgrade from the last agent in the repo": the three items left in `UPGRADE_PLAN_v25.md`.

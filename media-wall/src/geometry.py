@@ -482,8 +482,14 @@ SOFA_POUF = dict(w=75.0, d=75.0, h=44.0, x=(200.5, 275.5), z=(-195.0, -120.0))  
 #    shelf, with the shelf's front half free for the seat pads and the runner.
 _cb_z0, _cb_z1 = SHELF_B["z"]                                   # -84 .. -284: the shelf's length (the stair's foot stays clear)
 OPTC = dict(
-    z=(_cb_z0 - 2.0, _cb_z1), d=24.0, h=SHELF_B["top"] - SHELF_B["t"] - 2.0, t=1.8, door=1.8, back=0.6, plinth=3.0, shelf_y=93.0,
-    top=(90.0, 90.0, 2.7),                                      # each half: width along the wall, length out from it, thickness (v27: 90 long)
+    # v29, client: "i asked for a full upgrade of the tables design". Two oak sliding doors across the whole front (Häfele Slido Classic
+    # 40 IF C, inset, bypassing): shut, it's one tidy run of oak with nothing on show; slide one over the other to open either bay.
+    # Hinged doors can't work here: at the stair end there is nowhere for a door to fold back without standing in the first chair.
+    # d: the wall to the doors' face (v27: 24, no doors on the table bay); slide: the doors' zone in front of the inside (two 18 mm doors
+    # on the double track); inside 19.2, two folded chairs deep (18). The window side's chairs stop at the sofa's arm, so the doors' face
+    # can't come further out than this and still seat three in comfort.
+    z=(_cb_z0 - 2.0, _cb_z1), d=24.8, slide=5.0, h=SHELF_B["top"] - SHELF_B["t"] - 2.0, t=1.8, t_top=1.9, door=1.8, back=0.6, plinth=3.0, shelf_y=93.0,
+    top=(90.0, 92.5, 2.7),                                      # each half: width along the wall, length out from it, thickness (v29: 92.5, so 185 open)
     apron=4.6,                                                  # the frame under each half that the folded legs lie inside
     leg=(6.5, 4.5),                                             # oak legs, 6.5 × 4.5 (the folding brackets want 6.4 at the top)
     drawer_h=16.0,                                              # the drawer under the folded table
@@ -491,20 +497,35 @@ OPTC = dict(
     shelf_chairs=2,                                             # v27: two of the six on the shelf, at the back; four on the floor
 )
 _c = OPTC
-OPTC["front"] = ROOM_W - _c["d"]                                # 443: the cabinet's front face
+OPTC["front"] = ROOM_W - _c["d"]                                # 442.2: the doors' face
+OPTC["inner"] = OPTC["front"] + _c["slide"]                     # 447.2: the inside's front line, behind the doors (the hinge rail, the folded table, the drawer)
+OPTC["in_d"] = _c["d"] - _c["slide"] - _c["back"]               # 19.2 inside
 OPTC["bay_t"] = (_c["z"][0] - _c["t"], _c["z"][0] - _c["t"] - _c["top"][0] - 1.0)          # the table bay inside: 91 wide
 OPTC["bay_c"] = (OPTC["bay_t"][1] - _c["t"], _c["z"][1] + _c["t"])                        # the chair bay inside
 OPTC["cz"] = (OPTC["bay_t"][0] + OPTC["bay_t"][1]) / 2                                     # the table's centre line
 OPTC["tz"] = (OPTC["cz"] + _c["top"][0] / 2, OPTC["cz"] - _c["top"][0] / 2)               # its long sides when open
-OPTC["pivot"] = (OPTC["front"] + _c["apron"], TABLE_TOP - _c["top"][2])                   # the piano hinge: x, height (the top's underside)
+OPTC["pivot"] = (OPTC["inner"] + _c["apron"], TABLE_TOP - _c["top"][2])                   # the piano hinge: x, height (the top's underside)
 OPTC["len"] = 2 * _c["top"][1]                                                              # 180 open
 OPTC["tx"] = (OPTC["pivot"][0] - OPTC["len"], OPTC["pivot"][0])                           # open: x 267.6 .. 447.6
 OPTC["joint_x"] = OPTC["pivot"][0] - _c["top"][1]
 OPTC["folded_top"] = OPTC["pivot"][1] + _c["top"][1]                                       # 163.3: the halves standing up
-OPTC["flap"] = (OPTC["folded_top"] + 1.0 + _c["t"], _c["h"] - _c["t"])                   # v27: the linen space over the folded table (on its own floor)
+OPTC["flap"] = (OPTC["folded_top"] + 1.0 + _c["t"], _c["h"] - _c["t_top"])               # the linen shelf over the folded table (its floor's top face, the top's underside)
 OPTC["stack"] = 2 * _c["apron"] + 2 * _c["top"][2] + 0.3                                   # 14.9 deep folded
 OPTC["leg_h"] = TABLE_TOP - _c["top"][2] - _c["apron"]                                     # 68.7: floor to the apron's underside
-del _c, _cb_z0, _cb_z1
+# v29: the two sliding doors. A (the stair end) runs on the front track, B (the window end) on the back one; they overlap 3 in the middle.
+# Shut: A over the table bay, B over the chair bay. The table: A slides over B. The chairs: B slides behind A.
+_lin = _c["z"][0] - _c["z"][1] - 2 * _c["t"]                    # 194.4 between the ends
+OPTC["door_w"] = (_lin + 3.0) / 2                               # 98.7
+OPTC["door_h"] = _c["h"] - _c["t_top"] - _c["plinth"] - 0.8    # 183.3: 5 mm under the top track, 3 over the bottom guide
+_za, _zb = _c["z"][0] - _c["t"], _c["z"][1] + _c["t"]          # the inside's ends: -87.8, -282.2
+OPTC["doors"] = {"A": dict(track="front", shut=(_za, _za - OPTC["door_w"]), slid=(_zb + OPTC["door_w"], _zb)),
+                 "B": dict(track="back", shut=(_zb + OPTC["door_w"], _zb), slid=(_za, _za - OPTC["door_w"]))}
+OPTC["door_x"] = {"front": (OPTC["front"], OPTC["front"] + _c["door"]), "back": (OPTC["front"] + _c["door"] + 0.6, OPTC["front"] + 2 * _c["door"] + 0.6)}
+OPTC["open_t"] = (_za, _zb + OPTC["door_w"])                    # the table bay's opening with A slid away: -87.8 .. -183.5
+OPTC["open_c"] = (_za - OPTC["door_w"], _zb)                    # the chair bay's opening with B slid behind A: -186.5 .. -282.2
+OPTC["chair_z"] = [round((OPTC["open_c"][0] + OPTC["open_c"][1]) / 2 + s * (CHAIR_FOLDED[0] / 2 + 1.0), 2) for s in (1, -1)]   # two across, centred in that opening
+OPTC["door_kg"] = OPTC["door_w"] * OPTC["door_h"] * _c["door"] * 0.70 / 1000      # oak-faced ply about 700 kg/m³
+del _c, _cb_z0, _cb_z1, _lin, _za, _zb
 DINE_SQUEEZE = 55.0                                             # table edge per diner at a squeeze (UK guide: 60 to aim for)
 DINE_COMFORT = 58.0                                             # v27: near the guide's 60: what we call "in comfort" here
 CHAIR_TUCK = 8.0                                                # chairs pushed 8 under the edge: their backs 41 behind it (as for A and B)
