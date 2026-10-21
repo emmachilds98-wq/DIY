@@ -558,21 +558,31 @@ del _o, _sz, _wz, _sl, _wl, _stair, _window
 # chair door and the bare wall beyond it; the chair door swings towards the stairs over the table door. The six seat pads hang on the
 # table door's back, so the folded table stands 4 back from it. 54 cm shorter than the sliding cabinet, 1.8 shallower; 56 cm of wall comes back by the
 # pipe boxing.
+# v33, client: "I'd also like these chairs or similar, make adjustments and decisions as required", then the listing's own words: "2PCS
+# Wooden Folding Dining Chair with Cushion, Padded Seat, Grey Breathable Linen Fabric, 6.5cm Thick Cushion, 110° Backrest, 168kg Capacity,
+# No Assembly ... a generously sized 47×47cm seat ... 90×10×47cm" (Brayden Studio on Wayfair UK). 90 × 10 × 47 is the chair folded: 90
+# tall, 10 thick, 47 wide. They're the plan's chairs now, and the cabinet is drawn round them; the FRÖSVI (CHAIR, CHAIR_FOLDED) stays for
+# the earlier tables' drawings. The open chair's depth, height and seat height aren't in the listing's words: drawn at a like-for-like
+# chair's (Costway 53981642: 61 deep, 78.7 tall, the seat at 44.5).
+CHAIR_PADDED = dict(w=47.0, d=61.0, h=78.7, seat_h=44.5, seat=(47.0, 47.0), cushion=6.5, back_deg=110, kg=168,
+                    folded=(47.0, 10.0, 90.0))   # W, thick, tall
+
+
 def _make_cab(table_w=90.0):
     """v33: the compact cabinet built round a table table_w wide: 90 (the plan) or 80 (the more compact version, 10 shorter;
     its base is then too narrow for the two chairs lying on their sides, so four chairs go inside, not six)."""
-    _cf_len = CHAIR_FOLDED[2]
+    _cf_w, _cf_t, _cf_len = CHAIR_PADDED["folded"]   # v33: the grey padded chairs, folded 47 × 10 × 90
     CAB = dict(
         z0=OPTC["z"][0],              # -86: the stair end, where it always was (45 short of the stair box: the stairs' foot stays clear)
-        d=22.0,                       # the wall to the doors' faces (the sliding cabinet: 24.8); v31: 22, flush with the pipe boxing's face (v30: 23)
+        d=23.4,                       # the wall to the doors' faces; v31: 22, flush with the pipe boxing (the FRÖSVI, 9 thick); v33: 23.4, two padded chairs (10) deep
         h=OPTC["h"], t=1.8, t_top=1.8, door=1.8, back=0.6, plinth=3.0,
         gap=0.2,                      # behind the inset doors (a stop), and round them
         hinge_gap=0.3,                # the hinge side's gap: the piano hinge's two leaves sit in it
         bay_t=table_w + 1.0,          # the table box inside: the top (90 in the plan) and 0.5 a side
-        bay_c=46.0,                   # the chair box inside: a 43 chair and 1.5 a side
-        shelf_y=93.5,                 # the chair box's shelf (its top face 95.3)
-        pads=4.0,                     # the six seat pads (3) on their hooks, on the table door's back, in front of the folded table
-        pad=(40.0, 40.0, 3.0),        # v31: Dunelm Esme tie-on seat pads, 40 × 40 × 3, two ties each (the beech FRÖSVI's seat is 38 × 33)
+        bay_c=49.0,                   # the chair box inside: v33, a 47 chair and 1 a side
+        shelf_y=94.0,                 # the chair box's shelf (its top face 95.8): v33, a 90 chair under it and over it
+        pads=4.0,                     # v31: room for seat pads on the table door's back; v33: the chairs are padded, so it's the cloth bag's hook and some air
+        pad=(40.0, 40.0, 3.0),        # v31: Dunelm Esme tie-on seat pads (the beech FRÖSVI's); not needed with the padded chairs
     )
     _k = CAB
     CAB["front"] = ROOM_W - _k["d"]                                  # 444.0: the doors' faces and the carcass's front edges
@@ -615,12 +625,12 @@ def _make_cab(table_w=90.0):
     CAB["door_t_open"] = (CAB["door_t"][1] - _k["hinge_gap"], CAB["door_t"][1] - _k["hinge_gap"] - CAB["door_tw"])   # -178.8 .. -269.3
     CAB["door_t_face"] = CAB["front"] - 2 * _k["knuckle"] - _k["door"]                    # its room-side face lying open: x 441.7
     # the six chairs: two lying in the base, four standing in the chair bay, two deep on its floor and two deep on its shelf
-    CAB["chairs_base"] = 2 if _k["bay_t"] >= _cf_len + 2.0 else 0   # v33: a folded chair (89 long) lies across the base only in a 91 bay
+    CAB["chairs_base"] = 2 if _k["bay_t"] >= _cf_len + 1.0 else 0   # v33: a folded chair (90 long) lies across the base with 0.5 at each end: the 91 bay, not the 81
     CAB["chair_z"] = (CAB["bay_cz"][0] + CAB["bay_cz"][1]) / 2         # the standing chairs' centre line
-    _cf = CHAIR_FOLDED
+    _cf = (_cf_w, _cf_t, _cf_len)
     CAB["chair_x"] = [ROOM_W - _k["back"] - 0.3 - _cf[1] * (j + 1) - 0.3 * j for j in range(2)]   # their room-side faces, back first
     # seats: as for the sliding cabinet, the window side from the sofa's arm (or the table's end) to the doors' faces
-    _sz, _wz = CAB["tz"][0] + CHAIR[1] / 2 - CHAIR_TUCK, CAB["tz"][1] - CHAIR[1] / 2 + CHAIR_TUCK
+    _sz, _wz = CAB["tz"][0] + CHAIR_PADDED["d"] / 2 - CHAIR_TUCK, CAB["tz"][1] - CHAIR_PADDED["d"] / 2 + CHAIR_TUCK
     _sl, _wl = CAB["front"] - CAB["tx"][0], CAB["front"] - max(CAB["tx"][0], SOFA_X[1])
     _stair = lambda n: [round(CAB["front"] - _sl + _sl / n * (i + 0.5), 1) for i in range(n)]
     _window = lambda n: [round(CAB["front"] - _wl + _wl / n * (i + 0.5), 1) for i in range(n)]
@@ -633,17 +643,6 @@ def _make_cab(table_w=90.0):
 
 CAB = _make_cab(90.0)                 # the plan: 144.2 long, six chairs inside
 CAB80 = _make_cab(80.0)               # v33, client: "the compact cabinet is our only choice ... or any upgraded more compact version": 134.2 long, four chairs inside
-
-# v33, client: "I'd also like these chairs or similar, make adjustments and decisions as required": Brayden Studio's set of two wooden
-# folding dining chairs, grey linen, a 6.5 cm padded cushion, a 110° backrest, 168 kg (the Wayfair listing's title; its page is behind a
-# bot check, so its sizes aren't readable from here). Drawn at a like-for-like chair's published sizes (Costway 53981642: bent-wood frame,
-# linen padded seat and back): 48.3 W × 61 D × 78.7 H, seat 44.5 high and 40.6 × 44.5, folded 48.3 × 92.7. Its folded thickness isn't
-# published by either: it decides whether the cabinet can keep them (a check).
-CHAIR_PADDED = dict(w=48.3, d=61.0, h=78.7, seat_h=44.5, seat=(40.6, 44.5), cushion=6.5, back_deg=110, kg=168,
-                    folded=(48.3, 92.7))
-# with chairs that don't pack into it, the cabinet is the table box alone (no chair box): the table and its pads, and the linen shelf
-CAB_TABLE = dict(len=CAB["z_t"][0] - CAB["z_t"][1], freed=CAB["freed"] + (CAB["z_c"][0] - CAB["z_c"][1]),
-                 len80=CAB80["z_t"][0] - CAB80["z_t"][1], freed80=CAB80["freed"] + (CAB80["z_c"][0] - CAB80["z_c"][1]))
 
 # ---------------------------------------------------------------- v31 (21 Oct): beside the compact cabinet
 # client: "explore what could go next to the dining cabinet in the compact version which is now our primary option". The wall from the

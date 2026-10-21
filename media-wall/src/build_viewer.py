@@ -550,7 +550,7 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf, the table and the six chairs inside, {G.CAB['freed']:.0f} cm of wall back by the pipe boxing",
          "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long, three a side, bar 2 over it",
          "3d_window_c_six": "From the window, the compact cabinet open for six, the coffee table where it is",
-         "3d_c_tdoor": "The table door open with the table still folded: the six seat pads on the door's back, the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
+         "3d_c_tdoor": "The table door open with the table still folded: the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
          "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
          "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
          "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
@@ -564,8 +564,6 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c80_six": f"The more compact version open for six: the table {G.CAB80['len_open']:g} × {G.CAB80['top'][0]:g}, three a side",
          "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down, so four go inside, not six",
          "3d_c80_plan": "Bird\u2019s eye, the more compact version open for six",
-         "3d_br_six": "The grey padded chairs you'd like at the table, open for six (drawn at a like-for-like chair's size): a 6.5 cm linen cushion and a padded back",
-         "3d_br_folded": f"With the grey padded chairs, the cabinet is the table box alone, {G.CAB_TABLE['len']:.1f} long: they don't fold into it, so they're kept elsewhere",
          "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
 import item_shots as IS
 import plan_ui as PU   # v33: one count, Decide, the shortlist, build day
@@ -714,9 +712,9 @@ def options_card():
                 + f' <button type="button" class="btn ghost" data-decide="cabw" data-v="{k}">Pick this one</button></div></article>')
     return ('<div class="opts cmp2">'
             + card("90", K, st, "3d_c_six", f"The plan · {K['len']:.1f} cm of wall", "The compact cabinet, a 90-wide table",
-                   f"All six FRÖSVI: four standing, two lying in the base; the six pads on the door", ["Push the ottoman to the sofa while it's out."])
+                   f"All six of your padded chairs: four standing, two lying in the base", ["Push the ottoman to the sofa while it's out."])
             + card("80", K8, s8, "3d_c80_six", f"The more compact version · {K8['len']:.1f} cm of wall", "The same cabinet, an 80-wide table",
-                   f"Four FRÖSVI standing; the base is {K8['bay_t']:g} wide, too narrow for two lying ({g.CHAIR_FOLDED[2]:g} + 2)",
+                   f"Four standing; the base is {K8['bay_t']:g} wide, too narrow for two lying ({g.CHAIR_PADDED['folded'][2]:g} + 1)",
                    [f"{K['len'] - K8['len']:.0f} shorter, {K8['freed'] - K['freed']:.0f} more bare wall, but two chairs live elsewhere (the garage, or behind a door).",
                     f"{K['top'][0] - K8['top'][0]:g} narrower: a jug and one dish down the middle at a time."])
             + '</div><p class="caption">Tap the cabinet in the 3D room to swap its width; the Plan home\'s “Waiting on you” keeps your pick.</p>')
@@ -865,7 +863,7 @@ def chapter_facts(rows, fc, nfit):
         "joinery": chips("The cutting list (copy it for the timber merchant)", "Housings, mortises and pegs: the joints drawing", "Worktop: step 7", "Uprights: step 9",
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
         "dining": chips(f"The compact dining cabinet: <b>{g.CAB['len']:g} × {g.CAB['d']:g} × {g.CAB['h']:g}</b> under your shelf, flush with the pipe boxing",
-                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> beech chairs inside it, their tie-on pads on the door",
+                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>six</b> of your grey padded folding chairs inside it, folded 90 × 10 × 47",
                         f"Beside it, {g.BESIDE['len']:.0f} cm of wall: a mirror, a slim trolley or a low oak shelf (ideas)",
                         "Two hinged oak doors that turn right back; a linen shelf inside", f"Step 11 builds it, in {len(__import__('instructions').full()[11]['parts_full'])} stages", "Dining wall " + _ph(rows, "6 Dining wall"),
                         f"Or the more compact version: an {g.CAB80['top'][0]:g}-wide table, {g.CAB80['len']:.1f} long, four chairs inside"),   # v27; v30: the compact cabinet; v33: the only table
@@ -932,8 +930,6 @@ def _page(site=False):
         if p["name"] == "6 Dining wall":   # v33: the buy list follows the pick (Decide)
             lis = (f'<li class="picknote" data-picknote="cabw" hidden><span class="ms" aria-hidden="true">straighten</span><span>Your pick: the {G.CAB80["top"][0]:g}-wide table. The same rows with a little less oak and ply: '
                    f'the halves {G.CAB80["top"][0]:g} wide, the table box {G.CAB80["bay_t"]:g} inside, the cabinet {G.CAB80["len"]:.1f} long. Six chairs still to buy; four live inside.</span></li>'
-                   f'<li class="picknote" data-picknote="chair" hidden><span class="ms" aria-hidden="true">chair</span><span>Your pick: the grey padded chairs (Brayden Studio, sets of two, from the listing). '
-                   f'The FRÖSVI and seat pad rows come out; the chair box (its ply, its door and hinge) comes off the cutting list: the cabinet is the table box alone, {G.CAB_TABLE["len"]:.1f} long.</span></li>'
                    + lis.replace("in Olive (or Honey or Ivory)", '<span data-pickpads>in Olive (or Honey or Ivory)</span>'))
         ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{part_chip(PHASE_PART[p["name"]])} {html.escape(p["name"])}</span>'
                        f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')

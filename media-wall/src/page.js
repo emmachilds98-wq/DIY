@@ -342,7 +342,6 @@ window.PICKS = (() => {
     // the buy list follows the picks
     const pads = $("[data-pickpads]"); if (pads) { const v = st.decide.pads; pads.textContent = v ? `in ${v[0].toUpperCase() + v.slice(1)} (your pick)` : "in Olive (or Honey or Ivory)"; }
     $$('[data-picknote="cabw"]').forEach(n => { n.hidden = st.decide.cabw !== "80"; });
-    $$('[data-picknote="chair"]').forEach(n => { n.hidden = st.decide.chair !== "brayden"; });
     // waiting on you, and the third ring
     const wl = $("#waitl");
     if (wl) wl.innerHTML = D.map((d, i) => { const o = d.options.find(x => x.v === st.decide[d.key]), first = o || d.options.find(x => x.art) || d.options[0];
@@ -383,7 +382,7 @@ window.PICKS = (() => {
   function pick(v) {
     const d = D[di], o = d.options.find(x => x.v === v); if (!o) return;
     st.decide[d.key] = v; save("decide"); renderDecide(); paint();
-    const room = { pads: { decor: { pads: v }, merge: true }, cabw: { cabw: v }, beside: { beside: v }, chair: { chair: v } }[d.key];   // the room follows, without moving the camera
+    const room = { pads: { decor: { pads: v }, merge: true }, cabw: { cabw: v }, beside: { beside: v } }[d.key];   // the room follows, without moving the camera
     if (room) toRoom(room);
     cheer(`${d.title}: ${o.label}`, $(`[data-dv="${v}"]`, ov));
   }

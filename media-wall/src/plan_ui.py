@@ -1,6 +1,6 @@
 """v33, from the design review (UPGRADE_PLAN_v33.md, "Design review of v32"), the client: "Happy with upgrade plan, please perform it".
 The plan page's new parts, as data and markup for build_viewer.py; page.js runs them:
-- one count: 66 things to buy, 13 steps and the open choices, the same in Plan and Buy (the jobs counted apart);
+- one count: the things to buy (65), the 13 steps and the open choices, the same in Plan and Buy (the jobs counted apart);
 - the Plan home's "Waiting on you", "Checks on site" (the fit proof's CHECK rows) and "Where the money goes" (costs.overview);
 - Decide: the open choices, one per screen, with the renders already made, kept for both of you; the buy list follows the pick;
 - the ideas shortlist: "+ Add to plan" on each idea and suggestion, a running +£ and the plan's new total;
@@ -21,7 +21,7 @@ def _m(lo, hi):
 
 def decisions():
     """The four open choices (HANDOFF, "Waiting on the client"). Each option: v, label, note, art (a still), r3d (shown in the room),
-    cost (what it adds to the plan: lo, hi), and for the pads the buy list's words."""
+    cost (what it adds to the plan: lo, hi)."""
     C, C8, B = G.CAB, G.CAB80, G.BESIDE
     base = {"site": "C", "dining": "folded", "tdoor": False, "chairs": "cupboard", "scene": "bright"}
     beside = dict(key="beside", title="What goes beside the cabinet", q=f"{B['len']:.0f} cm of wall between the cabinet and the pipe boxing",
@@ -31,10 +31,6 @@ def decisions():
                            dict(v="dresser", label="A low oak shelf", note=f"In the cabinet's ply, {B['dresser']['w']:g} × {B['dresser']['d']:g} × {B['dresser']['h']:g}: plates, glasses, bottles", art="3d_beside_dresser", r3d=dict(base, beside="dresser", view="beside"), cost=[40, 80])],
                   default="clear", buy="The beside piece goes on the buy list under the dining wall")
     six = dict(base, dining="six", view="dining")
-    pads = dict(key="pads", title="The seat pads' colour", q="Dunelm Esme washed cotton, 40 × 40 with ties, £9 each, six of them",
-                options=[dict(v=k, label=k.title(), note=n, swatch=sw, r3d=dict(six, decor={"pads": k}, merge=True), cost=[0, 0])
-                         for k, n, sw in (("olive", "The room's sage (drawn)", "#7d7a45"), ("honey", "The room's ochre", "#c9934a"), ("ivory", "The room's cream", "#ece4d2"))],
-                default="olive", buy="The pads' row on the buy list says your colour")
     width = dict(key="cabw", title="The table: 90 or 80 wide",
                  q=f"80 makes the cabinet {C['len'] - C8['len']:.0f} shorter, but four chairs go inside, not six",
                  options=[dict(v="90", label=f"{C['top'][0]:g} wide (the plan)", note=f"{C['len']:.1f} long, six chairs inside, {C['top'][0] - 54:g} down the middle for dishes", art="3d_c_six", r3d=dict(six, cabw="90"), cost=[0, 0]),
@@ -45,13 +41,7 @@ def decisions():
                            dict(v="hinge", label="On the other side of the door", note="The hinge side: the button moves with it", r3d={"view": "door"}, cost=[0, 0]),
                            dict(v="check", label="We'll look and tell you", note="Nothing to buy changes", r3d={"view": "door"}, cost=[0, 0])],
                   default=None, buy="Nothing on the buy list changes")
-    P, T = G.CHAIR_PADDED, G.CAB_TABLE
-    chairs = dict(key="chair", title="The chairs", q="The grey padded ones you'd like, or the beech FRÖSVI that fold into the cabinet",
-                  options=[dict(v="frosvi", label="Beech FRÖSVI with tie-on pads (the plan)", note="All six fold into the cabinet: £20 each, the pads £9", art="3d_c_six", r3d=dict(six, chair="frosvi"), cost=[0, 0]),
-                           dict(v="brayden", label="The grey padded chairs", note=f"A {P['cushion']:g} cm cushion, a padded back; they don't fold in, so the cabinet is the table box alone, {T['len']:.1f} long, {T['freed']:.1f} of wall back. Price: on the listing",
-                                art="3d_br_six", r3d=dict(six, chair="brayden"), cost=[0, 0])],
-                  default="frosvi", buy="The dining wall's rows follow the chairs")
-    return [chairs, beside, pads, width, switch]
+    return [beside, width, switch]   # v33: the chairs are your padded ones, so the pads' colour went too
 
 
 def shortlist():
