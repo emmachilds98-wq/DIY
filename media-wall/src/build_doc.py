@@ -392,6 +392,30 @@ def slide_html():
 """
 
 
+def cost_pieces_html():
+    """v32: the cost overview's subtotals, for the plan on a page."""
+    import costs
+    ov = costs.overview(TRACK)
+    tl, th = sum(r[1] for r in ov), sum(r[2] for r in ov)
+    return ("<table class='tight'><tr><th>Piece</th><th>Things to buy</th><th>About</th></tr>"
+            + "".join(f"<tr><td>{p}</td><td class='num'>{len(items)}</td><td class='num'>£{money(lo, hi)}</td></tr>" for p, lo, hi, items in ov)
+            + f"<tr class='total'><td>All of it</td><td class='num'>{sum(len(r[3]) for r in ov)}</td><td class='num'>£{money(tl, th)}</td></tr></table>"
+            + "<p class='note'>Every item, piece by piece, is in section 11's cost overview; the buy list there ticks them off.</p>")
+
+
+def cost_overview_html():
+    """v32: every thing to buy, by piece, a short name and its estimate (costs.py), the subtotals and the total."""
+    import costs
+    ov = costs.overview(TRACK)
+    rows = []
+    for p, lo, hi, items in ov:
+        rows.append(f"<tr class='total'><td colspan='2'>{p}</td><td class='num'>£{money(lo, hi)}</td></tr>")
+        rows += [f"<tr><td class='num'>{costs.qty(q)}</td><td>{nm}</td><td class='num'>£{money(a, b)}</td></tr>" for q, nm, a, b in items]
+    tl, th = sum(r[1] for r in ov), sum(r[2] for r in ov)
+    rows.append(f"<tr class='total'><td colspan='2'>All of it</td><td class='num'>£{money(tl, th)}</td></tr>")
+    return "<table class='tight cost'><tr><th>Qty</th><th>To buy</th><th>About</th></tr>" + "".join(rows) + "</table>"
+
+
 def money(a, b):
     return f"{a:,}–{b:,}"
 
@@ -896,6 +920,8 @@ def _plan(deck=False):
 <tr><td>Colour and light</td><td>Card Room Green No. 79, colour-drenched. The ceiling LED strip, smart colour strips in the uprights and under the side run, a bias light, and two Wolston-style spot bars with smart colour bulbs on your two existing ceiling points; one app, one scene for the lot.</td></tr>
 <tr><td>Power and network</td><td>Your own job: the side-wall socket becomes a double, left for the 10-gang (everything modern, the PC included), right for the retro set, switched at the wall. Deco A in bedroom 3, Cat6 down the airing cupboard.</td></tr>
 </table>
+<h3>What it costs, piece by piece</h3>
+{cost_pieces_html()}
 </div>
 
 <h2 class="pb">2 · The room</h2>
@@ -1302,6 +1328,9 @@ def _plan(deck=False):
 
 <h2 class="pb">11 · Buy list and tracker</h2>
 <p>Every purchase and job, in build order, comes to about £{money(tl, th)}, with no electrician on top: the electrics are your own job, and the tools for them are on the list. Each phase carries its part's coloured label. Estimates are approximate UK prices; changed and new items are marked. Tick items off and write in what you paid.</p>
+<h3>Cost overview: each piece and what to buy for it</h3>
+{cost_overview_html()}
+<h3>By phase</h3>
 <table class="tight"><tr><th>Phase</th><th>Estimate (£)</th><th>Biggest item</th></tr>{ptot}</table>
 <p class="note">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles.</p>
 <table class="tracker"><thead><tr><th>Status</th><th>Item</th><th>Qty</th><th>Estimate (£)</th><th>Paid (£)</th></tr></thead><tbody>

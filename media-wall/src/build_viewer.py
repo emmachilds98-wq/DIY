@@ -628,6 +628,23 @@ def decor_block():
             f'<div class="gallery">{figs}</div>{b}')
 
 
+def cost_overview():
+    """v32, client: "a cost overview that shows each piece and list breakdown of shopping items ... clear buy list and estimated cost
+    without incorporating large explanations": each piece, its things to buy (quantity × short name) and their estimates."""
+    import costs
+    ov = costs.overview(TRACK)
+    tl, th = sum(r[1] for r in ov), sum(r[2] for r in ov)
+    cards = "".join(
+        f'<details class="cpiece"><summary><span class="cpn">{html.escape(p)}</span><span class="cpc">£{money(lo, hi)}</span><span class="cpi">{len(items)} to buy</span></summary>'
+        f'<table class="ctab"><tbody>' + "".join(f'<tr><td class="q">{html.escape(costs.qty(q))}</td><td>{html.escape(n)}</td><td class="m">£{money(a, b)}</td></tr>' for q, n, a, b in items)
+        + '</tbody></table></details>' for p, lo, hi, items in ov)
+    return (f'<div class="qhead"><h3 class="ptitle">Cost overview</h3><span class="caption">Each piece, what to buy for it, and about what it costs: £{money(tl, th)} in all</span></div>'
+            f'<div class="cpieces">{cards}</div>'
+            f'<p class="cfoot"><button type="button" class="btn" id="co-copy"><span class="ms" aria-hidden="true">content_copy</span> Copy the shopping list</button>'
+            f'<button type="button" class="btn" id="co-all">Open them all</button><span class="caption" id="co-st" aria-live="polite"></span></p>'
+            f'<textarea id="co-text" hidden>{html.escape(costs.text(TRACK, money))}</textarea>')
+
+
 def chairs_card():
     """v20, client: "is it not possible to build the chair storage into the table setup. i want it to be a fully pack away setup": the chair
     cupboard built in beside the table, flush with the pipe boxing; the open hooks stay as the cheap way; chairs five and six."""
@@ -939,9 +956,13 @@ def _page(site=False):
                 f'<div class="chhead"><i class="ms" aria-hidden="true">{ic}</i><h2>{html.escape(t)}</h2></div>{facts[k]}{inner}</section>')
     more = lambda body, lab="Read the full chapter": f'<details class="readmore"><summary>{lab} <span class="ms" aria-hidden="true">expand_more</span></summary>{body}</details>'
     nav = [("plan", "Plan", "map", 300), ("build", "Build", "construction", 50), ("buy", "Buy", "shopping_bag", 165), ("ideas", "Ideas", "lightbulb", 95)]   # v30: no Ask sheet (every question answered or dropped)
-    rail = (f'<nav class="rail" aria-label="Sections"><button type="button" id="tb-room" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
-            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
-    bbar = (f'<nav class="bbar" aria-label="Sections"><button type="button" class="toolsb" data-tools-toggle aria-expanded="false" aria-controls="r3d-panel"><i class="ms" aria-hidden="true">tune</i>Tools</button>'
+    # v32, client: "make tools always appear in 3D view and the other buttons on the left to be the expandable menu as these are the in
+    # depth plans used less": one Menu button opens the Room, Plan, Build, Buy and Ideas buttons (open by itself while a sheet is up)
+    rail = (f'<nav class="rail" aria-label="Sections"><button type="button" class="rail-tog" id="rail-tog" aria-expanded="false" aria-controls="rail-list" style="--h:280">'
+            f'<i class="ms" aria-hidden="true">menu</i><span>Menu</span></button><div class="rail-list" id="rail-list">'
+            f'<button type="button" id="tb-room" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
+            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</div></nav>')
+    bbar = (f'<nav class="bbar" aria-label="Sections"><button type="button" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
             + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
     def sheet(k, title, ic, h, body):
         return (f'<div class="sheet" id="sh-{k}" role="dialog" aria-modal="true" aria-labelledby="sh-{k}-h" aria-hidden="true" style="--h:{h}">'
@@ -1059,6 +1080,7 @@ def _page(site=False):
       <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
       <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
     </div>
+    {cost_overview()}
     <div class="qhead"><h3 class="ptitle">The buy list, in build order</h3>
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-filter="all" aria-pressed="true">Everything</button>
