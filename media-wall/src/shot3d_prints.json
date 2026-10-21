@@ -257,11 +257,11 @@
  },
  "3d_decor": {
   "files": [
-   "out/Media wall v32 - 3D - DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright (HD).png",
+   "out/Media wall v33 - 3D - DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright (HD).png",
    "src/art/3d_decor.webp",
-   "src/render_v32_3d_decor.png"
+   "src/render_v33_3d_decor.png"
   ],
-  "print": "692150499b86c801b2c5065c"
+  "print": "fa0c8fc47f978279a2264ccb"
  },
  "3d_dining_A_four": {
   "files": [

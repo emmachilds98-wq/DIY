@@ -73,7 +73,11 @@ run out of memory (the crash).
    create the WebGL renderer only when the Room is on screen (the deck opens on it, but the Plan sheet shouldn't keep it rendering:
    pause `frame()` while a sheet covers the room), handle `webglcontextrestored` (rebuild materials and carry on in Fast instead of asking
    for a reload), dispose render targets and the save's 2048² maps after `still()`.
-7. **The errors when making changes.** Headless, Edit room's add / turn / recolour / drag / undo / remove / paint and the Look, Lights and
+7. **The errors when making changes.** **Found (src/edit_probe.py, 1280 × 800):** after Look → walnut and Look → floorboards, the dock's
+   **Lights and Extras bubbles and the Film scene button couldn't be clicked** (Playwright: the element resolved but something else took
+   the click for 4 s+). Something covers the dock after a Look change: check the open panel's box, the toast, `.r3d-phone`, the sticker
+   layer and the `measureShift` cover with `document.elementFromPoint` at the bubble's centre, fix it first and add the check to qa.py.
+   Otherwise headless, Edit room's add / turn / recolour / drag / undo / remove / paint and the Look, Lights and
    Extras panels raised no page errors, only the colour warnings, but every change was slow (the recompiles and the shadow redraws
    above), which reads as broken on a phone. To catch what the client sees: a global trap (`window.onerror`, `unhandledrejection`, and
    `console.error` wrapped) that shows a small toast ("Something went wrong: …, it's been noted") and writes the message, the stack, the
