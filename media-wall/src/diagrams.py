@@ -573,7 +573,7 @@ def front():
     o.append(rect(X(g.TV_X[0]), Y(g.TV_TOP), g.TV_W * s, g.TV_H * s, "#ebeae6", "#c9c5bb", 4))
     o.append(t(X(g.TV_CX), Y(122), "LG OLED C6 55 in", 12.5, "middle", 650))
     o.append(t(X(g.TV_CX), Y(122) + 15, f"{_fmt(g.TV_W)} × {_fmt(g.TV_H)} · centre 116.5 · {_fmt(g.TV_CX)} from the side wall", 10, "middle", 400, MUTED))
-    o.append(t(X(g.TV_CX), Y(122) + 29, f"{_fmt(g.TV_SHIFT)} cm nearer the side wall than v10", 10, "middle", 600, BLUE))
+    o.append(t(X(g.TV_CX), Y(122) + 29, f"{_fmt(g.TV_SHIFT)} cm off the alcove's centre, towards the side wall", 10, "middle", 600, BLUE))
     o.append(rect(X(g.TV_CX - 23.5), Y(g.WORKTOP + 1.6), 47 * s, 1.6 * s, "#d8d5ce", "#bdb8ad", 1))
     # soundbar, turntable and its lid, 10-gang
     o.append(rect(X(g.TV_CX - 46), Y(g.WORKTOP + 6), 92 * s, 6 * s, SND_F, SND_S, 2))
@@ -2423,7 +2423,9 @@ def option_c_section():
     for lx in sorted({round(l[0], 1) for l in C["legs"]}):
         o.append(f'<rect x="{X(lx - C["leg"][0] / 2)}" y="{Y(C["leg_h"])}" width="{C["leg"][0] * k}" height="{C["leg_h"] * k}" fill="#cfae84" stroke="{OAKD}"/>')
     o.append(f'<circle cx="{X(px)}" cy="{Y(py)}" r="4" fill="{BLUE}"/>')
-    o.append(t(X(px) - 6, Y(py) + 18, "piano hinge", 9.5, "end", 700, BLUE))
+    # v29.1: the label left of door A's dashed line (it sat on top of it), a short leader to the hinge
+    o.append(f'<line x1="{X(xa) - 4:.1f}" y1="{Y(py) + 14:.1f}" x2="{X(px) - 4:.1f}" y2="{Y(py) + 3:.1f}" stroke="{BLUE}" stroke-width="1"/>')
+    o.append(t(X(xa) - 6, Y(py) + 18, "piano hinge", 9.5, "end", 700, BLUE))
     o.append(f'<path d="M{X(px - 70)},{Y(py + 6)} A{70 * k},{70 * k} 0 0 1 {X(px - 4)},{Y(py + 70)}" fill="none" stroke="{BLUE}" stroke-width="1.4" stroke-dasharray="5 3" marker-end="none"/>')
     def dx(xa, xb, y, lab, dy=-6):
         o.append(f'<line x1="{X(xa)}" y1="{Y(y)}" x2="{X(xb)}" y2="{Y(y)}" stroke="{BLUE}" stroke-width="1.3"/>')
@@ -2463,7 +2465,7 @@ def option_c_plan():
     # the cabinet
     ca, cb = C["z"]
     o.append(f'<rect x="{X(g.ROOM_W):.1f}" y="{Y(cb):.1f}" width="{C["d"] * k:.1f}" height="{(ca - cb) * k:.1f}" fill="{OAKF}" stroke="{OAKD}" stroke-width="1.6"/>')
-    o.append(f'<text x="{X(g.ROOM_W - C["d"] / 2):.1f}" y="{Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f}" {FONT} font-size="9" font-weight="700" fill="#5a3a20" text-anchor="middle" transform="rotate(-90 {X(g.ROOM_W - C["d"] / 2):.1f} {Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f})">{C["chairs"]} chairs</text>')
+    o.append(f'<text x="{X(g.ROOM_W - C["d"] / 2):.1f}" y="{Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f}" {FONT} font-size="9" font-weight="700" fill="#5a3a20" text-anchor="middle" transform="rotate(-90 {X(g.ROOM_W - C["d"] / 2):.1f} {Y((C["bay_c"][0] + C["bay_c"][1]) / 2):.1f})">chair bay (empty)</text>')
     # v29: the two doors, door A slid over door B (the table out)
     for kd, tr in (("A", "front"), ("B", "back")):
         za, zb = C["doors"][kd]["slid" if kd == "A" else "shut"]; x0, x1 = C["door_x"][tr]

@@ -643,7 +643,7 @@ def max_seats_zone():
         ("B: the flip-top by the stairs (the alternative)", "seven at a squeeze", ref("dining", "sofa"), "three a side (53 each) and one at the end", "five in comfort: two a side and the end", TIGHT),
         ("A: the flip-top on the chimney breast", "six at a squeeze", ref("dining", "sofa"), "three a side, 53 each", "four in comfort; no end seat: the sofa's in the way", TIGHT),
         ("A fourth chair a side at the cabinet", "eight round it", ref("dining", "sofa", "room"), f"{r1(st['stair'][2])} and {r1(st['window'][2])} of edge",
-         f"{st['stair'][2] / 4:.1f} each: under the 55 squeeze; v26's longer table did it, with the coffee table moved and all eight chairs in a bigger bay", NO),
+         f"{st['stair'][2] / 4:.1f} each: under the 55 squeeze; a 225 table did it, but only with the coffee table moved and all eight chairs in a bigger bay", NO),
         ("A longer table in the cabinet", f"halves over {r1(C['h'] - C['t'] - C['pivot'][1])}", ref("photo20"), "they must stand up under your shelf",
          f"{r1(C['h'] - C['t'] - C['pivot'][1])} is the most that folds away; {r1(C['top'][1])} leaves the linen shelf's space and keeps each half to about {C['top'][0] * C['top'][1] * C['top'][2] * 0.72 / 1000:.0f} kg", PASS),
     ])

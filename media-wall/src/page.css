@@ -118,6 +118,7 @@ body.sheet-open .r3d-dock, body.sheet-open .r3d-panel { display: none; }
 .ctile:hover { transform: translateY(-3px) rotate(-1deg); }
 .chapter[hidden], .plan-home[hidden] { display: none; }
 .chapter { display: grid; gap: 18px; }
+.chapter > * { min-width: 0; }   /* v29.1: an opened "Read the full chapter" (wide drawings, they scroll) no longer widens the chapter past a phone */
 .chback { justify-self: start; display: inline-flex; gap: 6px; align-items: center; min-height: 44px; padding: 0 16px 0 10px; border: 0; border-radius: 999px; background: var(--soft); color: var(--ink); font: 600 14px var(--body); cursor: pointer; }
 .chhead { display: flex; align-items: center; gap: 14px; }
 .chhead i { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: oklch(0.8 0.11 var(--h)); font-style: normal; }
