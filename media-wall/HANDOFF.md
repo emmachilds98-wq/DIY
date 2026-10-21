@@ -1,6 +1,20 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **FINISH v33 FIRST (the session ran out of usage mid-build, 21 Oct).** All code is committed on `claude/sharp-franklin-lrray1` (PR #30,
+  draft, don't merge until the client says). Left to do, in order:
+  1. `cd media-wall/src && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`.
+     shot3d skips the stills already committed (their fingerprints are in `shot3d_prints.json`), so it carries on where it stopped.
+     About 90 stills in all; make_images already ran.
+  2. QA: `python3 qa.py <dir>` and `python3 taptest.py <dir>` at 390 and 1280 (both updated for v33). Look at `3d_c_six`, `3d_c_chairs`,
+     `3d_c_tdoor` and `3d_c80_six`: the padded chairs (drawn from `inputs/chairs_padded_listing_photo.webp`) and the 23.4-deep cabinet.
+  3. Fill the placeholders below (`{FIT}`, `{PAGES}`, `{GUIDE}`, `{CHECKS}`, `{QA}`). Fit is 66/17/10/0 (`python3 -c "import fit; print(fit.counts())"`);
+     the total is £3,463–6,733. Update README's PDF links and page counts (v32 → v33, lines near "The full plan").
+  4. Commit and push everything (the client: "all work must be in GitHub"), update PR #30's body.
+  5. Deck 71ff: upload `src/deck_assets_todo.txt` (Artifact `asset: true`, 25 per call), record them in `src/deck_assets.json`, run
+     build_viewer again, publish `src/media_wall_viewer_inline.html` to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2.
+  Then the next round: `media-wall/UPGRADE_PLAN_v34.md`, whose "The 3D room: crashes, errors and lag" section has the measured plan.
+  The Edit-room test (`/tmp` script, gone with the container) raised no page errors in its first three pieces; re-run the plan's step 7.
 - **v33 (round 27, below): the compact cabinet is the only table, with a more compact 80-wide version; the six upgrades from the design
   review (the phone home, one count, Decide, the ideas shortlist, 90 vs 80 side by side, build day).** Fit {FIT}, total £3,397–6,547
   (unchanged: picks and added ideas show as "Added by you", not in TRACK), plan {PAGES}, guide {GUIDE}. Next: `media-wall/UPGRADE_PLAN_v34.md`.
