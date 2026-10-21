@@ -17,11 +17,11 @@
  },
  "3d_c_folded": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - packed away - bright (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - packed away - bright (HD).png",
    "src/art/3d_c_folded.webp",
-   "src/render_v29_3d_c_folded.png"
+   "src/render_v30_3d_c_folded.png"
   ],
-  "print": "c36f0e4667acbc81d2dc38ac"
+  "print": "6c67a0a051142521bf30e204"
  },
  "3d_c_plan": {
   "files": [
@@ -73,11 +73,11 @@
  },
  "3d_decor": {
   "files": [
-   "out/Media wall v29 - 3D - DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright (HD).png",
+   "out/Media wall v30 - 3D - DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright (HD).png",
    "src/art/3d_decor.webp",
-   "src/render_v29_3d_decor.png"
+   "src/render_v30_3d_decor.png"
   ],
-  "print": "5092cee0d507a8855587e76d"
+  "print": "669706e422ff2e08a0078ef0"
  },
  "3d_dining_A_four": {
   "files": [
@@ -193,11 +193,11 @@
  },
  "3d_seat": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright (HD).png",
    "src/art/3d_seat.webp",
-   "src/render_v29_3d_seat.png"
+   "src/render_v30_3d_seat.png"
   ],
-  "print": "8a9075af3e40a8a3abc501df"
+  "print": "af2e55585dd4f384b005e60b"
  },
  "3d_six_day": {
   "files": [
@@ -225,11 +225,11 @@
  },
  "3d_suggest": {
   "files": [
-   "out/Media wall v29 - 3D - SUGGESTED furniture and decor, all of them on - bright (HD).png",
+   "out/Media wall v30 - 3D - SUGGESTED furniture and decor, all of them on - bright (HD).png",
    "src/art/3d_suggest.webp",
-   "src/render_v29_3d_suggest.png"
+   "src/render_v30_3d_suggest.png"
   ],
-  "print": "d9c44a4a18edc5cda88e64d4"
+  "print": "bae42bf114e8bd3e66f9a645"
  },
  "3d_wall_drawers": {
   "files": [
