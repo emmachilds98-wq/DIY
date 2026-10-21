@@ -560,7 +560,7 @@ del _o, _sz, _wz, _sl, _wl, _stair, _window
 # pipe boxing.
 CAB = dict(
     z0=OPTC["z"][0],              # -86: the stair end, where it always was (45 short of the stair box: the stairs' foot stays clear)
-    d=23.0,                       # the wall to the doors' faces (the sliding cabinet: 24.8); the pipe boxing is 22
+    d=22.0,                       # the wall to the doors' faces (the sliding cabinet: 24.8); v31: 22, flush with the pipe boxing's face (v30: 23)
     h=OPTC["h"], t=1.8, t_top=1.8, door=1.8, back=0.6, plinth=3.0,
     gap=0.2,                      # behind the inset doors (a stop), and round them
     hinge_gap=0.3,                # the hinge side's gap: the piano hinge's two leaves sit in it
@@ -621,6 +621,17 @@ CAB["seats"] = {"four": [(x, _sz, "n") for x in _stair(2)] + [(x, _wz, "w") for 
 CAB["legs"] = [(CAB["joint_x"] + CAB["leg_in"], CAB["cz"] + s * 13.0) for s in (1, -1)] + \
               [(CAB["tx"][0] + CAB["leg_in"], CAB["cz"] + s * (_k["top"][0] / 2 - 4.0 - 2.0 - _k["leg"][1] / 2)) for s in (1, -1)]
 del _k, _cf, _sz, _wz, _sl, _wl, _stair, _window
+
+# ---------------------------------------------------------------- v31 (21 Oct): beside the compact cabinet
+# client: "explore what could go next to the dining cabinet in the compact version which is now our primary option". The wall from the
+# cabinet's window end to the pipe boxing's face, under your shelf. The open table door lies back over most of it (to door_t_open[1]),
+# standing CAB["d"] off the wall, so whatever goes here is no deeper than the cabinet; your trailing plant hangs over its far end.
+BESIDE = dict(z=(CAB["z"][1], PIPE_BOX["z"][1]), depth=CAB["d"], door_end=CAB["door_t_open"][1],
+              strands=SHELF_B["top"] - SHELF_B["t"] - PLANT_B["trail"][1])           # 81: the longest strands' ends above the floor
+BESIDE["len"] = BESIDE["z"][0] - BESIDE["z"][1]                                       # 55.8
+BESIDE["mirror"] = dict(w=40.0, h=150.0, t=2.5, y0=30.0)        # IKEA NISSEDAL 40 × 150, black, on the wall 30 up (its top at 180)
+BESIDE["dresser"] = dict(w=CAB["bay_c"] + 2 * CAB["t"], d=CAB["d"], h=76.0, t=1.8, shelf=40.0)   # a low open box, the chair box's width,
+                                                                 # table height: its top under the longest strands
 
 
 # ---------------------------------------------------------------- v27 (20 Oct): your rear speakers, standing behind the sofa

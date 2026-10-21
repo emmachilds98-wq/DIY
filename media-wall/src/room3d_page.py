@@ -12,8 +12,9 @@ IMPORTMAP = ('<script type="importmap">' + json.dumps({"imports": {"three": THRE
                                                                    "three/addons/": THREE + "examples/jsm/"}}) + "</script>")
 
 VIEWS = [("room", "The whole room"), ("window", "From the window"), ("wall", "The media wall"), ("sofa", "From the sofa"), ("door", "From the door"),
-         ("stairs", "From the stairs"), ("dining", "The dining table"), ("chairs", "Where the chairs live"), ("breast", "The chimney breast"),
-         ("windowwall", "The window wall"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"), ("doll", "Dolls’ house")]   # v21: the whole room first
+         ("stairs", "From the stairs"), ("dining", "The dining cabinet"), ("chairs", "Where the chairs live"), ("sit", "Sitting at the table"),
+         ("beside", "Beside the cabinet"), ("breast", "The chimney breast"),
+         ("windowwall", "The window wall"), ("pc", "The PC side wall"), ("plan", "Bird’s eye"), ("doll", "Dolls’ house")]   # v21: the whole room first; v31: sitting down, beside the cabinet
 
 CSS = """
 /* v25 (Demma, option 1c): the room is the home screen, full screen; one Tools pill holds every control; numbered stickers sit on
@@ -197,6 +198,21 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 40; background: var(--ink); color: var(--cream); border-radius: 999px; padding: 10px 18px;
   font: 600 14px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); max-width: calc(100vw - 24px); }
 .r3d-toast[hidden] { display: none; }
+.r3d-sub { margin: 6px 0 -4px; font: 600 16px Fredoka, system-ui, sans-serif; color: var(--ink); }
+.r3d-moments button .ms, .r3d-ui .chip .ms { font-size: 18px; vertical-align: -4px; }
+/* v31: the camera: its height, and the move buttons on the room (hold one to keep moving) */
+.r3d-eyerow { display: grid; grid-template-columns: auto 1fr 5.5em; gap: 10px; align-items: center; font-size: 14px; }
+.r3d-eyerow input { width: 100%; accent-color: oklch(0.55 0.12 235); }
+.r3d-eyerow output { font-variant-numeric: tabular-nums; color: var(--mut); text-align: right; }
+.r3d-pad { position: fixed; left: 16px; bottom: 22px; z-index: 30; display: grid; grid-template-columns: repeat(3, 44px) 44px; gap: 6px; padding: 8px;
+  border-radius: 22px; background: color-mix(in oklab, var(--cream) 88%, transparent); box-shadow: var(--shade); touch-action: none; user-select: none; }
+.r3d-pad[hidden] { display: none; }
+.r3d-pad button { width: 44px; height: 44px; border: 0; border-radius: 14px; background: var(--soft); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+.r3d-pad button:nth-child(4), .r3d-pad button:nth-child(8) { background: oklch(0.92 0.06 235); }
+.r3d-pad button:active { background: var(--ink); color: var(--cream); }
+.r3d-pad .ms { font-size: 22px; }
+@media (max-width: 899px) { .r3d-pad { left: 10px; bottom: 150px; } .r3d.tools-open .r3d-pad { display: none; } }
+.r3d.editing .r3d-pad { display: none; }
 @media (max-width: 899px) { .r3d-toast { top: 76px; max-width: calc(100vw - 32px); text-align: center; } }   /* v30: under the brand pill and the labels switch on a phone */
 .r3d-tourgo .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-size: 16px; }
 .r3d-ui .chip .ms, .r3d-ui .btn .ms { font-size: 19px; vertical-align: -4px; }
@@ -277,6 +293,8 @@ def tour():
         dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
         dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six", "cab": "compact"},
              text=f"The table door swings back flat and the table folds down to {g.CAB['len_open']:g} × {g.CAB['top'][0]:g} for six. Folded, the table and all six chairs pack into {g.CAB['len']:.0f} cm of wall."),
+        dict(view="sit", title="Sitting at the table", set={"site": "C", "dining": "six", "cab": "compact"},
+             text=f"At the table's far end, at a seated eye height: three a side with {g.CAB['len_open'] / 3:.0f} cm of edge each, the table door folded back flat behind them."),
         dict(view="sofa", title="From the sofa", text=f"About {s['view_dist'] / 100:.2f} m from the screen: the 55-inch fills about {s['view_angle']:.0f}° of your view, right for films and games."),
         dict(view="window", title="From the window", text="The whole wall in one look, over the sofa's back: your plants on the sill behind you."),
         dict(view="plan", title="From above", text="Everything to scale from the plan's own measurements. Drag to look round when the tour ends."),
@@ -348,6 +366,11 @@ def controls(gallery=""):
               '<span class="ms" aria-hidden="true">add</span> Add a piece of furniture</button></div>'
               '<span class="caption">Opens Edit room with its list: an armchair, a bookcase, a bench and more. Drag it where you like.</span></div>')
     views = "".join(f'<button type="button" class="chip" data-view="{k}" aria-pressed="false">{v}</button>' for k, v in VIEWS)
+    # v31, client: "explore what could go next to the dining cabinet in the compact version": the wall between it and the pipe boxing
+    BESIDE_SEG = ('<h3 class="r3d-sub">Beside the cabinet</h3>'
+                  + seg("beside", [(k, v["name"]) for k, v in G.BESIDE["opts"].items()], f"The {G.BESIDE['len']:.0f} cm of wall by the pipe boxing")
+                  + '<p class="caption">The open table door lies back over this wall while you eat, so anything here stays slim: '
+                  f'{G.BESIDE["depth"]:g} cm deep at most. <button type="button" class="chip" data-view="beside">See it</button></p>')
     picks = ('<div class="grp r3d-picks" id="r3d-picks"><span class="label">Your picks</span>'
              '<p class="r3d-picklist" id="r3d-picklist" aria-live="polite">Nothing switched on yet: turn on an idea, a suggestion or a decor choice and it shows here.</p>'
              '<div class="seg"><button type="button" class="chip" id="r3d-pickcopy">Copy as a note</button>'
@@ -361,6 +384,14 @@ def controls(gallery=""):
         "views": '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
                  f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
+                 # v31, client: "make camera movement easier within the 3d render. being able to adjust height would be good"
+                 + '<div class="grp r3d-move"><span class="label">Move round</span>'
+                 '<div class="r3d-eyerow"><label for="r3d-eye">Eye height</label><input type="range" id="r3d-eye" min="40" max="220" step="5" value="160">'
+                 '<output id="r3d-eyeout" for="r3d-eye">160 cm</output></div>'
+                 '<div class="seg" role="group" aria-label="Eye height"><button type="button" data-eye="115">Sitting, 115</button><button type="button" data-eye="160">Standing, 160</button>'
+                 '<button type="button" data-eye="210">High, 210</button><button type="button" data-level="1">Level the view</button></div></div>'
+                 + seg("cam", [("orbit", "Circle round a spot"), ("look", "Look round from here")], "Dragging the room")
+                 + seg("pad", [("on", "Show"), ("off", "Hide")], "Move buttons on the room")
                  + seg("labels", [("on", "Show"), ("off", "Hide")], "The numbered labels on the room")
                  + '<div class="grp r3d-sharegrp"><span class="label">Share this view</span><div class="seg"><button type="button" class="chip" id="r3d-link"><span class="ms" aria-hidden="true">link</span> Copy link to this view</button></div>'
                  '<span class="caption" id="r3d-linkst" aria-live="polite">The link opens the room on this view, with your table, lights, paint, decor and suggestions.</span></div>'
@@ -368,16 +399,35 @@ def controls(gallery=""):
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
                  + '<p class="caption"><b>Tap something in the room to work it:</b> the dining cabinet opens, folds and shows its chairs; the drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch.</p>'
-                 + '<p class="caption">Drag to look round, pinch or scroll to zoom. On a keyboard: W A S D or the arrows walk, Q and E turn.</p>',
+                 + '<p class="caption">Drag to look round, pinch or scroll to zoom (looking round from where you stand, scrolling walks you forward and back). '
+                 'On a keyboard: W A S D or the arrows walk, Q and E turn, R and F go up and down. Lost? Pick a view above, or Reset view.</p>',
+        # v31, client: "upgrade the views and layouts area of the site to ensure it reflects our recent upgrades": grouped, the compact cabinet
+        # first, with what goes beside it, how it opens, the floor it needs, and ready-made set-ups to try
         "layout": "".join([
+            '<h3 class="r3d-sub">The dining cabinet</h3>',
             seg("site", [("C", "The dining cabinet (the plan)"), ("B", "B: the flip-top by the stairs"), ("A", "A: the flip-top on the breast")], "The table: which option"),
             seg("cab", [("compact", f"Compact, {G.CAB['len']:.0f} long, hinged doors (the plan)"), ("sliding", f"Long, {G.OPTC['z'][0] - G.OPTC['z'][1]:.0f}, sliding doors")], "The dining cabinet: which version"),
             seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six")], "Folded or open"),
-            seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The cabinet's table door, with the table folded"),
-            seg("chairs", [("cupboard", "Chair door shut"), ("open", "Chair door open"), ("hooks", "Open hooks (B, A)"), ("away", "In the garage (B, A)")], "The chairs, with the table folded"),
+            seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The table door, with the table folded"),
+            seg("chairs", [("cupboard", "Shut"), ("open", "Open")], "The chair door, with the table folded"),
+            '<div class="grp"><span class="label">See how it works</span><div class="seg"><button type="button" class="chip" data-showopen="1"><span class="ms" aria-hidden="true">play_arrow</span> Watch it open</button></div>'
+            '<span class="caption">It opens step by step, a line about each step; tap the room to stop.</span></div>',
+            seg("foot", [("off", "Hide"), ("on", "Show")], "The floor it needs when it's open (table, chairs, the door's swing)"),
+            '<div class="grp"><span class="label">Try a set-up</span><div class="seg r3d-moments">'
+            '<button type="button" data-moment="dinner"><span class="ms" aria-hidden="true">dinner_dining</span> Dinner for six</button>'
+            '<button type="button" data-moment="four"><span class="ms" aria-hidden="true">lunch_dining</span> Lunch for four</button>'
+            '<button type="button" data-moment="film"><span class="ms" aria-hidden="true">movie</span> Film night</button>'
+            '<button type="button" data-moment="morning"><span class="ms" aria-hidden="true">wb_sunny</span> Everyday morning</button></div>'
+            '<span class="caption">Each sets the table, the lights and the curtains together, then shows you the room.</span></div>',
+            BESIDE_SEG,
+            '<h3 class="r3d-sub">Around the room</h3>',
             seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Plant stand and vinyl stand"),
+            seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "The media wall's drawers"),
+            '<details class="r3d-more"><summary>The flip-top\'s own choices (B and A)</summary><div class="r3d-dpanel">',
+            seg("chairs", [("cupboard", "In the chair cupboard"), ("open", "Cupboard open"), ("hooks", "On open hooks"), ("away", "In the garage")], "Its chairs"),
             seg("seat", [("off", "Not there"), ("up", "Folded"), ("down", "Down")], "Fold-down seat at the stair end (B)"),
-            seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers")]),
+            '</div></details>',
+            '<p class="caption">Or tap the cabinet in the room: its card opens it for four or six, folds it, opens either door and shows the other version.</p>']),
         "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
         "look": swatches + trims + decor_g,
         "extras": picks + ideas_g + sugg_g,
@@ -446,6 +496,7 @@ def section(gallery=""):
       <div class="acts"><button type="button" data-tour="prev" aria-label="Back one stop"><span class="ms" aria-hidden="true">skip_previous</span></button><button type="button" data-tour="pause" aria-label="Pause"><span class="ms" aria-hidden="true">pause</span></button><button type="button" data-tour="next" aria-label="Next stop"><span class="ms" aria-hidden="true">skip_next</span></button><button type="button" class="end" data-tour="stop">End the tour</button></div>
       <i class="r3d-tourbar"><b id="r3d-tourbar"></b></i></div>
     <div class="r3d-toast" id="r3d-toast" role="status" hidden></div>
+    <div class="r3d-pad" id="r3d-pad" role="group" aria-label="Move the camera (hold a button to keep moving)" hidden><button type="button" data-walk="tl" aria-label="Turn left" title="Turn left"><span class="ms" aria-hidden="true">rotate_left</span></button><button type="button" data-walk="f" aria-label="Walk forward" title="Walk forward"><span class="ms" aria-hidden="true">arrow_upward</span></button><button type="button" data-walk="tr" aria-label="Turn right" title="Turn right"><span class="ms" aria-hidden="true">rotate_right</span></button><button type="button" data-walk="u" aria-label="Up" title="Up"><span class="ms" aria-hidden="true">keyboard_arrow_up</span></button><button type="button" data-walk="l" aria-label="Step left" title="Step left"><span class="ms" aria-hidden="true">arrow_back</span></button><button type="button" data-walk="b" aria-label="Walk back" title="Walk back"><span class="ms" aria-hidden="true">arrow_downward</span></button><button type="button" data-walk="r" aria-label="Step right" title="Step right"><span class="ms" aria-hidden="true">arrow_forward</span></button><button type="button" data-walk="dn" aria-label="Down" title="Down"><span class="ms" aria-hidden="true">keyboard_arrow_down</span></button></div>
     <button type="button" class="r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the numbered labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button>
     <div class="r3d-pop" id="r3d-pop" role="dialog" aria-modal="false" aria-labelledby="r3d-pop-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
       <h3 id="r3d-pop-h"></h3><ul class="facts"></ul><div class="acts"><button type="button" class="go" data-popgo="plan">Open in the plan</button><button type="button" data-popgo="fly">Fly here</button></div></div>

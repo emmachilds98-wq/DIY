@@ -740,7 +740,8 @@ def cab_zone():
          ref("photo20", "room", "solidwall"), "the shelf's length; the stair's foot before it stays clear",
          f"{r1(C['freed'])} of bare wall back by the pipe boxing; {r1(slide - C['len'])} shorter than the sliding cabinet", PASS),
         ("Its depth", f"{r1(C['d'])} to the doors' faces", ref("room"), f"the pipe boxing beside it is {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} deep",
-         f"{r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than the boxing, {r1(G.OPTC['d'] - C['d'])} less than the sliding cabinet", PASS),
+         (f"flush with the boxing's face" if abs(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])) < 0.05 else
+          f"{r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than the boxing") + f", {r1(G.OPTC['d'] - C['d'])} less than the sliding cabinet", PASS),
         ("The two doors and their hinges", f"inset oak-faced ply: the table door {r1(C['door_tw'])} × {r1(C['door_h'])}, about {C['door_kg'][0]:.0f} kg; the chair door "
          f"{r1(C['door_cw'])} wide, about {C['door_kg'][1]:.0f} kg", ref("piano32"), "a full-height stainless piano hinge each, screwed every 10 cm into a solid oak edge",
          "the hinge's load isn't published: hang the table door, open it flat, and check its far end doesn't drop before you load the cabinet", CHECK),
