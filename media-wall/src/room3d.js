@@ -1108,12 +1108,7 @@ function buildBeside() {
     const m = B.mirror, g = new THREE.Group(); g.name = "mirror"; BES.mirror = g; beside.add(g);
     bx(g, W - m.t, m.y0, zc - m.w / 2, m.t, m.h, m.w, K.dark);
     // the glass: no live reflection (it would draw the room twice), a soft daylight sheen with two diagonal highlights reads as a mirror
-    const sheen = canvasTex(128, 512, (c, w, h) => {
-      const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#eef3f4"); gr.addColorStop(0.55, "#cdd8db"); gr.addColorStop(1, "#aab7bb");
-      c.fillStyle = gr; c.fillRect(0, 0, w, h); c.globalAlpha = 0.35; c.fillStyle = "#ffffff";
-      for (const [y, t] of [[90, 60], [230, 26]]) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y - 70); c.lineTo(w, y - 70 + t); c.lineTo(0, y + t); c.fill(); }
-    });
-    const glass = new THREE.Mesh(new THREE.PlaneGeometry((m.w - 4) * M, (m.h - 4) * M), mat({ color: "#ffffff", map: sheen, roughness: 0.12, metalness: 0.25 }));
+    const glass = new THREE.Mesh(new THREE.PlaneGeometry((m.w - 4) * M, (m.h - 4) * M), mat({ color: "#ffffff", map: MIRROR_SHEEN, roughness: 0.12, metalness: 0.25 }));
     glass.rotation.y = Math.PI / 2; glass.position.copy(v3(W - m.t - 0.05, m.y0 + m.h / 2, zc)); g.add(glass);
   }
   // the low oak shelf: the chair box's width, table height, open to the room: plates face-out, bowls, glasses, a few bottles
@@ -1314,6 +1309,12 @@ function applySvar() {
       const j = it ? it.mats.indexOf(m) : -1; if (j >= 0) it.base[j] = c; });   // a floor piece: placeAll recolours it (and Edit room's colour still wins)
   }
 }
+/* a mirror's glass: no live reflection (it would draw the room twice); a soft daylight sheen with two diagonal highlights reads as one */
+const MIRROR_SHEEN = canvasTex(128, 512, (c, w, h) => {
+  const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#eef3f4"); gr.addColorStop(0.55, "#cdd8db"); gr.addColorStop(1, "#aab7bb");
+  c.fillStyle = gr; c.fillRect(0, 0, w, h); c.globalAlpha = 0.35; c.fillStyle = "#ffffff";
+  for (const [y, t] of [[90, 60], [230, 26]]) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y - 70); c.lineTo(w, y - 70 + t); c.lineTo(0, y + t); c.fill(); }
+});
 const FILM_TEX = canvasTex(640, 360, (g, w, h) => {      // v32: a film on the TV (the backlight idea): a dusk sky, a sun, hills
   const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, "#2a3c8f"); sky.addColorStop(0.45, "#c44fb0"); sky.addColorStop(0.75, "#ff8a3d"); sky.addColorStop(1, "#ffcf6a");
   g.fillStyle = sky; g.fillRect(0, 0, w, h);
@@ -1699,13 +1700,16 @@ function buildIdeas() {
   // 7. the rug's non-slip pad: the corner by the door turned back to show it (the pad trimmed 2.5 inside the rug's edge)
   if (MOV.rug) { const g = IDEA_G.rugpad = new THREE.Group(), RG = R.RUG, hx = (RG.x[1] - RG.x[0]) / 2, hz = (RG.z[1] - RG.z[0]) / 2, L = 46;
     const tri = (pts, y, mat) => { const geo = new THREE.BufferGeometry();
+      const [p0, p1, p2] = pts.map(([x, z]) => [-x, z]);                                                         // wound to face up (three's x runs the other way)
+      if ((p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0]) > 0) pts = [pts[0], pts[2], pts[1]];
       geo.setAttribute("position", new THREE.Float32BufferAttribute(pts.flatMap(([x, z]) => [-x * M, y * M, z * M]), 3));
-      geo.setAttribute("uv", new THREE.Float32BufferAttribute(pts.flatMap(([x, z]) => [x / 60, z / 60]), 2)); geo.computeVertexNormals();
+      geo.setAttribute("uv", new THREE.Float32BufferAttribute(pts.flatMap(([x, z]) => [x / 60, z / 60]), 2));
+      geo.setAttribute("normal", new THREE.Float32BufferAttribute(pts.flatMap(() => [0, 1, 0]), 3));          // facing up, whichever way round
       const m = new THREE.Mesh(geo, mat); m.receiveShadow = true; g.add(m); return m; };
     const C = [hx, hz], A = [hx - L, hz], B = [hx, hz - L], F = [hx - L, hz - L];
-    tri([C, A, B], 0.95, floorMat);                                                                              // the carpet under the corner
-    tri([[hx - 2.5, hz - 2.5], [hx - L + 2.5, hz - 2.5], [hx - 2.5, hz - L + 2.5]], 1.05, reg(new THREE.MeshStandardMaterial({ color: "#8f8b84", roughness: 1, side: THREE.DoubleSide })));   // the pad
-    tri([A, B, F], 1.55, reg(new THREE.MeshStandardMaterial({ color: "#cdb990", roughness: 1, side: THREE.DoubleSide })));   // the rug's jute back, folded over
+    tri([C, A, B], 0.95, Object.assign(floorMat.clone(), { side: THREE.DoubleSide }));                           // the carpet under the corner
+    tri([[hx - 2.5, hz - 2.5], [hx - L + 2.5, hz - 2.5], [hx - 2.5, hz - L + 2.5]], 1.05, reg(new THREE.MeshStandardMaterial({ color: "#5f5b55", roughness: 1, side: THREE.DoubleSide })));   // the pad
+    tri([A, B, F], 1.55, reg(new THREE.MeshStandardMaterial({ color: "#a88a58", roughness: 1, side: THREE.DoubleSide })));   // the rug's jute back, folded over
     const fold = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, L * Math.SQRT2 * M, 10), reg(new THREE.MeshStandardMaterial({ color: R.RUG.cols[3], roughness: 1 })));
     fold.position.set(-(hx - L / 2) * M, 0.0125, (hz - L / 2) * M); fold.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(-1, 0, -1).normalize()); g.add(fold);
     MOV.rug.pivot.children[0].add(g); }
@@ -2087,7 +2091,7 @@ function buildPlantsAndRecords() {
     const upl = IDEA_G.plantlight = new THREE.Group(), blk = reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.45 }));
     const can = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.042, 0.1, 18), blk); can.position.set(0, 0.05, -0.06); can.rotation.x = -0.35; upl.add(shadow(can));
     const lens = new THREE.Mesh(new THREE.CircleGeometry(0.03, 18), new THREE.MeshBasicMaterial({ color: "#fff1d6", toneMapped: false })); lens.position.set(0, 0.1, -0.075); lens.rotation.x = -Math.PI / 2 - 0.35; upl.add(lens);
-    const sp = new THREE.SpotLight("#ffd9a8", 9, 3, 0.62, 0.7, 2); sp.position.set(0, 0.12, -0.08); sp.target.position.set(0, 1.9, -0.32);
+    const sp = new THREE.SpotLight("#ffd9a8", 22, 3, 0.7, 0.6, 2); sp.position.set(0, 0.12, -0.08); sp.target.position.set(0, 1.9, -0.32);
     sp.castShadow = true; sp.shadow.mapSize.set(512, 512); sp.shadow.bias = -0.0004; sp.shadow.camera.near = 0.04; upl.add(sp, sp.target);
     MOV.plants.pivot.add(upl); }
   // v18.1: the client's vinyl stand (their listing): 70 × 32 × 78, black steel, rustic wood; two face-out bays on top, wires below
@@ -2208,7 +2212,7 @@ Object.assign(CATALOGUE, {
     const th = reg(new THREE.MeshStandardMaterial({ color: "#e9e3d3", roughness: 1 })), roll = new THREE.Mesh(new THREE.SphereGeometry(0.17, 16, 12), th);
     roll.scale.set(1, 0.55, 1); roll.position.y = 0.42; g.add(shadow(roll)); } },
   mirror: { label: "Floor mirror (oak)", w: 60, d: 8, col: "#c48c57", build(g, m) {
-    const glass = reg(new THREE.MeshStandardMaterial({ color: "#c9d3d8", metalness: 0.95, roughness: 0.05 }));
+    const glass = reg(new THREE.MeshStandardMaterial({ color: "#ffffff", map: MIRROR_SHEEN, roughness: 0.12, metalness: 0.25 }));   // v32: was black (metal with nothing to reflect)
     const f = new THREE.Group(); lb(f, 0, 0, 0, 60, 170, 3, m); const gl = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 1.62), glass); gl.position.set(0, 0.85, 0.016); f.add(gl);
     f.rotation.x = -0.12; f.position.z = 0.04; g.add(f); } },
   lantern: { label: "Lantern and candles", w: 25, d: 25, col: "#1f1f21", build(g, m) {

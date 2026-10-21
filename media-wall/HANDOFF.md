@@ -1,6 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v32 (round 26, below): "Watch it open" slow and jointed, every idea, suggestion and Add-list piece with its own HD render and
+  in the 3D room, three new suggestions, a cost overview by piece, and the plan page's menus reworked (tools always on, a Menu
+  button for the rest).** Fit 110/39/15/0, total £3,397–6,547 (unchanged: nothing new is in the plan), plan PLANPAGES pages
+  (PLANMB MB), guide GUIDEPAGES. Deck 71ff published at v32. Next: `media-wall/UPGRADE_PLAN_v33.md`.
 - **v31 (round 25, below): the compact cabinet reviewed for a smaller build (now 22 deep, flush with the pipe boxing), the beech
   FRÖSVI with Dunelm Esme tie-on pads hung on the table door, four options beside the cabinet, an easier 3D camera and a regrouped
   Layout panel.** Fit 110/39/15/0, total £3,397–6,547, plan 102 pages (14.7 MB: the 3D stills go in as JPEG since v31; as PNG it was 50.5 MB, over GitHub's 50 MB advice), guide 53. Deck 71ff published at v31 (version 1792596482-fd0a,
@@ -50,10 +54,50 @@
   If an upload is refused as a "cpio archive" (a false sniff, v23), re-save that webp at quality 85 and upload it again. **Read the client's answers first:** ArtifactData
   `list` on `answers` (and `tracker`, `steps`). The QRfYUvbPVQpSHFgaDN4YMU deck belongs to another account: don't use it.
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
-  (shot3d renders 37 stills headless in SwiftShader WebGL: about 15 minutes for all, and since v28 only the ones whose fingerprint changed, `force` for all; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
+  (shot3d renders the stills (92 since v32) headless in SwiftShader WebGL: about 15 minutes for all, and since v28 only the ones whose fingerprint changed, `force` for all; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 21 Oct 2026, round 26: v32 (Watch it open, slowly; every idea rendered and in the room; a cost overview; menus)
+- Client (after PR #28 merged): "make tools always appear in 3D view and the other buttons on the left to be the expandable menu as these
+  are the in depth plans used less. slow down the playback of the table opening to show clearly how it puts together and opens in a slow
+  and clear manner. i want you to add function to add the new suggested furniture and decor in the room to see how it might look, i want
+  all suggested extra items, furniture and more to have full renders, nothing half HD or drawn. add anything else you haven't already
+  suggested. take my current version of the 3D viewer open in github as my core build and you can optimise how the menus appear given
+  this"; then "please also add a cost overview that shows each piece and list breakdown of shopping items. ie the media wall. 2 x
+  cabinet from ikea, 2 x 1.8m wood etc ... i need clear buy list and estimated cost without incorporating large explanations".
+- **Menus** (build_viewer `_page`, page.css, page_router.js `railOpen`, room3d_page): the 3D dock (Views, Layout, Lights, Look, Extras,
+  Edit) is always on screen, a cream pill at the bottom; the rail is one **Menu** button that unfolds Room / Plan / Build / Buy / Ideas
+  (open while a sheet is up on a laptop; on a phone the bottom bar shows only with a sheet open). `DemmaTools` bubbles toggle.
+- **Watch it open** (room3d.js): the table is jointed (`K.tableRig`: the first half on the rail's piano hinge, the second on the joint's
+  flip-top hinges, each leg on its bracket; one number `rig.p`, poses at `RIG`). Every moving part is an `anim` (p 0–1): the doors, the
+  pads, each stored chair (`slideOut`), each chair at the table, the rig; `CABP.compact` / `CABP.sliding`. Opening or folding from the
+  room runs `cabGo` (part after part, each waiting for the one before; `twTo(a, to, dur, delay, linear)`). The show (`showOpen`,
+  `showSteps`) is 13 steps (12 for the sliding one), about 40 s, on its own clock (`SH`, `showTick` in the frame loop; poses from
+  keyframes, so pause, back and next are exact), with its own card (`#r3d-show`, the tour card's styles), a wider `unfold` view for the
+  table steps; touching the room leaves it running (the camera then stays yours); Stop, Esc or any other button ends it with the table
+  out for six. The cabinet's tap card has "Watch it open, step by step".
+- **Every idea in 3D** (`ideas.IDEAS` all `True`): the TV backlight (a glow behind the TV, two coloured lights, a film on the screen:
+  `screenFilm`), the plant uplight (a spot under the stand's open middle, in the stand's pivot), the rug pad (the corner by the door
+  turned back, in the rug's group), the scene button (on the breast's side by the door: where the switch really is is a question), stair
+  nightlights (a strip under each tread's nose and a wash on the riser; export3d now sends `STAIR_RISE`, `STAIR_GOING`), and the
+  record-care caddy, re-sited from the pads drawer (its 14 cm is full: two pads, three remotes) to the end of the vinyl stand's bottom
+  shelf. Extras lists every idea (`room3d_page.IDEA_SHORT`).
+- **Three new suggestions** (`ideas.SUGGEST`, `SUGG_VARS`, fit sources `piclight`, `blackout`, `cablight`): picture lights over the two
+  framed LPs (Online Lighting Slimline 279, £14.99), a blackout roller blind face-fixed over the window (The Range made to measure, up
+  to 240 × 210, from £24.99; 239 × 124 here), lights in the dining cabinet (Dickens Direct 40 cm USB motion bar, £13.99 ex VAT; each box
+  lit while its door is open, `cabLit`).
+- **A render of every item** (`item_shots.py`): 10 ideas, 21 suggestions, 17 Add-list pieces, each with its state (`OPTS`) and a camera
+  set by eye (`AIM`; eyes kept off the ottoman in the middle of the room). shot3d renders them (`3d_id_*`, `3d_sg_*`, `3d_add_*`).
+  `R3D.set` takes `aim` (a camera), `added` (pieces for a still), `addpiece` (one more piece) and `merge` (keep what's on). The Ideas
+  sheet is a card per item with its render and "Show it in my room" / "Add it to my room" (`item_card`), and a new "More to add, in
+  Edit room" block; the plan's appendix has a gallery of them all (`item_gallery`, 960 JPEGs). The Add list's armchair, footstool,
+  floor cushion and beanbag are rounded and upholstered now; the floor mirror's glass uses the beside mirror's sheen (`MIRROR_SHEEN`).
+- **Cost overview** (`costs.py`): `PIECES` and a short name for every "To buy" row (`SHORT`, matched on the row's start; anything
+  unnamed lands in "Other"); the estimates are the buy list's own, so the totals match. In the Buy sheet (cards by piece, a table each,
+  Copy the shopping list) and in the plan (section 1, piece by piece; section 11, the full list).
+- Backups `*_v31_backup.*`; v31 outputs in `out/v31/`. Rebuilt: all stills (room3d.js changed). QA: QARESULT.
 
 ## Update 21 Oct 2026, round 25: v31 (a smaller cabinet checked, cushions, beside it, an easier camera, Views and Layout)
 - Client (after merging PR #27): "can you please review if there's any further optimisation we can do to the dining cabinet, we want the

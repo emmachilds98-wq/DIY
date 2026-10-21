@@ -52,7 +52,7 @@ def img(name, alt=""):
 def thumb(name, alt=""):
     """v32: a render small enough to put many on a page (a 960 JPEG), or the deck's picture."""
     if DECK:
-        return f'<img data-art="{DECK_ART.get(name, name)}" alt="{alt}" loading="lazy">'
+        return f'<img data-art="{DECK_ART.get(name) or name.split("_", 2)[2].rsplit(".", 1)[0]}" alt="{alt}" loading="lazy">'   # render_vNN_<stem>.png
     import io
     from PIL import Image
     im = Image.open(HERE / name).convert("RGB"); im.thumbnail((960, 540))
