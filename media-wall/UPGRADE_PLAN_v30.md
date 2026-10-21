@@ -16,4 +16,4 @@ Read `media-wall/HANDOFF.md` first (START HERE, then round 23).
 ## Rebuild and ship
 `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`
 then upload `src/deck_assets_todo.txt` to the deck's asset store, record them in `src/deck_assets.json`, run build_viewer again, QA at
-390 and 1280 px, update HANDOFF and README, PR into `main`, merge, publish the deck.
+390 and 1280 px (`python3 qa.py <shots dir>`: "fails" and "errors" empty; check the PDFs' page counts too), update HANDOFF and README, PR into `main`, merge, publish the deck.

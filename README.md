@@ -14,6 +14,7 @@ with the dining cabinet under your shelf by the stairs: the table and the six ch
 - **A better table:** 185 × 90 for six in comfort (a seventh at the end), the two halves flush at the joint, pegged breadboard ends, eased corners and tapered legs.
 - **Proper folding chairs:** six slatted chairs with sage seat pads, folded two deep in the chair bay, the pads on edge in front.
 - **The plan follows it everywhere:** new drawings, cutting list and buy list (your ticks kept), step 11 rewritten (the track grooves, the inside set back for the doors, hanging and adjusting the doors), and the flip-top is the alternative everywhere, not the default.
+- **Checked and tidied (v29.1):** step 11's cut list in the build guide now has the two sliding doors, the cabinet's drawer front and the sliding gear, and no longer the hinges and lid stays from the old design; the buy list adds the folded table's knob; two drawings' labels read clearly; and on a phone, each build step's parts list and every opened chapter fit the screen (they ran off the right edge).
 
 **v28** (a tour of the 3D room, a link to any view, versions of every suggestion)
 - **Take the tour** (Tools → Views): the 3D room flies round itself in eight stops with a line about each, from the whole room to the media wall, the breast, the dining cabinet opened for six and the sofa. Pause, skip or end it; touching the room stops it.
@@ -226,10 +227,10 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v27.pdf`](media-wall/out/Home_Network_Plan_v27.pdf) (90 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v27.pdf`](media-wall/out/Build_Guide_v27.pdf) (52 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
-- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v15/`)
-- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account; v16 is the last version published there: this session could not reach it with every round up to it, including the room in 3D: views × paints × key, drawer layouts, lighting scenes, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v29.pdf`](media-wall/out/Home_Network_Plan_v29.pdf) (92 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v29.pdf`](media-wall/out/Build_Guide_v29.pdf) (54 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
+- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v28/`)
+- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account, at v29: the room in 3D, the plan's chapters, build steps, buy tracker, answers and photos, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 
 ### Rebuilding the plan and renders
@@ -244,6 +245,7 @@ python3 fit.py           # the fit proof, zone by zone
 python3 make_images.py   # every render, montage, diagram image and viewer image (HD copies into ../out/)
 python3 build_doc.py     # the plan and the build guide PDFs into ../out/
 python3 build_viewer.py  # the viewer page (images in art/) and ../../index.html
+python3 qa.py            # the page at phone and laptop width: errors, overflow, sheets, chapters, step 11
 ```
 
 | File | What it does |
@@ -255,3 +257,4 @@ python3 build_viewer.py  # the viewer page (images in art/) and ../../index.html
 | `src/build_doc.py` | The plan text, tracker and tables; builds HTML then PDF |
 | `src/build_viewer.py` | The interactive viewer page and `index.html` |
 | `src/make_images.py` | Builds all renders, montages, HD outputs and viewer images |
+| `src/qa.py` | Checks the page at 390 and 1280 px (serves the repo itself): console errors, anything off the right edge, every sheet and chapter |

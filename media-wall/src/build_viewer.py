@@ -355,6 +355,7 @@ summary .part { font-weight: 400; }
 .sopen { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
 .sopen:focus-visible { outline: 2px solid var(--oak); outline-offset: 2px; }
 .sbody { display: grid; gap: 10px; min-width: 0; }
+.sbody > * { min-width: 0; }   /* v29.1: a step's drawing (640 wide, it scrolls) no longer widens its Buy first and Parts boxes past a phone */
 .sbody[hidden] { display: none; }
 .step:not(.open) { padding-block: 10px; }
 .snext { margin: 0; }

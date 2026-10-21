@@ -1,11 +1,12 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **NEXT AGENT, DO THIS FIRST: v29 is built (the full rebuild finished: fit 91/32/12/0, total £3,518–6,858, PDFs and the page at v29)
-  but NOT yet checked, merged or published.** Look at the cabinet stills (`art/3d_c_folded`, `3d_c_six`, `3d_c_chairs`) and the PDF's
-  section 5 and step 11; upload the 10 pictures in `src/deck_assets_todo.txt` to the deck's asset store, record them in
-  `src/deck_assets.json`, run `python3 build_viewer.py` again; QA at 390 and 1280; then mark PR #25 ready, merge into `main`, publish the
-  deck 71ff (`src/media_wall_viewer_inline.html`).
+- **v29.1 (round 23b) is checked and shipped:** PR #25 (v29) was merged before its checks; this round checked it, fixed what the
+  checks found (below), published the deck 71ff at v29 (version 1792561058-14bf, all 63 pictures in its asset store) and opened a PR
+  into `main` with the fixes (merge it if it's still open, so Pages carries them). Fit 91/32/12/0, total £3,518–6,858, plan 92 pages,
+  guide 54. Next: `media-wall/UPGRADE_PLAN_v30.md` (waiting on the client's view of the cabinet).
+- **QA is a script now:** `cd media-wall/src && python3 qa.py <shots dir>` serves the repo, opens the page at 390 and 1280, opens every
+  sheet, chapter, fold and build step, and reports console errors and anything past the right edge. "fails" and "errors" should be [].
 - **v29 (round 23, below): the dining cabinet fully upgraded** (two sliding oak doors, a 185 table, proper folding chairs) and the
   whole plan made consistent with it (no more "the flip-top is the default" anywhere). Next: `media-wall/UPGRADE_PLAN_v30.md`.
 - **v28 (round 22): the last three items of `UPGRADE_PLAN_v25.md` are done** (the guided tour and "copy link to
@@ -45,6 +46,35 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+
+## Update 21 Oct 2026, round 23b: v29.1 (v29 checked, fixed and shipped)
+- Client: "can you please continue on from latest pr where ive been upgrading" (PR #25, merged with its checks still to do).
+- **Checked:** the cabinet stills (`3d_c_folded`, `3d_c_six`, `3d_c_chairs`, `3d_c_plan`, `3d_window_c_six`) are right (doors shut; A
+  over B with the table out; B behind A, four chairs on the floor two deep, two on the shelf, pads on edge). The PDF's section 5 and the
+  guide's step 11 were read through.
+- **Fixed (build_doc):** step 11's cut list in the guide still had v27's hardware ("170° concealed hinges, three a door, the chair bay";
+  "Lid stays · butt hinges · drawer runners, for the linen flap, 200 mm") and lacked the sliding doors and the cabinet's drawer front
+  (`CUT_STEP` didn't match them, so they were in no step). Now: "Sliding door gear" (the Slido set and tracks, article numbers in the
+  notes) and "Drawer runners · catches · knob" (150 mm, as the instructions say); the drawer front is "Drawer front (the cabinet)" so it
+  doesn't catch the media wall's "Drawer fronts". The sliding-gear buy row adds the folded table's knob (`TRACK_KEEP_ID` keeps its id).
+- **Fixed (text):** round numbers in the plan's body: "v26's longer table" (fit `max_seats_zone`: "a 225 table did it, but only
+  with ..."), "Until v26 the plan was a flip-top table" ("Before the cabinet, ..."), "Nothing changed in v17" (dropped), the front
+  elevation's "25.25 cm nearer the side wall than v10" ("off the alcove's centre, towards the side wall"). `tidy.strip_versions` doesn't
+  catch possessives or "until/than vNN": write such sentences without the round. The byline date is 21 Oct. REVISION "29.1".
+- **Fixed (drawings):** `option_c_section`'s "piano hinge" label sat on door A's dashed line (now left of it, with a leader);
+  `option_c_plan` (open for six) labelled the empty chair bay "6 chairs" (now "chair bay (empty)").
+- **Fixed (the page, on phones):** every build step with drawings had its Buy first row and Parts/Hardware box 662 wide in a 350
+  column, the Hardware list clipped off the right edge (`.sbody` is a grid; its items kept `min-width: auto`, so the 640 px drawing
+  set the track); the same in four Plan chapters once "Read the full chapter" was open (716 wide; `.chapter`). `.sbody > *` and
+  `.chapter > *` get `min-width: 0` (build_viewer STYLE, page.css); the drawings scroll inside their cards. Earlier QA measured only
+  the page's scrollWidth, which the sheets hide.
+- **Gotchas:** a fresh container lacks the Python `playwright` package (`pip install -r requirements.txt`; Chromium is preinstalled
+  and `shot.py`/`shot3d.py` fall back to `/opt/pw-browsers/chromium`). A long size in a cut-list "num" cell (`td.num` doesn't wrap)
+  makes Chromium shrink the whole PDF to fit: the plan dropped to 66 pages and the guide to 39 with tiny text. Keep those cells short
+  and put detail in the notes; check the page counts after `build_doc.py`.
+- shot3d rendered 0 of 35 (nothing in the room changed). Deck: the 10 changed pictures uploaded and recorded in `deck_assets.json`,
+  then published (version 1792561058-14bf). Backups `*_v29_backup.*` (build_doc, diagrams, fit, build_viewer, page.css). The uncited
+  source `hinge170` (Blum 170°) stays in `fit.ORDER` so the footnote numbers don't move.
 
 ## Update 21 Oct 2026, round 23: v29 (the dining cabinet, fully upgraded; the plan around it)
 - Client: "whats left in the plan there seems to be missing things from what i requested" and "i asked for a full upgrade of the tables
