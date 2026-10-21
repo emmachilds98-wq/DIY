@@ -139,11 +139,11 @@ def scene():
         return {"x": cx, "z": cz, "axis": G.BAR_AXIS, "heads": [{"dx": dx, "col": col, "stem": stem, "tgt": list(tgt)} for dx, col, stem, tgt in heads]}
     room_spec = {
         "W": G.ROOM_W, "CEIL": G.CEIL, "ALC_W": G.ALC_W, "ALC_D": G.ALC_D, "BREAST_X": G.BREAST_X, "RECESS_Z": G.BREAST_D_WEST,
-        "DOOR_X": G.DOOR_X, "DOOR_H": 198.0, "STAIR_X": G.STAIR_X, "STAIR_FRONT": G.ALC_D - G.STAIR_D,
+        "DOOR_X": G.DOOR_X, "DOOR_H": 198.0, "STAIR_X": G.STAIR_X, "STAIR_FRONT": G.ALC_D - G.STAIR_D, "STAIR_RISE": G.STAIR_RISE, "STAIR_GOING": G.STAIR_GOING,
         "WELL_X0": G.DOOR_X[1] + 1.5, "WINDOW_Z": G.WINDOW_Z, "WINDOW_X": G.WINDOW_X, "WINDOW_Y": G.WINDOW_Y, "PC_CASE": G.PC_CASE, "PC_Z": G.PC_Z, "PC_SHELF_TOP": G.PC_SHELF_TOP, "WINDOW_REVEAL": G.WINDOW_REVEAL, "SILL": G.SILL,
         "RADIATOR_X": G.RADIATOR_X, "RADIATOR_Y": (15.0, 70.0), "SKIRT_H": G.SKIRT_H,
         "TV_X": G.TV_X, "TV_Y": (G.TV_BOTTOM, G.TV_TOP), "TV_Z": G.TV_PANEL_Z[0],
-        "SHELF_B": G.SHELF_B, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},
+        "SHELF_B": G.SHELF_B, "FRAMES_Y": G.FRAMES_Y, "TABLE_A": {"x": G.TABLE_X, "z": G.TABLE_Z, "cx": G.TABLE_CX},
         "TABLE_B": {"x": G.TABLE_B_X, "z": G.TABLE_B_Z, "cz": G.TABLE_B_CZ}, "SIX": {"x": G.SIX_X, "z": G.FREE_Z}, "OPEN_Z": G.OPEN_Z, "TABLE_B_OPEN_X": G.TABLE_B_OPEN_X,
         "IDEAS": __import__("ideas").SPOTS, "PLANT_STAND": G.PLANT_STAND, "RECORD_SHELF": G.RECORD_SHELF, "PLANT_LAYOUTS": G.PLANT_LAYOUTS, "LAMP_DEFAULT": G.LAMP_DEFAULT, "LP": G.LP, "CHAIR_STORE": G.CHAIR_STORE, "WALL_SEAT": G.WALL_SEAT, "SOFA_POUF": G.SOFA_POUF, "CHAIR_FOLDED": G.CHAIR_FOLDED, "HOOK": G.HOOK, "SOFA": {"x": G.SOFA_X, "back": G.SOFA_BACK_Z, "front": G.SOFA_FRONT_Z, "end": G.CHAISE_END_Z, "chaise_x": G.CHAISE_X},
         "COFFEE": G.COFFEE, "LAMP": G.FLOOR_LAMP,

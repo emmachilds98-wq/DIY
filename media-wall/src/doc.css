@@ -87,3 +87,8 @@ table.steps td:first-child { width: 14pt; text-align: center; font-weight: 650; 
 .part { display: inline-block; font-size: 6.8pt; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.5pt 5pt; border-radius: 6pt;
   color: #1f1f1f; background: color-mix(in srgb, var(--pc) 14%, white); border: 0.6pt solid color-mix(in srgb, var(--pc) 55%, white); margin-right: 3pt; vertical-align: 1pt; }
 .part::before { content: ""; display: inline-block; width: 5pt; height: 5pt; border-radius: 50%; background: var(--pc); margin-right: 3pt; vertical-align: 0.3pt; }
+/* v32: every idea, suggestion and piece to add, each rendered on its own: three to a row */
+.thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm 3mm; margin: 2mm 0 5mm; }
+figure.thumb { margin: 0; break-inside: avoid; }
+figure.thumb img { width: 100%; height: auto; display: block; border-radius: 1.5mm; }
+figure.thumb figcaption { font-size: 7.5pt; line-height: 1.25; margin-top: 1mm; color: #4a4a4a; }

@@ -728,6 +728,14 @@ SOURCES["vasagle"] = ("VASAGLE 4-Tier Slim Kitchen Storage Trolley with Wheels, 
 SOURCES["nissedal"] = "IKEA UK: NISSEDAL mirror, 40 × 150 cm, black (906.054.82) or white (706.054.83), £25 (was £30) (ikea.com/gb)"
 SOURCES["plates"] = "Dinner plates: IKEA FÄRGKLAR plate 26 cm (ikea.lt, 904.781.77); IKEA 365+ dinner plate 27 cm (dimensions.com)"
 ORDER.extend(["esme", "angsfraken", "bramon", "habitatchair", "plia", "vasagle", "nissedal", "plates"])
+# v32: the three new suggestions (ideas.SUGGEST), each from its product page
+SOURCES["piclight"] = ("Online Lighting: Slimline Medium Battery Operated LED Picture Light, satin nickel, £14.99 (166342): overall H 77 × W 279 × D 125 mm, "
+                       "shade H 16 × W 279 × D 16 mm, back plate H 70 × W 106 mm, three AA cells (onlinelighting.co.uk)")
+SOURCES["blackout"] = ("The Range: Made to Measure Blackout Roller Blind, from £24.99: width 10–240 cm, drop 10–210 cm, made to the size given, "
+                       "inside or outside the recess on top- or face-fix brackets (therange.co.uk)")
+SOURCES["cablight"] = ("Dickens Direct: 40cm USB Rechargeable LED Under Cabinet Light, wireless, motion sensor and touch, warm white (3000K), "
+                       "magnetic or adhesive fixing, £13.99 ex. VAT (PCJW256; dickensdirect.com)")
+ORDER.extend(["piclight", "blackout", "cablight"])
 
 
 def cab_zone():

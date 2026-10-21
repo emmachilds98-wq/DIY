@@ -271,7 +271,11 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "fairy": "Fairy lights on the pole", "hanger": "Hanging plant in the window", "trail": "Trailing plant, top shelf",
               "throw": "Knit throw on the sofa", "pclamp": "Mushroom lamp, PC shelf", "basket": "Seagrass basket",
               "candles": "LED candles on the shelf", "runner": "Table runner and vase", "floorcush": "Floor cushions",
-              "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf"}   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
+              "piclights": "Picture lights, LPs", "blind": "Blackout blind", "cablights": "Lights in the cabinet"}   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
+              "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
+              "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
 # v20: decor to try in the 3D room (room3d.js S.decor; the keys match its RUG_LOOKS, CUSHION_COLS, CURTAIN_COLS, the case's PRESETS, CASE_FRAMES)
 DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatweave"), ("blue", "Deep blue"), ("stripes", "Sage stripes"), ("none", "No rug")]),
          ("cushions", "Sofa cushions", [("none", "None"), ("rust", "Rust and ochre"), ("blues", "Blues"), ("sage", "Sage and cream")]),
@@ -344,9 +348,10 @@ def controls(gallery=""):
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     ideas_g = ('<div class="grp"><span class="label">Ideas (not in the plan)</span>'
-               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
-               '<button type="button" data-idea="glass" aria-pressed="false">Glass plant shelves</button>'
-               '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button></div></div>')
+               '<div class="seg" role="group" aria-label="Ideas, not in the plan">'
+               + "".join(f'<button type="button" data-idea="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(IDEA_SHORT[k])}</button>'
+                         for k, _t, size, *_ in ideas.IDEAS if k != "cushions")      # the cushions are Decor's
+               + '</div></div>')
     dec = {k: (lab, opts) for k, lab, opts in DECOR}
     decor_g = "".join('<div class="grp r3d-decor"><span class="label">' + html.escape(title) + '</span>'
                + "".join(f'<div class="r3d-decrow"><span>{html.escape(dec[k][0])}</span><div class="seg" role="group" aria-label="{html.escape(dec[k][0])}">'
