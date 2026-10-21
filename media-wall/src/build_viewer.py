@@ -12,7 +12,7 @@ from build_doc import TRACK, money, phase_totals, plan_sections, steps, GUIDE_RU
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
-VERSION = "26"
+from build_doc import VERSION   # v28: one version for the plan, the guide and the page (it had stuck at 26, so its PDF links broke)
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
@@ -1091,7 +1091,7 @@ def _page(site=False):
 {STYLE_V25}
 <button type="button" class="skip" data-tools-toggle>Open the room's controls</button>
 <div class="brand"><span class="mark" aria-hidden="true"><i style="background:var(--peach)"></i><i style="background:var(--mint)"></i><i style="background:var(--lilac)"></i><i style="background:var(--butter)"></i></span>
-  <span><b>Demma</b><small>Home Improvements</small></span></div>
+  <span><b>Demma<span class="ver" title="This page is version {VERSION}">v{VERSION}</span></b><small>Home Improvements</small></span></div>
 {rail}
 <main id="room" aria-label="Your room in 3D">{room3d_page.section(gallery3d())}</main>
 {sheet("plan", "Your plan", "map", 300, plan_home + chapters)}

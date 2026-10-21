@@ -173,6 +173,27 @@ details.r3d-more[open] > summary::before { content: "– "; }
   .r3d-pop::before { display: none; }
   body.sheet-open .r3d-stickers, body.tools-open .r3d-stickers { display: none; }
 }
+/* v28: the tour's card, the link's toast, the versions */
+.r3d-tour { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); width: min(520px, calc(100vw - 24px)); z-index: 32; background: var(--cream); color: var(--ink);
+  border-radius: 26px; padding: 14px 18px 16px; box-shadow: var(--shade); display: grid; gap: 6px; }
+.r3d-tour[hidden] { display: none; }
+.r3d-tourn { font: 600 12.5px Figtree, system-ui, sans-serif; color: var(--mut); }
+.r3d-tour h3 { margin: 0; font: 600 20px Fredoka, system-ui, sans-serif; }
+.r3d-tour p { margin: 0; font-size: 14.5px; line-height: 1.4; }
+.r3d-tour .acts { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+.r3d-tour .acts button { min-width: 44px; min-height: 44px; border: 0; border-radius: 999px; background: var(--soft); color: var(--ink); cursor: pointer; display: grid; place-items: center; font: 600 14px Fredoka, system-ui, sans-serif; }
+.r3d-tour .acts button.end { margin-left: auto; padding: 0 16px; background: oklch(0.8 0.11 235); }
+.r3d-tourbar { display: block; height: 5px; border-radius: 999px; background: var(--soft); overflow: hidden; }
+.r3d-tourbar b { display: block; height: 100%; width: 0; background: oklch(0.8 0.11 235); }
+.r3d.touring .r3d-dock, .r3d.touring .r3d-lbl { visibility: hidden; }
+.r3d-toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 40; background: var(--ink); color: var(--cream); border-radius: 999px; padding: 10px 18px;
+  font: 600 14px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); max-width: calc(100vw - 24px); }
+.r3d-toast[hidden] { display: none; }
+.r3d-tourgo .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-size: 16px; }
+.r3d-ui .chip .ms, .r3d-ui .btn .ms { font-size: 19px; vertical-align: -4px; }
+.r3d-svars [hidden] { display: none; }
+.r3d-linkbox { width: 100%; margin-top: 4px; min-height: 40px; border: 0; border-radius: 12px; padding: 6px 10px; background: var(--soft); color: var(--ink); font: 500 13px Figtree, system-ui, sans-serif; }
+@media (max-width: 899px) { .r3d-tour { left: 12px; right: 12px; transform: none; width: auto; bottom: 92px; } }
 @media (prefers-reduced-motion: reduce) { .r3d *, .stk { transition: none !important; } }
 """
 
@@ -235,6 +256,32 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
 DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case (an idea)", ("fill", "frame"))]
 
 
+def tour():
+    """v28, from the optimisation plan: "a guided tour": the room's main views in turn, a caption each (numbers from geometry, so they
+    follow the next round). set: choices shown for that stop only (put back after it)."""
+    g = G
+    s = g.summary()
+    return [
+        dict(view="room", title="The whole room", text=f"From above the window, the near wall cut away: the media wall, the breast, the door, the stairs and the dining cabinet, under a {g.CEIL:g} ceiling."),
+        dict(view="wall", title="The media wall", text=f"Artisan oak in Card Room Green across the {g.ALC_W:g} cm alcove: the TV centred at {g.TV_CENTRE:.1f}, the turntable on the right, the consoles and the LP crates below."),
+        dict(view="pc", title="The PC side wall", text=f"One oak run sweeps round the corner to the PC shelf at {g.PC_SHELF_TOP:g}, its leads inside the wall and a warm strip underneath."),
+        dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
+        dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six"},
+             text=f"The table folds out of the cabinet to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g} for six; the six chairs live inside it, and it all folds away."),
+        dict(view="sofa", title="From the sofa", text=f"About {s['view_dist'] / 100:.2f} m from the screen: the 55-inch fills about {s['view_angle']:.0f}° of your view, right for films and games."),
+        dict(view="window", title="From the window", text="The whole wall in one look, over the sofa's back: your plants on the sill behind you."),
+        dict(view="plan", title="From above", text="Everything to scale from the plan's own measurements. Drag to look round when the tour ends."),
+    ]
+
+
+PAGES_URL = "https://emmachilds98-wq.github.io/DIY/"   # v28: "Copy link to this view" always gives a link anyone can open
+
+
+def svar_json():
+    """v28: each suggestion's versions for room3d.js (colours) and Your picks (names)."""
+    return json.dumps({k: [[v, n, c] for v, n, c in vs] for k, vs in ideas.SUGG_VARS.items()}, separators=(",", ":"))
+
+
 def controls(gallery=""):
     """v25: the Tools panels. Same data-* hooks as v24's drawers (room3d.js binds to them), new containers: pill rows, preset tiles,
     round paint swatches. gallery: the HD pictures (build_viewer.gallery3d), shown under Views."""
@@ -281,6 +328,13 @@ def controls(gallery=""):
               '<div class="seg" role="group" aria-label="Suggested furniture and decor">'
               + "".join(f'<button type="button" data-sugg="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(SUGG_SHORT[k])}</button>' for k, _t, size, *_ in ideas.SUGGEST)
               + '<button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>'
+              # v28: two or three versions of each, a row for every suggestion that's switched on
+              '<div class="grp r3d-svars" id="r3d-svars"><span class="label">Choose a version</span>'
+              '<p class="caption" id="r3d-svnone">Switch a suggestion on and its versions show here.</p>'
+              + "".join(f'<div class="r3d-decrow" data-svrow="{k}" hidden><span>{html.escape(SUGG_SHORT[k])}</span><div class="seg" role="group" aria-label="{html.escape(SUGG_SHORT[k])}: version">'
+                        + "".join(f'<button type="button" data-svar="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n, _c in ideas.SUGG_VARS[k]) + '</div></div>'
+                        for k, *_ in ideas.SUGGEST)
+              + '</div>'
               '<div class="grp"><span class="label">Something of your own</span><div class="seg"><button type="button" class="chip" id="r3d-addfrom">'
               '<span class="ms" aria-hidden="true">add</span> Add a piece of furniture</button></div>'
               '<span class="caption">Opens Edit room with its list: an armchair, a bookcase, a bench and more. Drag it where you like.</span></div>')
@@ -295,8 +349,12 @@ def controls(gallery=""):
                 + '<button type="button" data-paintcustom="#2c5643" aria-pressed="false"><i style="--c:#2c5643"></i>Deep green</button>'
                 '<label><i><input type="color" id="r3d-custom" value="#899081" aria-label="Any colour for the walls"></i>Any colour</label></div></div>')
     return {
-        "views": f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
+        "views": '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
+                 f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
+                 + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
                  + seg("labels", [("on", "Show"), ("off", "Hide")], "The numbered labels on the room")
+                 + '<div class="grp r3d-sharegrp"><span class="label">Share this view</span><div class="seg"><button type="button" class="chip" id="r3d-link"><span class="ms" aria-hidden="true">link</span> Copy link to this view</button></div>'
+                 '<span class="caption" id="r3d-linkst" aria-live="polite">The link opens the room on this view, with your table, lights, paint, decor and suggestions.</span></div>'
                  + '<div class="grp r3d-save"><button class="btn primary" type="button" id="r3d-save">Save as HD picture</button>'
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
@@ -318,7 +376,8 @@ def picks_json():
     """v22: what "Your picks" needs to name and cost what's switched on (ideas.IDEAS and ideas.SUGGEST)."""
     out = {"ideas": {k: [t, c[0], c[1]] for k, t, _s, c, *_ in ideas.IDEAS},
            "sugg": {k: [t, c[0], c[1]] for k, t, _s, c, *_ in ideas.SUGGEST},
-           "decor": {k: [lab, dict(opts)] for k, lab, opts in DECOR}}
+           "decor": {k: [lab, dict(opts)] for k, lab, opts in DECOR},
+           "svar": {k: {v: n for v, n, _c in vs} for k, vs in ideas.SUGG_VARS.items()}}   # v28
     return json.dumps(out, separators=(",", ":"))
 
 
@@ -371,6 +430,10 @@ def section(gallery=""):
     <div class="r3d-msg" id="r3d-msg">Loading the 3D room…</div>
     <p class="r3d-cap sr-only" id="r3d-cap"></p>
     <div class="r3d-stickers" id="r3d-stickers">{stickers}</div>
+    <div class="r3d-tour" id="r3d-tour" role="region" aria-label="Tour of the room" aria-live="polite" hidden><span class="r3d-tourn" id="r3d-tourn"></span><h3 id="r3d-tourh"></h3><p id="r3d-tourp"></p>
+      <div class="acts"><button type="button" data-tour="prev" aria-label="Back one stop"><span class="ms" aria-hidden="true">skip_previous</span></button><button type="button" data-tour="pause" aria-label="Pause"><span class="ms" aria-hidden="true">pause</span></button><button type="button" data-tour="next" aria-label="Next stop"><span class="ms" aria-hidden="true">skip_next</span></button><button type="button" class="end" data-tour="stop">End the tour</button></div>
+      <i class="r3d-tourbar"><b id="r3d-tourbar"></b></i></div>
+    <div class="r3d-toast" id="r3d-toast" role="status" hidden></div>
     <button type="button" class="r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the numbered labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button>
     <div class="r3d-pop" id="r3d-pop" role="dialog" aria-modal="false" aria-labelledby="r3d-pop-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
       <h3 id="r3d-pop-h"></h3><ul class="facts"></ul><div class="acts"><button type="button" class="go" data-popgo="plan">Open in the plan</button><button type="button" data-popgo="fly">Fly here</button></div></div>
@@ -394,6 +457,8 @@ def section(gallery=""):
 <script type="application/json" id="scene3d-data">{data}</script>
 <script type="application/json" id="scenes-data">{scenes_json()}</script>
 <script type="application/json" id="lightrules-data">{rules_json()}</script>
+<script type="application/json" id="svar-data">{svar_json()}</script>
+<script type="application/json" id="tour-data">{json.dumps(dict(stops=tour(), pages=PAGES_URL), separators=(",", ":"))}</script>
 <script type="application/json" id="hotspots-data">{json.dumps(hotspots(), separators=(",", ":"))}</script>
 <script type="module">{(HERE / "room3d.js").read_text()}</script>
 <script>{DRAWER_JS}</script>

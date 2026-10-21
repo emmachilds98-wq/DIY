@@ -26,6 +26,8 @@ a { color: var(--oak); }
 .brand .mark i { border-radius: 50%; }
 .brand b { display: block; font: 600 18px/1.1 var(--display); }
 .brand small { display: block; font: 600 12px/1.2 var(--body); color: var(--mut2); }
+/* v28, client: "make sure version number is visible somewhere even if its faint so i can tell updates are done when i load" */
+.brand .ver { display: inline; margin-left: 7px; font: 500 12px/1 var(--body); color: var(--mut2); letter-spacing: .02em; vertical-align: 2px; }
 /* the section rail (laptop) and the bottom bar (phone) */
 .rail { position: fixed; left: 16px; top: 50%; transform: translateY(-50%); z-index: 45; display: grid; gap: 6px; padding: 10px 8px; border-radius: 999px; background: var(--page); box-shadow: var(--shadow); }
 .rail button, .bbar button { position: relative; display: grid; justify-items: center; gap: 2px; border: 0; background: none; color: var(--ink); cursor: pointer; font: 600 11.5px var(--body); padding: 4px 2px; min-width: 60px; }

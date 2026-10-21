@@ -2,14 +2,22 @@
 
 python3 shot3d.py            -> the full set (HD PNGs in ../out, WebPs in art/ for the page, PNGs here for the PDF)
 python3 shot3d.py test       -> a quick 1280 x 720 contact set in the scratch folder given by $SHOT3D_DIR (or here)
+python3 shot3d.py force      -> every still again, even the ones that haven't changed
+
+v28, from the optimisation plan: "only re-render the stills that changed". Each still has a fingerprint (its options and size, and
+what the room is built from: room3d.js, scene3d.json, the lighting presets and the suggestions' versions), kept in
+shot3d_prints.json. A still whose fingerprint matches is skipped; if only the version in its file names moved on, last round's
+files are copied to the new names (from where they were, or from out/vNN/ once they've been moved there).
 """
-import base64, io, os, pathlib, sys
+import base64, hashlib, io, json, os, pathlib, shutil, sys
 from playwright.sync_api import sync_playwright
 import room3d_page
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
 ART = HERE / "art"
+from build_doc import VERSION   # v28: the same number as the plan
+PRINTS = HERE / "shot3d_prints.json"
 
 # (file stem, options, title for ../out)
 SHOTS = [
@@ -62,11 +70,74 @@ SHOTS = [
 ]
 
 
-def run(test=False, only=None):
+BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100}
+
+
+def room_print():
+    """What every still is built from."""
+    h = hashlib.sha256()
+    for part in ((HERE / "room3d.js").read_bytes(), (HERE / "scene3d.json").read_bytes(), room3d_page.scenes_json().encode(),
+                 room3d_page.rules_json().encode(), room3d_page.svar_json().encode()):
+        h.update(hashlib.sha256(part).digest())
+    return h.hexdigest()
+
+
+def shot_print(room, opts, w, h):
+    return hashlib.sha256(json.dumps([room, dict(BASE, **opts, quality="hd"), w, h], sort_keys=True).encode()).hexdigest()[:24]
+
+
+def targets(stem, title):
+    return [OUT / f"Media wall v{VERSION} - 3D - {title} (HD).png", ART / f"{stem}.webp", HERE / f"render_v{VERSION}_{stem}.png"]
+
+
+def _find(old):
+    """Last round's file: where it was, or moved into out/vNN/."""
+    old = pathlib.Path(old)
+    if old.exists():
+        return old
+    for d in sorted(OUT.glob("v*/"), reverse=True):
+        if (d / old.name).exists():
+            return d / old.name
+    return None
+
+
+def reuse(rec, stem, title):
+    """Copy last round's files to this round's names; False if any is missing."""
+    new = targets(stem, title)
+    olds = [_find(o) for o in rec.get("files", [])]
+    if len(olds) != 3 or not all(olds):
+        return False
+    for o, n in zip(olds, new):
+        if o.resolve() != n.resolve():
+            shutil.copy2(o, n)
+    return True
+
+
+def run(test=False, only=None, force=False):
     page_file = room3d_page.standalone()
     dest = pathlib.Path(os.environ.get("SHOT3D_DIR", HERE)) if test else HERE
     w, h = (1280, 720) if test else (2560, 1440)
     from PIL import Image
+    room = room_print()
+    prints = json.loads(PRINTS.read_text()) if PRINTS.exists() else {}
+    todo = []
+    for stem, opts, title in SHOTS:
+        if only and only not in stem:
+            continue
+        rec = prints.get(stem, {})
+        rec_files = [HERE.parent / f for f in rec.get("files", [])]
+        if not test and not force and not only and rec.get("print") == shot_print(room, opts, w, h) and reuse(dict(rec, files=rec_files), stem, title):
+            if rec_files != targets(stem, title):
+                prints[stem] = dict(rec, files=[str(x.relative_to(HERE.parent)) for x in targets(stem, title)])
+            print(stem, "unchanged")
+            continue
+        todo.append((stem, opts, title))
+    if not test:
+        PRINTS.write_text(json.dumps(prints, indent=1, sort_keys=True) + "\n")
+    print(f"{len(todo)} of {len(SHOTS)} stills to render")
+    if not todo:
+        return
     with sync_playwright() as p:
         args = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-webgl"]
         try:
@@ -83,18 +154,19 @@ def run(test=False, only=None):
         except Exception:
             print("3D room didn't start:", errs)
             raise
-        for stem, opts, title in SHOTS:
-            if only and only not in stem:
-                continue
-            pg.evaluate("o => window.R3D.set(o)", dict({"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {}, "sugg": {}, "seat": "off", "tod": "evening", "master": 100}, **opts, quality="hd"))
+        for stem, opts, title in todo:
+            pg.evaluate("o => window.R3D.set(o)", dict(BASE, **opts, quality="hd"))
             url = pg.evaluate(f"() => window.R3D.still({w}, {h})")
             im = Image.open(io.BytesIO(base64.b64decode(url.split(",", 1)[1]))).convert("RGB")
             if test:
                 im.save(dest / f"{stem}.png")
             else:
-                im.save(OUT / f"Media wall v27 - 3D - {title} (HD).png")
-                im.resize((1920, 1080), Image.LANCZOS).save(ART / f"{stem}.webp", quality=86)
-                im.resize((1600, 900), Image.LANCZOS).save(HERE / f"render_v27_{stem}.png")
+                t = targets(stem, title)
+                im.save(t[0])
+                im.resize((1920, 1080), Image.LANCZOS).save(t[1], quality=86)
+                im.resize((1600, 900), Image.LANCZOS).save(t[2])
+                prints[stem] = {"print": shot_print(room, opts, w, h), "files": [str(x.relative_to(HERE.parent)) for x in t]}
+                PRINTS.write_text(json.dumps(prints, indent=1, sort_keys=True) + "\n")   # after each one, so a stopped run keeps what it made
             print(stem, "ok")
         if errs:
             print("console:", errs[:8])
@@ -102,4 +174,4 @@ def run(test=False, only=None):
 
 
 if __name__ == "__main__":
-    run(test="test" in sys.argv, only=next((a for a in sys.argv[1:] if a != "test"), None))
+    run(test="test" in sys.argv, force="force" in sys.argv, only=next((a for a in sys.argv[1:] if a not in ("test", "force")), None))
