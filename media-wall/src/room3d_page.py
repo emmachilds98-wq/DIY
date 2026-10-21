@@ -267,7 +267,7 @@ def tour():
         dict(view="pc", title="The PC side wall", text=f"One oak run sweeps round the corner to the PC shelf at {g.PC_SHELF_TOP:g}, its leads inside the wall and a warm strip underneath."),
         dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
         dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six"},
-             text=f"The table folds out of the cabinet to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g} for six; the six chairs live inside it, and it all folds away."),
+             text=f"Door A slides over door B and the table folds down to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g} for six; the six chairs live behind door B, and it all packs away."),
         dict(view="sofa", title="From the sofa", text=f"About {s['view_dist'] / 100:.2f} m from the screen: the 55-inch fills about {s['view_angle']:.0f}° of your view, right for films and games."),
         dict(view="window", title="From the window", text="The whole wall in one look, over the sofa's back: your plants on the sill behind you."),
         dict(view="plan", title="From above", text="Everything to scale from the plan's own measurements. Drag to look round when the tour ends."),

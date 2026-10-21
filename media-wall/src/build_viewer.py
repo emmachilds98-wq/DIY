@@ -32,7 +32,11 @@ def _plain(s):
 
 
 # v25: rows whose words changed keep the id their old words made, so ticks and amounts saved against them still show
-TRACK_KEEP_ID = {"Set up the smart bulbs in their app": "tdd8f66e8a569"}
+TRACK_KEEP_ID = {"Set up the smart bulbs in their app": "tdd8f66e8a569",
+                 # v29: the dining cabinet's rows reworded for the sliding doors; ticks and paid amounts stay
+                 "Solid oak for the table: two halves": "t8bc7f1b954e5", "The dining cabinet: oak-faced ply": "ta99476328449",
+                 "Oak for the cabinet's hinge rail": "t660dd8fcee21", "The doors' sliding gear": "t551b3e289617",
+                 "Build the dining cabinet: the carcass": "taae3dc4761a1", "One solid oak worktop, 300 × 62": "te9a6cd470663"}
 
 
 def track_rows():
@@ -553,10 +557,10 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
          "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
          "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug",
-         "3d_c_folded": "The dining cabinet packed away: one oak cabinet under your shelf, the table standing up in its bay over the drawer, the linen flap over it, the six chairs behind the doors",
-         "3d_c_six": "The dining cabinet open for six: the table 180 long, three a side, bar 2 over it",
+         "3d_c_folded": "The dining cabinet packed away: two oak sliding doors under your shelf, the table and the six chairs behind them",
+         "3d_c_six": f"The dining cabinet open for six: door A slid over door B, the table {G.OPTC['len']:g} long, three a side, bar 2 over it",
          "3d_window_c_six": "From the window, the dining cabinet open for six, the coffee table where it is",
-         "3d_c_chairs": "The chair bay open: four folded chairs on the floor, two on the shelf, the seat pads in front",
+         "3d_c_chairs": "The chair bay open, door B slid behind door A: four folded chairs on the floor, two on the shelf, the seat pads on edge in front",
          "3d_c_plan": "Bird\u2019s eye, the dining cabinet open for six",
          "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
@@ -570,7 +574,7 @@ def ideas_panel():
     cards = []
     for k, title, size, cost, why, where, in3d in I.IDEAS:
         im = (f'<img data-art="{IDEA_SHOT[k]}" alt="{html.escape(CAP3D[IDEA_SHOT[k]])}" loading="lazy">' if in3d else "")
-        opts = json.dumps(dict({"site": "B", "view": IDEA_VIEW.get(k, "window")}, **IDEA_OPTS.get(k, {"ideas": {k: True}})))
+        opts = json.dumps(dict({"site": "C", "view": IDEA_VIEW.get(k, "window")}, **IDEA_OPTS.get(k, {"ideas": {k: True}})))
         b = f"<button type='button' class='btn' data-r3d='{opts}'>See it in the 3D room</button>" if in3d else ""
         cards.append(f'<article class="opt{"" if in3d else " noimg"}">{im}<div class="ob"><span class="label">{html.escape(size)} · about £{cost[0]}–{cost[1]}</span>'
                      f'<h3>{html.escape(title)}</h3><p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>{b}</div></article>')
@@ -587,7 +591,7 @@ def suggest_block():
     rows = "".join(
         f'<article class="opt noimg"><div class="ob"><span class="label">{html.escape(size)} · about £{c[0]}–{c[1]}</span><h3>{html.escape(t)}</h3>'
         f'<p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>'
-        f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'B', 'view': 'door', 'sugg': {k: True}})}'>See it in the 3D room</button></div></article>"
+        f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'C', 'view': 'door', 'sugg': {k: True}})}'>See it in the 3D room</button></div></article>"
         for k, t, size, c, why, where in I.SUGGEST)
     lo, hi = I.suggest_low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Suggested furniture and decor</h2><span class="caption">Each one on or off, in the 3D room: none are in the plan or the costs</span></div>'
@@ -596,7 +600,7 @@ def suggest_block():
             f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start; the floor pieces move in Edit room. '
             f'All {len(I.SUGGEST)} together would be about £{lo}–{hi}. Edit room\'s Add list also has a rattan armchair, an oak blanket ladder, an oak bench and an arc floor lamp (v21).</p>'
             f'<div class="opts">{rows}</div>'
-            f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'B', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
+            f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'C', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
 
 
 def decor_block():
@@ -605,10 +609,10 @@ def decor_block():
     rows = "".join(f'<li><b>{html.escape(lab)}:</b> {html.escape(", ".join(n for _, n in opts))}</li>' for _, lab, opts in RP.DECOR)
     figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
                    f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k in ("3d_case_mixed", "3d_case_singles", "3d_decor"))
-    b = ("<button type='button' class='btn' data-r3d='" + json.dumps({"site": "B", "view": "door", "decor": {"rug": "stripes", "cushions": "rust", "curtains": "linen"}})
+    b = ("<button type='button' class='btn' data-r3d='" + json.dumps({"site": "C", "view": "door", "decor": {"rug": "stripes", "cushions": "rust", "curtains": "linen"}})
          + "'>Try decor in the 3D room</button>")
     return (f'<div class="qhead"><h2 class="ptitle">Decor to try</h2><span class="caption">In the 3D room, under “Decor”: your choices are kept on this device</span></div>'
-            f'<ul>{rows}</ul><p class="caption">Picking what goes in the glass case turns the case on (it hangs with the table by the stairs). '
+            f'<ul>{rows}</ul><p class="caption">Picking what goes in the glass case turns the case on (on the chimney breast, which the dining cabinet leaves free). '
             f'In Edit room, “Add” now has a floor vase with grasses, a knitted pouffe, a seagrass basket for throws, an oak floor mirror and a lantern, as well as the armchair, bookcase and the rest.</p>'
             f'<div class="gallery">{figs}</div>{b}')
 
@@ -623,7 +627,7 @@ def chairs_card():
     op = json.dumps({'site': 'B', 'dining': 'folded', 'chairs': 'open', 'view': 'chairs', 'scene': 'bright'})
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_chairs_shut" alt="{html.escape(CAP3D['3d_chairs_shut'])}" loading="lazy">
-    <div class="ob"><span class="label">1 · the plan (v20) · about £120–240</span><h3>A chair cupboard, built in beside the table</h3>
+    <div class="ob"><span class="label">With the flip-top (the alternative) · about £120–240</span><h3>A chair cupboard, built in beside the table</h3>
     <ul><li>Oak, {w:.0f} wide × {CB['d']:.0f} deep × {CB['h']:.0f} tall, in the gap at the table's window end, flush with the pipe boxing and under your shelf.</li>
     <li>Four folded chairs inside: two on its floor, two on its shelf, one behind the other. Two doors on push latches.</li>
     <li>The table and its chairs pack away together: the wall reads as one built-in piece.</li>
@@ -652,13 +656,14 @@ def options_card():
     b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "bright"}, "See B in 3D")
     c = btn({"site": "C", "dining": "six", "view": "dining", "scene": "bright"}, "See it open in 3D")
     c2 = btn({"site": "C", "dining": "folded", "chairs": "open", "view": "chairs", "scene": "bright"}, "The chairs inside")
+    c3 = btn({"site": "C", "dining": "folded", "chairs": "cupboard", "view": "dining", "scene": "bright"}, "See it shut")
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_c_six" alt="{html.escape(CAP3D['3d_c_six'])}" loading="lazy">
     <div class="ob"><span class="label">The plan · six in comfort</span><h3>The dining cabinet</h3>
-    <ul><li>One oak cabinet under the shelf: the table stands up in one bay, all {g.OPTC['chairs']} chairs fold into the other.</li>
-    <li>Opens to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}: three a side, the coffee table stays put.</li>
-    <li>A drawer for the mats under the table, a linen flap over it.</li>
-    <li class="minus">Push the ottoman to the sofa while it's out.</li></ul>{c} {c2}</div></article>
+    <ul><li>One oak cabinet under the shelf, two sliding doors: shut, nothing of the table or the {g.OPTC['chairs']} chairs on show.</li>
+    <li>Slide door A over door B and the table comes down to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}: three a side, the coffee table stays put.</li>
+    <li>Slide door B behind door A for the chairs; a drawer and a linen shelf inside.</li>
+    <li class="minus">Push the ottoman to the sofa while it's out.</li></ul>{c} {c2} {c3}</div></article>
   <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
     <div class="ob"><span class="label">B · the flip-top · the alternative</span><h3>A flip-top under your shelf</h3>
     <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast for the “now playing” ledge.</li>
@@ -783,7 +788,7 @@ CHAPTERS = [("c-room", "The room", "home", 50, "Sizes, the door, the stairs, the
             ("records", "Records & turntable", "album", 345, "LPs, crates, the vinyl stand"),
             ("side", "The side wall", "desktop_windows", 235, "One oak run out to the PC"),
             ("joinery", "Oak joinery", "carpenter", 70, "Joints, the cutting list"),
-            ("dining", "The dining wall", "table_restaurant", 50, "The flip-top and the chairs"),
+            ("dining", "The dining wall", "table_restaurant", 50, "The dining cabinet, six chairs inside"),
             ("paint", "Paint & light", "palette", 165, "Card Room Green, three presets"),
             ("network", "Network & power", "router", 25, "Decos, switches, the electrics"),
             ("views", "Drawn views", "draw", 125, "Every view in four greens"),
@@ -814,7 +819,7 @@ def chapter_facts(rows, fc, nfit):
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
         "dining": chips(f"The dining cabinet: <b>{g.OPTC['z'][0] - g.OPTC['z'][1]:g} × {g.OPTC['d']:g} × {g.OPTC['h']:g}</b> under your shelf",
                         f"Table <b>{g.OPTC['len']:g} × {g.OPTC['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> chairs inside it, the seat pads too",
-                        "A drawer under the table, a linen flap over it", "Step 11 builds it, in sixteen stages", "Dining wall " + _ph(rows, "6 Dining wall"),
+                        "Two oak sliding doors; a drawer and a linen shelf inside", f"Step 11 builds it, in {len(__import__('instructions').full()[11]['parts_full'])} stages", "Dining wall " + _ph(rows, "6 Dining wall"),
                         "The flip-top (by the stairs or on the breast) is the alternative"),   # v27
         "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])
                  + chips("Smart E14 bulbs in both bars, no dimmers", "Paint " + _ph(rows, "3 Paint"), "Lighting " + _ph(rows, "7 Lighting")),

@@ -547,6 +547,12 @@ SOURCES["foldtable"] = ("Clever (Italy): Slim fold-down table in a wall unit: fo
 SOURCES["hinge170"] = ("Blum CLIP top 170° full-overlay hinge, self-closing (71T6540; cabinetparts.com): doors open past flat, so they lie back "
                        "against the cabinet's front while you take the chairs out")
 ORDER.extend(["pianohinge", "legbracket", "foldtable", "hinge170"])
+# v29: the two sliding doors across the cabinet's front
+SOURCES["slido"] = ("Häfele UK catalogue 10.054, Slido Classic 40 IF C (files.hafele.co.uk/catalogfiles/www/16a10-54.pdf; NBS Source): two bypassing "
+                    "wooden doors inset in the carcass, top hung; doors 16–19 mm thick, up to 40 kg, 2200 tall and 1250 wide; fitting set for two doors "
+                    "with soft close 402.33.027; double top track for a 16 mm groove 402.33.652 (2.5 m, needs a top panel of 19 mm or more); bottom "
+                    "guide track 402.30.802 in a 6 mm groove. The track's section isn't published: the plan allows 5 cm of depth for it and the two doors")
+ORDER.append("slido")
 
 
 def optc_seats():
@@ -572,31 +578,42 @@ def optc_zone():
     under = g.SHELF_B["top"] - g.SHELF_B["t"]
     inside_h = C["h"] - C["t"]
     bay_c = C["bay_c"][0] - C["bay_c"][1]
-    in_d = C["d"] - C["door"] - C["back"]
+    in_d = C["in_d"]
+    oc, ot = C["open_c"][0] - C["open_c"][1], C["open_t"][0] - C["open_t"][1]
+    pb = g.PLANT_B
     pl = g.PLANT_LAYOUTS["corner"]["plants"]
     plant_face = pl[1] + g.PLANT_STAND["d"] / 2
     kg_half = C["top"][0] * C["top"][1] * C["top"][2] * 0.72 / 1000
     lo_top, up0 = C["plinth"] + ch, C["shelf_y"] + C["t"]
     n_floor = C["chairs"] - C["shelf_chairs"]
-    return ("The dining cabinet (the plan since v27)", f"one oak cabinet {r1(C['z'][0] - C['z'][1])} × {r1(C['d'])} × {r1(C['h'])} under your shelf; "
+    return ("The dining cabinet (the plan)", f"one oak cabinet {r1(C['z'][0] - C['z'][1])} × {r1(C['d'])} × {r1(C['h'])} under your shelf, two sliding doors; "
             f"the table {r1(C['len'])} × {r1(C['top'][0])} open, six chairs inside", [
         ("The cabinet under your shelf", f"{r1(C['h'])} tall", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - C['h'])}: the shelf stays as it is", PASS),
         ("Its length", f"z {r1(C['z'][0])} to {r1(C['z'][1])}", ref("photo20", "room"), "the shelf's length; the stair's foot before it stays clear",
          f"{r1(C['z'][1] - g.PIPE_BOX['z'][1])} short of the pipe boxing, {r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than it", PASS),
+        ("The two sliding doors", f"oak-faced ply {r1(C['door_w'])} × {r1(C['door_h'])} × {r1(C['door'])}, about {C['door_kg']:.0f} kg each", ref("slido"),
+         "Slido Classic 40 IF C: doors 16–19 thick, up to 40 kg, 125 wide, 220 tall", "well inside every limit; soft close at both ends", PASS),
+        ("The doors' depth", f"two 18 mm doors on a double track", ref("slido"), f"{r1(C['slide'])} allowed in front of the inside",
+         "the track's section isn't published: hold the track against the top panel when it arrives, before you fit the hinge rail", CHECK),
+        ("The top track's panel", f"a 16 mm groove in the top's underside", ref("slido"), "the track wants a top 19 mm or more", f"the top is {r1(C['t_top'] * 10)} mm ply", PASS),
+        ("The table bay, door A slid away", f"an opening {r1(ot)} wide", ref("slido"), f"the table {r1(C['top'][0])} wide", f"{r1(ot - C['top'][0])} spare: it swings down clear of both doors", PASS),
         ("The table standing up in its bay", f"two halves {r1(C['top'][1])} long, hinged at {r1(C['pivot'][1])}", ref("foldtable", "pianohinge"), f"{r1(inside_h)} inside the bay",
-         f"its top edge at {r1(C['folded_top'])}: {r1(inside_h - C['folded_top'])} over it for the linen flap's space", PASS),
-        ("The linen flap over the folded table", f"an opening {r1(C['flap'][1] - C['flap'][0])} tall, {r1(C['bay_t'][0] - C['bay_t'][1])} wide", ref("hinge170"),
-         f"{r1(in_d)} deep inside", "the cloth, napkins and candles; a lift-up flap on two stays, flush with the table's underside", PASS),
-        ("Folded, how deep", f"two aprons {r1(C['apron'])}, two tops {r1(C['top'][2])}", ref("legbracket"), f"{r1(C['d'] - C['back'])} inside the carcass",
-         f"{r1(C['stack'])} deep folded: {r1(C['d'] - C['back'] - C['stack'])} spare; the room sees the oak underside, flush with the doors", PASS),
+         f"its top edge at {r1(C['folded_top'])}: {r1(C['flap'][1] - C['flap'][0])} over it for the linen shelf", PASS),
+        ("The linen shelf over the folded table", f"{r1(C['flap'][1] - C['flap'][0])} tall, {r1(C['bay_t'][0] - C['bay_t'][1])} wide", ref("slido"),
+         f"{r1(in_d)} deep inside", "the cloth, napkins, runner and candles, behind door A", PASS),
+        ("Folded, how deep", f"two aprons {r1(C['apron'])}, two tops {r1(C['top'][2])}", ref("legbracket"), f"{r1(in_d)} inside, behind the doors",
+         f"{r1(C['stack'])} deep folded: {r1(in_d - C['stack'])} spare; nothing of it shows with the doors shut", PASS),
         ("Lowering it and flipping the half", f"each half about {kg_half:.0f} kg", ref("pianohinge", "fliphinge"), f"a {r1(C['top'][0])} piano hinge at its foot; three flip-top hinges at the joint",
          f"it swings down like a drop-front: about {kg_half:.0f} kg, two hands; the legs drop and lock as it comes down", PASS),
         ("The legs", f"oak {r1(C['leg'][0])} × {r1(C['leg'][1])}, {r1(C['leg_h'])} long, a pair at each half's end", ref("legbracket"), "four self-locking folding brackets",
          f"each pair folds flat inside its half's {r1(C['apron'])} apron; {r1(C['leg_h'])} of knee room under it", PASS),
         ("Six chairs in the chair bay: across", f"two side by side, 2 × {r1(cw)}", ref("frosvi"), f"the bay {r1(bay_c)} wide inside", f"{r1(bay_c - 2 * cw)} spare", PASS),
         ("Six chairs: deep and tall", f"two deep ({r1(2 * cdep)}), each {r1(ch)} tall", ref("frosvi"), f"{r1(in_d)} deep inside; the shelf at {r1(C['shelf_y'])}",
-         f"{r1(in_d - 2 * cdep)} spare deep; {n_floor} on the floor ({r1(C['plinth'])}–{r1(lo_top)}), {C['shelf_chairs']} on the shelf from {r1(up0)}, the shelf's front half free for the seat pads and the runner", PASS),
-        ("The chair bay's doors", "two oak doors, opening past flat", ref("hinge170"), "they lie back against the cabinet", "the bay opens wide to lift the chairs out", PASS),
+         f"{r1(in_d - 2 * cdep)} spare deep; {n_floor} on the floor ({r1(C['plinth'])}–{r1(lo_top)}), {C['shelf_chairs']} on the shelf from {r1(up0)}, the six seat pads on edge in front of them ({r1(in_d - cdep)} free there for 9)", TIGHT),
+        ("The chair bay, door B slid behind A", f"an opening {r1(oc)} wide", ref("slido", "frosvi"), f"two folded chairs {r1(2 * cw)} across",
+         f"{r1(oc - 2 * cw - 2)} spare: the chairs come straight out", PASS),
+        ("Your trailing plant on the shelf", f"strands {r1(pb['trail'][0])}–{r1(pb['trail'][1])} long at the window end", ref("photo20"), f"they hang by the doors' face at x {r1(C['front'])}",
+         "the doors slide behind them rather than swinging into them; tuck the strands to one side, or move the pot along the shelf", CHECK),
         ("Stair side: three chairs", f"{st['stair'][1]:.1f} of edge each", ref("dining", "frosvi"), f"{r1(st['stair'][2])} from the far end to the cabinet",
          "55 is the squeeze, 60 the aim: three sit in comfort", PASS),
         ("Stair side: the stair's foot and the door", f"chair backs at z {r1(s_back)}", ref("room", "photo20"), f"the stair box's face at {r1(g.STAIRS_WALL_Z[0])}; the door's edge reaches {r1(arc)}",
@@ -628,7 +645,7 @@ def max_seats_zone():
         ("A fourth chair a side at the cabinet", "eight round it", ref("dining", "sofa", "room"), f"{r1(st['stair'][2])} and {r1(st['window'][2])} of edge",
          f"{st['stair'][2] / 4:.1f} each: under the 55 squeeze; v26's longer table did it, with the coffee table moved and all eight chairs in a bigger bay", NO),
         ("A longer table in the cabinet", f"halves over {r1(C['h'] - C['t'] - C['pivot'][1])}", ref("photo20"), "they must stand up under your shelf",
-         f"{r1(C['h'] - C['t'] - C['pivot'][1])} is the most that folds away; {r1(C['top'][1])} leaves the linen flap's space and keeps each half to about {C['top'][0] * C['top'][1] * C['top'][2] * 0.72 / 1000:.0f} kg", PASS),
+         f"{r1(C['h'] - C['t'] - C['pivot'][1])} is the most that folds away; {r1(C['top'][1])} leaves the linen shelf's space and keeps each half to about {C['top'][0] * C['top'][1] * C['top'][2] * 0.72 / 1000:.0f} kg", PASS),
     ])
 
 _zones_v25 = zones

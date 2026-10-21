@@ -119,7 +119,7 @@ SUGGEST += [
     ("candles", "LED pillar candles on your black shelf", "three, 7.5 across × 10, 12.5 and 15 tall, warm flicker, on a timer", (15, 30),
      "A warm glow by the table in the evening without a flame near the shelf's things.", "On your black shelf by the stairs, at the window end."),
     ("runner", "A linen runner and a bud vase for the table", "a runner about 33 × 180, a 20 cm vase", (20, 40),
-     "Dresses the table when it's open; folds into the drawer (option C) or the chair cupboard when it isn't.", "Down the middle of the open table, whichever option."),
+     "Dresses the table when it's open; folds onto the cabinet's linen shelf when it isn't.", "Down the middle of the open table, whichever option."),
     ("floorcush", "Two floor cushions by the coffee table", "60 × 60 × 12 each, mustard and rust", (40, 80),
      "Extra seats for a film night, and two more colours from the rug.", "Stacked on the rug at the TV end of the coffee table; they move in Edit room."),
     ("lantern", "A rattan floor lantern with an LED candle", "about 30 across × 55 tall", (25, 50),

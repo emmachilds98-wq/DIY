@@ -24,7 +24,7 @@ $$(".toc").forEach(nav => {
 });
 /* ---------- the render viewer */
 const NAMES = { card_room: "Farrow & Ball Card Room Green No. 79, the chosen colour", treron: "Farrow & Ball Treron No. 292", sage: "Little Greene Sage Green No. 80", deep: "the deep forest green from earlier versions" };
-const VIEWS = { join: "Artisan oak media wall", four: "The flip-top open and set for four", six: "The flip-top open and set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" };
+const VIEWS = { join: "Artisan oak media wall", four: "The alternative: the flip-top open and set for four", six: "The alternative: the flip-top open and set for six, with both spot bars", side: "The PC side wall, seen from the room", drawers: "Every drawer out" };
 const view = Object.assign({ style: "join", paint: "card_room", key: false, dims: false }, store.get("mw13-view", {}));
 const shot = $("#shot"), cap = $("#cap"), keyBtn = $("#k-key"), dims = $("#dims"), dimsBtn = $("#k-dims");
 function draw() {
