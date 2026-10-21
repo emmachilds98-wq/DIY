@@ -292,3 +292,12 @@ document.addEventListener("change", e => {
     cheer(left ? `Step ${step.dataset.s} done! ${left} to go` : "Every step done!", t); return; }
   if (t.closest("#tracker")) cheer("Ticked off!", t);
 });
+
+/* v32: the cost overview: copy it as a shopping list, open every piece */
+document.addEventListener("click", e => {
+  const b = e.target.closest("#co-copy, #co-all"); if (!b) return;
+  if (b.id === "co-all") { const all = $$(".cpiece"), open = all.some(d => !d.open); all.forEach(d => d.open = open); b.textContent = open ? "Close them all" : "Open them all"; return; }
+  const t = $("#co-text").value, st = $("#co-st"), done = () => { st.textContent = "Copied: paste it into a note or a message."; };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, () => { prompt("Copy the list:", t); });
+  else prompt("Copy the list:", t);
+});

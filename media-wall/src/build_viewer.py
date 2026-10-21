@@ -574,44 +574,59 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_s_six": "The sliding cabinet (the alternative) open for six: door A slid over door B",
          "3d_s_chairs": "The sliding cabinet (the alternative): the chair bay open, door B slid behind door A, six chairs inside",
          "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
-IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
-IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
-IDEA_OPTS = {"cushions": {"decor": {"cushions": "rust"}}}   # v20: the cushions are a Decor choice, not an idea toggle
+import item_shots as IS
+CAP3D.update({stem: {"idea": "Idea (not in the plan): ", "sugg": "Suggested: ", "add": "In Edit room's Add list: "}[kd] + t
+              for stem, kd, _k, t, _o in IS.items()})   # v32: a full render of every idea, suggestion and piece to add
+
+
+def item_card(stem, kind, k, title, size, cost, why, where):
+    """v32, client: "add function to add the new suggested furniture and decor in the room to see how it might look ... full renders":
+    a card with its own HD still (tap for full size) and a button that switches it on in the room and flies to it."""
+    o = IS.with_aim(stem, {"idea": IS.idea_opts, "sugg": IS.sugg_opts, "add": IS.add_opts}[kind](k))
+    if kind == "add":   # added beside what you've already added, not instead of it
+        a = o["added"][0]; o = {key: v for key, v in o.items() if key not in ("added", "layout")}
+        o["addpiece"] = dict(type=k, x=a["x"], z=a["z"], **({"rot": a["rot"]} if "rot" in a else {}))
+    o["merge"] = True
+    lab = "Add it to my room" if kind == "add" else "Show it in my room"
+    meta = " · ".join(x for x in (html.escape(size), f"about £{cost[0]}–{cost[1]}" if cost else "") if x)
+    return (f'<article class="opt"><button type="button" class="g3d" data-full="{stem}"><img data-art="{stem}" alt="{html.escape(CAP3D[stem])}" loading="lazy"></button>'
+            f'<div class="ob"><span class="label">{meta}</span><h3>{html.escape(title)}</h3>'
+            + (f'<p>{html.escape(why)}</p>' if why else "") + (f'<p class="caption">{html.escape(where)}</p>' if where else "")
+            + f"<button type='button' class='btn' data-r3d='{json.dumps(o)}'><span class='ms' aria-hidden='true'>view_in_ar</span> {lab}</button></div></article>")
 
 
 def ideas_panel():
-    """v17: the ideas for later (ideas.py), a card each, with a way to see the first three in the 3D room."""
+    """v17: the ideas for later (ideas.py), a card each. v32: every one has its own full render and is in the 3D room."""
     import ideas as I
-    cards = []
-    for k, title, size, cost, why, where, in3d in I.IDEAS:
-        im = (f'<img data-art="{IDEA_SHOT[k]}" alt="{html.escape(CAP3D[IDEA_SHOT[k]])}" loading="lazy">' if in3d else "")
-        opts = json.dumps(dict({"site": "C", "view": IDEA_VIEW.get(k, "window")}, **IDEA_OPTS.get(k, {"ideas": {k: True}})))
-        b = f"<button type='button' class='btn' data-r3d='{opts}'>See it in the 3D room</button>" if in3d else ""
-        cards.append(f'<article class="opt{"" if in3d else " noimg"}">{im}<div class="ob"><span class="label">{html.escape(size)} · about £{cost[0]}–{cost[1]}</span>'
-                     f'<h3>{html.escape(title)}</h3><p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>{b}</div></article>')
+    cards = [item_card(f"3d_id_{k}", "idea", k, title, size, cost, why, where) for k, title, size, cost, why, where, _in3d in I.IDEAS]
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
-            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. The first three are in the 3D room, under “Ideas (not in the plan)”, all off until you turn them on; the cushions are under “Decor”. All of them together would be about £{lo}–{hi}.</p>'
-            f'<div class="opts">{"".join(cards)}</div>' + suggest_block() + decor_block())
+            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. Every one is in the 3D room (Tools → Extras, “Ideas”), all off until you turn them on; '
+            f'“Show it in my room” turns it on and takes you to it. All of them together would be about £{lo}–{hi}.</p>'
+            f'<div class="opts">{"".join(cards)}</div>' + suggest_block() + add_block() + decor_block())
 
 
 def suggest_block():
     """v21, client: "i also want expansion of the suggested furniture and decor making sure i can choose to have it or not"."""
     import ideas as I
     allon = {k: True for k, *_ in I.SUGGEST}
-    rows = "".join(
-        f'<article class="opt noimg"><div class="ob"><span class="label">{html.escape(size)} · about £{c[0]}–{c[1]}</span><h3>{html.escape(t)}</h3>'
-        f'<p>{html.escape(why)}</p><p class="caption">{html.escape(where)}</p>'
-        f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'C', 'view': 'door', 'sugg': {k: True}})}'>See it in the 3D room</button></div></article>"
-        for k, t, size, c, why, where in I.SUGGEST)
+    rows = "".join(item_card(f"3d_sg_{k}", "sugg", k, t, size, c, why, where) for k, t, size, c, why, where in I.SUGGEST)
     lo, hi = I.suggest_low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Suggested furniture and decor</h2><span class="caption">Each one on or off, in the 3D room: none are in the plan or the costs</span></div>'
             f'<figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
             f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure>'
-            f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start; the floor pieces move in Edit room. '
-            f'All {len(I.SUGGEST)} together would be about £{lo}–{hi}. Edit room\'s Add list also has a rattan armchair, an oak blanket ladder, an oak bench and an arc floor lamp (v21).</p>'
+            f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start, and two or three versions; the floor pieces move in Edit room. '
+            f'All {len(I.SUGGEST)} together would be about £{lo}–{hi}.</p>'
             f'<div class="opts">{rows}</div>'
             f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'C', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
+
+
+def add_block():
+    """v32: Edit room's Add list, each piece with its own render; the button adds one to your room (drag it where you like)."""
+    rows = "".join(item_card(f"3d_add_{k}", "add", k, lab, "", None, "", "") for k, lab in IS.ADD)
+    return (f'<div class="qhead"><h2 class="ptitle">More to add, in Edit room</h2><span class="caption">Stand-ins at real-world sizes, each its own colour</span></div>'
+            f'<p class="caption">“Add it to my room” puts one in the 3D room, on the floor the table opens over (or against the stairs wall); then drag it, turn it or recolour it in Edit room.</p>'
+            f'<div class="opts">{rows}</div>')
 
 
 def decor_block():
@@ -626,6 +641,23 @@ def decor_block():
             f'<ul>{rows}</ul><p class="caption">Picking what goes in the glass case turns the case on (on the chimney breast, which the dining cabinet leaves free). '
             f'In Edit room, “Add” now has a floor vase with grasses, a knitted pouffe, a seagrass basket for throws, an oak floor mirror and a lantern, as well as the armchair, bookcase and the rest.</p>'
             f'<div class="gallery">{figs}</div>{b}')
+
+
+def cost_overview():
+    """v32, client: "a cost overview that shows each piece and list breakdown of shopping items ... clear buy list and estimated cost
+    without incorporating large explanations": each piece, its things to buy (quantity × short name) and their estimates."""
+    import costs
+    ov = costs.overview(TRACK)
+    tl, th = sum(r[1] for r in ov), sum(r[2] for r in ov)
+    cards = "".join(
+        f'<details class="cpiece"><summary><span class="cpn">{html.escape(p)}</span><span class="cpc">£{money(lo, hi)}</span><span class="cpi">{len(items)} to buy</span></summary>'
+        f'<table class="ctab"><tbody>' + "".join(f'<tr><td class="q">{html.escape(costs.qty(q))}</td><td>{html.escape(n)}</td><td class="m">£{money(a, b)}</td></tr>' for q, n, a, b in items)
+        + '</tbody></table></details>' for p, lo, hi, items in ov)
+    return (f'<div class="qhead"><h3 class="ptitle">Cost overview</h3><span class="caption">Each piece, what to buy for it, and about what it costs: £{money(tl, th)} in all</span></div>'
+            f'<div class="cpieces">{cards}</div>'
+            f'<p class="cfoot"><button type="button" class="btn" id="co-copy"><span class="ms" aria-hidden="true">content_copy</span> Copy the shopping list</button>'
+            f'<button type="button" class="btn" id="co-all">Open them all</button><span class="caption" id="co-st" aria-live="polite"></span></p>'
+            f'<textarea id="co-text" hidden>{html.escape(costs.text(TRACK, money))}</textarea>')
 
 
 def chairs_card():
@@ -697,7 +729,7 @@ def options_card():
 
 def gallery3d():
     figs = "".join(f'<figure><button type="button" class="g3d" data-full="{k}"><img data-art="{k}" alt="{html.escape(CAP3D[k])}" loading="lazy"></button>'
-                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor", "3d_suggest", "3d_seat")))
+                   f'<figcaption>{html.escape(CAP3D[k])}</figcaption></figure>' for k, *_ in SHOTS3D if not k.startswith(("3d_ideas_", "3d_case_", "3d_decor", "3d_suggest", "3d_seat", "3d_id_", "3d_sg_", "3d_add_")))
     return f'<div class="gallery">{figs}</div>'
 
 TABNAME = dict(TABS)
@@ -939,9 +971,13 @@ def _page(site=False):
                 f'<div class="chhead"><i class="ms" aria-hidden="true">{ic}</i><h2>{html.escape(t)}</h2></div>{facts[k]}{inner}</section>')
     more = lambda body, lab="Read the full chapter": f'<details class="readmore"><summary>{lab} <span class="ms" aria-hidden="true">expand_more</span></summary>{body}</details>'
     nav = [("plan", "Plan", "map", 300), ("build", "Build", "construction", 50), ("buy", "Buy", "shopping_bag", 165), ("ideas", "Ideas", "lightbulb", 95)]   # v30: no Ask sheet (every question answered or dropped)
-    rail = (f'<nav class="rail" aria-label="Sections"><button type="button" id="tb-room" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
-            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
-    bbar = (f'<nav class="bbar" aria-label="Sections"><button type="button" class="toolsb" data-tools-toggle aria-expanded="false" aria-controls="r3d-panel"><i class="ms" aria-hidden="true">tune</i>Tools</button>'
+    # v32, client: "make tools always appear in 3D view and the other buttons on the left to be the expandable menu as these are the in
+    # depth plans used less": one Menu button opens the Room, Plan, Build, Buy and Ideas buttons (open by itself while a sheet is up)
+    rail = (f'<nav class="rail" aria-label="Sections"><button type="button" class="rail-tog" id="rail-tog" aria-expanded="false" aria-controls="rail-list" style="--h:280">'
+            f'<i class="ms" aria-hidden="true">menu</i><span>Menu</span></button><div class="rail-list" id="rail-list">'
+            f'<button type="button" id="tb-room" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
+            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</div></nav>')
+    bbar = (f'<nav class="bbar" aria-label="Sections"><button type="button" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
             + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
     def sheet(k, title, ic, h, body):
         return (f'<div class="sheet" id="sh-{k}" role="dialog" aria-modal="true" aria-labelledby="sh-{k}-h" aria-hidden="true" style="--h:{h}">'
@@ -1059,6 +1095,7 @@ def _page(site=False):
       <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
       <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
     </div>
+    {cost_overview()}
     <div class="qhead"><h3 class="ptitle">The buy list, in build order</h3>
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-filter="all" aria-pressed="true">Everything</button>

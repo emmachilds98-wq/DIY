@@ -60,16 +60,17 @@ CSS = """
 .r3d-act .acts button[aria-pressed=true] { background: var(--ink); color: var(--cream); }
 .r3d-act.above::before { top: auto; bottom: -7px; }
 .r3d.editing .r3d-act { display: none; }
-/* the Tools pill, its bubbles and its panel */
-.r3d-dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; z-index: 30; }
+/* the tools and their panel. v32, client: "make tools always appear in 3D view": the six buttons are always on the room, in a pill;
+   tapping one opens its panel, tapping it again closes it */
+.r3d-dock { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; z-index: 30;
+  padding: 6px 12px 4px; border-radius: 999px; background: color-mix(in oklab, var(--cream) 92%, transparent); box-shadow: var(--shade); }
 .r3d-toolsbtn { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px 0 16px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink);
   font: 600 17px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); cursor: pointer; transition: transform .3s var(--spring); }
 .r3d-toolsbtn:hover { transform: scale(1.05); }
 .r3d-bubbles { display: flex; gap: 8px; }
-.r3d.tools-open .r3d-bubbles { display: flex; }
-.r3d:not(.tools-open) .r3d-bubbles { display: none; }
-.r3d-bub { display: grid; justify-items: center; gap: 2px; width: 58px; padding: 0; border: 0; background: none; color: #fff; font: 600 11.5px Figtree, system-ui, sans-serif; cursor: pointer; text-shadow: 0 1px 3px #000; }
-.r3d-bub i { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: oklch(0.92 0.06 var(--h)); color: var(--ink); box-shadow: var(--shade); transition: transform .3s var(--spring), background .2s; font-style: normal; text-shadow: none; }
+.r3d-toolsbtn { display: none; }
+.r3d-bub { display: grid; justify-items: center; gap: 2px; width: 58px; padding: 0; border: 0; background: none; color: var(--ink); font: 600 11.5px Figtree, system-ui, sans-serif; cursor: pointer; }
+.r3d-bub i { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: oklch(0.92 0.06 var(--h)); color: var(--ink); transition: transform .3s var(--spring), background .2s; font-style: normal; }
 .r3d-bub:hover i { transform: translateY(-3px) scale(1.06); }
 .r3d-bub[aria-selected=true] i, .r3d-bub[aria-pressed=true] i { background: oklch(0.8 0.11 var(--h)); }
 .r3d-panel { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); width: min(430px, calc(100vw - 24px)); max-height: min(560px, calc(100dvh - 140px));
@@ -167,23 +168,23 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-size { font-size: 12.5px; color: var(--mut); font-variant-numeric: tabular-nums; }
 .r3d.editing canvas { cursor: pointer; }
 @media (min-width: 900px) {
-  .r3d-panel { left: auto; right: 16px; top: 16px; bottom: 96px; transform: none; width: min(420px, 38vw); max-height: none; }
+  .r3d-panel { left: auto; right: 16px; top: 16px; bottom: 104px; transform: none; width: min(420px, 38vw); max-height: none; }
 }
 @media (max-width: 899px) {
-  .r3d-dock { left: 12px; right: 12px; transform: none; bottom: 88px; justify-content: center; }
-  .r3d-dock .r3d-toolsbtn { display: none; }
-  .r3d-bubbles { gap: 4px; }
-  .r3d-bub { width: 54px; }
-  .r3d-panel { left: 12px; right: 12px; transform: none; width: auto; bottom: 160px; max-height: calc(50dvh - 30px); border-radius: 26px; }
+  .r3d-dock { left: 8px; right: 8px; transform: none; bottom: max(8px, env(safe-area-inset-bottom)); justify-content: center; padding: 6px 4px 4px; border-radius: 28px; }
+  .r3d-bubbles { gap: 2px; width: 100%; justify-content: space-between; }
+  .r3d-bub { width: auto; flex: 1; min-width: 0; }
+  .r3d-bub i { width: 42px; height: 42px; }
+  .r3d-panel { left: 12px; right: 12px; transform: none; width: auto; bottom: calc(max(8px, env(safe-area-inset-bottom)) + 78px); max-height: calc(50dvh - 20px); border-radius: 26px; }
   .r3d-edit { top: 74px; }
   .r3d-hint { display: none; }
   .r3d-addlist, .r3d-sel { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; justify-content: flex-start; } .r3d-addlist > *, .r3d-sel > * { flex: none; }
-  .r3d-pop { left: 12px !important; right: 12px; top: auto !important; bottom: 92px; width: auto; }
+  .r3d-pop { left: 12px !important; right: 12px; top: auto !important; bottom: calc(max(8px, env(safe-area-inset-bottom)) + 82px); width: auto; }
   .r3d-pop::before { display: none; }
   body.sheet-open .r3d-stickers, body.tools-open .r3d-stickers { display: none; }
 }
 /* v28: the tour's card, the link's toast, the versions */
-.r3d-tour { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); width: min(520px, calc(100vw - 24px)); z-index: 32; background: var(--cream); color: var(--ink);
+.r3d-tour { position: fixed; left: 50%; bottom: 104px; transform: translateX(-50%); width: min(520px, calc(100vw - 24px)); z-index: 32; background: var(--cream); color: var(--ink);
   border-radius: 26px; padding: 14px 18px 16px; box-shadow: var(--shade); display: grid; gap: 6px; }
 .r3d-tour[hidden] { display: none; }
 .r3d-tourn { font: 600 12.5px Figtree, system-ui, sans-serif; color: var(--mut); }
@@ -211,9 +212,10 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-pad button:nth-child(4), .r3d-pad button:nth-child(8) { background: oklch(0.92 0.06 235); }
 .r3d-pad button:active { background: var(--ink); color: var(--cream); }
 .r3d-pad .ms { font-size: 22px; }
-@media (max-width: 899px) { .r3d-pad { left: 10px; bottom: 150px; } .r3d.tools-open .r3d-pad { display: none; } }
+@media (min-width: 900px) { .r3d-pad { bottom: 104px; } }
+@media (max-width: 899px) { .r3d-pad { left: 10px; bottom: calc(max(8px, env(safe-area-inset-bottom)) + 84px); } .r3d.tools-open .r3d-pad { display: none; } }
 .r3d.editing .r3d-pad { display: none; }
-@media (max-width: 899px) { .r3d-toast { top: 76px; max-width: calc(100vw - 32px); text-align: center; } }   /* v30: under the brand pill and the labels switch on a phone */
+@media (max-width: 899px) { .r3d-toast { top: 132px; max-width: calc(100vw - 32px); text-align: center; } }   /* v32: under the Menu button too */   /* v30: under the brand pill and the labels switch on a phone */
 .r3d-tourgo .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-size: 16px; }
 .r3d-ui .chip .ms, .r3d-ui .btn .ms { font-size: 19px; vertical-align: -4px; }
 .r3d-svars [hidden] { display: none; }
@@ -247,16 +249,18 @@ DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return
   if (!tabs.some(t => t.dataset.drawer === cur)) cur = "layout";
   const sync = open => { r.classList.toggle("tools-open", open); document.body.classList.toggle("tools-open", open);
     document.querySelectorAll("[data-tools-toggle]").forEach(b => { b.setAttribute("aria-expanded", String(open)); const i = b.querySelector(".ms"); if (i) i.textContent = open ? "close" : "tune"; }); };
-  const show = k => { cur = k; tabs.forEach(t => { const on = t.dataset.drawer === k; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1;
+  const showing = () => !panel.hidden;
+  const show = k => { cur = k; tabs.forEach(t => { const on = t.dataset.drawer === k; t.setAttribute("aria-selected", String(on)); t.tabIndex = on || panel.hidden ? 0 : -1;
       document.getElementById("r3d-dp-" + t.dataset.drawer).hidden = !on; });
     const sc = panel.querySelector(".r3d-pscroll"); if (sc && k !== shown) sc.scrollTop = 0; shown = k;
     if (typeof arts === "function") arts(document.getElementById("r3d-dp-" + k));
     panel.hidden = false; panel.setAttribute("aria-labelledby", "r3d-dt-" + k); try { localStorage.setItem(K, k); } catch (e) {} };
   const open = k => { sync(true); show(k || cur); window.dispatchEvent(new CustomEvent("demma-tools", { detail: true })); };
-  const close = () => { sync(false); panel.hidden = true; window.dispatchEvent(new CustomEvent("demma-tools", { detail: false })); };
+  const close = () => { sync(false); panel.hidden = true; tabs.forEach(t => { t.setAttribute("aria-selected", "false"); t.tabIndex = 0; }); window.dispatchEvent(new CustomEvent("demma-tools", { detail: false })); };
   window.DemmaTools = { open, close, toggle() { r.classList.contains("tools-open") ? close() : open(); }, isOpen: () => r.classList.contains("tools-open") };
   document.addEventListener("click", e => { if (e.target.closest("[data-tools-toggle]")) window.DemmaTools.toggle(); });   // the phone's bottom bar comes later in the page
-  tabs.forEach((t, i) => { t.addEventListener("click", () => show(t.dataset.drawer));
+  // v32: the bubbles are always on the room: one opens its panel (and marks the tools open), the open one again closes it
+  tabs.forEach((t, i) => { t.addEventListener("click", () => { if (showing() && cur === t.dataset.drawer) close(); else open(t.dataset.drawer); });
     t.addEventListener("keydown", e => { const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return;
       const n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); show(n.dataset.drawer); }); });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && r.classList.contains("tools-open") && !document.body.classList.contains("sheet-open")) close(); });
@@ -267,7 +271,11 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "fairy": "Fairy lights on the pole", "hanger": "Hanging plant in the window", "trail": "Trailing plant, top shelf",
               "throw": "Knit throw on the sofa", "pclamp": "Mushroom lamp, PC shelf", "basket": "Seagrass basket",
               "candles": "LED candles on the shelf", "runner": "Table runner and vase", "floorcush": "Floor cushions",
-              "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf"}   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
+              "piclights": "Picture lights, LPs", "blind": "Blackout blind", "cablights": "Lights in the cabinet"}   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
+              "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
+              "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
 # v20: decor to try in the 3D room (room3d.js S.decor; the keys match its RUG_LOOKS, CUSHION_COLS, CURTAIN_COLS, the case's PRESETS, CASE_FRAMES)
 DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatweave"), ("blue", "Deep blue"), ("stripes", "Sage stripes"), ("none", "No rug")]),
          ("cushions", "Sofa cushions", [("none", "None"), ("rust", "Rust and ochre"), ("blues", "Blues"), ("sage", "Sage and cream")]),
@@ -340,9 +348,10 @@ def controls(gallery=""):
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     ideas_g = ('<div class="grp"><span class="label">Ideas (not in the plan)</span>'
-               '<div class="seg" role="group" aria-label="Ideas, not in the plan"><button type="button" data-idea="case" aria-pressed="false">Glass case on the breast</button>'
-               '<button type="button" data-idea="glass" aria-pressed="false">Glass plant shelves</button>'
-               '<button type="button" data-idea="ctable" aria-pressed="false">Sofa C-table</button></div></div>')
+               '<div class="seg" role="group" aria-label="Ideas, not in the plan">'
+               + "".join(f'<button type="button" data-idea="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(IDEA_SHORT[k])}</button>'
+                         for k, _t, size, *_ in ideas.IDEAS if k != "cushions")      # the cushions are Decor's
+               + '</div></div>')
     dec = {k: (lab, opts) for k, lab, opts in DECOR}
     decor_g = "".join('<div class="grp r3d-decor"><span class="label">' + html.escape(title) + '</span>'
                + "".join(f'<div class="r3d-decrow"><span>{html.escape(dec[k][0])}</span><div class="seg" role="group" aria-label="{html.escape(dec[k][0])}">'
@@ -414,7 +423,8 @@ def controls(gallery=""):
             seg("chairs", [("cupboard", "Shut"), ("open", "Open")], "The chair door, with the table folded"),
             seg("decor", [("pads:olive", "Olive"), ("pads:honey", "Honey"), ("pads:ivory", "Ivory"), ("pads:blue", "Blue")], "The chairs' tie-on seat pads (Dunelm Esme)"),
             '<div class="grp"><span class="label">See how it works</span><div class="seg"><button type="button" class="chip" data-showopen="1"><span class="ms" aria-hidden="true">play_arrow</span> Watch it open</button></div>'
-            '<span class="caption">It opens step by step, a line about each step; tap the room to stop.</span></div>',
+            '<span class="caption">Slowly, step by step: the doors, the chairs, then the table unfolding joint by joint, about 40 seconds. '
+            'Pause it or step back and on; you can look round while it plays.</span></div>',
             seg("foot", [("off", "Hide"), ("on", "Show")], "The floor it needs when it's open (table, chairs, the door's swing)"),
             '<div class="grp"><span class="label">Try a set-up</span><div class="seg r3d-moments">'
             '<button type="button" data-moment="dinner"><span class="ms" aria-hidden="true">dinner_dining</span> Dinner for six</button>'
@@ -498,6 +508,9 @@ def section(gallery=""):
     <div class="r3d-tour" id="r3d-tour" role="region" aria-label="Tour of the room" aria-live="polite" hidden><span class="r3d-tourn" id="r3d-tourn"></span><h3 id="r3d-tourh"></h3><p id="r3d-tourp"></p>
       <div class="acts"><button type="button" data-tour="prev" aria-label="Back one stop"><span class="ms" aria-hidden="true">skip_previous</span></button><button type="button" data-tour="pause" aria-label="Pause"><span class="ms" aria-hidden="true">pause</span></button><button type="button" data-tour="next" aria-label="Next stop"><span class="ms" aria-hidden="true">skip_next</span></button><button type="button" class="end" data-tour="stop">End the tour</button></div>
       <i class="r3d-tourbar"><b id="r3d-tourbar"></b></i></div>
+    <div class="r3d-tour r3d-show" id="r3d-show" role="region" aria-label="Watch it open" aria-live="polite" hidden><span class="r3d-tourn" id="r3d-shown"></span><h3 id="r3d-showh"></h3><p id="r3d-showp"></p>
+      <div class="acts"><button type="button" data-show="prev" aria-label="Back a step"><span class="ms" aria-hidden="true">skip_previous</span></button><button type="button" data-show="pause" aria-label="Pause"><span class="ms" aria-hidden="true">pause</span></button><button type="button" data-show="next" aria-label="Next step"><span class="ms" aria-hidden="true">skip_next</span></button><button type="button" class="end" data-show="stop">Stop</button></div>
+      <i class="r3d-tourbar"><b id="r3d-showbar"></b></i></div>
     <div class="r3d-toast" id="r3d-toast" role="status" hidden></div>
     <div class="r3d-pad" id="r3d-pad" role="group" aria-label="Move the camera (hold a button to keep moving)" hidden><button type="button" data-walk="tl" aria-label="Turn left" title="Turn left"><span class="ms" aria-hidden="true">rotate_left</span></button><button type="button" data-walk="f" aria-label="Walk forward" title="Walk forward"><span class="ms" aria-hidden="true">arrow_upward</span></button><button type="button" data-walk="tr" aria-label="Turn right" title="Turn right"><span class="ms" aria-hidden="true">rotate_right</span></button><button type="button" data-walk="u" aria-label="Up" title="Up"><span class="ms" aria-hidden="true">keyboard_arrow_up</span></button><button type="button" data-walk="l" aria-label="Step left" title="Step left"><span class="ms" aria-hidden="true">arrow_back</span></button><button type="button" data-walk="b" aria-label="Walk back" title="Walk back"><span class="ms" aria-hidden="true">arrow_downward</span></button><button type="button" data-walk="r" aria-label="Step right" title="Step right"><span class="ms" aria-hidden="true">arrow_forward</span></button><button type="button" data-walk="dn" aria-label="Down" title="Down"><span class="ms" aria-hidden="true">keyboard_arrow_down</span></button></div>
     <button type="button" class="r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the numbered labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button>

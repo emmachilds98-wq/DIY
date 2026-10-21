@@ -82,6 +82,9 @@ SHOTS = [
 ]
 
 
+# v32: a full render of every idea, suggestion and piece in Edit room's Add list (item_shots.py)
+SHOTS += __import__("item_shots").shots()
+
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
         "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
 

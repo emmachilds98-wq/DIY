@@ -31,7 +31,7 @@ IDEAS = [
     ("sync", "TV backlight that follows the picture",
      "a sync box on the HDMI line and a strip behind the TV (in place of the plain bias light)", (60, 130),
      "The wall behind the TV glows with the colours on screen, in the same app as the bars and strips, so a film can tint the room.",
-     "Behind the TV, on the bias light's place; the box sits by the HDMI switch in bay 1.", False),
+     "Behind the TV, on the bias light's place; the box sits by the HDMI switch in bay 1.", True),
     ("cushions", "Cushions and a throw in the rug's rust and ochre",
      "two or three 45 × 45 cushions and a throw", (40, 90),
      "They tie the blue corduroy sofa to the rug and the oak, and soften the ottoman end. v20: the 3D room has three colourways to try "
@@ -39,20 +39,21 @@ IDEAS = [
     ("plantlight", "A small uplight under the plant stand's bottom tier",
      "a plug-in spot, about 10 cm", (10, 20),
      "Throws the leaves' shadows up the wall at night, so the plants are part of the evening lighting with the room lights low.",
-     "On the floor, under the stand.", False),
+     "On the floor, under the stand's open middle.", True),
     ("rugpad", "A non-slip pad under the rug",
      "220 × 150, trimmed to fit", (15, 30),
-     "Keeps the rug flat and square on the carpet where the sofa's open end and the coffee table push it.", "Under the rug.", False),
+     "Keeps the rug flat and square on the carpet where the sofa's open end and the coffee table push it.", "Under the rug, 2.5 inside its edge (the 3D room turns the corner by the door back to show it).", True),
     ("button", "A smart scene button by the door",
      "a small wireless button, about 5 × 5", (15, 25),
      "One press for the Bright preset coming in, a long press for everything off, in the same app as the bars' bulbs and the strips.",
-     "On the wall beside the door's light switch.", False),
+     "By the door at switch height: drawn on the chimney breast's side, beside the door frame.", True),
     ("night", "A motion nightlight on the stairs",
      "battery LED strips under the treads' noses, or a single motion light", (15, 30),
-     "A soft glow on the stairs at night with nothing to wire; it turns itself off.", "The stairs.", False),
-    ("clean", "A record-cleaning tray in the pads drawer",
-     "a small tray, about 30 × 15", (10, 20),
-     "The carbon brush, a stylus brush and a cleaning fluid kept together next to the deck.", "Bay 3's pads drawer.", False),
+     "A soft glow on the stairs at night with nothing to wire; it turns itself off.", "Under each tread's nose, all the way up.", True),
+    ("clean", "A record-care caddy on your vinyl stand",
+     "a slim oak box, about 8 wide × 9 tall × 26 long", (10, 20),
+     "The carbon brush, a stylus brush and a cleaning fluid kept together, a step from the deck. (The pads drawer, where it was, is full: "
+     "its two pads and three remotes take its 14 cm.)", "At the end of your vinyl stand's bottom shelf, outside the wire dividers.", True),
 ]
 
 # where each 3D idea is drawn (room cm)
@@ -131,6 +132,18 @@ SUGGEST += [
 ]
 
 
+# v32, client: "add anything else you haven't already suggested": three more, each from a product page (fit.SOURCES)
+SUGGEST += [
+    ("piclights", "Picture lights over your two framed LPs", "two battery LED picture lights, each a 27.9 shade on a 12.5 arm", (30, 50),
+     "A warm wash down over the two LPs in the evening, with no wiring: three AA cells each.", "Centred over each framed LP on the chimney breast."),
+    ("blind", "A blackout roller blind for the window", "made to measure (up to 240 × 210): here about 239 wide × 124 drop", (25, 70),
+     "Film nights in daylight, and darker summer mornings; rolled up, it's a slim cassette under the curtain pole.",
+     "Face-fixed just above the window, down to the sill's nose: the plants on the sill stay behind it."),
+    ("cablights", "Lights inside the dining cabinet", "two 40 cm USB-rechargeable LED bars, warm white, motion sensing", (28, 40),
+     "Each box lights as its door opens, so the chairs, the pads and the cloth are easy to find in the evening.", "Under the top of each box, at the front."),
+]
+
+
 # v28, from the optimisation plan: "choices for each suggestion (two or three versions, like the decor rows)". The same piece in two or
 # three finishes; the size and the price stay. key: [(value, name, [colours])]; the first is the default. room3d.js (SVAR_MATS) puts
 # colour i on the piece's material i.
@@ -153,6 +166,9 @@ SUGG_VARS = {
     "lantern": [("natural", "Natural rattan", ["#b98f5c", "#b98f5c"]), ("dark", "Dark rattan", ["#6e5235", "#6e5235"]), ("black", "Black metal", ["#2a2a2c", "#2a2a2c"])],
     "mirror": [("oak", "Oak frame", ["#c48c57"]), ("black", "Black frame", ["#2a2a2c"]), ("brass", "Brass frame", ["#b8913f"])],
     "shelfled": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("amber", "Amber", ["#ffb347", "#ffb347"]), ("cool", "Cool white", ["#eef3ff", "#eef3ff"])],
+    "piclights": [("brass", "Antique brass", ["#b8913f", "#ffe0a8"]), ("nickel", "Satin nickel", ["#b9bcc0", "#fff1d6"]), ("black", "Black", ["#2a2a2c", "#ffe0a8"])],   # v32
+    "blind": [("oat", "Oatmeal", ["#cdbf9f"]), ("charcoal", "Charcoal", ["#3b3d40"]), ("sage", "Sage", ["#8b9878"])],
+    "cablights": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("natural", "Natural white", ["#fff1dc", "#fff1dc"])],
 }
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
 
