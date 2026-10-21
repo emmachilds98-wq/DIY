@@ -1,11 +1,11 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **NEXT AGENT, DO THIS FIRST: v29's source is committed on `claude/eloquent-johnson-pgmnud`, but its outputs were NOT rebuilt, merged or
-  published** (the session ran out of time mid-rebuild). Run the full rebuild (Rebuild, below; every still re-renders, ~15 min), check the
-  cabinet stills (`3d_c_folded`, `3d_c_six`, `3d_c_chairs`) and the PDF's section 5 and step 11, upload `src/deck_assets_todo.txt` to the
-  deck's asset store, record them in `src/deck_assets.json`, rebuild the viewer, QA at 390 and 1280, commit, PR into `main`, merge, publish
-  the deck 71ff. v28 outputs are already moved to `out/v28/`.
+- **NEXT AGENT, DO THIS FIRST: v29 is built (the full rebuild finished: fit 91/32/12/0, total £3,518–6,858, PDFs and the page at v29)
+  but NOT yet checked, merged or published.** Look at the cabinet stills (`art/3d_c_folded`, `3d_c_six`, `3d_c_chairs`) and the PDF's
+  section 5 and step 11; upload the 10 pictures in `src/deck_assets_todo.txt` to the deck's asset store, record them in
+  `src/deck_assets.json`, run `python3 build_viewer.py` again; QA at 390 and 1280; then mark PR #25 ready, merge into `main`, publish the
+  deck 71ff (`src/media_wall_viewer_inline.html`).
 - **v29 (round 23, below): the dining cabinet fully upgraded** (two sliding oak doors, a 185 table, proper folding chairs) and the
   whole plan made consistent with it (no more "the flip-top is the default" anywhere). Next: `media-wall/UPGRADE_PLAN_v30.md`.
 - **v28 (round 22): the last three items of `UPGRADE_PLAN_v25.md` are done** (the guided tour and "copy link to
