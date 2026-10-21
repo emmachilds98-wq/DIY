@@ -277,8 +277,10 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
          # v26: more to try: the oak's finish (every new oak piece), the floor, your black shelf
          ("oak", "The oak, on everything new", [("artisan", "Artisan oak (the plan)"), ("pale", "Pale, white-oiled"), ("smoked", "Smoked oak"), ("walnut", "Walnut")]),
          ("floor", "The floor", [("carpet", "Your grey carpet"), ("oatmeal", "Oatmeal carpet"), ("boards", "Oak floorboards")]),
-         ("shelf", "Your shelf by the stairs", [("black", "Black (yours)"), ("oak", "Oak"), ("white", "White")])]
-DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case (an idea)", ("fill", "frame"))]
+         ("shelf", "Your shelf by the stairs", [("black", "Black (yours)"), ("oak", "Oak"), ("white", "White")]),
+         # v31: the chairs' tie-on seat pads (Dunelm Esme, 40 × 40 × 3), in its colours
+         ("pads", "The chairs' seat pads", [("olive", "Olive (the plan)"), ("honey", "Honey"), ("ivory", "Ivory"), ("blue", "Blue")])]
+DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains", "pads")), ("The glass case (an idea)", ("fill", "frame"))]
 
 
 def tour():
@@ -410,6 +412,7 @@ def controls(gallery=""):
             seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six")], "Folded or open"),
             seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The table door, with the table folded"),
             seg("chairs", [("cupboard", "Shut"), ("open", "Open")], "The chair door, with the table folded"),
+            seg("decor", [("pads:olive", "Olive"), ("pads:honey", "Honey"), ("pads:ivory", "Ivory"), ("pads:blue", "Blue")], "The chairs' tie-on seat pads (Dunelm Esme)"),
             '<div class="grp"><span class="label">See how it works</span><div class="seg"><button type="button" class="chip" data-showopen="1"><span class="ms" aria-hidden="true">play_arrow</span> Watch it open</button></div>'
             '<span class="caption">It opens step by step, a line about each step; tap the room to stop.</span></div>',
             seg("foot", [("off", "Hide"), ("on", "Show")], "The floor it needs when it's open (table, chairs, the door's swing)"),

@@ -67,6 +67,12 @@ SHOTS = [
     ("3d_c_chairs", dict(view="chairs", site="C", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}),
      "THE COMPACT DINING CABINET - the chair door open, four chairs inside (plant stand and lamp hidden) - bright"),
     ("3d_c_plan", dict(view="plan", site="C", dining="six", scene="bright", tod="day", master=0), "THE COMPACT DINING CABINET - birds eye, open for six"),
+    # v31: the camera's new views, the floor the open table needs, and what could stand beside the compact cabinet
+    ("3d_c_sit", dict(view="sit", site="C", dining="six", scene="bright", tod="day"), "THE COMPACT DINING CABINET - sitting at the table, open for six - daytime"),
+    ("3d_c_foot", dict(view="plan", site="C", dining="folded", scene="bright", tod="day", master=0, foot=True), "THE COMPACT DINING CABINET - birds eye, folded, the floor it needs open"),
+    ("3d_beside_mirror", dict(view="beside", site="C", dining="folded", scene="bright", beside="mirror"), "BESIDE THE CABINET - a tall mirror - bright"),
+    ("3d_beside_trolley", dict(view="beside", site="C", dining="folded", scene="bright", beside="trolley"), "BESIDE THE CABINET - a slim trolley - bright"),
+    ("3d_beside_dresser", dict(view="beside", site="C", dining="folded", scene="bright", beside="dresser"), "BESIDE THE CABINET - a low oak shelf - bright"),
     ("3d_s_folded", dict(view="dining", site="C", cab="sliding", dining="folded", scene="bright"), "THE SLIDING CABINET (the alternative) - packed away - bright"),
     ("3d_s_six", dict(view="dining", site="C", cab="sliding", dining="six", scene="bright"), "THE SLIDING CABINET (the alternative) - open for six - bright, table rule"),
     ("3d_s_chairs", dict(view="chairs", site="C", cab="sliding", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}),
@@ -77,7 +83,7 @@ SHOTS = [
 
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "tdoor": False}   # v30: the compact cabinet
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():

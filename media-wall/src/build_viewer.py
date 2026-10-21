@@ -35,7 +35,9 @@ TRACK_KEEP_ID = {"Set up the smart bulbs in their app": "tdd8f66e8a569",
                  "Oak for the cabinet's hinge rail": "t660dd8fcee21", "The doors' sliding gear": "t551b3e289617",
                  "Build the dining cabinet: the carcass": "taae3dc4761a1", "One solid oak worktop, 300 × 62": "te9a6cd470663",
                  # v30: the compact cabinet's rows; the sliding gear's row is gone (the doors' hinges are a new row)
-                 "Build the dining cabinet: the two boxes": "taae3dc4761a1", "Open the table, level it at 76": "te78b64c0b588"}
+                 "Build the dining cabinet: the two boxes": "taae3dc4761a1", "Open the table, level it at 76": "te78b64c0b588",
+                 # v31: the chairs' row names the beech FRÖSVI (the pads have their own row)
+                 "Folding chairs, IKEA FRÖSVI in solid beech": "tfcb4fc34fb91"}
 
 
 def track_rows():
@@ -563,6 +565,11 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c_tdoor": "The table door open with the table still folded: the six seat pads on the door's back, the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
          "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
          "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
+         "3d_c_sit": "Sitting at the open table's far end: three a side on the beech chairs, their tie-on pads on, the table door folded back flat behind them",
+         "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet: the table, the six chairs and the table door's swing",
+         "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
+         "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that wheels out to the table's far end for dinner",
+         "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
          "3d_s_folded": f"The sliding cabinet (the alternative), packed away: {G.OPTC['z'][0] - G.OPTC['z'][1]:.0f} long, two oak sliding doors",
          "3d_s_six": "The sliding cabinet (the alternative) open for six: door A slid over door B",
          "3d_s_chairs": "The sliding cabinet (the alternative): the chair bay open, door B slid behind door A, six chairs inside",
@@ -667,9 +674,9 @@ def options_card():
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_c_six" alt="{html.escape(CAP3D['3d_c_six'])}" loading="lazy">
     <div class="ob"><span class="label">The plan · six in comfort · {K['len']:.0f} cm</span><h3>The compact dining cabinet</h3>
-    <ul><li>Two oak boxes under the shelf, {K['len']:.0f} long: the table and all six chairs inside, {K['freed']:.0f} cm of wall back by the pipe boxing.</li>
+    <ul><li>Two oak boxes under the shelf, {K['len']:.0f} long and {K['d']:g} deep, flush with the pipe boxing: the table and all six chairs inside, {K['freed']:.0f} cm of wall back.</li>
     <li>The table door turns back flat over the chair door and the table comes down to {K['len_open']:g} × {K['top'][0]:g}: three a side, the coffee table stays put.</li>
-    <li>Four chairs stand in the chair bay, two lie under the folded table; the seat pads hang on the table door.</li>
+    <li>Four chairs stand in the chair bay, two lie under the folded table; their six tie-on pads hang on the table door.</li>
     <li>Tap it in the 3D room to open it, fold it or show the chairs.</li>
     <li class="minus">Push the ottoman to the sofa while it's out.</li></ul>{c} {c2} {c3}</div></article>
   <article class="opt"><img data-art="3d_s_six" alt="{html.escape(CAP3D['3d_s_six'])}" loading="lazy">
@@ -830,8 +837,9 @@ def chapter_facts(rows, fc, nfit):
         "side": chips("One oak run sweeping out to the PC", f"PC shelf at <b>{g.LEDGE_TOP:g}</b>", "Leads through a brush grommet into conduit in the wall", "A warm LED strip underneath", "Step 10"),
         "joinery": chips("The cutting list (copy it for the timber merchant)", "Housings, mortises and pegs: the joints drawing", "Worktop: step 7", "Uprights: step 9",
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
-        "dining": chips(f"The compact dining cabinet: <b>{g.CAB['len']:g} × {g.CAB['d']:g} × {g.CAB['h']:g}</b> under your shelf, {g.CAB['freed']:.0f} cm of wall back",
-                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> chairs inside it, the seat pads on the door",
+        "dining": chips(f"The compact dining cabinet: <b>{g.CAB['len']:g} × {g.CAB['d']:g} × {g.CAB['h']:g}</b> under your shelf, flush with the pipe boxing",
+                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> beech chairs inside it, their tie-on pads on the door",
+                        f"Beside it, {g.BESIDE['len']:.0f} cm of wall: a mirror, a slim trolley or a low oak shelf (ideas)",
                         "Two hinged oak doors that turn right back; a linen shelf inside", f"Step 11 builds it, in {len(__import__('instructions').full()[11]['parts_full'])} stages", "Dining wall " + _ph(rows, "6 Dining wall"),
                         f"The long sliding cabinet ({g.OPTC['z'][0] - g.OPTC['z'][1]:g}) and the flip-top are the alternatives"),   # v27; v30: the compact cabinet
         "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])

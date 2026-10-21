@@ -1,6 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v31 (round 25, below): the compact cabinet reviewed for a smaller build (now 22 deep, flush with the pipe boxing), the beech
+  FRÖSVI with Dunelm Esme tie-on pads hung on the table door, four options beside the cabinet, an easier 3D camera and a regrouped
+  Layout panel.** Next: `media-wall/UPGRADE_PLAN_v32.md`.
 - **v30 (round 24, below): the compact dining cabinet is the plan, the sliding one the alternative; the questions are gone; tap
   things in the 3D room to work them.** Fit 107/37/14/0, total £3,373–6,603, plan 97 pages, guide 53. The deck 71ff is published at
   v30 (version 1792577704-36b4, the 14 changed pictures in its asset store). Next: `media-wall/UPGRADE_PLAN_v31.md` (waiting on the
@@ -50,6 +53,40 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 21 Oct 2026, round 25: v31 (a smaller cabinet checked, cushions, beside it, an easier camera, Views and Layout)
+- Client (after merging PR #27): "can you please review if there's any further optimisation we can do to the dining cabinet, we want the
+  best compact build that doesnt bulk up the living room while keeping as many chairs as we can in the unit. if the chairs are wood or
+  solid without cushioning then find cushions we could tie or put on the chair and put in the cabinet then update"; "is it possible to
+  also make camera movement easier within the 3d render. being able to adjust height would be good and sometimes the movement is quite
+  uncontrollable"; "explore what could go next to the dining cabinet in the compact version which is now our primary option"; "upgrade
+  the views and layouts area of the site to ensure it reflects our recent upgrades. you're welcome to add new functions and suggestions".
+- **The review** (build_doc `cab_review_html`): one change made, `CAB["d"]` 23 → 22, flush with the pipe boxing (the folded table and
+  pads 0.5 from the back, the chairs 1.4 spare). Not taken, with the numbers: slimmer chairs (Habitat's wooden one folds to 7: no
+  length or depth saved, the table and pads set the depth), no chair box (six lying would need chairs 3.2 thick; the slimmest, Plia, is
+  5.4 and £325), an 80-wide table (10 off the length; offered), three deep (9 deeper), pads tied on folded chairs (too thick), taller.
+- **The chairs:** IKEA UK's FRÖSVI is now listed in solid beech, £20 (705.343.15), 44 × 51 × 77, seat 38 × 33 at 46, a slatted seat
+  with no cushion, package 44 × 9 × 89 (no folded size published). The plan's old 43 × 49 × 78 seat 48 was the padded version (£30,
+  foam seat, cover not washable). `CHAIR` and `CHAIR_FOLDED` follow the beech one; every fit row recomputed (counts unchanged in kind).
+- **The pads:** Dunelm Esme 40 × 40 × 3 with ties, £9 (source `esme`), olive (drawn), honey or ivory; six on cup hooks on the table
+  door's back, two across, three high, from the rail's underside (`CAB["pad_zone"]`, 120.9): the hinge rail and the linen shelf now
+  stand `pads` (4) back from the door (`rail_x`, `linen_d`). Alternatives: IKEA ÄNGSFRÄKEN (36 round, £4, loop, no ties), BRÄMÖN
+  (34 × 34 × 1, £2, ties). A new buy row (£54); the chairs' row reworded (`TRACK_KEEP_ID` keeps its id). 3D: pads with ties on the
+  chairs and on the door; their colour in Look and in Layout (`decor.pads`).
+- **Beside the cabinet** (`G.BESIDE`, fit `beside_zone`, build_doc `beside_html`, 3D `buildBeside`/`placeBeside`, `S.beside`): the
+  55.8 cm to the pipe boxing, behind the open table door's line (22 off the wall, the door lies over the first 39.1); the trailing
+  plant's longest strands end about 81 up. Options: left clear (the plan), a tall mirror (IKEA NISSEDAL 40 × 150, £25: our pick), a slim
+  trolley (VASAGLE 20 × 43.2 × 86.5, £35.99: 5.5 into the strands, a CHECK row), a low oak shelf (49.6 × 22 × 76, own build). Not in
+  the buy list. The mirror's glass is a sheen texture, not a live reflection (it would draw the room twice).
+- **The camera** (room3d.js): damping 0.2, rotate 0.55, zoom and pan 0.6; `lift()` and the Views panel's eye-height slider (40–220)
+  with Sitting 115 / Standing 160 / High 210 and Level the view; R/F and Page Up/Down; `S.cam` "orbit" or "look" (look round from
+  where you stand: the target 35 cm ahead, the wheel walks); `S.pad` shows `#r3d-pad` (hold a button to keep moving; hidden on phones
+  while Tools is open); new views `sit` and `beside`; a tour stop sitting at the table.
+- **Layout panel** (room3d_page): headings; the cabinet's choices first; Watch it open (`showOpen`, a step every few seconds with a
+  toast); the floor it needs open (`S.foot`, `buildFoot`: the table, six chairs and the door's swing on the floor); set-ups
+  (`MOMENTS`: dinner for six, lunch for four, film night, everyday morning); Beside the cabinet; the flip-top's own choices folded.
+- New stills: `3d_c_sit`, `3d_c_foot`, `3d_beside_mirror`, `3d_beside_trolley`, `3d_beside_dresser`. Backups `*_v30_backup.*`.
+  v30 outputs in `out/v30/`.
 
 ## Update 21 Oct 2026, round 24: v30 (the compact cabinet; answers in, questions gone; tap to work things)
 - Client: "the wall on the stairs is solid. electrics done ourselves, remove all other questions and that section. ask. then i asked
