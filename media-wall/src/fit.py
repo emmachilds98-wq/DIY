@@ -909,7 +909,8 @@ def zones():
 # v33, client: "I'd also like these chairs or similar, make adjustments and decisions as required"
 SOURCES["padded"] = ("Wayfair UK (Brayden Studio), sent by you: \"2PCS Wooden Folding Dining Chair with Cushion, Padded Seat, Grey Breathable "
                      "Linen Fabric, 6.5cm Thick Cushion, 110° Backrest, 168kg Capacity, No Assembly\"; \"a generously sized 47×47cm seat paired with "
-                     "a 6.5cm thick high-density sponge cushion. 90×10×47cm\" (folded: 90 tall, 10 thick, 47 wide); listing u111353306")
+                     "a 6.5cm thick high-density sponge cushion. 90×10×47cm\" (folded: 90 tall, 10 thick, 47 wide); listing u111353306; "
+                     "your photo of a pair (media-wall/inputs/chairs_padded_listing_photo.webp): bent-wood sides, buttoned seat and back")
 SOURCES["costwaychair"] = ("Costway: set of 2 wooden folding dining chairs with linen padded seat and backrest (53981642), the like-for-like chair the "
                            "padded chairs' open depth, height and seat height are drawn at: 19 × 24 × 31 in (48.3 W × 61 D × 78.7 H cm), seat 17.5 in high (44.5), seat 16 × 17.5 in, "
                            "folding size 19 × 36.5 in (48.3 × 92.7); 300 lb a chair; no folded thickness published (costway.com, 21 Oct 2026)")

@@ -779,7 +779,8 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
     dark: mat({ color: "#241f1b", roughness: 0.9 }),
     beech: mat({ color: "#d4b58c", map: OAK_TEX, roughness: 0.6 }),       // the folding chairs
     pad: mat({ color: "#8e9a80", roughness: 0.95 }),                      // sage linen seat pads
-    linen: mat({ color: "#7d7c79", roughness: 0.97 }),                    // v33: the padded chairs' grey linen
+    linen: mat({ color: "#8f7d69", roughness: 0.97 }),                    // v33: the padded chairs' linen, the colour of your photo
+    linenBtn: mat({ color: "#6e5f4f", roughness: 0.8 }),                  // their buttons
     alu: mat({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }),
     steel: mat({ color: "#c9cbcd", roughness: 0.3, metalness: 0.9 }),     // v30: the piano hinges' knuckles
     plate: mat({ color: "#f4f1ea", roughness: 0.35 }),
@@ -845,19 +846,37 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
       c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                                     // the back away from the table (local +z is the back)
       g.add(c);
     };
-    // v33: the grey padded folding chairs (Brayden Studio, drawn at a like-for-like chair's size): a bent-wood frame, a 6.5 grey linen
-    // cushion, a padded back reclined to 110°
-    const paddedOpen = (g, x, z, face) => {
-      const P = R.CHAIR_PADDED, c = new THREE.Group(), sw = P.w, sd = P.d, sh = P.seat_h, bh = P.h, [cw, cd] = P.seat, cu = P.cushion;
-      for (const xx of [-sw / 2 + 1.6, sw / 2 - 1.6]) {
-        const fl = lb(c, xx, 0, -sd / 2 + 8, 2.8, sh - cu + 1, 2.8, K.beech); fl.rotation.x = 0.1;           // the front legs, splayed a little
-        const bl = lb(c, xx, 0, sd / 2 - 9, 2.8, bh, 2.8, K.beech); bl.rotation.x = -0.18;                    // the back legs rising to the back
-        lb(c, xx, sh - cu - 4, 0, 2.4, 3.2, sd - 18, K.beech);                                               // the seat's side rails
+    // v33: your padded folding chairs (Brayden Studio), drawn from the photo you sent (inputs/chairs_padded_listing_photo.webp): bent-wood
+    // sides, each back upright curving forward at the seat into the front leg, the back leg crossing it under the seat; a thick buttoned
+    // cushion on the seat (47 × 47, 6.5) and a buttoned pad between the uprights, reclined to 110°
+    const seg = (c, x, y1, z1, y2, z2, w, d, mat) => {
+      const L = Math.hypot(y2 - y1, z2 - z1), m = new THREE.Mesh(new THREE.BoxGeometry(w * M, L * M, d * M), mat);
+      m.position.copy(v3(x, (y1 + y2) / 2, (z1 + z2) / 2)); m.rotation.x = Math.atan2(z2 - z1, y2 - y1); c.add(shadow(m)); return m;
+    };
+    const BTN = new THREE.CylinderGeometry(0.008, 0.008, 0.005, 10);
+    const buttons = (mesh, cols, rows, w, h, face) => {     // buttons on a cushion's face (its own frame: x across, y up or z along)
+      for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+        const b = new THREE.Mesh(BTN, K.linenBtn), u = ((i + 0.5) / cols - 0.5) * w * M, v = ((j + 0.5) / rows - 0.5) * h * M;
+        if (face === "top") b.position.set(u, 0, v); else { b.position.set(u, v, 0); b.rotation.x = Math.PI / 2; }
+        b.position[face === "top" ? "y" : "z"] = face === "top" ? mesh.userData.t / 2 * M : -mesh.userData.t / 2 * M;
+        mesh.add(b);
       }
-      lb(c, 0, 16, -sd / 2 + 9, sw - 5, 2.4, 2.4, K.beech);                                                   // the stretcher
-      const seat = new THREE.Mesh(new RoundedBoxGeometry(cw * M, cu * M, cd * M, 3, 0.02), K.linen); seat.position.copy(v3(0, sh - cu / 2, -2)); c.add(shadow(seat));
-      const back = new THREE.Mesh(new RoundedBoxGeometry((sw - 6) * M, 30 * M, 5 * M, 3, 0.018), K.linen);
-      back.position.copy(v3(0, bh - 19, sd / 2 - 13)); back.rotation.x = -(P.back_deg - 90) * Math.PI / 180; c.add(shadow(back));
+    };
+    const paddedOpen = (g, x, z, face) => {
+      const P = R.CHAIR_PADDED, c = new THREE.Group(), sw = P.w, sh = P.seat_h, bh = P.h, [cw, cd] = P.seat, cu = P.cushion;
+      for (const sd of [-1, 1]) {
+        const xx = sd * (sw / 2 - 1.5);
+        seg(c, xx, bh, 24, 56, 19.5, 2.6, 3.2, K.beech);           // the back upright, leaning back
+        seg(c, xx, 56.6, 19.6, 48.5, 15.6, 2.6, 3.2, K.beech);     // the bend forward at the seat
+        seg(c, xx, 49.2, 16.2, 42, 9.5, 2.6, 3.2, K.beech);
+        seg(c, xx, 42.6, 10.2, 0, -26, 2.6, 3.4, K.beech);         // on down into the front leg
+        seg(c, xx * 0.92, 40, -16, 0, 22, 2.6, 3.4, K.beech);      // the back leg, crossing it under the seat
+      }
+      seg(c, 0, 37.5, -20, 37.5, 16, sw - 6, 1.4, K.dark);         // the seat's board, under the cushion
+      const seat = new THREE.Mesh(new RoundedBoxGeometry((cw - 1) * M, cu * M, (cd - 1) * M, 3, 0.022), K.linen);
+      seat.userData.t = cu; seat.position.copy(v3(0, sh - cu / 2, -3)); c.add(shadow(seat)); buttons(seat, 3, 3, cw - 13, cd - 13, "top");
+      const back = new THREE.Mesh(new RoundedBoxGeometry((sw - 5.6) * M, 22 * M, 5 * M, 3, 0.02), K.linen);
+      back.userData.t = 5; back.position.copy(v3(0, 67.5, 20.6)); back.rotation.x = Math.atan2(4.5, 22.7); c.add(shadow(back)); buttons(back, 3, 2, sw - 18, 12, "front");
       c.position.copy(v3(x, 0, z)); c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0; g.add(c);
     };
     for (const [k, list] of Object.entries(C.seats)) {
