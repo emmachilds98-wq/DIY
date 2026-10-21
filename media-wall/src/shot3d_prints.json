@@ -377,19 +377,19 @@
  },
  "3d_ideas_ctable": {
   "files": [
-   "out/Media wall v32 - 3D - IDEAS (not in the plan) - the C-table at the sofa's open end (HD).png",
+   "out/Media wall v33 - 3D - IDEAS (not in the plan) - the C-table at the sofa's open end (HD).png",
    "src/art/3d_ideas_ctable.webp",
-   "src/render_v32_3d_ideas_ctable.png"
+   "src/render_v33_3d_ideas_ctable.png"
   ],
-  "print": "621193fd54dbaba7b8a3b864"
+  "print": "6d42d379bf66df397c1f63e7"
  },
  "3d_ideas_window": {
   "files": [
-   "out/Media wall v32 - 3D - IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand (HD).png",
+   "out/Media wall v33 - 3D - IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand (HD).png",
    "src/art/3d_ideas_window.webp",
-   "src/render_v32_3d_ideas_window.png"
+   "src/render_v33_3d_ideas_window.png"
   ],
-  "print": "0b1afe35ef4d4c630e9e4aad"
+  "print": "2d38781488ce6832c8f8ee9c"
  },
  "3d_look": {
   "files": [
