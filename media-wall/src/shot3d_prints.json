@@ -1,282 +1,314 @@
 {
  "3d_B_folded": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - the stairs wall - table folded under the shelf - bright (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - the stairs wall - table folded under the shelf - bright (HD).png",
    "src/art/3d_B_folded.webp",
-   "src/render_v29_3d_B_folded.png"
+   "src/render_v30_3d_B_folded.png"
   ],
-  "print": "5cab01afa408db68f9e4d0de"
+  "print": "582a2a627a685b4d56362987"
  },
  "3d_c_chairs": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - the chair door open, four chairs inside (plant stand and lamp hidden) - bright (HD).png",
    "src/art/3d_c_chairs.webp",
-   "src/render_v29_3d_c_chairs.png"
+   "src/render_v30_3d_c_chairs.png"
   ],
-  "print": "3944557c170b9599982f3b57"
+  "print": "5b8947123ee77fd4aefa8afa"
  },
  "3d_c_folded": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - packed away - bright (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - packed away - bright (HD).png",
    "src/art/3d_c_folded.webp",
-   "src/render_v29_3d_c_folded.png"
+   "src/render_v30_3d_c_folded.png"
   ],
-  "print": "c36f0e4667acbc81d2dc38ac"
+  "print": "a970f2dffb5960c32cb16428"
  },
  "3d_c_plan": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - birds eye, open for six (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - birds eye, open for six (HD).png",
    "src/art/3d_c_plan.webp",
-   "src/render_v29_3d_c_plan.png"
+   "src/render_v30_3d_c_plan.png"
   ],
-  "print": "a7325d282a6394b8f7261a29"
+  "print": "8aa6b5998d34150b9bf8abeb"
  },
  "3d_c_six": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - open for six - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - open for six, the table door back flat - bright, table rule (HD).png",
    "src/art/3d_c_six.webp",
-   "src/render_v29_3d_c_six.png"
+   "src/render_v30_3d_c_six.png"
   ],
-  "print": "be2dee245b55ff2c19b757e1"
+  "print": "e41e0b4f95925828e037be8b"
+ },
+ "3d_c_tdoor": {
+  "files": [
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - the table door open - the folded table, the pads on the door, two chairs in the base - bright (HD).png",
+   "src/art/3d_c_tdoor.webp",
+   "src/render_v30_3d_c_tdoor.png"
+  ],
+  "print": "aeb40c921d4a0e5554731671"
  },
  "3d_case_mixed": {
   "files": [
-   "out/Media wall v29 - 3D - IDEAS (not in the plan) - the tall glass case, black frame, a bit of each (HD).png",
+   "out/Media wall v30 - 3D - IDEAS (not in the plan) - the tall glass case, black frame, a bit of each (HD).png",
    "src/art/3d_case_mixed.webp",
-   "src/render_v29_3d_case_mixed.png"
+   "src/render_v30_3d_case_mixed.png"
   ],
-  "print": "088a4be687ceab287bbb80f3"
+  "print": "b8761de715ecd374f4ed40a6"
  },
  "3d_case_singles": {
   "files": [
-   "out/Media wall v29 - 3D - IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - cosy (HD).png",
+   "out/Media wall v30 - 3D - IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - cosy (HD).png",
    "src/art/3d_case_singles.webp",
-   "src/render_v29_3d_case_singles.png"
+   "src/render_v30_3d_case_singles.png"
   ],
-  "print": "c80a94ee0d6649c9a3573d23"
+  "print": "2d71283d6d2d6ad65d58a625"
  },
  "3d_chairs": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - the chair cupboard beside the table, doors open, four chairs inside (plant stand and lamp hidden) - bright (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - the chair cupboard beside the table, doors open, four chairs inside (plant stand and lamp hidden) - bright (HD).png",
    "src/art/3d_chairs.webp",
-   "src/render_v29_3d_chairs.png"
+   "src/render_v30_3d_chairs.png"
   ],
-  "print": "6f5d4633aefd9402cd723fe1"
+  "print": "2c9437ce7e014322e4b8b8b5"
  },
  "3d_chairs_shut": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - packed away - the table folded and the chair cupboard shut - bright (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - packed away - the table folded and the chair cupboard shut - bright (HD).png",
    "src/art/3d_chairs_shut.webp",
-   "src/render_v29_3d_chairs_shut.png"
+   "src/render_v30_3d_chairs_shut.png"
   ],
-  "print": "5cab01afa408db68f9e4d0de"
+  "print": "582a2a627a685b4d56362987"
  },
  "3d_decor": {
   "files": [
-   "out/Media wall v29 - 3D - DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright (HD).png",
+   "out/Media wall v30 - 3D - DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright (HD).png",
    "src/art/3d_decor.webp",
-   "src/render_v29_3d_decor.png"
+   "src/render_v30_3d_decor.png"
   ],
-  "print": "5092cee0d507a8855587e76d"
+  "print": "e8db6998235f4ce3771ff7f6"
  },
  "3d_dining_A_four": {
   "files": [
-   "out/Media wall v29 - 3D - the dining table on the breast, down for four - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - the dining table on the breast, down for four - bright, table rule (HD).png",
    "src/art/3d_dining_A_four.webp",
-   "src/render_v29_3d_dining_A_four.png"
+   "src/render_v30_3d_dining_A_four.png"
   ],
-  "print": "9b8d0bbe5db60895247993fe"
+  "print": "38c92a4b414b53923cc507d1"
  },
  "3d_dining_B_four": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - by the stairs, down for four - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - by the stairs, down for four - bright, table rule (HD).png",
    "src/art/3d_dining_B_four.webp",
-   "src/render_v29_3d_dining_B_four.png"
+   "src/render_v30_3d_dining_B_four.png"
   ],
-  "print": "6f1530a5dbe9e5e5dbc84fe9"
+  "print": "4c8a80c9235eb842ebceb834"
  },
  "3d_doll_A": {
   "files": [
-   "out/Media wall v29 - 3D - dolls house - table on the breast (HD).png",
+   "out/Media wall v30 - 3D - dolls house - table on the breast (HD).png",
    "src/art/3d_doll_A.webp",
-   "src/render_v29_3d_doll_A.png"
+   "src/render_v30_3d_doll_A.png"
   ],
-  "print": "cdbe0ed8776f0adcd8252cc3"
+  "print": "f2c3252306c0e7c5bb8e8c21"
  },
  "3d_ideas_breast": {
   "files": [
-   "out/Media wall v29 - 3D - IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles (HD).png",
+   "out/Media wall v30 - 3D - IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles (HD).png",
    "src/art/3d_ideas_breast.webp",
-   "src/render_v29_3d_ideas_breast.png"
+   "src/render_v30_3d_ideas_breast.png"
   ],
-  "print": "43a6d020b774ce655c0f4b20"
+  "print": "957b0423423fa1bd1ac13ee5"
  },
  "3d_ideas_ctable": {
   "files": [
-   "out/Media wall v29 - 3D - IDEAS (not in the plan) - the C-table at the sofa's open end (HD).png",
+   "out/Media wall v30 - 3D - IDEAS (not in the plan) - the C-table at the sofa's open end (HD).png",
    "src/art/3d_ideas_ctable.webp",
-   "src/render_v29_3d_ideas_ctable.png"
+   "src/render_v30_3d_ideas_ctable.png"
   ],
-  "print": "8deb48c366d649f21dc6c560"
+  "print": "350dc7feb4dfacfc3f0b4ca2"
  },
  "3d_ideas_window": {
   "files": [
-   "out/Media wall v29 - 3D - IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand (HD).png",
+   "out/Media wall v30 - 3D - IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand (HD).png",
    "src/art/3d_ideas_window.webp",
-   "src/render_v29_3d_ideas_window.png"
+   "src/render_v30_3d_ideas_window.png"
   ],
-  "print": "e3bfd6a9e5cdab4ceed7fa7e"
+  "print": "cad4945607867200f1cd6463"
  },
  "3d_look": {
   "files": [
-   "out/Media wall v29 - 3D - LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright (HD).png",
+   "out/Media wall v30 - 3D - LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright (HD).png",
    "src/art/3d_look.webp",
-   "src/render_v29_3d_look.png"
+   "src/render_v30_3d_look.png"
   ],
-  "print": "54993e6f8af1d92ef4473ba6"
+  "print": "91e190a0a9b9126f13bf1076"
  },
  "3d_pc_day": {
   "files": [
-   "out/Media wall v29 - 3D - the PC side wall - daytime (HD).png",
+   "out/Media wall v30 - 3D - the PC side wall - daytime (HD).png",
    "src/art/3d_pc_day.webp",
-   "src/render_v29_3d_pc_day.png"
+   "src/render_v30_3d_pc_day.png"
   ],
-  "print": "adfb3055dc98e701e4025f9e"
+  "print": "927df821ba19d27e1d86a1a0"
  },
  "3d_pc_lit": {
   "files": [
-   "out/Media wall v29 - 3D - the PC side wall - PC lit - film (HD).png",
+   "out/Media wall v30 - 3D - the PC side wall - PC lit - film (HD).png",
    "src/art/3d_pc_lit.webp",
-   "src/render_v29_3d_pc_lit.png"
+   "src/render_v30_3d_pc_lit.png"
   ],
-  "print": "c3e531736d4652fc6700d689"
+  "print": "749c309773d8fcfcb0e41957"
  },
  "3d_plan_B": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - birds eye, down for four (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - birds eye, down for four (HD).png",
    "src/art/3d_plan_B.webp",
-   "src/render_v29_3d_plan_B.png"
+   "src/render_v30_3d_plan_B.png"
   ],
-  "print": "c3f582f66b36cdfc7a487681"
+  "print": "026cea0b860d790eba31f004"
  },
  "3d_plants_breast": {
   "files": [
-   "out/Media wall v29 - 3D - layout B - your plant stand on the breast - bright (HD).png",
+   "out/Media wall v30 - 3D - layout B - your plant stand on the breast - bright (HD).png",
    "src/art/3d_plants_breast.webp",
-   "src/render_v29_3d_plants_breast.png"
+   "src/render_v30_3d_plants_breast.png"
   ],
-  "print": "bcb4585b384d69d29c69de90"
+  "print": "7fb6cb4dcae9ea577fd18bdf"
  },
  "3d_plants_corner": {
   "files": [
-   "out/Media wall v29 - 3D - your plant stand in the window corner - layout A - bright (HD).png",
+   "out/Media wall v30 - 3D - your plant stand in the window corner - layout A - bright (HD).png",
    "src/art/3d_plants_corner.webp",
-   "src/render_v29_3d_plants_corner.png"
+   "src/render_v30_3d_plants_corner.png"
   ],
-  "print": "bf6be35d65f9381e711ead85"
+  "print": "f0ad195baa4b3a318d8fb9dd"
  },
  "3d_records_breast": {
   "files": [
-   "out/Media wall v29 - 3D - your vinyl stand on the breast - layout A - cosy (HD).png",
+   "out/Media wall v30 - 3D - your vinyl stand on the breast - layout A - cosy (HD).png",
    "src/art/3d_records_breast.webp",
-   "src/render_v29_3d_records_breast.png"
+   "src/render_v30_3d_records_breast.png"
   ],
-  "print": "45e7c2badbfb19d4deaf8656"
+  "print": "2c76c7e91bc9a41f1d5e9dab"
  },
  "3d_room": {
   "files": [
-   "out/Media wall v29 - 3D - the whole room - from above the window side, cut away - bright (HD).png",
+   "out/Media wall v30 - 3D - the whole room - from above the window side, cut away - bright (HD).png",
    "src/art/3d_room.webp",
-   "src/render_v29_3d_room.png"
+   "src/render_v30_3d_room.png"
   ],
-  "print": "5e93d50d692f7eb98c9c9600"
+  "print": "df146abd6d40547d57d7e4d4"
+ },
+ "3d_s_chairs": {
+  "files": [
+   "out/Media wall v30 - 3D - THE SLIDING CABINET (the alternative) - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright (HD).png",
+   "src/art/3d_s_chairs.webp",
+   "src/render_v30_3d_s_chairs.png"
+  ],
+  "print": "2d6351d892728d6603cb2e9d"
+ },
+ "3d_s_folded": {
+  "files": [
+   "out/Media wall v30 - 3D - THE SLIDING CABINET (the alternative) - packed away - bright (HD).png",
+   "src/art/3d_s_folded.webp",
+   "src/render_v30_3d_s_folded.png"
+  ],
+  "print": "b09626550b26bdf70c6f34dd"
+ },
+ "3d_s_six": {
+  "files": [
+   "out/Media wall v30 - 3D - THE SLIDING CABINET (the alternative) - open for six - bright, table rule (HD).png",
+   "src/art/3d_s_six.webp",
+   "src/render_v30_3d_s_six.png"
+  ],
+  "print": "cdf58f7d55c2464210cecfed"
  },
  "3d_seat": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright (HD).png",
    "src/art/3d_seat.webp",
-   "src/render_v29_3d_seat.png"
+   "src/render_v30_3d_seat.png"
   ],
-  "print": "8a9075af3e40a8a3abc501df"
+  "print": "a07ad9b225cd5ea9b9353ed6"
  },
  "3d_six_day": {
   "files": [
-   "out/Media wall v29 - 3D - from the door - out for six - daytime (HD).png",
+   "out/Media wall v30 - 3D - from the door - out for six - daytime (HD).png",
    "src/art/3d_six_day.webp",
-   "src/render_v29_3d_six_day.png"
+   "src/render_v30_3d_six_day.png"
   ],
-  "print": "c8b41d6ce8bb27c22f790047"
+  "print": "fd3405a7beeea590530c31b5"
  },
  "3d_sofa_cosy": {
   "files": [
-   "out/Media wall v29 - 3D - from the sofa - cosy (HD).png",
+   "out/Media wall v30 - 3D - from the sofa - cosy (HD).png",
    "src/art/3d_sofa_cosy.webp",
-   "src/render_v29_3d_sofa_cosy.png"
+   "src/render_v30_3d_sofa_cosy.png"
   ],
-  "print": "9c59e386bf12e4b4e991ed27"
+  "print": "6c9db9fd67d0ce0475e9b0ac"
  },
  "3d_stairs_A_four": {
   "files": [
-   "out/Media wall v29 - 3D - from the stairs - table on the breast, down for four - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - from the stairs - table on the breast, down for four - bright, table rule (HD).png",
    "src/art/3d_stairs_A_four.webp",
-   "src/render_v29_3d_stairs_A_four.png"
+   "src/render_v30_3d_stairs_A_four.png"
   ],
-  "print": "0f6d0abab396f5ebf2491413"
+  "print": "ff53696817f09ee3659ea97d"
  },
  "3d_suggest": {
   "files": [
-   "out/Media wall v29 - 3D - SUGGESTED furniture and decor, all of them on - bright (HD).png",
+   "out/Media wall v30 - 3D - SUGGESTED furniture and decor, all of them on - bright (HD).png",
    "src/art/3d_suggest.webp",
-   "src/render_v29_3d_suggest.png"
+   "src/render_v30_3d_suggest.png"
   ],
-  "print": "d9c44a4a18edc5cda88e64d4"
+  "print": "38e5c39829904928717fb745"
  },
  "3d_wall_drawers": {
   "files": [
-   "out/Media wall v29 - 3D - the media wall - every drawer out - cosy (HD).png",
+   "out/Media wall v30 - 3D - the media wall - every drawer out - cosy (HD).png",
    "src/art/3d_wall_drawers.webp",
-   "src/render_v29_3d_wall_drawers.png"
+   "src/render_v30_3d_wall_drawers.png"
   ],
-  "print": "15c5fbb073bf3abf3e346dbc"
+  "print": "bf5cfd5fa8ce61f0746ee00a"
  },
  "3d_wall_film": {
   "files": [
-   "out/Media wall v29 - 3D - the media wall - film (HD).png",
+   "out/Media wall v30 - 3D - the media wall - film (HD).png",
    "src/art/3d_wall_film.webp",
-   "src/render_v29_3d_wall_film.png"
+   "src/render_v30_3d_wall_film.png"
   ],
-  "print": "af46f710e486030fcb945b34"
+  "print": "5332c9822c496f49ca47e38a"
  },
  "3d_window_B_folded": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - from the window - table by the stairs, folded - bright (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - from the window - table by the stairs, folded - bright (HD).png",
    "src/art/3d_window_B_folded.webp",
-   "src/render_v29_3d_window_B_folded.png"
+   "src/render_v30_3d_window_B_folded.png"
   ],
-  "print": "f26022344af9faea9221d9af"
+  "print": "4005d800956024e04de3941f"
  },
  "3d_window_B_four": {
   "files": [
-   "out/Media wall v29 - 3D - B, THE FLIP-TOP - from the window - down for four - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - B, THE FLIP-TOP - from the window - down for four - bright, table rule (HD).png",
    "src/art/3d_window_B_four.webp",
-   "src/render_v29_3d_window_B_four.png"
+   "src/render_v30_3d_window_B_four.png"
   ],
-  "print": "9fe304fcec6565ce252565fe"
+  "print": "96b3745c4bd9461d94612ad5"
  },
  "3d_window_bright": {
   "files": [
-   "out/Media wall v29 - 3D - from the window - bright, every head straight down (HD).png",
+   "out/Media wall v30 - 3D - from the window - bright, every head straight down (HD).png",
    "src/art/3d_window_bright.webp",
-   "src/render_v29_3d_window_bright.png"
+   "src/render_v30_3d_window_bright.png"
   ],
-  "print": "5c9dc92f7b33def866140a7a"
+  "print": "90805df08708c199154feaad"
  },
  "3d_window_c_six": {
   "files": [
-   "out/Media wall v29 - 3D - THE DINING CABINET - from the window, open for six - bright, table rule (HD).png",
+   "out/Media wall v30 - 3D - THE COMPACT DINING CABINET - from the window, open for six - bright, table rule (HD).png",
    "src/art/3d_window_c_six.webp",
-   "src/render_v29_3d_window_c_six.png"
+   "src/render_v30_3d_window_c_six.png"
   ],
-  "print": "b30021a39eb31f711530dbc9"
+  "print": "5da1ed15a7836e7ea116b435"
  }
 }

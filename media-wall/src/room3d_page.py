@@ -51,6 +51,14 @@ CSS = """
 .r3d-pop .acts button { flex: 1; min-height: 44px; border: 0; border-radius: 999px; font: 600 14px Fredoka, system-ui, sans-serif; cursor: pointer; background: var(--soft); color: var(--ink); }
 .r3d-pop .acts button.go { background: oklch(0.8 0.11 var(--h)); }
 .r3d-pop .x { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--soft); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+/* v30: the card for an item you tap in the room: what it is, how it is now, and its controls */
+.r3d-act { width: 300px; --h: 50; }
+.r3d-act .st { margin: -2px 34px 12px 0; font-size: 13.5px; color: var(--mut); }
+.r3d-act .acts { flex-wrap: wrap; }
+.r3d-act .acts button { flex: 1 1 calc(50% - 4px); padding: 0 12px; }
+.r3d-act .acts button[aria-pressed=true] { background: var(--ink); color: var(--cream); }
+.r3d-act.above::before { top: auto; bottom: -7px; }
+.r3d.editing .r3d-act { display: none; }
 /* the Tools pill, its bubbles and its panel */
 .r3d-dock { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; z-index: 30; }
 .r3d-toolsbtn { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px 0 16px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink);
@@ -189,6 +197,7 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); z-index: 40; background: var(--ink); color: var(--cream); border-radius: 999px; padding: 10px 18px;
   font: 600 14px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); max-width: calc(100vw - 24px); }
 .r3d-toast[hidden] { display: none; }
+@media (max-width: 899px) { .r3d-toast { top: 76px; max-width: calc(100vw - 32px); text-align: center; } }   /* v30: under the brand pill and the labels switch on a phone */
 .r3d-tourgo .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-size: 16px; }
 .r3d-ui .chip .ms, .r3d-ui .btn .ms { font-size: 19px; vertical-align: -4px; }
 .r3d-svars [hidden] { display: none; }
@@ -266,8 +275,8 @@ def tour():
         dict(view="wall", title="The media wall", text=f"Artisan oak in Card Room Green across the {g.ALC_W:g} cm alcove: the TV centred at {g.TV_CENTRE:.1f}, the turntable on the right, the consoles and the LP crates below."),
         dict(view="pc", title="The PC side wall", text=f"One oak run sweeps round the corner to the PC shelf at {g.PC_SHELF_TOP:g}, its leads inside the wall and a warm strip underneath."),
         dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
-        dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six"},
-             text=f"Door A slides over door B and the table folds down to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g} for six; the six chairs live behind door B, and it all packs away."),
+        dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six", "cab": "compact"},
+             text=f"The table door swings back flat and the table folds down to {g.CAB['len_open']:g} × {g.CAB['top'][0]:g} for six. Folded, the table and all six chairs pack into {g.CAB['len']:.0f} cm of wall."),
         dict(view="sofa", title="From the sofa", text=f"About {s['view_dist'] / 100:.2f} m from the screen: the 55-inch fills about {s['view_angle']:.0f}° of your view, right for films and games."),
         dict(view="window", title="From the window", text="The whole wall in one look, over the sofa's back: your plants on the sill behind you."),
         dict(view="plan", title="From above", text="Everything to scale from the plan's own measurements. Drag to look round when the tour ends."),
@@ -358,11 +367,14 @@ def controls(gallery=""):
                  + '<div class="grp r3d-save"><button class="btn primary" type="button" id="r3d-save">Save as HD picture</button>'
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
+                 + '<p class="caption"><b>Tap something in the room to work it:</b> the dining cabinet opens, folds and shows its chairs; the drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch.</p>'
                  + '<p class="caption">Drag to look round, pinch or scroll to zoom. On a keyboard: W A S D or the arrows walk, Q and E turn.</p>',
         "layout": "".join([
             seg("site", [("C", "The dining cabinet (the plan)"), ("B", "B: the flip-top by the stairs"), ("A", "A: the flip-top on the breast")], "The table: which option"),
+            seg("cab", [("compact", f"Compact, {G.CAB['len']:.0f} long, hinged doors (the plan)"), ("sliding", f"Long, {G.OPTC['z'][0] - G.OPTC['z'][1]:.0f}, sliding doors")], "The dining cabinet: which version"),
             seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six")], "Folded or open"),
-            seg("chairs", [("cupboard", "Doors shut"), ("open", "Doors open"), ("hooks", "Open hooks (B, A)"), ("away", "In the garage (B, A)")], "The chairs, with the table folded"),
+            seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The cabinet's table door, with the table folded"),
+            seg("chairs", [("cupboard", "Chair door shut"), ("open", "Chair door open"), ("hooks", "Open hooks (B, A)"), ("away", "In the garage (B, A)")], "The chairs, with the table folded"),
             seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Plant stand and vinyl stand"),
             seg("seat", [("off", "Not there"), ("up", "Folded"), ("down", "Down")], "Fold-down seat at the stair end (B)"),
             seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "Drawers")]),
@@ -405,8 +417,8 @@ def hotspots():
              facts=[f"PC shelf at {g.PC_SHELF_TOP:g}", "Leads inside the wall", "Warm LED strip underneath", "Step 10"]),
         dict(id="breast", n=3, name="Chimney breast", hue=345, at=[(g.BREAST_X[0] + g.BREAST_X[1]) / 2, 120, -6], nrm=[0, -1], cut="", view="breast", chapter="records",
              facts=[f"Vinyl stand, {g.STAND_LPS} LPs", f"“Now playing” ledge at {g.NOW_LEDGE['top']:g}", "Two framed LPs", "Vinyl kit " + ph("9 Vinyl kit")]),
-        dict(id="dining", n=4, name="Dining cabinet", hue=50, at=[g.ROOM_W - 12, 110, g.OPTC["cz"]], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
-             facts=[f"Table {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}, six in comfort", "Six chairs inside it", "Step 11", ph("6 Dining wall")]),
+        dict(id="dining", n=4, name="Dining cabinet", hue=50, at=[g.ROOM_W - 12, 110, g.CAB["cz"]], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
+             facts=[f"Table {g.CAB['len_open']:g} × {g.CAB['top'][0]:g}, six in comfort", f"{g.CAB['len']:.0f} long, six chairs inside", "Tap it to open it", "Step 11", ph("6 Dining wall")]),
         dict(id="window", n=5, name="Window & plants", hue=165, at=[pl[0], PS["h"] - 20, pl[1] + 8], nrm=[0, 1], cut="win", view="windowwall", chapter="c-room",
              facts=[f"Plant stand {PS['w']:g} × {PS['d']:g} × {PS['h']:g}", f"Window ledge {g.WINDOW_REVEAL + g.SILL['nose']:g} deep", "Hessian curtains"]),
         dict(id="sofa", n=6, name="Sofa & rug", hue=95, at=[(g.SOFA_X[0] + g.SOFA_X[1]) / 2, 70, g.SOFA_BACK_Z + 55], nrm=None, cut="", view="sofa", chapter="c-room",
@@ -437,6 +449,8 @@ def section(gallery=""):
     <button type="button" class="r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the numbered labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button>
     <div class="r3d-pop" id="r3d-pop" role="dialog" aria-modal="false" aria-labelledby="r3d-pop-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
       <h3 id="r3d-pop-h"></h3><ul class="facts"></ul><div class="acts"><button type="button" class="go" data-popgo="plan">Open in the plan</button><button type="button" data-popgo="fly">Fly here</button></div></div>
+    <div class="r3d-pop r3d-act" id="r3d-act" role="dialog" aria-modal="false" aria-labelledby="r3d-act-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
+      <h3 id="r3d-act-h"></h3><p class="st" id="r3d-act-st" aria-live="polite"></p><div class="acts" id="r3d-acts"></div></div>
     <div class="r3d-edit">
       <div class="r3d-editbar" id="r3d-editbar" hidden><button type="button" id="r3d-editdone" class="primary">✓ Done</button><button type="button" id="r3d-add">+ Add</button><button type="button" id="r3d-undo" disabled title="Undo (Ctrl+Z)">↶ Undo</button><button type="button" id="r3d-layreset">Reset layout</button>
         <button type="button" class="r3d-share" id="r3d-share" hidden title="Save this layout so Emma and Dave both see it">Save for both of you</button><button type="button" class="r3d-share" id="r3d-useshared" hidden>Use the shared layout</button><span class="r3d-hint" id="r3d-sharest" aria-live="polite"></span>

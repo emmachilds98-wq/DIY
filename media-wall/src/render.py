@@ -2782,25 +2782,26 @@ def all_svgs():
     """Every render the plan and the viewer use."""
     global PAINT, SKIRT
     out = {}
+    from build_doc import VERSION   # v30: the labels carry the plan's version (they were typed in by hand)
     set_paint(PAINTS[MAIN_PAINT][0])
     sub = "Farrow & Ball Card Room Green No. 79 · drawn to the measured room, evening light"
     six_sub = ("The flip-top open on its gate leg, 110 × 160, still on the wall · both spot bars · three a side" if G.TABLE_STYLE == "fliptop" else
                "Lifted off with its leaf, 170 × 80, 75 cm off the breast · both spot bars · two a side, one at each end")
     out["v13_join_key"] = build(with_dims=True, numbered=True, style="joinery", game_open=30, rec_open=30)
-    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=("Artisan oak media wall · v29, the dining cabinet by the stairs", sub))
+    out["v13_join_clean"] = build(with_dims=False, style="joinery", label=(f"Artisan oak media wall · v{VERSION}, the dining cabinet by the stairs", sub))
     out["v13_join_dims"] = build(with_dims=True, style="joinery")
     out["v13_dining_four"] = build(with_dims=False, style="joinery", dining="four",
-                                   label=("Option A, the alternative: the flip-top on the chimney breast, set for four · v29", "Flip-top gate-leg oak table, still on the wall · " + sub))
+                                   label=(f"Option A, the alternative: the flip-top on the chimney breast, set for four · v{VERSION}", "Flip-top gate-leg oak table, still on the wall · " + sub))
     out["v13_dining_six"] = build(with_dims=False, style="joinery", dining="six",
-                                  label=("Option A, the alternative: the flip-top on the breast, set for six · v29", six_sub))
+                                  label=(f"Option A, the alternative: the flip-top on the breast, set for six · v{VERSION}", six_sub))
     dkw = dict(with_dims=False, style="joinery", cam=CAM_DRAWERS, game_open=30, rec_open_up=30, plinth_open=25, slim_open=30)
-    out["v13_drawers"] = build(**dkw, label=("Every drawer out · v29", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
+    out["v13_drawers"] = build(**dkw, label=(f"Every drawer out · v{VERSION}", "Game drawer, upper LP crate and a slim game drawer 30 out, plinth drawer 25 out (one LP crate at a time)"))
     out["v13_m_join"] = build(with_dims=False, style="joinery", measure="join")
     out["v13_m_four"] = build(with_dims=False, style="joinery", dining="four", measure="four")
     out["v13_m_six"] = build(with_dims=False, style="joinery", dining="six", measure="six")
     out["v13_m_drawers"] = build(**dkw, measure="drawers")
     out["v13_m_side"] = build_side(measure=True)
-    out["v13_side"] = build_side(label=("The PC side wall · v29", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
+    out["v13_side"] = build_side(label=(f"The PC side wall · v{VERSION}", "One oak run sweeping out to the PC, its glass side showing the parts inside, its LED strip underneath, cables chased into the wall, the sofa's open end below"))
     for k, (hx, name) in PAINTS.items():
         set_paint(hx)
         lab = name + (" · chosen" if k == MAIN_PAINT else "")

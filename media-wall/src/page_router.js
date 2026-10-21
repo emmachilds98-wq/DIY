@@ -2,10 +2,10 @@
    has its own hash; Back closes; Esc closes on a laptop, a swipe down on a phone; focus stays inside the open sheet. The old tab links
    (data-go, data-step, data-phase, data-find) open the right sheet and chapter. */
 const REDUCED = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
-const SHEETS = ["plan", "build", "buy", "ideas", "questions"];
+const SHEETS = ["plan", "build", "buy", "ideas"];   // v30: no Ask sheet; old links to it open the plan
 const GO = { overview: ["plan"], plan: ["plan"], room: [null], home: [null], "c-room": ["plan", "c-room"], views: ["plan", "views"], wall: ["plan", "wall"],
   records: ["plan", "records"], side: ["plan", "side"], joinery: ["plan", "joinery"], dining: ["plan", "dining"], paint: ["plan", "paint"], network: ["plan", "network"],
-  checks: ["plan", "fit"], fit: ["plan", "fit"], downloads: ["plan", "downloads"], ideas: ["ideas"], build: ["build"], buy: ["buy"], questions: ["questions"], ask: ["questions"] };
+  checks: ["plan", "fit"], fit: ["plan", "fit"], downloads: ["plan", "downloads"], ideas: ["ideas"], build: ["build"], buy: ["buy"], questions: ["plan"], ask: ["plan"] };
 let curSheet = null;
 const sheetEl = n => document.getElementById("sh-" + n);
 function showChapter(ch) {
@@ -46,7 +46,7 @@ function routeHash(h, push) {
   if (!h || h === "room") { closeSheets(); return; }
   let m;
   if ((m = h.match(/^step-(\d+)$/))) { openSheet("build"); openStep(m[1]); jumpTo(document.getElementById(h)); return; }
-  if (/^q-/.test(h)) { openSheet("questions"); jumpTo(document.getElementById(h)); return; }
+  if (/^q-/.test(h)) { openSheet("plan"); return; }
   if ((m = h.match(/^ph-(\d+)$/))) { openSheet("buy"); const d = document.getElementById(h); if (d) { d.open = true; jumpTo(d); } return; }
   const g = GO[h]; if (g) { if (!g[0]) closeSheets(); else openSheet(g[0], { chapter: g[1] }); }
 }

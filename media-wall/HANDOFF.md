@@ -1,6 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v30 (round 24, below): the compact dining cabinet is the plan, the sliding one the alternative; the questions are gone; tap
+  things in the 3D room to work them.** Fit 107/37/14/0, total £3,373–6,603, plan 97 pages, guide 53. The deck 71ff is published at
+  v30 (version 1792577704-36b4, the 14 changed pictures in its asset store). Next: `media-wall/UPGRADE_PLAN_v31.md` (waiting on the
+  client's view of the compact cabinet).
 - **v29.1 (round 23b) is checked and shipped:** PR #25 (v29) was merged before its checks; this round checked it, fixed what the
   checks found (below), published the deck 71ff at v29 (version 1792561058-14bf, all 63 pictures in its asset store) and opened a PR
   into `main` with the fixes (merge it if it's still open, so Pages carries them). Fit 91/32/12/0, total £3,518–6,858, plan 92 pages,
@@ -45,7 +49,51 @@
   (shot3d renders 37 stills headless in SwiftShader WebGL: about 15 minutes for all, and since v28 only the ones whose fingerprint changed, `force` for all; `SHOT3D_DIR=<scratch> python3 shot3d.py test <name>` makes quick
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
-  (one list feeds the PDF, the overview's "To confirm" line and the viewer's Questions tab).
+  (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 21 Oct 2026, round 24: v30 (the compact cabinet; answers in, questions gone; tap to work things)
+- Client: "the wall on the stairs is solid. electrics done ourselves, remove all other questions and that section. ask. then i asked
+  before if you can make function so say i click the dining cabinet i can manage options to open it, close it etc as goes for drawers and
+  other items i can interact with. also is there anyway you can optimise the dining cabinet build to fit the chairs in a better way so the
+  cabinet doesnt have to be so big"; picked "Hinged, 143 cm (Recommended)"; then "they dont particularly need to be oak chairs i just need a
+  smaller build on the cabinet if we can" and "show me both versions for the cabinet actually".
+- **Answers and questions:** `questions.QUESTIONS = []` (the functions stay and return ""); the Ask sheet, its nav button, badge, the q
+  ring, the drafts/photos/copy-all code (page.js) and the router's "questions" sheet are gone (`#questions`, `#ask`, `#q-...` open the
+  plan). Section 12 is "Agreed, later ideas, sources" with the answers as an agreed item. Fit: the stairs wall is solid (source
+  `solidwall`); every fixing row says plugs and screws.
+- **The compact cabinet (`geometry.CAB`), the plan:** two boxes side by side, 144.2 × 23 × 189 (the sliding one, `OPTC`, is 198 ×
+  24.8), 55.8 of wall back by the pipe boxing. The table box (91 inside) holds the same table on a hinge rail at 73.3, two FRÖSVI lying
+  on their sides in its base (the drawer is gone) and the linen shelf; the chair box (46 inside) four chairs, two deep on its floor and
+  two deep on its shelf at 93.5. The pads hang on the table door's back (the table's hinge is 4 + apron back from the inside's front).
+  Doors: inset, the table door one piece 90.5 × 183.8 (a bi-fold's leaves can't lie flat over the chair door), the chair door 45.5,
+  each on an Altro 1800 × 32 × 1 mm piano hinge (source `piano32`) where the boxes meet, turning 180° to lie flat over the other
+  (170° Blum hinges would hit the nearest window-side chair). Open, the table door's end is 9.2 short of the plant stand and its face
+  5.3 clear of the nearest chair; the trailing plant is a CHECK row. A flush magnet in the chair door's face (36.1 from its hinge) and
+  steel cups in the table door's (32.2 and 40) hold whichever door is open. Fit `cab_zone()` (24 rows) comes before the sliding zone.
+  The chairs stay FRÖSVI: a thinner chair wouldn't shorten it (the table box sets the length).
+- **Both versions everywhere:** the 3D room's `S.cab` ("compact" | "sliding", Layout, "The dining cabinet: which version"), `S.tdoor`
+  (the table door with the table folded); the doors tween (`cabTween`). Stills `3d_c_*` are the compact one (new: `3d_c_tdoor`),
+  `3d_s_folded`, `3d_s_six`, `3d_s_chairs` the sliding one. Plan section 5: `cab_html()` (the plan, drawings `cab_elevation`,
+  `cab_carcass`, `cab_section`, `cab_plan` in diagrams.py, plus `option_c_halves`), `slide_html()` (the alternative, its cost from
+  `SLIDE_ROWS`, the v29 buy rows kept out of the buy list), then the flip-top. Step 11 (build_doc `steps()`, `instructions.full()[11]`)
+  and the cutting list are the compact cabinet's; the sliding one's cut list and step 11 are in the `*_v29_1_backup.*` files.
+  The buy list: compact £816–1,405 with the chairs, sliding £961–1,660. `TRACK_KEEP_ID` keeps the reworded rows' ticks; the
+  sliding gear's row is gone and the doors' hinges row is new.
+- **Tap to work things (room3d.js, after `new ResizeObserver`):** a tap (under 6 px, 600 ms, not in Edit room) raycasts (`pickItem`,
+  skipping clipped points) and opens the item card `#r3d-act` (room3d_page) with buttons for the cabinet (open for four or six, fold,
+  either door, show the other version), the flip-top, its chair cupboard and seat, the drawers, the TV, the lamp, bars 1 and 2, the
+  curtains, the light box, the PC and anything placed in Edit room; Escape closes it. A first-run toast says so (localStorage
+  `mw30-taphint`). Fixed on the way: an instant `setView` now cancels a running camera tween.
+- **Version numbers that were typed in by hand:** make_images' HD file names and render.py's labels now take `build_doc.VERSION`;
+  room3d.js's saved-picture name takes `R.VERSION` (export3d).
+- **QA:** `qa.py` drops the questions sheet and checks both cabinets; `src/taptest.py` taps the cabinet, the media wall, the lamp,
+  the flip-top and the curtains at 390 and 1280 (project the point with `camera.updateMatrixWorld()` first; press Escape between taps,
+  the card stays open after an action).
+- Backups `*_v29_1_backup.*` (geometry, fit, diagrams, build_doc, instructions, questions, build_viewer, room3d_page, export3d, shot3d,
+  ideas, room3d.js, page.js, page_router.js, page.css). v29 outputs in `out/v29/`.
+- Rebuilt: shot3d rendered all 39 stills (room3d.js changed; about 75 minutes with make_images running beside it). The later
+  `R.VERSION` edit only names saved pictures, so `shot3d_prints.json` was re-keyed to the new room print rather than re-rendered.
+  QA: `qa.py` fails and errors [] at 390 and 1280; taptest all taps work at both. Plan 97 pages, guide 53 (no shrink).
 
 ## Update 21 Oct 2026, round 23b: v29.1 (v29 checked, fixed and shipped)
 - Client: "can you please continue on from latest pr where ive been upgrading" (PR #25, merged with its checks still to do).

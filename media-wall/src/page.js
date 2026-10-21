@@ -92,12 +92,10 @@ function dash() {
   $("#d-buy").textContent = bd.length + "/" + bi.length; ring("d-buy-bar", bd.length, bi.length);
   const paid = $$("#tracker .paid input").reduce((a, i) => a + (parseFloat(i.value) || 0), 0);
   $("#d-paid").textContent = "\u00a3" + Math.round(paid).toLocaleString("en-GB") + " paid so far";
-  const qa = answeredCount();
-  $("#d-q").textContent = qa + "/" + DATA.q.length; ring("d-q-bar", qa, DATA.q.length);
 }
 let dashQ = false;
 const dashSoon = () => { if (!dashQ) { dashQ = true; requestAnimationFrame(() => { dashQ = false; dash(); }); } };
-["#steps-ol", "#tracker", "#qs-list"].forEach(s => { const el = $(s); if (el) new MutationObserver(dashSoon).observe(el, { subtree: true, attributes: true, attributeFilter: ["class"] }); });
+["#steps-ol", "#tracker"].forEach(s => { const el = $(s); if (el) new MutationObserver(dashSoon).observe(el, { subtree: true, attributes: true, attributeFilter: ["class"] }); });
 document.addEventListener("input", dashSoon);
 $("#d-nextdone").addEventListener("click", e => { const cb = document.getElementById("sd-" + e.currentTarget.dataset.s); if (cb && !cb.checked && !cb.disabled) { cb.checked = true; cb.dispatchEvent(new Event("change", { bubbles: true })); } });
 /* links into the 3D room with its options set */
@@ -115,14 +113,11 @@ $$(".g3d").forEach(b => b.addEventListener("click", () => {
   lb.hidden = false; document.body.style.overflow = "hidden"; $("#lb-close").focus();
 }));
 
-/* ---------- shared state: answers, photos, tracker, build steps */
-let db = null, assets = null, user = null, myId = null, readOnly = false;
-const remote = {};            // answers/<id> bodies as saved
+/* ---------- shared state: tracker, build steps (v30: the questions and their answers are gone) */
+let db = null, user = null, myId = null, readOnly = false;
 const tstate = {};            // tracker/<id> bodies as saved
 const sstate = {};            // steps/<n> bodies as saved
 const chains = {};            // one write at a time per document
-const names = {};
-const fmtTime = iso => { try { return new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch (e) { return ""; } };
 function write(path, body) {
   const run = () => db.doc(path).set(body);
   chains[path] = (chains[path] || Promise.resolve()).then(run, run);
@@ -132,103 +127,7 @@ function onWriteError(e, stEl) {
   if (e && e.code === "invalid_argument") { readOnly = true; lockInputs(); }
   if (stEl) { stEl.textContent = e && e.code === "quota_exceeded" ? "The page's storage is full; tell Claude." : "Couldn't save. Try again in a moment."; stEl.className = "st err"; }
 }
-function lockInputs() { $$(".q textarea, .q .save, .items input, .sdone input").forEach(el => el.disabled = true); $$(".upl").forEach(el => el.hidden = true); }
-async function nameOf(id) {
-  if (!id) return "";
-  if (id === myId) return "you";
-  if (names[id] !== undefined) return names[id];
-  names[id] = "";
-  try { const ps = await user.profiles([id]); names[id] = (ps[id] && ps[id].name) || ""; } catch (e) {}
-  return names[id];
-}
-
-/* answers */
-const drafts = store.get("mw12-drafts", {});
-function cardFor(id) { return document.getElementById("q-" + id); }
-function answeredCount() {
-  return DATA.q.filter(q => ((remote[q.id] && remote[q.id].text) || (!db && drafts[q.id]) || "").trim() || (remote[q.id] && (remote[q.id].photos || []).length)).length;
-}
-function meter() {
-  const n = answeredCount(), t = DATA.q.length;
-  $("#q-count").textContent = n + " of " + t + " answered";
-  $("#q-bar").style.width = (100 * n / t) + "%";
-  $$(".ask-badge").forEach(b => { b.textContent = t - n; b.hidden = t - n === 0; });   // v25: the rail's red badge
-  DATA.q.forEach(q => { const c = cardFor(q.id), ta = $("textarea", c), txt = ((remote[q.id] && remote[q.id].text) || (!db && drafts[q.id]) || "").trim();
-    if (!db) c.classList.toggle("answered", !!txt); paintChips(q.id, (db && remote[q.id] ? remote[q.id].text : ta.value) || ""); $(".qans", c).textContent = txt ? "Your answer: " + txt : ""; });
-  dashSoon();
-}
-async function paintAnswer(id) {
-  const card = cardFor(id), body = remote[id];
-  if (!card) return;
-  const st = $(".st", card), ta = $("textarea", card);
-  if (body && document.activeElement !== ta && !card.dataset.dirty) ta.value = body.text || "";
-  card.classList.toggle("answered", !!(body && ((body.text || "").trim() || (body.photos || []).length)));
-  if (body && body.at) {
-    const who = await nameOf(body.by);
-    st.textContent = "Saved " + fmtTime(body.at) + (who ? " by " + who : "");
-    st.className = "st ok";
-  }
-  const box = $(".photos", card);
-  box.textContent = "";
-  for (const p of (body && body.photos) || []) {
-    if (!/^[0-9a-f]{32}$/.test(p.id || "")) continue;
-    const fig = document.createElement("figure");
-    const im = document.createElement("img");
-    im.src = "/_blob/" + p.id; im.alt = p.name || "Photo"; im.loading = "lazy";
-    im.onerror = () => { im.removeAttribute("src"); im.alt = "Photo unavailable"; };
-    fig.appendChild(im);
-    if (db && !readOnly) {
-      const rm = document.createElement("button"); rm.type = "button"; rm.textContent = "Remove"; rm.setAttribute("aria-label", "Remove this photo from the answer");
-      rm.addEventListener("click", () => {
-        const b = Object.assign({ text: "" }, remote[id]);
-        b.photos = (b.photos || []).filter(x => x.id !== p.id); b.by = myId; b.at = new Date().toISOString();
-        write("answers/" + id, b).catch(e => onWriteError(e, st));
-      });
-      fig.appendChild(rm);
-    }
-    box.appendChild(fig);
-  }
-  meter();
-}
-DATA.q.forEach(q => {
-  const card = cardFor(q.id), ta = $("textarea", card), st = $(".st", card);
-  if (drafts[q.id]) ta.value = drafts[q.id];
-  ta.addEventListener("input", () => { card.dataset.dirty = "1"; drafts[q.id] = ta.value; store.set("mw12-drafts", drafts); if (!db) meter(); st.textContent = db ? "Not saved yet" : "Kept on this device"; st.className = "st"; });
-  $(".save", card).addEventListener("click", async () => {
-    if (!db) { st.textContent = "Kept on this device. Copy all answers to send them."; st.className = "st"; meter(); thanks(); return; }
-    const body = Object.assign({ photos: [] }, remote[q.id], { text: ta.value.trim().slice(0, 4000), by: myId, at: new Date().toISOString() });
-    st.textContent = "Saving…"; st.className = "st";
-    try { await write("answers/" + q.id, body); delete card.dataset.dirty; delete drafts[q.id]; store.set("mw12-drafts", drafts); thanks(); }
-    catch (e) { onWriteError(e, st); }
-  });
-  $(".upl input", card).addEventListener("change", async ev => {
-    const files = [...ev.target.files].slice(0, 6);
-    ev.target.value = "";
-    if (!assets || !files.length) return;
-    st.textContent = "Uploading " + files.length + (files.length > 1 ? " photos…" : " photo…"); st.className = "st";
-    const added = [];
-    for (const f of files) {
-      try { const r = await assets.upload(f); added.push({ id: r.id, name: (f.name || "photo").slice(0, 80) }); }
-      catch (e) { st.textContent = e && e.code === "too_large" ? "That photo is over 20 MB; try a smaller one." : e && e.code === "unsupported_type" ? "That file type isn't supported; use a JPEG or PNG." : "Couldn't upload. Try again."; st.className = "st err"; }
-    }
-    if (!added.length) return;
-    const body = Object.assign({ text: "" }, remote[q.id]);
-    body.photos = (body.photos || []).concat(added); body.by = myId; body.at = new Date().toISOString();
-    try { await write("answers/" + q.id, body); } catch (e) { onWriteError(e, st); }
-  });
-});
-meter();
-
-$("#copy-all").addEventListener("click", async () => {
-  const lines = DATA.q.map((q, i) => {
-    const t = (cardFor(q.id).querySelector("textarea").value || "").trim();
-    return (i + 1) + ". " + q.q + "\n" + (t || "(not answered yet)");
-  });
-  const text = "Media wall: our answers\n\n" + lines.join("\n\n");
-  const box = $("#copy-box"), st = $("#copy-st");
-  try { await navigator.clipboard.writeText(text); st.textContent = "Copied. Paste it into a message."; box.hidden = true; }
-  catch (e) { box.value = text; box.hidden = false; box.focus(); box.select(); st.textContent = "Select the text below and copy it."; }
-});
+function lockInputs() { $$(".items input, .sdone input").forEach(el => el.disabled = true); }
 
 $("#copy-cuts").addEventListener("click", async () => {
   const box = $("#cuts-box"), st = $("#cuts-st");
@@ -317,10 +216,9 @@ paintSteps();
 
 /* light up what this view can do */
 (async () => {
-  const [d, u, a] = await Promise.all([use("db"), use("user"), use("assets")]);
+  const [d, u] = await Promise.all([use("db"), use("user")]);
   user = u;
   if (!d) {
-    $("#q-local").hidden = true;   // v23: no answer boxes, so no notice about where answers are kept
     $("#t-note").textContent = "Each phase says which build step it's needed for. Ticks and amounts are kept on this device only from this view.";
     $("#s-note").textContent = "Tick each step when it's done; from this view the ticks are kept on this device only.";
     return;
@@ -330,15 +228,6 @@ paintSteps();
   let canWrite = null;
   try { canWrite = u ? await u.can("data.write") : null; } catch (e) {}
   if (canWrite === false) { readOnly = true; lockInputs(); }
-  else if (a) { assets = a; }     // v25: a card's upload shows when you tap "Add a photo"
-  $$(".q .st").forEach(st => { if (st.textContent === "Kept on this device") st.textContent = "Not saved yet"; });
-  db.collection("answers").onSnapshot(snap => {
-    snap.docChanges().forEach(ch => {
-      if (ch.type === "removed") delete remote[ch.doc.id]; else remote[ch.doc.id] = ch.doc.data();
-      paintAnswer(ch.doc.id);
-    });
-    meter();
-  }, () => {});
   db.collection("tracker").onSnapshot(snap => {
     snap.docChanges().forEach(ch => { if (ch.type === "removed") delete tstate[ch.doc.id]; else tstate[ch.doc.id] = ch.doc.data(); });
     paintTracker();
@@ -383,39 +272,6 @@ paintSteps();
   if (saved && bar.querySelector('button[data-part="' + saved.replace(/"/g, "") + '"]')) pick(saved);
 })();
 
-/* ---------- v25: quick taps on the questions. A card's rows each take one choice; the choices make the plain-text answer
-   ("Cupboard: For six, 31 deep · Behind the top: No"), saved through the card's own (hidden) answer box and Save, so the same
-   answers/<id> record and the same drafts on this device. "Add a photo" opens that card's photo upload. */
-function chipsText(card) {
-  return $$(".qrow", card).map(r => { const on = $(".qc[aria-pressed=true]", r); if (!on || on.dataset.photo) return ""; return (r.dataset.label ? r.dataset.label + ": " : "") + on.dataset.v; }).filter(Boolean).join(" · ");
-}
-function paintChips(id, text) {
-  const card = cardFor(id); if (!card || card.dataset.tapping) return;
-  const parts = (text || "").split(" · ");
-  $$(".qrow", card).forEach(r => {
-    const lab = r.dataset.label, mine = parts.find(p => lab ? p.startsWith(lab + ": ") : true);
-    const v = mine ? (lab ? mine.slice(lab.length + 2) : mine) : (parts.length === 1 ? parts[0] : "");   // an answer saved as just the choice
-    $$(".qc", r).forEach(b => { if (!b.dataset.photo) b.setAttribute("aria-pressed", String(!!v && b.dataset.v === v)); });
-  });
-}
-document.addEventListener("click", e => {
-  const b = e.target.closest(".qc"); if (!b) return;
-  const card = b.closest(".q"), row = b.closest(".qrow"), st = $(".st", card);
-  if (b.dataset.photo) {
-    const up = $(".upl", card);
-    if (assets && !readOnly) { up.hidden = false; $("input", up).click(); }
-    else { st.textContent = db ? "Photos can't be added from this view." : "Photos save on the shared plan page; from here, send them in a message."; st.className = "st"; }
-    return;
-  }
-  const on = b.getAttribute("aria-pressed") !== "true";
-  $$(".qc", row).forEach(x => { if (!x.dataset.photo) x.setAttribute("aria-pressed", "false"); });
-  b.setAttribute("aria-pressed", String(on));
-  b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
-  const ta = $("textarea", card); ta.value = chipsText(card);
-  card.dataset.tapping = "1"; ta.dispatchEvent(new Event("input", { bubbles: true }));
-  $(".save", card).click(); delete card.dataset.tapping;
-});
-
 /* ---------- v25: the celebration: a dark pill toast, and an 18-dot confetti burst (no burst, and no springs, with reduced motion) */
 const toastEl = document.getElementById("toast"), DOTS = [50, 165, 300, 95, 235, 345, 25, 70, 125];
 let toastT = 0;
@@ -429,7 +285,6 @@ function cheer(msg, from) {
     d.style.background = `oklch(0.78 0.14 ${DOTS[i % DOTS.length]})`; d.style.setProperty("--dx", Math.cos(a) * R + "px"); d.style.setProperty("--dy", Math.sin(a) * R - 30 + "px"); box.appendChild(d); }
   document.body.appendChild(box); setTimeout(() => box.remove(), 1000);
 }
-function thanks() { const left = DATA.q.length - answeredCount(); cheer(left ? `Thanks! ${left} left` : "Thanks! That's every question"); }
 document.addEventListener("change", e => {
   const t = e.target; if (t.type !== "checkbox" || !t.checked) return;
   const step = t.closest(".step");

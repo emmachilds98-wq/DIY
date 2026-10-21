@@ -33,7 +33,8 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
               decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black" },   // v26: the oak, the floor, your shelf
               sugg: {},     // v21: the suggested furniture and decor, all off
-              seat: "off" };   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
+              seat: "off",
+              cab: "compact", tdoor: false };   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
@@ -678,7 +679,7 @@ function buildShell() {
   buildIdeas();
   buildPlantsAndRecords();
   buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
-  buildOptC();                                                                                 // v26
+  buildOptC(); buildCab();                                                                     // v26; v30: the compact cabinet
   flushCubes(shell);
 }
 /* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
@@ -750,141 +751,273 @@ function placeChairs() {
   chairsHook.visible = mode === "hooks" && folded;
 }
 
-/* v26: option C, the dining cabinet; v27: the plan, made for six. One flush oak cabinet under your shelf: at the stair end the table
-   bay, where a 180 × 90 top folded double stands up behind its framed oak underside (a drawer under it, the linen flap over it); at the
-   window end the chair bay, six FRÖSVI folded behind two doors (four on the floor, two on the shelf, their seat pads beside them).
-   S.site "C"; S.dining folded / four / six (the table always opens to its full 180). */
+/* v26: option C, the dining cabinet; v27: the plan, made for six; v29: two sliding doors (OPTC). v30, client: "is there anyway you can
+   optimise the dining cabinet build to fit the chairs in a better way so the cabinet doesnt have to be so big", "show me both versions":
+   the compact cabinet (CAB) is the plan, the sliding one the alternative. S.site "C"; S.cab "compact" / "sliding"; S.dining folded /
+   four / six; S.chairs "open" opens the chair door (the table folded); S.tdoor opens the table door with the table still folded.
+   The doors move by tween (cabTween), so a tap in the room swings or slides them; a still (R3D.set) snaps them. */
+const cabC = () => (S.cab === "sliding" ? R.OPTC : R.CAB);   // v30: the cabinet on show
+let CK = null;
+function cabKit() {      // the parts both cabinets share: materials, the table standing up and open, the chairs round it and folded
+  if (CK) return CK;
+  const mat = o => reg(new THREE.MeshStandardMaterial(o));
+  const K = {
+    oak: mat({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }),
+    oakV: mat({ color: "#c48c57", map: OAK_TEX_V, roughness: 0.55 }),     // the doors and the ends: the grain upright
+    oakIn: mat({ color: "#b5845a", map: OAK_TEX, roughness: 0.65 }),
+    oakEnd: mat({ color: "#b98250", map: OAK_TEX, roughness: 0.55 }),     // the breadboard ends, a touch darker
+    dark: mat({ color: "#241f1b", roughness: 0.9 }),
+    beech: mat({ color: "#d4b58c", map: OAK_TEX, roughness: 0.6 }),       // the folding chairs
+    pad: mat({ color: "#8e9a80", roughness: 0.95 }),                      // sage linen seat pads
+    alu: mat({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }),
+    steel: mat({ color: "#c9cbcd", roughness: 0.3, metalness: 0.9 }),     // v30: the piano hinges' knuckles
+    plate: mat({ color: "#f4f1ea", roughness: 0.35 }),
+    cloth: ["#efe7d8", "#8e9a80", "#c7643a"].map(c => mat({ color: c, roughness: 0.95 })),
+  };
+  K.bx = (g, x, y, z, w, h, d, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
+  K.rbx = (g, x, y, z, w, h, d, m, r = 0.6) => { const me = new THREE.Mesh(new RoundedBoxGeometry(w * M, h * M, d * M, 2, Math.min(r, Math.min(w, h, d) / 2.2) * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
+  // the table folded: standing up on its hinge rail, the inner half's apron to the room, the legs folded inside it
+  K.tableFold = C => {
+    const g = new THREE.Group(), [tw, tl, tt] = C.top, [tz0, tz1] = C.tz, ap = C.apron, [px, py] = C.pivot, xa = px - ap;
+    K.bx(g, px, py, tz1, tt, tl, tw, K.oak);
+    K.bx(g, px + tt + 0.3, py, tz1, tt, tl, tw, K.oakEnd);
+    for (const [a, b] of [[tz1, tz1 + 2], [tz0 - 2, tz0]]) K.bx(g, xa, py, a, ap, tl, b - a, K.oakIn);
+    for (const y of [py, py + tl - 2]) K.bx(g, xa, y, tz1 + 2, ap, 2, tw - 4, K.oakIn);
+    for (const z of [C.cz - 15, C.cz + 11]) K.bx(g, xa + 0.6, py + 5, z, C.leg[1], tl - 12, 4, K.oakIn);
+    return g;
+  };
+  // the table open: two halves flush at the joint, each a centre of staves between two breadboard ends, the corners eased; its aprons;
+  // four tapered legs
+  K.tableOpen = C => {
+    const g = new THREE.Group(), [tw, , tt] = C.top, [tz0, tz1] = C.tz, ap = C.apron, py = C.pivot[1], [tx0, tx1] = C.tx, jx = C.joint_x;
+    for (const [a, b] of [[jx, tx1], [tx0, jx - 0.15]]) {
+      K.rbx(g, a + 7, py, tz1, b - a - 14, tt, tw, K.oak, 0.5);
+      for (const e of [a, b - 7]) K.rbx(g, e, py, tz1, 7, tt, tw, K.oakEnd, 0.6);
+    }
+    for (const [a, b] of [[jx + 0.2, tx1 - ap], [tx0 + 3, jx - 3]]) {
+      for (const z of [tz1 + 4, tz0 - 6]) K.bx(g, a, py - ap, z, b - a, ap, 2, K.oakIn);
+      for (const x of [a, b - 2]) K.bx(g, x, py - ap, tz1 + 6, 2, ap, tw - 12, K.oakIn);
+    }
+    const legGeo = (() => { const lg = new THREE.CylinderGeometry(3.9 * M, 2.7 * M, C.leg_h * M, 4, 1); lg.rotateY(Math.PI / 4); lg.scale(C.leg[0] / 5.5, 1, C.leg[1] / 5.5); return lg; })();
+    for (const [lx, lz] of C.legs) { const l = new THREE.Mesh(legGeo, K.oakIn); l.position.copy(v3(lx, C.leg_h / 2, lz)); g.add(shadow(l)); }
+    return g;
+  };
+  // the chairs at the table: slatted beech folding chairs with sage pads, the back legs rising to a two-rail back; a plate at each
+  K.seats = C => {
+    const out = {}, [tz0, tz1] = C.tz, tx0 = C.tx[0], py = C.pivot[1], tt = C.top[2];
+    const chairOpen = (g, x, z, face) => {
+      const c = new THREE.Group(), sw = R.CHAIR[0], sd = R.CHAIR[1], sh = R.CHAIR[3], bh = R.CHAIR[2];
+      for (let i = 0; i < 4; i++) lb(c, 0, sh - 2.2, -sd / 2 + 6 + i * 9.4, sw - 4, 2.2, 8.2, K.beech);         // the seat's slats
+      for (const xx of [-sw / 2 + 1.5, sw / 2 - 1.5]) {
+        const back = lb(c, xx, 0, sd / 2 - 5, 2.6, bh, 3, K.beech); back.rotation.x = -0.06;              // the back legs, rising to the back
+        lb(c, xx, 0, -sd / 2 + 4, 2.6, sh - 2.2, 2.6, K.beech);                                           // the front legs
+        lb(c, xx, sh - 5, 0, 2.2, 3, sd - 6, K.beech);                                                    // the seat's side rails
+      }
+      for (const y of [bh - 9, bh - 21]) lb(c, 0, y, sd / 2 - 5.5, sw - 3, 7, 1.8, K.beech);             // two back rails
+      lb(c, 0, 14, -sd / 2 + 4, sw - 5, 2.2, 2.2, K.beech);                                               // the stretcher
+      const p = new THREE.Mesh(new RoundedBoxGeometry((sw - 7) * M, 3 * M, (sd - 14) * M, 2, 0.012), K.pad); p.position.copy(v3(0, sh + 1.5, -2)); c.add(shadow(p));
+      c.position.copy(v3(x, 0, z));
+      c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                                     // the back away from the table (local +z is the back)
+      g.add(c);
+    };
+    for (const [k, list] of Object.entries(C.seats)) {
+      const g = new THREE.Group();
+      for (const [x, z, f] of list) {
+        chairOpen(g, x, z, f);
+        const pz = f === "n" ? tz0 - 16 : f === "w" ? tz1 + 16 : C.cz, pxp = f === "e" ? tx0 + 16 : x;
+        const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.008, 28), K.plate); pl.position.copy(v3(pxp, py + tt + 0.4, pz)); g.add(pl);
+      }
+      out[k] = g;
+    }
+    return out;
+  };
+  // a folded chair standing up, its room-side face at x0 (cz its centre along the wall)
+  K.fchair = (g, x0, y0, cz) => {
+    const [cw, cdep, ch] = R.CHAIR_FOLDED;
+    for (const sd of [-1, 1]) {
+      K.bx(g, x0 + cdep - 3, y0, cz + sd * (cw / 2 - 1.3) - 1.3, 2.6, ch, 2.6, K.beech);                // the back legs
+      K.bx(g, x0 + 0.4, y0 + 2, cz + sd * (cw / 2 - 4) - 1.3, 2.6, ch - 14, 2.6, K.beech);             // the front legs, folded up against them
+    }
+    for (let i = 0; i < 4; i++) K.bx(g, x0 + 3.2, y0 + 30 + i * 9.4, cz - (cw / 2 - 5), 2.2, 8.2, cw - 10, K.beech);   // the seat, folded up
+    for (const y of [ch - 9, ch - 21]) K.bx(g, x0 + cdep - 3.4, y0 + y, cz - (cw / 2 - 3), 1.8, 7, cw - 6, K.beech);  // the back rails
+  };
+  // v30: a folded chair lying on its side (the compact cabinet's base): its length along the wall, its room-side face at x0
+  K.fchairLying = (g, x0, y0, cz) => {
+    const [cw, cdep, ch] = R.CHAIR_FOLDED, zA = cz - ch / 2;
+    for (const sd of [-1, 1]) {
+      K.bx(g, x0 + cdep - 3, y0 + cw / 2 + sd * (cw / 2 - 1.3) - 1.3, zA, 2.6, 2.6, ch, K.beech);        // the back legs, along the wall
+      K.bx(g, x0 + 0.4, y0 + cw / 2 + sd * (cw / 2 - 4) - 1.3, zA + 2, 2.6, 2.6, ch - 14, K.beech);
+    }
+    for (let i = 0; i < 4; i++) K.bx(g, x0 + 3.2, y0 + 5, zA + 30 + i * 9.4, 2.2, cw - 10, 8.2, K.beech);
+    for (const z of [ch - 9, ch - 21]) K.bx(g, x0 + cdep - 3.4, y0 + 3, zA + z, 1.8, cw - 6, 7, K.beech);
+  };
+  CK = K;
+  return K;
+}
+
 let optC = null, optCFold = null, optCOpen = null, optCChairsIn = null, optCDoors = {}, optCSeats = {};
 function buildOptC() {
   /* v29, client: "i asked for a full upgrade of the tables design". Shut, the cabinet is one tidy run of oak: two sliding doors between
      its ends (Häfele Slido Classic 40 IF C), a shadow-gap plinth, nothing of the table or the chairs on show. Door A (the stair end, front
      track) slides over door B to open the table bay; B slides behind A to open the chair bay. Inside: the table standing up on its hinge
-     rail, the drawer under it, the linen shelf over it; six folding chairs and their pads beside it. */
+     rail, the drawer under it, the linen shelf over it; six folding chairs and their pads beside it. v30: the alternative. */
   const C = R.OPTC; if (!C) return;
-  const [cw, cdep, ch] = R.CHAIR_FOLDED, W = R.W, xf = C.front, xi = C.inner, t = C.t;
-  const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
-  const oakV = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX_V, roughness: 0.55 }));   // the doors and the ends: the grain upright
-  const oakIn = reg(new THREE.MeshStandardMaterial({ color: "#b5845a", map: OAK_TEX, roughness: 0.65 }));
-  const oakEnd = reg(new THREE.MeshStandardMaterial({ color: "#b98250", map: OAK_TEX, roughness: 0.55 }));   // the breadboard ends, a touch darker
-  const dark = reg(new THREE.MeshStandardMaterial({ color: "#241f1b", roughness: 0.9 }));
-  const beech = reg(new THREE.MeshStandardMaterial({ color: "#d4b58c", map: OAK_TEX, roughness: 0.6 }));        // the folding chairs
-  const pad = reg(new THREE.MeshStandardMaterial({ color: "#8e9a80", roughness: 0.95 }));                        // sage linen seat pads
-  const alu = reg(new THREE.MeshStandardMaterial({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }));
-  const plate = reg(new THREE.MeshStandardMaterial({ color: "#f4f1ea", roughness: 0.35 }));
-  const cloth = ["#efe7d8", "#8e9a80", "#c7643a"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.95 })));
-  const bx = (g, x, y, z, w, h, d, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
-  const rbx = (g, x, y, z, w, h, d, m, r = 0.6) => { const me = new THREE.Mesh(new RoundedBoxGeometry(w * M, h * M, d * M, 2, Math.min(r, Math.min(w, h, d) / 2.2) * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
+  const K = cabKit(), bx = K.bx;
+  const [cw, cdep] = R.CHAIR_FOLDED, W = R.W, xf = C.front, xi = C.inner, t = C.t;
   const z0 = C.z[1], z1 = C.z[0], span = z1 - z0 - 2 * t, deepIn = W - C.back - xi;   // the window end, the stair end (z0 < z1)
   optC = new THREE.Group(); optC.name = "optc";
   // the carcass: two ends the full depth (the doors run between them), the 19 mm top with the track in its groove, the floor on a
   // plinth set 2.5 back (a shadow line), the back
-  bx(optC, xf, 0, z0, C.d, C.h, t, oakV); bx(optC, xf, 0, z1 - t, C.d, C.h, t, oakV);
-  bx(optC, xf, C.h - C.t_top, z0 + t, C.d, C.t_top, span, oak);
-  bx(optC, xf, C.plinth - t, z0 + t, C.d, t, span, oak);
-  bx(optC, xf + 2.5, 0, z0 + t, C.d - 2.5, C.plinth - t, span, dark);
-  bx(optC, W - C.back, C.plinth, z0 + t, C.back, C.h - C.plinth - C.t_top, span, oakIn);
-  bx(optC, xf + 0.3, C.h - C.t_top - 0.7, z0 + t, C.slide - 0.6, 0.7, span, alu);            // the double top track
-  bx(optC, xf + 0.3, C.plinth, z0 + t, C.slide - 0.6, 0.25, span, alu);                      // the bottom guide track
+  bx(optC, xf, 0, z0, C.d, C.h, t, K.oakV); bx(optC, xf, 0, z1 - t, C.d, C.h, t, K.oakV);
+  bx(optC, xf, C.h - C.t_top, z0 + t, C.d, C.t_top, span, K.oak);
+  bx(optC, xf, C.plinth - t, z0 + t, C.d, t, span, K.oak);
+  bx(optC, xf + 2.5, 0, z0 + t, C.d - 2.5, C.plinth - t, span, K.dark);
+  bx(optC, W - C.back, C.plinth, z0 + t, C.back, C.h - C.plinth - C.t_top, span, K.oakIn);
+  bx(optC, xf + 0.3, C.h - C.t_top - 0.7, z0 + t, C.slide - 0.6, 0.7, span, K.alu);            // the double top track
+  bx(optC, xf + 0.3, C.plinth, z0 + t, C.slide - 0.6, 0.25, span, K.alu);                      // the bottom guide track
   // inside, behind the doors: the partition, the chair shelf, the linen shelf, the hinge rail, the drawer
   const [bt0, bt1] = C.bay_t, [bc0, bc1] = C.bay_c;
-  bx(optC, xi, C.plinth, bt1 - t, deepIn, C.h - C.t_top - C.plinth, t, oakIn);
-  bx(optC, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, oakIn);
-  bx(optC, xi, C.flap[0] - t, bt1, deepIn, t, bt0 - bt1, oakIn);
+  bx(optC, xi, C.plinth, bt1 - t, deepIn, C.h - C.t_top - C.plinth, t, K.oakIn);
+  bx(optC, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, K.oakIn);
+  bx(optC, xi, C.flap[0] - t, bt1, deepIn, t, bt0 - bt1, K.oakIn);
   const rail = C.pivot[1] - 7;
-  bx(optC, xi, rail, bt1, deepIn, 7, bt0 - bt1, oak);
-  bx(optC, xi, C.plinth + 0.3, bt1 + 0.15, t, rail - C.plinth - 0.6, bt0 - bt1 - 0.3, oak);   // the drawer's front, inside
-  bx(optC, xi - 0.6, (C.plinth + rail) / 2 - 0.8, C.cz - 6, 0.6, 1.6, 12, dark);              // its finger slot
-  [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(optC, xi + 3 + i * 0.4, C.flap[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - 6, 3, 34, cloth[c]));   // the cloth, napkins and runner
+  bx(optC, xi, rail, bt1, deepIn, 7, bt0 - bt1, K.oak);
+  bx(optC, xi, C.plinth + 0.3, bt1 + 0.15, t, rail - C.plinth - 0.6, bt0 - bt1 - 0.3, K.oak);   // the drawer's front, inside
+  bx(optC, xi - 0.6, (C.plinth + rail) / 2 - 0.8, C.cz - 6, 0.6, 1.6, 12, K.dark);              // its finger slot
+  [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(optC, xi + 3 + i * 0.4, C.flap[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - 6, 3, 34, K.cloth[c]));   // the cloth, napkins and runner
   // the two sliding doors: A on the front track over the table bay, B on the back track over the chair bay; a routed finger slot near
   // each one's outer end. Each is a group placed at its stair-side edge (placeOptC slides it).
   optCDoors = {};
   for (const k of ["A", "B"]) {
     const D = C.doors[k], [dx0] = C.door_x[D.track], g = new THREE.Group();
-    bx(g, dx0, C.plinth + 0.3, -C.door_w, C.door, C.door_h, C.door_w, oakV);
+    bx(g, dx0, C.plinth + 0.3, -C.door_w, C.door, C.door_h, C.door_w, K.oakV);
     const zs = k === "A" ? -7 : -C.door_w + 4;
-    bx(g, dx0 - 0.05, 92, zs, 0.12, 26, 3, dark);
+    bx(g, dx0 - 0.05, 92, zs, 0.12, 26, 3, K.dark);
     optC.add(g); optCDoors[k] = g;
   }
-  // the table folded: standing up in its bay behind door A, the inner half's apron to the front, the legs folded inside it
-  optCFold = new THREE.Group();
-  const [tw, tl, tt] = C.top, [tz0, tz1] = C.tz, ap = C.apron, px = C.pivot[0], py = C.pivot[1];
-  bx(optCFold, px, py, tz1, tt, tl, tw, oak);
-  bx(optCFold, px + tt + 0.3, py, tz1, tt, tl, tw, oakEnd);
-  for (const [a, b] of [[tz1, tz1 + 2], [tz0 - 2, tz0]]) bx(optCFold, xi, py, a, ap, tl, b - a, oakIn);
-  for (const y of [py, py + tl - 2]) bx(optCFold, xi, y, tz1 + 2, ap, 2, tw - 4, oakIn);
-  for (const z of [C.cz - 15, C.cz + 11]) bx(optCFold, xi + 0.6, py + 5, z, C.leg[1], tl - 12, 4, oakIn);
-  optC.add(optCFold);
-  // the table open: two halves flush at the joint, each a centre of staves between two breadboard ends, the corners eased; its aprons;
-  // four tapered legs
-  optCOpen = new THREE.Group();
-  const [tx0, tx1] = C.tx, jx = C.joint_x;
-  for (const [a, b] of [[jx, tx1], [tx0, jx - 0.15]]) {
-    rbx(optCOpen, a + 7, py, tz1, b - a - 14, tt, tw, oak, 0.5);
-    for (const e of [a, b - 7]) rbx(optCOpen, e, py, tz1, 7, tt, tw, oakEnd, 0.6);
-  }
-  for (const [a, b] of [[jx + 0.2, tx1 - ap], [tx0 + 3, jx - 3]]) {
-    for (const z of [tz1 + 4, tz0 - 6]) bx(optCOpen, a, py - ap, z, b - a, ap, 2, oakIn);
-    for (const x of [a, b - 2]) bx(optCOpen, x, py - ap, tz1 + 6, 2, ap, tw - 12, oakIn);
-  }
-  const legGeo = (() => { const g = new THREE.CylinderGeometry(3.9 * M, 2.7 * M, C.leg_h * M, 4, 1); g.rotateY(Math.PI / 4); g.scale(C.leg[0] / 5.5, 1, C.leg[1] / 5.5); return g; })();
-  for (const [lx, lz] of C.legs) { const l = new THREE.Mesh(legGeo, oakIn); l.position.copy(v3(lx, C.leg_h / 2, lz)); optCOpen.add(shadow(l)); }
-  optC.add(optCOpen);
-  // the chairs at the table: slatted beech folding chairs with sage pads, the back legs rising to a two-rail back
-  const chairOpen = (g, x, z, face) => {
-    const c = new THREE.Group(), sw = R.CHAIR[0], sd = R.CHAIR[1], sh = R.CHAIR[3], bh = R.CHAIR[2];
-    for (let i = 0; i < 4; i++) lb(c, 0, sh - 2.2, -sd / 2 + 6 + i * 9.4, sw - 4, 2.2, 8.2, beech);          // the seat's slats
-    for (const xx of [-sw / 2 + 1.5, sw / 2 - 1.5]) {
-      const back = lb(c, xx, 0, sd / 2 - 5, 2.6, bh, 3, beech); back.rotation.x = -0.06;                // the back legs, rising to the back
-      lb(c, xx, 0, -sd / 2 + 4, 2.6, sh - 2.2, 2.6, beech);                                             // the front legs
-      lb(c, xx, sh - 5, 0, 2.2, 3, sd - 6, beech);                                                      // the seat's side rails
-    }
-    for (const y of [bh - 9, bh - 21]) lb(c, 0, y, sd / 2 - 5.5, sw - 3, 7, 1.8, beech);               // two back rails
-    lb(c, 0, 14, -sd / 2 + 4, sw - 5, 2.2, 2.2, beech);                                                 // the stretcher
-    const p = new THREE.Mesh(new RoundedBoxGeometry((sw - 7) * M, 3 * M, (sd - 14) * M, 2, 0.012), pad); p.position.copy(v3(0, sh + 1.5, -2)); c.add(shadow(p));
-    c.position.copy(v3(x, 0, z));
-    c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                                     // the back away from the table (local +z is the back)
-    g.add(c);
-  };
-  for (const [k, list] of Object.entries(C.seats)) {
-    const g = new THREE.Group();
-    for (const [x, z, f] of list) {
-      chairOpen(g, x, z, f);
-      const pz = f === "n" ? tz0 - 16 : f === "w" ? tz1 + 16 : C.cz, pxp = f === "e" ? tx0 + 16 : x;
-      const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.008, 28), plate); pl.position.copy(v3(pxp, py + tt + 0.4, pz)); g.add(pl);
-    }
-    optCSeats[k] = g; optC.add(g);
-  }
-  // six chairs folded in the chair bay: two across, two deep on the floor and one deep on the shelf, each a folded slatted chair; the six
-  // pads on edge in front of the two on the shelf
+  optCFold = K.tableFold(C); optC.add(optCFold);
+  optCOpen = K.tableOpen(C); optC.add(optCOpen);
+  optCSeats = K.seats(C); Object.values(optCSeats).forEach(g => optC.add(g));
+  // six chairs folded in the chair bay: two across, two deep on the floor and one deep on the shelf; the six pads on edge in front of
+  // the two on the shelf
   optCChairsIn = new THREE.Group();
-  const fchair = (g, x0, y0, cz) => {
-    for (const sd of [-1, 1]) {
-      bx(g, x0 + cdep - 3, y0, cz + sd * (cw / 2 - 1.3) - 1.3, 2.6, ch, 2.6, beech);                   // the back legs
-      bx(g, x0 + 0.4, y0 + 2, cz + sd * (cw / 2 - 4) - 1.3, 2.6, ch - 14, 2.6, beech);                // the front legs, folded up against them
-    }
-    for (let i = 0; i < 4; i++) bx(g, x0 + 3.2, y0 + 30 + i * 9.4, cz - (cw / 2 - 5), 2.2, 8.2, cw - 10, beech);   // the seat, folded up
-    for (const y of [ch - 9, ch - 21]) bx(g, x0 + cdep - 3.4, y0 + y, cz - (cw / 2 - 3), 1.8, 7, cw - 6, beech);  // the back rails
-  };
   for (const cz of C.chair_z) {
-    for (let j = 0; j < 2; j++) fchair(optCChairsIn, W - C.back - 0.3 - cdep - j * (cdep + 0.3), C.plinth, cz);
-    fchair(optCChairsIn, W - C.back - 0.3 - cdep, C.shelf_y + t, cz);
-    for (let k = 0; k < 3; k++) bx(optCChairsIn, xi + 0.6 + k * 3.1, C.shelf_y + t, cz - 19, 3, 38, 38, pad);
+    for (let j = 0; j < 2; j++) K.fchair(optCChairsIn, W - C.back - 0.3 - cdep - j * (cdep + 0.3), C.plinth, cz);
+    K.fchair(optCChairsIn, W - C.back - 0.3 - cdep, C.shelf_y + t, cz);
+    for (let k = 0; k < 3; k++) bx(optCChairsIn, xi + 0.6 + k * 3.1, C.shelf_y + t, cz - 19, 3, 38, 38, K.pad);
   }
   optC.add(optCChairsIn);
   scene.add(optC);
 }
+
+/* v30: the compact cabinet, two boxes side by side: the table box at the stair end (the table on its hinge rail, two chairs lying on
+   their sides in the base under it, the linen shelf over it, the six seat pads on the door's back) and the chair box (four chairs, two
+   deep on its floor and two deep on its shelf). Inset doors, each on a full-height piano hinge with its knuckle on the front: the table
+   door turns 180° towards the window and lies back over the chair door and the wall beyond; the chair door turns 180° towards the
+   stairs and lies back over the table door. */
+let cab = null, cabFold = null, cabOpen = null, cabSeats = {}, cabIn = null, cabDoor = {}, cabPads = null;
+function buildCab() {
+  const C = R.CAB; if (!C) return;
+  const K = cabKit(), bx = K.bx, W = R.W, t = C.t, xf = C.front, xi = C.inner, deepIn = C.in_d;
+  const [cw, cdep] = R.CHAIR_FOLDED;
+  cab = new THREE.Group(); cab.name = "cab";
+  // two carcasses: each two ends, a top, a floor on a plinth set 2.5 back (a shadow line), a back; the boxes screwed together
+  for (const [a, b] of [C.z_t, C.z_c]) {
+    const span = a - b - 2 * t;
+    bx(cab, xf, 0, b, C.d, C.h, t, K.oakV); bx(cab, xf, 0, a - t, C.d, C.h, t, K.oakV);
+    bx(cab, xf, C.h - C.t_top, b + t, C.d, C.t_top, span, K.oak);
+    bx(cab, xf, C.plinth - t, b + t, C.d, t, span, K.oak);
+    bx(cab, xf + 2.5, 0, b + t, C.d - 2.5, C.plinth - t, span, K.dark);
+    bx(cab, W - C.back, C.plinth, b + t, C.back, C.h - C.plinth - C.t_top, span, K.oakIn);
+  }
+  const [bt0, bt1] = C.bay_tz, [bc0, bc1] = C.bay_cz;
+  bx(cab, xi, C.rail[0], bt1, deepIn, 7, bt0 - bt1, K.oak);                                       // the hinge rail
+  bx(cab, xi, C.linen[0] - t, bt1, deepIn, t, bt0 - bt1, K.oakIn);                                // the linen shelf
+  bx(cab, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, K.oakIn);                                     // the chair bay's shelf
+  [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(cab, xi + C.pads + 1 + i * 0.4, C.linen[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - C.pads - 2, 3, 34, K.cloth[c]));   // the cloth, napkins, runner
+  // the chairs: two lying in the base, two deep; four standing in the chair bay, two deep on its floor and on its shelf
+  cabIn = new THREE.Group();
+  for (let j = 0; j < C.chairs_base; j++) K.fchairLying(cabIn, xi + 0.3 + j * (cdep + 0.3), C.base[0], C.cz);
+  for (const x0 of C.chair_x) for (const y0 of [C.plinth, C.shelf_y + t]) K.fchair(cabIn, x0, y0, C.chair_z);
+  cab.add(cabIn);
+  cabFold = K.tableFold(C); cab.add(cabFold);
+  cabOpen = K.tableOpen(C); cab.add(cabOpen);
+  cabSeats = K.seats(C); Object.values(cabSeats).forEach(g => cab.add(g));
+  // the doors: each a group at its hinge's axis, so turning it is a rotation; the door panel, a routed finger slot near its free edge,
+  // the piano hinge's knuckle; the table door carries the six seat pads on its back (a child of the door, so they swing with it)
+  cabDoor = {};
+  const ax = xf - C.knuckle;
+  const door = (key, z0, z1, hz) => {
+    const g = new THREE.Group(); g.position.copy(v3(ax, 0, hz));
+    const loc = (x, z) => [x - ax, z - hz];                                       // room cm to the door's own frame (x into the cabinet, z along it)
+    const [lx, lz0] = loc(xf, Math.min(z0, z1)), lz1 = loc(xf, Math.max(z0, z1))[1];
+    bx(g, lx, C.plinth + C.gap, lz0, C.door, C.door_h, lz1 - lz0, K.oakV);
+    const free = Math.abs(z0 - hz) > Math.abs(z1 - hz) ? z0 : z1, sz = free > hz ? -1 : 1;
+    bx(g, lx - 0.05, 92, loc(xf, free + sz * 5 - (sz < 0 ? 0 : 2.5))[1], 0.12, 26, 2.5, K.dark);   // the finger slot, 5 in from its free edge
+    const kn = new THREE.Mesh(new THREE.CylinderGeometry(0.28 * M, 0.28 * M, 180 * M, 8), K.steel); kn.position.copy(v3(0, C.plinth + C.gap + C.door_h / 2, 0)); g.add(kn);
+    cab.add(g); cabDoor[key] = g; return g;
+  };
+  door("T", C.door_t[0], C.door_t[1], C.door_t[1] - C.hinge_gap / 2);
+  door("C", C.door_c[0], C.door_c[1], C.door_c[0] + C.hinge_gap / 2);
+  // the six pads on the table door's back, two across and three high, from the hinge rail's height up
+  cabPads = new THREE.Group();
+  const hzT = C.door_t[1] - C.hinge_gap / 2, mid = (C.door_t[0] + C.door_t[1]) / 2;
+  for (let r = 0; r < 3; r++) for (const s of [-1, 1]) bx(cabPads, xf + C.door + 0.3 - ax, C.rail[1] + 0.7 + r * 37.7, mid + s * 20 - 19 - hzT, 3, 37, 38, K.pad);
+  cabDoor.T.add(cabPads);
+  scene.add(cab);
+}
+/* the doors' tween: each entry eases its object's rotation.y or position.z to a target; a still snaps them (cabSnap) */
+const CAB_TW = new Map();
+let cabSnap = false;
+function twTo(obj, prop, target) {
+  if (!obj) return;
+  const cur = prop === "ry" ? obj.rotation.y : obj.position.z;
+  if (cabSnap || REDUCE_M || Math.abs(cur - target) < 1e-4) { if (prop === "ry") obj.rotation.y = target; else obj.position.z = target; CAB_TW.delete(obj); return; }
+  CAB_TW.set(obj, { prop, from: cur, to: target, t0: performance.now(), dur: 700 });
+}
+function cabTween(now) {     // from the frame loop: true while anything is still moving
+  if (!CAB_TW.size) return false;
+  for (const [o, w] of CAB_TW) {
+    const k = Math.min(1, (now - w.t0) / w.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, v = w.from + (w.to - w.from) * e;
+    if (w.prop === "ry") o.rotation.y = v; else o.position.z = v;
+    if (k >= 1) CAB_TW.delete(o);
+  }
+  reshadow();
+  return true;
+}
+const REDUCE_M = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+function cabDoors() {        // which doors stand open: the table door with the table out (or S.tdoor), the chair door with S.chairs "open"
+  const folded = S.dining === "folded";
+  return { table: !folded || !!S.tdoor, chairs: folded && S.chairs === "open" && !S.tdoor };
+}
 function placeOptC() {
-  if (!optC) return;
-  const C = R.OPTC, on = S.site === "C", folded = S.dining === "folded", n = S.dining === "six" ? "six" : "four";
-  optC.visible = on;
-  if (!on) return;
-  optCFold.visible = folded; optCOpen.visible = !folded;
-  for (const [k, g] of Object.entries(optCSeats)) g.visible = !folded && k === n;
-  optCChairsIn.visible = folded;
-  // v29: the doors slide: the table out, door A over door B; the chairs out (the table folded), door B behind door A
-  const slidA = !folded, slidB = folded && S.chairs === "open";
-  optCDoors.A.position.copy(v3(0, 0, (slidA ? C.doors.A.slid : C.doors.A.shut)[0]));
-  optCDoors.B.position.copy(v3(0, 0, (slidB ? C.doors.B.slid : C.doors.B.shut)[0]));
+  const on = S.site === "C", sliding = S.cab === "sliding", folded = S.dining === "folded", n = S.dining === "six" ? "six" : "four";
+  const dr = cabDoors();
+  if (optC) {
+    const C = R.OPTC, vis = on && sliding;
+    optC.visible = vis;
+    if (vis) {
+      optCFold.visible = folded; optCOpen.visible = !folded;
+      for (const [k, g] of Object.entries(optCSeats)) g.visible = !folded && k === n;
+      optCChairsIn.visible = folded;
+      // v29: the doors slide: the table out, door A over door B; the chairs out (the table folded), door B behind door A
+      twTo(optCDoors.A, "pz", v3(0, 0, (dr.table ? C.doors.A.slid : C.doors.A.shut)[0]).z);
+      twTo(optCDoors.B, "pz", v3(0, 0, (dr.chairs ? C.doors.B.slid : C.doors.B.shut)[0]).z);
+    }
+  }
+  if (cab) {
+    const vis = on && !sliding;
+    cab.visible = vis;
+    if (vis) {
+      cabFold.visible = folded; cabOpen.visible = !folded;
+      for (const [k, g] of Object.entries(cabSeats)) g.visible = !folded && k === n;
+      cabIn.visible = folded;
+      cabPads.visible = folded;                          // with the table out, the pads are on the chairs
+      // v30: each door turns 180° about its knuckle: the table door towards the window (z falls), the chair door towards the stairs
+      twTo(cabDoor.T, "ry", dr.table ? Math.PI : 0);
+      twTo(cabDoor.C, "ry", dr.chairs ? -Math.PI : 0);
+    }
+  }
 }
 /* v17: the ideas (ideas.py), each its own group, all hidden until its button is on */
 const IDEA_G = {};
@@ -1065,7 +1198,7 @@ function applySuggest() {
   if (rn) {
     rn.visible = !!S.sugg.runner && S.dining !== "folded";
     const y = 76.3;
-    if (S.site === "C") { rn.position.copy(v3((R.OPTC.tx[0] + R.OPTC.tx[1]) / 2, y, R.OPTC.cz)); rn.rotation.y = 0; rn.scale.set(R.OPTC.len / 225, 1, 1); }
+    if (S.site === "C") { const C = cabC(); rn.position.copy(v3((C.tx[0] + C.tx[1]) / 2, y, C.cz)); rn.rotation.y = 0; rn.scale.set((C.len_open || C.len) / 225, 1, 1); }
     else if (S.site === "B") { rn.position.copy(v3((R.TABLE_B_OPEN_X[0] + R.TABLE_B_OPEN_X[1]) / 2, y, R.TABLE_B.cz)); rn.rotation.y = 0; rn.scale.set(0.78, 1, 1); }
     else { rn.position.copy(v3(R.TABLE_A.cx, y, (R.OPEN_Z[0] + R.OPEN_Z[1]) / 2)); rn.rotation.y = Math.PI / 2; rn.scale.set(0.78, 1, 1); }
   }
@@ -1989,8 +2122,8 @@ const VIEWS = {
   sofa:    { label: "From the sofa", eye: [85, 108, -250], at: [72, 112, 20], fov: 58 },
   door:    { label: "From the door", eye: [372, 165, -6], at: [110, 85, -210], fov: 64 },
   stairs:  { label: "From the stairs", eye: [438, 205, 4], at: [190, 70, -205], fov: 62 },
-  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [250, 150, -150], at: [467, 112, -185] }, C: { eye: [196, 175, -232], at: [430, 78, -130] }, fov: 60 },   // v21: back from the lamp
-  chairs:  { label: "The chair cupboard", eye: [255, 200, -190], at: [460, 95, -262], C: { eye: [228, 178, -150], at: [462, 92, -232] }, fov: 54 },   // v20; v21 clear of the lamp
+  dining:  { label: "The dining table", A: { eye: [250, 140, -262], at: [246, 88, 0] }, B: { eye: [250, 150, -150], at: [467, 112, -185] }, C: { eye: [196, 175, -232], at: [430, 78, -130] }, Cs: { eye: [196, 175, -232], at: [430, 78, -130] }, fov: 60 },   // v21: back from the lamp
+  chairs:  { label: "The chair cupboard", eye: [255, 200, -190], at: [460, 95, -262], C: { eye: [262, 170, -120], at: [462, 92, -200] }, Cs: { eye: [228, 178, -150], at: [462, 92, -232] }, fov: 54 },   // v20; v21 clear of the lamp; v30 the compact's chair bay
   windowwall: { label: "The window wall", eye: [236, 150, -70], at: [236, 120, -309], fov: 66 },   // v17: for the ideas' stills
   breast:  { label: "The chimney breast", eye: [246, 140, -250], at: [246, 120, 0], fov: 54 },   // v17: for the ideas' stills
   pc:      { label: "The PC side wall", eye: [345, 135, -168], at: [0, 112, -168], fov: 56 },
@@ -2036,12 +2169,13 @@ canvas.addEventListener("pointerdown", () => { canvas.focus({ preventScroll: tru
 function setView(name, instant, dur) {
   const v = VIEWS[name] || VIEWS.window; S.view = name;
   walked = false; controls.maxDistance = v.above ? 16 : 6;
-  const p = v[S.site] || v;
+  const p = (S.site === "C" && S.cab === "sliding" && v.Cs) || v[S.site] || v;   // v30: "Cs", the sliding cabinet's own eye
   const eye = v3(...p.eye), at = v3(...p.at);
   const from = { eye: camera.position.clone(), at: controls.target.clone(), fov: camera.fov };
   setAbove(!v.above);
   baseFov = v.fov;
-  if (instant) { camera.position.copy(eye); controls.target.copy(at); camera.fov = fitFov(v.fov); camera.updateProjectionMatrix(); controls.update(); dirty(); }
+  if (instant) { tween = null; camera.position.copy(eye); controls.target.copy(at);   // v30: an instant view stops any flight still under way
+                camera.fov = fitFov(v.fov); camera.updateProjectionMatrix(); controls.update(); dirty(); }
   else tween = { t0: performance.now(), from, to: { eye, at, fov: fitFov(v.fov) }, dur: dur || 900 };
   qsa("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === name)));
   store.set(KEY, S); updateCaption();
@@ -2101,8 +2235,8 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && tourSt) { 
 /* ---------------------------------------------------------------- v28: "copy link to this view"
    The look (where you stand and every choice, not Edit room's moves) as a plain #look-<token> (base64url JSON), which the page's
    router leaves alone. The link is always the GitHub Pages page, so anyone can open it. */
-const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null };
-const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow"];
+const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"] };   // v30: which cabinet
+const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor"];
 const HEX = /^#[0-9a-f]{6}$/i;
 const cm = v => [-v.x / M, v.y / M, v.z / M].map(n => Math.round(n));
 function lookOf() {
@@ -2256,6 +2390,130 @@ if (pop) pop.addEventListener("click", e => {
 canvas.addEventListener("pointerdown", () => { if (popId) closePop(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && popId) { const was = popId; closePop(); stickEls[was].focus(); } });
 new ResizeObserver(() => placeStickers()).observe(stage);
+/* ---------------------------------------------------------------- v30, client: "make function so say i click the dining cabinet i can
+   manage options to open it, close it etc as goes for drawers and other items i can interact with". A tap on the room (not a drag, not
+   in Edit room) finds what's under it and opens a card of what it can do. The card's buttons are the room's own controls (data-dining,
+   data-chairs, data-drawers, data-tog...), so they work, and stay in step with the Tools panel, exactly as its buttons do. */
+const act = qs("#r3d-act");
+let actId = null, actXY = null, tapDown = null;
+const clippedAt = p => CLIP.every(pl => pl.distanceToPoint(p) < 0);           // the cutaway hides what's on the far side of both planes
+const under = (o, g) => { if (!g) return false; for (; o; o = o.parent) if (o === g) return true; return false; };
+function pickItem(e) {
+  ray.setFromCamera(ndc(e), camera);
+  const hit = ray.intersectObjects(scene.children, true).find(h => h.object.isMesh && shown(h.object) && !clippedAt(h.point) && !(selBox && h.object === selBox));
+  if (!hit) return null;
+  const o = hit.object, p = hit.point;
+  const near = (obj, r) => !!obj && obj.getWorldPosition(new THREE.Vector3()).distanceTo(p) < r * M;
+  if (S.site === "C" && (under(o, cab) || under(o, optC))) return "cab";
+  if (under(o, chairCab) || under(o, chairsIn) || under(o, chairsHook)) return "chaircab";
+  if (under(o, seatUp) || under(o, seatDown)) return "seat";
+  if (under(o, lamp)) return "lamp";
+  if (under(o, bar1)) return "bar1";
+  if (under(o, bar2)) return "bar2";
+  if (under(o, curtOpen) || under(o, curtShut)) return "curtains";
+  if (o === tvScreen) return "tv";
+  if (o === lboxFace) return "lbox";
+  if (under(o, pcGlow)) return "pc";
+  let m = o; while (m && !m.userData.movId) m = m.parent;
+  if (m && MOV[m.userData.movId]) return "mov:" + m.userData.movId;
+  for (const [k, g] of Object.entries(G)) if (under(o, g)) {
+    if (k === "unit_in" || k === "unit_out") return "wall";
+    if (/^[AB]_/.test(k)) return "table";
+    if (near(tvScreen, 70)) return "tv";                                       // the TV's own frame and stand are in the room's fixed parts
+    if (near(lboxFace, 30)) return "lbox";
+    if (near(pcLight, 40)) return "pc";
+    return null;
+  }
+  return null;
+}
+const btn = (label, attrs, on) => ({ label, attrs, on });
+function actItems(id) {     // [title, how it is now, buttons]
+  const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
+  if (id === "cab" && S.site !== "C") id = "table";
+  if (id === "table" && S.site === "C") id = "cab";
+  if (id === "cab") {
+    const sl = S.cab === "sliding", d = cabDoors();
+    const st = !folded ? `Open for ${S.dining}: the table is out` : d.table ? "Packed away, the table door open" : d.chairs ? "Packed away, the chair door open" : "Packed away: the table and the six chairs inside";
+    return [sl ? "The sliding dining cabinet (the alternative)" : "The dining cabinet", st, [
+      btn("Open for six", { dining: "six" }, S.dining === "six"), btn("Open for four", { dining: "four" }, S.dining === "four"),
+      btn(folded ? "Folded away" : "Fold it away", { dining: "folded" }, folded),
+      ...(folded ? [btn(d.table ? "Shut the table door" : "Open the table door", { tdoor: d.table ? "shut" : "open" }),
+                    btn(d.chairs ? "Shut the chair door" : "Open the chair door", { chairs: d.chairs ? "cupboard" : "open" })] : []),
+      btn(sl ? "Show the compact one" : "Show the sliding one", { cab: sl ? "compact" : "sliding" }),
+      btn("Look at it", { view: "dining" }), btn("Read about it", { actgo: "dining" })]];
+  }
+  if (id === "table") return [S.site === "A" ? "The flip-top on the breast (the alternative)" : "The flip-top by the stairs (the alternative)", folded ? "Folded" : `Open for ${S.dining}`, [
+      btn("Open for six", { dining: "six" }, S.dining === "six"), btn("Open for four", { dining: "four" }, S.dining === "four"),
+      btn(folded ? "Folded" : "Fold it", { dining: "folded" }, folded), btn("Show the dining cabinet", { site: "C" }), btn("Look at it", { view: "dining" })]];
+  if (id === "chaircab") return ["The flip-top's chair cupboard", S.chairs === "open" ? "Doors open" : "Doors shut", [
+      btn(S.chairs === "open" ? "Shut the doors" : "Open the doors", { chairs: S.chairs === "open" ? "cupboard" : "open" }), btn("Look at it", { view: "chairs" })]];
+  if (id === "seat") return ["The fold-down seat", S.seat === "down" ? "Down" : "Folded up", [
+      btn(S.seat === "down" ? "Fold it up" : "Fold it down", { seat: S.seat === "down" ? "up" : "down" })]];
+  if (id === "wall") return ["The media wall", S.drawers ? "Every drawer pulled out" : "Drawers shut", [
+      btn(S.drawers ? "Push the drawers in" : "Pull the drawers out", { drawers: S.drawers ? "in" : "out" }),
+      btn(lv("bias") ? "TV off" : "TV on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"),
+      btn("Look at it", { view: "wall" }), btn("Read about it", { actgo: "wall" })]];
+  if (id === "tv") return ["The TV", lv("bias") ? "On, its bias light behind it" : "Off", [
+      btn(lv("bias") ? "Turn it off" : "Turn it on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"), btn("Look at it", { view: "sofa" })]];
+  if (id === "lamp") return ["Your red lamp", lv("lamp") ? "On" : "Off", [
+      btn(lv("lamp") ? "Turn it off" : "Turn it on", { layer: "lamp:" + (lv("lamp") ? "off" : "on") }), btn("Move it", { actedit: "lamp" })]];
+  if (id === "bar1" || id === "bar2") return [id === "bar1" ? "Spot bar 1, over the sofa" : "Spot bar 2, over the table", lv(id) ? "On" : "Off", [
+      btn(lv(id) ? "Turn it off" : "Turn it on", { layer: id + ":" + (lv(id) ? "off" : "on") }),
+      btn("Bright", { scene: "bright" }, S.scene === "bright"), btn("Cosy", { scene: "cosy" }, S.scene === "cosy"), btn("Film", { scene: "film" }, S.scene === "film")]];
+  if (id === "curtains") return ["The curtains", S.curtains ? "Drawn" : "Open", [btn(S.curtains ? "Open them" : "Draw them", { tog: "curtains" })]];
+  if (id === "lbox") return ["Your OBEGRÄNSAD light box", S.lbox ? "On" : "Off", [btn(S.lbox ? "Turn it off" : "Turn it on", { tog: "lbox" })]];
+  if (id === "pc") return ["Your PC", S.pc ? "Lit" : "Dark", [btn(S.pc ? "Lights off" : "Lights on", { tog: "pc" }), btn("Look at it", { view: "pc" }), btn("Read about it", { actgo: "side" })]];
+  if (id.startsWith("mov:")) { const it = MOV[id.slice(4)]; if (!it) return null;
+    return [it.label, it.fixed ? "Built in: it can come off, but not move" : "Drag it in Edit room, or change its colour", [btn(it.fixed ? "Take it off or put it back" : "Move it", { actedit: it.id })]]; }
+  return null;
+}
+function renderAct() {
+  const items = actId && actItems(actId);
+  if (!items) { closeAct(); return; }
+  const [title, st, bs] = items;
+  qs("#r3d-act-h").textContent = title; qs("#r3d-act-st").textContent = st;
+  const box = qs("#r3d-acts"); box.textContent = "";
+  for (const b of bs) {
+    const el = document.createElement("button"); el.type = "button"; el.textContent = b.label;
+    for (const [k, v] of Object.entries(b.attrs)) el.dataset[k] = v;
+    if (b.on !== undefined) el.setAttribute("aria-pressed", String(!!b.on));
+    box.appendChild(el);
+  }
+  placeAct();
+}
+function placeAct() {
+  if (!actXY) return;
+  const sw = stage.clientWidth, sh = stage.clientHeight, pw = act.offsetWidth || 300, ph = act.offsetHeight || 200;
+  const left = Math.max(12, Math.min(sw - pw - 12, actXY[0] - pw / 2));
+  const below = actXY[1] + 22 + ph < sh - 90, top = below ? actXY[1] + 22 : Math.max(12, actXY[1] - ph - 22);
+  act.style.left = left + "px"; act.style.top = top + "px"; act.style.setProperty("--ax", (actXY[0] - left) + "px");
+  act.classList.toggle("above", !below);
+}
+function openAct(id, xy) {
+  if (popId) closePop();
+  actId = id; actXY = xy; act.hidden = false; renderAct();
+  if (!act.hidden) { const f = qs("#r3d-acts button"); if (f) f.focus({ preventScroll: true }); }
+}
+function closeAct() { actId = null; if (act) act.hidden = true; }
+if (act) {
+  act.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.classList.contains("x")) { closeAct(); return; }
+    const d = b.dataset;
+    if (d.actgo) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: d.actgo } })); return; }
+    if (d.actedit) { const id = d.actedit; closeAct(); setEdit(true); select(id); return; }
+    if (d.view) setTimeout(closeAct, 0);                     // the room flies there; the card has done its job
+  });
+  canvas.addEventListener("pointerdown", e => { tapDown = (S.edit || e.button > 0) ? null : [e.clientX, e.clientY, performance.now()]; if (actId) closeAct(); });
+  canvas.addEventListener("pointerup", e => {
+    const t = tapDown; tapDown = null;
+    if (!t || S.edit || Math.hypot(e.clientX - t[0], e.clientY - t[1]) > 6 || performance.now() - t[2] > 600) return;
+    const id = pickItem(e); if (!id) return;
+    const r = stage.getBoundingClientRect();
+    openAct(id, [e.clientX - r.left, e.clientY - r.top]);
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && actId) closeAct(); });
+}
 function setAbove(show) {   // the floor above (the stairwell's upper walls) hides in the views from above
   scene.traverse(o => { if (o.name === "above") o.visible = show; });
   view.visible = show;
@@ -2315,6 +2573,7 @@ function frame(now) {
   }
   const changed = controls.update();
   if (changed) need = 2;
+  if (cabTween(now)) need = 2;                                    // v30: the cabinet's doors swinging or sliding
   if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
   const active = moving || changed || !!tween;
   if (active) { still_t = now; if (!lowRes) { lowRes = true; sizeRenderer(); } }
@@ -2340,8 +2599,9 @@ function autoQuality() {
 function updateCaption() {
   try { updatePicks(); } catch (e) {}   // v22
   const sc = SCENES[S.scene];
-  const site = S.site === "A" ? "Table on the chimney breast" : S.site === "C" ? "The dining cabinet" : "Table under the shelf by the stairs";
-  const din = S.site === "C" ? { folded: "folded away, the six chairs inside", four: `open, ${R.OPTC.len} long, for four`, six: `open, ${R.OPTC.len} long, for six` }[S.dining]
+  const site = S.site === "A" ? "Table on the chimney breast" : S.site === "C" ? (S.cab === "sliding" ? "The sliding dining cabinet (the alternative)" : "The compact dining cabinet") : "Table under the shelf by the stairs";
+  const cl = (cabC().len_open || cabC().len);
+  const din = S.site === "C" ? { folded: "folded away, the six chairs inside", four: `open, ${cl} long, for four`, six: `open, ${cl} long, for six` }[S.dining]
     : { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
   const paint = S.paint === "custom" ? `your colour ${S.custom}` : R.PAINTS[S.paint].name;
   const lights = sameAsScene() && S.master === 100 ? sc.name : `your lighting (from ${sc.name})`;
@@ -2370,8 +2630,8 @@ function still(w, h) {
   return url;
 }
 function stillName() {
-  const site = S.site === "A" ? "breast" : S.site === "C" ? "stairs wall (the cabinet)" : "stairs wall";
-  return `Media wall v29 - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
+  const site = S.site === "A" ? "breast" : S.site === "C" ? `stairs wall (the ${S.cab === "sliding" ? "sliding" : "compact"} cabinet)` : "stairs wall";
+  return `Media wall v${R.VERSION || ""} - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
   const st = qs("#r3d-savest");
@@ -2399,6 +2659,7 @@ function syncButtons() {
   const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
+  press("cab", S.cab); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
   qsa("[data-sugg]").forEach(b => b.setAttribute("aria-pressed", String(!!S.sugg[b.dataset.sugg])));
@@ -2412,6 +2673,7 @@ function syncButtons() {
   if (S.skirt !== "match" && qs("#r3d-skirt")) qs("#r3d-skirt").value = S.skirt;
   qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : (S.lv[k] ?? 0); i.value = v; qs(`[data-lvout="${k}"]`).textContent = `${Math.round(v)}%`; });
   qsa("[data-col]").forEach(i => { i.value = S.col[i.dataset.col] || WARM; });
+  if (actId) renderAct();                                                                           // v30: the item's card follows
 }
 root.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !root.contains(b)) return;
@@ -2419,13 +2681,16 @@ root.addEventListener("click", e => {
   if (d.view) { setView(d.view); return; }
   if (d.walk) { walk(d.walk); return; }
   if (d.site) { S.site = d.site; applyState(); if (S.view === "dining") setView("dining"); }
-  else if (d.dining) { S.dining = d.dining; applyState(); if (S.view === "dining") setView("dining"); }
+  else if (d.dining) { S.dining = d.dining; S.tdoor = false; applyState(); if (S.view === "dining") setView("dining"); }   // v30: folding it shuts the door too
+  else if (d.cab) { S.cab = d.cab; S.site = "C"; applyState(); if (S.view === "dining" || S.view === "chairs") setView(S.view); }   // v30: the compact or the sliding cabinet
+  else if (d.tdoor) { S.tdoor = d.tdoor === "open"; if (S.tdoor && S.chairs === "open") S.chairs = "cupboard"; applyState(); }
   else if (d.scene) S.scene = d.scene, S.lv = Object.assign({}, SCENES[d.scene].levels), S.master = 100, applyLight(), updateCaption(), store.set(KEY, S);   // tapping the tile again resets it
   else if (d.tod) S.tod = d.tod, applyLight(), updateCaption(), store.set(KEY, S);
   else if (d.ceil) S.ceil = d.ceil, repaint(), store.set(KEY, S), dirty();
   else if (d.skirt) S.skirt = d.skirt, repaint(), store.set(KEY, S), dirty();
   else if (d.colreset) S.col[d.colreset] = WARM, applyLight(), store.set(KEY, S);
   else if (d.tog) S[d.tog] = !S[d.tog], applyLight(), store.set(KEY, S);
+  else if (d.layer) { const [k, v] = d.layer.split(":"); S.lv = Object.assign({}, S.lv, { [k]: v === "on" ? (SCENES[S.scene].levels[k] || 60) : 0 }); applyLight(); updateCaption(); store.set(KEY, S); }   // v30: a light on or off from a card
   else if (d.sugg || d.suggall) {     // v21: a suggestion on or off (a piece you'd removed in Edit room comes back), or all of them
     const keys = d.sugg ? [d.sugg] : qsa("[data-sugg]").map(x => x.dataset.sugg), on = d.sugg ? !S.sugg[d.sugg] : d.suggall === "on";
     S.sugg = Object.assign({}, S.sugg); keys.forEach(k => { S.sugg[k] = on; if (S.layout["sg_" + k]) delete S.layout["sg_" + k].off; });
@@ -2445,7 +2710,7 @@ root.addEventListener("click", e => {
   else if (d.paint) S.paint = d.paint, repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
-  else if (d.chairs) S.chairs = d.chairs, applyState();
+  else if (d.chairs) { S.chairs = d.chairs; if (d.chairs === "open") S.tdoor = false; applyState(); }   // v30: one door open at a time
   else if (d.seat) S.seat = d.seat, applyState();
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
   else if (b.id === "r3d-full") { const st = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
@@ -2478,7 +2743,7 @@ function start() {
   buildShell(); buildLights(); buildFurniture(); buildSuggest(); buildSeatAndPouf();
   bar1 = buildBar(R.BAR1, lights.bar1, "bar1");
   gl.shadowMap.enabled = S.quality === "hd";
-  applyState();
+  cabSnap = true; applyState(); cabSnap = false;          // v30: the doors start where they are, no swing
   syncButtons();
   scene.traverse(o => { if (o.isMesh || o.isPoints || o.isLine) [].concat(o.material).forEach(m => m && !m.clippingPlanes && clipMat(m)); });   // v21: the cutaway
   setView(S.view, true);
@@ -2488,10 +2753,13 @@ function start() {
   root.classList.add("ready");
   requestAnimationFrame(frame);
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
+  try {                                                                                 // v30: once, say the room's things can be tapped
+    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); }
+  } catch (e) {}
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {
-    set(o) { oldScene(o); Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; applyState(); syncButtons(); if (o.view) setView(o.view, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, VIEWS, MATS, OAK_TEX },
+    set(o) { oldScene(o); Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; cabSnap = true; applyState(); cabSnap = false; syncButtons(); if (o.view) setView(o.view, true); },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }
