@@ -278,10 +278,10 @@ def cab_html():
 <figcaption>The chair door turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf.</figcaption></figure>
 <h3>How many sit down</h3>
 <p><b>Six, all in comfort:</b> three on the stair side ({st['stair'][1]:.1f} cm of edge each) and three on the window side ({st['window'][1]:.1f} each, from the sofa's arm to the cabinet). The open table door clears the nearest window-side chair by {n(C['door_t_face'] - (max(x for x, z, f in C['seats']['six'] if f == 'w') + G.CHAIR[0] / 2))} cm. The coffee table stays where it is, and a seventh chair fits at the far end if you bring one.</p>
+<table class="tight"><tr><th>Table</th><th>Seats</th><th>How</th><th>Notes</th></tr>{seats}</table>
 <figure>{cab_plan()}</figure>
 <figure class="render">{img("render_v30_3d_c_six.png", "The compact dining cabinet open for six")}
 <figcaption>Open for six in the 3D room: the table door turned back flat over the chair door, three a side, with bar 2 turned up over the table by the table rule.</figcaption></figure>
-<table class="tight"><tr><th>Table</th><th>Seats</th><th>How</th><th>Notes</th></tr>{seats}</table>
 <h3>How it's built</h3>
 <p>Step 11 of the build guide builds it in order, with every size. You build the two boxes and screw them together and to the wall. Then the hinge rail, the two halves with their aprons and legs, and the joint. Then you hang the table, the catches, and the two doors on their piano hinges. The drawings below are the ones to have open on the bench.</p>
 <figure>{cab_carcass()}</figure>

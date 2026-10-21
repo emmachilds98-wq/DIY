@@ -2377,7 +2377,7 @@ def option_c_elevation():
     o.append(f'<line x1="{X(z0) - 8}" y1="{Y(0)}" x2="{X(z1) + 8}" y2="{Y(0)}" stroke="{WALL}" stroke-width="2.4"/>')
     o.append(t(X(z0), Y(0) + 46, "← door wall", 9.5, "start", 500, MUTED))
     o.append(t(X(z1), Y(0) + 46, "window wall →", 9.5, "end", 500, MUTED))
-    return svg(W, H, "\n".join(o), "The dining cabinet, packed away",
+    return svg(W, H, "\n".join(o), "The sliding cabinet (the alternative), packed away",
                f"The stairs wall from the room, to scale (1 cm = {k} px). Two sliding doors (drawn see-through): the table stands up behind door A, the six chairs behind door B.")
 
 
@@ -2436,7 +2436,7 @@ def option_c_section():
     dx(jx, tx1, py + 26, f"inner half {_fmt(tl)}")
     dx(tx0, tx1, -12, f"open: {_fmt(C['len'])} from the cabinet, the top at {_fmt(g.TABLE_TOP)}", dy=16)
     o.append(t(X(tx0 + 12), Y(C["leg_h"] / 2), f"legs {_fmt(C['leg_h'])}, folding", 9.5, "start", 600, "#5a3a20"))
-    return svg(W, H, "\n".join(o), "The dining cabinet: how the table comes down",
+    return svg(W, H, "\n".join(o), "The sliding cabinet: how the table comes down",
                "Cut through the table bay, wall on the right. Folded (dashed): standing up behind door A. Open: slide A away, swing it down, flip the outer half.")
 
 
@@ -2487,7 +2487,7 @@ def option_c_plan():
     sl, wl = C["front"] - C["tx"][0], C["front"] - max(C["tx"][0], g.SOFA_X[1])
     o.append(t(X(C["tx"][0] + 5), Y(st_side) + 14, f"stair side: 3 at {sl / 3:.1f}", 9.5, "start", 700, BLUE))
     o.append(t(X(g.SOFA_X[1]) - 4, Y(C["tz"][1] - g.CHAIR[1] + g.CHAIR_TUCK) - 6, f"window side: 3 at {wl / 3:.1f}", 9.5, "end", 700, BLUE))
-    return svg(W, H, "\n".join(o), "The dining cabinet open for six",
+    return svg(W, H, "\n".join(o), "The sliding cabinet open for six",
                "From above, to scale. Door A slid over door B; three on the stair side, three on the window side, all in comfort; the coffee table stays where it is.")
 
 
@@ -2555,7 +2555,7 @@ def option_c_carcass():
         o.append(t(xr, Y(y) + 3.5, s, 9, "start", 700, BLUE))
     o.append(t(X(0), Y(C["h"]) - 12, "stair end", 9.5, "start", 600, MUTED))
     o.append(t(X(L), Y(C["h"]) - 12, "window end (2 short of the pipe boxing)", 9.5, "end", 600, MUTED))
-    return svg(W, H, "\n".join(o), "The dining cabinet's carcass, from the front",
+    return svg(W, H, "\n".join(o), "The sliding cabinet's carcass, from the front",
                f"Doors, drawer and table off; heights to each panel's top face. Ends, 19 mm top and floor {_fmt(C['d'])} deep; inside {_fmt(C['in_d'])} deep, {_fmt(C['slide'])} back for the doors.")
 
 

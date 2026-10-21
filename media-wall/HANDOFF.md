@@ -2,7 +2,8 @@
 
 ## START HERE (next agent)
 - **v30 (round 24, below): the compact dining cabinet is the plan, the sliding one the alternative; the questions are gone; tap
-  things in the 3D room to work them.** Fit 107/37/14/0, total £3,373–6,603. Next: `media-wall/UPGRADE_PLAN_v31.md` (waiting on the
+  things in the 3D room to work them.** Fit 107/37/14/0, total £3,373–6,603, plan 97 pages, guide 53. The deck 71ff is published at
+  v30 (version 1792577704-36b4, the 14 changed pictures in its asset store). Next: `media-wall/UPGRADE_PLAN_v31.md` (waiting on the
   client's view of the compact cabinet).
 - **v29.1 (round 23b) is checked and shipped:** PR #25 (v29) was merged before its checks; this round checked it, fixed what the
   checks found (below), published the deck 71ff at v29 (version 1792561058-14bf, all 63 pictures in its asset store) and opened a PR
@@ -85,11 +86,14 @@
   `mw30-taphint`). Fixed on the way: an instant `setView` now cancels a running camera tween.
 - **Version numbers that were typed in by hand:** make_images' HD file names and render.py's labels now take `build_doc.VERSION`;
   room3d.js's saved-picture name takes `R.VERSION` (export3d).
-- **QA:** `qa.py` drops the questions sheet and checks both cabinets; `taptest` (scratch) taps the cabinet, the media wall, the lamp,
+- **QA:** `qa.py` drops the questions sheet and checks both cabinets; `src/taptest.py` taps the cabinet, the media wall, the lamp,
   the flip-top and the curtains at 390 and 1280 (project the point with `camera.updateMatrixWorld()` first; press Escape between taps,
   the card stays open after an action).
 - Backups `*_v29_1_backup.*` (geometry, fit, diagrams, build_doc, instructions, questions, build_viewer, room3d_page, export3d, shot3d,
   ideas, room3d.js, page.js, page_router.js, page.css). v29 outputs in `out/v29/`.
+- Rebuilt: shot3d rendered all 39 stills (room3d.js changed; about 75 minutes with make_images running beside it). The later
+  `R.VERSION` edit only names saved pictures, so `shot3d_prints.json` was re-keyed to the new room print rather than re-rendered.
+  QA: `qa.py` fails and errors [] at 390 and 1280; taptest all taps work at both. Plan 97 pages, guide 53 (no shrink).
 
 ## Update 21 Oct 2026, round 23b: v29.1 (v29 checked, fixed and shipped)
 - Client: "can you please continue on from latest pr where ive been upgrading" (PR #25, merged with its checks still to do).
