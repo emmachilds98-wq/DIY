@@ -7,37 +7,173 @@
   ],
   "print": "da3051f666ee165cda761c17"
  },
+ "3d_add_arclamp": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Arc floor lamp (HD).png",
+   "src/art/3d_add_arclamp.webp",
+   "src/render_v32_3d_add_arclamp.png"
+  ],
+  "print": "8cdd0faed1ee6030377e70fe"
+ },
+ "3d_add_armchair": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Armchair (HD).png",
+   "src/art/3d_add_armchair.webp",
+   "src/render_v32_3d_add_armchair.png"
+  ],
+  "print": "e35b0aa3de73f7949ef1d9d0"
+ },
+ "3d_add_basket": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Seagrass basket (throws) (HD).png",
+   "src/art/3d_add_basket.webp",
+   "src/render_v32_3d_add_basket.png"
+  ],
+  "print": "d9369da9c7d54af1774932a1"
+ },
+ "3d_add_beanbag": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Beanbag (HD).png",
+   "src/art/3d_add_beanbag.webp",
+   "src/render_v32_3d_add_beanbag.png"
+  ],
+  "print": "fa99a54bf2827ee99abd2839"
+ },
+ "3d_add_bench": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Oak bench (HD).png",
+   "src/art/3d_add_bench.webp",
+   "src/render_v32_3d_add_bench.png"
+  ],
+  "print": "75f3dfc8aa3fa40fa9d77765"
+ },
+ "3d_add_bookcase": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Slim bookcase (HD).png",
+   "src/art/3d_add_bookcase.webp",
+   "src/render_v32_3d_add_bookcase.png"
+  ],
+  "print": "cbeb28466ef8ae60b85baab8"
+ },
+ "3d_add_crate": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Record crate (HD).png",
+   "src/art/3d_add_crate.webp",
+   "src/render_v32_3d_add_crate.png"
+  ],
+  "print": "026d4bf581b2d8552374d339"
+ },
+ "3d_add_cushion": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Floor cushion (HD).png",
+   "src/art/3d_add_cushion.webp",
+   "src/render_v32_3d_add_cushion.png"
+  ],
+  "print": "0f6e756e43b726fc006000bb"
+ },
+ "3d_add_footstool": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Footstool (HD).png",
+   "src/art/3d_add_footstool.webp",
+   "src/render_v32_3d_add_footstool.png"
+  ],
+  "print": "20169593c58f9a92a74b1da2"
+ },
+ "3d_add_ladder": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Blanket ladder (oak) (HD).png",
+   "src/art/3d_add_ladder.webp",
+   "src/render_v32_3d_add_ladder.png"
+  ],
+  "print": "96df3c152b31156708894f39"
+ },
+ "3d_add_lantern": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Lantern and candles (HD).png",
+   "src/art/3d_add_lantern.webp",
+   "src/render_v32_3d_add_lantern.png"
+  ],
+  "print": "81929030c2265a49700c22c8"
+ },
+ "3d_add_mirror": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Floor mirror (oak) (HD).png",
+   "src/art/3d_add_mirror.webp",
+   "src/render_v32_3d_add_mirror.png"
+  ],
+  "print": "b9e8815dfc4107797f6d5843"
+ },
+ "3d_add_plant": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Tall floor plant (HD).png",
+   "src/art/3d_add_plant.webp",
+   "src/render_v32_3d_add_plant.png"
+  ],
+  "print": "e5a8122ab0c41dd5571241fa"
+ },
+ "3d_add_pouffe": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Knitted pouffe (HD).png",
+   "src/art/3d_add_pouffe.webp",
+   "src/render_v32_3d_add_pouffe.png"
+  ],
+  "print": "5c4b98e716e139880d513d19"
+ },
+ "3d_add_rattan": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Rattan armchair (HD).png",
+   "src/art/3d_add_rattan.webp",
+   "src/render_v32_3d_add_rattan.png"
+  ],
+  "print": "03d69c44f35cd8d2d6452722"
+ },
+ "3d_add_sidetable": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Side table (HD).png",
+   "src/art/3d_add_sidetable.webp",
+   "src/render_v32_3d_add_sidetable.png"
+  ],
+  "print": "a464b1179904954383ee9883"
+ },
+ "3d_add_vase": {
+  "files": [
+   "out/Media wall v32 - 3D - EDIT ROOM, ADD - Floor vase with grasses (HD).png",
+   "src/art/3d_add_vase.webp",
+   "src/render_v32_3d_add_vase.png"
+  ],
+  "print": "60f96776bb695df3de49fd9d"
+ },
  "3d_beside_dresser": {
   "files": [
-   "out/Media wall v31 - 3D - BESIDE THE CABINET - a low oak shelf - bright (HD).png",
+   "out/Media wall v32 - 3D - BESIDE THE CABINET - a low oak shelf - bright (HD).png",
    "src/art/3d_beside_dresser.webp",
-   "src/render_v31_3d_beside_dresser.png"
+   "src/render_v32_3d_beside_dresser.png"
   ],
-  "print": "7fcedc4e7be086a54b2c9a07"
+  "print": "f079b6b6b9b9551c3662235c"
  },
  "3d_beside_mirror": {
   "files": [
-   "out/Media wall v31 - 3D - BESIDE THE CABINET - a tall mirror - bright (HD).png",
+   "out/Media wall v32 - 3D - BESIDE THE CABINET - a tall mirror - bright (HD).png",
    "src/art/3d_beside_mirror.webp",
-   "src/render_v31_3d_beside_mirror.png"
+   "src/render_v32_3d_beside_mirror.png"
   ],
-  "print": "2e112472ec517ceee42a18e5"
+  "print": "12cbb76a422450b2b4a67286"
  },
  "3d_beside_trolley": {
   "files": [
-   "out/Media wall v31 - 3D - BESIDE THE CABINET - a slim trolley - bright (HD).png",
+   "out/Media wall v32 - 3D - BESIDE THE CABINET - a slim trolley - bright (HD).png",
    "src/art/3d_beside_trolley.webp",
-   "src/render_v31_3d_beside_trolley.png"
+   "src/render_v32_3d_beside_trolley.png"
   ],
-  "print": "677f6a5ec6b8cff482e3d6cd"
+  "print": "3007b2eff9b71a484d9e09e3"
  },
  "3d_c_chairs": {
   "files": [
-   "out/Media wall v31 - 3D - THE COMPACT DINING CABINET - the chair door open, four chairs inside (plant stand and lamp hidden) - bright (HD).png",
+   "out/Media wall v32 - 3D - THE COMPACT DINING CABINET - the chair door open, four chairs inside (plant stand and lamp hidden) - bright (HD).png",
    "src/art/3d_c_chairs.webp",
-   "src/render_v31_3d_c_chairs.png"
+   "src/render_v32_3d_c_chairs.png"
   ],
-  "print": "2c56a8a7fe56f87f67247256"
+  "print": "2572c79f7e2519ee21b885a9"
  },
  "3d_c_folded": {
   "files": [
@@ -49,27 +185,27 @@
  },
  "3d_c_foot": {
   "files": [
-   "out/Media wall v31 - 3D - THE COMPACT DINING CABINET - birds eye, folded, the floor it needs open (HD).png",
+   "out/Media wall v32 - 3D - THE COMPACT DINING CABINET - birds eye, folded, the floor it needs open (HD).png",
    "src/art/3d_c_foot.webp",
-   "src/render_v31_3d_c_foot.png"
+   "src/render_v32_3d_c_foot.png"
   ],
-  "print": "bef803167a19ed5be09e4ba1"
+  "print": "08c69dd72f988b4e89753273"
  },
  "3d_c_plan": {
   "files": [
-   "out/Media wall v31 - 3D - THE COMPACT DINING CABINET - birds eye, open for six (HD).png",
+   "out/Media wall v32 - 3D - THE COMPACT DINING CABINET - birds eye, open for six (HD).png",
    "src/art/3d_c_plan.webp",
-   "src/render_v31_3d_c_plan.png"
+   "src/render_v32_3d_c_plan.png"
   ],
-  "print": "e255495003ad79e3b7b933be"
+  "print": "976b5d0c93eb1dba64d6be61"
  },
  "3d_c_sit": {
   "files": [
-   "out/Media wall v31 - 3D - THE COMPACT DINING CABINET - sitting at the table, open for six - daytime (HD).png",
+   "out/Media wall v32 - 3D - THE COMPACT DINING CABINET - sitting at the table, open for six - daytime (HD).png",
    "src/art/3d_c_sit.webp",
-   "src/render_v31_3d_c_sit.png"
+   "src/render_v32_3d_c_sit.png"
   ],
-  "print": "65d8d1822bbf80ab1375e021"
+  "print": "cc8c7b9b08ccfc7c9b7617f9"
  },
  "3d_c_six": {
   "files": [
@@ -151,6 +287,86 @@
   ],
   "print": "b3ff576d968be3be9231ccc5"
  },
+ "3d_id_button": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - A smart scene button by the door (HD).png",
+   "src/art/3d_id_button.webp",
+   "src/render_v32_3d_id_button.png"
+  ],
+  "print": "00607b3ccfebf588d46b4372"
+ },
+ "3d_id_case": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - A tall glass display case on the chimney breast (HD).png",
+   "src/art/3d_id_case.webp",
+   "src/render_v32_3d_id_case.png"
+  ],
+  "print": "b02125e72703c17f0bd60bc6"
+ },
+ "3d_id_clean": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - A record-care caddy on your vinyl stand (HD).png",
+   "src/art/3d_id_clean.webp",
+   "src/render_v32_3d_id_clean.png"
+  ],
+  "print": "5bc0753dc60ab18409081333"
+ },
+ "3d_id_ctable": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - An oak C-shaped side table for the sofa's open end (HD).png",
+   "src/art/3d_id_ctable.webp",
+   "src/render_v32_3d_id_ctable.png"
+  ],
+  "print": "8592cbe92c618485eb9aec74"
+ },
+ "3d_id_cushions": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - Cushions and a throw in the rug's rust and ochre (HD).png",
+   "src/art/3d_id_cushions.webp",
+   "src/render_v32_3d_id_cushions.png"
+  ],
+  "print": "3fa552917aaba334d1ef1928"
+ },
+ "3d_id_glass": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - Glass plant shelves across the window reveal (HD).png",
+   "src/art/3d_id_glass.webp",
+   "src/render_v32_3d_id_glass.png"
+  ],
+  "print": "d549d677be9f1ef269a786e0"
+ },
+ "3d_id_night": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - A motion nightlight on the stairs (HD).png",
+   "src/art/3d_id_night.webp",
+   "src/render_v32_3d_id_night.png"
+  ],
+  "print": "9fd3b2a6fe09338b07bfa355"
+ },
+ "3d_id_plantlight": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - A small uplight under the plant stand's bottom tier (HD).png",
+   "src/art/3d_id_plantlight.webp",
+   "src/render_v32_3d_id_plantlight.png"
+  ],
+  "print": "58f454b906673270540a9efa"
+ },
+ "3d_id_rugpad": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - A non-slip pad under the rug (HD).png",
+   "src/art/3d_id_rugpad.webp",
+   "src/render_v32_3d_id_rugpad.png"
+  ],
+  "print": "417b59f9ac4ca7803d568529"
+ },
+ "3d_id_sync": {
+  "files": [
+   "out/Media wall v32 - 3D - IDEA (not in the plan) - TV backlight that follows the picture (HD).png",
+   "src/art/3d_id_sync.webp",
+   "src/render_v32_3d_id_sync.png"
+  ],
+  "print": "abe123f134d55ae8f1ebd634"
+ },
  "3d_ideas_breast": {
   "files": [
    "out/Media wall v32 - 3D - IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles (HD).png",
@@ -177,11 +393,11 @@
  },
  "3d_look": {
   "files": [
-   "out/Media wall v31 - 3D - LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright (HD).png",
+   "out/Media wall v32 - 3D - LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright (HD).png",
    "src/art/3d_look.webp",
-   "src/render_v31_3d_look.png"
+   "src/render_v32_3d_look.png"
   ],
-  "print": "aab844867dae0c46a039688b"
+  "print": "85ae60f27174225031af0081"
  },
  "3d_pc_day": {
   "files": [
@@ -241,27 +457,27 @@
  },
  "3d_s_chairs": {
   "files": [
-   "out/Media wall v31 - 3D - THE SLIDING CABINET (the alternative) - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright (HD).png",
+   "out/Media wall v32 - 3D - THE SLIDING CABINET (the alternative) - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright (HD).png",
    "src/art/3d_s_chairs.webp",
-   "src/render_v31_3d_s_chairs.png"
+   "src/render_v32_3d_s_chairs.png"
   ],
-  "print": "4ea7eeb7779063a2ea8526ea"
+  "print": "149d491ae328aea12412587d"
  },
  "3d_s_folded": {
   "files": [
-   "out/Media wall v31 - 3D - THE SLIDING CABINET (the alternative) - packed away - bright (HD).png",
+   "out/Media wall v32 - 3D - THE SLIDING CABINET (the alternative) - packed away - bright (HD).png",
    "src/art/3d_s_folded.webp",
-   "src/render_v31_3d_s_folded.png"
+   "src/render_v32_3d_s_folded.png"
   ],
-  "print": "218d84bf3957d5441df1b085"
+  "print": "57614ee3f5aa155abce70b7a"
  },
  "3d_s_six": {
   "files": [
-   "out/Media wall v31 - 3D - THE SLIDING CABINET (the alternative) - open for six - bright, table rule (HD).png",
+   "out/Media wall v32 - 3D - THE SLIDING CABINET (the alternative) - open for six - bright, table rule (HD).png",
    "src/art/3d_s_six.webp",
-   "src/render_v31_3d_s_six.png"
+   "src/render_v32_3d_s_six.png"
   ],
-  "print": "88dcb82528daf5419cc9f0ff"
+  "print": "a08273337d1719d6a0172d7a"
  },
  "3d_seat": {
   "files": [
@@ -270,6 +486,174 @@
    "src/render_v32_3d_seat.png"
   ],
   "print": "f9c2b4b5d0b4cc578f58b0f0"
+ },
+ "3d_sg_art": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A large framed print over the sofa's return (HD).png",
+   "src/art/3d_sg_art.webp",
+   "src/render_v32_3d_sg_art.png"
+  ],
+  "print": "070220bb2052dd2dad7130aa"
+ },
+ "3d_sg_basket": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A seagrass basket for throws by the breast (HD).png",
+   "src/art/3d_sg_basket.webp",
+   "src/render_v32_3d_sg_basket.png"
+  ],
+  "print": "2f693327cfc13090983e5912"
+ },
+ "3d_sg_blind": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A blackout roller blind for the window (HD).png",
+   "src/art/3d_sg_blind.webp",
+   "src/render_v32_3d_sg_blind.png"
+  ],
+  "print": "0a9c9351b38ba6fd276f6630"
+ },
+ "3d_sg_cablights": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - Lights inside the dining cabinet (HD).png",
+   "src/art/3d_sg_cablights.webp",
+   "src/render_v32_3d_sg_cablights.png"
+  ],
+  "print": "45ecc83a7b3bf4ddbd272e1a"
+ },
+ "3d_sg_candles": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - LED pillar candles on your black shelf (HD).png",
+   "src/art/3d_sg_candles.webp",
+   "src/render_v32_3d_sg_candles.png"
+  ],
+  "print": "085a8941e6c3412445f06bf7"
+ },
+ "3d_sg_clock": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A slim wall clock over the door (HD).png",
+   "src/art/3d_sg_clock.webp",
+   "src/render_v32_3d_sg_clock.png"
+  ],
+  "print": "81f902197945e981cd2069cf"
+ },
+ "3d_sg_fairy": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - Warm fairy lights along the curtain pole (HD).png",
+   "src/art/3d_sg_fairy.webp",
+   "src/render_v32_3d_sg_fairy.png"
+  ],
+  "print": "c02f655c315f021f21e205fc"
+ },
+ "3d_sg_floorcush": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - Two floor cushions by the coffee table (HD).png",
+   "src/art/3d_sg_floorcush.webp",
+   "src/render_v32_3d_sg_floorcush.png"
+  ],
+  "print": "895cdc8a8033176a4fb87512"
+ },
+ "3d_sg_floorplant": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A tall floor plant at the sofa's open end (HD).png",
+   "src/art/3d_sg_floorplant.webp",
+   "src/render_v32_3d_sg_floorplant.png"
+  ],
+  "print": "9da5993f550c7a300c423899"
+ },
+ "3d_sg_hanger": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A macram\u00e9 plant hanger from the pole (HD).png",
+   "src/art/3d_sg_hanger.webp",
+   "src/render_v32_3d_sg_hanger.png"
+  ],
+  "print": "0ec75ced05a5113e6dd3a70d"
+ },
+ "3d_sg_lantern": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A rattan floor lantern with an LED candle (HD).png",
+   "src/art/3d_sg_lantern.webp",
+   "src/render_v32_3d_sg_lantern.png"
+  ],
+  "print": "d5149585fc497f0961ff0c55"
+ },
+ "3d_sg_mirror": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A tall arched mirror behind the sofa's corner (HD).png",
+   "src/art/3d_sg_mirror.webp",
+   "src/render_v32_3d_sg_mirror.png"
+  ],
+  "print": "8a952d49196ed0b5cdbacde8"
+ },
+ "3d_sg_pclamp": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A mushroom lamp on the PC shelf (HD).png",
+   "src/art/3d_sg_pclamp.webp",
+   "src/render_v32_3d_sg_pclamp.png"
+  ],
+  "print": "fd9180c700602cb44c2961e0"
+ },
+ "3d_sg_piclights": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - Picture lights over your two framed LPs (HD).png",
+   "src/art/3d_sg_piclights.webp",
+   "src/render_v32_3d_sg_piclights.png"
+  ],
+  "print": "2d63f4c5f4cafdfba7ecc92d"
+ },
+ "3d_sg_pouffe": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A knitted pouffe on the rug (HD).png",
+   "src/art/3d_sg_pouffe.webp",
+   "src/render_v32_3d_sg_pouffe.png"
+  ],
+  "print": "18059476bc15c67b35e9956f"
+ },
+ "3d_sg_runner": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A linen runner and a bud vase for the table (HD).png",
+   "src/art/3d_sg_runner.webp",
+   "src/render_v32_3d_sg_runner.png"
+  ],
+  "print": "e5ef22d6ce63beee10c1cda9"
+ },
+ "3d_sg_shelfled": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A warm LED strip under your black shelf (HD).png",
+   "src/art/3d_sg_shelfled.webp",
+   "src/render_v32_3d_sg_shelfled.png"
+  ],
+  "print": "e3bf70afddb7c7774fe405a4"
+ },
+ "3d_sg_sidetable": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A round oak side table at the sofa's open end (HD).png",
+   "src/art/3d_sg_sidetable.webp",
+   "src/render_v32_3d_sg_sidetable.png"
+  ],
+  "print": "867fe0c33235739d6881e18d"
+ },
+ "3d_sg_throw": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A chunky knit throw over the sofa's open end (HD).png",
+   "src/art/3d_sg_throw.webp",
+   "src/render_v32_3d_sg_throw.png"
+  ],
+  "print": "1a6059621b6d2e249bff7313"
+ },
+ "3d_sg_trail": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - A trailing pothos on the media wall's top shelf (HD).png",
+   "src/art/3d_sg_trail.webp",
+   "src/render_v32_3d_sg_trail.png"
+  ],
+  "print": "186564c984cb21e09e322857"
+ },
+ "3d_sg_tray": {
+  "files": [
+   "out/Media wall v32 - 3D - SUGGESTED - Coffee-table styling: an oak tray, two books and a candle (HD).png",
+   "src/art/3d_sg_tray.webp",
+   "src/render_v32_3d_sg_tray.png"
+  ],
+  "print": "2766a8c083ab486597c44028"
  },
  "3d_six_day": {
   "files": [
