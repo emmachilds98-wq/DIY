@@ -3,7 +3,7 @@
 ## START HERE (next agent)
 - **FINISH v33 FIRST (the session ran out of usage mid-build, 21 Oct).** All code is committed on `claude/sharp-franklin-lrray1` (PR #30,
   draft, don't merge until the client says). Left to do, in order:
-  1. `cd media-wall/src && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`.
+  1. DONE (commit 7cb1b8f): the full rebuild finished: every still, `Home_Network_Plan_v33.pdf`, `Build_Guide_v33.pdf`, the page; fit 66/17/10/0, total £3,463–6,733; 45 pictures still to upload to the deck. (To redo: `cd media-wall/src && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`.)
      shot3d skips the stills already committed (their fingerprints are in `shot3d_prints.json`), so it carries on where it stopped.
      About 90 stills in all; make_images already ran.
   2. QA: `python3 qa.py <dir>` and `python3 taptest.py <dir>` at 390 and 1280 (both updated for v33). Look at `3d_c_six`, `3d_c_chairs`,
