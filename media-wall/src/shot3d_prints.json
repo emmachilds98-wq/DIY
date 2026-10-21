@@ -449,11 +449,11 @@
  },
  "3d_room": {
   "files": [
-   "out/Media wall v32 - 3D - the whole room - from above the window side, cut away - bright (HD).png",
+   "out/Media wall v33 - 3D - the whole room - from above the window side, cut away - bright (HD).png",
    "src/art/3d_room.webp",
-   "src/render_v32_3d_room.png"
+   "src/render_v33_3d_room.png"
   ],
-  "print": "135c5f3812736fbc4539f427"
+  "print": "ca2e6d2114999a73ab7b2670"
  },
  "3d_s_chairs": {
   "files": [
