@@ -2763,8 +2763,8 @@ def cab_section():
     o.append(f'<line x1="{X(C["tx"][0] - 6)}" y1="{Y(0)}" x2="{X(g.ROOM_W) + 10}" y2="{Y(0)}" stroke="{WALL}" stroke-width="2.4"/>')
     o.append(f'<rect x="{X(C["front"])}" y="{Y(C["h"])}" width="{C["d"] * k}" height="{C["h"] * k}" fill="none" stroke="{OAKD}" stroke-width="1.4" stroke-dasharray="4 3"/>')
     px, py = C["pivot"]; tt = C["top"][2]; tl = C["top"][1]; ap = C["apron"]
-    o.append(f'<rect x="{X(C["inner"])}" y="{Y(py)}" width="{C["in_d"] * k}" height="{7 * k}" fill="{OAKS}"/>')                         # the hinge rail
-    o.append(f'<rect x="{X(C["inner"])}" y="{Y(C["linen"][0])}" width="{C["in_d"] * k}" height="{C["t"] * k}" fill="{OAKS}"/>')        # the linen shelf
+    o.append(f'<rect x="{X(C["rail_x"][0])}" y="{Y(py)}" width="{(C["rail_x"][1] - C["rail_x"][0]) * k}" height="{7 * k}" fill="{OAKS}"/>')   # the hinge rail (v31: set back behind the pads)
+    o.append(f'<rect x="{X(C["inner"] + C["pads"])}" y="{Y(C["linen"][0])}" width="{C["linen_d"] * k}" height="{C["t"] * k}" fill="{OAKS}"/>')   # the linen shelf (the same)
     # the two chairs lying in the base, two deep
     cw, cdep, ch = g.CHAIR_FOLDED
     for j in range(2):
@@ -2774,13 +2774,14 @@ def cab_section():
     o.append(t(X(C["front"]) - 6, Y(C["base"][0] + cw / 2) + 13, f"two deep ({_fmt(2 * cdep)} of {_fmt(C['in_d'])})", 9, "end", 500, "#5a3a20"))
     # the door, shut, with the pads on its back
     o.append(f'<rect x="{X(C["front"]):.1f}" y="{Y(C["plinth"] + C["gap"] + C["door_h"]):.1f}" width="{C["door"] * k:.1f}" height="{C["door_h"] * k:.1f}" fill="#e9d3b4" stroke="{OAKD}" stroke-dasharray="5 3"/>')
-    for r in range(3):
-        y0 = C["rail"][1] + 0.7 + r * 37.7
-        o.append(f'<rect x="{X(C["front"] + C["door"] + 0.3):.1f}" y="{Y(y0 + 37):.1f}" width="{3 * k:.1f}" height="{37 * k:.1f}" rx="3" fill="#c7d0bb" stroke="#7d8a6c"/>')
+    pw, ph, pt = C["pad"]
+    for r in range(3):                                         # v31: three 40 cm tie-on pads, from the hinge rail's underside up
+        y0 = C["pad_zone"][0] + 0.3 + r * (ph + 0.2)
+        o.append(f'<rect x="{X(C["front"] + C["door"] + 0.4):.1f}" y="{Y(y0 + ph):.1f}" width="{pt * k:.1f}" height="{ph * k:.1f}" rx="3" fill="#c7c69a" stroke="#7c7a4c"/>')
     o.append(t(X(C["front"]) - 6, Y(C["h"] - 2), "the table door: open it,", 9.5, "end", 700, "#5a3a20"))
     o.append(t(X(C["front"]) - 6, Y(C["h"] - 2) + 13, "it turns back flat (180°)", 9, "end", 500, "#5a3a20"))
-    o.append(t(X(C["front"]) - 6, Y(112), "six seat pads", 9.5, "end", 700, "#4f6a3c"))
-    o.append(t(X(C["front"]) - 6, Y(112) + 13, "on the door's back", 9, "end", 500, "#4f6a3c"))
+    o.append(t(X(C["front"]) - 6, Y(112), "six tie-on pads, 40 × 40,", 9.5, "end", 700, "#5c5a30"))
+    o.append(t(X(C["front"]) - 6, Y(112) + 13, "two across on the door's back", 9, "end", 500, "#5c5a30"))
     # folded: the stack standing in the bay, 4 back from the door (dashed)
     o.append(f'<rect x="{X(px)}" y="{Y(py + tl)}" width="{(2 * tt + 0.3 + ap) * k}" height="{tl * k}" fill="#f1e2cc" stroke="{OAKD}" stroke-dasharray="4 3"/>')
     o.append(f'<rect x="{X(px - ap)}" y="{Y(py + tl)}" width="{ap * k}" height="{tl * k}" fill="#e9d3b4" stroke="{OAKD}" stroke-dasharray="4 3"/>')

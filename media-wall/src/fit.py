@@ -428,8 +428,9 @@ def zones():
 
 
 # v19: somewhere to keep the dining chairs, without changing the table
-SOURCES["frosvi"] = ("IKEA UK: FRÖSVI folding chair (TERJE's successor, the same 43 W × 49 D × 78 H, seat 48, tested for 110 kg); the hole in the back "
-                     "is made to hang it on a wall hook, hooks not included; flat-packed (folded) 89 × 43 × 9 cm (ikea.com/gb, ikea.com.tw product pages)")
+SOURCES["frosvi"] = ("IKEA UK: FRÖSVI folding chair, beech, £20 (705.343.15): solid beech, a slatted seat with no cushion, 44 W × 51 D × 77 H, seat 38 × 33 "
+                     "at 46 high, tested for 110 kg, a hanging hole in the back; its package 44 × 9 × 89 cm, 2.89 kg (no folded size is published). "
+                     "The padded version, white with a Knisa cover (805.343.34, £30), is 43 × 49 × 78, seat 48 (ikea.com/gb product pages, 21 Oct 2026)")
 SOURCES["slhook"] = ("Screwfix: Smith & Locke Mid Duty Anti-Slip Storage Hook, 200 × 200 mm, steel, 60 kg maximum load, £3.59 (8882J); "
                      "FRÖSVI padded weighs 3.61 kg net (ikea.com.tw)")
 ORDER.extend(["frosvi", "slhook"])
@@ -713,6 +714,20 @@ SOURCES["piano32"] = ("IronmongeryDirect: Altro continuous piano hinge, 1800 × 
 SOURCES["solidwall"] = ("Client, 21 Oct 2026: \"the wall on the stairs is solid. electrics done ourselves\"; and \"i just need a smaller build "
                         "on the cabinet if we can\", \"they dont particularly need to be oak chairs\", \"show me both versions for the cabinet\"")
 ORDER.extend(["piano32", "solidwall"])
+# v31: the chairs' cushions, slimmer chairs looked at, and what could stand beside the compact cabinet
+SOURCES["esme"] = ("Dunelm: Esme Washed Cotton Square Seat Pad, £9: 40 × 40 × 3 cm, ties, recycled polyester fill, 100% cotton cover, wipe clean; "
+                   "Blue, Honey, Ivory, Olive or Rose Pink (dunelm.com, product 1000279425)")
+SOURCES["angsfraken"] = ("IKEA UK: ÄNGSFRÄKEN chair pad, £4: round, 36 cm across, 3.0 cm thick, an anti-slip back and a hanging loop (no ties), "
+                         "machine wash 40°C; black, blue, brown-red or dark beige (ikea.com/gb)")
+SOURCES["bramon"] = "IKEA UK: BRÄMÖN chair pad, £2 (504.846.65): 34 × 34 × 1.0 cm, ties, grey-beige, indoors or out (ikea.com/gb)"
+SOURCES["habitatchair"] = ("Habitat: Wooden Folding Chair, Light Wood, £21: open H79 × W42.5 × D47.5, seat 38 × 37 at 45; \"packs away flat to just 7cm deep\" "
+                           "(H87 × W43 × D7 folded) (habitat.co.uk, product 5548794)")
+SOURCES["plia"] = "Anonima Castelli Plia folding chair (Made in Design UK, £325): W46.9 × H88.8, 5.4 cm thick folded; steel and polycarbonate"
+SOURCES["vasagle"] = ("VASAGLE 4-Tier Slim Kitchen Storage Trolley with Wheels, £35.99: 20 × 43.2 × 86.5 cm, particleboard and steel, rustic white "
+                      "and honey brown (songmicshome.co.uk, UKLRC050)")
+SOURCES["nissedal"] = "IKEA UK: NISSEDAL mirror, 40 × 150 cm, black (906.054.82) or white (706.054.83), £25 (was £30) (ikea.com/gb)"
+SOURCES["plates"] = "Dinner plates: IKEA FÄRGKLAR plate 26 cm (ikea.lt, 904.781.77); IKEA 365+ dinner plate 27 cm (dimensions.com)"
+ORDER.extend(["esme", "angsfraken", "bramon", "habitatchair", "plia", "vasagle", "nissedal", "plates"])
 
 
 def cab_zone():
@@ -733,6 +748,9 @@ def cab_zone():
     lo_top, up0, up_top = C["plinth"] + ch, C["shelf_y"] + C["t"], C["shelf_y"] + C["t"] + ch
     near = max(x for x, z, f in C["seats"]["six"] if f == "w") + g.CHAIR[0] / 2      # the window side's chair nearest the cabinet: its side
     slide = G.OPTC["z"][0] - G.OPTC["z"][1]
+    pw, ph, pt = C["pad"]
+    pz = C["pad_zone"][1] - C["pad_zone"][0]
+    seat = (38.0, 33.0)                                   # the beech FRÖSVI's seat (source frosvi)
     return ("The compact dining cabinet (the plan)", f"two oak boxes side by side, {r1(C['len'])} × {r1(C['d'])} × {r1(C['h'])} under your shelf, hinged doors; "
             f"the table {r1(C['len_open'])} × {r1(C['top'][0])} open, six chairs inside", [
         ("The cabinet under your shelf", f"{r1(C['h'])} tall", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - C['h'])}: room to tip it up into place", PASS),
@@ -740,7 +758,8 @@ def cab_zone():
          ref("photo20", "room", "solidwall"), "the shelf's length; the stair's foot before it stays clear",
          f"{r1(C['freed'])} of bare wall back by the pipe boxing; {r1(slide - C['len'])} shorter than the sliding cabinet", PASS),
         ("Its depth", f"{r1(C['d'])} to the doors' faces", ref("room"), f"the pipe boxing beside it is {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} deep",
-         f"{r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than the boxing, {r1(G.OPTC['d'] - C['d'])} less than the sliding cabinet", PASS),
+         (f"flush with the boxing's face" if abs(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])) < 0.05 else
+          f"{r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than the boxing") + f", {r1(G.OPTC['d'] - C['d'])} less than the sliding cabinet", PASS),
         ("The two doors and their hinges", f"inset oak-faced ply: the table door {r1(C['door_tw'])} × {r1(C['door_h'])}, about {C['door_kg'][0]:.0f} kg; the chair door "
          f"{r1(C['door_cw'])} wide, about {C['door_kg'][1]:.0f} kg", ref("piano32"), "a full-height stainless piano hinge each, screwed every 10 cm into a solid oak edge",
          "the hinge's load isn't published: hang the table door, open it flat, and check its far end doesn't drop before you load the cabinet", CHECK),
@@ -757,6 +776,9 @@ def cab_zone():
          "the cloth, napkins, runner and candles, 4 back from the door", PASS),
         ("Folded, and the pads on the door", f"the table {r1(C['stack'])} deep, {r1(C['pads'])} back from the door: the six seat pads hang on the door's back in front of it",
          ref("legbracket", "frosvi"), f"{r1(in_d)} inside, behind the table door", f"{r1(in_d - C['stack'] - C['pads'])} spare behind it; the pads go on the chairs when the table's down", TIGHT),
+        ("The six tie-on pads on the door", f"{r1(pw)} × {r1(ph)} × {r1(pt)} each, two across and three high", ref("esme", "frosvi"),
+         f"the door {r1(C['door_tw'])} wide; from the hinge rail's underside to the top, {r1(pz)} (the rail and the linen shelf set {r1(C['pads'])} back)",
+         f"{r1(C['door_tw'] - 2 * pw)} spare across, {r1(pz - 3 * ph)} up; {r1(C['pads'] - pt)} for the hooks behind each; on the chairs they overhang the {r1(seat[0])} × {r1(seat[1])} seat a little, tied to the back legs", TIGHT),
         ("Lowering it and flipping the half", f"each half about {kg_half:.0f} kg", ref("pianohinge", "fliphinge"), f"a {r1(C['top'][0])} piano hinge at its foot; three flip-top hinges at the joint",
          f"it swings down like a drop-front: about {kg_half:.0f} kg, two hands; the legs drop and lock as it comes down", PASS),
         ("The legs", f"oak {r1(C['leg'][0])} × {r1(C['leg'][1])}, {r1(C['leg_h'])} long, a pair at each half's end", ref("legbracket"), "four self-locking folding brackets",
@@ -791,11 +813,31 @@ def cab_zone():
 _zones_v29 = zones
 
 
+def beside_zone():
+    """v31: what could stand beside the compact cabinet, on the wall to the pipe boxing: each kept behind the open table door's line."""
+    g, C, B = G, G.CAB, G.BESIDE
+    m, tr, d = B["mirror"], B["trolley"], B["dresser"]
+    covered = C["z"][1] - B["door_end"]                      # how much of the wall the open door lies over
+    under = g.SHELF_B["top"] - g.SHELF_B["t"]
+    return ("Beside the compact cabinet (ideas)", f"the wall from the cabinet's window end to the pipe boxing, {r1(B['len'])} long, under your shelf", [
+        ("The wall beside it", f"z {r1(B['z'][0])} to {r1(B['z'][1])}", ref("room", "photo20"), f"the open table door lies {r1(C['d'])} off it over the first {r1(covered)}",
+         f"so anything here stays within {r1(B['depth'])} of the wall: the door must lie flat in front of it", PASS),
+        ("A tall mirror", f"{r1(m['w'])} × {r1(m['h'])}, on the wall from {r1(m['y0'])} to {r1(m['y0'] + m['h'])}", ref("nissedal"), f"{r1(B['len'])} of wall, {r1(under)} under the shelf",
+         f"{r1((B['len'] - m['w']) / 2)} each side, {r1(under - m['y0'] - m['h'])} under the shelf; it bounces the window's light into the corner, and the trailing plant hangs in front of it", PASS),
+        ("A slim trolley", f"{r1(tr['w'])} long × {r1(tr['d'])} deep × {r1(tr['h'])}, on castors", ref("vasagle"), f"{r1(B['len'])} × {r1(B['depth'])}",
+         f"{r1(B['len'] - tr['w'])} spare along, {r1(B['depth'] - tr['d'])} deep; wheel it out beside the table's far end for dinner: plates, glasses, a jug", PASS),
+        ("The trolley and the trailing plant", f"its top at {r1(tr['h'])}", ref("photo20", "vasagle"), f"the longest strands end about {r1(B['strands'])} up",
+         f"{r1(tr['h'] - B['strands'])} into the longest strands: trim them a little or slide the pot along the shelf", CHECK),
+        ("A low oak shelf", f"{r1(d['w'])} × {r1(d['d'])} × {r1(d['h'])}, matching the cabinet, open to the room", ref("plates", "room"), "six dinner plates on edge, glasses, three bottles",
+         f"its top {r1(B['strands'] - d['h'])} under the longest strands; the open table door lies over {r1(covered)} of its {r1(d['w'])}: take what you need out before the table comes down", TIGHT),
+    ])
+
+
 def zones():
-    """v30: the compact cabinet is the plan: its zone comes first, then the sliding one (the alternative)."""
+    """v30: the compact cabinet is the plan: its zone comes first, then the sliding one (the alternative). v31: then what could go beside it."""
     zs = _zones_v29()
     i = next((k for k, z in enumerate(zs) if z[0].startswith("The sliding dining cabinet")), len(zs))
-    return zs[:i] + [cab_zone()] + zs[i:]
+    return zs[:i] + [cab_zone(), beside_zone()] + zs[i:]
 
 
 if __name__ == "__main__":

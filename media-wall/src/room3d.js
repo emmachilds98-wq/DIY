@@ -31,10 +31,11 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               plants: "corner", layout: {}, added: [], grow: true,
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
-              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black" },   // v26: the oak, the floor, your shelf
+              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive" },   // v26: the oak, the floor, your shelf; v31: the seat pads
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
-              cab: "compact", tdoor: false };   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
+              cab: "compact", tdoor: false,
+              cam: "orbit", pad: false, foot: false, beside: "clear" };   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
@@ -100,7 +101,11 @@ controls.dampingFactor = 0.09;
 controls.maxDistance = 6;          // v17: 6 m inside the room (the views from above lift it), never closer than 30 cm
 controls.minDistance = 0.3;
 controls.screenSpacePanning = false;   // v17: a right-drag slides along the floor
-controls.addEventListener("change", () => dirty());
+// v31, client: "make camera movement easier ... sometimes the movement is quite uncontrollable": it stops soon after you let go,
+// and a drag, a pinch or a scroll moves it about half as far
+controls.dampingFactor = 0.2;
+controls.rotateSpeed = 0.55; controls.zoomSpeed = 0.6; controls.panSpeed = 0.6;
+controls.addEventListener("change", () => { dirty(); if (typeof syncEye === "function") syncEye(); });
 
 /* ---------------------------------------------------------------- textures, made here so nothing loads */
 function canvasTex(w, h, draw, srgb = true) {
@@ -679,7 +684,7 @@ function buildShell() {
   buildIdeas();
   buildPlantsAndRecords();
   buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
-  buildOptC(); buildCab();                                                                     // v26; v30: the compact cabinet
+  buildOptC(); buildCab(); buildBeside();                                                      // v26; v30: the compact cabinet; v31: beside it
   flushCubes(shell);
 }
 /* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
@@ -815,7 +820,9 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
       }
       for (const y of [bh - 9, bh - 21]) lb(c, 0, y, sd / 2 - 5.5, sw - 3, 7, 1.8, K.beech);             // two back rails
       lb(c, 0, 14, -sd / 2 + 4, sw - 5, 2.2, 2.2, K.beech);                                               // the stretcher
-      const p = new THREE.Mesh(new RoundedBoxGeometry((sw - 7) * M, 3 * M, (sd - 14) * M, 2, 0.012), K.pad); p.position.copy(v3(0, sh + 1.5, -2)); c.add(shadow(p));
+      const [pw, , pt] = R.CAB.pad;                                                                      // v31: a 40 × 40 tie-on pad, tied to the back legs
+      const p = new THREE.Mesh(new RoundedBoxGeometry(pw * M, pt * M, pw * M, 2, 0.012), K.pad); p.position.copy(v3(0, sh + pt / 2, -1)); c.add(shadow(p));
+      for (const xx of [-sw / 2 + 1.5, sw / 2 - 1.5]) lb(c, xx, sh - 7, sd / 2 - 7.5, 1.4, 8, 1.4, K.pad);   // the ties round the back legs
       c.position.copy(v3(x, 0, z));
       c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                                     // the back away from the table (local +z is the back)
       g.add(c);
@@ -931,8 +938,8 @@ function buildCab() {
     bx(cab, W - C.back, C.plinth, b + t, C.back, C.h - C.plinth - C.t_top, span, K.oakIn);
   }
   const [bt0, bt1] = C.bay_tz, [bc0, bc1] = C.bay_cz;
-  bx(cab, xi, C.rail[0], bt1, deepIn, 7, bt0 - bt1, K.oak);                                       // the hinge rail
-  bx(cab, xi, C.linen[0] - t, bt1, deepIn, t, bt0 - bt1, K.oakIn);                                // the linen shelf
+  bx(cab, C.rail_x[0], C.rail[0], bt1, C.rail_x[1] - C.rail_x[0], 7, bt0 - bt1, K.oak);         // the hinge rail (v31: set back behind the pads)
+  bx(cab, xi + C.pads, C.linen[0] - t, bt1, C.linen_d, t, bt0 - bt1, K.oakIn);                    // the linen shelf (v31: the same)
   bx(cab, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, K.oakIn);                                     // the chair bay's shelf
   [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(cab, xi + C.pads + 1 + i * 0.4, C.linen[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - C.pads - 2, 3, 34, K.cloth[c]));   // the cloth, napkins, runner
   // the chairs: two lying in the base, two deep; four standing in the chair bay, two deep on its floor and on its shelf
@@ -959,10 +966,15 @@ function buildCab() {
   };
   door("T", C.door_t[0], C.door_t[1], C.door_t[1] - C.hinge_gap / 2);
   door("C", C.door_c[0], C.door_c[1], C.door_c[0] + C.hinge_gap / 2);
-  // the six pads on the table door's back, two across and three high, from the hinge rail's height up
+  // the six pads on the table door's back, two across and three high, from the hinge rail's underside up (v31: 40 × 40 tie-on pads,
+  // their ties hanging; the rail and the linen shelf stand back so they can)
   cabPads = new THREE.Group();
-  const hzT = C.door_t[1] - C.hinge_gap / 2, mid = (C.door_t[0] + C.door_t[1]) / 2;
-  for (let r = 0; r < 3; r++) for (const s of [-1, 1]) bx(cabPads, xf + C.door + 0.3 - ax, C.rail[1] + 0.7 + r * 37.7, mid + s * 20 - 19 - hzT, 3, 37, 38, K.pad);
+  const hzT = C.door_t[1] - C.hinge_gap / 2, mid = (C.door_t[0] + C.door_t[1]) / 2, [pw, ph, pt] = C.pad;
+  for (let r = 0; r < 3; r++) for (const s of [-1, 1]) {
+    const y0 = C.pad_zone[0] + 0.3 + r * (ph + 0.2), z0 = mid + s * (pw / 2 + 0.2) - pw / 2 - hzT;
+    K.rbx(cabPads, xf + C.door + 0.4 - ax, y0, z0, pt, ph, pw, K.pad, 1.2);
+    for (const e of [0.2, 0.8]) bx(cabPads, xf + C.door + 0.4 - ax, y0 + ph - 1, z0 + pw * e - 0.6, 0.4, 9, 1.2, K.pad);   // its two ties, on the hook
+  }
   cabDoor.T.add(cabPads);
   scene.add(cab);
 }
@@ -1018,6 +1030,121 @@ function placeOptC() {
       twTo(cabDoor.C, "ry", dr.chairs ? -Math.PI : 0);
     }
   }
+  placeFoot(); placeBeside();
+}
+/* v31: beside the compact cabinet (Layout, "Beside the cabinet"): left clear, a tall mirror, a slim trolley or a low oak shelf. All of
+   them stand no deeper than the cabinet, behind the open table door's line */
+let beside = null;
+const BES = {};
+function buildBeside() {
+  const B = R.BESIDE; if (!B) return;
+  const K = cabKit(), bx = K.bx, mat = o => reg(new THREE.MeshStandardMaterial(o)), W = R.W;
+  beside = new THREE.Group(); beside.name = "beside"; scene.add(beside);
+  const zc = (B.z[0] + B.z[1]) / 2;
+  // the mirror: IKEA NISSEDAL, black frame, on the wall, centred in the gap
+  if (B.mirror) {
+    const m = B.mirror, g = new THREE.Group(); g.name = "mirror"; BES.mirror = g; beside.add(g);
+    bx(g, W - m.t, m.y0, zc - m.w / 2, m.t, m.h, m.w, K.dark);
+    // the glass: no live reflection (it would draw the room twice), a soft daylight sheen with two diagonal highlights reads as a mirror
+    const sheen = canvasTex(128, 512, (c, w, h) => {
+      const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#eef3f4"); gr.addColorStop(0.55, "#cdd8db"); gr.addColorStop(1, "#aab7bb");
+      c.fillStyle = gr; c.fillRect(0, 0, w, h); c.globalAlpha = 0.35; c.fillStyle = "#ffffff";
+      for (const [y, t] of [[90, 60], [230, 26]]) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y - 70); c.lineTo(w, y - 70 + t); c.lineTo(0, y + t); c.fill(); }
+    });
+    const glass = new THREE.Mesh(new THREE.PlaneGeometry((m.w - 4) * M, (m.h - 4) * M), mat({ color: "#ffffff", map: sheen, roughness: 0.12, metalness: 0.25 }));
+    glass.rotation.y = Math.PI / 2; glass.position.copy(v3(W - m.t - 0.05, m.y0 + m.h / 2, zc)); g.add(glass);
+  }
+  // the low oak shelf: the chair box's width, table height, open to the room: plates face-out, bowls, glasses, a few bottles
+  if (B.dresser) {
+    const d = B.dresser, g = new THREE.Group(); g.name = "dresser"; BES.dresser = g; beside.add(g);
+    const z0 = B.z[0] - d.w, x0 = W - d.d, t = d.t;
+    bx(g, x0, 0, z0, d.d, d.h, t, K.oakV); bx(g, x0, 0, B.z[0] - t, d.d, d.h, t, K.oakV);        // the two ends
+    bx(g, x0, d.h - t, z0 + t, d.d, t, d.w - 2 * t, K.oak); bx(g, x0, 1.2, z0 + t, d.d, t, d.w - 2 * t, K.oakIn);   // the top and the floor
+    bx(g, W - 0.6, 3, z0 + t, 0.6, d.h - t - 3, d.w - 2 * t, K.oakIn);                            // the back
+    bx(g, x0 + 0.5, d.shelf, z0 + t, d.d - 1.1, t, d.w - 2 * t, K.oakIn);                         // the shelf
+    for (let i = 0; i < 6; i++) {                                                                  // six plates on edge, one behind the other
+      const pl = new THREE.Mesh(new THREE.CylinderGeometry(13.5 * M, 13.5 * M, 1.2 * M, 32), K.plate);
+      pl.rotation.z = Math.PI / 2; pl.position.copy(v3(x0 + 3 + i * 2.4, d.shelf + t + 13.7, zc + 2)); g.add(shadow(pl));
+    }
+    const glassM = mat({ color: "#dfe9ee", roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.45 });
+    for (let i = 0; i < 4; i++) { const gl2 = new THREE.Mesh(new THREE.CylinderGeometry(3.6 * M, 3 * M, 11 * M, 18), glassM); gl2.position.copy(v3(x0 + 5 + (i % 2) * 9, 3 + 5.5 + 1.8, z0 + 8 + Math.floor(i / 2) * 9)); g.add(gl2); }
+    const bottle = mat({ color: "#2f4a2c", roughness: 0.2, metalness: 0.2 });
+    for (let i = 0; i < 3; i++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(3.7 * M, 3.7 * M, 30 * M, 18), bottle); b.position.copy(v3(x0 + 10, 3 + 15 + 1.8, B.z[0] - 9 - i * 8.5)); g.add(shadow(b)); }
+    const carafe = new THREE.Mesh(new THREE.CylinderGeometry(4 * M, 5 * M, 24 * M, 20), glassM); carafe.position.copy(v3(x0 + 11, d.h + 12, zc + 6)); g.add(carafe);
+  }
+  // the slim trolley: three trays on a frame, four castors; it parks along the wall and wheels out to the table's far end
+  if (B.trolley) {
+    const tr = B.trolley, g = new THREE.Group(); g.name = "trolley"; BES.trolley = g; beside.add(g);
+    const body = mat({ color: tr.col || "#2b2b2b", roughness: 0.5, metalness: 0.3 }), x0 = W - 1.5 - tr.d, z0 = zc - tr.w / 2;
+    for (const [xx, zz] of [[x0, z0], [x0 + tr.d - 1.2, z0], [x0, z0 + tr.w - 1.2], [x0 + tr.d - 1.2, z0 + tr.w - 1.2]]) bx(g, xx, 4, zz, 1.2, tr.h - 4, 1.2, body);
+    for (const y of tr.tiers) { bx(g, x0, y, z0, tr.d, 0.8, tr.w, body); bx(g, x0, y, z0, tr.d, 4, 0.6, body); bx(g, x0, y, z0 + tr.w - 0.6, tr.d, 4, 0.6, body); }
+    for (const [xx, zz] of [[x0 + 1, z0 + 1], [x0 + tr.d - 1, z0 + 1], [x0 + 1, z0 + tr.w - 1], [x0 + tr.d - 1, z0 + tr.w - 1]]) {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(2 * M, 2 * M, 1.5 * M, 14), K.dark); w.rotation.x = Math.PI / 2; w.position.copy(v3(xx, 2, zz)); g.add(w); }
+    const cup = mat({ color: "#efe7d8", roughness: 0.5 });
+    for (let i = 0; i < 3; i++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(4 * M, 3.4 * M, 9 * M, 16), cup); c.position.copy(v3(x0 + tr.d / 2, tr.tiers[tr.tiers.length - 1] + 5.3, z0 + 8 + i * (tr.w - 16) / 2)); g.add(c); }
+  }
+  clipGroup(beside);
+}
+function placeBeside() {
+  if (!beside) return;
+  const on = S.site === "C" && S.cab === "compact";
+  for (const [k, g] of Object.entries(BES)) g.visible = on && S.beside === k;
+}
+/* v31: "Show the space it needs, open": with the table folded, the floor it takes when it's out for six: the table, the six chairs
+   and (the compact one) the table door's swing, drawn flat on the floor */
+let foot = null, footKey = "";
+function buildFoot(C) {
+  const g = new THREE.Group(); g.name = "foot";
+  const mat = (c, o) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o, depthWrite: false, side: THREE.DoubleSide });
+  const edge = new THREE.LineBasicMaterial({ color: "#1f4a38" });
+  const flat = (geo, m, x, z, y = 0.6) => { const p = new THREE.Mesh(geo, m); p.rotation.x = -Math.PI / 2; p.position.copy(v3(x, y, z)); p.renderOrder = 2; g.add(p); return p; };
+  const rect = (x0, x1, z0, z1, m, y) => { const p = flat(new THREE.PlaneGeometry(Math.abs(x1 - x0) * M, Math.abs(z1 - z0) * M), m, (x0 + x1) / 2, (z0 + z1) / 2, y);
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(p.geometry), edge); e.rotation.copy(p.rotation); e.position.copy(p.position); g.add(e); };
+  if (C.door_tw) {   // the compact cabinet: the table door turns through a half circle in front of the boxes as it opens
+    const hz = C.door_t[1] - C.hinge_gap / 2, hx = C.front - C.knuckle;
+    flat(new THREE.CircleGeometry(C.door_tw * M, 48, -Math.PI / 2, Math.PI), mat("#34507f", 0.16), hx, hz, 0.4);
+  }
+  rect(C.tx[0], C.tx[1], C.tz[1], C.tz[0], mat("#2f7d5b", 0.32), 0.7);
+  const cm = mat("#c7643a", 0.26), [cw, cd] = R.CHAIR;
+  for (const [x, z] of C.seats.six) rect(x - cw / 2, x + cw / 2, z - cd / 2, z + cd / 2, cm, 0.8);
+  return g;
+}
+function placeFoot() {
+  const want = !!S.foot && S.site === "C" && S.dining === "folded";
+  if (want && footKey !== S.cab) { if (foot) scene.remove(foot); foot = buildFoot(cabC()); clipGroup(foot); scene.add(foot); footKey = S.cab; }
+  if (foot) foot.visible = want;
+}
+function clipGroup(g) { g.traverse(o => { if (o.isMesh || o.isLine) [].concat(o.material).forEach(m => m && !m.clippingPlanes && clipMat(m)); }); }
+/* v31: suggested set-ups (Layout): several choices at once, then a flight to the view that shows them */
+const MOMENTS = {
+  dinner:  { set: { site: "C", dining: "six", tdoor: false, scene: "cosy", tod: "evening", curtains: true }, view: "dining",
+             say: "Dinner for six: the table out, the curtains drawn, the lights low, bar 2 up over the table" },
+  four:    { set: { site: "C", dining: "four", tdoor: false, scene: "bright", tod: "day", curtains: false }, view: "sit",
+             say: "Lunch for four: the table out, two a side, from your seat at the end" },
+  film:    { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "film", tod: "evening", curtains: true }, view: "sofa",
+             say: "Film night: everything packed away, the lights down" },
+  morning: { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "bright", tod: "day", curtains: false }, view: "room",
+             say: "An everyday morning: the cabinet shut, the room clear" },
+};
+function playMoment(k) {
+  const m = MOMENTS[k]; if (!m) return;
+  showStop(); Object.assign(S, m.set);
+  if (m.set.scene) { S.lv = Object.assign({}, SCENES[m.set.scene].levels); S.master = 100; }
+  applyState(); syncButtons(); setView(m.view); toast(m.say);
+}
+/* v31: "Watch it open": the cabinet opens step by step, a line about each step */
+let showT = [];
+function showStop() { showT.forEach(clearTimeout); showT = []; }
+function showOpen() {
+  showStop();
+  const sl = S.cab === "sliding";
+  const steps = [
+    [0, { site: "C", dining: "folded", tdoor: false, chairs: "cupboard" }, "chairs", "Packed away: the table and all six chairs inside"],
+    [1800, { chairs: "open" }, null, sl ? "1 · Slide door B behind door A: the chairs and their pads" : "1 · Open the chair door: four chairs, two on the floor and two on the shelf"],
+    [4600, { chairs: "cupboard", tdoor: true }, "dining", sl ? "2 · Slide door A over door B: the table, folded" : "2 · Shut it and open the table door: the six pads and two more chairs"],
+    [8000, { dining: "six", tdoor: false }, null, "3 · Lower the table and flip its half over: six sit down"],
+  ];
+  for (const [t, o, v, say] of steps) showT.push(setTimeout(() => { Object.assign(S, o); applyState(); syncButtons(); if (v) setView(v); toast(say); }, t));
 }
 /* v17: the ideas (ideas.py), each its own group, all hidden until its button is on */
 const IDEA_G = {};
@@ -1205,6 +1332,7 @@ function applySuggest() {
 }
 const CASE_FILLS = {}, cushM = [];
 const CUSHION_COLS = { rust: ["#c7643a", "#d9a441", "#efe7d8"], blues: ["#2f4a6e", "#9fb4cc", "#e9e3d3"], sage: ["#7a8a6a", "#efe7d8", "#b9a47f"] };
+const PAD_COLS = { olive: "#7c7a4c", honey: "#c99a4c", ivory: "#e8e0cd", blue: "#6d8cac" };   // v31: the seat pads
 const CURTAIN_COLS = { hessian: R.CURTAIN.col, linen: "#e6e0d2", sage: "#8b9878", blue: "#34507f", rust: "#a65a38" };
 const CASE_FRAMES = { oak: ["#c48c57", true, 0.55], black: ["#1f1f21", false, 0.45], white: ["#eeebe4", false, 0.5] };
 function pillow(w, h, t) {          // a plump cushion: a box whose faces swell in the middle and pinch at the seams
@@ -1231,6 +1359,7 @@ function applyDecor() {
     if (top.map !== t) { top.map = t; top.needsUpdate = true; } rugMesh.material.forEach((m, i) => { if (i !== 2) m.color.set(edge); }); }
   if (curtCloth) curtCloth.color.set(CURTAIN_COLS[D.curtains] || CURTAIN_COLS.hessian);
   if (cushG) { const c = CUSHION_COLS[D.cushions]; cushG.visible = !!c; if (c) cushM.forEach((m, i) => m.color.set(c[i])); }
+  if (CK) CK.pad.color.set(PAD_COLS[D.pads] || PAD_COLS.olive);                                   // v31: the chairs' tie-on pads (Dunelm Esme's colours)
   applySuggest();
   for (const [k, g] of Object.entries(CASE_FILLS)) g.visible = k === (D.fill in CASE_FILLS ? D.fill : "collect");
   if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : null;
@@ -2127,6 +2256,9 @@ const VIEWS = {
   windowwall: { label: "The window wall", eye: [236, 150, -70], at: [236, 120, -309], fov: 66 },   // v17: for the ideas' stills
   breast:  { label: "The chimney breast", eye: [246, 140, -250], at: [246, 120, 0], fov: 54 },   // v17: for the ideas' stills
   pc:      { label: "The PC side wall", eye: [345, 135, -168], at: [0, 112, -168], fov: 56 },
+  // v31: sitting at the open table's far end, looking at the cabinet; the wall beside the cabinet, by the pipe boxing
+  sit:     { label: "Sitting at the table", eye: [258, 115, -128], at: [455, 98, -150], fov: 62 },
+  beside:  { label: "Beside the cabinet", eye: [236, 152, -112], at: [462, 84, -262], fov: 60 },
   plan:    { label: "Bird’s eye", eye: [233.5, 1050, -135], at: [233.5, 0, -134.9], fov: 30, above: true },   // v21: closer, the room fills it
   doll:    { label: "Dolls’ house", eye: [610, 450, -560], at: [228, 55, -125], fov: 44, above: true },      // v21: closer, cut away
 };
@@ -2141,31 +2273,80 @@ function clampRoom(p, target = false) {   // the target (what you orbit round) m
   const q = v3(x, y, z), moved = q.distanceToSquared(p) > 1e-10;
   p.copy(q); return moved;
 }
-function walk(kind) {        // about 15 cm a press on the floor plane; turns 10°
+function walk(kind, k = 1) {        // about 15 cm a press on the floor plane; turns 10°; v31: up and down 10 cm; k < 1 while a button's held
   if (tween) return;
   walked = true; controls.maxDistance = 6;
   const fwd = controls.target.clone().sub(camera.position); fwd.y = 0;
   if (fwd.lengthSq() < 1e-8) fwd.set(0, 0, 1);
   fwd.normalize();
-  const side = new THREE.Vector3(-fwd.z, 0, fwd.x), step = 0.15;
+  const side = new THREE.Vector3(-fwd.z, 0, fwd.x), step = 0.15 * k;
   if (kind === "tl" || kind === "tr") {
-    const off = controls.target.clone().sub(camera.position).applyAxisAngle(new THREE.Vector3(0, 1, 0), (kind === "tl" ? 1 : -1) * Math.PI / 18);
+    const off = controls.target.clone().sub(camera.position).applyAxisAngle(new THREE.Vector3(0, 1, 0), (kind === "tl" ? 1 : -1) * Math.PI / 18 * k);
     controls.target.copy(camera.position).add(off);
+  } else if (kind === "u" || kind === "dn") {
+    const dy = (kind === "u" ? 1 : -1) * 0.1 * k, y = camera.position.y + dy;
+    if (y / M < 30 || y / M > R.CEIL - 10) return;
+    camera.position.y = y; controls.target.y += dy;
   } else {
     const d = kind === "f" ? fwd.multiplyScalar(step) : kind === "b" ? fwd.multiplyScalar(-step) : kind === "r" ? side.multiplyScalar(step) : side.multiplyScalar(-step);
     camera.position.add(d); controls.target.add(d);
   }
   clampRoom(camera.position); clampRoom(controls.target, true);
-  controls.update(); dirty();
+  controls.update(); dirty(); syncEye();
 }
-const WALK_KEYS = { w: "f", arrowup: "f", s: "b", arrowdown: "b", a: "l", arrowleft: "l", d: "r", arrowright: "r", q: "tl", e: "tr" };
+const WALK_KEYS = { w: "f", arrowup: "f", s: "b", arrowdown: "b", a: "l", arrowleft: "l", d: "r", arrowright: "r", q: "tl", e: "tr",
+                    r: "u", f: "dn", pageup: "u", pagedown: "dn" };   // v31: R and F (or Page Up and Down) go up and down
+/* v31: the camera's height, how a drag moves it, and the move buttons on the room */
+function lift(cm) {          // the eye to a height in cm, still looking the same way
+  tween = null; walked = true; controls.maxDistance = 6;
+  const y = Math.max(30, Math.min(R.CEIL - 10, cm)) * M, dy = y - camera.position.y;
+  camera.position.y = y; controls.target.y += dy;
+  clampRoom(camera.position); clampRoom(controls.target, true); controls.update(); dirty(); syncEye();
+}
+function levelView() {       // look straight ahead, no tilt
+  const d = controls.target.clone().sub(camera.position); d.y = 0;
+  if (d.lengthSq() < 1e-6) return;
+  controls.target.y = camera.position.y; controls.update(); dirty();
+}
+function seatLook() {        // "look round from here": the point you turn round sits just in front of your eye; circling: 2.2 m on
+  const d = controls.target.clone().sub(camera.position);
+  if (d.lengthSq() < 1e-8) d.set(0, 0, 1);
+  controls.target.copy(camera.position).addScaledVector(d.normalize(), S.cam === "look" ? 0.35 : 2.2);
+  clampRoom(controls.target, true); controls.update(); dirty();
+}
+function applyCam(reseat = true) {
+  const look = S.cam === "look";
+  controls.enableZoom = !look; controls.rotateSpeed = look ? 0.4 : 0.55;
+  if (reseat) seatLook();
+}
+let eyeT = 0;
+function syncEye() {         // the height slider follows the camera
+  const now = performance.now(); if (now - eyeT < 80) return; eyeT = now;
+  const i = qs("#r3d-eye"), o = qs("#r3d-eyeout"); if (!i || document.activeElement === i) return;
+  const cm = Math.round(camera.position.y / M); i.value = Math.min(220, Math.max(40, cm)); if (o) o.textContent = cm > 220 ? "above the room" : `${cm} cm`;
+}
+function applyPad() { const p = qs("#r3d-pad"); if (p) p.hidden = !S.pad; }
+let wheelAcc = 0;            // looking round, the wheel (or a two-finger scroll) walks
+canvas.addEventListener("wheel", e => {
+  if (S.cam !== "look") return;
+  e.preventDefault(); wheelAcc += e.deltaY;
+  if (Math.abs(wheelAcc) >= 60) { walk(wheelAcc < 0 ? "f" : "b"); wheelAcc = 0; }
+}, { passive: false });
+let padT = null;             // a move button held down keeps moving, in smaller steps
+const padStop = () => { if (padT) { clearTimeout(padT.t); clearInterval(padT.i); padT = null; } };
+root.addEventListener("pointerdown", e => {
+  const b = e.target.closest("[data-walk]"); if (!b) return;
+  e.preventDefault(); padStop(); const k = b.dataset.walk; walk(k);
+  padT = { t: setTimeout(() => { if (padT) padT.i = setInterval(() => walk(k, 0.4), 60); }, 300) };
+});
+["pointerup", "pointercancel"].forEach(ev => document.addEventListener(ev, padStop)); window.addEventListener("blur", padStop);
 root.addEventListener("keydown", e => {
   if (e.altKey || e.ctrlKey || e.metaKey || /^(input|select|textarea)$/i.test(e.target.tagName)) return;
   if (e.target.tagName === "BUTTON" && !e.target.dataset.walk && e.key.startsWith("Arrow")) return;   // arrows still move between buttons
   const k = WALK_KEYS[e.key.toLowerCase()]; if (!k) return;
   e.preventDefault(); walk(k);
 });
-canvas.addEventListener("pointerdown", () => { canvas.focus({ preventScroll: true }); if (tourSt) tourEnd(); });   // v28: touching the room ends the tour
+canvas.addEventListener("pointerdown", () => { canvas.focus({ preventScroll: true }); if (tourSt) tourEnd(); showStop(); });   // v28: touching the room ends the tour (v31: and "Watch it open")
 function setView(name, instant, dur) {
   const v = VIEWS[name] || VIEWS.window; S.view = name;
   walked = false; controls.maxDistance = v.above ? 16 : 6;
@@ -2175,7 +2356,7 @@ function setView(name, instant, dur) {
   setAbove(!v.above);
   baseFov = v.fov;
   if (instant) { tween = null; camera.position.copy(eye); controls.target.copy(at);   // v30: an instant view stops any flight still under way
-                camera.fov = fitFov(v.fov); camera.updateProjectionMatrix(); controls.update(); dirty(); }
+                camera.fov = fitFov(v.fov); camera.updateProjectionMatrix(); controls.update(); if (S.cam === "look") seatLook(); dirty(); syncEye(); }
   else tween = { t0: performance.now(), from, to: { eye, at, fov: fitFov(v.fov) }, dur: dur || 900 };
   qsa("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === name)));
   store.set(KEY, S); updateCaption();
@@ -2235,8 +2416,8 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && tourSt) { 
 /* ---------------------------------------------------------------- v28: "copy link to this view"
    The look (where you stand and every choice, not Edit room's moves) as a plain #look-<token> (base64url JSON), which the page's
    router leaves alone. The link is always the GitHub Pages page, so anyone can open it. */
-const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"] };   // v30: which cabinet
-const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor"];
+const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], beside: null };   // v30: which cabinet; v31: beside it
+const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor", "foot"];   // v31: the open table's floor
 const HEX = /^#[0-9a-f]{6}$/i;
 const cm = v => [-v.x / M, v.y / M, v.z / M].map(n => Math.round(n));
 function lookOf() {
@@ -2568,7 +2749,7 @@ function frame(now) {
     camera.position.lerpVectors(tween.from.eye, tween.to.eye, e);
     controls.target.lerpVectors(tween.from.at, tween.to.at, e);
     camera.fov = tween.from.fov + (tween.to.fov - tween.from.fov) * e; camera.updateProjectionMatrix();
-    if (k >= 1) tween = null;
+    if (k >= 1) { tween = null; if (S.cam === "look") seatLook(); syncEye(); }   // v31: looking round, the turning point comes back in front of you
     need = 2;
   }
   const changed = controls.update();
@@ -2660,6 +2841,7 @@ function syncButtons() {
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
   press("cab", S.cab); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
+  press("cam", S.cam); press("pad", S.pad ? "on" : "off"); press("foot", S.foot ? "on" : "off"); press("beside", S.beside); syncEye();   // v31
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
   qsa("[data-sugg]").forEach(b => b.setAttribute("aria-pressed", String(!!S.sugg[b.dataset.sugg])));
@@ -2679,7 +2861,9 @@ root.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || !root.contains(b)) return;
   const d = b.dataset;
   if (d.view) { setView(d.view); return; }
-  if (d.walk) { walk(d.walk); return; }
+  if (d.walk) { if (e.detail === 0) walk(d.walk); return; }   // v31: a pointer moves on pointerdown (held, it repeats); Enter or Space here
+  if (d.eye) { lift(+d.eye); return; }
+  if (d.level) { levelView(); return; }
   if (d.site) { S.site = d.site; applyState(); if (S.view === "dining") setView("dining"); }
   else if (d.dining) { S.dining = d.dining; S.tdoor = false; applyState(); if (S.view === "dining") setView("dining"); }   // v30: folding it shuts the door too
   else if (d.cab) { S.cab = d.cab; S.site = "C"; applyState(); if (S.view === "dining" || S.view === "chairs") setView(S.view); }   // v30: the compact or the sliding cabinet
@@ -2712,6 +2896,12 @@ root.addEventListener("click", e => {
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
   else if (d.chairs) { S.chairs = d.chairs; if (d.chairs === "open") S.tdoor = false; applyState(); }   // v30: one door open at a time
   else if (d.seat) S.seat = d.seat, applyState();
+  else if (d.cam) S.cam = d.cam, applyCam(), store.set(KEY, S);
+  else if (d.moment) { playMoment(d.moment); return; }                                              // v31
+  else if (d.showopen) { showOpen(); return; }
+  else if (d.beside) { S.beside = d.beside; if (d.beside !== "clear") { S.site = "C"; S.cab = "compact"; } applyState(); }   // v31
+  else if (d.foot) { S.foot = d.foot === "on"; if (S.foot) { S.site = "C"; S.dining = "folded"; } applyState(); }
+  else if (d.pad) S.pad = d.pad === "on", applyPad(), store.set(KEY, S);
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
   else if (b.id === "r3d-full") { const st = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
   else if (d.paintcustom) S.custom = d.paintcustom, S.paint = "custom", repaint(), updateCaption(), store.set(KEY, S), dirty();   // v25: Deep green, a ready-made custom colour
@@ -2727,6 +2917,7 @@ root.addEventListener("input", e => {
   else if (d.col) { S.col[d.col] = t.value; applyLight(); }
   else if (t.id === "r3d-ceil") { S.ceil = t.value; press("ceil", ""); repaint(); dirty(); }
   else if (t.id === "r3d-skirt") { S.skirt = t.value; press("skirt", ""); repaint(); dirty(); }
+  else if (t.id === "r3d-eye") { lift(+t.value); const o = qs("#r3d-eyeout"); if (o) o.textContent = `${t.value} cm`; return; }   // v31
   else return;
   store.set(KEY, S);
 });
@@ -2747,6 +2938,7 @@ function start() {
   syncButtons();
   scene.traverse(o => { if (o.isMesh || o.isPoints || o.isLine) [].concat(o.material).forEach(m => m && !m.clippingPlanes && clipMat(m)); });   // v21: the cutaway
   setView(S.view, true);
+  applyCam(S.cam === "look"); applyPad();                                               // v31
   sizeRenderer();
   gl.compile(scene, camera);
   msg.hidden = true;
@@ -2754,7 +2946,8 @@ function start() {
   requestAnimationFrame(frame);
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
-    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); }
+    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
+    else if (!localStorage.getItem("mw31-camhint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("New: Tools → Views → Move round sets your eye height and adds move buttons"), 1800); localStorage.setItem("mw31-camhint", "1"); }   // v31
   } catch (e) {}
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {

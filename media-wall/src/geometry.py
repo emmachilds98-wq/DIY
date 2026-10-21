@@ -213,7 +213,7 @@ LEG_PITCH = 6.0                             # the stored legs' centres across th
 LEG_STORE_W = 7 * LEG_PITCH + LEG_CLIP[1]   # 47.6 across, clips included
 LEAF_LEG_IN = (7.5, 6.5)                    # the leaf's own four inserts: in from its 60 and 80 edges, clear inside the frame's corners
 LEAF_KIT_KG = None                          # computed in fit.py
-CHAIR = (43.0, 49.0, 78.0, 48.0)           # IKEA TERJE folding chair: W, D, H, seat height
+CHAIR = (44.0, 51.0, 77.0, 46.0)           # W, D, H, seat height. v31: IKEA FRÖSVI in solid beech, slatted seat, no cushion (v15–v30: 43 × 49 × 78, seat 48: TERJE, and FRÖSVI's padded version)
 DINE_W = 60.0                              # table edge per diner (UK guide)
 CLEAR_MIN, CLEAR_OK, CLEAR_WALK = 60.0, 75.0, 100.0   # table edge to wall: tight minimum, aim, walk behind
 FREE_Z = (-75.0, -155.0)                   # v13.1: where the table stands for six or eight: 75 off the breast (the figure to aim for)
@@ -438,7 +438,7 @@ ALL_LPS = WALL_LPS + STAND_LPS                                    # 291
 # The client: "chair storage can be added somewhere also for the dining chairs, optional not essential unless easily done to the original
 # table without many changes". The table isn't changed. The chairs are IKEA FRÖSVI (TERJE's UK successor, the same 43 x 49 x 78), which
 # fold flat and have a hole in the back made to hang on a hook; folded they're about 43 W x 9 D x 89 H (their flat-pack size).
-CHAIR_FOLDED = (43.0, 9.0, 89.0)
+CHAIR_FOLDED = (44.0, 9.0, 89.0)            # v31: the beech FRÖSVI's flat pack, 44 × 9 × 89 (IKEA publishes no folded size: measure one)
 HOOK = (3.0, 20.0, 20.0)                     # v20: a 200 x 200 mm steel storage hook (Smith & Locke, Screwfix 8882J, 60 kg): two chairs on each
 _hook_top = SHELF_B["top"] - SHELF_B["t"]    # the shelf's underside, 191
 CHAIR_STORE = dict(
@@ -560,7 +560,7 @@ del _o, _sz, _wz, _sl, _wl, _stair, _window
 # pipe boxing.
 CAB = dict(
     z0=OPTC["z"][0],              # -86: the stair end, where it always was (45 short of the stair box: the stairs' foot stays clear)
-    d=23.0,                       # the wall to the doors' faces (the sliding cabinet: 24.8); the pipe boxing is 22
+    d=22.0,                       # the wall to the doors' faces (the sliding cabinet: 24.8); v31: 22, flush with the pipe boxing's face (v30: 23)
     h=OPTC["h"], t=1.8, t_top=1.8, door=1.8, back=0.6, plinth=3.0,
     gap=0.2,                      # behind the inset doors (a stop), and round them
     hinge_gap=0.3,                # the hinge side's gap: the piano hinge's two leaves sit in it
@@ -568,6 +568,7 @@ CAB = dict(
     bay_c=46.0,                   # the chair box inside: a 43 chair and 1.5 a side
     shelf_y=93.5,                 # the chair box's shelf (its top face 95.3)
     pads=4.0,                     # the six seat pads (3) on their hooks, on the table door's back, in front of the folded table
+    pad=(40.0, 40.0, 3.0),        # v31: Dunelm Esme tie-on seat pads, 40 × 40 × 3, two ties each (the beech FRÖSVI's seat is 38 × 33)
 )
 _k = CAB
 CAB["front"] = ROOM_W - _k["d"]                                  # 444.0: the doors' faces and the carcass's front edges
@@ -591,7 +592,10 @@ CAB["joint_x"] = CAB["pivot"][0] - _k["top"][1]
 CAB["folded_top"] = CAB["pivot"][1] + _k["top"][1]                # 165.8
 CAB["stack"] = OPTC["stack"]                                      # 14.9 deep folded
 CAB["rail"] = (CAB["pivot"][1] - 7.0, CAB["pivot"][1])            # the hinge rail: 66.3 .. 73.3
+CAB["rail_x"] = (CAB["inner"] + _k["pads"], ROOM_W - _k["back"])  # v31: its front set back with the folded table's, so the pads hang down past it
+CAB["pad_zone"] = (CAB["rail"][0], _k["h"] - _k["t_top"])         # v31: where the pads hang on the door: 66.3 .. 187.2, three rows of 40
 CAB["linen"] = (CAB["folded_top"] + 1.0 + _k["t"], _k["h"] - _k["t_top"])   # the linen shelf's top face .. the top's underside: 168.6 .. 187.2
+CAB["linen_d"] = CAB["in_d"] - _k["pads"]                         # v31: the linen shelf set back behind the pads too
 CAB["base"] = (_k["plinth"], CAB["rail"][0])                      # under the hinge rail: 3 .. 66.3, two chairs lying on their sides
 CAB["leg_h"] = TABLE_TOP - _k["top"][2] - _k["apron"]             # 68.7
 # the doors, inset between the top and the floor: the table door one piece (two leaves can't fold flat over the chair door: the outer
@@ -621,6 +625,20 @@ CAB["seats"] = {"four": [(x, _sz, "n") for x in _stair(2)] + [(x, _wz, "w") for 
 CAB["legs"] = [(CAB["joint_x"] + CAB["leg_in"], CAB["cz"] + s * 13.0) for s in (1, -1)] + \
               [(CAB["tx"][0] + CAB["leg_in"], CAB["cz"] + s * (_k["top"][0] / 2 - 4.0 - 2.0 - _k["leg"][1] / 2)) for s in (1, -1)]
 del _k, _cf, _sz, _wz, _sl, _wl, _stair, _window
+
+# ---------------------------------------------------------------- v31 (21 Oct): beside the compact cabinet
+# client: "explore what could go next to the dining cabinet in the compact version which is now our primary option". The wall from the
+# cabinet's window end to the pipe boxing's face, under your shelf. The open table door lies back over most of it (to door_t_open[1]),
+# standing CAB["d"] off the wall, so whatever goes here is no deeper than the cabinet; your trailing plant hangs over its far end.
+BESIDE = dict(z=(CAB["z"][1], PIPE_BOX["z"][1]), depth=CAB["d"], door_end=CAB["door_t_open"][1],
+              strands=SHELF_B["top"] - SHELF_B["t"] - PLANT_B["trail"][1])           # 81: the longest strands' ends above the floor
+BESIDE["len"] = BESIDE["z"][0] - BESIDE["z"][1]                                       # 55.8
+BESIDE["mirror"] = dict(w=40.0, h=150.0, t=2.5, y0=30.0)        # IKEA NISSEDAL 40 × 150, black, on the wall 30 up (its top at 180)
+BESIDE["dresser"] = dict(w=CAB["bay_c"] + 2 * CAB["t"], d=CAB["d"], h=76.0, t=1.8, shelf=40.0)   # a low open box, the chair box's width,
+                                                                 # table height: its top under the longest strands
+BESIDE["trolley"] = dict(w=43.2, d=20.0, h=86.5, tiers=(10.0, 34.0, 58.0, 84.0), col="#e9e4da")   # VASAGLE slim trolley, 4 tiers, 20 × 43.2 × 86.5
+BESIDE["opts"] = {"clear": dict(name="Left clear (the plan)"), "mirror": dict(name="A tall mirror"),
+                  "trolley": dict(name="A slim trolley"), "dresser": dict(name="A low oak shelf")}
 
 
 # ---------------------------------------------------------------- v27 (20 Oct): your rear speakers, standing behind the sofa
