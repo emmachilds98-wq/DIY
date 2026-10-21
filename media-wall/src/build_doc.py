@@ -41,7 +41,12 @@ def img(name, alt=""):
         return f'<img data-art="{DECK_ART[name]}" alt="{alt}" loading="lazy">'
     p = HERE / name
     mime = "jpeg" if p.suffix.lower() in (".jpg", ".jpeg") else "png"
-    return f'<img src="data:image/{mime};base64,{base64.b64encode(p.read_bytes()).decode()}" alt="{alt}">'
+    data = p.read_bytes()
+    if name.startswith("render_v") and "_3d_" in name and mime == "png":   # v31: the 3D stills go in as JPEG, so the plan stays under 50 MB
+        import io
+        from PIL import Image
+        buf = io.BytesIO(); Image.open(io.BytesIO(data)).convert("RGB").save(buf, "JPEG", quality=90); data, mime = buf.getvalue(), "jpeg"
+    return f'<img src="data:image/{mime};base64,{base64.b64encode(data).decode()}" alt="{alt}">'
 
 
 def n(x):

@@ -3,7 +3,7 @@
 ## START HERE (next agent)
 - **v31 (round 25, below): the compact cabinet reviewed for a smaller build (now 22 deep, flush with the pipe boxing), the beech
   FRÖSVI with Dunelm Esme tie-on pads hung on the table door, four options beside the cabinet, an easier 3D camera and a regrouped
-  Layout panel.** Fit 110/39/15/0, total £3,397–6,547, plan 102 pages, guide 53. Deck 71ff published at v31 (version 1792596482-fd0a,
+  Layout panel.** Fit 110/39/15/0, total £3,397–6,547, plan 102 pages (14.7 MB: the 3D stills go in as JPEG since v31; as PNG it was 50.5 MB, over GitHub's 50 MB advice), guide 53. Deck 71ff published at v31 (version 1792596482-fd0a,
   35 changed pictures in its store). Next: `media-wall/UPGRADE_PLAN_v32.md`.
 - **v30 (round 24, below): the compact dining cabinet is the plan, the sliding one the alternative; the questions are gone; tap
   things in the 3D room to work them.** Fit 107/37/14/0, total £3,373–6,603, plan 97 pages, guide 53. The deck 71ff is published at
