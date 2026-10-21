@@ -233,11 +233,11 @@
  },
  "3d_case_singles": {
   "files": [
-   "out/Media wall v32 - 3D - IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - cosy (HD).png",
+   "out/Media wall v33 - 3D - IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - cosy (HD).png",
    "src/art/3d_case_singles.webp",
-   "src/render_v32_3d_case_singles.png"
+   "src/render_v33_3d_case_singles.png"
   ],
-  "print": "9f2d9003fe3176d4d6a490c6"
+  "print": "f8ec9c671b72d6aa61d1e506"
  },
  "3d_chairs": {
   "files": [
