@@ -225,11 +225,11 @@
  },
  "3d_case_mixed": {
   "files": [
-   "out/Media wall v32 - 3D - IDEAS (not in the plan) - the tall glass case, black frame, a bit of each (HD).png",
+   "out/Media wall v33 - 3D - IDEAS (not in the plan) - the tall glass case, black frame, a bit of each (HD).png",
    "src/art/3d_case_mixed.webp",
-   "src/render_v32_3d_case_mixed.png"
+   "src/render_v33_3d_case_mixed.png"
   ],
-  "print": "21b6728d765ac14112076c1c"
+  "print": "1d5837fa8c78169084ad9b13"
  },
  "3d_case_singles": {
   "files": [
@@ -369,11 +369,11 @@
  },
  "3d_ideas_breast": {
   "files": [
-   "out/Media wall v32 - 3D - IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles (HD).png",
+   "out/Media wall v33 - 3D - IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles (HD).png",
    "src/art/3d_ideas_breast.webp",
-   "src/render_v32_3d_ideas_breast.png"
+   "src/render_v33_3d_ideas_breast.png"
   ],
-  "print": "4c47da80e1d941ad47cd1ded"
+  "print": "643fa13b30c514e77ff53cdf"
  },
  "3d_ideas_ctable": {
   "files": [
