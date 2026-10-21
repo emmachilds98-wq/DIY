@@ -440,6 +440,8 @@ def controls(gallery=""):
             # v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version for this"
             seg("cabw", [("90", f"{G.CAB['top'][0]:g} wide, {G.CAB['len']:.1f} long, six chairs inside (the plan)"),
                          ("80", f"{G.CAB80['top'][0]:g} wide, {G.CAB80['len']:.1f} long, four chairs inside")], "The compact cabinet: its table's width"),
+            # v33, client: "I'd also like these chairs or similar"
+            seg("chair", [("frosvi", "Beech FRÖSVI, tie-on pads: all six fold inside (the plan)"), ("brayden", f"Grey padded: they don't fold in; the table box alone, {G.CAB_TABLE['len']:.1f} long")], "The chairs"),
             seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six")], "Folded or open"),
             seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The table door, with the table folded"),
             seg("chairs", [("cupboard", "Shut"), ("open", "Open")], "The chair door, with the table folded"),

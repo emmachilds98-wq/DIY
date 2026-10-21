@@ -564,6 +564,8 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c80_six": f"The more compact version open for six: the table {G.CAB80['len_open']:g} × {G.CAB80['top'][0]:g}, three a side",
          "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down, so four go inside, not six",
          "3d_c80_plan": "Bird\u2019s eye, the more compact version open for six",
+         "3d_br_six": "The grey padded chairs you'd like at the table, open for six (drawn at a like-for-like chair's size): a 6.5 cm linen cushion and a padded back",
+         "3d_br_folded": f"With the grey padded chairs, the cabinet is the table box alone, {G.CAB_TABLE['len']:.1f} long: they don't fold into it, so they're kept elsewhere",
          "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
 import item_shots as IS
 import plan_ui as PU   # v33: one count, Decide, the shortlist, build day
@@ -930,6 +932,8 @@ def _page(site=False):
         if p["name"] == "6 Dining wall":   # v33: the buy list follows the pick (Decide)
             lis = (f'<li class="picknote" data-picknote="cabw" hidden><span class="ms" aria-hidden="true">straighten</span><span>Your pick: the {G.CAB80["top"][0]:g}-wide table. The same rows with a little less oak and ply: '
                    f'the halves {G.CAB80["top"][0]:g} wide, the table box {G.CAB80["bay_t"]:g} inside, the cabinet {G.CAB80["len"]:.1f} long. Six chairs still to buy; four live inside.</span></li>'
+                   f'<li class="picknote" data-picknote="chair" hidden><span class="ms" aria-hidden="true">chair</span><span>Your pick: the grey padded chairs (Brayden Studio, sets of two, from the listing). '
+                   f'The FRÖSVI and seat pad rows come out; the chair box (its ply, its door and hinge) comes off the cutting list: the cabinet is the table box alone, {G.CAB_TABLE["len"]:.1f} long.</span></li>'
                    + lis.replace("in Olive (or Honey or Ivory)", '<span data-pickpads>in Olive (or Honey or Ivory)</span>'))
         ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{part_chip(PHASE_PART[p["name"]])} {html.escape(p["name"])}</span>'
                        f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')

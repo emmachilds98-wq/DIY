@@ -82,7 +82,7 @@
   the room, both hidden while a card, the tools, a sheet, the tour or Edit is up (`.popped`); Menu is a dock bubble (`#r3d-menub`,
   page_router `railOpen` keeps its twin in step; the rail opens above the dock). `fitFov` frames portrait tighter (1.45 instead of 16/9).
 - **One count, Decide, the shortlist, build day** (`plan_ui.py`, page.js `PICKS`, page.css v33 block): the Plan home has three rings
-  (steps built, things bought out of 66, choices made out of 4), "Waiting on you" (`#waitl`), "Where the money goes" (costs.overview as
+  (steps built, things bought out of 66, choices made out of 5), "Waiting on you" (`#waitl`), "Where the money goes" (costs.overview as
   ranges, plus "Added by you") and "Checks on site" (the fit proof's {CHECKS} CHECK rows). Buy's tiles: the plan's total (with picks),
   bought of 66, paid, jobs of 25 apart; a "Things to buy" filter; "Added by you" (the beside pick and each added idea, Take out). Decide
   (`#decide`, a radio group per choice, the renders already made) saves to localStorage `mw33-picks` and the deck's db `picks/decide`,
@@ -90,6 +90,14 @@
   colour, the dining phase shows a note for 80). Every idea and suggestion card has "Add to plan" (`[data-short]`) with a sticky bar on
   the Ideas sheet. Build day (`#bday`, a "Build day" button on each step): the step's still (`plan_ui.STEP_ART`), Watch / Show it in the
   room, its tasks to tick (local, `mw33-tasks`), its tools, its things to buy (from the tracker) and Done (ticks the step).
+- **The grey padded chairs** (client: "I'd also like these chairs or similar, make adjustments and decisions as required"; Brayden Studio
+  on Wayfair, listing u111353306, behind a bot check: no sizes readable). `geometry.CHAIR_PADDED` is drawn at the like-for-like Costway
+  53981642 (48.3 × 61 × 78.7, seat 44.5, folded 48.3 × 92.7; sources `padded`, `costwaychair`); `fit.padded_zone()` (folded 92.7 can't
+  stand in the chair box or lie in the base; two deep needs ≤ 9.4 thick: CHECK); `CAB_TABLE` is the table box alone (94.6, 105.4 freed).
+  3D `S.chair` "frosvi" / "brayden" (`paddedOpen` at the table; with brayden the chair box group `cbox`, the stored chairs and the pads
+  hide; `rebuildCab` on change); Layout seg "The chairs"; Decide's first choice `chair`; the dining phase's note; build_doc
+  `padded_html()`; stills `3d_br_six`, `3d_br_folded`. Our call: keep the FRÖSVI unless they pick the padded ones; ask for the
+  listing's Dimensions tab (folded depth).
 - **Compare:** `options_card()` is the compact cabinet at 90 and at 80, side by side, with "Pick this one" (`[data-decide=cabw]`).
 - Backups `*_v32_backup.*`; v32 outputs in `out/v32/`. {QA}
 

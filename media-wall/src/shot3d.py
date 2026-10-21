@@ -69,6 +69,9 @@ SHOTS = [
     ("3d_c80_six", dict(view="dining", site="C", cabw="80", dining="six", scene="bright"), "THE 80-WIDE VERSION - open for six - bright, table rule"),
     ("3d_c80_tdoor", dict(view="dining", site="C", cabw="80", dining="folded", scene="bright", tdoor=True), "THE 80-WIDE VERSION - the table door open - no chairs in the base - bright"),
     ("3d_c80_plan", dict(view="plan", site="C", cabw="80", dining="six", scene="bright", tod="day", master=0), "THE 80-WIDE VERSION - birds eye, open for six"),
+    # v33, client: "I'd also like these chairs or similar": the grey padded chairs at the table, and the cabinet as the table box alone
+    ("3d_br_six", dict(view="dining", site="C", chair="brayden", dining="six", scene="bright"), "THE GREY PADDED CHAIRS - open for six - bright, table rule"),
+    ("3d_br_folded", dict(view="dining", site="C", chair="brayden", dining="folded", scene="bright"), "THE GREY PADDED CHAIRS - the table box alone, packed away - bright"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
@@ -78,7 +81,7 @@ SHOTS = [
 SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "chair": "frosvi", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():

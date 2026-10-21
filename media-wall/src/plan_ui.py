@@ -45,7 +45,13 @@ def decisions():
                            dict(v="hinge", label="On the other side of the door", note="The hinge side: the button moves with it", r3d={"view": "door"}, cost=[0, 0]),
                            dict(v="check", label="We'll look and tell you", note="Nothing to buy changes", r3d={"view": "door"}, cost=[0, 0])],
                   default=None, buy="Nothing on the buy list changes")
-    return [beside, pads, width, switch]
+    P, T = G.CHAIR_PADDED, G.CAB_TABLE
+    chairs = dict(key="chair", title="The chairs", q="The grey padded ones you'd like, or the beech FRÖSVI that fold into the cabinet",
+                  options=[dict(v="frosvi", label="Beech FRÖSVI with tie-on pads (the plan)", note="All six fold into the cabinet: £20 each, the pads £9", art="3d_c_six", r3d=dict(six, chair="frosvi"), cost=[0, 0]),
+                           dict(v="brayden", label="The grey padded chairs", note=f"A {P['cushion']:g} cm cushion, a padded back; they don't fold in, so the cabinet is the table box alone, {T['len']:.1f} long, {T['freed']:.1f} of wall back. Price: on the listing",
+                                art="3d_br_six", r3d=dict(six, chair="brayden"), cost=[0, 0])],
+                  default="frosvi", buy="The dining wall's rows follow the chairs")
+    return [chairs, beside, pads, width, switch]
 
 
 def shortlist():

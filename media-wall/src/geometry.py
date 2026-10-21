@@ -634,6 +634,17 @@ def _make_cab(table_w=90.0):
 CAB = _make_cab(90.0)                 # the plan: 144.2 long, six chairs inside
 CAB80 = _make_cab(80.0)               # v33, client: "the compact cabinet is our only choice ... or any upgraded more compact version": 134.2 long, four chairs inside
 
+# v33, client: "I'd also like these chairs or similar, make adjustments and decisions as required": Brayden Studio's set of two wooden
+# folding dining chairs, grey linen, a 6.5 cm padded cushion, a 110° backrest, 168 kg (the Wayfair listing's title; its page is behind a
+# bot check, so its sizes aren't readable from here). Drawn at a like-for-like chair's published sizes (Costway 53981642: bent-wood frame,
+# linen padded seat and back): 48.3 W × 61 D × 78.7 H, seat 44.5 high and 40.6 × 44.5, folded 48.3 × 92.7. Its folded thickness isn't
+# published by either: it decides whether the cabinet can keep them (a check).
+CHAIR_PADDED = dict(w=48.3, d=61.0, h=78.7, seat_h=44.5, seat=(40.6, 44.5), cushion=6.5, back_deg=110, kg=168,
+                    folded=(48.3, 92.7))
+# with chairs that don't pack into it, the cabinet is the table box alone (no chair box): the table and its pads, and the linen shelf
+CAB_TABLE = dict(len=CAB["z_t"][0] - CAB["z_t"][1], freed=CAB["freed"] + (CAB["z_c"][0] - CAB["z_c"][1]),
+                 len80=CAB80["z_t"][0] - CAB80["z_t"][1], freed80=CAB80["freed"] + (CAB80["z_c"][0] - CAB80["z_c"][1]))
+
 # ---------------------------------------------------------------- v31 (21 Oct): beside the compact cabinet
 # client: "explore what could go next to the dining cabinet in the compact version which is now our primary option". The wall from the
 # cabinet's window end to the pipe boxing's face, under your shelf. The open table door lies back over most of it (to door_t_open[1]),

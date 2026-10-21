@@ -911,11 +911,57 @@ def zones():
     return out
 
 
+# v33, client: "I'd also like these chairs or similar, make adjustments and decisions as required"
+SOURCES["padded"] = ("Wayfair UK: Brayden Studio set of 2 wooden folding dining side chairs, grey upholstered breathable linen, 6.5 cm thick padded "
+                     "cushion, 110° reclined backrest, 168 kg weight capacity, no assembly (listing u111353306, from its title; the page is behind a "
+                     "bot check from here, so its sizes and price are to be read from the listing)")
+SOURCES["costwaychair"] = ("Costway: set of 2 wooden folding dining chairs with linen padded seat and backrest (53981642), the like-for-like chair the "
+                           "padded chairs are drawn at: 19 × 24 × 31 in (48.3 W × 61 D × 78.7 H cm), seat 17.5 in high (44.5), seat 16 × 17.5 in, "
+                           "folding size 19 × 36.5 in (48.3 × 92.7); 300 lb a chair; no folded thickness published (costway.com, 21 Oct 2026)")
+ORDER.extend(["padded", "costwaychair"])
+
+
+def padded_zone():
+    """The grey padded folding chairs: at the table, and whether the compact cabinet can keep them (it was drawn round the FRÖSVI)."""
+    g, C, P, T = G, G.CAB, G.CHAIR_PADDED, G.CAB_TABLE
+    st = optc_seats(C)
+    fw, fh = P["folded"]
+    lo_clear, up_clear = C["shelf_y"] - C["plinth"], C["h"] - C["t_top"] - (C["shelf_y"] + C["t"])
+    two_deep = (C["in_d"] - 0.6) / 2
+    return ("The grey padded chairs (an option)", f"Brayden Studio, drawn at a like-for-like chair's size: {r1(P['w'])} × {r1(P['d'])} × {r1(P['h'])}, "
+            f"seat {r1(P['seat_h'])}, folded {r1(fw)} × {r1(fh)}", [
+        ("At the table", f"{r1(P['w'])} wide each, three a side", ref("padded", "costwaychair", "dining"), f"{st['stair'][1]:.1f} of edge each",
+         f"{st['stair'][1] - P['w']:.1f} between chairs; a {r1(P['cushion'])} cushion and a reclined back: the comfiest seat in the plan", PASS),
+        ("Its seat at the table", f"{r1(P['seat_h'])} high", ref("costwaychair"), f"the table's underside at {r1(C['pivot'][1] - C['apron'])} (the apron)",
+         f"{r1(C['pivot'][1] - C['apron'] - P['seat_h'])} for your knees (the FRÖSVI: {r1(C['pivot'][1] - C['apron'] - g.CHAIR[3])})", PASS),
+        ("Standing in the chair box, folded", f"{r1(fh)} tall", ref("costwaychair"), f"the floor to the shelf {r1(lo_clear)}, the shelf to the top {r1(up_clear)}",
+         f"{r1(fh - max(lo_clear, up_clear))} too tall for either, and two levels need {r1(2 * fh)} of the {r1(lo_clear + up_clear)}: one level only, with no shelf", NO),
+        ("Two deep in the chair box", "its folded thickness: not published", ref("padded", "costwaychair"), f"{r1(C['in_d'])} inside",
+         f"two deep only if it folds to {two_deep:.1f} or less; with a {r1(P['cushion'])} cushion on a wooden frame, unlikely: read it on the listing", CHECK),
+        ("Lying in the table box's base", f"{r1(fh)} long", ref("costwaychair"), f"the base {r1(C['bay_t'])} wide", f"{r1(fh + 2 - C['bay_t'])} too long", NO),
+        ("The cabinet without its chair box", f"the table box alone, {r1(T['len'])} long", ref("photo20"), f"the plan's {r1(C['len'])}",
+         f"{r1(T['freed'])} of bare wall by the pipe boxing instead of {r1(C['freed'])}; the six chairs live elsewhere, folded", PASS),
+    ])
+
+
+_zones_v33a = zones
+
+
+def zones():
+    """v33: the padded chairs' checks after the 80-wide version's."""
+    out = []
+    for z in _zones_v33a():
+        out.append(z)
+        if z[0].startswith("The more compact version"):
+            out.append(padded_zone())
+    return out
+
+
 def counts():
     """v33: the plan's checks only: the seat count's limits and the 80-wide option's rows stay out of the totals."""
     c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
     for title, _, rows in zones():
-        if title == "How many can sit down" or title.startswith("The more compact version"):
+        if title == "How many can sit down" or title.startswith(("The more compact version", "The grey padded chairs")):
             continue
         for r in rows:
             c[r[-1]] += 1
