@@ -160,6 +160,9 @@ def scene():
         "LAMP_BODY": G.LAMP_BODY, "LAMP_RGB": G.LAMP_HEADS_RGB,
     }
     room_spec["OPTC"] = G.OPTC                 # v26: option C, the dining cabinet (v27: the plan) (built in the browser)
+    room_spec["CAB"] = G.CAB                   # v30: the compact dining cabinet, the plan (OPTC: the sliding one, the alternative)
+    from build_doc import VERSION
+    room_spec["VERSION"] = VERSION             # v30: the plan's version, for the name of a picture saved from the 3D room
     room_spec.update(REAR_SPK=G.REAR_SPK, REAR_STAND=G.REAR_STAND, REAR_SPOTS=G.REAR_SPOTS)   # v27: your rear speakers on their stands
     room_spec["CHAIR"] = G.CHAIR; room_spec["SOFA_POUF"] = G.SOFA_POUF
     return {"room": room_spec, "groups": groups}

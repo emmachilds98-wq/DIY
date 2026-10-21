@@ -14,28 +14,23 @@ def full():
     g = G
     up_h = lambda y: n(y - g.WORKTOP)                       # a height on the wall, measured up an upright from its foot
     tenon = (g.RZ_SHELF_TOP - g.RZ_SHELF_T + (g.RZ_SHELF_T - 2.4) / 2, g.RZ_SHELF_TOP - (g.RZ_SHELF_T - 2.4) / 2)
-    # v27: the dining cabinet's sizes (geometry.OPTC), for step 11 and the cutting list
+    # v27: the dining table's sizes (geometry.OPTC; the same table in v30's compact cabinet), for step 11
     C = g.OPTC
-    t, L = C["t"], C["z"][0] - C["z"][1]
     tw, tl, tt = C["top"]
     ap = C["apron"]
-    cd, dp = C["d"], C["in_d"]                                          # v29: the ends, top and floor the full depth (the doors run between the ends); the panels inside behind the doors
-    Lin = L - 2 * t                                                      # top, floor and back: between the ends
-    part_h = C["h"] - C["t_top"] - C["plinth"]                           # the partition, between the floor and the top
-    bay_t = C["bay_t"][0] - C["bay_t"][1]
-    bay_c = C["bay_c"][0] - C["bay_c"][1]
-    back_h = C["h"] - C["t_top"] - (C["plinth"] - t)                     # from the floor panel's bottom to the top's underside
-    rail_y = C["pivot"][1] - 7
-    front_w = bay_t - 0.3
-    drawer_fh = rail_y - C["plinth"] - 0.6
-    door_w, door_h, sl = C["door_w"], C["door_h"], C["slide"]
-    box_w, box_d, box_h = bay_t - 2.6, 16.0, drawer_fh - 8
     sub_col_w = g.SUB_COL[1] - g.SUB_COL[0]
     ps_w = g.PS_COL[1] - g.PS_COL[0]
     breast_l = lambda x: n(x - g.BREAST_X[0])               # a position on the breast, from its alcove-side corner
+    # v30: the compact cabinet (geometry.CAB): two boxes, hinged doors; the table, its aprons, legs and joint are the sliding one's
+    K = g.CAB
+    k_back = K["h"] - K["t_top"] - K["plinth"]                          # each back, between its box's floor and top
+    k_sep = K["door_t"][1] - K["door_c"][0] - K["hinge_gap"]            # a point on one open door lands this much nearer the other's hinge
+    mag_t = 40.0                                                         # the table door's first steel cup, from its hinge edge
+    mag_c = mag_t - k_sep                                                # the chair door's magnet: where that cup lands
+    mag_t2 = mag_c - k_sep                                               # where the magnet lands on the table door when the chair door's open
     return {
         1: dict(
-            tools=["Tape measure", "Spirit level, 120 cm", "A notebook (or the questions list on the plan page)"],
+            tools=["Tape measure", "Spirit level, 120 cm", "A notebook"],
             draw=[]),
         2: dict(
             parts=["Two TP-Link TL-SG108 8-port switches", "Cat6 patch leads, 0.5–2 m (11)"],
@@ -331,50 +326,50 @@ def full():
                     "Lay the magnetic dust filter on the PC's top exhaust; brush it off once a month.",
                 ]),
             ]),
-        11: dict(   # v27: the dining cabinet, the table and the six chairs in one (v15–v26: the flip-top; its build is in plan section 5)
-            parts=[f"Oak-faced ply, cut to size by the merchant: 18 mm for two ends {n(C['h'])} × {n(cd)}, the floor {n(Lin)} × {n(cd)}, the partition {n(part_h)} × {n(dp)}, "
-                   f"the chair shelf {n(bay_c)} × {n(dp)}, the linen floor {n(bay_t)} × {n(dp)}, the drawer front {n(front_w)} × {n(drawer_fh)} and the two sliding doors {n(door_w)} × {n(door_h)} (oak both sides, grain upright, all edges lipped); 19 mm for the top {n(Lin)} × {n(cd)}",
-                   f"6 mm ply: the back {n(Lin)} × {n(back_h)}. 12 mm ply: the drawer box (two sides {n(box_d)} × {n(box_h)}, a back and a front {n(box_w - 2.4)} × {n(box_h)}) and a 6 mm base {n(box_w)} × {n(box_d)}",
+        11: dict(   # v27: the dining cabinet; v30: the compact one, two boxes with hinged doors (the sliding one is plan section 5's alternative)
+            parts=[f"Oak-faced ply, cut to size by the merchant, 18 mm: four ends {n(K['h'])} × {n(K['d'])}; the table box's top and floor {n(K['bay_t'])} × {n(K['d'])} and the chair box's {n(K['bay_c'])} × {n(K['d'])}; "
+                   f"the linen shelf {n(K['bay_t'])} × {n(K['in_d'])} and the chair shelf {n(K['bay_c'])} × {n(K['in_d'])}; the table door {n(K['door_tw'])} × {n(K['door_h'])} and the chair door {n(K['door_cw'])} × {n(K['door_h'])} (oak both sides, grain upright, all edges lipped)",
+                   f"6 mm ply: the two backs, {n(K['bay_t'])} × {n(k_back)} and {n(K['bay_c'])} × {n(k_back)}",
                    f"Solid oak: two table halves, each a centre {n(tl - 14)} × {n(tw)} × {n(tt)} of edge-glued staves and two breadboard ends {n(tw)} × 7 × {n(tt)}; "
-                   f"the hinge rail {n(bay_t)} × {n(dp)} × 7; eight apron rails 2 thick × {n(ap)} deep (outer half: two {n(tl - 6)} long, two {n(tw - 12)}; inner half: two {n(tl - 7.6)} long, two {n(tw - 12)}); "
-                   f"four legs {n(C['leg'][0])} × {n(C['leg'][1])}, cut 70 long and trimmed to the floor; two 1.2 cm battens {n(Lin)} × 3 for the plinth"],
-            hardware=["Altro continuous piano hinge, 1800 × 50, cut to 90", "Three Lee Valley 40574 narrow flip-top hinges (1.27 × 7.0) and their screws",
+                   f"the hinge rail {n(K['bay_t'])} × {n(K['in_d'])} × 7; eight apron rails 2 thick × {n(ap)} deep (outer half: two {n(tl - 6)} long, two {n(tw - 12)}; inner half: two {n(tl - 7.6)} long, two {n(tw - 12)}); "
+                   f"four legs {n(C['leg'][0])} × {n(C['leg'][1])}, cut 70 long and trimmed to the floor; two door stops 8 × 2.5 × 1.2; four 1.2 cm battens 3 wide for the plinth, two {n(K['bay_t'])} and two {n(K['bay_c'])} long"],
+            hardware=["Altro continuous piano hinge, 1800 × 50, cut to 90 (the table's foot)", "Two Altro continuous piano hinges, 1800 × 32 × 1 mm, stainless (the doors), not cut",
+                      "Three Lee Valley 40574 narrow flip-top hinges (1.27 × 7.0) and their screws",
                       "Folding, self-locking table-leg brackets, a set of four", "Sixteen figure-8 tabletop fasteners",
-                      "Häfele Slido Classic 40 IF C fitting set for two doors, with soft close (402.33.027)", f"Double top track for a groove (402.33.652) and bottom guide track (402.30.802), both cut to {n(Lin)}",
-                      "A pair of 150 mm side-mount drawer runners", "Two magnetic catches", "One knob, for the folded table",
-                      "Two steel angle brackets and 5 × 70 mm screws with plugs (or into studs) for the wall", "4 × 50 mm and 4 × 30 mm wood screws, 25 mm panel pins, wood glue",
+                      "Four magnetic catches", "A 10 mm flush magnet and two steel cups", "Six small brass cup hooks",
+                      "Two steel angle brackets, plugs and 5 × 70 mm screws for your solid wall", "4 × 50, 4 × 30 and 3.5 × 16 mm wood screws (the short ones for the piano hinges), 25 mm panel pins, wood glue",
                       "Plastic shims, felt pads, hardwax oil, 10 mm oak dowel for the breadboard pegs"],
-            tools=["Drill-driver and a countersink", "35 mm hinge-cup (Forstner) bit", "Router with 16 mm, 6 mm and straight bits and a guide", "Jigsaw or track saw", "Hacksaw (to cut the piano hinge)",
-                   "Chisels", "Clamps, at least four 100 cm", "Long spirit level and a square", "Tape measure and pencil", "A helper for standing the cabinet and hanging the table"],
-            draw=["optc_carcass", "optc_halves", "optc_section", "optc_elevation"],
+            tools=["Drill-driver and a countersink", "A self-centring (Vix) bit for the piano hinges' pilot holes", "35 mm and 10 mm Forstner bits", "Router with straight bits and a guide", "Jigsaw or track saw",
+                   "Hacksaw (to cut the table's piano hinge)", "Chisels", "Clamps, at least four 100 cm", "Long spirit level and a square", "Tape measure and pencil", "A helper for standing the boxes and hanging the table"],
+            draw=["cab_carcass", "optc_halves", "cab_section", "cab_elevation"],
             parts_full=[
                 ("Before you start: check and mark out", [
-                    f"Measure the gap under your shelf at both ends: it must be at least {n(C['h'] + 2)}. The cabinet is {n(C['h'])} tall and needs 2 cm to tip up into place.",
-                    f"Mark the cabinet's footprint on the floor: its window end {n(C['z'][1] - g.PIPE_BOX['z'][1])} cm from the pipe boxing's face, its stair end {n(L)} cm along from there, "
-                    f"{n(g.STAIRS_WALL_Z[0] - C['z'][0])} cm short of the stair box (that strip stays clear for the stairs' foot). It stands {n(C['d'])} deep off the wall.",
-                    "Knock along the wall where the top of the cabinet will be. A dull sound is brick: plugs and screws. A hollow sound is plasterboard on studs: find two studs with a detector and use them.",
-                    f"Lay a long level along the footprint. Note the low end: the shims go there later.",
+                    f"Measure the gap under your shelf at both ends: it must be at least {n(K['h'] + 2)}. The boxes are {n(K['h'])} tall and need 2 cm to tip up into place.",
+                    f"Mark the cabinet's footprint on the floor: {n(K['len'])} long and {n(K['d'])} deep off the wall, its stair end {n(g.STAIRS_WALL_Z[0] - K['z'][0])} cm short of the stair box (that strip stays clear for the stairs' foot). "
+                    f"Its window end is then {n(K['freed'])} cm short of the pipe boxing's face. Mark the line between the two boxes, {n(K['z_t'][0] - K['z_t'][1])} from the stair end.",
+                    "Your stairs wall is solid: the two brackets go in with plugs and screws. Run the detector over both spots first, as for every hole.",
+                    "Lay a long level along the footprint. Note the low end: the shims go there later.",
                     "Oil every oak face and edge (two thin coats, a day apart) before you assemble anything: it's much easier on flat parts, and a board oiled on one side cups.",
                 ]),
-                ("The carcass", [
-                    f"First rout the tracks' grooves, while the panels are flat. Under the top: a 16 mm groove for the double top track, its depth and its distance from the front edge from the fitting set's sheet, so the doors' faces end up 2 mm behind the front edges. In the floor's top face: a 6 mm groove for the bottom guide track, the same distance back. Both run the full length.",
-                    f"Lay both end panels flat, inside faces up, and mark on each: the floor's top face at {n(C['plinth'])} and the top flush with the panel's top edge. Mark a line {n(sl)} back from the front edge, full height: everything inside stands behind it, and the doors run in front of it. "
-                    f"On the stair end mark the hinge rail ({n(rail_y)}–{n(C['pivot'][1])}) and the linen floor's top face at {n(C['flap'][0])}. On the window end mark the chair shelf's top face at {n(C['shelf_y'] + t)}.",
-                    f"Stand the two ends up and fit the top and the floor between them: glue, pre-drill and drive three 4 × 50 screws through each end into each panel's end grain. The floor's bottom face is at {n(C['plinth'] - t)}, so it sits {n(C['plinth'] - t)} off the floor.",
-                    f"Fit the partition between the top and the floor, its stair-side face {n(t + bay_t)} from the stair end's outside face (the table bay is {n(bay_t)} inside) and its front edge on the {n(sl)} line. Check it's square with a square at the front, then glue and screw through the top and the floor, three screws each.",
-                    f"Fit the chair shelf between the partition and the window end, its top face at {n(C['shelf_y'] + t)}, its front edge on the {n(sl)} line: glue and three screws through each side.",
-                    f"Fit the linen floor between the stair end and the partition, its top face at {n(C['flap'][0])}, its front edge on the line: glue and three screws through each side. It's the linen shelf: the cloth, napkins, runner and candles.",
-                    f"Measure both diagonals of the front: when they're equal, the carcass is square. Glue and pin the 6 mm back ({n(Lin)} × {n(back_h)}) across the back edges of the top, floor, partition and shelves, between the ends; it holds the carcass square.",
-                    f"Glue and screw the two 1.2 cm battens under the floor, one 1 cm back from the front edge and one at the back: that's the plinth.",
+                ("The two boxes", [
+                    f"Each box is two ends with a top and a floor between them, a back and a shelf. Lay the ends flat, inside faces up, and mark on each: the floor's top face at {n(K['plinth'])}, the top flush with the end's top edge, "
+                    f"and a line {n(K['door'] + K['gap'])} back from the front edge, full height. The shelves and the hinge rail stand behind that line; the door sits in front of it, flush with the front edges.",
+                    f"On the table box's two ends mark the hinge rail ({n(K['rail'][0])}–{n(K['rail'][1])}) and the linen shelf's top face at {n(K['linen'][0])}. On the chair box's ends mark the chair shelf's top face at {n(K['shelf_y'] + K['t'])}.",
+                    f"Stand two ends up and fit their top and floor between them, flush at the front: glue, pre-drill and drive three 4 × 50 screws through each end into each panel's end grain. "
+                    f"The table box is {n(K['bay_t'])} inside, the chair box {n(K['bay_c'])}. Each floor's bottom face is at {n(K['plinth'] - K['t'])}.",
+                    "Fit the linen shelf in the table box and the chair shelf in the chair box, their front edges on the line: glue and three screws through each end.",
+                    f"Measure both diagonals of each box's front: when they're equal, it's square. Glue and pin each 6 mm back ({n(K['bay_t'])} or {n(K['bay_c'])} × {n(k_back)}) between the ends, the floor and the top; it holds the box square.",
+                    "Glue and screw two battens under each floor, one 1 cm back from the front edge and one at the back: that's the plinth.",
                 ]),
-                ("Stand it and fix it to the wall", [
-                    "With your helper, tip the carcass up and walk it into place on its marks, back to the wall.",
-                    "Shim under the battens at the low end until it's level along its length and plumb at the front. Check again after a minute: it settles.",
-                    f"Screw the two angle brackets under the top, one {n(30)} cm in from each end, and into the wall (5 × 70 screws into plugs, or into the studs). They stop it tipping; the floor takes the weight.",
+                ("Stand them and fix them to the wall", [
+                    "With your helper, tip the table box up and walk it onto its marks, back to the wall; then the chair box beside it at the window end.",
+                    "Shim under the battens until both are level along their length, plumb at the front, and flush with each other at the front and the top. Check again after a minute: they settle.",
+                    "Clamp the two meeting ends together and screw them to each other with four 4 × 30 screws from inside the chair box, at about 20, 70, 120 and 170 up. Now they're one cabinet.",
+                    "Screw an angle bracket under each box's top, in the middle, and into the wall with plugs and 5 × 70 screws. They stop it tipping; the floor takes the weight.",
                 ]),
                 ("The hinge rail", [
-                    f"Slide the oak hinge rail ({n(bay_t)} × {n(dp)} × 7) into the table bay, its top face at {n(C['pivot'][1])}, its front face on the {n(sl)} line, level with the partition's front edge. Before you glue it, hold a door and the top track in front of it: both doors must slide past it with a few millimetres to spare.",
-                    "Glue it, then drive two 4 × 50 screws through the stair end and two through the partition into each end. It carries the table's whole weight when it's open, so don't skip the glue.",
+                    f"Slide the oak hinge rail ({n(K['bay_t'])} × {n(K['in_d'])} × 7) into the table box, its top face at {n(K['rail'][1])}, its front on the line.",
+                    "Glue it, then drive two 4 × 50 screws through each end into it. It carries the table's whole weight when it's open, so don't skip the glue.",
                 ]),
                 ("The two table halves", [
                     f"Ask the timber merchant for two centre panels of edge-glued staves, each {n(tl - 14 + 5)} × {n(tw)} × {n(tt)}: {n(tl - 14)} between the shoulders plus a 2.5 tongue at each end, and four breadboard ends {n(tw)} × 7 × {n(tt)}.",
@@ -401,36 +396,36 @@ def full():
                     "Swing it: open, the two tops are flush; folded, the outer half lies flat on the inner half, top face to top face, with nothing proud.",
                 ]),
                 ("Hang the table", [
-                    f"Cut the piano hinge to {n(tw)} with a hacksaw and file the ends smooth.",
+                    f"Cut the 50 mm piano hinge to {n(tw)} with a hacksaw and file the ends smooth.",
                     "With the inner half face down, screw one leaf of the piano hinge along its wall end, on the underside, the knuckle exactly on the end edge: a screw every 10 cm, pilot holes first.",
-                    f"Fold the outer half onto the inner half. With your helper, lift the folded table upright into the bay, its wall end down on the hinge rail, its underside facing the room, centred in the bay ({n((bay_t - tw) / 2)} each side).",
-                    f"Screw the hinge's other leaf to the rail's top face, the knuckle {n(ap)} back from the rail's front face: one screw at each end first, try the swing, then the rest.",
-                    f"Try it: it swings down to flat with its top at {n(g.TABLE_TOP)} and back up to stand in the bay without touching the sides. The folded table's top edge is at {n(C['folded_top'])}, under the linen floor.",
+                    f"Fold the outer half onto the inner half. With your helper, lift the folded table upright into the table box, its wall end down on the hinge rail, its underside facing the room, centred ({n((K['bay_t'] - tw) / 2)} each side).",
+                    f"Screw the hinge's other leaf to the rail's top face, the knuckle {n(K['pivot'][0] - K['inner'])} back from the rail's front. That leaves {n(K['pads'])} in front of the folded table for the seat pads on the door. One screw at each end first, try the swing, then the rest.",
+                    f"Try it: it swings down to flat with its top at {n(g.TABLE_TOP)} and back up to stand in the box without touching the sides. The folded table's top edge is at {n(K['folded_top'])}, just under the linen shelf.",
                 ]),
-                ("The catches and the pull", [
-                    f"Screw two magnetic catches under the linen floor's front edge, {n(15)} cm in from each side, and their plates on the folded table's top edge: they hold it upright.",
-                    "Fit the knob on the inner half's apron, in the middle near the top when it's folded: with door A slid away, that's what you pull to bring it down.",
+                ("The catches and the finger pull", [
+                    "Screw two magnetic catches under the linen shelf's front edge, 15 cm in from each side, and their plates on the folded table's top edge: they hold it upright.",
+                    "Rout a finger pull 12 long and 1.5 deep in the underside of the inner half's apron rail by the joint, in the middle: folded, it's at the top, and that's what you pull to bring the table down. No knob, so nothing presses into the pads on the door.",
                 ]),
-                ("The drawer", [
-                    f"Make the drawer box from 12 mm ply: two sides {n(box_d)} × {n(box_h)}, a back and a front {n(box_w - 2.4)} × {n(box_h)} between them, glued and pinned, the 6 mm base screwed under: {n(box_w)} wide, {n(box_d)} deep.",
-                    f"Screw the runners to the stair end and the partition 3 cm above the floor's top face, and their other halves to the box's sides. Slide it in.",
-                    f"Screw the drawer front ({n(front_w)} × {n(drawer_fh)}) to the box from inside, on the {n(sl)} line, a 3 mm gap under the hinge rail and above the floor. Rout a finger slot in the middle of its top edge: no knob, so the doors slide past it.",
-                ]),
-                ("Hang the two sliding doors", [
-                    f"Cut the double top track and the bottom guide track to {n(Lin)} with a hacksaw and file the ends. Press the top track into the groove under the top and screw it; press and glue the bottom guide into the floor's groove.",
-                    "Fit the running gear's housings to the top edge of each door and the guides to the bottom edge, at the positions on the fitting set's sheet, measured from each end.",
-                    "Hang door B first, on the back track, over the chair bay: clip its running gear into the track, then swing its foot onto the guide. Then door A on the front track, over the table bay.",
-                    "Turn each running gear's wheel (±2 mm) until both doors hang plumb with an even 3 mm under the top, and meet straight in the middle. Clip in the stoppers and the soft-close catches at both ends.",
-                    "Rout an upright finger slot in each door, 5 cm in from its outer end, 26 long, 2.5 wide and 1 deep, at about 92–118 from the floor; ease its edges and oil it.",
-                    "Slide them: door A all the way over door B opens the table bay; door B all the way behind door A opens the chair bay. Neither ever swings into the room.",
+                ("Hang the two doors", [
+                    f"The table door ({n(K['door_tw'])} × {n(K['door_h'])}) hangs on the table box's window end and the chair door ({n(K['door_cw'])} wide) on the chair box's stair end. "
+                    "The two hinges sit side by side where the boxes meet, and each door opens away from the other, turning 180° to lie flat over it.",
+                    "Lay a door face down, its hinge edge up. Screw one leaf of a 32 mm piano hinge along that edge, centred (1.9 short of each end), the knuckle just proud of the door's face: a 3.5 × 16 screw every 10 cm into pilot holes made with the self-centring bit.",
+                    "Stand the door in its opening on 2 mm packers, with an even gap all round. Screw the hinge's other leaf to the inside face of the end it hangs on, the knuckle just proud of the front edge: one screw at the top and one at the bottom first, try the swing, then the rest.",
+                    "Hang the table door first, then the chair door. Each should shut flush with the front edges and open right back, flat against the other door.",
+                    "Glue an oak door stop under each box's top, behind its door's free edge, with a magnetic catch let into it and the catch's plate on the door's back: the door closes flush and stays shut.",
+                    f"Let the 10 mm flush magnet into the chair door's face, {n(mag_c)} from its hinge edge and 100 up, and the two steel cups into the table door's face at the same height, {n(mag_t2)} and {n(mag_t)} from its hinge edge. Whichever door is open now holds flat against the other.",
+                    f"Screw the six cup hooks to the table door's back in two rows of three, inside the {n(K['bay_t'])} opening: the seat pads hang on them, {n(K['pads'])} deep, in front of the folded table.",
+                    "Rout an upright finger slot in each door 5 cm in from its free edge, 26 long, 2.5 wide and 1 deep, at about 92–118 from the floor; ease its edges and oil it.",
+                    "Open the table door flat and press down gently on its far end: it mustn't drop. If it does, check every hinge screw is in tight before you load the cabinet.",
                 ]),
                 ("Level the table and trim the legs", [
-                    "Open the table: pull it down, unfold the inner half's legs till they click, lower it; flip the outer half over and unfold its legs till they click.",
+                    "Open the table door and lay it back over the chair door. Open the table: pull it down, unfold the inner half's legs till they click, lower it; flip the outer half over and unfold its legs till they click.",
                     f"Lay the level across it in both directions. Mark each leg where it should meet the floor so the top is level at {n(g.TABLE_TOP)}, fold the legs, saw them off square and stick felt pads on.",
                 ]),
                 ("Load the chairs and check", [
-                    f"Slide door B behind door A. Stand four folded chairs on the chair bay's floor, two side by side and two deep, and two on the shelf at the back, side by side. The six seat pads stand on edge on the shelf in front of them, three each.",
-                    "Slide both doors shut and stand back: two oak doors between the ends, nothing on show.",
+                    "Lay two folded chairs on their sides in the table box's base, under the hinge rail, one behind the other: the back one first.",
+                    "Open the chair door. Stand two folded chairs on the chair box's floor, one behind the other, and two on its shelf the same way.",
+                    "Hang the six seat pads on the table door's hooks, fold the table up, shut both doors and stand back: two plain oak doors, nothing on show.",
                 ]),
             ]),
         12: dict(

@@ -1,4 +1,4 @@
-"""v29.1: QA for the page (the GitHub Pages index.html), at 390 × 844 and 1280 × 800: console errors, sideways scroll, the version
+"""v29.1 (v30: no questions sheet; the compact cabinet's step 11 and both cabinets' states): QA for the page (the GitHub Pages index.html), at 390 × 844 and 1280 × 800: console errors, sideways scroll, the version
 label, the PDF links, every sheet and Plan chapter with every fold opened (anything poking past the screen's right edge that isn't in
 a scroller), step 11 open, the dining cabinet's states in the 3D room.
     python3 qa.py [screenshot folder]       serves the repo itself; prints a JSON report, "fails" and "errors" should be empty
@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT = sys.argv[1] if len(sys.argv) > 1 else "."
 BASE = ""
 CHAPTERS = ["c-room", "views", "wall", "records", "side", "joinery", "dining", "paint", "network", "fit", "downloads"]
-SHEETS = ["plan", "build", "buy", "ideas", "questions"]
+SHEETS = ["plan", "build", "buy", "ideas"]   # v30: the questions sheet is gone
 ARGS = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-webgl"]
 
 OVER = """sel => { const el = sel ? document.querySelector(sel) : document.scrollingElement;
@@ -79,15 +79,16 @@ def run(p, w, h):
         fail(f"step 11 not open: {st and {k: v for k, v in st.items() if k != 'text'}}")
     else:
         t = st["text"]
-        for bad in ("170°", "Lid stays", "linen flap"):
+        for bad in ("170°", "Lid stays", "linen flap", "Slido", "sliding door"):
             if bad in t:
                 fail(f"step 11 still says {bad!r}")
-        rep["notes"].append("step 11 mentions: " + ", ".join(k for k in ("Sliding door gear", "Hang the two sliding doors", "Slido", "150 mm") if k in t))
+        rep["notes"].append("step 11 mentions: " + ", ".join(k for k in ("Hang the two doors", "piano hinge", "flush magnet", "two boxes") if k in t))
     pg.screenshot(path=f"{OUT}/qa_{w}_step11.png")
     # back to the room; the cabinet's states
     pg.evaluate("() => { location.hash = '#room'; }")
     pg.wait_for_timeout(400)
-    for opts in ({"site": "C", "dining": "six", "view": "dining"}, {"site": "C", "dining": "folded", "chairs": "open", "view": "chairs"},
+    for opts in ({"site": "C", "cab": "sliding", "dining": "six", "view": "dining"}, {"site": "C", "cab": "compact", "dining": "folded", "tdoor": True, "view": "dining"},
+                 {"site": "C", "dining": "six", "view": "dining"}, {"site": "C", "dining": "folded", "chairs": "open", "view": "chairs"},
                  {"site": "C", "dining": "folded", "view": "room"}, {"site": "B", "dining": "four"}, {"site": "C", "dining": "six", "view": "room"}):
         pg.evaluate("o => window.R3D.set(o)", opts)
         pg.wait_for_timeout(700)

@@ -20,9 +20,6 @@ DECK_URL = "https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2"
 LPS = G.ALL_LPS   # v19: 291, the wall's 191 and the vinyl stand's 100
 SINGLES = 2 * G.TRAY_SINGLES
 
-# ---------------------------------------------------------------- the open questions, most consequential first
-# (id, question, why it matters, how to check, a photo helps)
-from questions import QUESTIONS   # v13.6: one list, shared with the plan PDF
 import room3d_page                 # v14: the room in 3D
 from shot3d import SHOTS as SHOTS3D
 
@@ -36,7 +33,9 @@ TRACK_KEEP_ID = {"Set up the smart bulbs in their app": "tdd8f66e8a569",
                  # v29: the dining cabinet's rows reworded for the sliding doors; ticks and paid amounts stay
                  "Solid oak for the table: two halves": "t8bc7f1b954e5", "The dining cabinet: oak-faced ply": "ta99476328449",
                  "Oak for the cabinet's hinge rail": "t660dd8fcee21", "The doors' sliding gear": "t551b3e289617",
-                 "Build the dining cabinet: the carcass": "taae3dc4761a1", "One solid oak worktop, 300 × 62": "te9a6cd470663"}
+                 "Build the dining cabinet: the carcass": "taae3dc4761a1", "One solid oak worktop, 300 × 62": "te9a6cd470663",
+                 # v30: the compact cabinet's rows; the sliding gear's row is gone (the doors' hinges are a new row)
+                 "Build the dining cabinet: the two boxes": "taae3dc4761a1", "Open the table, level it at 76": "te78b64c0b588"}
 
 
 def track_rows():
@@ -527,8 +526,8 @@ STYLE_V25 = re.sub(r':root\[data-(?:theme="dark"|skin="[a-z]+")\][^{]*\{[^}]*\}'
 
 
 TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("ideas", "Ideas"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
-        ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("questions", "Questions"), ("checks", "Checks & sources")]
-TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it", "questions": "Your input"}   # v14: the tab bar in four groups
+        ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("checks", "Checks & sources")]
+TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it"}   # v14: the tab bar in four groups
 CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above the window side with the window wall cut away, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture",
          "3d_window_B_folded": "From the window, the Bright preset: the table folded under your shelf by the stairs, the breast free",
          "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
@@ -558,11 +557,15 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
          "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
          "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug",
-         "3d_c_folded": "The dining cabinet packed away: two oak sliding doors under your shelf, the table and the six chairs behind them",
-         "3d_c_six": f"The dining cabinet open for six: door A slid over door B, the table {G.OPTC['len']:g} long, three a side, bar 2 over it",
-         "3d_window_c_six": "From the window, the dining cabinet open for six, the coffee table where it is",
-         "3d_c_chairs": "The chair bay open, door B slid behind door A: four folded chairs on the floor, two on the shelf, the seat pads on edge in front",
-         "3d_c_plan": "Bird\u2019s eye, the dining cabinet open for six",
+         "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf, the table and the six chairs inside, {G.CAB['freed']:.0f} cm of wall back by the pipe boxing",
+         "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long, three a side, bar 2 over it",
+         "3d_window_c_six": "From the window, the compact cabinet open for six, the coffee table where it is",
+         "3d_c_tdoor": "The table door open with the table still folded: the six seat pads on the door's back, the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
+         "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
+         "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
+         "3d_s_folded": f"The sliding cabinet (the alternative), packed away: {G.OPTC['z'][0] - G.OPTC['z'][1]:.0f} long, two oak sliding doors",
+         "3d_s_six": "The sliding cabinet (the alternative) open for six: door A slid over door B",
+         "3d_s_chairs": "The sliding cabinet (the alternative): the chair bay open, door B slid behind door A, six chairs inside",
          "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
 IDEA_SHOT = {"case": "3d_ideas_breast", "glass": "3d_ideas_window", "ctable": "3d_ideas_ctable", "cushions": "3d_decor"}
 IDEA_VIEW = {"case": "breast", "glass": "windowwall", "ctable": "pc", "cushions": "door"}
@@ -655,20 +658,29 @@ def options_card():
         return f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
     a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "bright"}, "See A in 3D")
     b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "bright"}, "See B in 3D")
-    c = btn({"site": "C", "dining": "six", "view": "dining", "scene": "bright"}, "See it open in 3D")
-    c2 = btn({"site": "C", "dining": "folded", "chairs": "open", "view": "chairs", "scene": "bright"}, "The chairs inside")
-    c3 = btn({"site": "C", "dining": "folded", "chairs": "cupboard", "view": "dining", "scene": "bright"}, "See it shut")
+    K, O = g.CAB, g.OPTC
+    c = btn({"site": "C", "cab": "compact", "dining": "six", "view": "dining", "scene": "bright"}, "See it open in 3D")
+    c2 = btn({"site": "C", "cab": "compact", "dining": "folded", "chairs": "open", "tdoor": False, "view": "chairs", "scene": "bright"}, "The chairs inside")
+    c3 = btn({"site": "C", "cab": "compact", "dining": "folded", "chairs": "cupboard", "tdoor": False, "view": "dining", "scene": "bright"}, "See it shut")
+    s1 = btn({"site": "C", "cab": "sliding", "dining": "six", "view": "dining", "scene": "bright"}, "See it in 3D")
+    s2 = btn({"site": "C", "cab": "sliding", "dining": "folded", "chairs": "cupboard", "tdoor": False, "view": "dining", "scene": "bright"}, "Shut")
     return f"""<div class="opts">
   <article class="opt"><img data-art="3d_c_six" alt="{html.escape(CAP3D['3d_c_six'])}" loading="lazy">
-    <div class="ob"><span class="label">The plan · six in comfort</span><h3>The dining cabinet</h3>
-    <ul><li>One oak cabinet under the shelf, two sliding doors: shut, nothing of the table or the {g.OPTC['chairs']} chairs on show.</li>
-    <li>Slide door A over door B and the table comes down to {g.OPTC['len']:g} × {g.OPTC['top'][0]:g}: three a side, the coffee table stays put.</li>
-    <li>Slide door B behind door A for the chairs; a drawer and a linen shelf inside.</li>
+    <div class="ob"><span class="label">The plan · six in comfort · {K['len']:.0f} cm</span><h3>The compact dining cabinet</h3>
+    <ul><li>Two oak boxes under the shelf, {K['len']:.0f} long: the table and all six chairs inside, {K['freed']:.0f} cm of wall back by the pipe boxing.</li>
+    <li>The table door turns back flat over the chair door and the table comes down to {K['len_open']:g} × {K['top'][0]:g}: three a side, the coffee table stays put.</li>
+    <li>Four chairs stand in the chair bay, two lie under the folded table; the seat pads hang on the table door.</li>
+    <li>Tap it in the 3D room to open it, fold it or show the chairs.</li>
     <li class="minus">Push the ottoman to the sofa while it's out.</li></ul>{c} {c2} {c3}</div></article>
+  <article class="opt"><img data-art="3d_s_six" alt="{html.escape(CAP3D['3d_s_six'])}" loading="lazy">
+    <div class="ob"><span class="label">The alternative · {O['z'][0] - O['z'][1]:.0f} cm</span><h3>The sliding dining cabinet</h3>
+    <ul><li>The same table and chairs behind two sliding doors: nothing ever swings into the room.</li>
+    <li>A drawer for the mats; the chairs stand two across.</li>
+    <li class="minus">{O['z'][0] - O['z'][1] - K['len']:.0f} cm longer: each sliding door needs a door's width to park in.</li></ul>{s1} {s2}</div></article>
   <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
     <div class="ob"><span class="label">B · the flip-top · the alternative</span><h3>A flip-top under your shelf</h3>
     <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast for the “now playing” ledge.</li>
-    <li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li><li class="minus">Wall's build unknown: knock first.</li></ul>{b}</div></article>
+    <li>Your solid stairs wall: plugs and screws.</li><li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li></ul>{b}</div></article>
   <article class="opt"><img data-art="3d_dining_A_four" alt="Option A in 3D: the table down for four on the chimney breast" loading="lazy">
     <div class="ob"><span class="label">A · the flip-top · the alternative</span><h3>A flip-top on the chimney breast</h3>
     <ul><li>The flip-top opens towards the window: four with room, six elbows-in.</li><li>Solid breast: plugs and screws, no surprises.</li>
@@ -687,7 +699,7 @@ SEC_TAB = {"1": "overview", "2": "overview", "3": "wall", "4": "wall", "5": "din
 
 
 LINKNAME = {"overview": "plan", "room": "3D room", "views": "Drawn views chapter", "ideas": "Ideas", "wall": "Media wall chapter", "dining": "Dining wall chapter",
-            "paint": "Paint & light chapter", "network": "Network & power chapter", "build": "Build steps", "buy": "Buy list", "questions": "Ask list", "checks": "Fit proof"}
+            "paint": "Paint & light chapter", "network": "Network & power chapter", "build": "Build steps", "buy": "Buy list", "checks": "Fit proof"}
 
 
 def _tablink(tab):
@@ -818,10 +830,10 @@ def chapter_facts(rows, fc, nfit):
         "side": chips("One oak run sweeping out to the PC", f"PC shelf at <b>{g.LEDGE_TOP:g}</b>", "Leads through a brush grommet into conduit in the wall", "A warm LED strip underneath", "Step 10"),
         "joinery": chips("The cutting list (copy it for the timber merchant)", "Housings, mortises and pegs: the joints drawing", "Worktop: step 7", "Uprights: step 9",
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
-        "dining": chips(f"The dining cabinet: <b>{g.OPTC['z'][0] - g.OPTC['z'][1]:g} × {g.OPTC['d']:g} × {g.OPTC['h']:g}</b> under your shelf",
-                        f"Table <b>{g.OPTC['len']:g} × {g.OPTC['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> chairs inside it, the seat pads too",
-                        "Two oak sliding doors; a drawer and a linen shelf inside", f"Step 11 builds it, in {len(__import__('instructions').full()[11]['parts_full'])} stages", "Dining wall " + _ph(rows, "6 Dining wall"),
-                        "The flip-top (by the stairs or on the breast) is the alternative"),   # v27
+        "dining": chips(f"The compact dining cabinet: <b>{g.CAB['len']:g} × {g.CAB['d']:g} × {g.CAB['h']:g}</b> under your shelf, {g.CAB['freed']:.0f} cm of wall back",
+                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> chairs inside it, the seat pads on the door",
+                        "Two hinged oak doors that turn right back; a linen shelf inside", f"Step 11 builds it, in {len(__import__('instructions').full()[11]['parts_full'])} stages", "Dining wall " + _ph(rows, "6 Dining wall"),
+                        f"The long sliding cabinet ({g.OPTC['z'][0] - g.OPTC['z'][1]:g}) and the flip-top are the alternatives"),   # v27; v30: the compact cabinet
         "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])
                  + chips("Smart E14 bulbs in both bars, no dimmers", "Paint " + _ph(rows, "3 Paint"), "Lighting " + _ph(rows, "7 Lighting")),
         "network": chips("Virgin Hub 5 in modem mode", "Three Deco X1500s", "Two TL-SG108 switches", "Cat6 runs on step 3",
@@ -855,10 +867,9 @@ def ring(key, hue, label, go):
 
 def _page(site=False):
     """v25 (Demma Home Improvements, option 1c "Room as map"): the 3D room is the home screen; a rail (a bottom bar on phones) opens
-    the Plan, Build, Buy, Ideas and Ask sheets over it; the Tools button holds every 3D control. Every v24 panel id, data-* hook and
+    the Plan, Build, Buy and Ideas sheets over it (v30: the Ask sheet is gone); the Tools button holds every 3D control. Every v24 panel id, data-* hook and
     saved key is kept: the panels live inside the sheets now."""
     import diagrams as D
-    import questions as QM
     prefix = "media-wall/src/" if site else ""
     imgs = {k: f"{prefix}art/{k}.webp" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
     imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.webp" for v in ("join", "four", "six", "drawers", "side")})
@@ -873,26 +884,6 @@ def _page(site=False):
     decision = re.search(r'<div class="decision">(.*?)</div>', pre, re.S).group(1)
     s1 = re.sub(r"</div>\s*$", "", sec["1"].strip())
     facts = chapter_facts(rows, fc, nfit)
-    qs = [{"id": i, "q": q, "why": w, "how": h, "photo": ph} for i, q, w, h, ph in QUESTIONS]
-    QH = [235, 300, 50, 165, 345, 95, 70, 125, 25]
-    def qrows(i):
-        out = []
-        for lab, choices in QM.OPTS.get(i, []):
-            bs = "".join((f'<button type="button" class="qc" data-photo="1"><span class="ms" aria-hidden="true">photo_camera</span>{html.escape(c)}</button>' if c.startswith("Add a photo")
-                          else f'<button type="button" class="qc" data-v="{html.escape(c)}" aria-pressed="false">{html.escape(c)}</button>') for c in choices)
-            out.append(f'<div class="qrow" data-label="{html.escape(lab or "")}">' + (f'<span class="label">{html.escape(lab)}</span>' if lab else "")
-                       + f'<div class="qchips" role="group" aria-label="{html.escape(lab or "Your answer")}">{bs}</div></div>')
-        return "".join(out)
-    q_items = "\n".join(
-        f'<li class="q" id="q-{i}" data-q="{i}" style="--h:{QH[n % len(QH)]}"><h3><span class="n">{n:02d}</span><span>{html.escape(q)}</span></h3>'
-        f'{qrows(i)}<p class="qans" aria-live="polite"></p>'
-        f'<details class="qwhy"><summary>Why we ask</summary><p>{html.escape(w)}</p><p><b>How:</b> {html.escape(h)}</p></details>'
-        # the answer box and Save stay (hidden): the quick taps write through them, so answers/<id> and the drafts on this device are as before
-        f'<div class="qin" hidden><label class="label" for="a-{i}">Your answer</label><textarea id="a-{i}" rows="2" placeholder="Type here"></textarea>'
-        f'<button class="btn primary save" type="button" data-q="{i}">Save</button></div>'
-        f'<div class="row"><label class="upl btn" hidden>Add a photo<input type="file" accept="image/*" multiple data-q="{i}" id="f-{i}"></label>'
-        f'<span class="st" aria-live="polite"></span></div><div class="photos"></div></li>'
-        for n, (i, q, w, h, ph) in enumerate(QUESTIONS, 1))
     ph_html = []
     for p in phases:
         items = [r for r in rows if r["phase"] == p["name"]]
@@ -924,7 +915,7 @@ def _page(site=False):
             f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
             f'<p class="ssee">Also see: {see}</p>'
             f'<p class="snext"><button type="button" class="btn" data-next="{s["n"]}">Next step →</button></p></div></li>')
-    data = {"img": imgs, "q": qs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
+    data = {"img": imgs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
             "phases": [{k: p[k] for k in ("name", "idx", "lo", "hi")} for p in phases], "top": 200 * -(-max(p["hi"] for p in phases) // 200),
             "steps": len(steps()), "tabs": [t for t, _ in TABS]}
     used = [k for k in PARTS if any(k in st["part"] for st in steps())]
@@ -939,12 +930,11 @@ def _page(site=False):
         return (f'<section class="chapter" id="ch-{k}" data-ch="{k}" style="--h:{h}" hidden><button type="button" class="chback" data-go="overview"><span class="ms" aria-hidden="true">arrow_back</span>All chapters</button>'
                 f'<div class="chhead"><i class="ms" aria-hidden="true">{ic}</i><h2>{html.escape(t)}</h2></div>{facts[k]}{inner}</section>')
     more = lambda body, lab="Read the full chapter": f'<details class="readmore"><summary>{lab} <span class="ms" aria-hidden="true">expand_more</span></summary>{body}</details>'
-    nav = [("plan", "Plan", "map", 300), ("build", "Build", "construction", 50), ("buy", "Buy", "shopping_bag", 165), ("ideas", "Ideas", "lightbulb", 95), ("questions", "Ask", "forum", 235)]
-    badge = f'<span class="badge ask-badge">{len(QUESTIONS)}</span>'
+    nav = [("plan", "Plan", "map", 300), ("build", "Build", "construction", 50), ("buy", "Buy", "shopping_bag", 165), ("ideas", "Ideas", "lightbulb", 95)]   # v30: no Ask sheet (every question answered or dropped)
     rail = (f'<nav class="rail" aria-label="Sections"><button type="button" id="tb-room" data-nav="room" aria-current="true" style="--h:25"><i class="ms" aria-hidden="true">view_in_ar</i>Room</button>'
-            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}{badge if k == "questions" else ""}</button>' for k, n, ic, h in nav) + '</nav>')
+            + "".join(f'<button type="button" id="tb-{"overview" if k == "plan" else k}" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
     bbar = (f'<nav class="bbar" aria-label="Sections"><button type="button" class="toolsb" data-tools-toggle aria-expanded="false" aria-controls="r3d-panel"><i class="ms" aria-hidden="true">tune</i>Tools</button>'
-            + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}{badge if k == "questions" else ""}</button>' for k, n, ic, h in nav) + '</nav>')
+            + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
     def sheet(k, title, ic, h, body):
         return (f'<div class="sheet" id="sh-{k}" role="dialog" aria-modal="true" aria-labelledby="sh-{k}-h" aria-hidden="true" style="--h:{h}">'
                 f'<div class="shd"><span class="grab" aria-hidden="true"></span><h2 id="sh-{k}-h"><i class="ms" aria-hidden="true">{ic}</i><span>{title}</span></h2>'
@@ -958,7 +948,7 @@ def _page(site=False):
 
     plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
       <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the fold-down table, the network and power: about £{money(lo_tot, hi_tot)} in all.</p></div>
-      <div class="rings">{ring("build", 50, "build steps", "build")}{ring("buy", 165, "bought", "buy")}{ring("q", 235, "answered", "questions")}</div>
+      <div class="rings">{ring("build", 50, "build steps", "build")}{ring("buy", 165, "bought", "buy")}</div>
       <p class="caption" id="d-paid">£0 paid so far</p>
       <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
@@ -1076,18 +1066,6 @@ def _page(site=False):
     <div class="block"><h2 class="ptitle">Suggestions in the room</h2><p class="caption">Each one switches the room too: close this to see them.</p>{sugg_chips}</div>
     {ideas_panel()}
   </section>"""
-    ask_body = f"""<section class="panel" id="questions">
-    <p class="caption">{len(QUESTIONS)} things only you can tell us, the ones that change the drawings first. Tap an answer; a photo is often quicker than words.</p>
-    <div class="meter"><span id="q-count">0 of {len(QUESTIONS)} answered</span></div>
-    <div class="qprog" aria-hidden="true"><i id="q-bar"></i></div>
-    <p class="notice" id="q-local" hidden>Answers can't be saved for both of you from this view: they're kept on this device. When you're done, use Copy all answers and paste them into a message.</p>
-    <p class="notice" id="q-ro" hidden>You can read the answers here but not change them. Ask Emma to give you Contributor access in the Share menu.</p>
-    <ul class="qs" id="qs-list">
-{q_items}
-    </ul>
-    <div class="row"><button class="btn" id="copy-all" type="button">Copy all answers</button><span class="caption" id="copy-st" aria-live="polite"></span></div>
-    <textarea id="copy-box" class="caption" rows="6" hidden readonly aria-label="All answers as text"></textarea>
-  </section>"""
     page = f"""<title>Demma Home Improvements</title>
 {room3d_page.IMPORTMAP}
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1104,7 +1082,6 @@ def _page(site=False):
 {sheet("build", "Build", "construction", 50, build_body)}
 {sheet("buy", "Buy", "shopping_bag", 165, buy_body)}
 {sheet("ideas", "Ideas", "lightbulb", 95, ideas_body)}
-{sheet("questions", "Ask", "forum", 235, ask_body)}
 {bbar}
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="The picture at full size">
   <div class="lbbar"><span class="caption" id="lb-cap">Full size: drag or scroll to look round. Pinch to zoom on a phone.</span><button class="btn" id="lb-close" type="button">Close</button></div>

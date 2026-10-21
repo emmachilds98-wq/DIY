@@ -58,20 +58,26 @@ SHOTS = [
     ("3d_suggest", dict(view="door", site="C", dining="folded", scene="bright", sugg={k: True for k, *_ in __import__("ideas").SUGGEST}),
      "SUGGESTED furniture and decor, all of them on - bright"),
     ("3d_seat", dict(view="dining", site="B", dining="folded", scene="bright", seat="down"), "B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright"),
-    # v26: option C, the dining cabinet; v27: the plan, for six
-    ("3d_c_folded", dict(view="dining", site="C", dining="folded", scene="bright"), "THE DINING CABINET - packed away - bright"),
-    ("3d_c_six", dict(view="dining", site="C", dining="six", scene="bright"), "THE DINING CABINET - open for six - bright, table rule"),
-    ("3d_window_c_six", dict(view="window", site="C", dining="six", scene="bright"), "THE DINING CABINET - from the window, open for six - bright, table rule"),
+    # v26: option C, the dining cabinet; v27: the plan, for six; v30: the compact cabinet is the plan, the sliding one the alternative
+    ("3d_c_folded", dict(view="dining", site="C", dining="folded", scene="bright"), "THE COMPACT DINING CABINET - packed away - bright"),
+    ("3d_c_six", dict(view="dining", site="C", dining="six", scene="bright"), "THE COMPACT DINING CABINET - open for six, the table door back flat - bright, table rule"),
+    ("3d_window_c_six", dict(view="window", site="C", dining="six", scene="bright"), "THE COMPACT DINING CABINET - from the window, open for six - bright, table rule"),
+    ("3d_c_tdoor", dict(view="dining", site="C", dining="folded", scene="bright", tdoor=True),
+     "THE COMPACT DINING CABINET - the table door open - the folded table, the pads on the door, two chairs in the base - bright"),
     ("3d_c_chairs", dict(view="chairs", site="C", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}),
-     "THE DINING CABINET - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright"),
-    ("3d_c_plan", dict(view="plan", site="C", dining="six", scene="bright", tod="day", master=0), "THE DINING CABINET - birds eye, open for six"),
+     "THE COMPACT DINING CABINET - the chair door open, four chairs inside (plant stand and lamp hidden) - bright"),
+    ("3d_c_plan", dict(view="plan", site="C", dining="six", scene="bright", tod="day", master=0), "THE COMPACT DINING CABINET - birds eye, open for six"),
+    ("3d_s_folded", dict(view="dining", site="C", cab="sliding", dining="folded", scene="bright"), "THE SLIDING CABINET (the alternative) - packed away - bright"),
+    ("3d_s_six", dict(view="dining", site="C", cab="sliding", dining="six", scene="bright"), "THE SLIDING CABINET (the alternative) - open for six - bright, table rule"),
+    ("3d_s_chairs", dict(view="chairs", site="C", cab="sliding", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}),
+     "THE SLIDING CABINET (the alternative) - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
 
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100}
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "tdoor": False}   # v30: the compact cabinet
 
 
 def room_print():

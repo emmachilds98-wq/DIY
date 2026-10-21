@@ -548,6 +548,81 @@ OPTC["seats"] = {   # (x, z, the way the chair faces: "n" ... as room3d.js reads
 del _o, _sz, _wz, _sl, _wl, _stair, _window
 
 
+# ---------------------------------------------------------------- v30: the compact dining cabinet (the plan); OPTC above is the alternative
+# client: "is there anyway you can optimise the dining cabinet build to fit the chairs in a better way so the cabinet doesnt have to be
+# so big", then "show me both versions". The same table and the same six FRÖSVI chairs, packed tighter: four in a bay one chair wide
+# (two deep on its floor, two deep on its shelf) and two lying on their sides in the table bay's base, under the folded table, where the
+# drawer was. Two carcasses screwed side by side: the table box at the stair end (where the table always was, so the seats don't move)
+# and the chair box beside it. Sliding doors would each need a door's width to park in, so these are hinged: inset, each on a full-height
+# piano hinge whose knuckle sits on the front, so it opens 180° and lies back flat. The table door swings towards the window over the
+# chair door and the bare wall beyond it; the chair door swings towards the stairs over the table door. The six seat pads hang on the
+# table door's back, so the folded table stands 4 back from it. 54 cm shorter than the sliding cabinet, 1.8 shallower; 56 cm of wall comes back by the
+# pipe boxing.
+CAB = dict(
+    z0=OPTC["z"][0],              # -86: the stair end, where it always was (45 short of the stair box: the stairs' foot stays clear)
+    d=23.0,                       # the wall to the doors' faces (the sliding cabinet: 24.8); the pipe boxing is 22
+    h=OPTC["h"], t=1.8, t_top=1.8, door=1.8, back=0.6, plinth=3.0,
+    gap=0.2,                      # behind the inset doors (a stop), and round them
+    hinge_gap=0.3,                # the hinge side's gap: the piano hinge's two leaves sit in it
+    bay_t=91.0,                   # the table box inside: the 90 top and 0.5 a side
+    bay_c=46.0,                   # the chair box inside: a 43 chair and 1.5 a side
+    shelf_y=93.5,                 # the chair box's shelf (its top face 95.3)
+    pads=4.0,                     # the six seat pads (3) on their hooks, on the table door's back, in front of the folded table
+)
+_k = CAB
+CAB["front"] = ROOM_W - _k["d"]                                  # 444.0: the doors' faces and the carcass's front edges
+CAB["inner"] = CAB["front"] + _k["door"] + _k["gap"]             # 446.0: the inside's front line
+CAB["in_d"] = _k["d"] - _k["door"] - _k["gap"] - _k["back"]      # 20.4 inside
+CAB["z_t"] = (_k["z0"], _k["z0"] - 2 * _k["t"] - _k["bay_t"])     # the table box: -86 .. -180.6
+CAB["z_c"] = (CAB["z_t"][1], CAB["z_t"][1] - 2 * _k["t"] - _k["bay_c"])   # the chair box: -180.6 .. -230.2
+CAB["z"] = (_k["z0"], CAB["z_c"][1])
+CAB["len"] = CAB["z"][0] - CAB["z"][1]                            # 144.2
+CAB["bay_tz"] = (CAB["z_t"][0] - _k["t"], CAB["z_t"][1] + _k["t"])    # the table bay inside: -87.8 .. -178.8 (as the sliding cabinet's)
+CAB["bay_cz"] = (CAB["z_c"][0] - _k["t"], CAB["z_c"][1] + _k["t"])    # the chair bay inside: -182.4 .. -228.4
+CAB["freed"] = CAB["z"][1] - PIPE_BOX["z"][1]                    # 55.8: wall back by the pipe boxing
+CAB["top"] = OPTC["top"]                                          # the same table: two halves 92.5 × 90 × 2.7
+CAB["apron"], CAB["leg"], CAB["leg_in"] = OPTC["apron"], OPTC["leg"], OPTC["leg_in"]
+CAB["cz"] = (CAB["bay_tz"][0] + CAB["bay_tz"][1]) / 2             # -133.3: the table's centre line (unchanged)
+CAB["tz"] = (CAB["cz"] + _k["top"][0] / 2, CAB["cz"] - _k["top"][0] / 2)
+CAB["pivot"] = (CAB["inner"] + _k["pads"] + _k["apron"], TABLE_TOP - _k["top"][2])     # the piano hinge under the inner half: 454.6, 73.3
+CAB["len_open"] = 2 * _k["top"][1]                                # 185 open
+CAB["tx"] = (CAB["pivot"][0] - CAB["len_open"], CAB["pivot"][0])
+CAB["joint_x"] = CAB["pivot"][0] - _k["top"][1]
+CAB["folded_top"] = CAB["pivot"][1] + _k["top"][1]                # 165.8
+CAB["stack"] = OPTC["stack"]                                      # 14.9 deep folded
+CAB["rail"] = (CAB["pivot"][1] - 7.0, CAB["pivot"][1])            # the hinge rail: 66.3 .. 73.3
+CAB["linen"] = (CAB["folded_top"] + 1.0 + _k["t"], _k["h"] - _k["t_top"])   # the linen shelf's top face .. the top's underside: 168.6 .. 187.2
+CAB["base"] = (_k["plinth"], CAB["rail"][0])                      # under the hinge rail: 3 .. 66.3, two chairs lying on their sides
+CAB["leg_h"] = TABLE_TOP - _k["top"][2] - _k["apron"]             # 68.7
+# the doors, inset between the top and the floor: the table door one piece (two leaves can't fold flat over the chair door: the outer
+# one would end up behind the inner one), on the table box's window end; the chair door on the chair box's stair end
+CAB["door_h"] = _k["h"] - _k["t_top"] - _k["plinth"] - 2 * _k["gap"]                 # 183.8
+CAB["door_t"] = (CAB["bay_tz"][0] - _k["gap"], CAB["bay_tz"][1] + _k["hinge_gap"])   # the table door: z -88.0 .. -178.5, hinged at -178.5
+CAB["door_c"] = (CAB["bay_cz"][0] - _k["hinge_gap"], CAB["bay_cz"][1] + _k["gap"])   # the chair door: z -182.7 .. -228.2, hinged at -182.7
+CAB["door_tw"] = CAB["door_t"][0] - CAB["door_t"][1]              # 90.5
+CAB["door_cw"] = CAB["door_c"][0] - CAB["door_c"][1]              # 45.5
+CAB["knuckle"] = 0.25                                             # the hinge pin's centre in front of the doors' faces
+CAB["door_kg"] = (CAB["door_tw"] * CAB["door_h"] * _k["door"] * 0.70 / 1000, CAB["door_cw"] * CAB["door_h"] * _k["door"] * 0.70 / 1000)
+# open, a door turns 180° about its knuckle and lies back in front of its neighbour: the table door's far end then reaches
+CAB["door_t_open"] = (CAB["door_t"][1] - _k["hinge_gap"], CAB["door_t"][1] - _k["hinge_gap"] - CAB["door_tw"])   # -178.8 .. -269.3
+CAB["door_t_face"] = CAB["front"] - 2 * _k["knuckle"] - _k["door"]                    # its room-side face lying open: x 441.7
+# the six chairs: two lying in the base, four standing in the chair bay, two deep on its floor and two deep on its shelf
+CAB["chairs_base"] = 2
+CAB["chair_z"] = (CAB["bay_cz"][0] + CAB["bay_cz"][1]) / 2         # the standing chairs' centre line
+_cf = CHAIR_FOLDED
+CAB["chair_x"] = [ROOM_W - _k["back"] - 0.3 - _cf[1] * (j + 1) - 0.3 * j for j in range(2)]   # their room-side faces, back first
+# seats: as for the sliding cabinet, the window side from the sofa's arm (or the table's end) to the doors' faces
+_sz, _wz = CAB["tz"][0] + CHAIR[1] / 2 - CHAIR_TUCK, CAB["tz"][1] - CHAIR[1] / 2 + CHAIR_TUCK
+_sl, _wl = CAB["front"] - CAB["tx"][0], CAB["front"] - max(CAB["tx"][0], SOFA_X[1])
+_stair = lambda n: [round(CAB["front"] - _sl + _sl / n * (i + 0.5), 1) for i in range(n)]
+_window = lambda n: [round(CAB["front"] - _wl + _wl / n * (i + 0.5), 1) for i in range(n)]
+CAB["seats"] = {"four": [(x, _sz, "n") for x in _stair(2)] + [(x, _wz, "w") for x in _window(2)],
+                "six": [(x, _sz, "n") for x in _stair(3)] + [(x, _wz, "w") for x in _window(3)]}
+CAB["legs"] = [(CAB["joint_x"] + CAB["leg_in"], CAB["cz"] + s * 13.0) for s in (1, -1)] + \
+              [(CAB["tx"][0] + CAB["leg_in"], CAB["cz"] + s * (_k["top"][0] / 2 - 4.0 - 2.0 - _k["leg"][1] / 2)) for s in (1, -1)]
+del _k, _cf, _sz, _wz, _sl, _wl, _stair, _window
+
+
 # ---------------------------------------------------------------- v27 (20 Oct): your rear speakers, standing behind the sofa
 # client: "add my surround speakers to the build that exist standing behind the sofa ill send a photo". The AX5100G's rears
 # (90 × 144 × 109 mm, Hisense) on slim floor stands. v27.1, from your photos and your answer ("they are directly behind the sofa
