@@ -367,12 +367,15 @@ const HESSIAN = canvasTex(256, 256, (g, w, h) => {   // v15: hessian's coarse, o
 HESSIAN.repeat.set(3, 9);
 // v16: the client's light box is an IKEA OBEGRÄNSAD: a black panel with a 16 x 16 grid of white LEDs that shows blocky black-and-white
 // pictures, "like pharmacy LED ads". Drawn showing a pixel music note; the unlit LEDs are dark grey dots on the black face.
-// v16: the navy cap's poem, printed in pale lines under its peak
-const POEM_TEX = canvasTex(256, 140, (g, w, h) => {
-  g.fillStyle = "#1f2a44"; g.fillRect(0, 0, w, h);
-  g.fillStyle = "#d9d2b8";
-  for (let i = 0; i < 9; i++) { const lw = 150 + ((i * 37) % 70); g.fillRect((w - lw) / 2, 12 + i * 13, lw, 4); }
+// v16: the cap's embroidery. v37: drawn as rows of gold stitching in the shape of the client's cap (four lines on the crown, fourteen
+// on the brim), not as words: on a transparent ground, laid over the green crown and the brown brim
+const stitchTex = (w, h, rows) => canvasTex(w, h, (g, W, H) => {
+  g.clearRect(0, 0, W, H); g.fillStyle = "#e2c06a"; const r = rnd(rows.length * 7), lh = H / (rows.length + 1);
+  rows.forEach((f, i) => { const y = lh * (i + 0.75), lw = W * f; let x = (W - lw) / 2;
+    while (x < (W + lw) / 2) { const ww = 6 + r() * 16; g.fillRect(x, y, Math.min(ww, (W + lw) / 2 - x), lh * 0.42); x += ww + (r() < 0.25 ? 9 : 3); } });   // stitched words
 });
+const CAP_CROWN_TEX = stitchTex(512, 220, [0.34, 0.5, 0.82, 0.9]);
+const CAP_BRIM_TEX = stitchTex(512, 600, [0.86, 0.8, 0.8, 0.92, 0.6, 0.48, 0.66, 0.5, 0.6, 0.66, 0.84, 0.36, 0.36, 0.24]);
 const NOTE = ["................", "......#######...", "......#######...", "......##....#...", "......#.....#...", "......#.....#...",
               "......#.....#...", "......#.....#...", "......#.....#...", "..####....####..", ".######..######.", ".######..######.",
               "..####....####..", "................", "................", "................"];
@@ -2338,18 +2341,53 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
     mb.position.copy(v3(spot.x, R.LAMP.h + 5, spot.z)); mb.rotation.z = -0.22; mb.rotation.x = 0.12; g.add(mb);
     const perp = new THREE.Vector3(-toward.z, 0, toward.x);                         // room coords: across the heads
     const out = new THREE.Vector3(-perp.x, 0, perp.z).normalize(), up = new THREE.Vector3(0, 1, 0);   // world
-    const cap = new THREE.Group(), navy = reg(new THREE.MeshStandardMaterial({ color: H.cap_col, roughness: 0.8 }));
-    const crown = new THREE.Mesh(new THREE.SphereGeometry(0.095, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2), navy); crown.scale.set(1, 0.85, 1.08);
-    const peak = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.006, 28, 1, false, -Math.PI * 0.32, Math.PI * 0.64), navy);
-    peak.position.set(0, 0.0, -0.055); peak.scale.set(1, 1, 0.9);
-    const poem = new THREE.Mesh(new THREE.PlaneGeometry(0.11, 0.06), new THREE.MeshStandardMaterial({ map: POEM_TEX, roughness: 0.9 }));
-    poem.rotation.x = Math.PI / 2; poem.position.set(0, -0.004, -0.115);
-    cap.add(shadow(crown), shadow(peak), poem);
-    const xAxis = new THREE.Vector3().crossVectors(out, up);
-    cap.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, out, up));
+    const cap = buildCap(H);                                                         // v37: a structured baseball cap, not a beret
+    const xAxis = new THREE.Vector3().crossVectors(out, up), tilt = 0.4;               // v37: tipped so the stiff brim kicks out from the pole
+    const yAx = out.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(up, Math.sin(tilt)), zAx = up.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(out, -Math.sin(tilt));
+    cap.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAx, zAx));
     cap.position.copy(v3(spot.x, H.cap_y, spot.z)).add(out.clone().multiplyScalar(0.02)); g.add(cap);
   }
   fixtures.add(g);
+}
+
+/* v37, client: "It should be a baseball cap: a fitted, structured, rounded crown with a flat, stiff brim that projects forward. Make the
+   brim noticeably oversized (roughly 1.5-2x a normal proportion)". In the cap's own frame (metres): the crown up +y, the brim forward -z.
+   Six panels on an oval base, a seam down the middle of the front and five more, a button on top, an eyelet in each panel; a flat brim
+   1.8 times a usual one, stiff (an edged slab), with the gold stitching on its top and across the crown's front (geometry.HATS) */
+function buildCap(H) {
+  const cap = new THREE.Group(), cm = M, a = H.crown_w / 2, b = H.crown_l / 2, h = H.crown_h;
+  const green = reg(new THREE.MeshStandardMaterial({ color: H.crown_col, roughness: 0.85, side: THREE.DoubleSide }));
+  const brown = reg(new THREE.MeshStandardMaterial({ color: H.brim_col, roughness: 0.8 }));
+  const seamM = reg(new THREE.MeshStandardMaterial({ color: "#1f3327", roughness: 0.9 }));
+  const prof = [[1, 0], [1.0, 0.22], [0.975, 0.45], [0.9, 0.66], [0.76, 0.82], [0.55, 0.93], [0.3, 0.985], [0, 1]];   // firm sides, a rounded top
+  const pts = prof.map(([r, y]) => new THREE.Vector2(r * a * cm, y * h * cm));
+  const crown = new THREE.Mesh(new THREE.LatheGeometry(pts, 48), green); crown.scale.z = b / a; cap.add(shadow(crown));
+  // the seams: one down the front's middle (phi = PI), the rest every 60 degrees, a little proud of the cloth
+  for (let i = 0; i < 6; i++) { const phi = Math.PI + i * Math.PI / 3;
+    const path = new THREE.CatmullRomCurve3(prof.slice(0, -1).map(([r, y]) => new THREE.Vector3(r * a * Math.sin(phi) * cm * 1.004, y * h * cm, r * b * Math.cos(phi) * cm * 1.004)).concat([new THREE.Vector3(0, h * cm, 0)]));
+    cap.add(new THREE.Mesh(new THREE.TubeGeometry(path, 24, 0.0009, 5), seamM)); }
+  const button = new THREE.Mesh(new THREE.SphereGeometry(1.0 * cm, 14, 8), green); button.scale.y = 0.5; button.position.y = h * cm; cap.add(button);
+  for (let i = 0; i < 6; i++) { const phi = Math.PI + Math.PI / 6 + i * Math.PI / 3, k = 0.76, ye = 0.82 * h;   // an eyelet high on each panel
+    const e = new THREE.Mesh(new THREE.CircleGeometry(0.35 * cm, 12), seamM); const p_ = new THREE.Vector3(k * a * Math.sin(phi) * 1.01 * cm, ye * cm, k * b * Math.cos(phi) * 1.01 * cm);
+    e.position.copy(p_); e.lookAt(p_.clone().multiply(new THREE.Vector3(2, 1.3, 2))); cap.add(e); }
+  // the gold stitching across the crown's front: a patch of the same surface, a hair proud
+  const rAt = t => { for (let i = 1; i < prof.length; i++) { const [r0, y0] = prof[i - 1], [r1, y1] = prof[i]; if (t <= y1) return r0 + (r1 - r0) * (t - y0) / (y1 - y0); } return 0; };
+  const fpts = [0.16, 0.3, 0.45, 0.58, 0.68].map(t => new THREE.Vector2(rAt(t) * a * cm * 1.006, t * h * cm));
+  const front = new THREE.Mesh(new THREE.LatheGeometry(fpts, 24, Math.PI - 0.8, 1.6), reg(new THREE.MeshStandardMaterial({ map: CAP_CROWN_TEX, transparent: true, alphaTest: 0.35, roughness: 0.55, metalness: 0.25, side: THREE.DoubleSide })));
+  front.scale.z = b / a; cap.add(front);
+  // the brim: a flat stiff slab off the crown's front, 1.8 times a usual one, the stitching on its top
+  const t1 = 1.25, W = H.brim_w / 2, L = H.brim_len, shape = new THREE.Shape(), steps = 24;
+  for (let i = 0; i <= steps; i++) { const th = -t1 + 2 * t1 * i / steps; const x = a * Math.sin(th), y = b * Math.cos(th); i ? shape.lineTo(x, y) : shape.moveTo(x, y); }   // along the crown
+  for (let i = steps; i >= 0; i--) { const sx = -1 + 2 * i / steps, y0 = b * Math.cos(t1); shape.lineTo(sx * W, y0 + (b + L - y0) * Math.pow(1 - Math.pow(Math.abs(sx), 2.6), 1 / 2.6)); }   // its rounded front edge
+  const slab = new THREE.ExtrudeGeometry(shape, { depth: H.brim_t, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.12, bevelSegments: 1, curveSegments: 4 });
+  slab.rotateX(-Math.PI / 2); slab.scale(cm, cm, cm);
+  const brim = new THREE.Mesh(slab, brown); brim.position.y = -0.1 * cm; cap.add(shadow(brim));
+  const top = new THREE.ShapeGeometry(shape, 4), uv = top.attributes.uv, ps = top.attributes.position;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (W - ps.getX(i)) / (2 * W), 1 - (ps.getY(i) - b * Math.cos(t1)) / (b + L - b * Math.cos(t1)));   // read from the front, the first row at the crown
+  top.rotateX(-Math.PI / 2); top.scale(cm, cm, cm);
+  const stitch = new THREE.Mesh(top, reg(new THREE.MeshStandardMaterial({ map: CAP_BRIM_TEX, transparent: true, alphaTest: 0.35, roughness: 0.55, metalness: 0.25 })));
+  stitch.position.y = (H.brim_t + 0.1) * cm; cap.add(stitch);
+  return cap;
 }
 
 /* ---------------------------------------------------------------- the furniture, by state */

@@ -86,7 +86,7 @@ SHOTS = [
     ("3d_beside_shoes", dict(view="beside", site="C", dining="folded", scene="bright", beside="shoes"), "BESIDE THE CABINET - two shoe cabinets - bright"),
     ("3d_shelf_gap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[360, 205, -215], at=[462, 192, -282], fov=40)),
      "YOUR BLACK SHELF - its window end 10 cm short of the pipe boxing - daytime"),
-    ("3d_lamp_cap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[215, 150, -215], at=[288, 140, -276], fov=28)),
+    ("3d_lamp_cap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[235, 140, -300], at=[288, 132, -276], fov=30)),
      "THE RED LAMP - your cap, a structured baseball cap with an oversized brim - daytime"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
