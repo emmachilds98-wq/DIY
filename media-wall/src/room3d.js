@@ -19,6 +19,25 @@ const msg = qs("#r3d-msg");
 
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+/* v35: an error trap. Anything that goes wrong in the room (a script error, a failed promise, three's own console errors: a shader
+   that won't compile, a lost graphics context) shows a small note and is kept: the last 20 in this browser (R3D.errors() lists them)
+   and, on the deck, in its database ("errors"), so the next round can read what you saw, on which device */
+const ERRS = { t: 0, busy: false, db: null };
+function noteError(kind, m, stack) {
+  if (ERRS.busy) return; ERRS.busy = true;
+  try {
+    const c = gl && gl.getContext && gl.getContext(), dbg = c && c.getExtension("WEBGL_debug_renderer_info");
+    const e = { at: new Date().toISOString(), kind, msg: String(m || "").slice(0, 400), stack: String(stack || "").slice(0, 1200),
+      ua: navigator.userAgent, dpr: devicePixelRatio, size: [innerWidth, innerHeight], frame: window.top !== window ? "embedded" : "page",
+      gpu: dbg ? String(c.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : "", state: (() => { try { return JSON.stringify(S).slice(0, 3000); } catch (x) { return ""; } })() };
+    const log = store.get("r3d-errors", []); log.push(e); store.set("r3d-errors", log.slice(-20));
+    if (window.claude && window.claude.use) (ERRS.db || (ERRS.db = window.claude.use("db"))).then(db => db && db.doc("errors/" + e.at.replace(/[^0-9]/g, "")).set(e)).catch(() => {});
+    if (performance.now() - ERRS.t > 10000) { ERRS.t = performance.now(); toast("Something went wrong in the 3D room: it's been noted. " + e.msg.slice(0, 90)); }
+  } catch (x) {} finally { ERRS.busy = false; }
+}
+addEventListener("error", e => { if (e.error || e.message) noteError("error", e.message, e.error && e.error.stack); });
+addEventListener("unhandledrejection", e => { const r = e.reason || {}; noteError("promise", r.message || r, r.stack); });
+{ const ce = console.error.bind(console); console.error = (...a) => { ce(...a); noteError("console", a.map(x => (x && x.message) || String(x)).join(" "), a.find(x => x && x.stack) && a.find(x => x && x.stack).stack); }; }
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
 const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the plan
@@ -45,6 +64,7 @@ if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
 if (!S.svar || typeof S.svar !== "object" || Array.isArray(S.svar)) S.svar = {};   // v28: each suggestion's version (its first by default)
 S.decor = Object.assign({}, DEF.decor, (S.decor && typeof S.decor === "object") ? S.decor : {});
+if (!S.picked) S.quality = "fast";   // v35: every device starts in Fast; HD follows if its first frames are quick (autoQuality)
 if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
 if (!Array.isArray(S.added)) S.added = [];
 if (!(S.plants in R.PLANT_LAYOUTS)) S.plants = DEF.plants;
@@ -128,22 +148,29 @@ function adoptLights(scn) {           // after anything that builds lights (the 
 }
 /* v35: the first time the table opened, 18 shaders compiled for the parts that had been hidden (the open table, the chairs round it,
    the plates): 18 s here, a freeze on a phone. three's compile() can't make them ahead (it doesn't set up the cutaway's clipping, so
-   its shaders don't match), so once the room is on screen and still, each hidden part is drawn for one frame into a single pixel of the
-   real canvas (the next frame redraws it): its shaders are then ready when you open the table or switch something on. A few at a time,
-   only while nothing moves; again after a quality change */
-const PRE = { queue: [], done: 0 };
+   its shaders don't match), so once the room is on screen and still, each hidden part is drawn on its own (camera layer 31: the part
+   and every light) into a 1 × 1 target that three treats like the screen (same colour space and tone mapping, so the same shaders):
+   its shaders are then ready when you open the table or switch something on. Nothing on screen changes, so there's no redraw after.
+   One part at a time, only after a second with no taps or drags; again after a quality change */
+const PRE = { queue: [], done: 0, rt: null, idleT: 0 };
 function precompile() {
   PRE.queue.length = 0;
   const hiddenUp = o => { for (let p = o.parent; p; p = p.parent) if (!p.visible) return true; return false; };
   scene.traverse(o => { if (!o.isLight && o.visible === false && !hiddenUp(o)) PRE.queue.push(o); });
 }
-function precompileStep() {           // from the frame loop, when nothing's moving: one hidden part, drawn into one pixel
+function precompileStep() {           // from the frame loop, when nothing's moving: one hidden part, drawn off screen
   if (!PRE.queue.length || !LIVE || (gl.shadowMap.enabled && gl.shadowMap.needsUpdate)) return false;   // never while the shadows are due a redraw
-  const o = PRE.queue.shift(), shown = [];
+  const o = PRE.queue.shift(), shown = [], tagged = [];
   if (o.visible !== false || !o.parent) return true;
-  o.traverse(c => { if (!c.isLight && c.visible === false) { shown.push(c); c.visible = true; } });
-  gl.setScissorTest(true); gl.setScissor(0, 0, 1, 1);
-  try { gl.render(scene, camera); } finally { gl.setScissorTest(false); shown.forEach(c => { c.visible = false; }); }
+  if (!PRE.rt) { PRE.rt = new THREE.WebGLRenderTarget(1, 1); PRE.rt.isXRRenderTarget = true; PRE.rt.texture.colorSpace = gl.outputColorSpace; }
+  scene.traverse(c => { if (c.isLight) c.layers.enable(31); });
+  o.traverse(c => { if (!c.isLight) { if (c.visible === false) { shown.push(c); c.visible = true; } if (!c.layers.isEnabled(31)) { tagged.push(c); c.layers.enable(31); } } });
+  const mask = camera.layers.mask, was = gl.getRenderTarget();
+  camera.layers.set(31); gl.setRenderTarget(PRE.rt);
+  try { gl.render(scene, camera); } finally {
+    gl.setRenderTarget(was); camera.layers.mask = mask;
+    shown.forEach(c => { c.visible = false; }); tagged.forEach(c => c.layers.disable(31));
+  }
   PRE.done++;
   return true;
 }
@@ -203,6 +230,9 @@ const OAK_TEX = canvasTex(1024, 512, (g, w, h) => {
   }
   for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(70,40,15,${0.08 + r() * 0.12})`; g.fillRect(r() * w, r() * h, 2 + r() * 5, 0.8); }
 });
+// v35: a plain white map and a flat bump stand in for "none", so a Look change never changes a material's shader (a recompile)
+const BLANK = canvasTex(4, 4, (g, w, h) => { g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); });
+const FLAT = canvasTex(4, 4, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); }, false);
 const OAK_TEX_V = (() => { const tx = OAK_TEX.clone(); tx.rotation = Math.PI / 2; tx.center.set(0.5, 0.5); tx.needsUpdate = true; return tx; })();   // v29: upright grain, for tall doors
 
 const OAK_BUMP = canvasTex(512, 256, (g, w, h) => {
@@ -439,13 +469,14 @@ function kindMat(kind) {
 
 /* ---------------------------------------------------------------- geometry from the plan's records */
 const GRAIN = 0.6;   // metres of oak per texture repeat
+const fillCol = f => new THREE.Color(f === "glass" || f === "art" || f === "brick" ? "#ffffff" : f);   // v35: kinds, not colours (the console's "Unknown color" warnings)
 function colAttr(geo, cols) { geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3)); }
 const SOFT = new Set([R.SOFA_CORD[0]]);   // v15: the blue corduroy sofa, upholstered rather than boxy
 function softGeo(b) {
   const [, x, y, z, w, h, d, f] = b, r = Math.min(4, Math.min(w, h, d) / 2.6);
   const g = new RoundedBoxGeometry(w * M, h * M, d * M, 3, r * M);
   g.translate(-(x + w / 2) * M, (y + h / 2) * M, (z + d / 2) * M);
-  const c = new THREE.Color(f), cols = [];
+  const c = fillCol(f), cols = [];
   for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
   colAttr(g, cols);
   return g;
@@ -464,7 +495,7 @@ function boxGeo(b) {
       if (rot) uv.setXY(i, v * sv + ox, u * su + oy); else uv.setXY(i, u * su + ox, v * sv + oy);
     }
   }
-  const front = new THREE.Color(f);
+  const front = fillCol(f);
   const hue = c => { const o = {}; c.getHSL(o); return o; };
   const differs = c2 => { if (!c2) return false; const a = hue(front), b2 = hue(new THREE.Color(c2)); return Math.abs(a.h - b2.h) > 0.07 || Math.abs(a.s - b2.s) > 0.3; };
   const top = differs(t) ? new THREE.Color(t) : front, side = differs(s) ? new THREE.Color(s) : front;
@@ -495,7 +526,7 @@ function frameMesh(f) {
   const g = new THREE.ExtrudeGeometry(sh, { depth: 2 * M, bevelEnabled: false });
   const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / GRAIN, uv.getY(i) / GRAIN);
   g.translate(0, 0, z * M);
-  const c = new THREE.Color(fill), cols = []; for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
+  const c = fillCol(fill), cols = []; for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
   colAttr(g, cols);
   return new THREE.Mesh(g, kindMat(kindOf(fill, "g")));
 }
@@ -678,7 +709,7 @@ function buildShell() {
   curtShut.add(panel(wx0 - CU.ext, half, CU.folds * 2.2), panel(wx0 - CU.ext + half, half, CU.folds * 2.2));
   shell.add(curtOpen, curtShut);
   // shelf B: the client's 2 m black floating shelf on the stairs wall
-  const sb = R.SHELF_B, black = shelfMat = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
+  const sb = R.SHELF_B, black = shelfMat = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", map: BLANK, roughness: 0.55 }));
   cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black);
   // v16: "on the left of that shelf is my ikea light box" ... "black not white": the OBEGRÄNSAD panel, black, standing landscape against
   // the wall at the shelf's stair end; its 16 x 16 LEDs fill a square in the middle of the face
@@ -1744,7 +1775,7 @@ function applyDecor() {
   if (CK) CK.pad.color.set(PAD_COLS[D.pads] || PAD_COLS.olive);                                   // v31: the chairs' tie-on pads (Dunelm Esme's colours)
   applySuggest();
   for (const [k, g] of Object.entries(CASE_FILLS)) g.visible = k === (D.fill in CASE_FILLS ? D.fill : "collect");
-  if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : null;
+  if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : BLANK;
     caseFrameM.color.set(col); caseFrameM.roughness = ro; if (caseFrameM.map !== mp) { caseFrameM.map = mp; caseFrameM.needsUpdate = true; } }
   // v26: the oak's finish on every new oak piece (not your plant stand, vinyl stand, curtain pole or the stairs)
   const tint = OAK_TINTS[D.oak] || OAK_TINTS.artisan;
@@ -1753,12 +1784,12 @@ function applyDecor() {
     m.color.copy(m.userData.oakBase).multiply(tint);
   }
   if (floorMat) { const f = FLOORS[D.floor] || FLOORS.carpet; if (floorMat.map !== f[0]) { floorMat.map = f[0]; floorMat.bumpMap = f[1]; floorMat.roughness = f[2]; floorMat.needsUpdate = true; } }
-  if (shelfMat) { const [c, ro, oakM] = SHELF_COLS[D.shelf] || SHELF_COLS.black, mp = oakM ? OAK_TEX : null;
+  if (shelfMat) { const [c, ro, oakM] = SHELF_COLS[D.shelf] || SHELF_COLS.black, mp = oakM ? OAK_TEX : BLANK;
     shelfMat.color.set(c).multiply(oakM ? tint : new THREE.Color(1, 1, 1)); shelfMat.roughness = ro; if (shelfMat.map !== mp) { shelfMat.map = mp; shelfMat.needsUpdate = true; } }
 }
 const srgb = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace);   // the tints as you'd see them, not in linear light
 const OAK_TINTS = { artisan: srgb(1, 1, 1), pale: srgb(1.12, 1.09, 1.03), smoked: srgb(0.66, 0.57, 0.5), walnut: srgb(0.55, 0.42, 0.34) };
-const FLOORS = { carpet: [CARPET, PILE, 1], oatmeal: [OATMEAL, PILE, 1], boards: [BOARDS, null, 0.55] };
+const FLOORS = { carpet: [CARPET, PILE, 1], oatmeal: [OATMEAL, PILE, 1], boards: [BOARDS, FLAT, 0.55] };
 const SHELF_COLS = { black: ["#1a1a1b", 0.55, false], oak: ["#c48c57", 0.55, true], white: ["#eeebe4", 0.5, false] };
 function ibox(grp, x, y, z, w, h, d, mat, cast = true) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat);
@@ -2743,11 +2774,20 @@ qs("#r3d-picksave")?.addEventListener("click", () => {
   ldb.doc("layouts/picks").set(JSON.parse(JSON.stringify({ items, text: pickText(items), at: new Date().toISOString() })))
     .then(() => { st.textContent = "Saved for the next round."; }, e => { st.textContent = e && e.code === "invalid_argument" ? "This view can't save (read-only)." : "Couldn't save. Try again in a moment."; });
 });
-/* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast */
+/* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast. v35: the browser usually
+   gives the context back within a second or two: then the room rebuilds itself in Fast where it was, no reload; the button stays as
+   the way out if it doesn't come back */
+let glLost = false;
 canvas.addEventListener("webglcontextlost", e => {
-  e.preventDefault(); S.quality = "fast"; S.picked = true; store.set(KEY, S);
+  e.preventDefault(); glLost = true; S.quality = "fast"; S.picked = true; store.set(KEY, S);
   msg.hidden = false; root.classList.remove("ready");
-  msg.innerHTML = 'The 3D room ran out of graphics memory (HD with shadows asks a lot of a phone). <button type="button" class="btn" onclick="location.reload()">Reload it in Fast</button>';
+  msg.innerHTML = 'The 3D room ran out of graphics memory; bringing it back in Fast… <button type="button" class="btn" onclick="location.reload()">Reload it</button>';
+  noteError("context", "WebGL context lost");
+});
+canvas.addEventListener("webglcontextrestored", () => {
+  glLost = false; msg.hidden = true; root.classList.add("ready");
+  applyLight(); syncButtons(); if (gl.shadowMap.enabled) gl.shadowMap.needsUpdate = true; precompile(); dirty();
+  toast("The 3D room is back, in Fast");
 });
 
 /* ---------------------------------------------------------------- views */
@@ -2844,6 +2884,7 @@ canvas.addEventListener("wheel", e => {
   e.preventDefault(); wheelAcc += e.deltaY;
   if (Math.abs(wheelAcc) >= 60) { walk(wheelAcc < 0 ? "f" : "b"); wheelAcc = 0; }
 }, { passive: false });
+["pointerdown", "pointermove", "keydown", "wheel"].forEach(t => root.addEventListener(t, () => { PRE.idleT = performance.now(); }, { passive: true, capture: true }));   // v35: the shader warm-up waits while you use the room
 let padT = null;             // a move button held down keeps moving, in smaller steps
 const padStop = () => { if (padT) { clearTimeout(padT.t); clearInterval(padT.i); padT = null; } };
 root.addEventListener("pointerdown", e => {
@@ -3035,6 +3076,11 @@ function setLabels(on) {
   dirty();
 }
 document.addEventListener("click", e => { const b = e.target.closest("#r3d-lbl, [data-labels]"); if (!b) return; setLabels(b.id === "r3d-lbl" ? !labelsOn : b.dataset.labels === "on"); });
+// v35: each label's size is read once (and again after a resize or the fonts arriving), not every frame: reading it straight after
+// moving the labels made the browser lay the page out again for each label, each frame
+const stickSz = el => el._sz || (el.offsetWidth ? (el._sz = [el.offsetWidth, el.offsetHeight]) : [140, 40]);
+const stickReset = () => { for (const k in stickEls) if (stickEls[k]) stickEls[k]._sz = null; };
+addEventListener("resize", stickReset); if (document.fonts) document.fonts.ready.then(() => { stickReset(); dirty(); });
 function placeStickers() {
   if (!HOTS.length || !started || !labelsOn) return;
   const w = stage.clientWidth, h = stage.clientHeight, cx = -camera.position.x / M, cz = camera.position.z / M;
@@ -3043,11 +3089,10 @@ function placeStickers() {
     const el = stickEls[H.id]; if (!el) continue;
     _p.copy(v3(...H.at)).project(camera);
     const off = _p.z > 1 || _p.z < -1 || Math.abs(_p.x) > 1.02 || Math.abs(_p.y) > 1.02;
-    el.hidden = off;
+    if (el.hidden !== off) el.hidden = off;
     if (off) { if (popId === H.id) closePop(); continue; }
-    const hw = (el.offsetWidth || 140) / 2 + 6, x = Math.max(hw + railR, Math.min(w - hw, (_p.x + 1) / 2 * w)); let y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
+    const [ew, eh] = stickSz(el), hw = ew / 2 + 6, x = Math.max(hw + railR, Math.min(w - hw, (_p.x + 1) / 2 * w)); let y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
     if (cover && x + hw > cover.left && x - hw < cover.right && y + 20 > cover.top && y - 20 < cover.bottom) { el.hidden = true; if (popId === H.id) closePop(); continue; }   // v26: not under the Tools panel
-    const ew = el.offsetWidth || 140, eh = el.offsetHeight || 40;
     for (let k = 0; k < 8; k++) {
       const hit = placed.find(q => Math.abs(x - q.x) < (ew + q.w) / 2 + 4 && Math.abs(y - q.y) < (eh + q.h) / 2 + 4);
       if (!hit) break;
@@ -3256,7 +3301,7 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 }
 
 /* ---------------------------------------------------------------- render loop, only when something changed */
-let need = 2, moving = false, still_t = 0, lowRes = false;
+let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = true;   // v35: slowDev until the speed check says otherwise
 function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
@@ -3313,22 +3358,31 @@ function frame(now) {
   if (showTick(now)) need = 2;                                    // v32: "Watch it open"
   if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
   const active = moving || changed || !!tween;
-  if (active) { still_t = now; if (!lowRes) { lowRes = true; sizeRenderer(); } }
-  else if (lowRes && now - still_t > 180) { lowRes = false; sizeRenderer(); }
+  // v35: the lower resolution only while you hold and drag the room on a slow device, and only once the drag has lasted a moment:
+  // each switch resizes the canvas (a new drawing buffer), which cost more than it saved after a tap, a fly-to or a Look change
+  if (moving && slowDev) { if (!dragT) dragT = now; still_t = now; if (!lowRes && now - dragT > 150) { lowRes = true; sizeRenderer(); } }
+  else { dragT = 0; if (active) still_t = now; else if (lowRes && now - still_t > 250) { lowRes = false; sizeRenderer(); } }
   if (updateCut()) need = 2;
-  if (need === 0 && !active && !SH && now - preT > 250 && precompileStep()) { preT = now; need = 1; }   // v35: one hidden part's shaders, then redraw
+  if (probe > 0 && !lowRes) need = Math.max(need, 1);                 // v35: the speed check's three frames come first, at the start
+  if (need === 0 && !active && !SH && probe === 0 && now - preT > 250 && now - PRE.idleT > 1000 && precompileStep()) preT = now;   // v35: one hidden part's shaders, off screen
+  if (glLost || (document.body.classList.contains("sheet-open") && !SH && !tween)) return;   // v35: nothing drawn behind the Plan's sheets (the last picture stays)
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
-    syncRig(); gl.render(scene, camera); need--; placeStickers();
+    const f0 = performance.now(); syncRig(); gl.render(scene, camera); FT.calls = gl.info.render.calls; FT.tris = gl.info.render.triangles; need--; placeStickers(); FT[FT.n++ % 60] = performance.now() - f0;
     if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
   }
 }
 // v14.1: if this device takes too long over a full HD frame, drop to Fast (unless you picked a quality yourself)
 let probe = 3; const probeT = [], PX = new Uint8Array(4);
 let preT = 0;
+const FT = []; FT.n = 0;   // v35: the last 60 frames' times, for R3D.perf()
 function autoQuality() {
   const ms = probeT.sort((a, b) => a - b)[1];
-  if (ms > 70 && S.quality === "hd" && !S.picked) {
+  if (S.quality === "fast") slowDev = ms > 30;
+  if (S.picked) return;
+  if (S.quality === "fast" && !SMALL && ms < 20) {          // v35: quick in Fast on a laptop: on to HD, once, while the room is still
+    S.quality = "hd"; applyLight(); syncButtons(); probe = 3; probeT.length = 0;
+  } else if (ms > 70 && S.quality === "hd") {
     S.quality = "fast"; applyLight(); syncButtons();
     qs("#r3d-savest").textContent = "Switched to Fast for this device; pick HD for shadows (saved pictures always have them).";
   }
@@ -3533,6 +3587,14 @@ function start() {
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
     still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE },
+    errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
+    perf() {                                                                          // v35: the counts to watch each round
+      const i = gl.info, ls = [], ms = FT.slice().sort((a, b) => a - b);
+      scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
+      return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
+        lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
+        warm: PRE.queue.length, errors: store.get("r3d-errors", []).length };
+    },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }
