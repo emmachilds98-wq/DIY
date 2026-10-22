@@ -5,6 +5,7 @@ a scroller), step 11 open, the dining cabinet's states in the 3D room.
 """
 import json, sys, threading, functools, http.server, pathlib, urllib.request
 from playwright.sync_api import sync_playwright
+import localcdn
 from build_doc import VERSION
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -33,6 +34,7 @@ def run(p, w, h):
         b = p.chromium.launch(args=ARGS, executable_path="/opt/pw-browsers/chromium")
     ctx = b.new_context(viewport={"width": w, "height": h}, device_scale_factor=1)
     pg = ctx.new_page()
+    localcdn.route(pg)                                   # v34: three.js from THREE_LOCAL, if set
     pg.on("pageerror", lambda e: rep["errors"].append("pageerror: " + str(e)[:200]))
     pg.on("console", lambda m: rep["errors"].append("console: " + m.text[:200]) if m.type == "error" else None)
     pg.goto(BASE)

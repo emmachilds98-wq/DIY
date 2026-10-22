@@ -5,6 +5,7 @@ url = sys.argv[1]; w, h = int(sys.argv[2]), int(sys.argv[3])
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
     pg = b.new_page(viewport={"width": w, "height": h}, is_mobile=w < 600, has_touch=w < 600); errs = []
+    __import__("localcdn").route(pg)   # v34: three.js from THREE_LOCAL, if set
     pg.on("pageerror", lambda e: errs.append("PAGEERROR: " + str(e)[:400])); pg.on("console", lambda m: errs.append(m.type + ": " + m.text[:300]) if m.type in ("error", "warning") else None)
     pg.goto(url); pg.wait_for_function("window.R3D && window.R3D.ready", timeout=180000); pg.wait_for_timeout(800)
     def step(name, fn):

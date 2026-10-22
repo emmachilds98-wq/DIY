@@ -9,15 +9,18 @@ import geometry as G
 
 WZ = G.WINDOW_Z
 
-# (id, title, size, rough cost £, why it suits the room, where it goes, in 3D)
-IDEAS = [
-    ("case", "A tall glass display case on the chimney breast",
+# v34, client: "i like the large glass display case on the chimney breast": it is in the plan now (build_doc TRACK, section 4,
+# step 9), so it left IDEAS; its own words stay here for the plan
+CASE_IDEA = ("case", "A tall glass display case on the chimney breast",
      "90 wide × 85 tall × 12 deep, three glass shelves", (90, 170),
      "For collectibles, boxed games, 7-inch singles, small plants or ceramics, lit from inside, without a cabinet on the floor: 12 deep, so it "
      "stands no further out than a picture ledge. Oak frame from the offcuts (or painted black or white), a 4 mm toughened glass front that "
      "lifts off, three 6 mm glass shelves on pins, an LED strip under the top on the strips' app. Hung on a French cleat: about 16 kg empty. "
      "It takes the place of the two framed LPs, above the “now playing” ledge. In the 3D room, try what's inside it and its frame.",
-     "On the breast, centred, from 137 to 222 (just clear of the sleeves on the “now playing” ledge, 13 under the ceiling); with the table by the stairs only.", True),
+     "On the breast, centred, from 137 to 222 (just clear of the sleeves on the “now playing” ledge, 13 under the ceiling); with the table by the stairs only.", True)
+
+# (id, title, size, rough cost £, why it suits the room, where it goes, in 3D)
+IDEAS = [
     ("glass", "Glass plant shelves across the window reveal",
      "two 10 mm toughened shelves, 235 × 18, at 130 and 170", (120, 200),
      "Your deep sill already takes a row of plants; two glass shelves above it make the window a green screen that still lets the light "

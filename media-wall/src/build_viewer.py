@@ -556,6 +556,7 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
          "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet: the table, the six chairs and the table door's swing",
          "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
+         "3d_beside_trolley_out": "The slim trolley wheeled out to the open table's far end for dinner, clear of the chairs (tap it in the 3D room: Wheel it to the table)",
          "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that wheels out to the table's far end for dinner",
          "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
          "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side, your hessian curtains on their wooden pole",
@@ -583,7 +584,7 @@ def item_card(stem, kind, k, title, size, cost, why, where):
     addp = (f' <button type="button" class="btn addplan" data-short="{kind}:{k}" aria-pressed="false"><span class="ms" aria-hidden="true">add</span><span class="t">Add to plan</span></button>'
             if kind in ("idea", "sugg") and cost else "")   # v33: the ideas shortlist
     meta = " · ".join(x for x in (html.escape(size), f"about £{cost[0]}–{cost[1]}" if cost else "") if x)
-    return (f'<article class="opt"><button type="button" class="g3d" data-full="{stem}"><img data-art="{stem}" alt="{html.escape(CAP3D[stem])}" loading="lazy"></button>'
+    return (f'<article class="opt" id="it-{kind}-{k}"><button type="button" class="g3d" data-full="{stem}"><img data-art="{stem}" alt="{html.escape(CAP3D[stem])}" loading="lazy"></button>'
             f'<div class="ob"><span class="label">{meta}</span><h3>{html.escape(title)}</h3>'
             + (f'<p>{html.escape(why)}</p>' if why else "") + (f'<p class="caption">{html.escape(where)}</p>' if where else "")
             + f"<button type='button' class='btn' data-r3d='{json.dumps(o)}'><span class='ms' aria-hidden='true'>view_in_ar</span> {lab}</button>{addp}</div></article>")

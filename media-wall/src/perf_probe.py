@@ -8,6 +8,7 @@ INFO = """() => { const d = R3D._dbg, g = d.gl, i = g.info; let L = 0, Lv = 0, s
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
     pg = b.new_page(viewport={"width": w, "height": h}, device_scale_factor=2 if w < 600 else 1, is_mobile=w < 600, has_touch=w < 600); errs = []
+    __import__("localcdn").route(pg)   # v34: three.js from THREE_LOCAL, if set
     pg.on("pageerror", lambda e: errs.append("pageerror: " + str(e)[:300])); pg.on("console", lambda m: errs.append(m.type + ": " + m.text[:300]) if m.type in ("error", "warning") else None)
     t0 = time.time(); pg.goto(url); pg.wait_for_function("window.R3D && window.R3D.ready", timeout=180000); print("ready s", round(time.time() - t0, 1), "buildMs", pg.evaluate("R3D.buildMs"))
     pg.wait_for_timeout(1500)

@@ -11,6 +11,7 @@ files are copied to the new names (from where they were, or from out/vNN/ once t
 """
 import base64, hashlib, io, json, os, pathlib, shutil, sys
 from playwright.sync_api import sync_playwright
+import localcdn
 import room3d_page
 
 HERE = pathlib.Path(__file__).parent
@@ -69,6 +70,10 @@ SHOTS = [
     ("3d_c80_six", dict(view="dining", site="C", cabw="80", dining="six", scene="bright"), "THE 80-WIDE VERSION - open for six - bright, table rule"),
     ("3d_c80_tdoor", dict(view="dining", site="C", cabw="80", dining="folded", scene="bright", tdoor=True), "THE 80-WIDE VERSION - the table door open - no chairs in the base - bright"),
     ("3d_c80_plan", dict(view="plan", site="C", cabw="80", dining="six", scene="bright", tod="day", master=0), "THE 80-WIDE VERSION - birds eye, open for six"),
+    # v34: the trolley wheeled to the table
+    ("3d_beside_trolley_out", dict(view="dining", site="C", dining="six", scene="bright", beside="trolley", trolley="out", layout={"lamp": {"off": True}},
+                                    aim=dict(eye=[175, 170, -60], at=[320, 50, -175], fov=62)),
+     "BESIDE THE CABINET - the slim trolley wheeled to the table, open for six (lamp hidden) - bright, table rule"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
@@ -78,7 +83,8 @@ SHOTS = [
 SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear",
+        "blind": "down", "lp": False, "trolley": "park"}   # v34: the blind, the records, the trolley   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():
@@ -152,6 +158,7 @@ def run(test=False, only=None, force=False):
         except Exception:   # Playwright's own browser missing: use the preinstalled Chromium
             b = p.chromium.launch(args=args, executable_path="/opt/pw-browsers/chromium")
         pg = b.new_page(viewport={"width": 1400, "height": 1000})
+        localcdn.route(pg)                                   # v34: three.js from THREE_LOCAL, if set
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
