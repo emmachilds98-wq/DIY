@@ -301,7 +301,9 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
               "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet",
               "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
-              "shelfboxes": "Boxes on your shelf", "plantshelf": "Plant shelf, 10 off the wall"}   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "shelfboxes": "Boxes on your shelf",
+              "stairdrawers": "Drawers in the steps", "alcoveshelves": "Alcove shelves", "windowseat": "Storage window seat", "hallbench": "Bench with cubbies",
+              "wardrobe": "Built-in cupboard", "wallcabs": "Wall cabinets, sofa", "overdoor": "Hook rail over the door"}   # v37   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
 IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
               "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
               "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
@@ -458,7 +460,10 @@ def controls(gallery=""):
             '<button type="button" data-moment="dinner"><span class="ms" aria-hidden="true">dinner_dining</span> Dinner for six</button>'
             '<button type="button" data-moment="four"><span class="ms" aria-hidden="true">lunch_dining</span> Lunch for four</button>'
             '<button type="button" data-moment="film"><span class="ms" aria-hidden="true">movie</span> Film night</button>'
-            '<button type="button" data-moment="morning"><span class="ms" aria-hidden="true">wb_sunny</span> Everyday morning</button></div>'
+            '<button type="button" data-moment="morning"><span class="ms" aria-hidden="true">wb_sunny</span> Everyday morning</button>'
+            # v37: the games out of the ottoman, and drinks at the bar built in beside the cabinet
+            '<button type="button" data-moment="games"><span class="ms" aria-hidden="true">casino</span> Games night</button>'
+            '<button type="button" data-moment="drinks"><span class="ms" aria-hidden="true">local_bar</span> Drinks</button></div>'
             '<span class="caption">Each sets the table, the lights and the curtains together, then shows you the room.</span></div>',
             BESIDE_SEG,
             '<h3 class="r3d-sub">Around the room</h3>',
@@ -479,8 +484,13 @@ def opts_json():
     extra = {"rail": ("An oak blanket rail beside the dining cabinet", f"{B['rail']['w']:g} wide, four 28 mm oak rails, 12 off the wall", (25, 45),
                       "On the wall beside the dining cabinet, under your black shelf: the open table door lies back over it while you eat."),
              "on": ("Your storage ottoman, the lid on", "76 × 76 × 45", None, "On the rug by the coffee table."),
-             "off": ("Your storage ottoman, the lid off", f"{G.OTTO_GAMES['games']} square games and the cards inside", None, "On the rug by the coffee table.")}
-    view = {"rail": dict(view="beside"), "on": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50), "off": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)}
+             "off": ("Your storage ottoman, the lid off", f"{G.OTTO_GAMES['games']} square games and the cards inside", None, "On the rug by the coffee table."),
+             # v37: built in beside the cabinet, and the shoe cabinets in the same place
+             "barbeside": ("A bar built in beside the dining cabinet", f"{G.BAR_BUILT['w']:g} wide, an oak counter at {G.BAR_BUILT['counter']:g}, {G.BAR_BUILT['front']:g} deep; {G.BAR_BUILT['bottles']} bottles", (110, 200),
+                           "Between the dining cabinet and the pipe boxing, fixed to the wall and the floor. Set the drinks out before you open the table: the open table door lies back over it."),
+             "shoes": ("Two shoe cabinets beside the dining cabinet", f"two IKEA TRONES {G.TRONES[0]:g} × {G.TRONES[1]:g} × {G.TRONES[2]:g}, about eight pairs", (25, 30),
+                       "On the wall between the dining cabinet and the pipe boxing, behind the open table door's line.")}
+    view = {"rail": dict(view="beside"), "barbeside": dict(view="beside"), "shoes": dict(view="beside"), "on": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50), "off": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)}
     groups = []
     for key, title, mode, note, items in ideas.OPTION_GROUPS:
         its = []
@@ -507,7 +517,10 @@ def opts_html():
     return ('<div class="grp r3d-opts" id="r3d-opts"><span class="label">Storage and a bar: your options</span>'
             '<p class="caption r3d-opthow"><b>How it works:</b> pick an option and the room shows it and takes you to it; <b>None</b> takes it away; '
             '<b>See it</b> takes you back. Tap a piece in the room for its colours, to move it or to take it away. What you pick shows in '
-            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>' + rows + '</div>')
+            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>'
+            # v37: everything off in one go, back to the plan as it is
+            '<div class="seg"><button type="button" class="chip" data-optclear="1"><span class="ms" aria-hidden="true">restart_alt</span> Clear all extras</button></div>'
+            + rows + '</div>')
 
 
 def picks_json():
@@ -564,7 +577,8 @@ def section(gallery=""):
     # v33, the phone home: a strip of the places (tap one to fly there and open its card) and the set-ups as chips, under the room
     places = "".join(f'<button type="button" data-place="{h["id"]}" style="--h:{h["hue"]}"><b>{h["n"]}</b>{html.escape(h.get("short", h["name"]))}</button>' for h in hotspots())
     moments = "".join(f'<button type="button" data-moment="{k}"><span class="ms" aria-hidden="true">{ic}</span>{t}</button>'
-                      for k, ic, t in (("dinner", "dinner_dining", "Dinner for six"), ("four", "lunch_dining", "Lunch for four"), ("film", "movie", "Film night"), ("morning", "wb_sunny", "Morning")))
+                      for k, ic, t in (("dinner", "dinner_dining", "Dinner for six"), ("four", "lunch_dining", "Lunch for four"), ("film", "movie", "Film night"), ("morning", "wb_sunny", "Morning"),
+                                     ("games", "casino", "Games night"), ("drinks", "local_bar", "Drinks")))   # v37
     data = json.dumps(json.loads((HERE / "scene3d.json").read_text()), separators=(",", ":"))
     return f"""<div class="r3d" id="r3d">
   <div class="r3d-stage"><canvas tabindex="0" aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom; WASD or the arrow keys walk, Q and E turn"></canvas>

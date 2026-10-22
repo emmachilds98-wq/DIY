@@ -170,7 +170,12 @@ def scene():
     room_spec["CHAIR"] = G.CHAIR; room_spec["SOFA_POUF"] = G.SOFA_POUF
     room_spec["OTTOMAN"] = G.OTTOMAN; room_spec["DRINKS"] = G.DRINKS   # v34: the storage ottoman; the drinks cabinet under the case
     # v36: a third bar, the ottoman's games and cards, the blankets' basket, more storage, the plant shelf
-    for k in ("BAR_SIDE", "OTTO_GAMES", "GAME_BOX", "CARD_DECK", "THROW_FOLDED", "BLANKET_BASKET", "LIFT_COFFEE", "KUGGIS", "DOOR_SHELF", "SHELF_BOXES", "PLANT_SHELF", "ARCHITRAVE"):
+    for k in ("BAR_SIDE", "OTTO_GAMES", "GAME_BOX", "CARD_DECK", "THROW_FOLDED", "BLANKET_BASKET", "LIFT_COFFEE", "KUGGIS", "DOOR_SHELF", "SHELF_BOXES", "ARCHITRAVE"):
+        room_spec[k] = getattr(G, k)
+    # v37: the built-in bar beside the cabinet, its glass rail, the shoe cabinets, the window corner's three, the alcove shelves, the
+    # wall cabinets, the step drawers, the over-door rail
+    for k in ("BAR_BUILT", "BAR_RAIL", "BAR_GLASS_H", "TRONES", "CORNER", "WINDOW_SEAT", "HALL_BENCH", "WARDROBE", "ALCOVE_SHELVES", "EKET", "WALL_CABS",
+              "STAIR_DRAWERS", "OVERDOOR"):
         room_spec[k] = getattr(G, k)
     return {"room": room_spec, "groups": groups}
 

@@ -281,7 +281,15 @@ STAIRS_WALL_Z = (ALC_D - STAIR_D, WINDOW_Z)        # -41 .. -309: the stair box'
 # the window corner (sketch: 230 along this wall, 220 out), floor to ceiling. The shelf can't run into it, so it stops 2 short of it, 200 long;
 # its top is put at 196 (the photo gave about 200) so the IKEA OBEGRÄNSAD panel (36 tall) stands on it under the 235 ceiling.
 PIPE_BOX = dict(x=(ROOM_W - NW_BOX[1], ROOM_W), z=(WINDOW_Z, WINDOW_Z + NW_BOX[0]), hollow=True)   # x 445 .. 467, z -309 .. -286
-SHELF_B = dict(z=(PIPE_BOX["z"][1] + 202.0, PIPE_BOX["z"][1] + 2.0), top=196.0, t=5.0, d=25.0)   # -84 .. -284
+# v37, client: "The shelf on the wall alongside the stairs must always end 10cm short of the right-hand wall, regardless of any other
+# sizing or positioning logic. It should never touch the right wall ... it reflects how the shelf is actually installed." Facing the
+# stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side (z -286, your photo: the shelf and the hanging plant
+# end short of it). A hard constraint: the window end is the boxing's face plus SHELF_B_GAP, the 2 m shelf runs back from there, and
+# nothing else (the cabinet, the beside pieces, Edit room) moves it. Was 2 short of the boxing (v16 to v36).
+SHELF_B_GAP = 10.0
+SHELF_B_LEN = 200.0                                                      # your 2 m floating shelf
+SHELF_B = dict(z=(PIPE_BOX["z"][1] + SHELF_B_GAP + SHELF_B_LEN, PIPE_BOX["z"][1] + SHELF_B_GAP), top=196.0, t=5.0, d=25.0, gap=SHELF_B_GAP)   # -76 .. -276
+assert SHELF_B["z"][1] - PIPE_BOX["z"][1] == SHELF_B_GAP == 10.0, "the black shelf ends 10 short of the right-hand wall (the pipe boxing), always"
 DINING_SITES = {"breast": "On the chimney breast", "stairs": "Under the shelf, by the stairs"}
 DINING_SITE = "stairs"                              # v16, client: "table by the stairs should be default view now": the plan's default
 TABLE_B_CZ = -180.0                                # the table's centre along the stairs wall: 84 to the stair box, 74 to the window
@@ -393,6 +401,13 @@ HAT_PEG = None                                       # v16: "youve put a random 
 # v16, the client's photo ("Hat"): the hats hang on the red lamp: a black graduation cap on the pole's top, a navy baseball cap with a poem
 # printed under its peak hung on the pole below the top head
 HATS = dict(board=24.0, cap_y=FLOOR_LAMP["h"] - 26.0, cap_col="#1f2a44")
+# v37, client: "The hat on the red lamp currently looks like a beret ... It should be a baseball cap: a fitted, structured, rounded crown
+# with a flat, stiff brim that projects forward. Make the brim noticeably oversized (roughly 1.5-2x a normal proportion)", with a photo of
+# the cap (inputs/photo_cap_poem_22oct.webp: a green crown, a brown brim, the fishing poem embroidered in gold on both). A structured
+# six-panel cap's bill is about 7 cm (SanMar's spec sheet); this one is 1.8 times that. Crown: an oval about 61 round (a 58-60 head), 11.5 tall.
+HATS.update(crown_w=18.4, crown_l=20.4, crown_h=11.5, brim_std=7.0, brim_x=1.8, brim_w=19.0, brim_t=0.45,
+            crown_col="#2d4636", brim_col="#83502f", thread="#e2c06a")
+HATS["brim_len"] = round(HATS["brim_std"] * HATS["brim_x"], 1)                         # 12.6 out from the crown's front
 
 # the heads along each bar (offset along the bar from its centre, + towards the media wall / door), shade colour, stem colour, aim
 SAGE, BLUE, MUSTARD, PINK = ("#a9c7ab", "#8db59c"), ("#a7d0d8", "#7fbfc8"), ("#e8b53f", "#dca52f"), ("#e79c95", "#d9877f")
@@ -487,7 +502,7 @@ SOFA_POUF = dict(SOFA_POUF, w=OTTOMAN["w"], d=OTTOMAN["d"], h=OTTOMAN["h"],
 #    three a side in comfort. A drawer under it for the mats; over it, where v26's longer halves stood, a lift-up flap for the cloth.
 #  - at the window end, the chair bay behind two doors: the six FRÖSVI folded, four on the floor (two across, two deep) and two on the
 #    shelf, with the shelf's front half free for the seat pads and the runner.
-_cb_z0, _cb_z1 = SHELF_B["z"]                                   # -84 .. -284: the shelf's length (the stair's foot stays clear)
+_cb_z0, _cb_z1 = PIPE_BOX["z"][1] + 202.0, PIPE_BOX["z"][1] + 2.0   # -84 .. -284: the dining wall's line (v16's shelf ends; v37: the shelf moved to its 10 gap, the cabinet stays)
 OPTC = dict(
     # v29, client: "i asked for a full upgrade of the tables design". Two oak sliding doors across the whole front (Häfele Slido Classic
     # 40 IF C, inset, bypassing): shut, it's one tidy run of oak with nothing on show; slide one over the other to open either bay.
@@ -740,10 +755,80 @@ DOOR_SHELF["head"] = round(CEIL - DOOR_SHELF["top"] - KUGGIS[2], 1)             
 # 3, "shelfboxes": two of the same boxes on your black shelf (25 deep: they stand 1 over its front), either side of the laser
 SHELF_BOXES = [(-144.0, -179.0), (-191.0, -226.0)]
 
-# the plant shelf: a small oak shelf at the stairs end of the right side wall, held 10 off the wall on two oak arms; your hanging
-# plant moves onto it from the window end of the black shelf (its strands then fall through the gap and over the front, not over the
-# dining cabinet's table door). The window end can't take it: the open table door lies back over that wall.
-PLANT_SHELF = dict(w=30.0, d=15.0, t=2.2, gap=10.0, top=SHELF_B["top"], arm=(25.0, 4.0, 2.2),
-                   z=(round(STAIRS_WALL_Z[0] - (STAIRS_WALL_Z[0] - CAB["z"][0]) / 2 + 15.0, 1), round(STAIRS_WALL_Z[0] - (STAIRS_WALL_Z[0] - CAB["z"][0]) / 2 - 15.0, 1)))
-PLANT_SHELF["under"] = round(PLANT_SHELF["top"] - PLANT_SHELF["t"], 1)                 # 193.8 headroom at the stairs' foot
-PLANT_SHELF["ends"] = (round(PLANT_SHELF["top"] - PLANT_B["trail"][1], 1), round(PLANT_SHELF["top"] - PLANT_B["trail"][0], 1))   # 86 .. 141
+# (v36's plant shelf went in v37: the client's "10cm gap" is the black shelf's own gap from the pipe boxing, SHELF_B_GAP)
+
+
+# ---------------------------------------------------------------- v37 (22 Oct), client: "Add a new 'Bar' option ... next to the dining
+# cabinet ... a fixed, built-in counter-style unit (permanent joinery attached to the wall/floor), not a freestanding or wheeled
+# trolley"; "more storage suggestions ... under-stair drawers, alcove shelving, window seat with storage, wall-mounted cabinets, built-in
+# wardrobes, shoe storage, a hallway bench with cubbies, and over-door racks". All suggestions (not in the plan or its costs until picked).
+# The v36 plant shelf is gone: your "10cm gap" was the black shelf's gap from the boxing (SHELF_B above), not a second shelf.
+
+# D, the built-in bar: the one free wall beside the cabinet (BESIDE, between its window end and the pipe boxing), scribed to both. It is
+# no deeper than the open table door's line (the door lies back over most of it while you eat), so it is a back-bar: a cupboard to a
+# worktop-height oak counter, a mirror back, an oak shelf with a glass rail under it, and a display shelf over that.
+BAR_GLASS_H = 23.0                     # a tall stemmed wine glass (most are 20 to 23)
+BAR_RAIL = (40.0, 3.6, 11.0)           # Bev-Equip single-row glass hanger, 400 long, 36 high, a 110 mount plate: four or five glasses
+BAR_BUILT = dict(z=(BESIDE["z"][0] - 0.3, BESIDE["z"][1]), d=22.0, t=_dr_t, door=_dr_t, back=0.6, plinth=3.0, recess=2.0,
+                 counter=90.0, top_t=2.7, over=0.4,                     # the counter: UK worktop height, 27 mm oak, 4 mm over the doors
+                 shelf=(135.0, 15.0), shelf2=(165.0, 15.0), mirror=0.3)
+_bb = BAR_BUILT
+_bb["w"] = round(_bb["z"][0] - _bb["z"][1], 1)                                           # 52.5
+_bb["front"] = round(_bb["d"] + _bb["over"], 1)                                          # 22.4: the counter's edge off the wall
+_bb["inner_w"] = round(_bb["w"] - 2 * _bb["t"], 1)                                       # 48.9
+_bb["inner_d"] = round(_bb["d"] - _bb["door"] - _bb["back"], 1)                          # 19.6
+_bb["floor"] = round(_bb["plinth"] + _bb["t"], 1)                                        # 4.8: the cupboard's floor
+_bb["mid"] = round(_bb["floor"] + DRINKS_BOTTLE[0] + 1.0, 1)                             # 40.8: the shelf inside, over the lower bottles
+_bb["inner_top"] = round(_bb["counter"] - _bb["top_t"], 1)                               # 87.3 under the counter
+_bb["across"] = int(_bb["inner_w"] // DRINKS_BOTTLE[1])                                  # 5 across
+_bb["rows"] = int(_bb["inner_d"] // DRINKS_BOTTLE[1])                                    # 2 deep
+_bb["bottles"] = 2 * _bb["across"] * _bb["rows"]                                         # 20 on two shelves
+_bb["glass_low"] = round(_bb["shelf"][0] - 2.7 - BAR_RAIL[1] - BAR_GLASS_H, 1)           # 105.7: the hanging glasses' feet
+_bb["glass_gap"] = round(_bb["glass_low"] - _bb["counter"], 1)                           # 15.7 over the counter
+_bb["door_clear"] = round(CAB["d"] - _bb["front"], 1)                                    # 1.0 behind the open table door
+_bb["covered"] = round(_bb["z"][0] - CAB["door_t_open"][1], 1)                           # 35.9 of it behind the open door
+del _bb
+BESIDE["opts"]["bar"] = dict(name="A built-in bar")
+
+# shoes: two IKEA TRONES (52 × 18 × 39, wall-fixed) stacked in the same slot, 18 deep: well behind the table door's line
+TRONES = (52.0, 18.0, 39.0)
+BESIDE["shoes"] = dict(n=2, y0=8.0, gap=1.0)
+BESIDE["opts"]["shoes"] = dict(name="Shoe cabinets")
+
+# the window corner: the wall between the curtains' stack and the pipe boxing, where your plant stand stands (layout A). Each of these
+# takes it (pick one). Free floor: the window wall to the seated window-side chairs' backs; across, the stack's end to the table door.
+_cu_end = WINDOW_X[1] + CURTAIN["ext"]                                                   # 338: the curtains' stack ends
+_corner_x = (_cu_end, CAB["front"])                                                      # 338 .. 443.6
+_chair_back = min(z for _x, z, _f in CAB["seats"]["six"]) - CHAIR_PADDED["d"] / 2        # -231.3
+CORNER = dict(x=_corner_x, w=round(_corner_x[1] - _corner_x[0], 1), z0=WINDOW_Z, chairs=round(_chair_back, 1),
+              free=round(_chair_back - WINDOW_Z, 1))                                     # 105.6 wide, 77.7 out to the chairs' backs
+# 1, "windowseat": a built-in oak storage seat, the plant stand's width, a lift-up lid on a piano hinge, a 6 cm seat cushion
+WINDOW_SEAT = dict(x=((_corner_x[0] + _corner_x[1]) / 2 - PLANT_STAND["w"] / 2, (_corner_x[0] + _corner_x[1]) / 2 + PLANT_STAND["w"] / 2),
+                   d=46.0, h=45.0, cushion=6.0, t=_dr_t, back_cush=(45.0, 12.0))
+WINDOW_SEAT["box_h"] = WINDOW_SEAT["h"] - WINDOW_SEAT["cushion"]                         # 39
+WINDOW_SEAT["inside"] = (round(PLANT_STAND["w"] - 2 * _dr_t, 1), round(WINDOW_SEAT["d"] - 2 * _dr_t, 1), round(WINDOW_SEAT["box_h"] - 2 * _dr_t, 1))
+# 2, "hallbench": a shoe bench with open cubbies and a padded seat (104 × 30 × 48)
+HALL_BENCH = dict(w=104.0, d=30.0, h=48.0, cubbies=(5, 2), pad=4.0)
+HALL_BENCH["x"] = ((_corner_x[0] + _corner_x[1]) / 2 - HALL_BENCH["w"] / 2, (_corner_x[0] + _corner_x[1]) / 2 + HALL_BENCH["w"] / 2)
+# 3, "wardrobe": a built-in cupboard of hanging depth (60), floor to ceiling, two hinged doors (sliding ones need 66 and a 5 track)
+WARDROBE = dict(x=(_corner_x[0] + 2.0, _corner_x[0] + 2.0 + 100.0), d=60.0, h=CEIL, t=_dr_t, door=_dr_t, plinth=6.0, rail_y=180.0)
+WARDROBE["behind_chairs"] = round(_chair_back - (WINDOW_Z + WARDROBE["d"]), 1)          # 17.7 to the seated chairs' backs
+# 4, "alcoveshelves": two oak floating shelves (B&Q Shelf Depot, 900 × 230) over the plant stand, in the same corner
+ALCOVE_SHELVES = dict(w=90.0, d=23.0, t=3.8, tops=(182.0, 212.0))
+ALCOVE_SHELVES["x"] = ((_corner_x[0] + PIPE_BOX["x"][0]) / 2 - 45.0, (_corner_x[0] + PIPE_BOX["x"][0]) / 2 + 45.0)
+ALCOVE_SHELVES["over_stand"] = round(ALCOVE_SHELVES["tops"][0] - ALCOVE_SHELVES["t"] - PLANT_STAND["h"], 1)   # 20.2 over the stand
+del _cu_end, _corner_x, _chair_back
+
+# 5, "wallcabs": two IKEA EKET wall cabinets (35 cube, glass doors) on the side wall over the sofa's corner, past the PC shelf's end
+EKET = (35.0, 35.0, 35.0)
+WALL_CABS = dict(n=2, y0=162.0, z0=PC_SHELF_Z[1] - 4.0)
+WALL_CABS["z"] = (WALL_CABS["z0"], WALL_CABS["z0"] - WALL_CABS["n"] * EKET[0])         # -216 .. -286
+WALL_CABS["head"] = round(CEIL - WALL_CABS["y0"] - EKET[2], 1)                           # 38 under the ceiling (EKET asks for 5)
+
+# 6, "stairdrawers": drawers in the bottom three steps' risers (your stairs, or the new ones), on 350 runners
+STAIR_DRAWERS = dict(n=3, inset=4.0, h=14.5, depth=35.0)
+STAIR_DRAWERS["w"] = round(STAIR_X[1] - STAIR_X[0] - 2 * STAIR_DRAWERS["inset"], 1)    # 51
+
+# 7, "overdoor": a six-hook over-door rail on the hall door's room side (49 × 11 × 14)
+OVERDOOR = dict(w=49.0, d=11.0, h=14.0, hooks=6, door_t=4.0)
+OVERDOOR["open_gap"] = round(DOOR_X[0] - BREAST_X[1], 1)                                 # 12: the open door to the breast's side
