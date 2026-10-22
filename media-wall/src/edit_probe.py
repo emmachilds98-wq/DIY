@@ -31,7 +31,7 @@ with sync_playwright() as p:
     step("reset layout", lambda: pg.click("#r3d-layreset"))
     step("edit off", lambda: pg.click("#r3d-editdone"))
     # tools panel changes
-    for sel in ("[data-drawer=look]", "[data-decor='oak:walnut']", "[data-decor='floor:boards']", "[data-drawer=lights]", "[data-scene=film]", "[data-drawer=extras]"):
+    for sel in ("[data-drawer=look]", "[data-decor='oak:walnut']", "[data-decor='floor:boards']", "[data-drawer=views]", "[data-scene=film]", "[data-drawer=extras]"):
         step("click " + sel, lambda sel=sel: pg.locator(sel).first.click(timeout=10000))
     step("sugg all", lambda: pg.evaluate("() => { const b = document.querySelector('[data-suggall=on], [data-sproxyall=on]'); if (b) b.click(); }"))
     print("TOTAL errors:", len(errs)); print("\n".join(errs[:30]))

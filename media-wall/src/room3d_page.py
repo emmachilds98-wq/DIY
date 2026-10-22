@@ -267,12 +267,14 @@ LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves an
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
 # v25: the five Tools tabs (were v22's drawers): (key, name, icon, hue)
-DRAWERS = [("views", "Views", "photo_camera", 235), ("layout", "Layout", "chair", 50), ("lights", "Lights", "lightbulb", 95), ("look", "Look", "palette", 165), ("extras", "Extras", "auto_awesome", 300)]
+# v37, client: "Relocate the lights controls so they sit under 'View' in the main buttons menu": four tabs, the lights in Views
+DRAWERS = [("views", "Views", "photo_camera", 235), ("layout", "Layout", "chair", 50), ("look", "Look", "palette", 165), ("extras", "Extras", "auto_awesome", 300)]
 # One Tools button holds every 3D control: the pill (on a laptop) or the bottom bar's Tools button (on a phone, [data-tools-toggle])
 # opens the bubble row; a bubble opens its panel. The last tab is remembered (mw22-drawer); Esc and the pill close it.
 DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return;
   const K = "mw22-drawer", tabs = [...r.querySelectorAll("[data-drawer]")], panel = document.getElementById("r3d-panel"), btns = [...document.querySelectorAll("[data-tools-toggle]")];
   let cur = "layout", shown = ""; try { cur = localStorage.getItem(K) || "layout"; } catch (e) {}
+  if (cur === "lights") cur = "views";                                   // v37: the lights moved into Views
   if (!tabs.some(t => t.dataset.drawer === cur)) cur = "layout";
   const sync = open => { r.classList.toggle("tools-open", open); document.body.classList.toggle("tools-open", open);
     document.querySelectorAll("[data-tools-toggle]").forEach(b => { b.setAttribute("aria-expanded", String(open)); const i = b.querySelector(".ms"); if (i) i.textContent = open ? "close" : "tune"; }); };
@@ -425,6 +427,9 @@ def controls(gallery=""):
         "views": '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
                  f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
+                 # v37: the lights live here now (they were their own tab): the presets, daytime, every light's slider and colour, the quality
+                 + '<h3 class="r3d-sub" id="r3d-lightsh">Lights</h3>' + lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality")
+                 + '<h3 class="r3d-sub">Moving round and sharing</h3>'
                  # v31, client: "make camera movement easier within the 3d render. being able to adjust height would be good"
                  + '<div class="grp r3d-move"><span class="label">Move round</span>'
                  '<div class="r3d-eyerow"><label for="r3d-eye">Eye height</label><input type="range" id="r3d-eye" min="40" max="220" step="5" value="160">'
@@ -470,7 +475,6 @@ def controls(gallery=""):
             seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Plant stand and vinyl stand"),
             seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "The media wall's drawers"),
             '<p class="caption">Or tap the cabinet in the room: its card opens it for four or six, folds it, opens either door and swaps the table\'s width.</p>']),
-        "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
         "look": swatches + trims + decor_g,
         "extras": opts_html() + picks + ideas_g + sugg_g,
     }
