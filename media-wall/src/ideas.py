@@ -137,13 +137,25 @@ SUGGEST += [
 
 # v32, client: "add anything else you haven't already suggested": three more, each from a product page (fit.SOURCES)
 SUGGEST += [
-    ("piclights", "Picture lights over your two framed LPs", "two battery LED picture lights, each a 27.9 shade on a 12.5 arm", (30, 50),
-     "A warm wash down over the two LPs in the evening, with no wiring: three AA cells each.", "Centred over each framed LP on the chimney breast."),
     ("blind", "A blackout roller blind for the window", "made to measure (up to 240 × 210): here about 239 wide × 124 drop", (25, 70),
      "Film nights in daylight, and darker summer mornings; rolled up, it's a slim cassette under the curtain pole.",
      "Face-fixed just above the window, down to the sill's nose: the plants on the sill stay behind it."),
     ("cablights", "Lights inside the dining cabinet", "two 40 cm USB-rechargeable LED bars, warm white, motion sensing", (28, 40),
      "Each box lights as its door opens, so the chairs and the cloth are easy to find in the evening.", "Under the top of each box, at the front."),
+]
+# v34: the picture lights went with the two framed LPs (the glass case takes their place, lit inside). Client: "maybe integrating a wall
+# bar in here for drinks/spirits or whether another area could facilitate a bar of some kind and how id build it in": two ways
+# (geometry.DRINKS; the build in the plan's appendix, "A bar for drinks")
+SUGGEST += [
+    ("barcase", "A drinks cabinet under the glass case", "90 × 39 × 20, oak; its front drops to a 90 × 36 counter at 98", (80, 130),
+     "Your spirits behind an oak fall-front, built in under the case you picked: nine 70 cl bottles (the tallest made, 35) on a mirror "
+     "back, lit from under the top. Down on its two soft-close stays the front is a counter to pour at; the glasses go on the case's "
+     "bottom shelf, just above. Nothing stands on the floor.",
+     "On the chimney breast under the glass case, the case's width, from 96 to 136: it takes the “now playing” ledge's place (the vinyl "
+     "stand's face-out top bays show what's on)."),
+    ("bartrolley", "The slim trolley beside the cabinet, as a drinks trolley", "VASAGLE, 20 × 43.2 × 86.5: bottles on top, glasses, mixers and an ice bucket below", (36, 70),
+     "Nothing to build: it parks in the gap beside the dining cabinet and pulls out for dinner, before the table door opens, to stand behind the window-side diners, or over to the sofa.",
+     "Beside the dining cabinet (Layout, Beside the cabinet: the slim trolley), behind the open table door's line."),
 ]
 
 
@@ -169,8 +181,9 @@ SUGG_VARS = {
     "lantern": [("natural", "Natural rattan", ["#b98f5c", "#b98f5c"]), ("dark", "Dark rattan", ["#6e5235", "#6e5235"]), ("black", "Black metal", ["#2a2a2c", "#2a2a2c"])],
     "mirror": [("oak", "Oak frame", ["#c48c57"]), ("black", "Black frame", ["#2a2a2c"]), ("brass", "Brass frame", ["#b8913f"])],
     "shelfled": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("amber", "Amber", ["#ffb347", "#ffb347"]), ("cool", "Cool white", ["#eef3ff", "#eef3ff"])],
-    "piclights": [("brass", "Antique brass", ["#b8913f", "#ffe0a8"]), ("nickel", "Satin nickel", ["#b9bcc0", "#fff1d6"]), ("black", "Black", ["#2a2a2c", "#ffe0a8"])],   # v32
     "blind": [("oat", "Oatmeal", ["#cdbf9f"]), ("charcoal", "Charcoal", ["#3b3d40"]), ("sage", "Sage", ["#8b9878"])],
+    "barcase": [("oak", "Oak", ["#c48c57"]), ("green", "Card Room Green outside", ["#2d5a46"]), ("black", "Black outside", ["#2a2a2c"])],   # v34
+    "bartrolley": [("gin", "Gin and tonics", ["#3f6b3a"]), ("whisky", "Whisky and rum", ["#9a5a22"]), ("clear", "Vodka and clear spirits", ["#e8eef0"])],
     "cablights": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("natural", "Natural white", ["#fff1dc", "#fff1dc"])],
 }
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"

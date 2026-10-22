@@ -467,6 +467,13 @@ BEHIND_TOP = dict(gap=22.0, hook=3.0, upstand=10.0, rail=RAIL[2] + 21.0)
 WALL_SEAT = dict(w=38.0, d=33.0, t=2.7, h=46.0, fold=5.0, z=(CHAIR_STORE["stair_gap"][0] - 1.5, CHAIR_STORE["stair_gap"][1] + 1.5))
 # client: "the sofa has a ottoman poufe type thing that is the size of a chair on the sofa, its square, blue corduroy matching the sofa"
 SOFA_POUF = dict(w=75.0, d=75.0, h=44.0, x=(200.5, 275.5), z=(-195.0, -120.0))   # on the rug beside the coffee table, a footrest
+# v34, client: "we'd like to get a new ottoman that is actually a storage ottoman, can you find one that is similar size to what we
+# have right now and would match the room or current sofa": navy velvet, a lift-off padded lid, 76 square (the nearest size made to
+# the 75 you have; sources istoolsott, opulent, zoe); the same spot. Its height and the box's depth inside: to confirm on the listing
+OTTOMAN = dict(w=76.0, d=76.0, h=45.0, lid=10.0, inner_h=28.0, wall=3.0, col="#273a63", pick="ISTOOLS Large Velvet Storage Ottoman")
+SOFA_POUF = dict(SOFA_POUF, w=OTTOMAN["w"], d=OTTOMAN["d"], h=OTTOMAN["h"],
+                 x=((SOFA_POUF["x"][0] + SOFA_POUF["x"][1] - OTTOMAN["w"]) / 2, (SOFA_POUF["x"][0] + SOFA_POUF["x"][1] + OTTOMAN["w"]) / 2),
+                 z=((SOFA_POUF["z"][0] + SOFA_POUF["z"][1] - OTTOMAN["d"]) / 2, (SOFA_POUF["z"][0] + SOFA_POUF["z"][1] + OTTOMAN["d"]) / 2))
 
 
 # ---------------------------------------------------------------- v26 (20 Oct): option C, the dining cabinet; v27: the plan, for six
@@ -668,3 +675,21 @@ REAR_SPK = (9.0, 14.4, 10.9)                   # W, H, D
 REAR_STAND = dict(base=(11.0, 11.0, 1.5), pole=2.5, top=96.0)   # a weighted base, a pole, the speaker on a plate at 96
 REAR_SPOTS = [(SOFA_X[0] + REAR_STAND["base"][0] / 2, SOFA_BACK_Z - 6.5),    # left: behind the sofa's corner end, in the corner
               (SOFA_X[1] - REAR_STAND["base"][0] / 2, SOFA_BACK_Z - 6.5)]    # right: behind the sofa's window end
+
+
+# ---------------------------------------------------------------- v34, client: "one thing ive been thinking about is maybe integrating a
+# wall bar in here for drinks/spirits or whether another area could facilitate a bar of some kind and how id build it in". Two ways,
+# both suggestions (ideas.SUGGEST: not in the plan or the costs until chosen). A, "barcase": a wall-hung oak drinks cabinet under the
+# glass case (ideas.CASE), the case's width, an inset fall-front that drops to a counter on two soft-close stays, nine 70 cl bottles
+# standing on a mirror-backed shelf lit from under the top. B, "bartrolley": the slim trolley beside the dining cabinet (BESIDE) as a
+# drinks trolley that wheels to the table.
+DRINKS_BOTTLE = (35.0, 9.5)        # the tallest and widest 70 cl spirit bottles we found: 34.9 tall (Univerre Platin), 9.5 across (Oblò)
+_dr_t = 1.8                    # 18 mm oak-faced ply, the dining cabinet's sheet
+_dr_in = DRINKS_BOTTLE[0] + 0.5   # inside height: the tallest bottle and a finger's gap
+DRINKS = dict(x=((BREAST_X[0] + BREAST_X[1]) / 2 - 45.0, (BREAST_X[0] + BREAST_X[1]) / 2 + 45.0),   # the case's 90, centred on the breast
+           top=135.5,                                   # 1.5 under the glass case's bottom (137)
+           d=20.0, t=_dr_t, inner_h=_dr_in, mirror=0.3,
+           n=int((90.0 - 2 * _dr_t) // DRINKS_BOTTLE[1]))  # nine across
+DRINKS["y"] = (round(DRINKS["top"] - _dr_in - 2 * _dr_t, 1), DRINKS["top"])          # 96.4 .. 135.5
+DRINKS["counter"] = round(DRINKS["y"][0] + _dr_t, 1)                                 # 98.2: the inner floor, where the flap lands
+DRINKS["reach"] = round(DRINKS["d"] + _dr_in, 1)                                     # 55.5: the open counter's front, off the breast

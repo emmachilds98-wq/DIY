@@ -831,7 +831,7 @@ def beside_zone():
         ("A tall mirror", f"{r1(m['w'])} × {r1(m['h'])}, on the wall from {r1(m['y0'])} to {r1(m['y0'] + m['h'])}", ref("nissedal"), f"{r1(B['len'])} of wall, {r1(under)} under the shelf",
          f"{r1((B['len'] - m['w']) / 2)} each side, {r1(under - m['y0'] - m['h'])} under the shelf; it bounces the window's light into the corner, and the trailing plant hangs in front of it", PASS),
         ("A slim trolley", f"{r1(tr['w'])} long × {r1(tr['d'])} deep × {r1(tr['h'])}, on castors", ref("vasagle"), f"{r1(B['len'])} × {r1(B['depth'])}",
-         f"{r1(B['len'] - tr['w'])} spare along, {r1(B['depth'] - tr['d'])} deep; wheel it out beside the table's far end for dinner: plates, glasses, a jug", PASS),
+         f"{r1(B['len'] - tr['w'])} spare along, {r1(B['depth'] - tr['d'])} deep; pull it out for dinner before the table door opens, to stand behind the window-side diners: plates, glasses, a jug", PASS),
         ("The trolley and the trailing plant", f"its top at {r1(tr['h'])}", ref("photo20", "vasagle"), f"the longest strands end about {r1(B['strands'])} up",
          f"{r1(tr['h'] - B['strands'])} into the longest strands: trim them a little or slide the pot along the shelf", CHECK),
         ("A low oak shelf", f"{r1(d['w'])} × {r1(d['d'])} × {r1(d['h'])}, matching the cabinet, open to the room", ref("plates", "room"), "six dinner plates on edge, glasses, three bottles",
@@ -927,6 +927,133 @@ def counts():
             c[r[-1]] += 1
     return c
 
+
+
+# ---------------------------------------------------------------- v34, client: "i like the large glass display case on the chimney breast"
+# (in the plan now), "maybe integrating a wall bar in here for drinks/spirits" (two suggestions) and "a new ottoman that is actually a
+# storage ottoman ... similar size to what we have right now"
+SOURCES["glasscut"] = ("FHB Rundle (UK): custom-sized toughened glass panels, cut to your sizes, polished on all edges with docked corners, "
+                       "0.3 m² minimum charged (fhbrundle.co.uk); toughened glass about £70–90 a m², polished edges about £5 a m² more (UK glass cost "
+                       "calculator, everycalculators.com)")
+SOURCES["acrylicmirror"] = ("Simply Plastics (UK): silver acrylic mirror sheet cut to size, ±1 mm, 3 mm (5 mm advised over 1200 × 1200) "
+                            "(simplyplastics.com)")
+SOURCES["bottles"] = ("70 cl spirit bottles, makers' sheets: Univerre Platin 70 cl 349 tall × 74.0 across; Univerre Oblò bartop 192 × 94.7; "
+                      "Univerre London 238 × 92.0; Saverglass Premiere Spirit 70 cl 327.5 × 76.2; Verallia Caeli 700 ml 263.9 × 74.7 "
+                      "(univerre.ch, saverglass.com, uk.verallia.com)")
+SOURCES["flapstay"] = ("Howdens: Blum soft-close flap stay, pack of two, steel, for doors 14–22 mm thick (HKE0069; howdens.com); a stay is sized "
+                       "by torque, half the flap's height × its weight (Sugatsune soft-down stays, global.sugatsune.com)")
+SOURCES["istoolsott"] = ("ISTOOLS (UK): Large Velvet Storage Ottoman, square, a lift-off upholstered lid on a memory-foam pad, a solid wooden "
+                         "frame, legs that screw on; 14 sizes from 48 × 43 to 120 × 120, among them 76 × 76 (30 × 30 in, \"a small-flat coffee "
+                         "table\"); blues include navy; the 76 × 76 listed at £304 on one of their velvet ottomans; height not given "
+                         "(istools.co.uk/products/square-plain-lid-coffee-table-ottoman-storage-large-velvet-footrest-ukw)")
+SOURCES["opulent"] = ("Dunelm: Square Opulent Velvet Storage Footstool, H 39 × W 62 × D 62 cm, legs 3.5, storage inside H 18 × 57.5 × 57.5, "
+                      "nine colours including navy, £139.30–199 (dunelm.com, product 1000249916)")
+SOURCES["zoe"] = ("Dunelm: Zoe Pinstripe Fabric Square Storage Footstool, H 49 × W 96 × D 96 cm, cotton blend, tested to 120 kg, navy among "
+                  "its colours, £199 (£99.50 in a sale) (dunelm.com, product 1000239490)")
+SOURCES["luxorcord"] = ("Homebase: Luxor Navy Blue Jumbo Cord Footstool, 55 × 55, 45 high (42 on diy.com), a fixed top, no storage, £136 "
+                        "(homebase.co.uk, 0739873)")
+ORDER.extend(["glasscut", "acrylicmirror", "bottles", "flapstay", "istoolsott", "opulent", "zoe", "luxorcord"])
+
+
+def case_zone():
+    """v34: the glass display case on the breast, in the plan (ideas.CASE: 90 × 85 × 12, three glass shelves)."""
+    import ideas
+    C, L, P_ = ideas.CASE, G.NOW_LEDGE, G.PLANT_STAND
+    w, h = C["x"][1] - C["x"][0], C["y"][1] - C["y"][0]
+    lp_top = L["top"] + G.LP * 0.99
+    sh = C["shelves"]
+    gaps = [sh[0] - C["y"][0] - C["frame"], sh[1] - sh[0], sh[2] - sh[1], C["y"][1] - C["frame"] - sh[2]]
+    return ("The glass display case on the chimney breast (v34: in the plan)", f"{r1(w)} × {r1(h)} × {r1(C['d'])}, from {r1(C['y'][0])} to {r1(C['y'][1])}", [
+        ("On the breast, centred", f"{r1(w)} wide", ref("glasscut"), f"breast {r1(G.BREAST_W)} wide",
+         f"{r1((G.BREAST_W - w) / 2)} each side", PASS),
+        ("Under the ceiling", f"top at {r1(C['y'][1])}", ref("glasscut"), f"{r1(G.CEIL)} ceiling", f"{r1(G.CEIL - C['y'][1])} above it", PASS),
+        ("Over the “now playing” sleeves", f"bottom at {r1(C['y'][0])}", ref("media"), f"the sleeves' tops at {r1(lp_top)}", f"{r1(C['y'][0] - lp_top)} between", TIGHT),
+        ("Its four spaces", ", ".join(r1(x) for x in gaps) + " high", ref("glasscut"), "7-inch singles 18.4, boxed games, figures, small plants",
+         "the bottom one takes tumblers and coupes (about 9–14) if you build the drinks cabinet under it", PASS),
+        ("Depth, front to back", f"{r1(C['d'])} deep, a 4 mm front, 6 mm shelves", ref("glasscut"), "the vinyl stand below it stands 32 out",
+         "it stays no further out than a picture ledge; the stand and its sleeves sit under it", PASS),
+        ("With layout B instead (the plant stand on the breast)", f"the stand {r1(P_['h'])} tall", ref("plantstand"), f"the case from {r1(C['y'][0])}",
+         "they can't share the breast: the case is drawn with layout A (the plan); with B it would hang elsewhere", CHECK),
+    ])
+
+
+def drinks_zone():
+    """v34: the two ways to a bar (suggestions, not in the plan's checks or costs)."""
+    D, Bo, B, tr = G.DRINKS, G.DRINKS_BOTTLE, G.BESIDE, G.BESIDE["trolley"]
+    w = D["x"][1] - D["x"][0]
+    return ("A bar for drinks: two ways (suggestions)", f"A under the glass case, {r1(w)} × {r1(D['y'][1] - D['y'][0])} × {r1(D['d'])}; B the slim trolley", [
+        ("A: the bottles standing", f"inside {r1(D['inner_h'])} high", ref("bottles"), f"the tallest 70 cl {r1(Bo[0])}", f"{r1(D['inner_h'] - Bo[0])} over it", TIGHT),
+        ("A: across the cabinet", f"{D['n']} bottles", ref("bottles"), f"inside {r1(w - 2 * D['t'])} wide", f"{r1(Bo[1])} each for the widest (9.5)", PASS),
+        ("A: front to back", f"{r1(D['d'] - D['t'] - 1.2 - D['mirror'])} clear inside", ref("bottles", "acrylicmirror"), f"the widest bottle {r1(Bo[1])}",
+         "one row, the labels to the room, the mirror behind", PASS),
+        ("A: under the case", f"top at {r1(D['y'][1])}", ref("glasscut"), f"the case from {ideas_case_y0()}", f"{r1(ideas_case_y0() - D['y'][1])} between", PASS),
+        ("A: the open front, a counter", f"at {r1(D['counter'])}, {r1(D['reach'])} off the breast", ref("flapstay"),
+         "the vinyl stand below: 78 tall, 32 deep", f"{r1(D['counter'] - G.RECORD_SHELF['h'])} over it; a standing bar's height", PASS),
+        ("A: the flap's stays", "18 mm oak-faced ply, about 3 kg", ref("flapstay"), "Blum's soft-close stays: doors 14–22 mm", "within; check the torque on Blum's chart", PASS),
+        ("A: the “now playing” ledge", f"its top at {r1(G.NOW_LEDGE['top'])}", ref("media"), f"the cabinet {r1(D['y'][0])}–{r1(D['y'][1])}",
+         "it comes off: the vinyl stand's face-out top bays show what's on", PASS),
+        ("B: the trolley, pulled out for dinner", f"{r1(tr['w'])} × {r1(tr['d'])}, to x 326–346", ref("vasagle"),
+         "the open table door's swing (90.5 from its hinge), the window-side chairs, the plant stand",
+         "112 from the door's hinge (the door is 90.5), 13 behind the chairs, 1.3 off the plant stand: it comes out before the table door opens", TIGHT),
+        ("B: on its trays", "bottles on top; glasses, mixers, an ice bucket below", ref("vasagle", "bottles"), "trays 24 apart",
+         "the top tray takes the tallest bottle; tumblers and cans fit between the others", PASS),
+    ])
+
+
+def ideas_case_y0():
+    import ideas
+    return ideas.CASE["y"][0]
+
+
+def ottoman_zone():
+    """v34: the new storage ottoman, where the old one stood."""
+    g = G
+    O, P_ = g.OTTOMAN, g.SOFA_POUF
+    gap_c = P_["x"][0] - g.COFFEE["x"][1]
+    gap_s = P_["z"][0] - g.SOFA_FRONT_Z
+    return ("The storage ottoman (v34: replaces your blue cord one)", f"{r1(O['w'])} × {r1(O['d'])} × {r1(O['h'])}, navy velvet, on the rug", [
+        ("Its size against the old one", f"{r1(O['w'])} square", ref("istoolsott", "pouf"), "yours 75 square, 44 high", "1 wider each way: the nearest size made", PASS),
+        ("Beside the coffee table", f"x {r1(P_['x'][0])}–{r1(P_['x'][1])}", ref("istoolsott"), f"coffee table to x {r1(g.COFFEE['x'][1])}",
+         f"{r1(gap_c)} between them; {r1(gap_s)} off the sofa's front", PASS),
+        ("Its height", f"about {r1(O['h'])}", ref("istoolsott"), "the sofa's seat about 45", "a footrest level with the seat; ISTOOLS don't publish it: check", CHECK),
+        ("Inside", f"about {r1(O['inner_h'])} deep under the lid", ref("istoolsott", "opulent"), "two throws or a blanket, folded",
+         "the Dunelm one (the smaller pick) is 18 deep inside: a throw or two", PASS),
+    ])
+
+
+_zones_v33 = zones
+
+
+def zones():
+    """v34: the case in the plan; the ottoman is the new one; the bar's two ways after the breast (suggestions)."""
+    out = []
+    for z in _zones_v33():
+        if z[0].startswith("Your sofa's ottoman"):
+            z = ottoman_zone()
+        if z[0].startswith("The chimney breast"):
+            z = (z[0], z[1], [r for r in z[2] if not r[0].startswith(("If you choose option A", "Leaning back 8°, under the framed LPs"))])
+            out.append(z)
+            out.append(case_zone())
+            out.append(drinks_zone())
+            continue
+        out.append(z)
+    if not any(t.startswith("The glass display case") for t, *_ in out):
+        out += [case_zone(), drinks_zone()]
+    return out
+
+
+_counts_v33 = counts
+
+
+def counts():
+    """v34: as v33, and the bar's two ways (suggestions) stay out of the totals."""
+    c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
+    for title, _, rows in zones():
+        if title == "How many can sit down" or title.startswith(("The more compact version", "A bar for drinks")):
+            continue
+        for r in rows:
+            c[r[-1]] += 1
+    return c
 
 if __name__ == "__main__":
     for title, space, rows in zones():
