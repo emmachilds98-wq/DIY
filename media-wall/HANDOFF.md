@@ -121,6 +121,8 @@
   mode tag was nudged 2px; lists were free-wrapping flex. Now `.r3d-optrow` is a grid (head / See it / buttons / caption),
   `.seg.r3d-grid` (auto-fill columns ≥148, versions ≥112) on every list, All on/off on their own row. Checked by measurement at 390 and
   1280: no heading over a button, every grid in even columns, every See it at one x.
+- **QA:** `qa.py` now waits for the 3D room's warm-up queue to empty before its "lighting makes no shaders" check: with v37's twelve more
+  hidden pieces a warm-up step could land inside the check at 390 (60 -> 62); with the queue empty it's 62 -> 62.
 - **Safety filter.** Twice this round the session was cut off just as the cap's poem was about to be typed into the code (its lines are a
   joke about fishing but read as dark). Keep it out of code, text and commit messages.
 

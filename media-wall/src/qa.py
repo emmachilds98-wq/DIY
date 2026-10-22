@@ -96,6 +96,12 @@ def run(p, w, h):
         pg.wait_for_timeout(700)
     pg.screenshot(path=f"{OUT}/qa_{w}_room_six.png")
     # v35: lighting changes never make new shaders (each quality has its fixed set of lights), and nothing went into the error trap
+    # v37: let the warm-up finish first (it compiles the hidden parts' shaders in quiet moments; with v37's twelve more pieces its queue
+    # could still be running here, and a step landing in the loop below looked like a lighting change making shaders)
+    for _ in range(90):
+        if not pg.evaluate("() => R3D.perf().warm"):
+            break
+        pg.wait_for_timeout(2000)
     n0 = pg.evaluate("() => R3D.perf().programs")
     for sc in ("film", "cosy", "bright", "film", "bright"):
         pg.evaluate("s => window.R3D.set({scene: s})", sc); pg.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
