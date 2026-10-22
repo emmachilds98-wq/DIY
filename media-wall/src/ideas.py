@@ -177,11 +177,24 @@ SUGGEST += [
      "Over the hall door, above its architrave (the wall clock suggestion's place)."),
     ("shelfboxes", "Two lidded boxes on your black shelf", "35 × 26 × 15 each", (20, 30),
      "Chargers, batteries and spare bulbs by the table, either side of the laser.", "On your black shelf by the stairs, in the middle."),
-    ("plantshelf", "A small plant shelf, 10 cm off the wall, for your hanging plant", "30 × 15 oak, its back 10 off the wall, at 196", (10, 25),
-     "Your hanging plant on its own little shelf: the strands fall through the 10 cm gap behind it and over its front, down the wall "
-     "instead of over the dining cabinet's doors, and it lines up with your black shelf.",
-     "On the right side wall (the stairs wall), at its stairs end, between the stairs and the dining cabinet. The plant moves here from "
-     "the black shelf's window end, where the open table door lies back."),
+]
+
+# v37, client: "make more storage suggestions ... then add any more extras" (geometry v37; fit.storage_zone)
+SUGGEST += [
+    ("cornershelf", "A high oak shelf over the sofa's corner, two lidded boxes on it", "80 × 27 oak at 205; boxes 35 × 26 × 15", (35, 60),
+     "Out-of-the-way storage for what you rarely need (spare cables, the boxes the consoles came in, gift bags), above everyone's heads.",
+     "On the side wall over the sofa's window corner, past the PC, above the print suggestion."),
+    ("doorhooks", "Hooks on the back of the hall door", "35 × 13, six hooks; doors up to 4 thick", (7, 15),
+     "Your caps, bags and a coat by the door, with nothing to drill: it hooks over the door's top.", "On the room side of the hall door, at the top."),
+    ("sconces", "Two wall lights either side of the glass case", "25 × 9 × 15 each, pine, plug-in with an in-line switch", (50, 90),
+     "A warm glow on the case and the breast in the evening, without the spots; they fit the 13.75 either side of the case.",
+     "On the chimney breast, either side of the glass case, 175 up; the cables down the breast in paintable covers."),
+    ("neon", "A small neon sign over the sofa's corner", "50 × 20 on clear acrylic, LED, USB with a dimmer", (40, 100),
+     "A bit of fun over the corner you sit in: the words are yours (we drew three).",
+     "On the side wall over the sofa's window corner, between the print and the high shelf."),
+    ("pendant", "A plug-in pendant over the dining table", "a 4 m fabric flex, a ceiling hook, a G125 globe bulb", (25, 50),
+     "A low warm light over the open table for dinners: hooked over its middle, the flex swagged to a hook at the wall and down to a socket.",
+     "From a ceiling hook over the open table's middle, about 150 up when it's out; looped up to a hook by the wall when the table's away."),
 ]
 
 
@@ -216,7 +229,11 @@ SUGG_VARS = {
     "liftcoffee": [("oak", "Oak effect", ["#b07d4f"]), ("black", "Black", ["#2c2a28"]), ("white", "White", ["#ece8e0"])],
     "doorshelf": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],
     "shelfboxes": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],
-    "plantshelf": [("oak", "Oak", ["#c48c57"]), ("black", "Black, like your shelf", ["#1a1a1b"])],
+    "cornershelf": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],   # v37
+    "doorhooks": [("white", "White (as sold)", ["#ece8e0"]), ("green", "Painted Card Room Green", ["#566b52"])],
+    "sconces": [("pine", "Pine (as sold)", ["#c9a46a"]), ("black", "Black", ["#2a2a2c"]), ("green", "Card Room Green", ["#566b52"])],
+    "neon": [("fish", "“And yet, I fish”", ["#ffb347"]), ("bar", "“Bar”", ["#ff5fb0"]), ("cheers", "“Cheers”", ["#7fd6ff"])],
+    "pendant": [("black", "Black flex", ["#1f1f21"]), ("ochre", "Ochre flex", ["#d9a441"]), ("sage", "Sage flex", ["#8b9878"])],
 }
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
 
@@ -239,15 +256,18 @@ def suggest_html():
 # Extras opens on these rows; each picks or switches, flies the camera to it and says where it goes. (key, title, mode, note, items):
 # mode "one" picks one (or None), "any" switches each; an item is (value, label, what it sets in the room's state).
 OPTION_GROUPS = [
-    ("bar", "A bar for drinks", "one", "Three places, one at a time. Later, when the stairs change, the space under them could take a fourth.",
-     [("barcase", "Under the glass case", {"sugg": "barcase"}), ("bartrolley", "The trolley beside the cabinet", {"sugg": "bartrolley"}),
-      ("barside", "By the sofa, under the oak run", {"sugg": "barside"})]),
+    ("bar", "A bar for drinks", "one", "Four ways, one at a time. Later, when the stairs change, the space under them could take another.",
+     [("bar", "Built in beside the cabinet", {"beside": "bar"}), ("barcase", "Under the glass case", {"sugg": "barcase"}),
+      ("barside", "By the sofa, under the oak run", {"sugg": "barside"}), ("bartrolley", "The trolley beside the cabinet", {"sugg": "bartrolley"})]),
     ("games", "Games and cards: in the ottoman", "lid", "Twelve square board games in three layers and a row of card games along one side.",
      [("on", "Lid on", {"lid": False}), ("off", "Lift the lid", {"lid": True})]),
     ("blankets", "Your blankets (about five)", "one", "Two places for five folded throws; pick one.",
      [("blanketbasket", "A tall basket at the sofa's end", {"sugg": "blanketbasket"}), ("rail", "An oak rail beside the cabinet", {"beside": "rail"})]),
     ("storage", "More storage", "any", "Switch on as many as you like. Later: cupboards under the new stairs.",
      [("liftcoffee", "A lift-top coffee table", {"sugg": "liftcoffee"}), ("doorshelf", "A shelf over the hall door", {"sugg": "doorshelf"}),
-      ("shelfboxes", "Boxes on your black shelf", {"sugg": "shelfboxes"})]),
-    ("plant", "Your hanging plant", "any", "On its own shelf, 10 cm off the stairs wall.", [("plantshelf", "On a small shelf, 10 off the wall", {"sugg": "plantshelf"})]),
+      ("shelfboxes", "Boxes on your black shelf", {"sugg": "shelfboxes"}), ("cornershelf", "A high shelf over the sofa's corner", {"sugg": "cornershelf"}),
+      ("doorhooks", "Hooks on the hall door", {"sugg": "doorhooks"})]),
+    ("touches", "Lights and finishing touches", "any", "Switch on as many as you like; tap one in the room for its versions.",
+     [("sconces", "Wall lights by the glass case", {"sugg": "sconces"}), ("neon", "A neon sign", {"sugg": "neon"}),
+      ("pendant", "A pendant over the table", {"sugg": "pendant"})]),
 ]

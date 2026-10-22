@@ -281,7 +281,11 @@ STAIRS_WALL_Z = (ALC_D - STAIR_D, WINDOW_Z)        # -41 .. -309: the stair box'
 # the window corner (sketch: 230 along this wall, 220 out), floor to ceiling. The shelf can't run into it, so it stops 2 short of it, 200 long;
 # its top is put at 196 (the photo gave about 200) so the IKEA OBEGRÄNSAD panel (36 tall) stands on it under the 235 ceiling.
 PIPE_BOX = dict(x=(ROOM_W - NW_BOX[1], ROOM_W), z=(WINDOW_Z, WINDOW_Z + NW_BOX[0]), hollow=True)   # x 445 .. 467, z -309 .. -286
-SHELF_B = dict(z=(PIPE_BOX["z"][1] + 202.0, PIPE_BOX["z"][1] + 2.0), top=196.0, t=5.0, d=25.0)   # -84 .. -284
+# v37, client: "the shelf on the wall going up the stairs should have the 10cm gap before the right side no matter what, this is how its
+# installed. not touching the right hand wall": your 2 m shelf stops 10 short of the pipe boxing (the wall on its right as you face it)
+SHELF_B_GAP = 10.0
+SHELF_B = dict(z=(PIPE_BOX["z"][1] + SHELF_B_GAP + 200.0, PIPE_BOX["z"][1] + SHELF_B_GAP), top=196.0, t=5.0, d=25.0, gap=SHELF_B_GAP)   # -76 .. -276
+_SHELF_B_V36 = (-84.0, -284.0)       # where v16-v36 drew it: the cabinets, the flip-top's chair gap and the lightbox stay planned on it
 DINING_SITES = {"breast": "On the chimney breast", "stairs": "Under the shelf, by the stairs"}
 DINING_SITE = "stairs"                              # v16, client: "table by the stairs should be default view now": the plan's default
 TABLE_B_CZ = -180.0                                # the table's centre along the stairs wall: 84 to the stair box, 74 to the window
@@ -385,7 +389,7 @@ SILL = dict(nose=3.0, t=3.0, y=WINDOW_Y[0]) # a white sill across the reveal, 3 
 # on the left of that shelf is my ikea light box"
 # v16, client: "lightbox is also black not white. it makes black and white print basic images in blocks like pharmacy LED ads": the IKEA
 # OBEGRÄNSAD LED wall lamp (black, 52 x 36 x 6, a 16 x 16 grid of white LEDs, five programmes), standing landscape at the left end
-LIGHTBOX = dict(z=(SHELF_B["z"][0] - 2.0, SHELF_B["z"][0] - 54.0), h=36.0, d=6.0, grid=16, name="IKEA OBEGRÄNSAD")
+LIGHTBOX = dict(z=(_SHELF_B_V36[0] - 2.0, _SHELF_B_V36[0] - 54.0), h=36.0, d=6.0, grid=16, name="IKEA OBEGRÄNSAD")
 LASER = dict(z=sum(SHELF_B["z"]) / 2, size=(9.0, 6.0, 9.0), on=False)   # v16: "the laser lights should not be on, i was just saying that it is on that shelf"
 PLANT_B = dict(z=SHELF_B["z"][1] + 9.0, pot=14.0, trail=(55.0, 110.0), strands=7)   # v16: "move plant to edge of the shelf": the window end
 # "either add my hat there or give it a wallstand or something to display it": an oak hat peg on the stairs wall by the lamp
@@ -447,7 +451,7 @@ CHAIR_STORE = dict(
     hooks=dict(z=(TABLE_B_Z[1], PIPE_BOX["z"][1]), x=ROOM_W, chairs=4, per_hook=2,
                chair_y=((3.0, 3.0 + CHAIR_FOLDED[2]), (96.0, 96.0 + CHAIR_FOLDED[2])), hook_y=(86.0, 179.0), under_shelf=_hook_top),
     # the stair end: from the shelf's start (z -84, past it the stair's foot has to stay clear) to the table's other end (z -125)
-    stair_gap=(SHELF_B["z"][0], TABLE_B_Z[0]),
+    stair_gap=(_SHELF_B_V36[0], TABLE_B_Z[0]),
     # under the stairs, inside the room: the flight rises from z -35 to the door wall at z 39, so it's only about 78 tall there
     owned=(4, 6),                            # four on the wall; a fifth and sixth (for six at the table) in the garage, or under the stairs
     # v20, client: "is it not possible to build the chair storage into the table setup. i want it to be a fully pack away setup": an oak
@@ -487,7 +491,7 @@ SOFA_POUF = dict(SOFA_POUF, w=OTTOMAN["w"], d=OTTOMAN["d"], h=OTTOMAN["h"],
 #    three a side in comfort. A drawer under it for the mats; over it, where v26's longer halves stood, a lift-up flap for the cloth.
 #  - at the window end, the chair bay behind two doors: the six FRÖSVI folded, four on the floor (two across, two deep) and two on the
 #    shelf, with the shelf's front half free for the seat pads and the runner.
-_cb_z0, _cb_z1 = SHELF_B["z"]                                   # -84 .. -284: the shelf's length (the stair's foot stays clear)
+_cb_z0, _cb_z1 = _SHELF_B_V36                                   # -84 .. -284: the shelf's v36 length (the stair's foot stays clear); v37 keeps the cabinets where they were
 OPTC = dict(
     # v29, client: "i asked for a full upgrade of the tables design". Two oak sliding doors across the whole front (Häfele Slido Classic
     # 40 IF C, inset, bypassing): shut, it's one tidy run of oak with nothing on show; slide one over the other to open either bay.
@@ -738,12 +742,39 @@ DOOR_SHELF = dict(x=(DOOR_X[0] - 4.0, DOOR_X[1] + 4.0), d=27.0, t=2.7, y=198.0 +
 DOOR_SHELF["top"] = DOOR_SHELF["y"] + DOOR_SHELF["t"]                                 # 208.7
 DOOR_SHELF["head"] = round(CEIL - DOOR_SHELF["top"] - KUGGIS[2], 1)                   # 11.3 over the boxes
 # 3, "shelfboxes": two of the same boxes on your black shelf (25 deep: they stand 1 over its front), either side of the laser
-SHELF_BOXES = [(-144.0, -179.0), (-191.0, -226.0)]
+SHELF_BOXES = [(round(LASER['z'] + 40.5, 1), round(LASER['z'] + 5.5, 1)), (round(LASER['z'] - 5.5, 1), round(LASER['z'] - 40.5, 1))]
 
-# the plant shelf: a small oak shelf at the stairs end of the right side wall, held 10 off the wall on two oak arms; your hanging
-# plant moves onto it from the window end of the black shelf (its strands then fall through the gap and over the front, not over the
-# dining cabinet's table door). The window end can't take it: the open table door lies back over that wall.
-PLANT_SHELF = dict(w=30.0, d=15.0, t=2.2, gap=10.0, top=SHELF_B["top"], arm=(25.0, 4.0, 2.2),
-                   z=(round(STAIRS_WALL_Z[0] - (STAIRS_WALL_Z[0] - CAB["z"][0]) / 2 + 15.0, 1), round(STAIRS_WALL_Z[0] - (STAIRS_WALL_Z[0] - CAB["z"][0]) / 2 - 15.0, 1)))
-PLANT_SHELF["under"] = round(PLANT_SHELF["top"] - PLANT_SHELF["t"], 1)                 # 193.8 headroom at the stairs' foot
-PLANT_SHELF["ends"] = (round(PLANT_SHELF["top"] - PLANT_B["trail"][1], 1), round(PLANT_SHELF["top"] - PLANT_B["trail"][0], 1))   # 86 .. 141
+
+
+# ---------------------------------------------------------------- v37 (22 Oct), client: "can you make a bar option next to the dining cabinet that
+# builds it as a permanent bar type area and not a trolley ... make more storage suggestions ... then add any more extras"
+# D, BESIDE "bar": a built-in oak bar box beside the dining cabinet, the gap's length to the pipe boxing, its depth and height, in its ply:
+# a cupboard below (spare bottles, mixers), a drinks bay with a fall-front counter (A's build), two glass shelves above. With the table out
+# the open table door lies back across most of its front, so it's poured from before the table door opens (or once it's shut).
+_bx = dict(w=round(BESIDE["len"], 1), d=CAB["d"], h=CAB["h"], t=1.8, plinth=3.0)
+_bx["cup"] = (_bx["plinth"], 86.0)                                         # the cupboard: 3 .. 86
+_bx["bay"] = (round(_bx["cup"][1] + 1.0, 1), round(_bx["cup"][1] + 1.0 + DRINKS["inner_h"] + 2 * _dr_t, 1))   # 87 .. 126.1: the drinks bay
+_bx["counter"] = round(_bx["bay"][0] + _dr_t, 1)                           # 88.8: its front down, a counter
+_bx["glass"] = (146.0, 167.0)                                              # two shelves for glasses, open
+_bx["n"] = int((_bx["w"] - 2 * _dr_t) // DRINKS_BOTTLE[1])                 # five across
+_bx["covered"] = round(CAB["z"][1] - CAB["door_t_open"][1], 1)              # 36: the open table door over its front
+BESIDE["bar"] = _bx
+BESIDE["opts"]["bar"] = dict(name="A built-in bar")
+
+# more storage: 1, "cornershelf": an oak shelf high over the sofa's window corner on the side wall, two lidded boxes on it (KUGGIS)
+CORNER_SHELF = dict(x=(0.0, 27.0), z=(-218.0, -298.0), t=2.7, top=205.0)
+CORNER_SHELF["head"] = round(CEIL - CORNER_SHELF["top"] - KUGGIS[2], 1)       # 15 over the boxes
+# 2, "doorhooks": an over-door hook rail on the room side of the hall door (IKEA ENUDDEN, 35 × 13, six hooks, doors up to 4 thick)
+DOOR_HOOKS = dict(w=35.0, h=13.0, hooks=6, door_max=4.0)
+
+# more extras: 1, "sconces": two plug-in wall lights either side of the glass case (Dunelm Fulton, H25 × W9 × D15, pine, 1.8 m cable)
+SCONCE = dict(h=25.0, w=9.0, d=15.0, cable=180.0)
+_case_w = 90.0
+SCONCES = dict(x=(round((BREAST_X[0] + BREAST_X[1]) / 2 - _case_w / 2 - (BREAST_X[1] - BREAST_X[0] - _case_w) / 4, 1),
+                  round((BREAST_X[0] + BREAST_X[1]) / 2 + _case_w / 2 + (BREAST_X[1] - BREAST_X[0] - _case_w) / 4, 1)), y=175.0)
+SCONCES["side"] = round((BREAST_X[1] - BREAST_X[0] - _case_w) / 2, 2)      # 13.75 each side of the case
+# 2, "neon": a small LED neon sign, 50 × 20 on clear acrylic, on the side wall over the sofa's window corner: between the print
+# suggestion (its top at 165) and the high corner shelf (from 202.3); the oak run over the bar by the sofa leaves only 16 under it
+NEON = dict(w=50.0, h=20.0, z=(-230.0, -280.0), y=(172.0, 192.0))
+# 3, "pendant": a plug-in pendant on a 4 m fabric flex swagged from a ceiling hook over the open table's middle; a G125 globe bulb
+PENDANT = dict(flex=400.0, bulb=12.5, drop_to=150.0)

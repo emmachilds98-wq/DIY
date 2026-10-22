@@ -152,8 +152,8 @@ def fliptop_zones():
         ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}, {r1(g.FOLDED_D)} off the wall", ref("photo20"), f"shelf's underside about {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
          f"{r1(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
         ("Light over the table", "the existing pendant point, for bar 2", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})", "over the open table's stair side: the bar runs along it", PASS),
-        ("Your shelf and the pipe boxing (v16)", f"the shelf {r1(g.SHELF_B['z'][0] - g.SHELF_B['z'][1])} long", ref("photo20", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])}, {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} out",
-         f"drawn {r1(g.SHELF_B['z'][1] - g.PIPE_BOX['z'][1])} short of it, {r1(g.SHELF_B['z'][0] - g.STAIRS_WALL_Z[0])} past the stair box (your photo: about 41)", PASS),
+        ("Your shelf and the pipe boxing (v37: as installed)", f"the shelf {r1(g.SHELF_B['z'][0] - g.SHELF_B['z'][1])} long", ref("photo20", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])}",
+         f"{r1(g.SHELF_B['z'][1] - g.PIPE_BOX['z'][1])} short of it, as you have it (\"not touching the right hand wall\"); {r1(g.SHELF_B['z'][0] - g.STAIRS_WALL_Z[0])} past the stair box", PASS),
         ("The OBEGRÄNSAD panel on the shelf (v16)", f"{r1(g.LIGHTBOX['z'][0] - g.LIGHTBOX['z'][1])} × {r1(g.LIGHTBOX['h'])} × {r1(g.LIGHTBOX['d'])}, standing landscape at the stair end", ref("obegransad"), f"shelf top {r1(g.SHELF_B['top'])} to the {r1(g.CEIL)} ceiling",
          f"{r1(g.CEIL - g.SHELF_B['top'] - g.LIGHTBOX['h'])} over it: this needs the shelf at 198 or lower (measure it); higher, hang the panel on the wall beside the shelf instead", CHECK),
         ("The window side's chairs and the pipe boxing", f"backs at z {r1(north_back)}", ref("terje", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])} (x {r1(g.PIPE_BOX['x'][0])} to the wall)",
@@ -1071,14 +1071,23 @@ SOURCES["kuggis"] = ("IKEA: KUGGIS box with lid, 26 × 35 × 15 cm, recycled PET
                      "(ikea.com.tr/en/p09610214)")
 SOURCES["oakdowel"] = ("Tools & Timber: oak dowels, 18 to 30 mm across, cut from 350 to 2400 mm long (toolsandtimber.co.uk/oak-dowels)")
 ORDER.extend(["ttr", "bicycle", "ofelia", "cotswold", "homelife", "kuggis", "oakdowel"])
+SOURCES["enudden"] = ("IKEA: ENUDDEN hanger for door, white, 35 × 13 cm, six hooks, for doors up to 4 cm thick; a covered back against "
+                      "scratches (ikea.com, 602.516.65)")
+SOURCES["fulton"] = ("Dunelm: Fulton Easy Fit plug-in wall light, rustic pine, H25 × W9 × D15 cm, GLS E27, a 1.8 m cable from the plug "
+                     "(dunelm.com/product/fulton-easy-fit-plug-in-wall-light-1000182782)")
+SOURCES["neonfilter"] = ("Neon Filter (UK): custom LED neon signs from £39.95, preset widths from 40 cm, cut-to-shape, cut-to-letter or "
+                         "whole-board acrylic backing; about £100 for a 60 cm name sign (neonfilter.com)")
+SOURCES["flexkit"] = ("Wayfair UK: Borough Wharf fabric flex cable kit, a plug-in pendant set: 4 m of 3-core fabric cable, an E27 holder, "
+                      "a UK plug with a dimmer (wayfair.ie, i002961268); a G125 globe bulb is 125 mm across")
+ORDER.extend(["enudden", "fulton", "neonfilter", "flexkit"])
 
 
 def storage_zone():
     """v36: the options round the room: a third bar, the games and cards, the blankets, more storage, the plant shelf (suggestions)."""
     g = G
-    C, O, Gm, Bb, Ra, Ds, Ps = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF, g.PLANT_SHELF
+    C, O, Gm, Bb, Ra, Ds = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF
     th, n = g.THROW_FOLDED, g.BLANKETS
-    return ("Storage and a bar: the options (suggestions)", "a third bar by the sofa, the ottoman's games, five blankets, three more places, the plant shelf", [
+    return ("Storage and a bar: the options (suggestions)", "two more bars, the ottoman's games, five blankets, five more places, lights and touches", [
         ("C, the bar by the sofa: bottles", f"{C['n']} across, inside {r1(C['inner_h'])} high", ref("bottles"), f"the tallest 70 cl {r1(g.DRINKS_BOTTLE[0])}",
          f"{r1(C['inner_h'] - g.DRINKS_BOTTLE[0])} over it, as under the case", TIGHT),
         ("C: under the oak run", f"top at {r1(C['y'][1])}", ref("room"), f"the run's underside {r1(g.LEDGE_TOP - g.SIDE_RUN_T)}",
@@ -1101,10 +1110,20 @@ def storage_zone():
          f"the door's 198 and a {r1(g.ARCHITRAVE)} architrave", f"{r1(Ds['head'])} over two {r1(g.KUGGIS[2])}-high boxes; check your architrave", CHECK),
         ("Boxes on your black shelf", f"two {r1(g.KUGGIS[0])} × {r1(g.KUGGIS[1])} × {r1(g.KUGGIS[2])}", ref("kuggis"), "the shelf 25 deep, the laser in the middle",
          "1 over the shelf's front; either side of the laser", TIGHT),
-        ("The plant shelf", f"{r1(Ps['w'])} × {r1(Ps['d'])}, {r1(Ps['gap'])} off the wall, top {r1(Ps['top'])}", ref("room"),
-         f"the stairs end of the wall: z {r1(g.STAIRS_WALL_Z[0])} to {r1(g.CAB['z'][0])}", f"{r1(Ps['under'])} under it at the stairs' foot (the door's 198)", PASS),
-        ("The plant shelf: the strands", f"from {r1(Ps['top'])}, {r1(g.PLANT_B['trail'][0])}–{r1(g.PLANT_B['trail'][1])} long", ref("room"),
-         "the table door hinges at the cabinet's far end", f"their ends {r1(Ps['ends'][0])}–{r1(Ps['ends'][1])} up, clear of both doors", PASS),
+        ("D, the built-in bar beside the cabinet", f"{r1(g.BESIDE['bar']['w'])} × {r1(g.BESIDE['bar']['d'])} × {r1(g.BESIDE['bar']['h'])}", ref("room", "bottles"),
+         f"the gap to the pipe boxing {r1(g.BESIDE['len'])}, the cabinet {r1(g.CAB['d'])} deep and {r1(g.CAB['h'])} tall", f"{g.BESIDE['bar']['n']} bottles in its bay; flush with the cabinet", PASS),
+        ("D: with the table out", f"the open table door lies back over {r1(g.BESIDE['bar']['covered'])} of its front", ref("hinge170"),
+         "the door turns 180° to lie flat along the cabinet's front", "pour first: its front is covered while the table's out; the last 16.7 stays clear", TIGHT),
+        ("The high shelf over the sofa's corner", f"80 × 27 at {r1(g.CORNER_SHELF['top'])}", ref("kuggis", "room"), "the ceiling 235; the PC to 202 further along",
+         f"{r1(g.CORNER_SHELF['head'])} over two {r1(g.KUGGIS[2])}-high boxes; past the PC", PASS),
+        ("Hooks on the hall door", f"{r1(g.DOOR_HOOKS['w'])} × {r1(g.DOOR_HOOKS['h'])}, {g.DOOR_HOOKS['hooks']} hooks", ref("enudden"), f"doors up to {r1(g.DOOR_HOOKS['door_max'])} thick",
+         "a usual internal door is 3.5 to 4.4 thick: check yours", CHECK),
+        ("Wall lights by the glass case", f"{r1(g.SCONCE['w'])} wide each", ref("fulton", "glasscut"), f"{r1(g.SCONCES['side'])} either side of the case",
+         f"{r1((g.SCONCES['side'] - g.SCONCE['w']) / 2)} each side of each light", TIGHT),
+        ("The neon sign", f"{r1(g.NEON['w'])} × {r1(g.NEON['h'])}, {r1(g.NEON['y'][0])}–{r1(g.NEON['y'][1])} up", ref("neonfilter"),
+         "the print's top 165, the high shelf from 202.3", "7 and 10.3 clear", PASS),
+        ("The pendant over the table", f"a {r1(g.PENDANT['flex'] / 100)} m flex, the bulb {r1(g.PENDANT['drop_to'])} up", ref("flexkit"),
+         "the open table 76 high; heads standing about 170", "74 over the table; looped up to the wall's hook when the table's away", PASS),
     ])
 
 
