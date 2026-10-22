@@ -562,6 +562,12 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that pulls out for dinner to stand behind the window-side diners",
          "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
          "3d_beside_rail": "Beside the cabinet, an oak blanket rail: five blankets over four oak rails, 12 off the wall, behind the open table door's line",
+         # v37: the bar built in beside the cabinet, the shoe cabinets, your black shelf's 10 cm gap, the red lamp's cap
+         "3d_beside_bar": "Beside the cabinet, a bar built in (a suggestion): a cupboard for 20 bottles, an oak counter at 90, a mirror back, glasses on a rail, a display shelf",
+         "3d_beside_bar_open": "The built-in bar open in the evening: its doors back, the bottles inside, glasses hanging from the rail",
+         "3d_beside_shoes": "Beside the cabinet, two shoe cabinets (a suggestion): IKEA TRONES, 18 deep, behind the open table door's line",
+         "3d_shelf_gap": "Your black shelf's window end, always 10 cm short of the pipe boxing, your hanging plant on it",
+         "3d_lamp_cap": "Your red lamp's cap: a structured six-panel crown and a flat, stiff brim 1.8 times a usual one, gold stitching",
          "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side, your hessian curtains on their wooden pole",
          "3d_doll": "Dolls\u2019 house view: the compact cabinet packed away under your shelf",
          "3d_c80_folded": f"The more compact version packed away: the same two oak boxes round an 80-wide table, {G.CAB80['len']:.1f} long, {G.CAB80['freed']:.1f} cm of wall back",

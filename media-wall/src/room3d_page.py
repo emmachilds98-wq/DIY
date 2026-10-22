@@ -221,12 +221,26 @@ details.r3d-more[open] > summary::before { content: "– "; }
   font: 600 14px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); max-width: calc(100vw - 24px); }
 .r3d-toast[hidden] { display: none; }
 .r3d-sub { margin: 6px 0 -4px; font: 600 16px Fredoka, system-ui, sans-serif; color: var(--ink); }
-/* v36: Extras' option rows: a row per need, its mode tag, a line between rows */
-.r3d-optrow { padding: 8px 0 6px; border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
-.r3d-optrow:first-of-type { border-top: 0; }
-.r3d-optmode { margin-left: 6px; padding: 1px 8px; border-radius: 999px; font: 500 11.5px/1.6 system-ui, sans-serif; letter-spacing: .02em;
-  background: var(--chip, rgba(0,0,0,.06)); color: var(--muted, #6b6560); vertical-align: 2px; }
+/* v36: Extras' option rows: a row per need, its mode tag, a line between rows. v37, client: "Some buttons in the Extras tab are slightly
+   misaligned": each row is a grid (the heading and its tag, See it pinned on the right, the options in even columns, the caption under);
+   the heading's -4 bottom margin (it ran into the buttons) is gone here; the tag sits on the heading's centre line, not nudged 2px */
+.r3d-optrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "head see" "btns btns" "cap cap"; gap: 8px 10px;
+  align-items: center; padding: 12px 0; border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
+.r3d-opts > .r3d-optclear + .r3d-optrow, .r3d-opts > .r3d-opthow + .r3d-optrow { border-top: 0; }
+.r3d-optrow > .r3d-sub { grid-area: head; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; line-height: 1.25; min-width: 0; }
+.r3d-optrow > .r3d-optsee { grid-area: see; align-self: start; }
+.r3d-optrow > .seg { grid-area: btns; }
+.r3d-optrow > .caption { grid-area: cap; margin: 0; }
+.r3d-optmode { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; font: 500 11.5px system-ui, sans-serif; letter-spacing: .02em;
+  background: var(--chip, rgba(0,0,0,.06)); color: var(--muted, #6b6560); }
 .r3d-opthow { margin: 2px 0 6px; }
+/* v37: every list of choices in Extras on one column grid, so the buttons line up row to row; words start at the same left padding */
+.r3d-ui .seg.r3d-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr)); gap: 6px; }
+.r3d-ui .seg.r3d-grid-s { grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr)); }
+.r3d-ui .seg.r3d-grid > button { width: 100%; text-align: left; line-height: 1.25; }
+#r3d-dp-extras .chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+#r3d-dp-extras .chip .ms { vertical-align: 0; }
+.r3d-allrow { margin-top: 2px; }
 .r3d-moments button .ms, .r3d-ui .chip .ms { font-size: 18px; vertical-align: -4px; }
 /* v31: the camera: its height, and the move buttons on the room (hold one to keep moving) */
 .r3d-eyerow { display: grid; grid-template-columns: auto 1fr 5.5em; gap: 10px; align-items: center; font-size: 14px; }
@@ -267,12 +281,14 @@ LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves an
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
 # v25: the five Tools tabs (were v22's drawers): (key, name, icon, hue)
-DRAWERS = [("views", "Views", "photo_camera", 235), ("layout", "Layout", "chair", 50), ("lights", "Lights", "lightbulb", 95), ("look", "Look", "palette", 165), ("extras", "Extras", "auto_awesome", 300)]
+# v37, client: "Relocate the lights controls so they sit under 'View' in the main buttons menu": four tabs, the lights in Views
+DRAWERS = [("views", "Views", "photo_camera", 235), ("layout", "Layout", "chair", 50), ("look", "Look", "palette", 165), ("extras", "Extras", "auto_awesome", 300)]
 # One Tools button holds every 3D control: the pill (on a laptop) or the bottom bar's Tools button (on a phone, [data-tools-toggle])
 # opens the bubble row; a bubble opens its panel. The last tab is remembered (mw22-drawer); Esc and the pill close it.
 DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return;
   const K = "mw22-drawer", tabs = [...r.querySelectorAll("[data-drawer]")], panel = document.getElementById("r3d-panel"), btns = [...document.querySelectorAll("[data-tools-toggle]")];
   let cur = "layout", shown = ""; try { cur = localStorage.getItem(K) || "layout"; } catch (e) {}
+  if (cur === "lights") cur = "views";                                   // v37: the lights moved into Views
   if (!tabs.some(t => t.dataset.drawer === cur)) cur = "layout";
   const sync = open => { r.classList.toggle("tools-open", open); document.body.classList.toggle("tools-open", open);
     document.querySelectorAll("[data-tools-toggle]").forEach(b => { b.setAttribute("aria-expanded", String(open)); const i = b.querySelector(".ms"); if (i) i.textContent = open ? "close" : "tune"; }); };
@@ -301,7 +317,9 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
               "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet",
               "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
-              "shelfboxes": "Boxes on your shelf", "plantshelf": "Plant shelf, 10 off the wall"}   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "shelfboxes": "Boxes on your shelf",
+              "stairdrawers": "Drawers in the steps", "alcoveshelves": "Alcove shelves", "windowseat": "Storage window seat", "hallbench": "Bench with cubbies",
+              "wardrobe": "Built-in cupboard", "wallcabs": "Wall cabinets, sofa", "overdoor": "Hook rail over the door"}   # v37   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
 IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
               "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
               "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
@@ -376,7 +394,7 @@ def controls(gallery=""):
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     ideas_g = ('<div class="grp"><span class="label">Ideas (not in the plan)</span>'
-               '<div class="seg" role="group" aria-label="Ideas, not in the plan">'
+               '<div class="seg r3d-grid" role="group" aria-label="Ideas, not in the plan">'
                + "".join(f'<button type="button" data-idea="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(IDEA_SHORT[k])}</button>'
                          for k, _t, size, *_ in ideas.IDEAS if k != "cushions")      # the cushions are Decor's
                + '</div></div>')
@@ -391,13 +409,13 @@ def controls(gallery=""):
                     f'<label class="chip r3d-anycol">Any colour <input type="color" id="r3d-{key}" value="#f2efe8" aria-label="{lab}: any colour"></label></div></div>'
                     for key, lab in (("ceil", "The ceiling"), ("skirt", "Skirting, the door and its frame")))
     sugg_g = ('<div class="grp"><span class="label">Every suggestion, one by one (not in the plan)</span>'
-              '<div class="seg" role="group" aria-label="Suggested furniture and decor">'
+              '<div class="seg r3d-grid" role="group" aria-label="Suggested furniture and decor">'
               + "".join(f'<button type="button" data-sugg="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(SUGG_SHORT[k])}</button>' for k, _t, size, *_ in ideas.SUGGEST)
-              + '<button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>'
+              + '</div><div class="seg r3d-allrow"><button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>'
               # v28: two or three versions of each, a row for every suggestion that's switched on
               '<div class="grp r3d-svars" id="r3d-svars"><span class="label">Choose a version</span>'
               '<p class="caption" id="r3d-svnone">Switch a suggestion on and its versions show here.</p>'
-              + "".join(f'<div class="r3d-decrow" data-svrow="{k}" hidden><span>{html.escape(SUGG_SHORT[k])}</span><div class="seg" role="group" aria-label="{html.escape(SUGG_SHORT[k])}: version">'
+              + "".join(f'<div class="r3d-decrow" data-svrow="{k}" hidden><span>{html.escape(SUGG_SHORT[k])}</span><div class="seg r3d-grid r3d-grid-s" role="group" aria-label="{html.escape(SUGG_SHORT[k])}: version">'
                         + "".join(f'<button type="button" data-svar="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n, _c in ideas.SUGG_VARS[k]) + '</div></div>'
                         for k, *_ in ideas.SUGGEST)
               + '</div>'
@@ -423,6 +441,9 @@ def controls(gallery=""):
         "views": '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
                  f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
+                 # v37: the lights live here now (they were their own tab): the presets, daytime, every light's slider and colour, the quality
+                 + '<h3 class="r3d-sub" id="r3d-lightsh">Lights</h3>' + lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality")
+                 + '<h3 class="r3d-sub">Moving round and sharing</h3>'
                  # v31, client: "make camera movement easier within the 3d render. being able to adjust height would be good"
                  + '<div class="grp r3d-move"><span class="label">Move round</span>'
                  '<div class="r3d-eyerow"><label for="r3d-eye">Eye height</label><input type="range" id="r3d-eye" min="40" max="220" step="5" value="160">'
@@ -458,14 +479,16 @@ def controls(gallery=""):
             '<button type="button" data-moment="dinner"><span class="ms" aria-hidden="true">dinner_dining</span> Dinner for six</button>'
             '<button type="button" data-moment="four"><span class="ms" aria-hidden="true">lunch_dining</span> Lunch for four</button>'
             '<button type="button" data-moment="film"><span class="ms" aria-hidden="true">movie</span> Film night</button>'
-            '<button type="button" data-moment="morning"><span class="ms" aria-hidden="true">wb_sunny</span> Everyday morning</button></div>'
+            '<button type="button" data-moment="morning"><span class="ms" aria-hidden="true">wb_sunny</span> Everyday morning</button>'
+            # v37: the games out of the ottoman, and drinks at the bar built in beside the cabinet
+            '<button type="button" data-moment="games"><span class="ms" aria-hidden="true">casino</span> Games night</button>'
+            '<button type="button" data-moment="drinks"><span class="ms" aria-hidden="true">local_bar</span> Drinks</button></div>'
             '<span class="caption">Each sets the table, the lights and the curtains together, then shows you the room.</span></div>',
             BESIDE_SEG,
             '<h3 class="r3d-sub">Around the room</h3>',
             seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Plant stand and vinyl stand"),
             seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "The media wall's drawers"),
             '<p class="caption">Or tap the cabinet in the room: its card opens it for four or six, folds it, opens either door and swaps the table\'s width.</p>']),
-        "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
         "look": swatches + trims + decor_g,
         "extras": opts_html() + picks + ideas_g + sugg_g,
     }
@@ -479,8 +502,13 @@ def opts_json():
     extra = {"rail": ("An oak blanket rail beside the dining cabinet", f"{B['rail']['w']:g} wide, four 28 mm oak rails, 12 off the wall", (25, 45),
                       "On the wall beside the dining cabinet, under your black shelf: the open table door lies back over it while you eat."),
              "on": ("Your storage ottoman, the lid on", "76 × 76 × 45", None, "On the rug by the coffee table."),
-             "off": ("Your storage ottoman, the lid off", f"{G.OTTO_GAMES['games']} square games and the cards inside", None, "On the rug by the coffee table.")}
-    view = {"rail": dict(view="beside"), "on": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50), "off": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)}
+             "off": ("Your storage ottoman, the lid off", f"{G.OTTO_GAMES['games']} square games and the cards inside", None, "On the rug by the coffee table."),
+             # v37: built in beside the cabinet, and the shoe cabinets in the same place
+             "barbeside": ("A bar built in beside the dining cabinet", f"{G.BAR_BUILT['w']:g} wide, an oak counter at {G.BAR_BUILT['counter']:g}, {G.BAR_BUILT['front']:g} deep; {G.BAR_BUILT['bottles']} bottles", (110, 200),
+                           "Between the dining cabinet and the pipe boxing, fixed to the wall and the floor. Set the drinks out before you open the table: the open table door lies back over it."),
+             "shoes": ("Two shoe cabinets beside the dining cabinet", f"two IKEA TRONES {G.TRONES[0]:g} × {G.TRONES[1]:g} × {G.TRONES[2]:g}, about eight pairs", (25, 30),
+                       "On the wall between the dining cabinet and the pipe boxing, behind the open table door's line.")}
+    view = {"rail": dict(view="beside"), "barbeside": dict(view="beside"), "shoes": dict(view="beside"), "on": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50), "off": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)}
     groups = []
     for key, title, mode, note, items in ideas.OPTION_GROUPS:
         its = []
@@ -499,15 +527,18 @@ def opts_html():
     for key, title, mode, note, items in ideas.OPTION_GROUPS:
         btns = ('<button type="button" data-opt="%s:none" aria-pressed="false">None</button>' % key) if mode == "one" else ""
         btns += "".join(f'<button type="button" data-opt="{key}:{v}" aria-pressed="false">{html.escape(label)}</button>' for v, label, _s in items)
-        btns += f'<button type="button" class="chip" data-optsee="{key}"><span class="ms" aria-hidden="true">visibility</span> See it</button>'
         how = {"one": "Pick one", "any": "Switch on any", "lid": "Open or shut"}[mode]
         rows += (f'<div class="r3d-optrow" data-optgrp="{key}"><h3 class="r3d-sub">{html.escape(title)} <span class="r3d-optmode">{how}</span></h3>'
-                 f'<div class="seg" role="group" aria-label="{html.escape(title)}">{btns}</div>'
+                 f'<button type="button" class="chip r3d-optsee" data-optsee="{key}" aria-label="See it: {html.escape(title)}"><span class="ms" aria-hidden="true">visibility</span> See it</button>'
+                 f'<div class="seg r3d-grid" role="group" aria-label="{html.escape(title)}">{btns}</div>'
                  f'<p class="caption" data-optcap="{key}" aria-live="polite">{html.escape(note)}</p></div>')
     return ('<div class="grp r3d-opts" id="r3d-opts"><span class="label">Storage and a bar: your options</span>'
             '<p class="caption r3d-opthow"><b>How it works:</b> pick an option and the room shows it and takes you to it; <b>None</b> takes it away; '
             '<b>See it</b> takes you back. Tap a piece in the room for its colours, to move it or to take it away. What you pick shows in '
-            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>' + rows + '</div>')
+            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>'
+            # v37: everything off in one go, back to the plan as it is
+            '<div class="seg r3d-optclear"><button type="button" class="chip" data-optclear="1"><span class="ms" aria-hidden="true">restart_alt</span> Clear all extras</button></div>'
+            + rows + '</div>')
 
 
 def picks_json():
@@ -564,7 +595,8 @@ def section(gallery=""):
     # v33, the phone home: a strip of the places (tap one to fly there and open its card) and the set-ups as chips, under the room
     places = "".join(f'<button type="button" data-place="{h["id"]}" style="--h:{h["hue"]}"><b>{h["n"]}</b>{html.escape(h.get("short", h["name"]))}</button>' for h in hotspots())
     moments = "".join(f'<button type="button" data-moment="{k}"><span class="ms" aria-hidden="true">{ic}</span>{t}</button>'
-                      for k, ic, t in (("dinner", "dinner_dining", "Dinner for six"), ("four", "lunch_dining", "Lunch for four"), ("film", "movie", "Film night"), ("morning", "wb_sunny", "Morning")))
+                      for k, ic, t in (("dinner", "dinner_dining", "Dinner for six"), ("four", "lunch_dining", "Lunch for four"), ("film", "movie", "Film night"), ("morning", "wb_sunny", "Morning"),
+                                     ("games", "casino", "Games night"), ("drinks", "local_bar", "Drinks")))   # v37
     data = json.dumps(json.loads((HERE / "scene3d.json").read_text()), separators=(",", ":"))
     return f"""<div class="r3d" id="r3d">
   <div class="r3d-stage"><canvas tabindex="0" aria-label="The living room in 3D: drag to look round, scroll or pinch to zoom; WASD or the arrow keys walk, Q and E turn"></canvas>

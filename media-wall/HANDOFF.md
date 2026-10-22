@@ -1,6 +1,12 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v37 (round 31, below): a bar built in beside the dining cabinet (beside option "bar"), shoe cabinets ("shoes"), seven more
+  storage suggestions, the black shelf pinned 10 cm short of the pipe boxing (a hard rule, `SHELF_B_GAP`), the red lamp's cap rebuilt as a
+  structured baseball cap, the lights moved into Views, Extras lined up on a grid.** All new pieces are suggestions (not in TRACK): fit
+  73/18/13/0 (the new CHECK: the shelf's stairs end), total £3,673–7,173 unchanged; plan 116 pages (18.9 MB), guide 53; 104 stills.
+  Next: `media-wall/UPGRADE_PLAN_v38.md`. **Never write the cap's poem out in code or text**: its wording tripped the session's safety
+  filter twice this round; the embroidery is drawn as stitched rows (`stitchTex`).
 - **v36 (round 30, below): more places for a bar, the ottoman's games and cards, two homes for five blankets, more storage, a plant
   shelf 10 off the stairs wall, and Extras opening on a row per need** (`ideas.OPTION_GROUPS`). All suggestions (not in TRACK or the
   totals): fit 70/18/12/0 and £3,673–7,173 unchanged; plan 110 pages (17.0 MB), guide 53; 93 stills. Next:
@@ -77,6 +83,48 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 22 Oct 2026, round 31: v37 (a built-in bar, more storage, the shelf's 10 cm gap, the cap, Lights in Views, Extras lined up)
+- Client: (1) a "Bar" option "next to the dining cabinet ... a fixed, built-in counter-style unit (permanent joinery attached to the
+  wall/floor), not a freestanding or wheeled trolley"; (2) Extras' buttons "slightly misaligned"; (3) more storage: "under-stair drawers,
+  alcove shelving, window seat with storage, wall-mounted cabinets, built-in wardrobes, shoe storage, a hallway bench with cubbies, and
+  over-door racks"; (4) "Relocate the lights controls so they sit under 'View'"; (5) "The shelf on the wall alongside the stairs must always
+  end 10cm short of the right-hand wall, regardless of any other sizing or positioning logic ... a hard constraint"; (6) the red lamp's hat
+  "looks like a beret ... It should be a baseball cap ... brim noticeably oversized (roughly 1.5–2x)", with a photo of the cap
+  (`inputs/photo_cap_poem_22oct.webp`); (7) further suggestions. Then: "go ahead and then merge to main".
+- **The shelf (5).** v36 misread "10cm gap from wall" as a new 10-off-the-wall plant shelf; the client meant the black shelf (`SHELF_B`, the
+  one in `inputs/photo_stairs_wall_record_shelf.jpeg`) ends 10 short of the right-hand wall, which at its height is the pipe boxing's side
+  (z -286). geometry: `SHELF_B_GAP = 10`, `SHELF_B_LEN = 200`, z (-76, -276), an `assert`; the dining cabinet keeps its own line
+  (`_cb_z0, _cb_z1` from the boxing, no longer from the shelf). room3d.js pins `R.SHELF_B.z` from `R.PIPE_BOX` at load (tested with the
+  old ends fed in: still -276). The plant shelf is gone everywhere (geometry, ideas, OPTION_GROUPS, room3d.js, shot3d, fit, build_doc).
+  fit `shelf_zone()` (after the compact cabinet; one CHECK: the stairs end is now 35 past the stair box, the photo looked like 41).
+- **The bar (1).** `geometry.BAR_BUILT` in the BESIDE slot (52.5 wide, 22 deep, counter 22.4 at 90; 1.0 behind the open table door's
+  line, 35.8 of it behind the door while eating): cupboard, 20 bottles on two shelves, mirror back, oak shelves at 135 and 165, a
+  Bev-Equip 400 glass rail. `BESIDE["opts"]["bar"]`; room3d.js `buildBeside` (`BES.bar`, doors `WORK.barflap3` on `S.barflap`); the bar
+  row in Extras is now four ("barbeside", set `beside: bar`). Stills `3d_beside_bar`, `3d_beside_bar_open`.
+- **Storage (3).** geometry v37 block: `TRONES` (beside "shoes"), `CORNER` (x 338–443.6, 77.7 free to the seated chairs), `WINDOW_SEAT`,
+  `HALL_BENCH`, `WARDROBE` (60 deep, hinged doors), `ALCOVE_SHELVES`, `EKET`/`WALL_CABS`, `STAIR_DRAWERS` (`S.sdraw`, `WORK.sdraw`),
+  `OVERDOOR`. ideas.SUGGEST +7 (`stairdrawers`, `alcoveshelves`, `windowseat`, `hallbench`, `wardrobe`, `wallcabs`, `overdoor`);
+  OPTION_GROUPS: bar (4), games, blankets, **corner** (one of seat/bench/cupboard), storage (any, 8 incl. shoes). room3d.js
+  `buildStorage37`; rules in `extrasRule()` (one per place; the cupboard clears the beside wall and the alcove shelves; a corner pick hides
+  whichever stand is in the corner via `cornerHides`). The hall isn't modelled: the bench is shown in the window corner, the text says so.
+  Sources `trones`, `eket`, `floatshelf`, `seat`, `shoebench`, `wardrobe`, `overdoor`, `stepdrawers`, `worktop`, `glassrail`, `wineglass`.
+  fit `more_storage_zone()` (out of the counts).
+- **Further (7):** Layout "Try a set-up": **Games night** (lid off, lift-top up, cosy) and **Drinks** (the built-in bar open); Extras
+  **Clear all extras** (`data-optclear`). `shot3d.py` `only` takes a comma list.
+- **The cap (6).** `HATS` + crown 18.4 × 20.4 × 11.5, brim 7 × 1.8 = 12.6 (source `capspec`), green/brown/gold. room3d.js `buildCap()`:
+  lathe crown, six seam tubes, button, eyelets, an extruded flat brim with a stitched overlay, tipped 0.4 rad off the pole. **The poem's
+  words are not written anywhere** (see START HERE): `stitchTex` draws rows of gold stitching in its shape.
+- **Lights → Views (4).** `room3d_page.DRAWERS` is four tabs; Views has a "Lights" heading (presets, daytime, sliders, switches, quality)
+  then "Moving round and sharing". A saved `mw22-drawer` of "lights" opens Views. `edit_probe.py` uses `[data-drawer=views]`.
+- **Extras (2).** Audit: `.r3d-sub`'s -4 bottom margin ran headings into the buttons; See it wrapped to a different spot each row; the
+  mode tag was nudged 2px; lists were free-wrapping flex. Now `.r3d-optrow` is a grid (head / See it / buttons / caption),
+  `.seg.r3d-grid` (auto-fill columns ≥148, versions ≥112) on every list, All on/off on their own row. Checked by measurement at 390 and
+  1280: no heading over a button, every grid in even columns, every See it at one x.
+- **QA:** `qa.py` now waits for the 3D room's warm-up queue to empty before its "lighting makes no shaders" check: with v37's twelve more
+  hidden pieces a warm-up step could land inside the check at 390 (60 -> 62); with the queue empty it's 62 -> 62.
+- **Safety filter.** Twice this round the session was cut off just as the cap's poem was about to be typed into the code (its lines are a
+  joke about fishing but read as dark). Keep it out of code, text and commit messages.
 
 ## Update 22 Oct 2026, round 30: v36 (bars, storage, blankets, the plant shelf; the options made easy to manage)
 - Client: "perfect currently the base plan is great, explore any more bar ideas and where we could put it as well as more storage and

@@ -62,7 +62,7 @@ SHOTS = [
     ("3d_beside_mirror", dict(view="beside", site="C", dining="folded", scene="bright", beside="mirror"), "BESIDE THE CABINET - a tall mirror - bright"),
     ("3d_beside_trolley", dict(view="beside", site="C", dining="folded", scene="bright", beside="trolley"), "BESIDE THE CABINET - a slim trolley - bright"),
     ("3d_beside_dresser", dict(view="beside", site="C", dining="folded", scene="bright", beside="dresser"), "BESIDE THE CABINET - a low oak shelf - bright"),
-    ("3d_beside_rail", dict(view="beside", site="C", dining="folded", scene="bright", beside="rail", sugg={"plantshelf": True}), "BESIDE THE CABINET - an oak blanket rail, five blankets (v36) - bright"),
+    ("3d_beside_rail", dict(view="beside", site="C", dining="folded", scene="bright", beside="rail"), "BESIDE THE CABINET - an oak blanket rail, five blankets - bright"),
     # v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version": the flip-top and the
     # sliding cabinet's stills are gone; the plan's table in daylight and the dolls' house; the 80-wide version, 10 shorter, four chairs inside
     ("3d_c_six_day", dict(view="door", site="C", dining="six", scene="bright", tod="day", master=0), "THE COMPACT DINING CABINET - from the door, open for six - daytime"),
@@ -78,6 +78,16 @@ SHOTS = [
     ("3d_bar_shut", dict(view="breast", site="C", dining="folded", scene="bright", sugg={"barcase": True}), "THE CHIMNEY BREAST - the glass case, and the drinks cabinet under it (a suggestion), shut - bright"),
     ("3d_ottoman", dict(site="C", dining="folded", scene="bright", tod="day", lid=True, aim=dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)),
      "THE STORAGE OTTOMAN - navy velvet, its lid lifted off - daytime"),
+    # v37: the bar built in beside the cabinet (shut, then open in the evening), the shoe cabinets in the same place, your black shelf's
+    # 10 cm gap at the pipe boxing, and the red lamp's cap
+    ("3d_beside_bar", dict(site="C", dining="folded", scene="bright", beside="bar", aim=dict(eye=[330, 150, -170], at=[458, 105, -262], fov=52)), "BESIDE THE CABINET - a built-in bar, shut - bright"),
+    ("3d_beside_bar_open", dict(site="C", dining="folded", scene="cosy", beside="bar", barflap=True, aim=dict(eye=[345, 138, -180], at=[460, 108, -262], fov=46)),
+     "BESIDE THE CABINET - the built-in bar open, glasses on its rail - cosy"),
+    ("3d_beside_shoes", dict(site="C", dining="folded", scene="bright", beside="shoes", aim=dict(eye=[330, 140, -170], at=[458, 55, -262], fov=52)), "BESIDE THE CABINET - two shoe cabinets - bright"),
+    ("3d_shelf_gap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[405, 225, -240], at=[462, 192, -282], fov=40)),
+     "YOUR BLACK SHELF - its window end 10 cm short of the pipe boxing - daytime"),
+    ("3d_lamp_cap", dict(site="C", dining="folded", scene="bright", tod="evening", aim=dict(eye=[205, 145, -302], at=[288, 130, -276], fov=34)),
+     "THE RED LAMP - your cap, a structured baseball cap with an oversized brim - bright"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
@@ -88,7 +98,7 @@ SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
         "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear",
-        "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False, "ctop": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
+        "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False, "ctop": False, "sdraw": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():
@@ -140,7 +150,7 @@ def run(test=False, only=None, force=False):
     prints = json.loads(PRINTS.read_text()) if PRINTS.exists() else {}
     todo = []
     for stem, opts, title in SHOTS:
-        if only and only not in stem:
+        if only and not any(o in stem for o in only.split(",")):   # v37: several, comma-separated
             continue
         rec = prints.get(stem, {})
         rec_files = [HERE.parent / f for f in rec.get("files", [])]
