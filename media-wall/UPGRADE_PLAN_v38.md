@@ -9,7 +9,8 @@ central to the sofa, the games in line with the TV, the vinyl on the left with t
 version (the dining cabinet with the bar beside it) and fix the door hitting the plant shelf; cheap existing items in the build and buy
 guides where possible, a full build where not; a better blanket basket; keep the storage shelves on the wall; a more unique storage
 coffee table; everything fits and is accurate; keep the other options but don't HD-render them or write guides for them; slim the whole
-thing down to what they need, using Claude Design to make the flow easier.
+thing down to what they need, using Claude Design to make the flow easier. Then: "include option to view ceiling Alcatrazes in
+differing designs so we can decide if we want it in future" (item 12).
 
 ## 0. Before any building: four questions for the client
 
@@ -182,12 +183,31 @@ from the plan and the page (the live 3D room shows them). This also cuts a full 
 **The code:** remove what's unreachable since v33 (the flip-top, the sliding cabinet, site A and B paths) and the plant shelf's
 leftovers; merge the static oak and instance repeats to cut draw calls (469 in Fast at 390 now; target 150 or fewer).
 
-## 12. Order of work
+## 12. Ceiling designs to try (for later: an option, not the plan)
+
+The client: "include option to view ceiling Alcatrazes in differing designs so we can decide if we want it in future". We've read this
+as **Artex** (your ceiling is textured in your photos); confirm, or say what you meant. In Look, a **Ceiling** row shows each design
+in the live 3D room, in any paint colour:
+
+- **As it is:** your current textured ceiling.
+- **Smooth:** skimmed flat (what most people do with old Artex).
+- **Artex patterns:** stipple, swirl, fan and basket weave.
+- **Feature ceilings:** oak-effect beams across the room; a shallow coffered grid; a recessed LED cove round the edge (the "LED coving"
+  upgrade path for your ceiling strip, noted since round 4).
+
+**How:** the textures are bump maps drawn on a canvas, swapped on the ceiling's material, so the graphics card makes no new shaders
+(the v35 trick: the material always has a bump map; "none" is a flat one). The beams, coffers and cove are hidden groups, warmed up off
+screen like the other options. Each design's card gives a rough cost and what it involves, each with a source (skimming over Artex,
+asbestos testing first for a pre-2000 ceiling, faux beams, an LED cove kit), and the clash check makes sure the beams and cove
+clear the spot bars, the rose and the door. **No HD stills or guide pages** (it's an option), except one comparison picture in the
+plan's options table if you want it.
+
+## 13. Order of work
 
 1. The client's answers (section 0); `geometry.FIRM`.
 2. Item 10's clash check first, so every later change is checked as it's made.
 3. Item 2 (the door and the bar), then item 3 (the media wall swap, on its own branch, the main view checked before carrying on).
-4. Items 4, 5 and 6 (the stairs, the walls, the lights).
+4. Items 4, 5 and 6 (the stairs, the walls, the lights), then item 12 (the ceiling designs).
 5. Items 8 and 9 (the basket and the coffee table), with sources and "buy and adapt" builds.
 6. Item 11's design canvas to the client; after approval, the page and the slimmer PDF, guide and stills.
 7. Rebuild, `qa.py` and `taptest.py` at 390 and 1280 plus the clash check, HANDOFF and README, then a PR into `main` and the merge.
