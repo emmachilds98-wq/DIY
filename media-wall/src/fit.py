@@ -562,7 +562,7 @@ def optc_seats(C=None):
     g, C = G, (C or G.OPTC)
     stair_len = C["front"] - C["tx"][0]                         # the stair side: from the far end to the cabinet
     window_len = C["front"] - max(C["tx"][0], g.SOFA_X[1])      # the window side: stops at the sofa's arm
-    back = g.CHAIR[1] - g.CHAIR_TUCK
+    back = (g.CHAIR_PADDED["d"] if C is g.CAB or C is g.CAB80 else g.CHAIR[1]) - g.CHAIR_TUCK   # v33: the compact cabinet's padded chairs
     end_clear = C["tx"][0] - back - g.COFFEE["x"][1]            # an end chair's back to the coffee table
     n_s, n_w = int(stair_len // g.DINE_COMFORT), int(window_len // g.DINE_COMFORT)
     return dict(stair=(n_s, stair_len / n_s, stair_len), window=(n_w, window_len / n_w, window_len), end=1 if end_clear >= 0 else 0, end_clear=end_clear,
@@ -642,8 +642,8 @@ def max_seats_zone():
     seat = lambda t: (f"{t['stair'][1]:.1f} and {t['window'][1]:.1f} of edge each; a seventh at the far end with a spare chair" if t["end"]
                       else f"{t['stair'][1]:.1f} and {t['window'][1]:.1f} each")
     return ("How many can sit down", "every table we've drawn, in this room, with chairs a person wide and backs 41 behind the edge", [
-        ("The compact dining cabinet (the plan)", f"{st['comfort']} in comfort", ref("dining", "frosvi"), f"{st['stair'][0]} on the stair side, {st['window'][0]} on the window side", seat(st), PASS),
-        ("The sliding dining cabinet (the alternative)", f"{sl['comfort']} in comfort", ref("dining", "frosvi"), f"{sl['stair'][0]} on the stair side, {sl['window'][0]} on the window side", seat(sl), PASS),
+        ("The compact dining cabinet (the plan)", f"{st['comfort']} in comfort", ref("dining", "padded", "costwaychair"), f"{st['stair'][0]} on the stair side, {st['window'][0]} on the window side", seat(st), PASS),
+        ("The sliding dining cabinet (the alternative)", f"{sl['comfort']} in comfort", ref("dining", "padded", "costwaychair"), f"{sl['stair'][0]} on the stair side, {sl['window'][0]} on the window side", seat(sl), PASS),
         ("B: the flip-top by the stairs (the alternative)", "seven at a squeeze", ref("dining", "sofa"), "three a side (53 each) and one at the end", "five in comfort: two a side and the end", TIGHT),
         ("A: the flip-top on the chimney breast", "six at a squeeze", ref("dining", "sofa"), "three a side, 53 each", "four in comfort; no end seat: the sofa's in the way", TIGHT),
         ("A fourth chair a side at the cabinet", "eight round it", ref("dining", "sofa", "room"), f"{r1(st['stair'][2])} and {r1(st['window'][2])} of edge",
@@ -741,9 +741,9 @@ ORDER.extend(["piclight", "blackout", "cablight"])
 def cab_zone():
     """The compact cabinet: the same table and six chairs as the sliding one, packed into two boxes 144 long with hinged doors."""
     g, C = G, G.CAB
-    cw, cdep, ch = g.CHAIR_FOLDED
+    cw, cdep, ch = g.CHAIR_PADDED["folded"]                 # v33: the grey padded chairs, folded 47 × 10 × 90
     st = optc_seats(C)
-    back = g.CHAIR[1] - g.CHAIR_TUCK
+    back = g.CHAIR_PADDED["d"] - g.CHAIR_TUCK
     s_back, w_back = C["tz"][0] + back, C["tz"][1] - back
     arc = g.BREAST_D_WEST - g.DOOR_SWING
     under = g.SHELF_B["top"] - g.SHELF_B["t"]
@@ -754,11 +754,8 @@ def cab_zone():
     kg_half = C["top"][0] * C["top"][1] * C["top"][2] * 0.72 / 1000
     base_h = C["base"][1] - C["base"][0]
     lo_top, up0, up_top = C["plinth"] + ch, C["shelf_y"] + C["t"], C["shelf_y"] + C["t"] + ch
-    near = max(x for x, z, f in C["seats"]["six"] if f == "w") + g.CHAIR[0] / 2      # the window side's chair nearest the cabinet: its side
+    near = max(x for x, z, f in C["seats"]["six"] if f == "w") + g.CHAIR_PADDED["w"] / 2      # the window side's chair nearest the cabinet: its side
     slide = G.OPTC["z"][0] - G.OPTC["z"][1]
-    pw, ph, pt = C["pad"]
-    pz = C["pad_zone"][1] - C["pad_zone"][0]
-    seat = (38.0, 33.0)                                   # the beech FRÖSVI's seat (source frosvi)
     return ("The compact dining cabinet (the plan)", f"two oak boxes side by side, {r1(C['len'])} × {r1(C['d'])} × {r1(C['h'])} under your shelf, hinged doors; "
             f"the table {r1(C['len_open'])} × {r1(C['top'][0])} open, six chairs inside", [
         ("The cabinet under your shelf", f"{r1(C['h'])} tall", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - C['h'])}: room to tip it up into place", PASS),
@@ -774,35 +771,36 @@ def cab_zone():
         ("The table door open", "it turns 180° and lies back flat over the chair door and the wall beyond", ref("piano32", "plantstand"),
          f"its far end reaches z {r1(C['door_t_open'][1])}; your plant stand's front is at z {r1(plant_face)}",
          f"{r1(C['door_t_open'][1] - plant_face)} clear of the plant stand; a flush magnet in the chair door's face holds it open", PASS),
-        ("The open table door and the window side's chairs", f"its face, lying open, at x {r1(C['door_t_face'])}", ref("frosvi", "dining"),
-         f"the nearest chair's side at x {r1(near)}", f"{r1(C['door_t_face'] - near)} clear (the pads are on the chairs by then): the chair pulls back past it", PASS),
+        ("The open table door and the window side's chairs", f"its face, lying open, at x {r1(C['door_t_face'])}", ref("padded", "dining"),
+         f"the nearest chair's side at x {r1(near)}", f"{r1(C['door_t_face'] - near)} clear: the chair pulls back past it", PASS),
         ("The chair door open", "it turns 180° and lies back flat over the table door", ref("piano32"), f"the table door {r1(C['door_tw'])} wide",
          f"well inside it; open it only with the table folded (the chairs come out first)", PASS),
         ("The table standing up in its bay", f"two halves {r1(C['top'][1])} long, hinged at {r1(C['pivot'][1])}", ref("foldtable", "pianohinge"), f"the bay {r1(bay_t)} wide inside",
          f"{r1((bay_t - C['top'][0]) / 2)} each side; its top edge at {r1(C['folded_top'])}, under the linen shelf", TIGHT),
         ("The linen shelf over the folded table", f"{r1(C['linen'][1] - C['linen'][0])} tall, {r1(bay_t)} wide", ref("foldtable"), f"{r1(in_d)} deep inside",
          "the cloth, napkins, runner and candles, 4 back from the door", PASS),
-        ("Folded, and the pads on the door", f"the table {r1(C['stack'])} deep, {r1(C['pads'])} back from the door: the six seat pads hang on the door's back in front of it",
-         ref("legbracket", "frosvi"), f"{r1(in_d)} inside, behind the table door", f"{r1(in_d - C['stack'] - C['pads'])} spare behind it; the pads go on the chairs when the table's down", TIGHT),
-        ("The six tie-on pads on the door", f"{r1(pw)} × {r1(ph)} × {r1(pt)} each, two across and three high", ref("esme", "frosvi"),
-         f"the door {r1(C['door_tw'])} wide; from the hinge rail's underside to the top, {r1(pz)} (the rail and the linen shelf set {r1(C['pads'])} back)",
-         f"{r1(C['door_tw'] - 2 * pw)} spare across, {r1(pz - 3 * ph)} up; {r1(C['pads'] - pt)} for the hooks behind each; on the chairs they overhang the {r1(seat[0])} × {r1(seat[1])} seat a little, tied to the back legs", TIGHT),
+        ("Folded, behind the table door", f"the table {r1(C['stack'])} deep, {r1(C['pads'])} back from the door (a hook for the cloth bag)",
+         ref("legbracket"), f"{r1(in_d)} inside, behind the table door", f"{r1(in_d - C['stack'] - C['pads'])} spare behind it", PASS),
         ("Lowering it and flipping the half", f"each half about {kg_half:.0f} kg", ref("pianohinge", "fliphinge"), f"a {r1(C['top'][0])} piano hinge at its foot; three flip-top hinges at the joint",
          f"it swings down like a drop-front: about {kg_half:.0f} kg, two hands; the legs drop and lock as it comes down", PASS),
         ("The legs", f"oak {r1(C['leg'][0])} × {r1(C['leg'][1])}, {r1(C['leg_h'])} long, a pair at each half's end", ref("legbracket"), "four self-locking folding brackets",
          f"each pair folds flat inside its half's {r1(C['apron'])} apron; {r1(C['leg_h'])} of knee room under it", PASS),
-        ("Two chairs in the base, on their sides", f"two folded, each {r1(ch)} long and {r1(cw)} tall, two deep ({r1(2 * cdep)})", ref("frosvi"),
+        ("Two chairs in the base, on their sides", f"two folded, each {r1(ch)} long and {r1(cw)} tall, two deep ({r1(2 * cdep)})", ref("padded"),
          f"the base under the hinge rail: {r1(bay_t)} wide, {r1(base_h)} tall, {r1(in_d)} deep",
          f"{r1((bay_t - ch) / 2)} at each end, {r1(base_h - cw)} over them, {r1(in_d - 2 * cdep)} spare deep: lift the front one out, then the back one", TIGHT),
-        ("Four chairs in the chair bay", f"one across ({r1(cw)}), two deep ({r1(2 * cdep)}), {r1(ch)} tall", ref("frosvi"), f"the bay {r1(bay_c)} wide, {r1(in_d)} deep; the shelf at {r1(C['shelf_y'])}",
+        ("Four chairs in the chair bay", f"one across ({r1(cw)}), two deep ({r1(2 * cdep)}), {r1(ch)} tall", ref("padded"), f"the bay {r1(bay_c)} wide, {r1(in_d)} deep; the shelf at {r1(C['shelf_y'])}",
          f"{r1((bay_c - cw) / 2)} each side, {r1(in_d - 2 * cdep)} deep; two on the floor ({r1(C['plinth'])}–{r1(lo_top)}, {r1(C['shelf_y'] - lo_top)} under the shelf), "
          f"two on the shelf ({r1(up0)}–{r1(up_top)}, {r1(C['h'] - C['t_top'] - up_top)} under the top)", TIGHT),
         ("Your trailing plant on the shelf", f"strands {r1(pb['trail'][0])}–{r1(pb['trail'][1])} long, the pot at z {r1(pb['z'])}", ref("photo20"),
          f"the open table door's end at z {r1(C['door_t_open'][1])}", f"{r1(C['door_t_open'][1] - pb['z'])} short of the pot: tuck the strands aside, or slide the pot to the shelf's end", CHECK),
-        ("Stair side: three chairs", f"{st['stair'][1]:.1f} of edge each", ref("dining", "frosvi"), f"{r1(st['stair'][2])} from the far end to the cabinet",
+        ("Stair side: three chairs", f"{st['stair'][1]:.1f} of edge each", ref("dining", "padded", "costwaychair"), f"{r1(st['stair'][2])} from the far end to the cabinet",
          "55 is the squeeze, 60 the aim: three sit in comfort", PASS),
-        ("Stair side: the stair's foot and the door", f"chair backs at z {r1(s_back)}", ref("room", "photo20"), f"the stair box's face at {r1(g.STAIRS_WALL_Z[0])}; the door's edge reaches {r1(arc)}",
-         f"{r1(g.STAIRS_WALL_Z[0] - s_back)} from the stair box, {r1(arc - s_back)} from the door's swing: tuck the end chair in after a meal", TIGHT),
+        # v33: the padded chairs' depth isn't in the listing's words (drawn at a like-for-like chair's 61): the stair side's backs then reach
+        # into the door's swing while you sit; the deepest chair that clears it is the check
+        ("Stair side: the stair's foot and the door", f"chair backs at z {r1(s_back)}", ref("room", "photo20", "padded", "costwaychair"), f"the stair box's face at {r1(g.STAIRS_WALL_Z[0])}; the door's edge reaches {r1(arc)}",
+         (f"{r1(g.STAIRS_WALL_Z[0] - s_back)} from the stair box, {r1(arc - s_back)} from the door's swing: tuck the end chair in after a meal" if arc - s_back >= 0 else
+          f"seated, the backs reach {r1(s_back - arc)} into the door's swing: keep the door shut while you eat. Measure a chair's depth: "
+          f"{r1(arc - C['tz'][0] + g.CHAIR_TUCK)} or less and the door clears"), TIGHT if arc - s_back >= 0 else CHECK),
         ("Window side: three chairs", f"{st['window'][1]:.1f} of edge each", ref("dining", "sofa"), f"{r1(st['window'][2])} from the sofa's arm (x {r1(g.SOFA_X[1])}) to the cabinet",
          f"three in comfort; backs at z {r1(w_back)}, {r1(w_back - plant_face)} clear of your plant stand", PASS),
         ("The far end and the coffee table", f"the table ends at x {r1(C['tx'][0])}", ref("dining"), f"the coffee table to x {r1(g.COFFEE['x'][1])}",
@@ -846,6 +844,88 @@ def zones():
     zs = _zones_v29()
     i = next((k for k, z in enumerate(zs) if z[0].startswith("The sliding dining cabinet")), len(zs))
     return zs[:i] + [cab_zone(), beside_zone()] + zs[i:]
+
+
+# v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version for this as we're trying to
+# optimise space": the sliding cabinet and the flip-top leave the fit proof; the compact cabinet with an 80-wide table is checked beside it.
+def cab80_zone():
+    """The more compact version: the same cabinet round a 185 × 80 table, 10 shorter. Its base is too narrow for the two chairs lying in it."""
+    g, C, P = G, G.CAB80, G.CAB
+    cw, cdep, ch = g.CHAIR_PADDED["folded"]
+    st = optc_seats(C)
+    plate = 27.0
+    mid80, mid90 = C["top"][0] - 2 * plate, P["top"][0] - 2 * plate
+    pl = g.PLANT_LAYOUTS["corner"]["plants"]
+    plant_face = pl[1] + g.PLANT_STAND["d"] / 2
+    return ("The more compact version: an 80-wide table (an option)", f"the same two boxes, {r1(C['len'])} long, the table {r1(C['len_open'])} × {r1(C['top'][0])} open", [
+        ("Its length", f"z {r1(C['z'][0])} to {r1(C['z'][1])}", ref("photo20", "room"), f"{r1(P['len'])} for the plan's",
+         f"{r1(P['len'] - C['len'])} shorter: {r1(C['freed'])} of bare wall by the pipe boxing instead of {r1(P['freed'])}", PASS),
+        ("At the table", f"{st['comfort']} in comfort", ref("dining", "padded", "costwaychair"), f"{st['stair'][0]} a side, {st['stair'][1]:.0f} of edge each: the length doesn't change",
+         f"the window edge {r1(C['tz'][1] - g.SOFA_FRONT_Z)} from the sofa's front (the plan's: {r1(P['tz'][1] - g.SOFA_FRONT_Z)})", PASS),
+        ("Across the table", f"{r1(C['top'][0])} wide, a 27 plate at each place", ref("plates", "dining"), f"{r1(P['top'][0])} in the plan",
+         f"{r1(mid80)} down the middle for dishes (the plan: {r1(mid90)}): a jug and one dish at a time", TIGHT),
+        ("Six chairs inside", f"four standing in the chair box; two lying on their sides need {r1(ch)} + 1", ref("padded"), f"the base is {r1(C['bay_t'])} wide (the plan's {r1(P['bay_t'])})",
+         "the two don't fit lying down: four go inside, two live elsewhere (the garage, or folded behind a door)", NO),
+        ("The table door", f"{r1(C['door_tw'])} wide, open over the chair door", ref("piano32"), f"your plant stand's front at z {r1(plant_face)}",
+         f"its far end at z {r1(C['door_t_open'][1])}: {r1(C['door_t_open'][1] - plant_face)} clear", PASS),
+    ])
+
+
+def max_seats_zone():
+    """v33: the compact cabinet only, in its two widths."""
+    g, C, C8 = G, G.CAB, G.CAB80
+    st, s8 = optc_seats(C), optc_seats(C8)
+    seat = lambda t: (f"{t['stair'][1]:.1f} and {t['window'][1]:.1f} of edge each; a seventh at the far end with a spare chair" if t["end"]
+                      else f"{t['stair'][1]:.1f} and {t['window'][1]:.1f} each")
+    return ("How many can sit down", "the compact cabinet's table, in this room, with chairs a person wide and backs 41 behind the edge", [
+        ("The compact cabinet (the plan)", f"{st['comfort']} in comfort", ref("dining", "frosvi"), f"{st['stair'][0]} on the stair side, {st['window'][0]} on the window side", seat(st), PASS),
+        ("The 80-wide version", f"{s8['comfort']} in comfort", ref("dining", "frosvi"), f"{s8['stair'][0]} on the stair side, {s8['window'][0]} on the window side", seat(s8) + "; four chairs inside, not six", PASS),
+        ("A fourth chair a side", "eight round it", ref("dining", "sofa", "room"), f"{r1(st['stair'][2])} and {r1(st['window'][2])} of edge",
+         f"{st['stair'][2] / 4:.1f} each: under the 55 squeeze", NO),
+        ("A longer table in the cabinet", f"halves over {r1(C['h'] - C['t_top'] - C['pivot'][1])}", ref("photo20"), "they must stand up under your shelf",
+         f"{r1(C['h'] - C['t_top'] - C['pivot'][1])} is the most that folds away; {r1(C['top'][1])} leaves the linen shelf's space", PASS),
+    ])
+
+
+_zones_v32 = zones
+_SET_ASIDE = ("The sliding dining cabinet", "The flip-top table", "Option A: the flip-top", "The flip-top's chair cupboard", "More ways to keep the chairs with the flip-top")
+
+
+def zones():
+    """v33: the compact cabinet only (the sliding cabinet and the flip-top are set aside), with its 80-wide version after it."""
+    out = []
+    for z in _zones_v32():
+        if z[0].startswith(_SET_ASIDE):
+            continue
+        if z[0] == "How many can sit down":
+            z = max_seats_zone()
+        z = (z[0], z[1], [r for r in z[2] if not r[0].startswith("If you choose option A")])
+        out.append(z)
+        if z[0].startswith("The compact dining cabinet"):
+            out.append(cab80_zone())
+    return out
+
+
+# v33, client: "I'd also like these chairs or similar, make adjustments and decisions as required"
+SOURCES["padded"] = ("Wayfair UK (Brayden Studio), sent by you: \"2PCS Wooden Folding Dining Chair with Cushion, Padded Seat, Grey Breathable "
+                     "Linen Fabric, 6.5cm Thick Cushion, 110° Backrest, 168kg Capacity, No Assembly\"; \"a generously sized 47×47cm seat paired with "
+                     "a 6.5cm thick high-density sponge cushion. 90×10×47cm\" (folded: 90 tall, 10 thick, 47 wide); listing u111353306; "
+                     "your photo of a pair (media-wall/inputs/chairs_padded_listing_photo.webp): bent-wood sides, buttoned seat and back")
+SOURCES["costwaychair"] = ("Costway: set of 2 wooden folding dining chairs with linen padded seat and backrest (53981642), the like-for-like chair the "
+                           "padded chairs' open depth, height and seat height are drawn at: 19 × 24 × 31 in (48.3 W × 61 D × 78.7 H cm), seat 17.5 in high (44.5), seat 16 × 17.5 in, "
+                           "folding size 19 × 36.5 in (48.3 × 92.7); 300 lb a chair; no folded thickness published (costway.com, 21 Oct 2026)")
+ORDER.extend(["padded", "costwaychair"])
+
+
+def counts():
+    """v33: the plan's checks only: the seat count's limits and the 80-wide option's rows stay out of the totals."""
+    c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
+    for title, _, rows in zones():
+        if title == "How many can sit down" or title.startswith("The more compact version"):
+            continue
+        for r in rows:
+            c[r[-1]] += 1
+    return c
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""v30: taps things in the 3D room (the cabinet, its doors, both versions, the media wall, the lamp, the curtains, the flip-top) at 1280 and 390
+"""v30: taps things in the 3D room (the cabinet, its doors, its two widths (v33), the media wall, the lamp, the curtains) at 1280 and 390
 and prints what each card offers and what each button did.  python3 taptest.py [screenshot folder]"""
 import sys, json, threading, functools, http.server, pathlib
 from playwright.sync_api import sync_playwright
@@ -35,7 +35,8 @@ def run(w, h):
         tap([444, 45, -150], "the cabinet"); press("Open for six"); print("   dining:", S("dining")); pg.screenshot(path=f"{OUT}/tap_{w}_six.png")
         pg.wait_for_timeout(800); tap([444, 150, -200], "the cabinet again"); press("Fold it away"); print("   dining:", S("dining"))
         tap([444, 45, -205], "the chair door"); press("Open the chair door"); print("   chairs:", S("chairs")); pg.screenshot(path=f"{OUT}/tap_{w}_chairs.png")
-        tap([444, 45, -150], "the cabinet"); press("Show the sliding one"); print("   cab:", S("cab")); pg.screenshot(path=f"{OUT}/tap_{w}_sliding.png")
+        tap([444, 45, -150], "the cabinet"); press("Show the 80-wide"); print("   cabw:", S("cabw"), "w:", pg.evaluate("() => R3D._dbg.scene.getObjectByName('cab').userData.w")); pg.screenshot(path=f"{OUT}/tap_{w}_80.png")
+        tap([444, 45, -150], "the cabinet"); press("Show the 90-wide"); print("   cabw:", S("cabw"))
         pg.evaluate("() => R3D.set({cab: 'compact', view: 'wall', drawers: false})"); pg.wait_for_timeout(600)
         tap([60, 30, 12], "the media wall's base"); press("Pull the drawers out"); print("   drawers:", S("drawers"))
         pg.evaluate("() => R3D.set({view: 'room'})"); pg.wait_for_timeout(600)
@@ -48,8 +49,13 @@ def run(w, h):
         if cxy and tap(cxy, "the curtains"): press("Draw them"); print("   curtains:", S("curtains"))
         else: print("   curtains: hidden from this view, skipped"); pg.keyboard.press("Escape")
         pg.screenshot(path=f"{OUT}/tap_{w}_curtains.png")
-        pg.evaluate("() => R3D.set({site: 'B', dining: 'folded', view: 'dining'})"); pg.wait_for_timeout(600)
-        tap([462, 76, -160], "the flip-top"); press("Open for four"); print("   site/dining:", S("site"), S("dining"))
+        pg.evaluate("() => R3D.set({site: 'B', cab: 'sliding', dining: 'folded', view: 'dining'})"); pg.wait_for_timeout(600)
+        print("   v33, the compact cabinet only: site/cab after asking for the flip-top's:", S("site"), S("cab"))
+        if w < 600:   # v33, the phone home: a place from the strip opens its card
+            pg.evaluate("() => R3D.set({view: 'room'})"); pg.wait_for_timeout(600)
+            pg.locator("[data-place=dining]").click(); pg.wait_for_timeout(1600)
+            print("   place card:", pg.evaluate("() => !document.getElementById('r3d-pop').hidden && document.getElementById('r3d-pop-h').textContent"))
+            pg.screenshot(path=f"{OUT}/tap_{w}_place.png"); pg.keyboard.press("Escape")
         pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', view: 'room'})")
         print("  errors:", errs[:5])
         b.close()

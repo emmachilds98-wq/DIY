@@ -34,7 +34,11 @@ function railOpen(on) {
   const r = $(".rail"), t = $("#rail-tog"); if (!r || !t) return;
   r.classList.toggle("open", on); t.setAttribute("aria-expanded", String(on));
   const lab = $("span", t); if (lab) lab.textContent = on ? "Close" : "Menu"; const ic = $(".ms", t); if (ic) ic.textContent = on ? "close" : "menu";
+  const m = $("#r3d-menub"); if (m) { m.setAttribute("aria-expanded", String(on)); $(".ms", m).textContent = on ? "close" : "menu"; }   // v33: its twin in the phone's dock
 }
+/* v33, the phone home: Menu sits in the dock, and opens the same five sections above it */
+{ const m = $("#r3d-menub"); if (m && $(".rail")) m.hidden = false; }
+document.addEventListener("click", e => { if (e.target.closest("#r3d-menub")) railOpen(!$(".rail").classList.contains("open")); });
 document.addEventListener("click", e => { if (e.target.closest("#rail-tog")) { const on = !$(".rail").classList.contains("open"); railOpen(on); if (on) { const f = $("#rail-list button"); if (f) f.focus({ preventScroll: true }); } } });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !curSheet && $(".rail.open")) { railOpen(false); $("#rail-tog").focus(); } });
 function setHash(h, push) {

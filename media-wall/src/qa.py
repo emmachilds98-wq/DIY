@@ -87,7 +87,7 @@ def run(p, w, h):
     # back to the room; the cabinet's states
     pg.evaluate("() => { location.hash = '#room'; }")
     pg.wait_for_timeout(400)
-    for opts in ({"site": "C", "cab": "sliding", "dining": "six", "view": "dining"}, {"site": "C", "cab": "compact", "dining": "folded", "tdoor": True, "view": "dining"},
+    for opts in ({"site": "C", "cabw": "80", "dining": "six", "view": "dining"}, {"site": "C", "cabw": "90", "dining": "folded", "tdoor": True, "view": "dining"},
                  {"site": "C", "dining": "six", "view": "dining"}, {"site": "C", "dining": "folded", "chairs": "open", "view": "chairs"},
                  {"site": "C", "dining": "folded", "view": "room"}, {"site": "B", "dining": "four"}, {"site": "C", "dining": "six", "view": "room"}):
         pg.evaluate("o => window.R3D.set(o)", opts)
@@ -96,6 +96,20 @@ def run(p, w, h):
     sw, cw = pg.evaluate(OVER, None)
     if sw > cw:
         fail(f"page scrolls sideways after the 3D states {sw} > {cw}")
+    # v33: one count (the Plan's ring and Buy agree), Decide and build day open on one screen
+    cnt = pg.evaluate("() => [document.getElementById('d-buy').textContent, document.getElementById('t-done').textContent, document.getElementById('d-choice').textContent]")
+    if cnt[0].split("/")[1] != cnt[1].split(" of ")[1]:
+        fail(f"the counts disagree: plan {cnt[0]!r}, buy {cnt[1]!r}")
+    rep["notes"].append(f"counts: plan {cnt[0]}, buy {cnt[1]}, choices {cnt[2]}")
+    for js, name in (("PICKS.openDecide(2)", "decide"), ("PICKS.openDay(11)", "bday")):
+        pg.evaluate(js); pg.wait_for_timeout(500)
+        poke = pg.evaluate(OVER, None)
+        if poke[0] > poke[1]:
+            fail(f"{name} scrolls sideways {poke}")
+        pg.screenshot(path=f"{OUT}/qa_{w}_{name}.png")
+        pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
+        if pg.evaluate(f"() => !document.getElementById('{name}').hidden"):
+            fail(f"{name} didn't close on Escape")
     has_tour = pg.evaluate("() => !!document.querySelector('[data-tour], #r3d-tour')")
     rep["notes"].append(f"tour control present: {has_tour}")
     b.close()

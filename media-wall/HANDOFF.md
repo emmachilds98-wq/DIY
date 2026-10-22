@@ -1,6 +1,23 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **FINISH v33 FIRST (the session ran out of usage mid-build, 21 Oct).** All code is committed on `claude/sharp-franklin-lrray1` (PR #30,
+  draft, don't merge until the client says). Left to do, in order:
+  1. DONE (commit 7cb1b8f): the full rebuild finished: every still, `Home_Network_Plan_v33.pdf`, `Build_Guide_v33.pdf`, the page; fit 66/17/10/0, total £3,463–6,733; 45 pictures still to upload to the deck. (To redo: `cd media-wall/src && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`.)
+     shot3d skips the stills already committed (their fingerprints are in `shot3d_prints.json`), so it carries on where it stopped.
+     About 90 stills in all; make_images already ran.
+  2. QA: `python3 qa.py <dir>` and `python3 taptest.py <dir>` at 390 and 1280 (both updated for v33). Look at `3d_c_six`, `3d_c_chairs`,
+     `3d_c_tdoor` and `3d_c80_six`: the padded chairs (drawn from `inputs/chairs_padded_listing_photo.webp`) and the 23.4-deep cabinet.
+  3. Fill the placeholders below (`{FIT}`, `{PAGES}`, `{GUIDE}`, `{CHECKS}`, `{QA}`). Fit is 66/17/10/0 (`python3 -c "import fit; print(fit.counts())"`);
+     the total is £3,463–6,733. Update README's PDF links and page counts (v32 → v33, lines near "The full plan").
+  4. Commit and push everything (the client: "all work must be in GitHub"), update PR #30's body.
+  5. Deck 71ff: upload `src/deck_assets_todo.txt` (Artifact `asset: true`, 25 per call), record them in `src/deck_assets.json`, run
+     build_viewer again, publish `src/media_wall_viewer_inline.html` to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2.
+  Then the next round: `media-wall/UPGRADE_PLAN_v34.md`, whose "The 3D room: crashes, errors and lag" section has the measured plan.
+  The Edit-room test (`/tmp` script, gone with the container) raised no page errors in its first three pieces; re-run the plan's step 7.
+- **v33 (round 27, below): the compact cabinet is the only table, with a more compact 80-wide version; the six upgrades from the design
+  review (the phone home, one count, Decide, the ideas shortlist, 90 vs 80 side by side, build day).** Fit {FIT}, total £3,397–6,547
+  (unchanged: picks and added ideas show as "Added by you", not in TRACK), plan {PAGES}, guide {GUIDE}. Next: `media-wall/UPGRADE_PLAN_v34.md`.
 - **v32 (round 26, below): "Watch it open" slow and jointed, every idea, suggestion and Add-list piece with its own HD render and
   in the 3D room, three new suggestions, a cost overview by piece, and the plan page's menus reworked (tools always on, a Menu
   button for the rest).** Fit 110/39/15/0, total £3,397–6,547 (unchanged: nothing new is in the plan), plan 108 pages
@@ -58,6 +75,47 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 21 Oct 2026, round 27: v33 (one table and a more compact version; the six upgrades from the design review)
+- Client: "The compact cabinet is our only choice for the table now or any upgraded more compact version for this as we're trying to
+  optimise space. Happy with upgrade plan, please perform it" (the plan: `UPGRADE_PLAN_v33.md`, "Design review of v32", and the design
+  canvas https://claude.ai/artifact/SWtnzbiJgb3bhH2EFCXygE).
+- **The compact cabinet only.** room3d.js `applyState` forces `S.site = "C"`, `S.cab = "compact"` (the sliding cabinet's and the
+  flip-top's code stays, unreachable); Layout lost the site / cab / flip-top controls; the tap card swaps the width instead of the
+  version; shot3d dropped the 15 A / B / sliding stills (and gained `3d_c_six_day`, `3d_doll`); build_doc section 5 lost `slide_html()`
+  and the flip-top's pages (the appendix "Options we set aside" has a short table of the three, costed with `slide_cost` /
+  `fliptop_cost`); fit.py's `zones()` skips `_SET_ASIDE` and the "If you choose option A" row. The drawn views lost "four" and "six"
+  (the flip-top's 2D renders; make_images still draws them).
+- **The more compact version** (`geometry._make_cab(table_w)`, `CAB80 = _make_cab(80.0)`): 134.2 long, 65.8 freed, table box 81 inside,
+  so `chairs_base` is 0 (a folded FRÖSVI stands 89: two lying need 91): four chairs inside, two elsewhere. `BESIDE` stays derived from
+  the 90-wide one (the 80 shifts the beside group 5 cm along). fit `cab80_zone()` (after the compact zone) and `max_seats_zone()`; build_doc
+  `cab80_html()` (its figures, the two widths side by side, its checks, our call: keep 90). In 3D `S.cabw` "90" / "80" (`cabC()`,
+  `rebuildCab()` swaps the group when the width changes; `footKey` includes the width); export3d sends `CAB80`; stills `3d_c80_*`.
+- **Phone home** (room3d_page CSS at ≤ 599 px, room3d.js): pins show the number only (`.stk .t` hidden, an aria-label each); a places
+  strip (`[data-place]`: fly to the view, then open the card, docked above the dock) and the set-ups (`[data-moment]`) as chips under
+  the room, both hidden while a card, the tools, a sheet, the tour or Edit is up (`.popped`); Menu is a dock bubble (`#r3d-menub`,
+  page_router `railOpen` keeps its twin in step; the rail opens above the dock). `fitFov` frames portrait tighter (1.45 instead of 16/9).
+- **One count, Decide, the shortlist, build day** (`plan_ui.py`, page.js `PICKS`, page.css v33 block): the Plan home has three rings
+  (steps built, things bought out of 65, choices made out of 3), "Waiting on you" (`#waitl`), "Where the money goes" (costs.overview as
+  ranges, plus "Added by you") and "Checks on site" (the fit proof's {CHECKS} CHECK rows). Buy's tiles: the plan's total (with picks),
+  bought of 65, paid, jobs of 25 apart; a "Things to buy" filter; "Added by you" (the beside pick and each added idea, Take out). Decide
+  (`#decide`, a radio group per choice, the renders already made) saves to localStorage `mw33-picks` and the deck's db `picks/decide`,
+  `picks/short` (`{v, by, at}`); the room follows (`cabw`, `decor.pads`, `beside`), the buy list follows (the pads' row says your
+  colour, the dining phase shows a note for 80). Every idea and suggestion card has "Add to plan" (`[data-short]`) with a sticky bar on
+  the Ideas sheet. Build day (`#bday`, a "Build day" button on each step): the step's still (`plan_ui.STEP_ART`), Watch / Show it in the
+  room, its tasks to tick (local, `mw33-tasks`), its tools, its things to buy (from the tracker) and Done (ticks the step).
+- **The grey padded chairs are the plan** (client: "I'd also like these chairs or similar, make adjustments and decisions as required",
+  then the listing's text: 47×47 seat, 6.5 cm cushion, 110° back, 168 kg, "90×10×47cm" = folded 90 tall, 10 thick, 47 wide; Wayfair
+  u111353306 is behind a bot check, so the client pasted it). `geometry.CHAIR_PADDED` (open depth/height/seat height from the like-for-like
+  Costway 53981642: sources `padded`, `costwaychair`); the FRÖSVI stays as `CHAIR`/`CHAIR_FOLDED` for the old tables. `_make_cab` uses the
+  padded chairs: `d` 23.4 (two at 10 deep; 1.4 proud of the boxing), `bay_c` 49, `shelf_y` 94, base chairs when `bay_t >= 90 + 1`: 147.2
+  long, 52.8 freed; 80-wide 137.2 / 62.8, four inside. The tie-on pads are gone (TRACK row, costs.SHORT, Decide's pads colour, Look's pads,
+  the 3D pads, step 11's hooks; the `pads` 4 cm setback stays: a cloth bag hook). fit: `optc_seats` uses the padded depth for CAB/CAB80;
+  the stair side's backs reach 8.7 into the door's swing seated at 61 deep: a CHECK (52.3 or less clears). TRACK: "Folding chairs, six:
+  your grey padded ones", £240–390 (an estimate, about £80–130 a pair: confirm the price). 3D: `paddedOpen` at the table, `K.fchair` /
+  `fchairLying` draw them folded with grey cushions; the show's text updated. Decide is three choices now (beside, width, switch).
+- **Compare:** `options_card()` is the compact cabinet at 90 and at 80, side by side, with "Pick this one" (`[data-decide=cabw]`).
+- Backups `*_v32_backup.*`; v32 outputs in `out/v32/`. {QA}
 
 ## Update 21 Oct 2026, round 26: v32 (Watch it open, slowly; every idea rendered and in the room; a cost overview; menus)
 - Client (after PR #28 merged): "make tools always appear in 3D view and the other buttons on the left to be the expandable menu as these

@@ -140,7 +140,7 @@ SUGGEST += [
      "Film nights in daylight, and darker summer mornings; rolled up, it's a slim cassette under the curtain pole.",
      "Face-fixed just above the window, down to the sill's nose: the plants on the sill stay behind it."),
     ("cablights", "Lights inside the dining cabinet", "two 40 cm USB-rechargeable LED bars, warm white, motion sensing", (28, 40),
-     "Each box lights as its door opens, so the chairs, the pads and the cloth are easy to find in the evening.", "Under the top of each box, at the front."),
+     "Each box lights as its door opens, so the chairs and the cloth are easy to find in the evening.", "Under the top of each box, at the front."),
 ]
 
 

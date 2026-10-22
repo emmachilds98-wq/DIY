@@ -2618,7 +2618,7 @@ def cab_elevation():
     ox, oy = 30, 110
     X = lambda z: ox + (z0 - z) * k
     Y = lambda y: oy + (g.CEIL - y) * k
-    cw, cdep, ch = g.CHAIR_FOLDED
+    cw, cdep, ch = g.CHAIR_PADDED["folded"]   # v33: your padded chairs
     o = [f'<rect x="{X(z0)}" y="{Y(g.CEIL)}" width="{(z0 - z1) * k}" height="{g.CEIL * k}" fill="#f4f1ea" stroke="{WALL}" stroke-width="2"/>']
     sz = g.STAIRS_WALL_Z[0]
     o.append(f'<rect x="{X(z0)}" y="{Y(g.CEIL)}" width="{(z0 - sz) * k}" height="{g.CEIL * k}" fill="#e6e0d3" stroke="#9a958b"/>')
@@ -2748,7 +2748,7 @@ def cab_carcass():
 
 
 def cab_section():
-    """A cut through the table box, wall on the right: the door with the seat pads on its back, the table standing up 4 back from it,
+    """A cut through the table box, wall on the right: the door, the table standing up 4 back from it,
     two chairs lying in the base, then the table down on its legs."""
     g, C = G, G.CAB
     W, H = 900, 780
@@ -2766,27 +2766,21 @@ def cab_section():
     o.append(f'<rect x="{X(C["rail_x"][0])}" y="{Y(py)}" width="{(C["rail_x"][1] - C["rail_x"][0]) * k}" height="{7 * k}" fill="{OAKS}"/>')   # the hinge rail (v31: set back behind the pads)
     o.append(f'<rect x="{X(C["inner"] + C["pads"])}" y="{Y(C["linen"][0])}" width="{C["linen_d"] * k}" height="{C["t"] * k}" fill="{OAKS}"/>')   # the linen shelf (the same)
     # the two chairs lying in the base, two deep
-    cw, cdep, ch = g.CHAIR_FOLDED
+    cw, cdep, ch = g.CHAIR_PADDED["folded"]   # v33: your padded chairs
     for j in range(2):
         x0 = C["inner"] + 0.3 + j * (cdep + 0.3)
         o.append(f'<rect x="{X(x0):.1f}" y="{Y(C["base"][0] + cw):.1f}" width="{cdep * k:.1f}" height="{cw * k:.1f}" rx="3" fill="#f3e7d2" stroke="{OAKD}" stroke-dasharray="4 2"/>')
     o.append(t(X(C["front"]) - 6, Y(C["base"][0] + cw / 2), "two chairs lying,", 9.5, "end", 700, "#5a3a20"))
     o.append(t(X(C["front"]) - 6, Y(C["base"][0] + cw / 2) + 13, f"two deep ({_fmt(2 * cdep)} of {_fmt(C['in_d'])})", 9, "end", 500, "#5a3a20"))
-    # the door, shut, with the pads on its back
+    # the door, shut
     o.append(f'<rect x="{X(C["front"]):.1f}" y="{Y(C["plinth"] + C["gap"] + C["door_h"]):.1f}" width="{C["door"] * k:.1f}" height="{C["door_h"] * k:.1f}" fill="#e9d3b4" stroke="{OAKD}" stroke-dasharray="5 3"/>')
-    pw, ph, pt = C["pad"]
-    for r in range(3):                                         # v31: three 40 cm tie-on pads, from the hinge rail's underside up
-        y0 = C["pad_zone"][0] + 0.3 + r * (ph + 0.2)
-        o.append(f'<rect x="{X(C["front"] + C["door"] + 0.4):.1f}" y="{Y(y0 + ph):.1f}" width="{pt * k:.1f}" height="{ph * k:.1f}" rx="3" fill="#c7c69a" stroke="#7c7a4c"/>')
     o.append(t(X(C["front"]) - 6, Y(C["h"] - 2), "the table door: open it,", 9.5, "end", 700, "#5a3a20"))
     o.append(t(X(C["front"]) - 6, Y(C["h"] - 2) + 13, "it turns back flat (180°)", 9, "end", 500, "#5a3a20"))
-    o.append(t(X(C["front"]) - 6, Y(112), "six tie-on pads, 40 × 40,", 9.5, "end", 700, "#5c5a30"))
-    o.append(t(X(C["front"]) - 6, Y(112) + 13, "two across on the door's back", 9, "end", 500, "#5c5a30"))
     # folded: the stack standing in the bay, 4 back from the door (dashed)
     o.append(f'<rect x="{X(px)}" y="{Y(py + tl)}" width="{(2 * tt + 0.3 + ap) * k}" height="{tl * k}" fill="#f1e2cc" stroke="{OAKD}" stroke-dasharray="4 3"/>')
     o.append(f'<rect x="{X(px - ap)}" y="{Y(py + tl)}" width="{ap * k}" height="{tl * k}" fill="#e9d3b4" stroke="{OAKD}" stroke-dasharray="4 3"/>')
     o.append(f'<line x1="{X(C["front"]):.1f}" y1="{Y(C["h"]) - 10:.1f}" x2="{X(px - ap):.1f}" y2="{Y(C["h"]) - 10:.1f}" stroke="{BLUE}" stroke-width="1.2"/>')
-    o.append(t(X(C["front"]) + 2, Y(C["h"]) - 14, f"door {_fmt(C['door'] + C['gap'])} + pads {_fmt(C['pads'])}", 9, "start", 700, BLUE))
+    o.append(t(X(C["front"]) + 2, Y(C["h"]) - 14, f"door {_fmt(C['door'] + C['gap'])} + {_fmt(C['pads'])}", 9, "start", 700, BLUE))
     # open: the two halves, the aprons, the legs
     jx, tx0, tx1 = C["joint_x"], C["tx"][0], C["tx"][1]
     o.append(f'<rect x="{X(tx0)}" y="{Y(py + tt)}" width="{(tx1 - tx0) * k}" height="{tt * k + 1}" fill="#d9b48a" stroke="{OAKD}" stroke-width="1.4"/>')
@@ -2812,7 +2806,7 @@ def cab_section():
     o.append(t(X(C["front"]) - 6, Y(152), f"folded: {_fmt(C['stack'])} deep,", 9.5, "end", 700, "#5a3a20"))
     o.append(t(X(C["front"]) - 6, Y(152) + 13, f"its top at {_fmt(C['folded_top'])}", 9, "end", 500, "#5a3a20"))
     return svg(W, H, "\n".join(o), "The compact cabinet: how the table comes down",
-               "Through the table box, wall on the right. Folded (dashed): 4 back from the door and its pads, two chairs lying under it. Open: the door turned back, the table down.")
+               "Through the table box, wall on the right. Folded (dashed): 4 back from the door, two chairs lying under it. Open: the door turned back, the table down.")
 
 
 def cab_plan():
@@ -2851,14 +2845,14 @@ def cab_plan():
     for lx, lz in C["legs"]:
         o.append(f'<rect x="{X(lx + C["leg"][0] / 2):.1f}" y="{Y(lz - C["leg"][1] / 2):.1f}" width="{C["leg"][0] * k:.1f}" height="{C["leg"][1] * k:.1f}" fill="{OAKD}"/>')
     o.append(t(X((tx0 + tx1) / 2), Y(C["cz"]) + 4, f"table {_fmt(C['len_open'])} × {_fmt(C['top'][0])}", 11, "middle", 700, "#5a3a20"))
-    cw, cd = g.CHAIR[0], g.CHAIR[1]
+    cw, cd = g.CHAIR_PADDED["w"], g.CHAIR_PADDED["d"]   # v33: your padded chairs
     for i, (x, z, f) in enumerate(C["seats"]["six"]):
         w_, d_ = (cd, cw) if f == "e" else (cw, cd)
         o.append(f'<rect x="{X(x + w_ / 2):.1f}" y="{Y(z - d_ / 2):.1f}" width="{w_ * k:.1f}" height="{d_ * k:.1f}" rx="4" fill="#fff" stroke="{BLUE}" stroke-width="1.4"/>')
         o.append(t(X(x), Y(z) + 4, str(i + 1), 11, "middle", 700, BLUE))
-    st_side = C["tz"][0] + g.CHAIR[1] - g.CHAIR_TUCK
+    st_side = C["tz"][0] + g.CHAIR_PADDED["d"] - g.CHAIR_TUCK
     sl, wl = C["front"] - C["tx"][0], C["front"] - max(C["tx"][0], g.SOFA_X[1])
     o.append(t(X(C["tx"][0] + 5), Y(st_side) + 14, f"stair side: 3 at {sl / 3:.1f}", 9.5, "start", 700, BLUE))
-    o.append(t(X(g.SOFA_X[1]) - 4, Y(C["tz"][1] - g.CHAIR[1] + g.CHAIR_TUCK) - 6, f"window side: 3 at {wl / 3:.1f}", 9.5, "end", 700, BLUE))
+    o.append(t(X(g.SOFA_X[1]) - 4, Y(C["tz"][1] - g.CHAIR_PADDED["d"] + g.CHAIR_TUCK) - 6, f"window side: 3 at {wl / 3:.1f}", 9.5, "end", 700, BLUE))
     return svg(W, H, "\n".join(o), "The compact cabinet open for six",
                "From above, to scale. The table door turned back flat over the chair door and the wall beyond (dashed: its swing); three a side, all in comfort.")

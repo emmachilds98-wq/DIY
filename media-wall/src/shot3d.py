@@ -22,21 +22,10 @@ PRINTS = HERE / "shot3d_prints.json"
 # (file stem, options, title for ../out)
 SHOTS = [
     ("3d_room", dict(view="room", site="C", dining="folded", scene="bright"), "the whole room - from above the window side, cut away - bright"),   # v21: the new default view
-    ("3d_window_B_folded", dict(view="window", site="B", dining="folded", scene="bright"), "B, THE FLIP-TOP - from the window - table by the stairs, folded - bright"),
-    ("3d_window_B_four", dict(view="window", site="B", dining="four", scene="bright"), "B, THE FLIP-TOP - from the window - down for four - bright, table rule"),
     ("3d_wall_film", dict(view="wall", site="C", dining="folded", scene="film"), "the media wall - film"),
     ("3d_wall_drawers", dict(view="wall", site="C", dining="folded", scene="cosy", drawers=True), "the media wall - every drawer out - cosy"),
     ("3d_sofa_cosy", dict(view="sofa", site="C", dining="folded", scene="cosy"), "from the sofa - cosy"),
-    ("3d_B_folded", dict(view="dining", site="B", dining="folded", scene="bright"), "B, THE FLIP-TOP - the stairs wall - table folded under the shelf - bright"),
-    ("3d_chairs", dict(view="chairs", site="B", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}), "B, THE FLIP-TOP - the chair cupboard beside the table, doors open, four chairs inside (plant stand and lamp hidden) - bright"),
-    ("3d_chairs_shut", dict(view="dining", site="B", dining="folded", scene="bright", chairs="cupboard", layout={}), "B, THE FLIP-TOP - packed away - the table folded and the chair cupboard shut - bright"),
-    ("3d_stairs_A_four", dict(view="stairs", site="A", dining="four", scene="bright"), "from the stairs - table on the breast, down for four - bright, table rule"),
-    ("3d_dining_A_four", dict(view="dining", site="A", dining="four", scene="bright"), "the dining table on the breast, down for four - bright, table rule"),
-    ("3d_dining_B_four", dict(view="dining", site="B", dining="four", scene="bright"), "B, THE FLIP-TOP - by the stairs, down for four - bright, table rule"),
-    ("3d_six_day", dict(view="door", site="A", dining="six", scene="bright", tod="day", master=0), "from the door - out for six - daytime"),
     ("3d_pc_day", dict(view="pc", site="C", dining="folded", scene="bright", tod="day", master=0), "the PC side wall - daytime"),
-    ("3d_plan_B", dict(view="plan", site="B", dining="four", scene="bright", tod="day", master=0), "B, THE FLIP-TOP - birds eye, down for four"),
-    ("3d_doll_A", dict(view="doll", site="A", dining="folded", scene="bright", tod="day", master=0), "dolls house - table on the breast"),
     # v17: the bright preset (was General), the lit PC, and the ideas (not in the plan)
     ("3d_window_bright", dict(view="window", site="C", dining="folded", scene="bright"), "from the window - bright, every head straight down"),
     ("3d_pc_lit", dict(view="pc", site="C", dining="folded", scene="film", pc=True), "the PC side wall - PC lit - film"),
@@ -57,7 +46,6 @@ SHOTS = [
     # v21: the suggested furniture and decor, all on
     ("3d_suggest", dict(view="door", site="C", dining="folded", scene="bright", sugg={k: True for k, *_ in __import__("ideas").SUGGEST}),
      "SUGGESTED furniture and decor, all of them on - bright"),
-    ("3d_seat", dict(view="dining", site="B", dining="folded", scene="bright", seat="down"), "B, THE FLIP-TOP - the fold-down seat at the stair end, down - bright"),
     # v26: option C, the dining cabinet; v27: the plan, for six; v30: the compact cabinet is the plan, the sliding one the alternative
     ("3d_c_folded", dict(view="dining", site="C", dining="folded", scene="bright"), "THE COMPACT DINING CABINET - packed away - bright"),
     ("3d_c_six", dict(view="dining", site="C", dining="six", scene="bright"), "THE COMPACT DINING CABINET - open for six, the table door back flat - bright, table rule"),
@@ -73,10 +61,14 @@ SHOTS = [
     ("3d_beside_mirror", dict(view="beside", site="C", dining="folded", scene="bright", beside="mirror"), "BESIDE THE CABINET - a tall mirror - bright"),
     ("3d_beside_trolley", dict(view="beside", site="C", dining="folded", scene="bright", beside="trolley"), "BESIDE THE CABINET - a slim trolley - bright"),
     ("3d_beside_dresser", dict(view="beside", site="C", dining="folded", scene="bright", beside="dresser"), "BESIDE THE CABINET - a low oak shelf - bright"),
-    ("3d_s_folded", dict(view="dining", site="C", cab="sliding", dining="folded", scene="bright"), "THE SLIDING CABINET (the alternative) - packed away - bright"),
-    ("3d_s_six", dict(view="dining", site="C", cab="sliding", dining="six", scene="bright"), "THE SLIDING CABINET (the alternative) - open for six - bright, table rule"),
-    ("3d_s_chairs", dict(view="chairs", site="C", cab="sliding", dining="folded", scene="bright", chairs="open", layout={"plants": {"off": True}, "lamp": {"off": True}}),
-     "THE SLIDING CABINET (the alternative) - the chair bay open, six chairs inside (plant stand and lamp hidden) - bright"),
+    # v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version": the flip-top and the
+    # sliding cabinet's stills are gone; the plan's table in daylight and the dolls' house; the 80-wide version, 10 shorter, four chairs inside
+    ("3d_c_six_day", dict(view="door", site="C", dining="six", scene="bright", tod="day", master=0), "THE COMPACT DINING CABINET - from the door, open for six - daytime"),
+    ("3d_doll", dict(view="doll", site="C", dining="folded", scene="bright", tod="day", master=0), "dolls house - the compact cabinet packed away"),
+    ("3d_c80_folded", dict(view="dining", site="C", cabw="80", dining="folded", scene="bright"), "THE 80-WIDE VERSION - packed away, 10 shorter - bright"),
+    ("3d_c80_six", dict(view="dining", site="C", cabw="80", dining="six", scene="bright"), "THE 80-WIDE VERSION - open for six - bright, table rule"),
+    ("3d_c80_tdoor", dict(view="dining", site="C", cabw="80", dining="folded", scene="bright", tdoor=True), "THE 80-WIDE VERSION - the table door open - no chairs in the base - bright"),
+    ("3d_c80_plan", dict(view="plan", site="C", cabw="80", dining="six", scene="bright", tod="day", master=0), "THE 80-WIDE VERSION - birds eye, open for six"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
@@ -86,7 +78,7 @@ SHOTS = [
 SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():

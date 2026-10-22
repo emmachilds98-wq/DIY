@@ -413,7 +413,7 @@ details.sdraw figure.dia svg { display: block; width: 100%; min-width: 640px; he
   .caxis span:nth-child(even) { display: none; }
 }
 #tracker { display: grid; gap: 10px; }
-#tracker.f-left li.done, #tracker.f-left li[data-kind="job"], #tracker.f-jobs li[data-kind="buy"] { display: none; }
+#tracker.f-left li.done, #tracker.f-left li[data-kind="job"], #tracker.f-jobs li[data-kind="buy"], #tracker.f-buys li[data-kind="job"], #tracker.f-jobs li.picknote { display: none; }
 summary .pf a { color: var(--oak); }
 /* v14: tab groups, the overview's dashboard, the table's two options, the 3D room and its gallery */
 .hlinks { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; }
@@ -531,21 +531,10 @@ TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("checks", "Checks & sources")]
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it"}   # v14: the tab bar in four groups
 CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above the window side with the window wall cut away, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture",
-         "3d_window_B_folded": "From the window, the Bright preset: the table folded under your shelf by the stairs, the breast free",
-         "3d_window_B_four": "Option B from the window: the table down for four under your shelf by the stairs, set for dinner",
          "3d_wall_film": "The media wall with the Film preset: bias light on, bar 1 off, the strips low",
          "3d_wall_drawers": "Every drawer out, the Cosy preset: the LP crates under the turntable, a slim game drawer beside them",
          "3d_sofa_cosy": "From the sofa, the Cosy preset: light on the deck, the ledge and the LP crates",
-         "3d_chairs": "The chair cupboard (v20) beside the folded table, doors open: four folded chairs inside, two on its floor and two on its shelf (plant stand and lamp hidden for the view)",
-         "3d_chairs_shut": "The stairs wall packed away (v20): the table folded under your shelf and the oak chair cupboard shut beside it, flush with the pipe boxing",
-         "3d_B_folded": "The stairs wall: your shelf with the black OBEGRÄNSAD panel, the laser (off) and the plant hanging at the end by the pipe boxing, the red lamp, the table folded under it",
-         "3d_stairs_A_four": "From the stairs: the table down for four on the breast",
-         "3d_dining_A_four": "Option A: down for four on the chimney breast",
-         "3d_dining_B_four": "Option B: down for four under the shelf, bar 2 right over it",
-         "3d_six_day": "The flip-top open for six, in daylight: three a side, your hessian curtains on their wooden pole",
          "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
-         "3d_plan_B": "Bird\u2019s eye, option B set for four",
-         "3d_doll_A": "Dolls\u2019 house view, option A",
          "3d_window_bright": "The Bright preset: every spot head straight down, evenly spread, the strips and the lamp filling in",
          "3d_pc_lit": "The Film preset with the PC lit: its fans and the RGB strip glowing behind the glass side",
          "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended): two towers of five tiers and a taller plant in the open middle",
@@ -558,11 +547,10 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
          "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
-         "3d_seat": "Option (v23): the fold-down oak seat at the stair end, down, beside the folded table; your sofa's ottoman on the rug",
          "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf, the table and the six chairs inside, {G.CAB['freed']:.0f} cm of wall back by the pipe boxing",
          "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long, three a side, bar 2 over it",
          "3d_window_c_six": "From the window, the compact cabinet open for six, the coffee table where it is",
-         "3d_c_tdoor": "The table door open with the table still folded: the six seat pads on the door's back, the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
+         "3d_c_tdoor": "The table door open with the table still folded: the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
          "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
          "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
          "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
@@ -570,11 +558,15 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
          "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that wheels out to the table's far end for dinner",
          "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
-         "3d_s_folded": f"The sliding cabinet (the alternative), packed away: {G.OPTC['z'][0] - G.OPTC['z'][1]:.0f} long, two oak sliding doors",
-         "3d_s_six": "The sliding cabinet (the alternative) open for six: door A slid over door B",
-         "3d_s_chairs": "The sliding cabinet (the alternative): the chair bay open, door B slid behind door A, six chairs inside",
+         "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side, your hessian curtains on their wooden pole",
+         "3d_doll": "Dolls\u2019 house view: the compact cabinet packed away under your shelf",
+         "3d_c80_folded": f"The more compact version packed away: the same two oak boxes round an 80-wide table, {G.CAB80['len']:.1f} long, {G.CAB80['freed']:.1f} cm of wall back",
+         "3d_c80_six": f"The more compact version open for six: the table {G.CAB80['len_open']:g} × {G.CAB80['top'][0]:g}, three a side",
+         "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down, so four go inside, not six",
+         "3d_c80_plan": "Bird\u2019s eye, the more compact version open for six",
          "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
 import item_shots as IS
+import plan_ui as PU   # v33: one count, Decide, the shortlist, build day
 CAP3D.update({stem: {"idea": "Idea (not in the plan): ", "sugg": "Suggested: ", "add": "In Edit room's Add list: "}[kd] + t
               for stem, kd, _k, t, _o in IS.items()})   # v32: a full render of every idea, suggestion and piece to add
 
@@ -588,11 +580,13 @@ def item_card(stem, kind, k, title, size, cost, why, where):
         o["addpiece"] = dict(type=k, x=a["x"], z=a["z"], **({"rot": a["rot"]} if "rot" in a else {}))
     o["merge"] = True
     lab = "Add it to my room" if kind == "add" else "Show it in my room"
+    addp = (f' <button type="button" class="btn addplan" data-short="{kind}:{k}" aria-pressed="false"><span class="ms" aria-hidden="true">add</span><span class="t">Add to plan</span></button>'
+            if kind in ("idea", "sugg") and cost else "")   # v33: the ideas shortlist
     meta = " · ".join(x for x in (html.escape(size), f"about £{cost[0]}–{cost[1]}" if cost else "") if x)
     return (f'<article class="opt"><button type="button" class="g3d" data-full="{stem}"><img data-art="{stem}" alt="{html.escape(CAP3D[stem])}" loading="lazy"></button>'
             f'<div class="ob"><span class="label">{meta}</span><h3>{html.escape(title)}</h3>'
             + (f'<p>{html.escape(why)}</p>' if why else "") + (f'<p class="caption">{html.escape(where)}</p>' if where else "")
-            + f"<button type='button' class='btn' data-r3d='{json.dumps(o)}'><span class='ms' aria-hidden='true'>view_in_ar</span> {lab}</button></div></article>")
+            + f"<button type='button' class='btn' data-r3d='{json.dumps(o)}'><span class='ms' aria-hidden='true'>view_in_ar</span> {lab}</button>{addp}</div></article>")
 
 
 def ideas_panel():
@@ -690,41 +684,40 @@ def chairs_card():
 
 
 def options_card():
-    """v14: the table's places side by side, with a way into the 3D room for each (v27: the dining cabinet first, the plan)."""
+    """v14: the table's places side by side, with a way into the 3D room for each (v27: the dining cabinet first, the plan). v33, client: "The
+    compact cabinet is our only choice for the table now or any upgraded more compact version for this as we're trying to optimise space":
+    the compact cabinet with its 90-wide table (the plan) beside the more compact version, an 80-wide table, 10 shorter."""
     g = G
-    south, north = g.STAIRS_WALL_Z[0] - g.TABLE_B_Z[0], g.TABLE_B_Z[1] - g.WINDOW_Z
-    def btn(opts, lab):
-        return f"<button type=\"button\" class=\"btn\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
-    a = btn({"site": "A", "dining": "four", "view": "dining", "scene": "bright"}, "See A in 3D")
-    b = btn({"site": "B", "dining": "four", "view": "dining", "scene": "bright"}, "See B in 3D")
-    K, O = g.CAB, g.OPTC
-    c = btn({"site": "C", "cab": "compact", "dining": "six", "view": "dining", "scene": "bright"}, "See it open in 3D")
-    c2 = btn({"site": "C", "cab": "compact", "dining": "folded", "chairs": "open", "tdoor": False, "view": "chairs", "scene": "bright"}, "The chairs inside")
-    c3 = btn({"site": "C", "cab": "compact", "dining": "folded", "chairs": "cupboard", "tdoor": False, "view": "dining", "scene": "bright"}, "See it shut")
-    s1 = btn({"site": "C", "cab": "sliding", "dining": "six", "view": "dining", "scene": "bright"}, "See it in 3D")
-    s2 = btn({"site": "C", "cab": "sliding", "dining": "folded", "chairs": "cupboard", "tdoor": False, "view": "dining", "scene": "bright"}, "Shut")
-    return f"""<div class="opts">
-  <article class="opt"><img data-art="3d_c_six" alt="{html.escape(CAP3D['3d_c_six'])}" loading="lazy">
-    <div class="ob"><span class="label">The plan · six in comfort · {K['len']:.0f} cm</span><h3>The compact dining cabinet</h3>
-    <ul><li>Two oak boxes under the shelf, {K['len']:.0f} long and {K['d']:g} deep, flush with the pipe boxing: the table and all six chairs inside, {K['freed']:.0f} cm of wall back.</li>
-    <li>The table door turns back flat over the chair door and the table comes down to {K['len_open']:g} × {K['top'][0]:g}: three a side, the coffee table stays put.</li>
-    <li>Four chairs stand in the chair bay, two lie under the folded table; their six tie-on pads hang on the table door.</li>
-    <li>Tap it in the 3D room to open it, fold it or show the chairs.</li>
-    <li class="minus">Push the ottoman to the sofa while it's out.</li></ul>{c} {c2} {c3}</div></article>
-  <article class="opt"><img data-art="3d_s_six" alt="{html.escape(CAP3D['3d_s_six'])}" loading="lazy">
-    <div class="ob"><span class="label">The alternative · {O['z'][0] - O['z'][1]:.0f} cm</span><h3>The sliding dining cabinet</h3>
-    <ul><li>The same table and chairs behind two sliding doors: nothing ever swings into the room.</li>
-    <li>A drawer for the mats; the chairs stand two across.</li>
-    <li class="minus">{O['z'][0] - O['z'][1] - K['len']:.0f} cm longer: each sliding door needs a door's width to park in.</li></ul>{s1} {s2}</div></article>
-  <article class="opt"><img data-art="3d_dining_B_four" alt="Option B in 3D: the table down for four under the shelf by the stairs" loading="lazy">
-    <div class="ob"><span class="label">B · the flip-top · the alternative</span><h3>A flip-top under your shelf</h3>
-    <ul><li>Opens into the room: three a side and one at the end.</li><li>Out of the door's swing, under the pendant point; frees the breast for the “now playing” ledge.</li>
-    <li>Your solid stairs wall: plugs and screws.</li><li class="minus">Side chairs tight: {south - g.CHAIR[1] + 8:.0f} and {north - g.CHAIR[1] + 8:.0f} cm behind them; the lamp moves while it's open.</li></ul>{b}</div></article>
-  <article class="opt"><img data-art="3d_dining_A_four" alt="Option A in 3D: the table down for four on the chimney breast" loading="lazy">
-    <div class="ob"><span class="label">A · the flip-top · the alternative</span><h3>A flip-top on the chimney breast</h3>
-    <ul><li>The flip-top opens towards the window: four with room, six elbows-in.</li><li>Solid breast: plugs and screws, no surprises.</li>
-    <li class="minus">No seat at its end (the sofa); one chair in the door's swing.</li></ul>{a}</div></article>
-</div>"""
+    import fit
+    K, K8 = g.CAB, g.CAB80
+    st, s8 = fit.optc_seats(K), fit.optc_seats(K8)
+    plate = 27.0
+    def btn(opts, lab, cls="btn"):
+        return f"<button type=\"button\" class=\"{cls}\" data-r3d='{json.dumps(opts)}'>{lab}</button>"
+    def card(k, C, t, img, lab, h3, extra, minus):
+        base = {"site": "C", "cab": "compact", "cabw": k, "scene": "bright"}
+        rows = [("On the wall", f"{C['len']:.1f} × {C['d']:g} × {C['h']:g}, two oak boxes"),
+                ("Wall left free", f"{C['freed']:.1f} by the pipe boxing"),
+                ("At the table", f"<b>{t['comfort']} in comfort</b>, three a side, {t['stair'][1]:.0f} of edge each"),
+                ("Across the table", f"{C['top'][0]:g} wide: {C['top'][0] - 2 * plate:g} down the middle between two plates"),
+                ("Chairs inside", extra),
+                ("The table door", f"{C['door_tw']:g} wide, turned back flat over the chair door")]
+        dl = "".join(f"<dt>{a}</dt><dd>{b}</dd>" for a, b in rows)
+        return (f'<article class="opt{" on" if k == "90" else ""}"><img data-art="{img}" alt="{html.escape(CAP3D[img])}" loading="lazy">'
+                f'<div class="ob"><span class="label">{lab}</span><h3>{h3}</h3><dl class="cmp">{dl}</dl>'
+                + "".join(f'<p class="caption minus">{m}</p>' for m in minus)
+                + btn(dict(base, dining="six", view="dining"), "See it open in 3D") + " "
+                + btn(dict(base, dining="folded", chairs="cupboard", tdoor=False, view="dining"), "See it shut") + " "
+                + btn(dict(base, dining="folded", chairs="open", tdoor=False, view="chairs"), "The chairs inside")
+                + f' <button type="button" class="btn ghost" data-decide="cabw" data-v="{k}">Pick this one</button></div></article>')
+    return ('<div class="opts cmp2">'
+            + card("90", K, st, "3d_c_six", f"The plan · {K['len']:.1f} cm of wall", "The compact cabinet, a 90-wide table",
+                   f"All six of your padded chairs: four standing, two lying in the base", ["Push the ottoman to the sofa while it's out."])
+            + card("80", K8, s8, "3d_c80_six", f"The more compact version · {K8['len']:.1f} cm of wall", "The same cabinet, an 80-wide table",
+                   f"Four standing; the base is {K8['bay_t']:g} wide, too narrow for two lying ({g.CHAIR_PADDED['folded'][2]:g} + 1)",
+                   [f"{K['len'] - K8['len']:.0f} shorter, {K8['freed'] - K['freed']:.0f} more bare wall, but two chairs live elsewhere (the garage, or behind a door).",
+                    f"{K['top'][0] - K8['top'][0]:g} narrower: a jug and one dish down the middle at a time."])
+            + '</div><p class="caption">Tap the cabinet in the 3D room to swap its width; the Plan home\'s “Waiting on you” keeps your pick.</p>')
 
 
 def gallery3d():
@@ -870,10 +863,10 @@ def chapter_facts(rows, fc, nfit):
         "joinery": chips("The cutting list (copy it for the timber merchant)", "Housings, mortises and pegs: the joints drawing", "Worktop: step 7", "Uprights: step 9",
                          "Oak joinery " + _ph(rows, "5 Oak joinery")),
         "dining": chips(f"The compact dining cabinet: <b>{g.CAB['len']:g} × {g.CAB['d']:g} × {g.CAB['h']:g}</b> under your shelf, flush with the pipe boxing",
-                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>{g.OPTC['chairs']}</b> beech chairs inside it, their tie-on pads on the door",
+                        f"Table <b>{g.CAB['len_open']:g} × {g.CAB['top'][0]:g}</b>: six in comfort, three a side", f"All <b>six</b> of your grey padded folding chairs inside it, folded 90 × 10 × 47",
                         f"Beside it, {g.BESIDE['len']:.0f} cm of wall: a mirror, a slim trolley or a low oak shelf (ideas)",
                         "Two hinged oak doors that turn right back; a linen shelf inside", f"Step 11 builds it, in {len(__import__('instructions').full()[11]['parts_full'])} stages", "Dining wall " + _ph(rows, "6 Dining wall"),
-                        f"The long sliding cabinet ({g.OPTC['z'][0] - g.OPTC['z'][1]:g}) and the flip-top are the alternatives"),   # v27; v30: the compact cabinet
+                        f"Or the more compact version: an {g.CAB80['top'][0]:g}-wide table, {g.CAB80['len']:.1f} long, four chairs inside"),   # v27; v30: the compact cabinet; v33: the only table
         "paint": f'<ul class="facts">{paints}</ul>' + chips(*[f"<b>{n}</b> {html.escape(SC.COLOURS[k])}" for k, n, *_ in SC.SCENES])
                  + chips("Smart E14 bulbs in both bars, no dimmers", "Paint " + _ph(rows, "3 Paint"), "Lighting " + _ph(rows, "7 Lighting")),
         "network": chips("Virgin Hub 5 in modem mode", "Three Deco X1500s", "Two TL-SG108 switches", "Cat6 runs on step 3",
@@ -934,6 +927,10 @@ def _page(site=False):
             + "</li>" for r in items)
         when = f' · <a href="#build" data-go="build" data-step="{p["step"]}">before step {p["step"]}</a>' if p["step"] else ""
         cost = f"£{money(p['lo'], p['hi'])}" if p["hi"] else "jobs only"
+        if p["name"] == "6 Dining wall":   # v33: the buy list follows the pick (Decide)
+            lis = (f'<li class="picknote" data-picknote="cabw" hidden><span class="ms" aria-hidden="true">straighten</span><span>Your pick: the {G.CAB80["top"][0]:g}-wide table. The same rows with a little less oak and ply: '
+                   f'the halves {G.CAB80["top"][0]:g} wide, the table box {G.CAB80["bay_t"]:g} inside, the cabinet {G.CAB80["len"]:.1f} long. Six chairs still to buy; four live inside.</span></li>'
+                   + lis.replace("in Olive (or Honey or Ivory)", '<span data-pickpads>in Olive (or Honey or Ivory)</span>'))
         ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{part_chip(PHASE_PART[p["name"]])} {html.escape(p["name"])}</span>'
                        f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')
     step_cards = []
@@ -946,6 +943,7 @@ def _page(site=False):
             f'<div><p class="sparts">{part_chip(s["part"])}</p><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
             f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label>'
             f'<button type="button" class="sopen" aria-expanded="true" aria-controls="sb-{s["n"]}">Close</button></div>'
+            f'<p class="sbday"><button type="button" class="btn" data-bday="{s["n"]}"><span class="ms" aria-hidden="true">handyman</span> Build day: this step on one screen</button></p>'
             f'<div class="sbody" id="sb-{s["n"]}">'
             + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
             + need_html(s)
@@ -957,7 +955,9 @@ def _page(site=False):
             f'<p class="snext"><button type="button" class="btn" data-next="{s["n"]}">Next step →</button></p></div></li>')
     data = {"img": imgs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
             "phases": [{k: p[k] for k in ("name", "idx", "lo", "hi")} for p in phases], "top": 200 * -(-max(p["hi"] for p in phases) // 200),
-            "steps": len(steps()), "tabs": [t for t, _ in TABS]}
+            "steps": len(steps()), "tabs": [t for t, _ in TABS],
+            # v33: one count, Decide, the shortlist, build day (plan_ui.py)
+            "plan": [lo_tot, hi_tot], "decide": PU.decisions(), "short": PU.shortlist(), "bday": PU.buildday(steps())}
     used = [k for k in PARTS if any(k in st["part"] for st in steps())]
     part_buttons = "".join(f'<button type="button" data-part="{html.escape(k)}" aria-pressed="false"><span class="dot" style="background:{PARTS[k]}"></span>{html.escape(k)}</button>' for k in used)
     segbar = "".join(f'<i data-s="{s["n"]}" style="--pc:{PARTS[s["part"][0]]}" title="{s["n"]}. {html.escape(s["title"])}"></i>' for s in steps())
@@ -991,15 +991,14 @@ def _page(site=False):
               else f'<p class="caption">Also on <a href="{PAGES}" target="_blank" rel="noopener">GitHub Pages</a>.</p>')
 
     plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
-      <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the fold-down table, the network and power: about £{money(lo_tot, hi_tot)} in all.</p></div>
-      <div class="rings">{ring("build", 50, "build steps", "build")}{ring("buy", 165, "bought", "buy")}</div>
-      <p class="caption" id="d-paid">£0 paid so far</p>
+      <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the compact dining cabinet, the network and power: about <b id="d-total">£{money(lo_tot, hi_tot)}</b> in all.</p></div>
+      {PU.plan_home(ring, sum(1 for r in rows if r["kind"] == "buy"), len(steps())).replace("{MONEY}", PU.money_html(TRACK))}
       <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
       <div class="sec-h"><h2>Chapters</h2></div>
       <div class="tilegrid">{tiles}</div>
-      <div class="sec-h"><h2>The table: the dining cabinet</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
+      <div class="sec-h"><h2>The table: 90 or 80 wide, side by side</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
       {options_card()}
       <details class="fold"><summary>The plan on a page</summary><div class="doc">{s1}</div></details>
       <!--keep--><details class="fold changes"><summary>What changed in v{VERSION}</summary><div class="doc"><p>{decision}</p></div></details><!--/keep-->
@@ -1010,7 +1009,7 @@ def _page(site=False):
         chapter("records", more(f'<div class="doc">{sec["4"]}</div>')),
         chapter("side", more(f'<div class="doc">{sec["6"]}</div>')),
         chapter("joinery", '<p><a class="btn" href="#build" data-go="build" data-find="Cutting list">Open the cutting list (copy it as text)</a></p>' + more(f'<div class="doc">{sec["7"]}</div>')),
-        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">The table: the dining cabinet, or the flip-top</h2>{options_card()}</div>'
+        chapter("dining", f'<div class="panel" id="dining"><nav class="toc" aria-label="In this chapter"></nav><div class="block"><h2 class="ptitle">The table: the compact dining cabinet, 90 or 80 wide</h2>{options_card()}</div>'
                           + more(f'<div class="doc">{sec["5"]}</div>') + '</div>'),
         chapter("paint", f'<div class="panel" id="paint">{preset_cards()}' + more(f'<div class="doc">{sec["8"]}</div>') + '</div>'),
         chapter("network", more(f'<div class="panel" id="network"><nav class="toc" aria-label="In this chapter"></nav><div class="doc">{sec["9"]}</div></div>')),
@@ -1020,8 +1019,6 @@ def _page(site=False):
       <div class="group"><span class="label" id="l-style">View</span>
         <div class="seg" role="group" aria-labelledby="l-style">
           <button id="s-join" data-style="join" aria-pressed="true">Artisan oak (main)</button>
-          <button id="s-four" data-style="four" aria-pressed="false">Dining, four at the wall</button>
-          <button id="s-six" data-style="six" aria-pressed="false">Dining, six in the room</button>
           <button id="s-side" data-style="side" aria-pressed="false">PC side wall</button>
           <button id="s-drawers" data-style="drawers" aria-pressed="false">Drawers open</button>
         </div></div>
@@ -1090,16 +1087,18 @@ def _page(site=False):
   </section>"""
     buy_body = f"""<section class="panel" id="buy">
     <div class="tiles">
-      <div><strong>£{money(lo_tot, hi_tot)}</strong><span>the whole plan; no electrician on top</span></div>
-      <div><strong id="t-left">£{money(lo_tot, hi_tot)}</strong><span>still to buy: the items not ticked yet</span></div>
+      <div><strong id="t-plan">£{money(lo_tot, hi_tot)}</strong><span id="t-plans">the whole plan, {sum(1 for r in rows if r["kind"] == "buy")} things to buy; no electrician on top</span></div>
+      <div><strong id="t-done">0 of {sum(1 for r in rows if r["kind"] == "buy")}</strong><span>things bought · <b id="t-left">nothing ticked yet</b></span></div>
       <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
-      <div><strong id="t-done">0 of {len(rows)}</strong><span>items and jobs ticked off</span></div>
+      <div><strong id="t-jobs">0 of {len(rows) - sum(1 for r in rows if r["kind"] == "buy")}</strong><span>jobs on the list done (the {len(steps())} build steps tick in Build)</span></div>
     </div>
+    <div class="picked" id="picked" hidden><div class="qhead"><h3 class="ptitle">Added by you</h3><span class="caption" id="picked-sum"></span></div><ul id="picked-l"></ul></div>
     {cost_overview()}
     <div class="qhead"><h3 class="ptitle">The buy list, in build order</h3>
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-filter="all" aria-pressed="true">Everything</button>
         <button type="button" data-filter="left" aria-pressed="false">Still to buy</button>
+        <button type="button" data-filter="buys" aria-pressed="false">Things to buy</button>
         <button type="button" data-filter="jobs" aria-pressed="false">Jobs only</button>
       </div></div>
     <p class="caption" id="t-note">Each phase says which build step it's needed for. Tick each item off and write in what you paid; it saves for both of you.</p>
@@ -1108,6 +1107,7 @@ def _page(site=False):
     <p class="notice">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles. Estimates are approximate UK prices.</p>
   </section>"""
     ideas_body = f"""<section class="panel" id="ideas">
+    <div class="shortbar" id="shortbar"><div><span class="label" id="sb-count">Nothing added to the plan yet</span><b id="sb-total">The plan: £{money(lo_tot, hi_tot)}</b></div><a class="btn" href="#buy" data-go="buy">See the buy list</a></div>
     <div class="block"><h2 class="ptitle">Suggestions in the room</h2><p class="caption">Each one switches the room too: close this to see them.</p>{sugg_chips}</div>
     {ideas_panel()}
   </section>"""
@@ -1133,6 +1133,7 @@ def _page(site=False):
   <div class="lbscroll" id="lb-scroll"><div class="lbwrap"><img id="lb-img" alt=""><img id="lb-dims" alt="" hidden></div></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+{PU.overlays()}
 <script>
 const DATA = {json.dumps(data)};
 const SITE = {json.dumps(site)};

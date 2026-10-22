@@ -161,6 +161,8 @@ def scene():
     }
     room_spec["OPTC"] = G.OPTC                 # v26: option C, the dining cabinet (v27: the plan) (built in the browser)
     room_spec["CAB"] = G.CAB                   # v30: the compact dining cabinet, the plan (OPTC: the sliding one, the alternative)
+    room_spec["CAB80"] = G.CAB80   # v33: the more compact version, an 80-wide table
+    room_spec["CHAIR_PADDED"] = G.CHAIR_PADDED   # v33: the grey padded chairs, drawn at the table
     room_spec["BESIDE"] = G.BESIDE             # v31: what could stand beside it
     from build_doc import VERSION
     room_spec["VERSION"] = VERSION             # v30: the plan's version, for the name of a picture saved from the 3D room

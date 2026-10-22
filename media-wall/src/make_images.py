@@ -43,8 +43,7 @@ def main(diagrams=True):
         ("v13_join_clean.svg", OUT / f"Media wall v{VERSION} - artisan oak - Card Room Green, table by the stairs (HD).png", W, H, 2.0),
         ("v13_join_key.svg", OUT / f"Media wall v{VERSION} - artisan oak - numbered key (HD).png", KW, H, 2.0),
         ("v13_join_dims.svg", OUT / f"Media wall v{VERSION} - artisan oak - heights and widths (HD).png", W, H, 2.0),
-        ("v13_dining_four.svg", OUT / f"Media wall v{VERSION} - option A, flip-top set for four (HD).png", W, H, 2.0),
-        ("v13_dining_six.svg", OUT / f"Media wall v{VERSION} - option A, flip-top set for six (HD).png", W, H, 2.0),
+        # v33: the flip-top is set aside, so its two HD pictures are no longer made (its drawn views stay for the page's art)
         ("v13_side.svg", OUT / f"Media wall v{VERSION} - the PC side wall (HD).png", W, H, 2.0),
         ("v13_side.svg", "render_v13_side.png", W, H, 1.1),
         ("v13_drawers.svg", "render_v13_drawers.png", W, H, 1.1),

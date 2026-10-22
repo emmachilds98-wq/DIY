@@ -34,7 +34,7 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive" },   // v26: the oak, the floor, your shelf; v31: the seat pads
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
-              cab: "compact", tdoor: false,
+              cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
               cam: "orbit", pad: false, foot: false, beside: "clear" };   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
@@ -761,7 +761,7 @@ function placeChairs() {
    the compact cabinet (CAB) is the plan, the sliding one the alternative. S.site "C"; S.cab "compact" / "sliding"; S.dining folded /
    four / six; S.chairs "open" opens the chair door (the table folded); S.tdoor opens the table door with the table still folded.
    The doors move by tween (cabTween), so a tap in the room swings or slides them; a still (R3D.set) snaps them. */
-const cabC = () => (S.cab === "sliding" ? R.OPTC : R.CAB);   // v30: the cabinet on show
+const cabC = () => (S.cab === "sliding" ? R.OPTC : S.cabw === "80" && R.CAB80 ? R.CAB80 : R.CAB);   // v30: the cabinet on show; v33: its 80-wide version
 /* v32: everything in the cabinets that moves is an "anim": one number p, 0 to 1, and what it does to the model (a door's swing or
    slide, a chair drawn out, the table's joints); twTo eases p, the show sets it from its own clock */
 const ease = k => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
@@ -779,6 +779,8 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
     dark: mat({ color: "#241f1b", roughness: 0.9 }),
     beech: mat({ color: "#d4b58c", map: OAK_TEX, roughness: 0.6 }),       // the folding chairs
     pad: mat({ color: "#8e9a80", roughness: 0.95 }),                      // sage linen seat pads
+    linen: mat({ color: "#8f7d69", roughness: 0.97 }),                    // v33: the padded chairs' linen, the colour of your photo
+    linenBtn: mat({ color: "#6e5f4f", roughness: 0.8 }),                  // their buttons
     alu: mat({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }),
     steel: mat({ color: "#c9cbcd", roughness: 0.3, metalness: 0.9 }),     // v30: the piano hinges' knuckles
     plate: mat({ color: "#f4f1ea", roughness: 0.35 }),
@@ -827,6 +829,7 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
   K.seats = C => {
     const out = {}, [tz0, tz1] = C.tz, tx0 = C.tx[0], py = C.pivot[1], tt = C.top[2];
     const chairOpen = (g, x, z, face) => {
+      if (R.CHAIR_PADDED) return paddedOpen(g, x, z, face);   // v33: your grey padded chairs are the plan's
       const c = new THREE.Group(), sw = R.CHAIR[0], sd = R.CHAIR[1], sh = R.CHAIR[3], bh = R.CHAIR[2];
       for (let i = 0; i < 4; i++) lb(c, 0, sh - 2.2, -sd / 2 + 6 + i * 9.4, sw - 4, 2.2, 8.2, K.beech);         // the seat's slats
       for (const xx of [-sw / 2 + 1.5, sw / 2 - 1.5]) {
@@ -843,6 +846,39 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
       c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0;                                     // the back away from the table (local +z is the back)
       g.add(c);
     };
+    // v33: your padded folding chairs (Brayden Studio), drawn from the photo you sent (inputs/chairs_padded_listing_photo.webp): bent-wood
+    // sides, each back upright curving forward at the seat into the front leg, the back leg crossing it under the seat; a thick buttoned
+    // cushion on the seat (47 × 47, 6.5) and a buttoned pad between the uprights, reclined to 110°
+    const seg = (c, x, y1, z1, y2, z2, w, d, mat) => {
+      const L = Math.hypot(y2 - y1, z2 - z1), m = new THREE.Mesh(new THREE.BoxGeometry(w * M, L * M, d * M), mat);
+      m.position.copy(v3(x, (y1 + y2) / 2, (z1 + z2) / 2)); m.rotation.x = Math.atan2(z2 - z1, y2 - y1); c.add(shadow(m)); return m;
+    };
+    const BTN = new THREE.CylinderGeometry(0.008, 0.008, 0.005, 10);
+    const buttons = (mesh, cols, rows, w, h, face) => {     // buttons on a cushion's face (its own frame: x across, y up or z along)
+      for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+        const b = new THREE.Mesh(BTN, K.linenBtn), u = ((i + 0.5) / cols - 0.5) * w * M, v = ((j + 0.5) / rows - 0.5) * h * M;
+        if (face === "top") b.position.set(u, 0, v); else { b.position.set(u, v, 0); b.rotation.x = Math.PI / 2; }
+        b.position[face === "top" ? "y" : "z"] = face === "top" ? mesh.userData.t / 2 * M : -mesh.userData.t / 2 * M;
+        mesh.add(b);
+      }
+    };
+    const paddedOpen = (g, x, z, face) => {
+      const P = R.CHAIR_PADDED, c = new THREE.Group(), sw = P.w, sh = P.seat_h, bh = P.h, [cw, cd] = P.seat, cu = P.cushion;
+      for (const sd of [-1, 1]) {
+        const xx = sd * (sw / 2 - 1.5);
+        seg(c, xx, bh, 24, 56, 19.5, 2.6, 3.2, K.beech);           // the back upright, leaning back
+        seg(c, xx, 56.6, 19.6, 48.5, 15.6, 2.6, 3.2, K.beech);     // the bend forward at the seat
+        seg(c, xx, 49.2, 16.2, 42, 9.5, 2.6, 3.2, K.beech);
+        seg(c, xx, 42.6, 10.2, 0, -26, 2.6, 3.4, K.beech);         // on down into the front leg
+        seg(c, xx * 0.92, 40, -16, 0, 22, 2.6, 3.4, K.beech);      // the back leg, crossing it under the seat
+      }
+      seg(c, 0, 37.5, -20, 37.5, 16, sw - 6, 1.4, K.dark);         // the seat's board, under the cushion
+      const seat = new THREE.Mesh(new RoundedBoxGeometry((cw - 1) * M, cu * M, (cd - 1) * M, 3, 0.022), K.linen);
+      seat.userData.t = cu; seat.position.copy(v3(0, sh - cu / 2, -3)); c.add(shadow(seat)); buttons(seat, 3, 3, cw - 13, cd - 13, "top");
+      const back = new THREE.Mesh(new RoundedBoxGeometry((sw - 5.6) * M, 22 * M, 5 * M, 3, 0.02), K.linen);
+      back.userData.t = 5; back.position.copy(v3(0, 67.5, 20.6)); back.rotation.x = Math.atan2(4.5, 22.7); c.add(shadow(back)); buttons(back, 3, 2, sw - 18, 12, "front");
+      c.position.copy(v3(x, 0, z)); c.rotation.y = { n: 0, w: Math.PI, e: Math.PI / 2 }[face] || 0; g.add(c);
+    };
     for (const [k, list] of Object.entries(C.seats)) {
       const g = new THREE.Group(); g.userData.chairs = [];
       for (const [x, z, f] of list) {
@@ -857,24 +893,26 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
     return out;
   };
   // a folded chair standing up, its room-side face at x0 (cz its centre along the wall)
+  // v33: a folded chair standing up (your grey padded ones, 47 wide, 10 thick, 90 tall), its room-side face at x0, cz its centre along the wall
+  const FOLD = () => (R.CHAIR_PADDED ? R.CHAIR_PADDED.folded : R.CHAIR_FOLDED);
   K.fchair = (g, x0, y0, cz) => {
-    const [cw, cdep, ch] = R.CHAIR_FOLDED;
+    const [cw, cdep, ch] = FOLD();
     for (const sd of [-1, 1]) {
-      K.bx(g, x0 + cdep - 3, y0, cz + sd * (cw / 2 - 1.3) - 1.3, 2.6, ch, 2.6, K.beech);                // the back legs
-      K.bx(g, x0 + 0.4, y0 + 2, cz + sd * (cw / 2 - 4) - 1.3, 2.6, ch - 14, 2.6, K.beech);             // the front legs, folded up against them
+      K.bx(g, x0 + cdep - 2.8, y0, cz + sd * (cw / 2 - 1.4) - 1.4, 2.8, ch, 2.8, K.beech);                // the back legs
+      K.bx(g, x0 + 0.3, y0 + 2, cz + sd * (cw / 2 - 4.2) - 1.4, 2.8, ch - 16, 2.8, K.beech);           // the front legs, folded up against them
     }
-    for (let i = 0; i < 4; i++) K.bx(g, x0 + 3.2, y0 + 30 + i * 9.4, cz - (cw / 2 - 5), 2.2, 8.2, cw - 10, K.beech);   // the seat, folded up
-    for (const y of [ch - 9, ch - 21]) K.bx(g, x0 + cdep - 3.4, y0 + y, cz - (cw / 2 - 3), 1.8, 7, cw - 6, K.beech);  // the back rails
+    K.rbx(g, x0 + 2.4, y0 + 22, cz - (cw / 2 - 4.5), cdep - 5.4, 46, cw - 9, K.linen, 1.5);              // the seat's cushion, folded up
+    K.rbx(g, x0 + cdep - 4.6, y0 + ch - 34, cz - (cw / 2 - 3.5), 2.0, 28, cw - 7, K.linen, 0.8);          // the padded back
   };
-  // v30: a folded chair lying on its side (the compact cabinet's base): its length along the wall, its room-side face at x0
+  // a folded chair lying on its side (the table box's base): its length along the wall, its room-side face at x0
   K.fchairLying = (g, x0, y0, cz) => {
-    const [cw, cdep, ch] = R.CHAIR_FOLDED, zA = cz - ch / 2;
+    const [cw, cdep, ch] = FOLD(), zA = cz - ch / 2;
     for (const sd of [-1, 1]) {
-      K.bx(g, x0 + cdep - 3, y0 + cw / 2 + sd * (cw / 2 - 1.3) - 1.3, zA, 2.6, 2.6, ch, K.beech);        // the back legs, along the wall
-      K.bx(g, x0 + 0.4, y0 + cw / 2 + sd * (cw / 2 - 4) - 1.3, zA + 2, 2.6, 2.6, ch - 14, K.beech);
+      K.bx(g, x0 + cdep - 2.8, y0 + cw / 2 + sd * (cw / 2 - 1.4) - 1.4, zA, 2.8, 2.8, ch, K.beech);
+      K.bx(g, x0 + 0.3, y0 + cw / 2 + sd * (cw / 2 - 4.2) - 1.4, zA + 2, 2.8, 2.8, ch - 16, K.beech);
     }
-    for (let i = 0; i < 4; i++) K.bx(g, x0 + 3.2, y0 + 5, zA + 30 + i * 9.4, 2.2, cw - 10, 8.2, K.beech);
-    for (const z of [ch - 9, ch - 21]) K.bx(g, x0 + cdep - 3.4, y0 + 3, zA + z, 1.8, cw - 6, 7, K.beech);
+    K.rbx(g, x0 + 2.4, y0 + 4.5, zA + 22, cdep - 5.4, cw - 9, 46, K.linen, 1.5);
+    K.rbx(g, x0 + cdep - 4.6, y0 + 3.5, zA + ch - 34, 2.0, cw - 7, 28, K.linen, 0.8);
   };
   CK = K;
   return K;
@@ -953,24 +991,25 @@ function buildOptC() {
    door turns 180° towards the window and lies back over the chair door and the wall beyond; the chair door turns 180° towards the
    stairs and lies back over the table door. */
 let cab = null, cabRig = null, cabSeats = {}, cabIn = null, cabDoor = {}, cabPads = null, cabLit = [];
-function buildCab() {
-  const C = R.CAB; if (!C) return;
+function buildCab(C = cabC()) {
+  if (!C) return;
   const K = cabKit(), bx = K.bx, W = R.W, t = C.t, xf = C.front, xi = C.inner, deepIn = C.in_d;
   const [cw, cdep] = R.CHAIR_FOLDED;
-  cab = new THREE.Group(); cab.name = "cab";
+  cab = new THREE.Group(); cab.name = "cab"; cab.userData.w = C.top[0];
+  const cbox = new THREE.Group(), packs = true;   // v33: the chair box in its own group
   // two carcasses: each two ends, a top, a floor on a plinth set 2.5 back (a shadow line), a back; the boxes screwed together
   for (const [a, b] of [C.z_t, C.z_c]) {
-    const span = a - b - 2 * t;
-    bx(cab, xf, 0, b, C.d, C.h, t, K.oakV); bx(cab, xf, 0, a - t, C.d, C.h, t, K.oakV);
-    bx(cab, xf, C.h - C.t_top, b + t, C.d, C.t_top, span, K.oak);
-    bx(cab, xf, C.plinth - t, b + t, C.d, t, span, K.oak);
-    bx(cab, xf + 2.5, 0, b + t, C.d - 2.5, C.plinth - t, span, K.dark);
-    bx(cab, W - C.back, C.plinth, b + t, C.back, C.h - C.plinth - C.t_top, span, K.oakIn);
+    const span = a - b - 2 * t, tg = a === C.z_c[0] ? cbox : cab;
+    bx(tg, xf, 0, b, C.d, C.h, t, K.oakV); bx(tg, xf, 0, a - t, C.d, C.h, t, K.oakV);
+    bx(tg, xf, C.h - C.t_top, b + t, C.d, C.t_top, span, K.oak);
+    bx(tg, xf, C.plinth - t, b + t, C.d, t, span, K.oak);
+    bx(tg, xf + 2.5, 0, b + t, C.d - 2.5, C.plinth - t, span, K.dark);
+    bx(tg, W - C.back, C.plinth, b + t, C.back, C.h - C.plinth - C.t_top, span, K.oakIn);
   }
   const [bt0, bt1] = C.bay_tz, [bc0, bc1] = C.bay_cz;
   bx(cab, C.rail_x[0], C.rail[0], bt1, C.rail_x[1] - C.rail_x[0], 7, bt0 - bt1, K.oak);         // the hinge rail (v31: set back behind the pads)
   bx(cab, xi + C.pads, C.linen[0] - t, bt1, C.linen_d, t, bt0 - bt1, K.oakIn);                    // the linen shelf (v31: the same)
-  bx(cab, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, K.oakIn);                                     // the chair bay's shelf
+  bx(cbox, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, K.oakIn);                                    // the chair bay's shelf
   [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(cab, xi + C.pads + 1 + i * 0.4, C.linen[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - C.pads - 2, 3, 34, K.cloth[c]));   // the cloth, napkins, runner
   // the chairs: two lying in the base, two deep; four standing in the chair bay, two deep on its floor and on its shelf
   cabIn = new THREE.Group();
@@ -995,7 +1034,8 @@ function buildCab() {
     cab.add(g); cabDoor[key] = g; return g;
   };
   door("T", C.door_t[0], C.door_t[1], C.door_t[1] - C.hinge_gap / 2);
-  door("C", C.door_c[0], C.door_c[1], C.door_c[0] + C.hinge_gap / 2);
+  door("C", C.door_c[0], C.door_c[1], C.door_c[0] + C.hinge_gap / 2); cbox.add(cabDoor.C);
+  cbox.visible = packs; cabIn.visible = packs; cab.add(cbox);
   // the six pads on the table door's back, two across and three high, from the hinge rail's underside up (v31: 40 × 40 tie-on pads,
   // their ties hanging; the rail and the linen shelf stand back so they can)
   cabPads = new THREE.Group();
@@ -1020,9 +1060,16 @@ function buildCab() {
     cab.add(g); }
   // v32: the pads lift off the door's back (into the room once it's open), the doors each turn 180°
   CABP.compact = { sl: false, C, doorT: anim(v => { cabDoor.T.rotation.y = Math.PI * v; cabLit[0].visible = v > 0.04; }), doorC: anim(v => { cabDoor.C.rotation.y = -Math.PI * v; cabLit[1].visible = v > 0.04; }),
-                   stand, base, pads: anim(v => { cabPads.position.x = -0.25 * v; cabPads.visible = v < 0.999; }), rig: cabRig.userData.rig,
+                   stand, base, pads: anim(v => { cabPads.position.x = -0.25 * v; cabPads.visible = false; }), rig: cabRig.userData.rig,
                    seats: { four: cabSeats.four.userData.chairs, six: cabSeats.six.userData.chairs } };
   scene.add(cab);
+}
+/* v33: the 80-wide version is the same build round a narrower table: swap the whole cabinet when the width changes */
+function rebuildCab() {
+  CAB_TW.clear();
+  scene.remove(cab); cab.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+  buildCab(cabC()); clipGroup(cab); applySuggest();
+  const was = cabSnap; cabSnap = true; cabGo(CABP.compact); cabSnap = was;
 }
 /* the cabinets' tween: each entry eases an anim's p to a target, after a wait (delay) if it has one; a still snaps them (cabSnap) */
 const CAB_TW = new Map();
@@ -1146,6 +1193,7 @@ function placeBeside() {
   if (!beside) return;
   const on = S.site === "C" && S.cab === "compact";
   for (const [k, g] of Object.entries(BES)) g.visible = on && S.beside === k;
+  beside.position.z = S.cabw === "80" && R.CAB80 ? (R.CAB.z[1] - R.CAB80.z[1]) / 2 * M : 0;   // v33: centred in the longer gap
 }
 /* v31: "Show the space it needs, open": with the table folded, the floor it takes when it's out for six: the table, the six chairs
    and (the compact one) the table door's swing, drawn flat on the floor */
@@ -1168,7 +1216,8 @@ function buildFoot(C) {
 }
 function placeFoot() {
   const want = !!S.foot && S.site === "C" && S.dining === "folded";
-  if (want && footKey !== S.cab) { if (foot) scene.remove(foot); foot = buildFoot(cabC()); clipGroup(foot); scene.add(foot); footKey = S.cab; }
+  const fk = S.cab + S.cabw;
+  if (want && footKey !== fk) { if (foot) scene.remove(foot); foot = buildFoot(cabC()); clipGroup(foot); scene.add(foot); footKey = fk; }
   if (foot) foot.visible = want;
 }
 function clipGroup(g) { g.traverse(o => { if (o.isMesh || o.isLine) [].concat(o.material).forEach(m => m && !m.clippingPlanes && clipMat(m)); }); }
@@ -1205,12 +1254,12 @@ function showSteps(P) {
     add("Slide door B shut", "", 2.6, [[P.doorC, 0, 0, 2.1]]);
     add("Slide door A open", "It runs on the front track, over door B. The table is behind it, folded face to face.", 3.3, [[P.doorT, 1, 0, 2.7]], "dining");
   } else {
-    add("Packed away", `Everything is inside: the table on its hinge rail, six chairs and their pads, in a cabinet ${Math.round(C.len)} long and ${Math.round(C.d)} deep.`, 2.6, [], "chairs");
+    add("Packed away", `Everything is inside: the table on its hinge rail and the six padded chairs, in a cabinet ${Math.round(C.len)} long and ${C.d} deep.`, 2.6, [], "chairs");
     add("Open the chair door", "It turns right round on its piano hinge and lies back against the table door.", 3.2, [[P.doorC, 1, 0, 2.6]]);
-    add("Take out four chairs", "Two from the floor and two from the shelf, the front ones first. Folded, each is 9 deep.", 4.1, each(P.stand, 1, 0.7, 1.4));
+    add("Take out four chairs", "Two from the floor and two from the shelf, the front ones first. Folded, each is 10 thick.", 4.1, each(P.stand, 1, 0.7, 1.4));
     add("Shut the chair door", "", 2.7, [[P.doorC, 0, 0, 2.2]]);
-    add("Open the table door", "It turns the other way, towards the window. The six seat pads hang on its back.", 3.4, [[P.doorT, 1, 0, 2.8]], "dining");
-    add("Take off the pads and two more chairs", "The pads come off their hooks, then the two chairs lying in the base slide out.", 4, [[P.pads, 1, 0, 1.2], ...each(P.base, 1, 0.7, 1.4, 1.2)]);
+    add("Open the table door", "It turns the other way, towards the window. The folded table is behind it.", 3.4, [[P.doorT, 1, 0, 2.8]], "dining");
+    if (P.base.length) add("Take out two more chairs", "The two lying in the base slide out, the front one first.", 3.2, each(P.base, 1, 0.7, 1.4));
   }
   add("Tilt the table out", "Both halves together, folded face to face, turn out on the piano hinge at the rail.", 3.3, rig(0, 1, 2.8), "unfold");
   add("Fold down the first two legs", "They swing down from under the first half and lock on their brackets.", 2.7, rig(1, 2, 2.2));
@@ -1218,7 +1267,7 @@ function showSteps(P) {
   add("Flip the second half over", "It turns over on the three flip-top hinges at the joint, its own legs still folded under it.", 3.9, rig(3, 4, 3.4));
   add("Fold down its two legs", "", 2.3, rig(4, 5, 1.8));
   add("Lay it flat", `The joint closes flush: the table is ${Math.round(C.len_open || C.len)} long and ${Math.round(C.top[0])} wide.`, 2.6, rig(5, 6, 1.8));
-  add("Six sit down", "The chairs unfold round it, a pad tied on each.", 4.6, each(P.seats.six, 0, 0.35, 1.2));
+  add("Six sit down", "The padded chairs unfold round it.", 4.6, each(P.seats.six, 0, 0.35, 1.2));
   return st;
 }
 function showOpen() {
@@ -1916,6 +1965,8 @@ function drop(group, list) {   // take a fixture and its lights out of the scene
 }
 let built = {};
 function applyState() {
+  S.site = "C"; S.cab = "compact"; if (S.cabw !== "80") S.cabw = "90";   // v33, client: "the compact cabinet is our only choice for the table now"
+  if (cab && cab.userData.w !== cabC().top[0]) rebuildCab();
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
   const b2 = `${S.site === "C" ? "B" : S.site}_${S.site === "C" ? (S.dining === "folded" ? "folded" : "six") : S.dining}`;   // v26: C lights like B
@@ -2682,7 +2733,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && tourSt) { 
 /* ---------------------------------------------------------------- v28: "copy link to this view"
    The look (where you stand and every choice, not Edit room's moves) as a plain #look-<token> (base64url JSON), which the page's
    router leaves alone. The link is always the GitHub Pages page, so anyone can open it. */
-const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], beside: null };   // v30: which cabinet; v31: beside it
+const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], cabw: ["90", "80"], beside: null };   // v30: which cabinet; v31: beside it
 const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor", "foot"];   // v31: the open table's floor
 const HEX = /^#[0-9a-f]{6}$/i;
 const cm = v => [-v.x / M, v.y / M, v.z / M].map(n => Math.round(n));
@@ -2819,12 +2870,12 @@ function openPop(id) {
   if (popId) stickEls[popId].setAttribute("aria-expanded", "false");
   popId = id; const el = stickEls[id]; el.setAttribute("aria-expanded", "true");
   pop.style.setProperty("--h", H.hue);
-  qs("#r3d-pop-h").textContent = H.name;
+  qs("#r3d-pop-h").textContent = `${H.n} · ${H.name}`;
   const ul = qs(".facts", pop); ul.textContent = "";
   H.facts.forEach(f => { const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); });
-  pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true });
+  pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true }); syncPlaces();
 }
-function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; }
+function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; try { syncPlaces(); } catch (e) {} }
 qsa(".stk").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); popId === b.dataset.hot ? closePop() : openPop(b.dataset.hot); }));
 if (pop) pop.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -2835,6 +2886,17 @@ if (pop) pop.addEventListener("click", e => {
   else if (b.dataset.popgo === "plan") { closePop(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: H.chapter } })); }
 });
 canvas.addEventListener("pointerdown", () => { if (popId) closePop(); });
+/* v33, the phone home: the places strip under the room; a tap flies to the place and opens its card, docked above the dock */
+qsa("[data-place]").forEach(b => b.addEventListener("click", e => {
+  e.stopPropagation(); const H = HOTS.find(h => h.id === b.dataset.place); if (!H) return;
+  if (popId === H.id) { closePop(); return; }
+  if (SH) showStop(true); setView(H.view); if (!labelsOn) setLabels(true);
+  setTimeout(() => { placeStickers(); if (stickEls[H.id] && !stickEls[H.id].hidden) openPop(H.id); else openPopAt(H.id); }, 950);
+}));
+function openPopAt(id) {    // the place's pin is off the picture: the card still opens (docked on a phone)
+  const el = stickEls[id]; if (!el) return; el.style.left = (stage.clientWidth / 2) + "px"; el.style.top = "60px"; openPop(id);
+}
+function syncPlaces() { qsa("[data-place]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.place === popId))); root.classList.toggle("popped", !!popId); }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && popId) { const was = popId; closePop(); stickEls[was].focus(); } });
 new ResizeObserver(() => placeStickers()).observe(stage);
 /* ---------------------------------------------------------------- v30, client: "make function so say i click the dining cabinet i can
@@ -2880,14 +2942,14 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id === "table" && S.site === "C") id = "cab";
   if (id === "cab") {
     const sl = S.cab === "sliding", d = cabDoors();
-    const st = !folded ? `Open for ${S.dining}: the table is out` : d.table ? "Packed away, the table door open" : d.chairs ? "Packed away, the chair door open" : "Packed away: the table and the six chairs inside";
-    return [sl ? "The sliding dining cabinet (the alternative)" : "The dining cabinet", st, [
+    const st = !folded ? `Open for ${S.dining}: the table is out` : d.table ? "Packed away, the table door open" : d.chairs ? "Packed away, the chair door open" : (S.cabw === "80" ? "Packed away: the table and four of the six chairs inside" : "Packed away: the table and the six chairs inside");
+    return [S.cabw === "80" ? "The dining cabinet, 80-wide table" : "The dining cabinet", st, [
       btn("Open for six", { dining: "six" }, S.dining === "six"), btn("Open for four", { dining: "four" }, S.dining === "four"),
       btn(folded ? "Folded away" : "Fold it away", { dining: "folded" }, folded),
       ...(folded ? [btn(d.table ? "Shut the table door" : "Open the table door", { tdoor: d.table ? "shut" : "open" }),
                     btn(d.chairs ? "Shut the chair door" : "Open the chair door", { chairs: d.chairs ? "cupboard" : "open" })] : []),
       btn("Watch it open, step by step", { showopen: "1" }),
-      btn(sl ? "Show the compact one" : "Show the sliding one", { cab: sl ? "compact" : "sliding" }),
+      btn(S.cabw === "80" ? "Show the 90-wide table (the plan)" : "Show the 80-wide version (10 shorter)", { cabw: S.cabw === "80" ? "90" : "80" }),
       btn("Look at it", { view: "dining" }), btn("Read about it", { actgo: "dining" })]];
   }
   if (id === "table") return [S.site === "A" ? "The flip-top on the breast (the alternative)" : "The flip-top by the stairs (the alternative)", folded ? "Folded" : `Open for ${S.dining}`, [
@@ -2973,7 +3035,7 @@ function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
 let baseFov = 50;
-const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (16 / 9) / asp) * 180 / Math.PI);
+const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (asp < 0.8 ? 1.45 : 16 / 9) / asp) * 180 / Math.PI);   // v33: portrait, tighter
 function sizeRenderer() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
@@ -3048,9 +3110,9 @@ function autoQuality() {
 function updateCaption() {
   try { updatePicks(); } catch (e) {}   // v22
   const sc = SCENES[S.scene];
-  const site = S.site === "A" ? "Table on the chimney breast" : S.site === "C" ? (S.cab === "sliding" ? "The sliding dining cabinet (the alternative)" : "The compact dining cabinet") : "Table under the shelf by the stairs";
+  const site = S.cabw === "80" ? "The compact dining cabinet, its 80-wide table" : "The compact dining cabinet";   // v33: the only table
   const cl = (cabC().len_open || cabC().len);
-  const din = S.site === "C" ? { folded: "folded away, the six chairs inside", four: `open, ${cl} long, for four`, six: `open, ${cl} long, for six` }[S.dining]
+  const din = S.site === "C" ? { folded: S.cabw === "80" ? "folded away, four chairs inside" : "folded away, the six chairs inside", four: `open, ${cl} long, for four`, six: `open, ${cl} long, for six` }[S.dining]
     : { folded: "folded on the wall", four: "open on its gate leg, for four", six: "open on its gate leg, for six" }[S.dining];
   const paint = S.paint === "custom" ? `your colour ${S.custom}` : R.PAINTS[S.paint].name;
   const lights = sameAsScene() && S.master === 100 ? sc.name : `your lighting (from ${sc.name})`;
@@ -3079,7 +3141,7 @@ function still(w, h) {
   return url;
 }
 function stillName() {
-  const site = S.site === "A" ? "breast" : S.site === "C" ? `stairs wall (the ${S.cab === "sliding" ? "sliding" : "compact"} cabinet)` : "stairs wall";
+  const site = `stairs wall (the compact cabinet${S.cabw === "80" ? ", 80 wide" : ""})`;
   return `Media wall v${R.VERSION || ""} - 3D - ${(VIEWS[S.view] || VIEWS.window).label.replace(/[’']/g, "")} - table on the ${site}, ${S.dining} - ${SCENES[S.scene].name}.png`;
 }
 qs("#r3d-save").addEventListener("click", async () => {
@@ -3108,7 +3170,7 @@ function syncButtons() {
   const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("paint", S.paint); press("lamp", S.lamp);
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
-  press("cab", S.cab); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
+  press("cab", S.cab); press("cabw", S.cabw); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
   press("cam", S.cam); press("pad", S.pad ? "on" : "off"); press("foot", S.foot ? "on" : "off"); press("beside", S.beside); syncEye();   // v31
   qsa("[data-tog]").forEach(b => b.setAttribute("aria-pressed", String(!!S[b.dataset.tog])));
   qsa("[data-idea]").forEach(b => b.setAttribute("aria-pressed", String(!!S.ideas[b.dataset.idea])));
@@ -3137,6 +3199,7 @@ root.addEventListener("click", e => {
   if (d.site) { S.site = d.site; applyState(); if (S.view === "dining") setView("dining"); }
   else if (d.dining) { S.dining = d.dining; S.tdoor = false; applyState(); if (S.view === "dining") setView("dining"); }   // v30: folding it shuts the door too
   else if (d.cab) { S.cab = d.cab; S.site = "C"; applyState(); if (S.view === "dining" || S.view === "chairs") setView(S.view); }   // v30: the compact or the sliding cabinet
+  else if (d.cabw) { S.cabw = d.cabw; applyState(); if (S.view === "dining" || S.view === "chairs") setView(S.view); }              // v33: the table 90 or 80 wide
   else if (d.tdoor) { S.tdoor = d.tdoor === "open"; if (S.tdoor && S.chairs === "open") S.chairs = "cupboard"; applyState(); }
   else if (d.scene) S.scene = d.scene, S.lv = Object.assign({}, SCENES[d.scene].levels), S.master = 100, applyLight(), updateCaption(), store.set(KEY, S);   // tapping the tile again resets it
   else if (d.tod) S.tod = d.tod, applyLight(), updateCaption(), store.set(KEY, S);
