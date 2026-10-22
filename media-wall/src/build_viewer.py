@@ -542,7 +542,7 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up), the vinyl stand back in the window corner",
          "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
-         "3d_ideas_breast": "Idea, not in the plan: the tall glass display case (v20: 85 tall, three glass shelves) on the chimney breast, oak, with collectibles, above the \u201cnow playing\u201d ledge",
+         "3d_glass_case": "The glass display case on the chimney breast, in the plan: 90 × 85 × 12, oak, three glass shelves lit inside, collectibles in it, above the \u201cnow playing\u201d ledge and your vinyl stand",
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
@@ -556,7 +556,10 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
          "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet: the table, the six chairs and the table door's swing",
          "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
-         "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that wheels out to the table's far end for dinner",
+         "3d_beside_trolley_out": "The slim trolley pulled out for dinner, beside the window-side diners and clear of the table door's swing (tap it in the 3D room: Pull it out for dinner)",
+         "3d_bar_shut": "The chimney breast: the glass case, and under it the drinks cabinet (a suggestion) with its oak front shut",
+         "3d_ottoman": "The new storage ottoman: navy velvet, 76 square, its padded lid lifted off the box inside",
+         "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that pulls out for dinner to stand behind the window-side diners",
          "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
          "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side, your hessian curtains on their wooden pole",
          "3d_doll": "Dolls\u2019 house view: the compact cabinet packed away under your shelf",
@@ -583,7 +586,7 @@ def item_card(stem, kind, k, title, size, cost, why, where):
     addp = (f' <button type="button" class="btn addplan" data-short="{kind}:{k}" aria-pressed="false"><span class="ms" aria-hidden="true">add</span><span class="t">Add to plan</span></button>'
             if kind in ("idea", "sugg") and cost else "")   # v33: the ideas shortlist
     meta = " · ".join(x for x in (html.escape(size), f"about £{cost[0]}–{cost[1]}" if cost else "") if x)
-    return (f'<article class="opt"><button type="button" class="g3d" data-full="{stem}"><img data-art="{stem}" alt="{html.escape(CAP3D[stem])}" loading="lazy"></button>'
+    return (f'<article class="opt" id="it-{kind}-{k}"><button type="button" class="g3d" data-full="{stem}"><img data-art="{stem}" alt="{html.escape(CAP3D[stem])}" loading="lazy"></button>'
             f'<div class="ob"><span class="label">{meta}</span><h3>{html.escape(title)}</h3>'
             + (f'<p>{html.escape(why)}</p>' if why else "") + (f'<p class="caption">{html.escape(where)}</p>' if where else "")
             + f"<button type='button' class='btn' data-r3d='{json.dumps(o)}'><span class='ms' aria-hidden='true'>view_in_ar</span> {lab}</button>{addp}</div></article>")
@@ -607,8 +610,8 @@ def suggest_block():
     rows = "".join(item_card(f"3d_sg_{k}", "sugg", k, t, size, c, why, where) for k, t, size, c, why, where in I.SUGGEST)
     lo, hi = I.suggest_low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Suggested furniture and decor</h2><span class="caption">Each one on or off, in the 3D room: none are in the plan or the costs</span></div>'
-            f'<figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
-            f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure>'
+            f'<div class="gallery"><figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
+            f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure></div>'
             f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start, and two or three versions; the floor pieces move in Edit room. '
             f'All {len(I.SUGGEST)} together would be about £{lo}–{hi}.</p>'
             f'<div class="opts">{rows}</div>'
@@ -632,7 +635,7 @@ def decor_block():
     b = ("<button type='button' class='btn' data-r3d='" + json.dumps({"site": "C", "view": "door", "decor": {"rug": "stripes", "cushions": "rust", "curtains": "linen"}})
          + "'>Try decor in the 3D room</button>")
     return (f'<div class="qhead"><h2 class="ptitle">Decor to try</h2><span class="caption">In the 3D room, under “Decor”: your choices are kept on this device</span></div>'
-            f'<ul>{rows}</ul><p class="caption">Picking what goes in the glass case turns the case on (on the chimney breast, which the dining cabinet leaves free). '
+            f'<ul>{rows}</ul><p class="caption">The glass case on the chimney breast is in the plan: pick what goes in it and its frame here. '
             f'In Edit room, “Add” now has a floor vase with grasses, a knitted pouffe, a seagrass basket for throws, an oak floor mirror and a lantern, as well as the armchair, bookcase and the rest.</p>'
             f'<div class="gallery">{figs}</div>{b}')
 

@@ -5,13 +5,16 @@ url = sys.argv[1]; w, h = int(sys.argv[2]), int(sys.argv[3])
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--enable-webgl", "--ignore-gpu-blocklist"])
     pg = b.new_page(viewport={"width": w, "height": h}, is_mobile=w < 600, has_touch=w < 600); errs = []
+    __import__("localcdn").route(pg)   # v34: three.js from THREE_LOCAL, if set
     pg.on("pageerror", lambda e: errs.append("PAGEERROR: " + str(e)[:400])); pg.on("console", lambda m: errs.append(m.type + ": " + m.text[:300]) if m.type in ("error", "warning") else None)
-    pg.goto(url); pg.wait_for_function("window.R3D && window.R3D.ready", timeout=180000); pg.wait_for_timeout(800)
+    pg.goto(url, wait_until="domcontentloaded", timeout=120000); pg.wait_for_function("window.R3D && window.R3D.ready", timeout=180000)
+    pg.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))"); pg.wait_for_timeout(800)   # v35: after the first frame (its shaders)
+    P = "() => R3D._dbg.gl.info.programs.length"
     def step(name, fn):
         n = len(errs); t = time.time()
         try: fn()
-        except Exception as e: errs.append(f"STEP {name} failed: {str(e)[:200]}")
-        pg.wait_for_timeout(500); print(f"{name}: {round((time.time()-t)*1000)} ms, new errors {errs[n:]}")
+        except Exception as e: errs.append(f"STEP {name} failed: {str(e)[:900]}")
+        pg.wait_for_timeout(500); print(f"{name}: {round((time.time()-t)*1000)} ms, programs {pg.evaluate(P)}, new errors {errs[n:]}")
     cx, cy = w // 2, h // 2
     step("edit on", lambda: pg.click("#r3d-editbtn"))
     step("add list", lambda: pg.click("#r3d-add"))
@@ -29,7 +32,7 @@ with sync_playwright() as p:
     step("edit off", lambda: pg.click("#r3d-editdone"))
     # tools panel changes
     for sel in ("[data-drawer=look]", "[data-decor='oak:walnut']", "[data-decor='floor:boards']", "[data-drawer=lights]", "[data-scene=film]", "[data-drawer=extras]"):
-        step("click " + sel, lambda sel=sel: pg.locator(sel).first.click(timeout=4000))
+        step("click " + sel, lambda sel=sel: pg.locator(sel).first.click(timeout=10000))
     step("sugg all", lambda: pg.evaluate("() => { const b = document.querySelector('[data-suggall=on], [data-sproxyall=on]'); if (b) b.click(); }"))
     print("TOTAL errors:", len(errs)); print("\n".join(errs[:30]))
     b.close()

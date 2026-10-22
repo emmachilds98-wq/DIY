@@ -1,7 +1,9 @@
 """v30: taps things in the 3D room (the cabinet, its doors, its two widths (v33), the media wall, the lamp, the curtains) at 1280 and 390
-and prints what each card offers and what each button did.  python3 taptest.py [screenshot folder]"""
+and prints what each card offers and what each button did (v34: the blind, the vinyl stand, the trolley, a suggestion's versions, the
+storage ottoman's lid, the drinks case's flap).  python3 taptest.py [screenshot folder]"""
 import sys, json, threading, functools, http.server, pathlib
 from playwright.sync_api import sync_playwright
+import localcdn
 ROOT = pathlib.Path(__file__).resolve().parents[2]; OUT = sys.argv[1] if len(sys.argv) > 1 else "."
 class Q(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -16,6 +18,7 @@ def run(w, h):
     with sync_playwright() as p:
         b = p.chromium.launch(args=ARGS, executable_path="/opt/pw-browsers/chromium")
         pg = b.new_page(viewport={"width": w, "height": h})
+        localcdn.route(pg)                                   # v34: three.js from THREE_LOCAL, if set
         pg.on("pageerror", lambda e: errs.append(str(e)[:200])); pg.on("console", lambda m: errs.append(m.text[:200]) if m.type == "error" else None)
         pg.goto(BASE); pg.wait_for_function("window.R3D && window.R3D.ready", timeout=180000)
         pg.evaluate("() => document.querySelectorAll('.stk').forEach(s => s.style.pointerEvents = 'none')")   # the stickers sit over things
@@ -53,10 +56,29 @@ def run(w, h):
         print("   v33, the compact cabinet only: site/cab after asking for the flip-top's:", S("site"), S("cab"))
         if w < 600:   # v33, the phone home: a place from the strip opens its card
             pg.evaluate("() => R3D.set({view: 'room'})"); pg.wait_for_timeout(600)
+            pg.keyboard.press("Escape"); pg.wait_for_timeout(300)                         # v34: the curtains' card was still up (it hides the strip)
             pg.locator("[data-place=dining]").click(); pg.wait_for_timeout(1600)
             print("   place card:", pg.evaluate("() => !document.getElementById('r3d-pop').hidden && document.getElementById('r3d-pop-h').textContent"))
             pg.screenshot(path=f"{OUT}/tap_{w}_place.png"); pg.keyboard.press("Escape")
-        pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', view: 'room'})")
+        # v34: the blind, the records, the trolley, a suggestion's card
+        CEN = "k => { const { THREE } = R3D._dbg; const o = k.split('.').reduce((a, p) => a[p], R3D._dbg); const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()); return [-c.x * 100, c.y * 100, c.z * 100]; }"
+        pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', sugg: {blind: true}, blind: 'down', curtains: false, view: 'windowwall'})"); pg.wait_for_timeout(800)
+        tap(pg.evaluate(CEN, "SUGG_G.blind"), "the blind"); press("Roll it up"); print("   blind:", S("blind"))
+        pg.evaluate("() => R3D.set({sugg: {}, view: 'breast', lp: false})"); pg.wait_for_timeout(800)
+        tap(pg.evaluate(CEN, "MOV.records.pivot"), "the vinyl stand"); press("Lift out"); print("   lp:", S("lp"))
+        pg.evaluate("() => R3D.set({beside: 'trolley', trolley: 'park', dining: 'folded', view: 'beside'})"); pg.wait_for_timeout(800)
+        tray = lambda: (lambda c: [c[0], 84.4, c[2]])(pg.evaluate(CEN, "BES.trolley"))   # its top tray (the frame is open between the trays)
+        tap(tray(), "the trolley"); press("Pull it out"); print("   trolley:", S("trolley")); pg.wait_for_timeout(3500)
+        pg.evaluate("() => R3D.set({dining: 'six', aim: {eye: [175, 170, -60], at: [320, 50, -175], fov: 62}})"); pg.wait_for_timeout(800); pg.screenshot(path=f"{OUT}/tap_{w}_trolley.png")
+        tap(tray(), "the trolley, out"); press("Park it"); print("   trolley:", S("trolley"), "p", pg.evaluate("() => R3D._dbg.WORK.trolley.p"))
+        pg.evaluate("() => R3D.set({beside: 'clear', trolley: 'park', dining: 'folded', sugg: {floorplant: true}, view: 'pc'})"); pg.wait_for_timeout(800)
+        if tap((lambda c: [c[0], 10, c[2]])(pg.evaluate(CEN, "SUGG_G.floorplant.pivot")), "the floor plant's pot (a suggestion)"): press("Terracotta"); print("   svar:", S("svar"))
+        # v34: the drinks cabinet's front, the storage ottoman's lid
+        pg.evaluate("() => R3D.set({sugg: {barcase: true}, barflap: false, view: 'breast'})"); pg.wait_for_timeout(800)
+        if tap((lambda c: [c[0], 120, -20.5])(pg.evaluate(CEN, "SUGG_G.barcase")), "the drinks cabinet's front"): press("Open the bar"); print("   barflap:", S("barflap"))
+        pg.evaluate("() => R3D.set({sugg: {}, lid: false, aim: {eye: [300, 150, -60], at: [238, 30, -157], fov: 50}})"); pg.wait_for_timeout(800)
+        if tap((lambda c: [c[0], 44, c[2]])(pg.evaluate(CEN, "MOV.pouf.pivot")), "the ottoman's lid"): press("Lift the lid"); print("   lid:", S("lid"))
+        pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', sugg: {}, lid: false, view: 'room'})")
         print("  errors:", errs[:5])
         b.close()
 run(1280, 800); run(390, 844)

@@ -19,6 +19,25 @@ const msg = qs("#r3d-msg");
 
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+/* v35: an error trap. Anything that goes wrong in the room (a script error, a failed promise, three's own console errors: a shader
+   that won't compile, a lost graphics context) shows a small note and is kept: the last 20 in this browser (R3D.errors() lists them)
+   and, on the deck, in its database ("errors"), so the next round can read what you saw, on which device */
+const ERRS = { t: 0, busy: false, db: null };
+function noteError(kind, m, stack) {
+  if (ERRS.busy) return; ERRS.busy = true;
+  try {
+    const c = gl && gl.getContext && gl.getContext(), dbg = c && c.getExtension("WEBGL_debug_renderer_info");
+    const e = { at: new Date().toISOString(), kind, msg: String(m || "").slice(0, 400), stack: String(stack || "").slice(0, 1200),
+      ua: navigator.userAgent, dpr: devicePixelRatio, size: [innerWidth, innerHeight], frame: window.top !== window ? "embedded" : "page",
+      gpu: dbg ? String(c.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : "", state: (() => { try { return JSON.stringify(S).slice(0, 3000); } catch (x) { return ""; } })() };
+    const log = store.get("r3d-errors", []); log.push(e); store.set("r3d-errors", log.slice(-20));
+    if (window.claude && window.claude.use) (ERRS.db || (ERRS.db = window.claude.use("db"))).then(db => db && db.doc("errors/" + e.at.replace(/[^0-9]/g, "")).set(e)).catch(() => {});
+    if (performance.now() - ERRS.t > 10000) { ERRS.t = performance.now(); toast("Something went wrong in the 3D room: it's been noted. " + e.msg.slice(0, 90)); }
+  } catch (x) {} finally { ERRS.busy = false; }
+}
+addEventListener("error", e => { if (e.error || e.message) noteError("error", e.message, e.error && e.error.stack); });
+addEventListener("unhandledrejection", e => { const r = e.reason || {}; noteError("promise", r.message || r, r.stack); });
+{ const ce = console.error.bind(console); console.error = (...a) => { ce(...a); noteError("console", a.map(x => (x && x.message) || String(x)).join(" "), a.find(x => x && x.stack) && a.find(x => x && x.stack).stack); }; }
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
 const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the plan
@@ -35,7 +54,8 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
               cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
-              cam: "orbit", pad: false, foot: false, beside: "clear" };   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
+              cam: "orbit", pad: false, foot: false, beside: "clear",
+              blind: "down", lp: false, trolley: "park", lid: false, barflap: false };   // v34: the blind (a suggestion) down or rolled up; a record lifted out of the vinyl stand; the trolley parked or at the table   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
 DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
@@ -44,6 +64,7 @@ if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
 if (!S.svar || typeof S.svar !== "object" || Array.isArray(S.svar)) S.svar = {};   // v28: each suggestion's version (its first by default)
 S.decor = Object.assign({}, DEF.decor, (S.decor && typeof S.decor === "object") ? S.decor : {});
+if (!S.picked) S.quality = "fast";   // v35: every device starts in Fast; HD follows if its first frames are quick (autoQuality)
 if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
 if (!Array.isArray(S.added)) S.added = [];
 if (!(S.plants in R.PLANT_LAYOUTS)) S.plants = DEF.plants;
@@ -90,6 +111,77 @@ gl.toneMapping = THREE.ACESFilmicToneMapping;
 gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
+/* v35, client: "it currently still crashes in the claude version ... it also is a bit slow on the render sometimes becoming HD".
+   three.js builds every material's shader for the number of lights it can see and how many cast shadows, so each light switched on or
+   off (a scene, the table rule, a suggestion, a hidden group with a light in it) rebuilt about 20 shaders: 10 s for "Film", 21 s to open
+   the table. Now, while you use the room, the lights the renderer sees are a fixed set for each quality (Fast leaves out the area lights
+   and every other bar head, as before), a light that's "off" is turned down to nothing, and only one head on each spot bar casts a
+   shadow (HD). A light inside something that can be hidden (an idea, a suggestion, the cabinet's bars) moves to an always-shown rig that
+   follows it: always in HD's set (at nothing while hidden), never in Fast's (their glowing materials still show). While still() renders a picture (LIVE false) every light
+   behaves as it always did, so the saved pictures don't change. */
+let LIVE = true;
+const lightRig = new THREE.Group(); lightRig.name = "lightRig";
+const RIGGED = [];
+function shownChain(o) { for (; o && o.parent; o = o.parent) if (!o.visible) return false; return true; }
+function lightIn(l) {                 // in the renderer's set for this quality
+  const hd = S.quality === "hd";
+  if (l.userData.owner) return hd;     // an idea's or a suggestion's light: always in HD's set (at nothing while it's hidden), never in Fast's
+  if (l.isRectAreaLight) return hd;
+  if (!hd && l.userData.barIx !== undefined) return l.userData.barIx % 2 === 0;
+  return true;
+}
+function adoptLight(l, scn) {
+  if (l.userData.adopted) return;
+  l.userData.adopted = true;
+  let v = l.visible, i = l.intensity, cs = l.castShadow;
+  const owner = l.parent && l.parent !== scn && l.parent !== fixtures ? l.parent : null;
+  if (owner) { l.userData.owner = owner; l.userData.lp = l.position.clone(); lightRig.add(l); RIGGED.push(l); }
+  const on = () => v && (!owner || shownChain(owner));
+  Object.defineProperty(l, "visible", { configurable: true, get: () => (LIVE ? lightIn(l) : on()), set: x => { v = x; } });
+  Object.defineProperty(l, "intensity", { configurable: true, get: () => (on() ? i : 0), set: x => { i = x; } });
+  Object.defineProperty(l, "castShadow", { configurable: true, set: x => { cs = x; },
+    get: () => (LIVE ? S.quality === "hd" && l.isSpotLight && (l === lights.bar1[0] || l === lights.bar2[0]) : cs) });
+}
+function adoptLights(scn) {           // after anything that builds lights (the start, applyState, Edit room's add)
+  const found = []; scn.traverse(o => { if (o.isLight && !o.userData.adopted) found.push(o); });
+  found.forEach(l => adoptLight(l, scn));
+}
+/* v35: the first time the table opened, 18 shaders compiled for the parts that had been hidden (the open table, the chairs round it,
+   the plates): 18 s here, a freeze on a phone. three's compile() can't make them ahead (it doesn't set up the cutaway's clipping, so
+   its shaders don't match), so once the room is on screen and still, each hidden part is drawn on its own (camera layer 31: the part
+   and every light) into a 1 × 1 target that three treats like the screen (same colour space and tone mapping, so the same shaders):
+   its shaders are then ready when you open the table or switch something on. Nothing on screen changes, so there's no redraw after.
+   One part at a time, only after a second with no taps or drags; again after a quality change */
+const PRE = { queue: [], done: 0, rt: null, idleT: 0 };
+function precompile() {
+  PRE.queue.length = 0;
+  const hiddenUp = o => { for (let p = o.parent; p; p = p.parent) if (!p.visible) return true; return false; };
+  scene.traverse(o => { if (!o.isLight && o.visible === false && !hiddenUp(o)) PRE.queue.push(o); });
+}
+function precompileStep() {           // from the frame loop, when nothing's moving: one hidden part, drawn off screen
+  if (!PRE.queue.length || !LIVE || (gl.shadowMap.enabled && gl.shadowMap.needsUpdate)) return false;   // never while the shadows are due a redraw
+  const o = PRE.queue.shift(), shown = [], tagged = [];
+  if (o.visible !== false || !o.parent) return true;
+  if (!PRE.rt) { PRE.rt = new THREE.WebGLRenderTarget(1, 1); PRE.rt.isXRRenderTarget = true; PRE.rt.texture.colorSpace = gl.outputColorSpace; }
+  scene.traverse(c => { if (c.isLight) c.layers.enable(31); });
+  o.traverse(c => { if (!c.isLight) { if (c.visible === false) { shown.push(c); c.visible = true; } if (!c.layers.isEnabled(31)) { tagged.push(c); c.layers.enable(31); } } });
+  const mask = camera.layers.mask, was = gl.getRenderTarget();
+  camera.layers.set(31); gl.setRenderTarget(PRE.rt);
+  try { gl.render(scene, camera); } finally {
+    gl.setRenderTarget(was); camera.layers.mask = mask;
+    shown.forEach(c => { c.visible = false; }); tagged.forEach(c => c.layers.disable(31));
+  }
+  PRE.done++;
+  return true;
+}
+function syncRig() {                  // each frame: a rigged light follows its owner, and leaves with it (a rebuilt cabinet)
+  for (let k = RIGGED.length - 1; k >= 0; k--) {
+    const l = RIGGED[k], o = l.userData.owner;
+    let top = o; while (top && top.parent) top = top.parent;
+    if (!l.parent || !o || top !== scene) { lightRig.remove(l); RIGGED.splice(k, 1); continue; }
+    o.updateWorldMatrix(true, false); l.position.copy(l.userData.lp).applyMatrix4(o.matrixWorld);
+  }
+}
 RectAreaLightUniformsLib.init();
 
 const scene = new THREE.Scene();
@@ -138,6 +230,9 @@ const OAK_TEX = canvasTex(1024, 512, (g, w, h) => {
   }
   for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(70,40,15,${0.08 + r() * 0.12})`; g.fillRect(r() * w, r() * h, 2 + r() * 5, 0.8); }
 });
+// v35: a plain white map and a flat bump stand in for "none", so a Look change never changes a material's shader (a recompile)
+const BLANK = canvasTex(4, 4, (g, w, h) => { g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); });
+const FLAT = canvasTex(4, 4, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); }, false);
 const OAK_TEX_V = (() => { const tx = OAK_TEX.clone(); tx.rotation = Math.PI / 2; tx.center.set(0.5, 0.5); tx.needsUpdate = true; return tx; })();   // v29: upright grain, for tall doors
 
 const OAK_BUMP = canvasTex(512, 256, (g, w, h) => {
@@ -374,13 +469,14 @@ function kindMat(kind) {
 
 /* ---------------------------------------------------------------- geometry from the plan's records */
 const GRAIN = 0.6;   // metres of oak per texture repeat
+const fillCol = f => new THREE.Color(f === "glass" || f === "art" || f === "brick" ? "#ffffff" : f);   // v35: kinds, not colours (the console's "Unknown color" warnings)
 function colAttr(geo, cols) { geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3)); }
 const SOFT = new Set([R.SOFA_CORD[0]]);   // v15: the blue corduroy sofa, upholstered rather than boxy
 function softGeo(b) {
   const [, x, y, z, w, h, d, f] = b, r = Math.min(4, Math.min(w, h, d) / 2.6);
   const g = new RoundedBoxGeometry(w * M, h * M, d * M, 3, r * M);
   g.translate(-(x + w / 2) * M, (y + h / 2) * M, (z + d / 2) * M);
-  const c = new THREE.Color(f), cols = [];
+  const c = fillCol(f), cols = [];
   for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
   colAttr(g, cols);
   return g;
@@ -399,7 +495,7 @@ function boxGeo(b) {
       if (rot) uv.setXY(i, v * sv + ox, u * su + oy); else uv.setXY(i, u * su + ox, v * sv + oy);
     }
   }
-  const front = new THREE.Color(f);
+  const front = fillCol(f);
   const hue = c => { const o = {}; c.getHSL(o); return o; };
   const differs = c2 => { if (!c2) return false; const a = hue(front), b2 = hue(new THREE.Color(c2)); return Math.abs(a.h - b2.h) > 0.07 || Math.abs(a.s - b2.s) > 0.3; };
   const top = differs(t) ? new THREE.Color(t) : front, side = differs(s) ? new THREE.Color(s) : front;
@@ -430,7 +526,7 @@ function frameMesh(f) {
   const g = new THREE.ExtrudeGeometry(sh, { depth: 2 * M, bevelEnabled: false });
   const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / GRAIN, uv.getY(i) / GRAIN);
   g.translate(0, 0, z * M);
-  const c = new THREE.Color(fill), cols = []; for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
+  const c = fillCol(fill), cols = []; for (let i = 0; i < g.attributes.position.count; i++) cols.push(c.r, c.g, c.b);
   colAttr(g, cols);
   return new THREE.Mesh(g, kindMat(kindOf(fill, "g")));
 }
@@ -613,7 +709,7 @@ function buildShell() {
   curtShut.add(panel(wx0 - CU.ext, half, CU.folds * 2.2), panel(wx0 - CU.ext + half, half, CU.folds * 2.2));
   shell.add(curtOpen, curtShut);
   // shelf B: the client's 2 m black floating shelf on the stairs wall
-  const sb = R.SHELF_B, black = shelfMat = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", roughness: 0.55 }));
+  const sb = R.SHELF_B, black = shelfMat = reg(new THREE.MeshStandardMaterial({ color: "#1a1a1b", map: BLANK, roughness: 0.55 }));
   cube(Wd - sb.d, sb.top - sb.t, sb.z[1], sb.d, sb.t, sb.z[0] - sb.z[1], black);
   // v16: "on the left of that shelf is my ikea light box" ... "black not white": the OBEGRÄNSAD panel, black, standing landscape against
   // the wall at the shelf's stair end; its 16 x 16 LEDs fill a square in the middle of the face
@@ -1132,7 +1228,9 @@ function cabGo(P) {
     if (dr.table) seq([P.doorT], 1, 700);
     if (dr.chairs) seq([P.doorC], 1, 700);
   }
+  cabStill = performance.now() + t;                      // v34: the trolley waits for it
 }
+let cabStill = 0;
 function placeOptC() {
   const on = S.site === "C", sliding = S.cab === "sliding";
   if (optC) optC.visible = on && sliding;
@@ -1176,7 +1274,7 @@ function buildBeside() {
     for (let i = 0; i < 3; i++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(3.7 * M, 3.7 * M, 30 * M, 18), bottle); b.position.copy(v3(x0 + 10, 3 + 15 + 1.8, B.z[0] - 9 - i * 8.5)); g.add(shadow(b)); }
     const carafe = new THREE.Mesh(new THREE.CylinderGeometry(4 * M, 5 * M, 24 * M, 20), glassM); carafe.position.copy(v3(x0 + 11, d.h + 12, zc + 6)); g.add(carafe);
   }
-  // the slim trolley: three trays on a frame, four castors; it parks along the wall and wheels out to the table's far end
+  // the slim trolley: three trays on a frame, four castors; it parks along the wall and pulls out for dinner (v34: WORK.trolley)
   if (B.trolley) {
     const tr = B.trolley, g = new THREE.Group(); g.name = "trolley"; BES.trolley = g; beside.add(g);
     const body = mat({ color: tr.col || "#2b2b2b", roughness: 0.5, metalness: 0.3 }), x0 = W - 1.5 - tr.d, z0 = zc - tr.w / 2;
@@ -1186,8 +1284,40 @@ function buildBeside() {
       const w = new THREE.Mesh(new THREE.CylinderGeometry(2 * M, 2 * M, 1.5 * M, 14), K.dark); w.rotation.x = Math.PI / 2; w.position.copy(v3(xx, 2, zz)); g.add(w); }
     const cup = mat({ color: "#efe7d8", roughness: 0.5 });
     for (let i = 0; i < 3; i++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(4 * M, 3.4 * M, 9 * M, 16), cup); c.position.copy(v3(x0 + tr.d / 2, tr.tiers[tr.tiers.length - 1] + 5.3, z0 + 8 + i * (tr.w - 16) / 2)); g.add(c); }
+    // v34: the slim trolley as a drinks trolley (a suggestion): bottles on the top tray, glasses, mixers and an ice bucket below
+    { const dk = SUGG_G.bartrolley = new THREE.Group(), r = rnd(23), xm = x0 + tr.d / 2, [t1, t2, t3, t4] = tr.tiers;
+      const tint = reg(new THREE.MeshPhysicalMaterial({ color: "#3f6b3a", roughness: 0.08, transmission: 0.35, transparent: true, opacity: 0.88 })), clear = reg(new THREE.MeshPhysicalMaterial({ color: "#e8eef0", roughness: 0.06, transmission: 0.6, transparent: true, opacity: 0.55 }));
+      SVAR_MATS.bartrolley = [tint];
+      for (let i = 0; i < 4; i++) { const bh = 26 + r() * 7, br = 3.7 + r() * 0.8, zz = z0 + 5.5 + i * (tr.w - 11) / 3;
+        const b_ = new THREE.Mesh(new THREE.CylinderGeometry(br * M, br * M, bh * 0.7 * M, 16), i % 2 ? clear : tint); b_.position.copy(v3(xm, t4 + 0.8 + bh * 0.35, zz)); dk.add(b_);
+        const n_ = new THREE.Mesh(new THREE.CylinderGeometry(1.3 * M, br * 0.9 * M, bh * 0.3 * M, 12), i % 2 ? clear : tint); n_.position.copy(v3(xm, t4 + 0.8 + bh * 0.85, zz)); dk.add(n_); }
+      for (let i = 0; i < 4; i++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(3.8 * M, 3.3 * M, 9 * M, 16), clear); c.position.copy(v3(xm, t3 + 0.8 + 4.5, z0 + 6 + i * 10.4)); dk.add(c); }
+      const steel = reg(new THREE.MeshStandardMaterial({ color: "#c9cbcd", roughness: 0.25, metalness: 0.9 }));
+      const ice = new THREE.Mesh(new THREE.CylinderGeometry(7.5 * M, 6.5 * M, 17 * M, 22), steel); ice.position.copy(v3(xm, t2 + 0.8 + 8.5, z0 + 12)); dk.add(ice);
+      for (let i = 0; i < 3; i++) { const cn = new THREE.Mesh(new THREE.CylinderGeometry(3.3 * M, 3.3 * M, 11.5 * M, 14), reg(new THREE.MeshStandardMaterial({ color: ["#e9e4da", "#c7643a", "#8e9a80"][i], roughness: 0.4, metalness: 0.4 })));
+        cn.position.copy(v3(xm, t2 + 0.8 + 5.75, z0 + 26 + i * 7)); dk.add(cn); }
+      g.add(dk); }
+    // v34: "Pull it out for dinner": it slides along the wall to 1.3 clear of the plant stand's corner (z -234 .. -277.2, wherever the
+    // cabinet's width put it), then rolls 119.5 straight out, to x 326 .. 346: past the table door's whole swing (90.5 from its hinge),
+    // 13 behind the window-side chairs, clear of the lamp and the sofa. It can't reach the table's far end: with six sat down the sofa's
+    // end and the chairs leave no way past. It comes out, and goes back, only with the table door shut (the open door lies over its spot)
+    WORK.trolley = anim(v => {
+      const zT = -255.6, dz = zT - (zc + beside.position.z / M), a = Math.min(1, v / 0.15), b = Math.max(0, (v - 0.15) / 0.85);
+      g.position.set(119.5 * ease(b) * M, 0, dz * ease(a) * M); });
   }
   clipGroup(beside);
+}
+function placeWork() {      // v34
+  twTo(WORK.blind, S.blind === "up" ? 0 : 1, 1800);
+  twTo(WORK.barflap, S.barflap ? 1 : 0, 1400);
+  twTo(WORK.lid, S.lid ? 1 : 0, 1500);
+  twTo(WORK.lp, S.lp ? 1 : 0, 1300);
+  // the trolley parks behind the table door's line: back it goes once the door has shut (the open door lies over its spot)
+  if (WORK.trolley) {
+    if (S.beside !== "trolley") twTo(WORK.trolley, 0, 0);
+    else if (!cabSnap && S.site === "C" && S.cab === "compact" && cabDoors().table && cabP() && cabP().doorT.p > 0.02) {}   // the door's over its spot: it waits (a still or a link just puts it there)
+    else twTo(WORK.trolley, S.trolley === "out" ? 1 : 0, 3200, Math.max(0, cabStill - performance.now()));
+  }
 }
 function placeBeside() {
   if (!beside) return;
@@ -1346,6 +1476,12 @@ let ideaLed;
 let rugMesh, curtCloth, caseFrameM, cushG, coffeeG, floorMat, shelfMat;
 /* v21: suggested furniture and decor (ideas.SUGGEST, the same keys), each on or off (S.sugg); the floor pieces move in Edit room */
 const SUGG_G = {};
+/* v34, client: "i like the large glass display case on the chimney breast": it's in the plan, so it's on the breast whenever the table
+   isn't (the flip-top's site A, set aside) */
+const caseOn = () => S.site !== "A" && S.plants !== "breast";   // layout B's plant stand (158 tall) stands in front of the breast
+/* v34: more things that work from a tap (placeWork): the blind rolls up and down, the front records lift out of the vinyl stand, the
+   trolley beside the cabinet pulls out for dinner; each an anim, eased by the cabinets' tween */
+const WORK = {};
 /* v28: the suggestions' versions (ideas.SUGG_VARS): colour i goes on SVAR_MATS[k][i], a material or a light of that piece's own */
 const SVAR = JSON.parse((document.getElementById("svar-data") || {}).textContent || "{}");
 const SVAR_MATS = {};
@@ -1484,17 +1620,7 @@ function buildSuggest() {
     const roll = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), mat("#7a8a6a")); roll.scale.set(1, 0.6, 1); roll.position.y = 0.41; g.add(shadow(roll)); }, SVAR_MATS.basket);
   // v32, client: "add anything else you haven't already suggested": three more
   // picture lights over the two framed LPs (a 27.9 shade, 12.5 out on its arm from a 10.6 × 7 back plate), each washing its LP
-  { const g = SUGG_G.piclights = new THREE.Group(), fw = 34, gap = 8, cx = R.TABLE_A.cx, y0 = R.FRAMES_Y + fw + 4;
-    const metal = reg(new THREE.MeshStandardMaterial({ color: "#b8913f", roughness: 0.3, metalness: 0.85 })); SVAR_MATS.piclights = [metal];
-    const glowP = new THREE.MeshBasicMaterial({ color: "#ffe0a8", toneMapped: false });
-    for (const xc of [cx - gap / 2 - fw / 2, cx + gap / 2 + fw / 2]) {
-      ibox(g, xc - 5.3, y0, -0.8, 10.6, 7, 0.8, metal);                                    // the back plate
-      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.12, 8), metal); arm.rotation.x = Math.PI / 2; arm.position.copy(v3(xc, y0 + 3.5, -6.5)); g.add(arm);
-      const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.279, 16), metal); shade.rotation.z = Math.PI / 2; shade.position.copy(v3(xc, y0 + 3.5, -12.5)); g.add(shadow(shade));
-      const led = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.002, 0.006), glowP); led.position.copy(v3(xc, y0 + 2.6, -12.2)); g.add(led);
-      const sp = new THREE.SpotLight("#ffe0a8", 2.2, 1.2, 0.9, 0.8, 2); sp.position.copy(v3(xc, y0 + 2.4, -12)); sp.target.position.copy(v3(xc, R.FRAMES_Y + 10, 0)); g.add(sp, sp.target); SVAR_MATS.piclights.push(sp);
-    }
-    shell.add(g); }
+  // v35: the picture lights went with the two framed LPs (v34): not built
   // a blackout roller blind, face-fixed just above the window and down to the sill's nose, in front of the reveal (its plants stay behind it)
   { const g = SUGG_G.blind = new THREE.Group(), [wx0, wx1] = R.WINDOW_X, [wy0, wy1] = R.WINDOW_Y, z = R.WINDOW_Z + 3.2, bw = wx1 - wx0 + 4;
     const cloth = reg(new THREE.MeshStandardMaterial({ color: "#cdbf9f", roughness: 0.95, side: THREE.DoubleSide })); SVAR_MATS.blind = [cloth];
@@ -1502,8 +1628,48 @@ function buildSuggest() {
     ibox(g, wx0 - 4, wy1 + 4, R.WINDOW_Z + 0.2, bw + 4, 8, 6, white_);                    // the cassette over the window
     const top = wy1 + 4, bot = wy0 + R.SILL.t + 1;
     const pane = new THREE.Mesh(new THREE.PlaneGeometry(bw * M, (top - bot) * M), cloth); pane.position.copy(v3((wx0 + wx1) / 2, (top + bot) / 2, z)); g.add(shadow(pane));
-    ibox(g, wx0 - 2, bot - 1.6, z - 0.6, bw, 1.6, 1.2, white_);                            // the bottom bar
+    const bar = ibox(g, wx0 - 2, bot - 1.6, z - 0.6, bw, 1.6, 1.2, white_), bar0 = bar.position.y;   // the bottom bar
+    WORK.blind = anim(v => { const k = Math.max(0.03, v); pane.scale.y = k; pane.position.y = (top - (top - bot) * k / 2) * M; bar.position.y = bar0 + (top - bot) * (1 - k) * M; }, 1);   // v34: down (1) or rolled up
     const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.7, 6), white_); cord.position.copy(v3(wx1 - 4, top - 35, z - 1.2)); g.add(cord);
+    shell.add(g); }
+  // v34, client: "maybe integrating a wall bar in here for drinks/spirits": a drinks cabinet under the glass case, the case's width, 20
+  // deep (geometry.BAR). An inset oak fall-front on a piano hinge drops onto two soft-close stays to a counter at 98; inside, nine 70 cl
+  // bottles on a mirror back, lit from under the top. Its front (S.barflap) is a tween like the cabinet's doors
+  if (R.DRINKS) { const B = R.DRINKS, g = SUGG_G.barcase = new THREE.Group(), [x0, x1] = B.x, [y0, y1] = B.y, t = B.t, d = B.d, w = x1 - x0;
+    const outer = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 })), inner = reg(new THREE.MeshStandardMaterial({ color: "#b5845a", map: OAK_TEX, roughness: 0.65 }));
+    SVAR_MATS.barcase = [outer];
+    ibox(g, x0, y0, -d, t, y1 - y0, d, outer); ibox(g, x1 - t, y0, -d, t, y1 - y0, d, outer);        // the two ends
+    ibox(g, x0 + t, y1 - t, -d, w - 2 * t, t, d, outer); ibox(g, x0 + t, y0, -d, w - 2 * t, t, d, outer);   // the top and the floor
+    ibox(g, x0 + t, y0 + t, -1.2, w - 2 * t, y1 - y0 - 2 * t, 0.9, inner);                          // the back
+    const mir = new THREE.Mesh(new THREE.PlaneGeometry((w - 2 * t) * M, (y1 - y0 - 2 * t) * M), reg(new THREE.MeshStandardMaterial({ color: "#ffffff", map: MIRROR_SHEEN, roughness: 0.1, metalness: 0.3 })));
+    mir.rotation.y = Math.PI; mir.position.copy(v3((x0 + x1) / 2, (y0 + y1) / 2, -1.2 - B.mirror)); g.add(mir);   // the acrylic mirror on the back
+    const led = new THREE.Mesh(new THREE.BoxGeometry((w - 2 * t - 4) * M, 0.004, 0.008), new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false }));
+    led.position.copy(v3((x0 + x1) / 2, y1 - t - 0.3, -d + 3)); g.add(led);
+    const glow = new THREE.PointLight("#ffcf94", 1.2, 0.9, 2); glow.position.copy(v3((x0 + x1) / 2, y1 - t - 4, -d + 6)); g.add(glow);
+    const glassC = ["#3f6b3a", "#c48a3a", "#e8eef0", "#6b2e1f", "#2f4e6e", "#d9c27a", "#e8eef0", "#4a3a2a", "#8a9a5b"].map(c =>
+      reg(new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.08, metalness: 0, transmission: 0.35, transparent: true, opacity: 0.88 })));
+    const cap = reg(new THREE.MeshStandardMaterial({ color: "#1f1f21", roughness: 0.4 })), label = reg(new THREE.MeshStandardMaterial({ color: "#efe7d8", roughness: 0.8 }));
+    const r = rnd(71), pitch = (w - 2 * t) / B.n;
+    for (let i = 0; i < B.n; i++) {                                                                   // nine 70 cl bottles: tall, round, squat
+      const bh = 24 + r() * 10, br = 3.6 + r() * 1.1, cx = x0 + t + pitch * (i + 0.5), cz = -d / 2 - 1, yb = y0 + t;
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(br * M, br * M, bh * 0.68 * M, 18), glassC[i % glassC.length]); body.position.copy(v3(cx, yb + bh * 0.34, cz)); g.add(body);
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(1.3 * M, br * 0.95 * M, bh * 0.26 * M, 14), glassC[i % glassC.length]); neck.position.copy(v3(cx, yb + bh * 0.81, cz)); g.add(neck);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(1.5 * M, 1.5 * M, bh * 0.06 * M, 12), cap); top.position.copy(v3(cx, yb + bh * 0.97, cz)); g.add(top);
+      const lab = new THREE.Mesh(new THREE.CylinderGeometry((br + 0.05) * M, (br + 0.05) * M, bh * 0.25 * M, 18, 1, true, -0.9, 1.8), label); lab.position.copy(v3(cx, yb + bh * 0.3, cz)); lab.rotation.y = Math.PI; g.add(lab);
+    }
+    // the fall-front: hinged along the floor's front edge, it turns down onto its stays; two tumblers and a jigger stand on it once it's down
+    const flap = new THREE.Group(); flap.position.copy(v3(0, y0 + t, -d)); g.add(flap);
+    const fl = new THREE.Mesh(new THREE.BoxGeometry((w - 2 * t - 0.4) * M, B.inner_h * M, t * M), outer); fl.position.set(-(x0 + x1) / 2 * M, B.inner_h / 2 * M, t / 2 * M); flap.add(shadow(fl));
+    const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 14), reg(new THREE.MeshStandardMaterial({ color: "#b8913f", roughness: 0.3, metalness: 0.8 })));
+    knob.rotation.x = Math.PI / 2; knob.position.set(-(x0 + x1) / 2 * M, (B.inner_h - 4) * M, -0.01); flap.add(knob);
+    const onTop = new THREE.Group(); flap.add(onTop);
+    const tumbler = reg(new THREE.MeshPhysicalMaterial({ color: "#eef3f4", roughness: 0.05, transmission: 0.6, transparent: true, opacity: 0.5 }));
+    for (const [dx, h_, rr] of [[-14, 9, 4], [-4, 9, 4], [10, 5, 2]]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(rr * M, rr * 0.85 * M, h_ * M, 18), tumbler);
+      c.position.set(-((x0 + x1) / 2 + dx) * M, (B.inner_h - 10) * M, (t + h_ / 2) * M); c.rotation.x = Math.PI / 2; onTop.add(c); }   // on its inside face: the top, once it's down
+    const stays = new THREE.Group(); g.add(stays);
+    for (const xs of [x0 + t + 2, x1 - t - 2]) { const st = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.012, 0.3), reg(new THREE.MeshStandardMaterial({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 })));
+      st.position.copy(v3(xs, y0 + t + 8, -d - 9)); st.rotation.x = 0.5; stays.add(st); }
+    WORK.barflap = anim(v => { flap.rotation.x = -Math.PI / 2 * v; onTop.visible = v > 0.98; stays.visible = v > 0.9; });
     shell.add(g); }
 }
 /* v23: the fold-down oak seat in the gap at the stair end (an option, geometry.WALL_SEAT), and your sofa's square ottoman */
@@ -1523,12 +1689,27 @@ function buildSeatAndPouf() {
   ibox(seatUp, W - S_.fold - S_.t, S_.h - 2, zb, S_.t, S_.d, w, oak);                  // folded: standing up against its brackets
   ibox(seatDown, W - S_.d, S_.h - S_.t, zb, S_.d - 0.5, S_.t, w, oak);                // down: a seat at 46
   shell.add(seatUp, seatDown);
-  // the ottoman: blue corduroy like the sofa, movable in Edit room
-  const P_ = R.SOFA_POUF, cord = reg(new THREE.MeshStandardMaterial({ color: R.SOFA_CORD[0], roughness: 0.9, bumpMap: CORD, bumpScale: 0.9 }));
-  const g = new THREE.Group(), body = new THREE.Mesh(new RoundedBoxGeometry(P_.w * M, (P_.h - 4) * M, P_.d * M, 4, 0.04), cord);
-  body.position.y = (P_.h - 4) / 2 * M + 0.04; g.add(shadow(body));
-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) lb(g, x * (P_.w / 2 - 6), 0, z * (P_.d / 2 - 6), 4, 4, 4, reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.5 })));
-  movable("pouf", "Your sofa's ottoman", g, () => ({ x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }), P_.w, P_.d, [cord], false,
+  // the ottoman, movable in Edit room. v34, client: "we'd like to get a new ottoman that is actually a storage ottoman ... similar size to
+  // what we have right now and would match the room or current sofa": navy velvet, a padded lid that lifts off (S.lid), a box inside
+  const P_ = R.SOFA_POUF, O = R.OTTOMAN || { w: P_.w, d: P_.d, h: P_.h, lid: 10, inner_h: 28, wall: 3, col: R.SOFA_CORD[0] };
+  const velvet = reg(new THREE.MeshPhysicalMaterial({ color: O.col, roughness: 0.75, sheen: 1, sheenRoughness: 0.45, sheenColor: new THREE.Color("#8fa3d6") }));
+  const leg = reg(new THREE.MeshStandardMaterial({ color: "#5a3a22", roughness: 0.5 }));
+  const g = new THREE.Group(), legH = 4, boxH = O.h - O.lid - legH;
+  // a hollow box: an upholstered floor under the storage and four walls, a dark lining inside, seen with the lid off
+  rlb(g, 0, legH, 0, O.w, boxH - O.inner_h, O.d, velvet, 2);
+  for (const [x, z, w_, d_] of [[0, -(O.d - O.wall) / 2, O.w, O.wall], [0, (O.d - O.wall) / 2, O.w, O.wall], [-(O.w - O.wall) / 2, 0, O.wall, O.d - 2 * O.wall], [(O.w - O.wall) / 2, 0, O.wall, O.d - 2 * O.wall]])
+    rlb(g, x, legH + boxH - O.inner_h - 0.5, z, w_, O.inner_h + 0.5, d_, velvet, 1.2);
+  const inside = reg(new THREE.MeshStandardMaterial({ color: "#1d2236", roughness: 0.95 }));
+  lb(g, 0, legH + boxH - O.inner_h + 0.05, 0, O.w - 2 * O.wall - 0.2, 0.2, O.d - 2 * O.wall - 0.2, inside, false);
+  const throwM = reg(new THREE.MeshStandardMaterial({ color: "#c7643a", roughness: 1, bumpMap: HESSIAN, bumpScale: 1 }));
+  lb(g, -8, legH + boxH - 9, 4, 40, 8, 34, throwM, false);                                        // a folded throw inside
+  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) taperLeg(g, x * (O.w / 2 - 5), z * (O.d / 2 - 5), legH, leg);
+  const lidG = new THREE.Group(), lid = new THREE.Mesh(new RoundedBoxGeometry(O.w * M, O.lid * M, O.d * M, 4, 0.035), velvet);
+  lid.position.y = (legH + boxH + O.lid / 2) * M; lidG.add(shadow(lid));
+  const welt = new THREE.Mesh(new THREE.BoxGeometry((O.w - 1) * M, 0.006, (O.d - 1) * M), velvet); welt.position.y = (legH + boxH + 0.3) * M; lidG.add(welt);
+  g.add(lidG);                                                                                    // a group: kept out of the merge, so it can lift
+  WORK.lid = anim(v => { lidG.position.set(0.18 * Math.max(0, v - 0.4) / 0.6, 0.22 * Math.min(1, v / 0.4), 0); lidG.rotation.z = -0.28 * Math.max(0, v - 0.4) / 0.6; });   // up, then over to lean on its side
+  movable("pouf", "Your storage ottoman", g, () => ({ x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }), P_.w, P_.d, [velvet], false,
           { when: () => !(S.site === "C" && S.dining !== "folded") });   // v26: it moves aside while the cabinet's table is out
   // v27, client: "add my surround speakers to the build that exist standing behind the sofa": the soundbar's two rears on slim stands
   // behind the sofa's long side, movable in Edit room (drawn to the AX5100G's published size until your photo)
@@ -1548,8 +1729,9 @@ function buildSeatAndPouf() {
 }
 function applySuggest() {
   if (seatUp) { seatUp.visible = S.seat === "up" && S.site !== "C"; seatDown.visible = S.seat === "down" && S.site !== "C"; }
-  for (const k of ["art", "clock", "tray", "fairy", "hanger", "trail", "throw", "pclamp", "candles", "mirror", "shelfled", "blind", "cablights"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
-  if (SUGG_G.piclights) { SUGG_G.piclights.visible = !!S.sugg.piclights && !(S.ideas.case && S.site !== "A");   // v32: over the two framed LPs, while they hang
+  for (const k of ["art", "clock", "tray", "fairy", "hanger", "trail", "throw", "pclamp", "candles", "mirror", "shelfled", "blind", "cablights", "bartrolley"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
+  if (SUGG_G.barcase) SUGG_G.barcase.visible = !!S.sugg.barcase && caseOn();                          // v34: under the case
+  if (SUGG_G.piclights) { SUGG_G.piclights.visible = !!S.sugg.piclights && !caseOn();   // v32: over the two framed LPs, while they hang
     SUGG_G.piclights.position.y = S.site !== "A" && S.plants === "breast" ? 0.3 : 0; }
   // v26: the runner lies down the middle of whichever table is open
   const rn = SUGG_G.runner;
@@ -1593,7 +1775,7 @@ function applyDecor() {
   if (CK) CK.pad.color.set(PAD_COLS[D.pads] || PAD_COLS.olive);                                   // v31: the chairs' tie-on pads (Dunelm Esme's colours)
   applySuggest();
   for (const [k, g] of Object.entries(CASE_FILLS)) g.visible = k === (D.fill in CASE_FILLS ? D.fill : "collect");
-  if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : null;
+  if (caseFrameM) { const [col, oakMap, ro] = CASE_FRAMES[D.frame] || CASE_FRAMES.oak, mp = oakMap ? OAK_TEX : BLANK;
     caseFrameM.color.set(col); caseFrameM.roughness = ro; if (caseFrameM.map !== mp) { caseFrameM.map = mp; caseFrameM.needsUpdate = true; } }
   // v26: the oak's finish on every new oak piece (not your plant stand, vinyl stand, curtain pole or the stairs)
   const tint = OAK_TINTS[D.oak] || OAK_TINTS.artisan;
@@ -1602,12 +1784,12 @@ function applyDecor() {
     m.color.copy(m.userData.oakBase).multiply(tint);
   }
   if (floorMat) { const f = FLOORS[D.floor] || FLOORS.carpet; if (floorMat.map !== f[0]) { floorMat.map = f[0]; floorMat.bumpMap = f[1]; floorMat.roughness = f[2]; floorMat.needsUpdate = true; } }
-  if (shelfMat) { const [c, ro, oakM] = SHELF_COLS[D.shelf] || SHELF_COLS.black, mp = oakM ? OAK_TEX : null;
+  if (shelfMat) { const [c, ro, oakM] = SHELF_COLS[D.shelf] || SHELF_COLS.black, mp = oakM ? OAK_TEX : BLANK;
     shelfMat.color.set(c).multiply(oakM ? tint : new THREE.Color(1, 1, 1)); shelfMat.roughness = ro; if (shelfMat.map !== mp) { shelfMat.map = mp; shelfMat.needsUpdate = true; } }
 }
 const srgb = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace);   // the tints as you'd see them, not in linear light
 const OAK_TINTS = { artisan: srgb(1, 1, 1), pale: srgb(1.12, 1.09, 1.03), smoked: srgb(0.66, 0.57, 0.5), walnut: srgb(0.55, 0.42, 0.34) };
-const FLOORS = { carpet: [CARPET, PILE, 1], oatmeal: [OATMEAL, PILE, 1], boards: [BOARDS, null, 0.55] };
+const FLOORS = { carpet: [CARPET, PILE, 1], oatmeal: [OATMEAL, PILE, 1], boards: [BOARDS, FLAT, 0.55] };
 const SHELF_COLS = { black: ["#1a1a1b", 0.55, false], oak: ["#c48c57", 0.55, true], white: ["#eeebe4", 0.5, false] };
 function ibox(grp, x, y, z, w, h, d, mat, cast = true) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat);
@@ -1854,7 +2036,7 @@ const white = new THREE.MeshStandardMaterial({ color: "#f2f0eb", roughness: 0.4 
 const toppers = new THREE.MeshStandardMaterial({ color: "#d6a873", roughness: 0.5, map: OAK_TEX });
 const HEADS = {};
 function headMat(col) { return HEADS[col] || (HEADS[col] = reg(new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, side: THREE.DoubleSide }))); }
-function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat) {
+function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat, barIx) {
   const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.075, 0.13, 28, 1, true), shadeMat || headMat(col));
   const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.019, 0.038, 16), shadeMat || toppers);
   const glow = new THREE.Mesh(new THREE.CircleGeometry(0.06, 24), new THREE.MeshBasicMaterial({ color: "#fff3dc", toneMapped: false }));   // one each: it dims with its own light
@@ -1869,7 +2051,7 @@ function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat) {
   sp.position.copy(apex.clone().add(dir.clone().multiplyScalar(0.14)));
   sp.target.position.copy(apex.clone().add(dir.clone().multiplyScalar(3)));
   sp.shadow.mapSize.set(1024, 1024); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.camera.near = 0.05; sp.shadow.radius = 6;
-  sp.userData = { k: kSpot, glow, colKey };
+  sp.userData = { k: kSpot, glow, colKey, barIx };   // v35: barIx, its place on a spot bar (Fast lights every other one)
   scene.add(sp, sp.target); lightList.push(sp);
 }
 function buildBar(spec, list, colKey) {   // v15: the bar runs along z (TV to window) when spec.axis is "z"
@@ -1884,7 +2066,7 @@ function buildBar(spec, list, colKey) {   // v15: the bar runs along z (TV to wi
     const apex = v3(hx, C - 6.5, hz), tgt = v3(...h.tgt);
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 8), headMat(h.stem));
     stem.position.copy(v3(hx, C - 5, hz)); g.add(stem);
-    spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 140, colKey);
+    spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 140, colKey, undefined, spec.heads.indexOf(h));
   }
   fixtures.add(g); return g;
 }
@@ -1973,13 +2155,15 @@ function applyState() {
   if (built.bar2 !== b2) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2; }
   const lk = S.lamp + JSON.stringify(S.layout.lamp || {});
   if (built.lamp !== lk) { buildLamp(); built.lamp = lk; }
-  if (G.now_ledge) G.now_ledge.visible = S.site !== "A" && S.plants !== "breast";   // v18: with the plants on the breast the ledge comes off
+  if (G.now_ledge) G.now_ledge.visible = S.site !== "A" && S.plants !== "breast" && !(S.sugg.barcase && caseOn());   // v18: with the plants on the breast the ledge comes off; v34: the drinks cabinet takes its place
   placeChairs();                                                                   // v20: the chair cupboard, its doors, the chairs in it
+  placeWork();                                                                     // v34: the blind, the records, the trolley
   applyDecor();                                                                    // v20: the rug, cushions, curtains, the case's fill and frame
   applySvar();                                                                     // v28: the suggestions' versions
   placeAll();
   repaint();
   applyLight();
+  adoptLights(scene);                                                              // v35: new lights (a rebuilt bar or lamp) join the fixed set
   updateCaption();
   store.set(KEY, S);
   dirty();
@@ -2008,8 +2192,8 @@ function applyLight() {
   lboxFace.material.color.set(S.lbox && !day ? "#ffffff" : "#5a5a5e");
   laserDots.visible = S.laser && !day;
   if (pcGlow) { pcGlow.visible = !!S.pc; pcLight.visible = !!S.pc; }
-  for (const [k, g] of Object.entries(IDEA_G)) g.visible = !!S.ideas[k] && (k !== "case" || S.site !== "A");   // v17: ideas, off by default
-  if (G.frames) G.frames.visible = !(S.ideas.case && S.site !== "A");                                         // the case replaces the frames
+  for (const [k, g] of Object.entries(IDEA_G)) g.visible = k === "case" ? caseOn() : !!S.ideas[k];          // v17: ideas, off by default
+  if (G.frames) G.frames.visible = !caseOn();                                                                 // the case replaces the frames
   if (G.frames) G.frames.position.y = S.site !== "A" && S.plants === "breast" ? 0.3 : 0;                        // v18.1: up 30 over the 158 plant stand
   if (ideaLed) ideaLed.color.set(day ? "#8a8578" : "#fff1d6");
   curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
@@ -2022,7 +2206,7 @@ function applyLight() {
   win.visible = hd || day;
   MATS.forEach(m => { if ("envMapIntensity" in m) m.envMapIntensity = day ? 0.25 : 0.12; });
   gl.toneMappingExposure = day ? 0.5 : 0.62;
-  if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); }
+  if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); if (LIVE && started) precompile(); }
   reshadow();
   dirty();
 }
@@ -2039,6 +2223,13 @@ const movers = new THREE.Group(); scene.add(movers);
 function rlb(g, x, y, z, w, h, d, mat, r = 3) {           // v32: the same, its edges rounded (upholstery)
   const m = new THREE.Mesh(new RoundedBoxGeometry(w * M, h * M, d * M, 3, Math.min(r, w / 2.2, h / 2.2, d / 2.2) * M), mat);
   m.position.copy(v3(x, y + h / 2, z)); g.add(shadow(m)); return m;
+}
+function fabric(m, k = 0.6) { m.roughness = 0.95; m.bumpMap = HESSIAN; m.bumpScale = k; return m; }   // v34: a woven cover (its colour stays Edit room's)
+function fabricMat(c) { return fabric(reg(new THREE.MeshStandardMaterial({ color: c }))); }
+function pipe(g, x, y, z, len, mat, across = false) {      // v34: piping along an upholstered edge (along z, or across x)
+  const p = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, len * M, 8), mat); p.position.copy(v3(x, y, z));
+  if (across) p.rotation.z = Math.PI / 2; else p.rotation.x = Math.PI / 2;
+  g.add(p); return p;
 }
 function taperLeg(g, x, z, h, mat) {                        // v32: a round tapered leg under upholstery
   const l = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.011, h * M, 12), mat); l.position.copy(v3(x, h / 2, z)); g.add(shadow(l)); return l;
@@ -2161,11 +2352,14 @@ function buildPlantsAndRecords() {
     lb(g, 0, sy + 2, -2, 2, h - sy - 6, d - 8, wood);                                          // the divider between the two bays
     for (const y of [h - 10, h - 22]) lb(g, 0, y, -d / 2 + 1.5, w, 6, 1.6, wood);              // back boards
     const sleeves = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d", "#f0c24b", "#7a4fb0", "#e8603c"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.55 })));
-    const lp = R.LP;
+    const lp = R.LP, front = new THREE.Group(), lifts = [];                                    // v34: the front LP of each bay lifts out (a group: not merged)
     for (const bx of [-w / 4, w / 4]) for (let k = 0; k < 5; k++) {                            // top bays: LPs leaning back, face-out
       const m = new THREE.Mesh(new THREE.BoxGeometry((RS.bay - 2) * M * 0.97, lp * M, 0.004), sleeves[Math.floor(r() * sleeves.length)]);
-      m.position.copy(v3(bx, sy + 2 + lp / 2, d / 2 - 6 - k * 3.2)); m.rotation.x = -0.3; g.add(shadow(m));
+      m.position.copy(v3(bx, sy + 2 + lp / 2, d / 2 - 6 - k * 3.2)); m.rotation.x = -0.3; (k ? g : front).add(shadow(m));
+      if (!k) { const y0 = m.position.y, z0 = m.position.z; lifts.push(v => { m.position.y = y0 + 0.24 * v; m.position.z = z0 + 0.07 * v; m.rotation.x = -0.3 + 0.38 * v; }); }
     }
+    g.add(front);
+    WORK.lp = anim(v => lifts.forEach((f, i) => f(Math.min(1, Math.max(0, v * 1.4 - i * 0.4)))));   // the left bay's first, then the right's
     for (let k = 0; k < RS.wires; k++) {                                                        // the wire dividers, and LPs between them
       const zz = d / 2 - 3 - k * (d - 6) / (RS.wires - 1);
       for (const x of [-w / 2 + 12, w / 2 - 12]) lb(g, x, yb + 2, zz, 0.5, RS.wire_h, 0.5, steel, false);
@@ -2200,9 +2394,12 @@ function buildPlantsAndRecords() {
 /* things to add: simple stand-ins at real-world sizes, each with its own colour */
 const CATALOGUE = {
   armchair: { label: "Armchair", w: 80, d: 80, col: "#b5643f", build(g, m, oak) {     // v32: upholstered, rounded, on tapered oak legs
+    fabric(m);                                                                             // v34: a woven cover, piped edges, a scatter cushion
     rlb(g, 0, 14, 2, 74, 14, 72, m, 4); rlb(g, 0, 28, 6, 60, 13, 62, m, 5);                // the base and the seat cushion
-    rlb(g, 0, 28, -31, 72, 46, 14, m, 5); rlb(g, 0, 40, -22, 58, 32, 10, m, 4.5);          // the back and its cushion
-    for (const x of [-31, 31]) rlb(g, x, 28, 2, 12, 34, 72, m, 5);                         // the arms
+    rlb(g, 0, 28, -31, 72, 46, 14, m, 5); rlb(g, 0, 40, -22, 58, 32, 10, m, 4.5).rotation.x = -0.1;   // the back and its cushion, leaning back
+    for (const x of [-31, 31]) { rlb(g, x, 28, 2, 12, 34, 72, m, 5); pipe(g, x, 61.8, 2, 58, m); }   // the arms, piped along the top's flat
+    pipe(g, 0, 39.5, 35.5, 50, m, true); pipe(g, 0, 26.8, 36.8, 66, m, true);              // on the rounded front edges of the seat and the base
+    const sc = rlb(g, 0, 41, -13, 40, 38, 11, fabricMat("#d8c9ad"), 5); sc.rotation.set(-0.32, 0, 0.07);   // an oatmeal linen scatter cushion
     for (const [x, z] of [[-31, -31], [31, -31], [-31, 33], [31, 33]]) taperLeg(g, x, z, 14, oak); } },
   sidetable: { label: "Side table", w: 45, d: 45, col: "#c48c57", build(g, m) {
     lb(g, 0, 48, 0, 45, 2.5, 45, m); for (const [x, z] of [[-19, -19], [19, -19], [-19, 19], [19, 19]]) lb(g, x, 0, z, 3.5, 48, 3.5, m); } },
@@ -2210,15 +2407,48 @@ const CATALOGUE = {
     const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide }));
     potPlant(g, 0, 0, 0, 16, 26, 0, rnd(5), m, leaf); } },
   bookcase: { label: "Slim bookcase", w: 60, d: 30, col: "#c48c57", build(g, m) {
-    lb(g, -29, 0, 0, 2, 180, 30, m); lb(g, 29, 0, 0, 2, 180, 30, m); lb(g, 0, 0, -14.5, 60, 180, 1, m);
-    const r = rnd(9), cols = ["#2f3e5c", "#d24b33", "#e9e3d3", "#14806d", "#f0c24b"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.6 })));
-    for (const y of [0, 36, 72, 108, 144, 178]) lb(g, 0, y, 0, 56, 2, 30, m);
-    for (const y of [2, 38, 74, 110]) { let x = -26; while (x < 22) { const bw = 2 + r() * 3, bh = 22 + r() * 9; lb(g, x + bw / 2, y, -2, bw, bh, 22, cols[Math.floor(r() * cols.length)]); x += bw + 0.3; } } } },
+    // v34: closer to a real one: a recessed plinth, an overhanging top, books of every size (some leaning, a stack lying flat), two
+    // baskets on the bottom shelf, a trailing plant, a framed print, a vase and a candle
+    m.map = OAK_TEX; m.color.set("#c48c57"); m.roughness = 0.55;
+    lb(g, -29, 0, 0, 2, 178, 30, m); lb(g, 29, 0, 0, 2, 178, 30, m); lb(g, 0, 6, -14.5, 56, 172, 1, m);   // the sides, the back
+    lb(g, 0, 0, 11.5, 56, 6, 2, m); lb(g, 0, 178, 0.5, 62, 2.4, 31.5, m);                  // the kick board, set back; the top
+    for (const y of [6, 42, 78, 114, 150]) lb(g, 0, y, 0, 56, 2, 30, m);
+    const r = rnd(9), mt = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.62 }));
+    const spines = ["#2f3e5c", "#d24b33", "#e9e3d3", "#14806d", "#f0c24b", "#6b4f7a", "#1f1f21", "#b98250", "#8b9878"].map(mt), pages = mt("#efe9dc");
+    const book = (x, y, bw, bh, bd, lean = 0) => {
+      const b = lb(g, x, y, 13 - bd / 2 - r() * 1.2, bw, bh, bd, spines[Math.floor(r() * spines.length)]);
+      if (lean) { b.rotation.z = lean; b.position.x -= Math.sin(lean) * bh / 2 * M; b.position.y -= (1 - Math.cos(lean)) * bh / 2 * M; }
+      return b;
+    };
+    const row = (y, x0, x1) => { let x = x0; while (x < x1) { const bw = 1.8 + r() * 3.2; book(x + bw / 2, y, bw, 19 + r() * 11, 15 + r() * 7); x += bw + 0.2; } return x; };
+    // the bottom shelf: two seagrass baskets
+    const sea = reg(new THREE.MeshStandardMaterial({ color: "#b89a6c", roughness: 1, bumpMap: HESSIAN, bumpScale: 1.2 }));
+    for (const x of [-13.5, 13.5]) { lb(g, x, 8, 0, 25, 24, 26, sea); lb(g, x, 31, 0, 25.6, 1.4, 26.6, sea); }
+    // books upright, then two leaning on them
+    let x = row(44, -26, 12); book(x + 3.2, 44, 2.6, 27, 19, 0.32); book(x + 7.4, 44, 3, 24, 17, 0.34);
+    // a stack lying flat, a small trailing plant, a framed print
+    for (let i = 0, yy = 80; i < 4; i++) { const bh = 2.2 + r() * 2; lb(g, -18 + (r() - 0.5) * 2, yy, 2, 22 - i * 1.5, bh, 17 - i, spines[(i * 3 + 1) % spines.length]); yy += bh; }
+    potPlant(g, 2, 80, 4, 6, 6, 3, rnd(41), mt("#d8cfc0"), reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide })));
+    const fr = lb(g, 18, 80, -10, 17, 22, 1.6, mt("#1f1f21")); fr.rotation.x = 0.12;
+    lb(g, 18, 82.4, -9.0, 13, 17, 0.2, mt("#e7c9a0")).rotation.x = 0.12;
+    // books again, and a bookend
+    x = row(116, -26, 14); lb(g, x + 2, 116, 4, 1, 14, 10, mt("#2a2a2c"));
+    // the top shelf: a vase, a candle, a few books
+    const vase = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.2, 20), mt("#c46c45")); vase.position.copy(v3(-17, 162, 2)); g.add(shadow(vase));
+    const wax = reg(new THREE.MeshStandardMaterial({ color: "#f3ecdc", roughness: 0.8, emissive: "#ffb35a", emissiveIntensity: 0.12 }));
+    const cdl = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.1, 18), wax); cdl.position.copy(v3(-5, 157, 4)); g.add(shadow(cdl));
+    row(152, 4, 25); } },
   beanbag: { label: "Beanbag", w: 80, d: 80, col: "#40609a", build(g, m) {     // v32: slumped, with a hollow to sit in
-    const geo = new THREE.SphereGeometry(0.4, 40, 24), q = geo.attributes.position;
-    for (let i = 0; i < q.count; i++) { const x = q.getX(i), y = q.getY(i), z = q.getZ(i), r = Math.hypot(x, z);
+    fabric(m, 1);                                                                          // v34: a cord cover, a welted seam, a carry handle
+    const geo = new THREE.SphereGeometry(0.4, 48, 28), q = geo.attributes.position;
+    for (let i = 0; i < q.count; i++) { const x = q.getX(i), y = q.getY(i), z = q.getZ(i), r = Math.hypot(x, z), a = Math.atan2(z, x);
+      const sag = 1 + 0.035 * Math.sin(a * 6) * Math.max(0, 1 - Math.abs(y) / 0.4);          // soft folds where the cover slumps
+      q.setX(i, x * sag); q.setZ(i, z * sag);
       q.setY(i, y > 0 ? y * 0.78 - 0.1 * Math.max(0, 1 - r / 0.22) * (y / 0.4) : y * 0.62); }
-    geo.computeVertexNormals(); const b = new THREE.Mesh(geo, m); b.position.y = 0.25; g.add(shadow(b)); } },
+    geo.computeVertexNormals(); const b = new THREE.Mesh(geo, m); b.position.y = 0.25; g.add(shadow(b));
+    const ring = []; for (let i = 0; i < 72; i++) { const a = i / 72 * Math.PI * 2, rr = 0.4 * (1 + 0.035 * Math.sin(a * 6)) + 0.002; ring.push(new THREE.Vector3(Math.cos(a) * rr, 0, Math.sin(a) * rr)); }
+    const seam = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ring, true), 144, 0.006, 6, true), m); seam.position.y = 0.25; g.add(seam);   // on the folds, round its widest
+    const hdl = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.009, 8, 18, Math.PI), m); hdl.position.set(0, 0.45, -0.31); hdl.rotation.x = -0.7; g.add(hdl); } },
   footstool: { label: "Footstool", w: 50, d: 50, col: "#34507f", build(g, m, oak) {
     rlb(g, 0, 12, 0, 50, 28, 50, m, 5); for (const [x, z] of [[-20, -20], [20, -20], [-20, 20], [20, 20]]) taperLeg(g, x, z, 12, oak); } },
   cushion: { label: "Floor cushion", w: 60, d: 60, col: "#e2a33a", build(g, m) { rlb(g, 0, 0, 0, 60, 14, 60, m, 5); } },
@@ -2544,11 +2774,20 @@ qs("#r3d-picksave")?.addEventListener("click", () => {
   ldb.doc("layouts/picks").set(JSON.parse(JSON.stringify({ items, text: pickText(items), at: new Date().toISOString() })))
     .then(() => { st.textContent = "Saved for the next round."; }, e => { st.textContent = e && e.code === "invalid_argument" ? "This view can't save (read-only)." : "Couldn't save. Try again in a moment."; });
 });
-/* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast */
+/* v18: if the graphics card gives up (most often HD with shadows on a phone), say so and come back in Fast. v35: the browser usually
+   gives the context back within a second or two: then the room rebuilds itself in Fast where it was, no reload; the button stays as
+   the way out if it doesn't come back */
+let glLost = false;
 canvas.addEventListener("webglcontextlost", e => {
-  e.preventDefault(); S.quality = "fast"; S.picked = true; store.set(KEY, S);
+  e.preventDefault(); glLost = true; S.quality = "fast"; S.picked = true; store.set(KEY, S);
   msg.hidden = false; root.classList.remove("ready");
-  msg.innerHTML = 'The 3D room ran out of graphics memory (HD with shadows asks a lot of a phone). <button type="button" class="btn" onclick="location.reload()">Reload it in Fast</button>';
+  msg.innerHTML = 'The 3D room ran out of graphics memory; bringing it back in Fast… <button type="button" class="btn" onclick="location.reload()">Reload it</button>';
+  noteError("context", "WebGL context lost");
+});
+canvas.addEventListener("webglcontextrestored", () => {
+  glLost = false; msg.hidden = true; root.classList.add("ready");
+  applyLight(); syncButtons(); if (gl.shadowMap.enabled) gl.shadowMap.needsUpdate = true; precompile(); dirty();
+  toast("The 3D room is back, in Fast");
 });
 
 /* ---------------------------------------------------------------- views */
@@ -2645,6 +2884,7 @@ canvas.addEventListener("wheel", e => {
   e.preventDefault(); wheelAcc += e.deltaY;
   if (Math.abs(wheelAcc) >= 60) { walk(wheelAcc < 0 ? "f" : "b"); wheelAcc = 0; }
 }, { passive: false });
+["pointerdown", "pointermove", "keydown", "wheel"].forEach(t => root.addEventListener(t, () => { PRE.idleT = performance.now(); }, { passive: true, capture: true }));   // v35: the shader warm-up waits while you use the room
 let padT = null;             // a move button held down keeps moving, in smaller steps
 const padStop = () => { if (padT) { clearTimeout(padT.t); clearInterval(padT.i); padT = null; } };
 root.addEventListener("pointerdown", e => {
@@ -2733,8 +2973,9 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && tourSt) { 
 /* ---------------------------------------------------------------- v28: "copy link to this view"
    The look (where you stand and every choice, not Edit room's moves) as a plain #look-<token> (base64url JSON), which the page's
    router leaves alone. The link is always the GitHub Pages page, so anyone can open it. */
-const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], cabw: ["90", "80"], beside: null };   // v30: which cabinet; v31: beside it
-const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor", "foot"];   // v31: the open table's floor
+const LOOK_STR = { site: ["A", "B", "C"], dining: ["folded", "four", "six"], chairs: null, plants: null, seat: ["off", "up", "down"], scene: null, tod: ["evening", "day"], paint: null, lamp: null, cab: ["compact", "sliding"], cabw: ["90", "80"], beside: null,
+                   blind: ["down", "up"], trolley: ["park", "out"] };   // v30: which cabinet; v31: beside it; v34: the blind, the trolley
+const LOOK_BOOL = ["drawers", "curtains", "lbox", "laser", "pc", "grow", "tdoor", "foot", "lp", "lid", "barflap"];   // v31: the open table's floor; v34: a record lifted out
 const HEX = /^#[0-9a-f]{6}$/i;
 const cm = v => [-v.x / M, v.y / M, v.z / M].map(n => Math.round(n));
 function lookOf() {
@@ -2835,6 +3076,11 @@ function setLabels(on) {
   dirty();
 }
 document.addEventListener("click", e => { const b = e.target.closest("#r3d-lbl, [data-labels]"); if (!b) return; setLabels(b.id === "r3d-lbl" ? !labelsOn : b.dataset.labels === "on"); });
+// v35: each label's size is read once (and again after a resize or the fonts arriving), not every frame: reading it straight after
+// moving the labels made the browser lay the page out again for each label, each frame
+const stickSz = el => el._sz || (el.offsetWidth ? (el._sz = [el.offsetWidth, el.offsetHeight]) : [140, 40]);
+const stickReset = () => { for (const k in stickEls) if (stickEls[k]) stickEls[k]._sz = null; };
+addEventListener("resize", stickReset); if (document.fonts) document.fonts.ready.then(() => { stickReset(); dirty(); });
 function placeStickers() {
   if (!HOTS.length || !started || !labelsOn) return;
   const w = stage.clientWidth, h = stage.clientHeight, cx = -camera.position.x / M, cz = camera.position.z / M;
@@ -2843,11 +3089,10 @@ function placeStickers() {
     const el = stickEls[H.id]; if (!el) continue;
     _p.copy(v3(...H.at)).project(camera);
     const off = _p.z > 1 || _p.z < -1 || Math.abs(_p.x) > 1.02 || Math.abs(_p.y) > 1.02;
-    el.hidden = off;
+    if (el.hidden !== off) el.hidden = off;
     if (off) { if (popId === H.id) closePop(); continue; }
-    const hw = (el.offsetWidth || 140) / 2 + 6, x = Math.max(hw + railR, Math.min(w - hw, (_p.x + 1) / 2 * w)); let y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
+    const [ew, eh] = stickSz(el), hw = ew / 2 + 6, x = Math.max(hw + railR, Math.min(w - hw, (_p.x + 1) / 2 * w)); let y = Math.max(28, Math.min(h - 28, (1 - _p.y) / 2 * h));   // kept whole on screen
     if (cover && x + hw > cover.left && x - hw < cover.right && y + 20 > cover.top && y - 20 < cover.bottom) { el.hidden = true; if (popId === H.id) closePop(); continue; }   // v26: not under the Tools panel
-    const ew = el.offsetWidth || 140, eh = el.offsetHeight || 40;
     for (let k = 0; k < 8; k++) {
       const hit = placed.find(q => Math.abs(x - q.x) < (ew + q.w) / 2 + 4 && Math.abs(y - q.y) < (eh + q.h) / 2 + 4);
       if (!hit) break;
@@ -2923,6 +3168,11 @@ function pickItem(e) {
   if (o === tvScreen) return "tv";
   if (o === lboxFace) return "lbox";
   if (under(o, pcGlow)) return "pc";
+  for (const g of Object.values(BES)) if (under(o, g)) return "beside";       // v34: more things work from a tap
+  const obj = g => (g && g.isObject3D ? g : g && g.pivot);                  // a floor suggestion is a movable (its pivot)
+  for (const [k, g] of Object.entries(IDEA_G)) if (under(o, obj(g))) return "id:" + k;
+  for (const [k, g] of Object.entries(SUGG_G)) if (under(o, obj(g))) return "sg:" + k;
+  if (MOV.records && under(o, MOV.records.pivot)) return "records";
   let m = o; while (m && !m.userData.movId) m = m.parent;
   if (m && MOV[m.userData.movId]) return "mov:" + m.userData.movId;
   for (const [k, g] of Object.entries(G)) if (under(o, g)) {
@@ -2973,6 +3223,26 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id === "curtains") return ["The curtains", S.curtains ? "Drawn" : "Open", [btn(S.curtains ? "Open them" : "Draw them", { tog: "curtains" })]];
   if (id === "lbox") return ["Your OBEGRÄNSAD light box", S.lbox ? "On" : "Off", [btn(S.lbox ? "Turn it off" : "Turn it on", { tog: "lbox" })]];
   if (id === "pc") return ["Your PC", S.pc ? "Lit" : "Dark", [btn(S.pc ? "Lights off" : "Lights on", { tog: "pc" }), btn("Look at it", { view: "pc" }), btn("Read about it", { actgo: "side" })]];
+  if (id === "beside") { const B = R.BESIDE, cur = S.beside;           // v34
+    return ["Beside the cabinet", (B.opts[cur] || {}).name || cur, [
+      ...Object.entries(B.opts).map(([k, o]) => btn(o.name, { beside: k }, cur === k)),
+      ...(cur === "trolley" ? [btn(S.trolley === "out" ? (cabDoors().table ? "Park it by the wall (once the table is folded)" : "Park it by the wall") : (cabDoors().table ? "Pull it out (once the table is folded)" : "Pull it out for dinner"), { trolley: S.trolley === "out" ? "park" : "out" })] : []),
+      btn("Look at it", { view: "beside" }), btn("Read about it", { actgo: "dining" })]]; }
+  if (id === "records") return ["Your vinyl stand", S.lp ? "The front record of each bay lifted out" : "Two face-out bays on top, LPs filed below", [
+      btn(S.lp ? "Put the records back" : "Lift out the front records", { lp: S.lp ? "in" : "out" }),
+      btn(S.ideas.clean ? "Take away the record-care caddy" : "Add a record-care caddy (an idea)", { idea: "clean" }, !!S.ideas.clean),
+      btn("Move it", { actedit: "records" })]];
+  if (id.startsWith("sg:") || id.startsWith("id:")) {
+    const sg = id.startsWith("sg:"), k = id.slice(3), nm = ((sg ? PD.sugg : PD.ideas)[k] || [k])[0], it = sg && MOV["sg_" + k];
+    if (!(sg ? S.sugg : S.ideas)[k]) return null;                        // taken away: the card closes
+    return [nm, sg ? "A suggestion: not in the plan's costs" : "An idea: not in the plan's costs", [
+      ...(k === "blind" ? [btn(S.blind === "up" ? "Pull it down" : "Roll it up", { blind: S.blind === "up" ? "down" : "up" })] : []),
+      ...(k === "barcase" ? [btn(S.barflap ? "Close the bar" : "Open the bar", { barflap: S.barflap ? "shut" : "open" })] : []),
+      ...(sg ? (SVAR[k] || []).map(([v, n]) => btn(n, { svar: `${k}:${v}` }, svarOf(k) === v)) : []),
+      ...(it && !it.fixed ? [btn("Move it", { actedit: it.id })] : []),
+      btn("Take it away", sg ? { sugg: k } : { idea: k }), btn("See its card", { actideas: (sg ? "sugg-" : "idea-") + k })]]; }
+  if (id === "mov:pouf") return ["Your storage ottoman", S.lid ? "The lid off: the box inside holds throws and blankets" : "Navy velvet, its padded lid on", [   // v34
+      btn(S.lid ? "Put the lid back" : "Lift the lid", { lid: S.lid ? "on" : "off" }), btn("Move it", { actedit: "pouf" }), btn("Read about it", { actgo: "c-room" })]];
   if (id.startsWith("mov:")) { const it = MOV[id.slice(4)]; if (!it) return null;
     return [it.label, it.fixed ? "Built in: it can come off, but not move" : "Drag it in Edit room, or change its colour", [btn(it.fixed ? "Take it off or put it back" : "Move it", { actedit: it.id })]]; }
   return null;
@@ -3011,6 +3281,7 @@ if (act) {
     if (b.classList.contains("x")) { closeAct(); return; }
     const d = b.dataset;
     if (d.actgo) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: d.actgo } })); return; }
+    if (d.actideas) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "ideas", item: d.actideas } })); return; }   // v34
     if (d.actedit) { const id = d.actedit; closeAct(); setEdit(true); select(id); return; }
     if (d.view) setTimeout(closeAct, 0);                     // the room flies there; the card has done its job
   });
@@ -3030,7 +3301,7 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 }
 
 /* ---------------------------------------------------------------- render loop, only when something changed */
-let need = 2, moving = false, still_t = 0, lowRes = false;
+let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = true;   // v35: slowDev until the speed check says otherwise
 function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
@@ -3087,20 +3358,45 @@ function frame(now) {
   if (showTick(now)) need = 2;                                    // v32: "Watch it open"
   if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
   const active = moving || changed || !!tween;
-  if (active) { still_t = now; if (!lowRes) { lowRes = true; sizeRenderer(); } }
-  else if (lowRes && now - still_t > 180) { lowRes = false; sizeRenderer(); }
+  // v35: the lower resolution only while you hold and drag the room on a slow device, and only once the drag has lasted a moment:
+  // each switch resizes the canvas (a new drawing buffer), which cost more than it saved after a tap, a fly-to or a Look change
+  if (moving && slowDev) { if (!dragT) dragT = now; still_t = now; if (!lowRes && now - dragT > 150) { lowRes = true; sizeRenderer(); } }
+  else { dragT = 0; if (active) still_t = now; else if (lowRes && now - still_t > 250) { lowRes = false; sizeRenderer(); } }
   if (updateCut()) need = 2;
+  if (probe > 0 && !lowRes) need = Math.max(need, 1);                 // v35: the speed check's three frames come first, at the start
+  if (need === 0 && !active && !SH && probe === 0 && now - preT > 250 && now - PRE.idleT > 1000 && precompileStep()) preT = now;   // v35: one hidden part's shaders, off screen
+  if (glLost || (document.body.classList.contains("sheet-open") && !SH && !tween)) return;   // v35: nothing drawn behind the Plan's sheets (the last picture stays)
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
-    gl.render(scene, camera); need--; placeStickers();
+    const f0 = performance.now(); syncRig(); gl.render(scene, camera); FT.calls = gl.info.render.calls; FT.tris = gl.info.render.triangles; need--; placeStickers(); FT[FT.n++ % 60] = performance.now() - f0;
     if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
   }
 }
 // v14.1: if this device takes too long over a full HD frame, drop to Fast (unless you picked a quality yourself)
 let probe = 3; const probeT = [], PX = new Uint8Array(4);
+let preT = 0;
+const FT = []; FT.n = 0;   // v35: the last 60 frames' times, for R3D.perf()
+function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
+  const i = gl.info, ls = [], ms = FT.slice().sort((a, b) => a - b);
+  scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
+  return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
+    lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length };
+}
+if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
+  const box = document.createElement("div"); box.className = "r3d-perf";
+  box.style.cssText = "position:absolute;left:8px;bottom:8px;z-index:30;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.72);color:#fff;font:12px/1.35 ui-monospace,monospace;pointer-events:none;white-space:pre";
+  root.append(box); let n0 = FT.n, t0 = performance.now();
+  setInterval(() => { if (!gl || !started) return; const p = perfInfo(), t = performance.now(), fps = (FT.n - n0) * 1000 / (t - t0); n0 = FT.n; t0 = t;
+    box.textContent = `${p.quality} · ${fps.toFixed(0)} frames/s · ${p.frameMs} ms\ncalls ${p.calls} · tris ${Math.round(p.triangles / 1000)}k · shaders ${p.programs}\nlights ${p.lights} · shadows ${p.shadows} · ratio ${p.ratio} · errors ${p.errors}`; }, 1000);
+}
 function autoQuality() {
   const ms = probeT.sort((a, b) => a - b)[1];
-  if (ms > 70 && S.quality === "hd" && !S.picked) {
+  if (S.quality === "fast") slowDev = ms > 30;
+  if (S.picked) return;
+  if (S.quality === "fast" && !SMALL && ms < 20) {          // v35: quick in Fast on a laptop: on to HD, once, while the room is still
+    S.quality = "hd"; applyLight(); syncButtons(); probe = 3; probeT.length = 0;
+  } else if (ms > 70 && S.quality === "hd") {
     S.quality = "fast"; applyLight(); syncButtons();
     qs("#r3d-savest").textContent = "Switched to Fast for this device; pick HD for shadows (saved pictures always have them).";
   }
@@ -3123,6 +3419,7 @@ function still(w, h) {
   const pr = gl.getPixelRatio(), size = gl.getSize(new THREE.Vector2()), asp = camera.aspect;
   const fov0 = camera.fov;
   gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.fov = fitFov(baseFov); camera.clearViewOffset(); camera.updateProjectionMatrix();
+  LIVE = false; syncRig();                                                                 // v35: the lights as they always were, for the picture
   const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
   if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
   const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
@@ -3136,6 +3433,7 @@ function still(w, h) {
   gl.shadowMap.enabled = was;
   MATS.forEach(m => m.needsUpdate = true);
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(1024, 1024); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
+  LIVE = true;
   applyLight();
   gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.fov = fov0; applyShift(); dirty();
   return url;
@@ -3211,14 +3509,16 @@ root.addEventListener("click", e => {
   else if (d.sugg || d.suggall) {     // v21: a suggestion on or off (a piece you'd removed in Edit room comes back), or all of them
     const keys = d.sugg ? [d.sugg] : qsa("[data-sugg]").map(x => x.dataset.sugg), on = d.sugg ? !S.sugg[d.sugg] : d.suggall === "on";
     S.sugg = Object.assign({}, S.sugg); keys.forEach(k => { S.sugg[k] = on; if (S.layout["sg_" + k]) delete S.layout["sg_" + k].off; });
+    if (on && keys.includes("bartrolley")) { S.beside = "trolley"; S.site = "C"; S.cab = "compact"; }   // v34: it's the slim trolley, dressed
+    if (on && keys.includes("barcase") && S.plants === "breast") S.plants = "corner";                  // v34: under the case, on a free breast
     applyState(); }
   else if (d.svar) { const [k, v] = d.svar.split(":"); S.svar = Object.assign({}, S.svar, { [k]: v }); applySvar(); placeAll(); updateCaption(); store.set(KEY, S); dirty(); }   // v28
   else if (d.tour) { tourCtl(d.tour); return; }
   else if (b.id === "r3d-tourbtn") { tourStart(); return; }
   else if (b.id === "r3d-link") { copyLook(); return; }
   else if (d.decor) {           // v20: decor; picking what's in the case (or its frame) shows the case, which hangs with the table by the stairs
-    const [k, v] = d.decor.split(":"), was = S.ideas.case && S.site !== "A"; S.decor = Object.assign({}, S.decor, { [k]: v });
-    if (k === "fill" || k === "frame") { S.ideas = Object.assign({}, S.ideas, { case: true }); if (S.site === "A") S.site = "C"; }   // v27: the case needs the breast free
+    const [k, v] = d.decor.split(":"), was = caseOn(); S.decor = Object.assign({}, S.decor, { [k]: v });
+    if ((k === "fill" || k === "frame") && S.site === "A") S.site = "C";                              // v27: the case needs the breast free (v34: it's the plan)
     applyState(); if ((k === "fill" || k === "frame") && !was) setView("breast"); }
   else if (d.idea) S.ideas = Object.assign({}, S.ideas, { [d.idea]: !S.ideas[d.idea] }), applyLight(), placeAll(), updateCaption(), store.set(KEY, S);
   else if (d.plants) {           // v18: the layout puts the stand and the shelf back on their spots for it
@@ -3232,6 +3532,11 @@ root.addEventListener("click", e => {
   else if (d.cam) S.cam = d.cam, applyCam(), store.set(KEY, S);
   else if (d.moment) { playMoment(d.moment); return; }                                              // v31
   else if (d.showopen) { showOpen(); return; }
+  else if (d.blind) { S.blind = d.blind; applyState(); }
+  else if (d.barflap) { S.barflap = d.barflap === "open"; applyState(); }                          // v34: the drinks cabinet's front
+  else if (d.lid) { S.lid = d.lid === "off"; applyState(); }                                       // v34: the storage ottoman's lid                                          // v34
+  else if (d.lp) { S.lp = d.lp === "out"; applyState(); }
+  else if (d.trolley) { S.trolley = d.trolley; if (d.trolley === "out") { S.beside = "trolley"; S.site = "C"; S.cab = "compact"; } applyState(); }
   else if (d.beside) { S.beside = d.beside; if (d.beside !== "clear") { S.site = "C"; S.cab = "compact"; } applyState(); }   // v31
   else if (d.foot) { S.foot = d.foot === "on"; if (S.foot) { S.site = "C"; S.dining = "folded"; } applyState(); }
   else if (d.pad) S.pad = d.pad === "on", applyPad(), store.set(KEY, S);
@@ -3264,6 +3569,7 @@ function start() {
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
   gl.localClippingEnabled = true;
+  scene.add(lightRig);                                                                  // v35: the fixed set of lights
   buildShell(); buildLights(); buildFurniture(); buildSuggest(); buildSeatAndPouf();
   bar1 = buildBar(R.BAR1, lights.bar1, "bar1");
   gl.shadowMap.enabled = S.quality === "hd";
@@ -3277,6 +3583,7 @@ function start() {
   msg.hidden = true;
   root.classList.add("ready");
   requestAnimationFrame(frame);
+  precompile();                                                                         // v35: hidden parts' shaders, while the room's idle
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
     if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
@@ -3287,11 +3594,15 @@ function start() {
     set(o) { const aim = o.aim; o = Object.assign({}, o); delete o.aim; if (SH) showStop(false);   // v32: "aim", a piece's own close look
       const lay = "added" in o ? { layout: o.layout || {}, added: o.added } : null; delete o.added; if (lay) delete o.layout;   // v32: pieces added for a still
       const addp = o.addpiece; delete o.addpiece;                                    // v32: the plan page's "Add it to my room": one more piece
+      const showat = o.showat; delete o.showat;                                      // v34: a still part way through "Watch it open"
       if (o.merge) { delete o.merge; for (const k of ["sugg", "ideas", "decor"]) if (o[k]) o[k] = Object.assign({}, S[k], o[k]); }   // v32: "Show it in my room" keeps what's already on
       oldScene(o); Object.assign(S, o); S.decor = Object.assign({}, DEF.decor, o.decor || S.decor); if (o.scene && !o.lv) S.lv = Object.assign({}, SCENES[o.scene].levels); if (o.quality) S.picked = true; cabSnap = true; applyState(); cabSnap = false; syncButtons(); if (lay) { cabSnap = true; restoreLayout(lay); cabSnap = false; }
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
+      if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE },
+    errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
+    perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }

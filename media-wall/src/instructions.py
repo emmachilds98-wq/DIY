@@ -112,7 +112,7 @@ def full():
                 ("On the chimney breast", [
                     f"Find the breast's centre: {n(g.BREAST_W / 2)} cm from its alcove-side corner. Draw it plumb from the floor to 170.",
                     f"Mark the “now playing” ledge's top at {n(g.NOW_LEDGE['top'])}, level, and its two concealed brackets 6 cm in from each side of the breast.",
-                    f"Mark the framed LPs' bottom edges at {n(g.FRAMES_Y)}, centred on the line. (The dining table isn't here: it's in its cabinet by the stairs, step 11.)",
+                    "Mark the glass display case's bottom edge at 137 and its top at 222, 90 wide, centred on the line; its oak cleat's top edge at 212. (The dining table isn't here: it's in its cabinet by the stairs, step 11.)",
                 ]),
                 ("Check for cables", [
                     "Run the detector along every line where you'll drill: the cleats, the spacer blocks, the upright brackets, the ledge's brackets, the PC shelf and, on the stairs wall, the cabinet's two wall brackets.",
@@ -243,8 +243,10 @@ def full():
             ]),
         9: dict(
             parts=["Two oak uprights, 165 × 30 × 4.5 (cut to fit)", "High shelf: 128.9 × 30 × 4 and 51.7 × 30 × 4", "Record ledge 128.9 × 7 × 2.4 and its lip",
-                   "Series X shelf 55 × 30 × 4", "Two oak cleats for the reveal, 30 long", "The “now playing” ledge 105.5 × 7 × 2.4 and its lip, two concealed brackets", "Oak wedges (2 + spares), 10 mm oak dowel for pegs and the uprights' dowels"],
-            hardware=["Four concealed upright brackets", "5 × 60 mm screws and plugs", "Wood glue", "LED strip in its aluminium channel (from the lighting phase)"],
+                   "Series X shelf 55 × 30 × 4", "Two oak cleats for the reveal, 30 long", "The “now playing” ledge 105.5 × 7 × 2.4 and its lip, two concealed brackets",
+                   "The glass case: oak sides 85 × 12 × 2 (2), top and bottom 86 × 12 × 2 (2), a 6 mm oak-faced ply back 86 × 81, a 4 mm toughened front 85.6 × 82.2, three 6 mm toughened shelves 85.6 × 9.2, two oak cleat strips 80 × 6 × 1.8 cut at 45°", "Oak wedges (2 + spares), 10 mm oak dowel for pegs and the uprights' dowels"],
+            hardware=["Four concealed upright brackets", "5 × 60 mm screws and plugs", "Wood glue", "LED strip in its aluminium channel (from the lighting phase)",
+                      "Twelve 5 mm shelf pins for glass, with rubber sleeves", "A warm white LED strip, 85 cm, for the case"],
             tools=["Router with a straight bit and a guide batten", "Chisels 6, 12 and 25 mm, and a mallet", "Japanese pull saw", "Drill with a 10 mm brad-point bit and a 20 mm bit",
                    "Dowel jig or dowel centres", "Combination square, marking knife", "Spirit level and laser", "Clamps", "A helper"],
             draw=["joints", "section"],
@@ -291,6 +293,16 @@ def full():
                     f"Cut it {n(g.NOW_LEDGE['x'][1] - g.NOW_LEDGE['x'][0])} × 7 × 2.4 from the shelf board's offcut and glue a 1.5 cm lip along its front edge, so a sleeve stands against the wall without sliding.",
                     f"Mark a level line on the chimney breast at {n(g.NOW_LEDGE['top'] - g.NOW_LEDGE['t'])} (the ledge's underside), {n(g.NOW_LEDGE['x'][0] - g.BREAST_X[0])} cm in from each side of the breast.",
                     "Fit its two concealed brackets to the maker's instructions, slide the ledge on, and stand three LPs on it.",
+                ]),
+                ("The glass display case on the breast (v34)", [
+                    "Rout a 5 mm groove 6 mm deep along the inside of the top and bottom pieces, 1.5 cm in from their front edges, for the glass front: the top's groove 12 mm deep, so the front lifts up into it and drops into the bottom one.",
+                    "Rout a 6 mm rebate along the back edges of all four pieces for the ply back.",
+                    "Drill the shelf-pin holes on the sides' inner faces, front and back, 3 cm in from each edge: at 19, 40 and 61 above the bottom piece's top (the shelves at 158, 179 and 200 on the wall).",
+                    "Glue and dowel the frame together (sides between the top and the bottom), check the diagonals, then glue and pin the ply back into its rebate.",
+                    "Stick the LED strip under the top, just behind the groove, and run its lead out through a 10 mm hole in the back's top corner, down the breast's side to a plug (the strips' app runs it).",
+                    "Screw one cleat strip to the case's back, 10 under its top, the bevel down and facing the wall. Screw the other to the breast at 212 (its top edge), level, the bevel up and facing out, with 5 × 60 screws in plugs every 20 cm.",
+                    "Lift the case onto the cleat (two people: about 16 kg before the glass), check it's level, and fix its bottom edge to the breast with two small mirror plates.",
+                    "Fit the pins and lay in the three glass shelves; lift the front up into the top groove and drop it into the bottom one. Fill it.",
                 ]),
             ]),
         10: dict(

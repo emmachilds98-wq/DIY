@@ -11,6 +11,7 @@ files are copied to the new names (from where they were, or from out/vNN/ once t
 """
 import base64, hashlib, io, json, os, pathlib, shutil, sys
 from playwright.sync_api import sync_playwright
+import localcdn
 import room3d_page
 
 HERE = pathlib.Path(__file__).parent
@@ -35,12 +36,12 @@ SHOTS = [
     ("3d_plants_breast", dict(view="breast", site="C", dining="folded", scene="bright", plants="breast"), "layout B - your plant stand on the breast - bright"),
     ("3d_ideas_window", dict(view="windowwall", site="C", dining="folded", scene="bright", ideas=dict(glass=True)), "IDEAS (not in the plan) - the window wall - glass plant shelves beside your plant stand"),
     ("3d_ideas_ctable", dict(view="pc", site="C", dining="folded", scene="bright", ideas=dict(ctable=True)), "IDEAS (not in the plan) - the C-table at the sofa's open end"),
-    ("3d_ideas_breast", dict(view="breast", site="C", dining="folded", scene="bright", ideas=dict(case=True)), "IDEAS (not in the plan) - the tall glass case on the breast, oak, collectibles"),
+    ("3d_glass_case", dict(view="breast", site="C", dining="folded", scene="bright"), "THE CHIMNEY BREAST - the glass display case, oak, collectibles, the vinyl stand under it - bright"),   # v34: in the plan
     # v20: the taller case with other things in it, and decor to try
-    ("3d_case_mixed", dict(view="breast", site="C", dining="folded", scene="bright", ideas=dict(case=True), decor=dict(fill="mixed", frame="black")),
-     "IDEAS (not in the plan) - the tall glass case, black frame, a bit of each"),
-    ("3d_case_singles", dict(view="breast", site="C", dining="folded", scene="cosy", ideas=dict(case=True), decor=dict(fill="singles", frame="white")),
-     "IDEAS (not in the plan) - the tall glass case, white frame, 7-inch singles and tapes - cosy"),
+    ("3d_case_mixed", dict(view="breast", site="C", dining="folded", scene="bright", decor=dict(fill="mixed", frame="black")),
+     "THE GLASS CASE - black frame, a bit of each"),
+    ("3d_case_singles", dict(view="breast", site="C", dining="folded", scene="cosy", decor=dict(fill="singles", frame="white")),
+     "THE GLASS CASE - white frame, 7-inch singles and tapes - cosy"),
     ("3d_decor", dict(view="door", site="C", dining="folded", scene="bright", decor=dict(rug="stripes", cushions="rust", curtains="linen")),
      "DECOR to try - sage-stripe rug, rust and ochre cushions, white linen curtains - bright"),
     # v21: the suggested furniture and decor, all on
@@ -69,6 +70,13 @@ SHOTS = [
     ("3d_c80_six", dict(view="dining", site="C", cabw="80", dining="six", scene="bright"), "THE 80-WIDE VERSION - open for six - bright, table rule"),
     ("3d_c80_tdoor", dict(view="dining", site="C", cabw="80", dining="folded", scene="bright", tdoor=True), "THE 80-WIDE VERSION - the table door open - no chairs in the base - bright"),
     ("3d_c80_plan", dict(view="plan", site="C", cabw="80", dining="six", scene="bright", tod="day", master=0), "THE 80-WIDE VERSION - birds eye, open for six"),
+    # v34: the trolley pulled out for dinner; the drinks cabinet under the glass case, shut; the storage ottoman, its lid off
+    ("3d_beside_trolley_out", dict(view="dining", site="C", dining="six", scene="bright", beside="trolley", trolley="out", layout={"lamp": {"off": True}},
+                                    aim=dict(eye=[235, 165, -285], at=[345, 55, -245], fov=55)),
+     "BESIDE THE CABINET - the slim trolley pulled out for dinner, clear of the table door's swing (lamp hidden) - bright, table rule"),
+    ("3d_bar_shut", dict(view="breast", site="C", dining="folded", scene="bright", sugg={"barcase": True}), "THE CHIMNEY BREAST - the glass case, and the drinks cabinet under it (a suggestion), shut - bright"),
+    ("3d_ottoman", dict(site="C", dining="folded", scene="bright", tod="day", lid=True, aim=dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)),
+     "THE STORAGE OTTOMAN - navy velvet, its lid lifted off - daytime"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
 ]
@@ -78,7 +86,8 @@ SHOTS = [
 SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear"}   # v30: the compact cabinet; v31: the floor outline, beside it
+        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear",
+        "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():
@@ -152,6 +161,7 @@ def run(test=False, only=None, force=False):
         except Exception:   # Playwright's own browser missing: use the preinstalled Chromium
             b = p.chromium.launch(args=args, executable_path="/opt/pw-browsers/chromium")
         pg = b.new_page(viewport={"width": 1400, "height": 1000})
+        localcdn.route(pg)                                   # v34: three.js from THREE_LOCAL, if set
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)

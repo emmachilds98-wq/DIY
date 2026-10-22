@@ -1,23 +1,21 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-- **FINISH v33 FIRST (the session ran out of usage mid-build, 21 Oct).** All code is committed on `claude/sharp-franklin-lrray1` (PR #30,
-  draft, don't merge until the client says). Left to do, in order:
-  1. DONE (commit 7cb1b8f): the full rebuild finished: every still, `Home_Network_Plan_v33.pdf`, `Build_Guide_v33.pdf`, the page; fit 66/17/10/0, total £3,463–6,733; 45 pictures still to upload to the deck. (To redo: `cd media-wall/src && python3 export3d.py && python3 shot3d.py && python3 build_doc.py && python3 build_viewer.py`.)
-     shot3d skips the stills already committed (their fingerprints are in `shot3d_prints.json`), so it carries on where it stopped.
-     About 90 stills in all; make_images already ran.
-  2. QA: `python3 qa.py <dir>` and `python3 taptest.py <dir>` at 390 and 1280 (both updated for v33). Look at `3d_c_six`, `3d_c_chairs`,
-     `3d_c_tdoor` and `3d_c80_six`: the padded chairs (drawn from `inputs/chairs_padded_listing_photo.webp`) and the 23.4-deep cabinet.
-  3. Fill the placeholders below (`{FIT}`, `{PAGES}`, `{GUIDE}`, `{CHECKS}`, `{QA}`). Fit is 66/17/10/0 (`python3 -c "import fit; print(fit.counts())"`);
-     the total is £3,463–6,733. Update README's PDF links and page counts (v32 → v33, lines near "The full plan").
-  4. Commit and push everything (the client: "all work must be in GitHub"), update PR #30's body.
-  5. Deck 71ff: upload `src/deck_assets_todo.txt` (Artifact `asset: true`, 25 per call), record them in `src/deck_assets.json`, run
-     build_viewer again, publish `src/media_wall_viewer_inline.html` to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2.
-  Then the next round: `media-wall/UPGRADE_PLAN_v34.md`, whose "The 3D room: crashes, errors and lag" section has the measured plan.
-  The Edit-room test (`/tmp` script, gone with the container) raised no page errors in its first three pieces; re-run the plan's step 7.
+- **v35 (round 29, below): the 3D room's crashes, errors and lag (`UPGRADE_PLAN_v35.md`'s first item), worked through.** No shader
+  rebuilds while the room's used (lights a fixed set per quality; hidden parts warmed off screen while idle), every device starts in
+  Fast, nothing drawn behind the sheets, the room back by itself after a lost context, an error trap (`R3D.errors()`, the deck's db
+  `errors/`), `R3D.perf()` and `?perf`. Not done: fewer draw calls (~450 in Fast; target ≤ 120) and fewer meshes. The plan, the buy list
+  and the stills are as v34 except the ottoman's lid, now shut (v34's showed it lifted wherever it was in view after its own still). Next: `media-wall/UPGRADE_PLAN_v36.md`; **read the error log
+  first** (ArtifactData `list` on `errors` on the deck; or ask the client to open the room and run `R3D.errors()` / send a `?perf` screenshot).
+- **v34 (round 28, below): the glass display case is in the plan; a storage ottoman; two ways to a bar (suggestions, built and
+  rendered); more of the room works from a tap.** Fit 70/18/12/0, total £3,673–7,173 (the case +£90–170 less the frames' £20–40; the ottoman +£140–310), plan 102 pages (15.6 MB), guide 53. Round 28 also rebuilt
+  this branch on main's v33 (PR #30) after a parallel v33 had been made on the older v32 (only what still applied came across; see
+  round 28). v33's own leftovers: the numbers below are filled in; QA ran on v34; the deck is still at v32 (this session's account
+  couldn't open it). **Still not started: v34's "The 3D room: crashes, errors and lag"** (now in `UPGRADE_PLAN_v35.md`, first).
+  Headless runs here need `THREE_LOCAL` (round 28). Next: `media-wall/UPGRADE_PLAN_v35.md`.
 - **v33 (round 27, below): the compact cabinet is the only table, with a more compact 80-wide version; the six upgrades from the design
-  review (the phone home, one count, Decide, the ideas shortlist, 90 vs 80 side by side, build day).** Fit {FIT}, total £3,397–6,547
-  (unchanged: picks and added ideas show as "Added by you", not in TRACK), plan {PAGES}, guide {GUIDE}. Next: `media-wall/UPGRADE_PLAN_v34.md`.
+  review (the phone home, one count, Decide, the ideas shortlist, 90 vs 80 side by side, build day).** Fit 66/17/10/0, total £3,463–6,733
+  (the padded chairs; picks and added ideas show as "Added by you", not in TRACK), plan 97 pages (14 MB), guide 53. Next: `media-wall/UPGRADE_PLAN_v34.md`.
 - **v32 (round 26, below): "Watch it open" slow and jointed, every idea, suggestion and Add-list piece with its own HD render and
   in the 3D room, three new suggestions, a cost overview by piece, and the plan page's menus reworked (tools always on, a Menu
   button for the rest).** Fit 110/39/15/0, total £3,397–6,547 (unchanged: nothing new is in the plan), plan 108 pages
@@ -76,6 +74,102 @@
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
 
+## Update 22 Oct 2026, round 29: v35 (the 3D room: crashes, errors and lag)
+- Client (21 Oct): "it currently still crashes in the claude version and has some errors in the web mode when trying to make changes.
+  it also is a bit slow on the render sometimes becoming HD". Measured first (v34, `perf_probe.py`, 1280 × 800, headless SwiftShader:
+  times inflated, counts real): Film scene 10.7 s (shaders 73 → 92), opening the table 21 s, "Unknown color glass/art" warnings, the
+  dock's bubbles unclickable after Look changes (`edit_probe.py`).
+- **No shader rebuilds** (`room3d.js`, after `reshadow()`): every light is "adopted" (`adoptLight`): its `visible`, `intensity` and
+  `castShadow` become accessors. While `LIVE`, `visible` is the quality's fixed set (`lightIn`: HD all; Fast none of the rect-area
+  lights, the lights that belong to hideable parts, or every other bar head), "off" reads as intensity 0, and only the first head of
+  bar 1 and bar 2 casts a shadow, in HD. Lights inside hideable groups move onto `lightRig` (so a hidden group can't drop them out of
+  the count) and follow their owner each frame (`syncRig`, which also drops lights whose owner left the scene: the cabinet's rebuild
+  leaked 18 a time before). `still()` sets `LIVE = false`: saves light the room exactly as before (the stills didn't change).
+- **The warm-up** (`PRE`, `precompile`, `precompileStep`): each hidden part (the open table, the chairs, the suggestions...) is drawn on
+  its own (camera layer 31, every light on it) into a 1 × 1 target flagged `isXRRenderTarget` with the screen's colour space, which three
+  treats like the screen (same tone mapping and output: the same shader keys; a plain render target makes different ones). One part per
+  250 ms, only after a second with no input (`PRE.idleT`), none while a shadow redraw is due, after the speed check, again after a
+  quality change. Opening the table after the warm-up: 21 s → 45 ms here, shaders steady. `three.compile()` can't do this (it doesn't
+  set the cutaway's clipping, so its keys differ); a 1-pixel scissor on the canvas could, but needed a full redraw each step (that was
+  what kept the page too busy to click in round 29's first try).
+- **Look changes:** a plain white map (`BLANK`) and a flat bump (`FLAT`) stand in for "no map", so the shelf colours, the case frame and
+  the floorboards don't change a material's shader. `fillCol()` gives `boxGeo`/`softGeo`/`frameMesh` white for the kinds "glass",
+  "art", "brick" (the warnings).
+- **Lighter:** every device starts in Fast unless you picked (`S.picked`); `autoQuality` moves a laptop to HD if its Fast frames are
+  under 20 ms (then re-checks HD, back to Fast over 70 ms); the speed check's three frames happen at the start. The lower resolution
+  only while dragging on a slow device, after 150 ms (each switch resizes the canvas: a profile showed 4.2 s of `setSize` after a
+  Look change here). Nothing is drawn while `body.sheet-open` (the warm-up carries on). `webglcontextrestored`: the room comes back in
+  Fast without a reload. The labels' sizes are cached (`stickSz`), not read every frame.
+- **Errors:** `noteError()` (window `error`, `unhandledrejection`, `console.error`): a toast at most every 10 s, the last 20 in
+  localStorage `r3d-errors` (`R3D.errors()`), and on the deck `db.doc("errors/<time>")` with the message, stack, state, device and GPU.
+  `R3D.perf()` (calls, triangles, shaders, lights, shadows, quality, pixel ratio, median frame ms, warm-up left, errors) and `?perf` (an
+  overlay to screenshot). `qa.py` now fails if the lighting scenes make new shaders or the trap caught anything.
+- **After** (same probes): lighting scenes add no shaders (QA); table 45 ms; Look walnut/boards ~0.3 s; no console warnings; Edit room
+  add/turn/drag/undo no errors. In SwiftShader each new shader still takes ~1 s, so a click landing on a warm-up step can wait that
+  long (`edit_probe` uses 10 s timeouts); on a real GPU a shader is tens of ms.
+- **Not done (v36):** draw calls ~450 in Fast (merge the static oak, instance the LPs, spindles, chairs, plates); build ideas and
+  suggestions on first show instead of at load; textures ≤ 1024². The Claude-app crash couldn't be reproduced here: the trap is how
+  we'll see it.
+- Stills: before the version bump, `3d_room` and `3d_glass_case` were re-rendered and compared with v34: the same (0.01 % and 0 % of
+  pixels moved), so the lighting rework doesn't change saves. `3d_look` differed: **v34's stills after `3d_ottoman` showed the ottoman
+  with its lid lifted** (`S.lid` carried over from that still: `shot3d.BASE` had no `lid` or `barflap`); BASE now sets both shut. All 86
+  were then rendered as v35 (the version is in `scene3d.json`'s room, so a version bump always re-renders every still).
+- QA: `qa.py` fails and errors [] at 390 and 1280; `taptest.py` the same taps as v34, all working (the curtains now tappable at 390).
+- Backups `build_doc_v34_backup.py`, `room3d_v34_backup.js`; v34 outputs in `out/v34/`. Fit 70/18/12/0, total £3,673–7,173 (unchanged),
+  plan 102 pages (15.6 MB), guide 53 (5.6 MB). The deck: still not reachable from this session's account (Artifact read: not found).
+
+## Update 22 Oct 2026, round 28: v34 (the glass case in the plan; a storage ottoman; two ways to a bar; more taps)
+- **What happened first.** This session started on `claude/optimistic-lovelace-7phxl6` from v32 and made its own "v33" (the flip-top's
+  Watch it open, more taps, Edit room's furniture in detail) while another session's v33 (PR #30, the compact cabinet only, the padded
+  chairs) was merged into `main`. The client: "i think you ve actually missed some of the old work in the repo ... assess and look at
+  the whole repo tree". The branch was reset onto `main` (the parallel v33 kept locally as `v33-parallel-local`, not pushed) and only
+  what still applied came across: the taps (blind, vinyl stand, trolley, every idea and suggestion), Edit room's armchair, beanbag and
+  bookcase, `R3D.set({showat})`, `localcdn.py`. The flip-top's jointed rig was dropped (the flip-top is set aside). The two old branches
+  `claude/compassionate-wright-a150qf` (v11, 19 Oct) and `claude/tender-dijkstra-vbfd96` (v10, 18 Oct) hold one stray commit each:
+  both superseded by later rounds.
+- Client (22 Oct): "i like the large glass display case on the chimney breast. one thing ive been thinking about is maybe integrating a
+  wall bar in here for drinks/spirits or whether another area could facilitate a bar of some kind and how id build it in, can you make
+  some suggestions in build and render. we'd like to get a new ottoman that is actually a storage ottoman, can you find one that is
+  similar size to what we have right now and would match the room or current sofa". Also, with a photo of the bannister and the wall by
+  the door: the turntable is a Technics SL-220 ("freq generator servo automatic"); "Stairs will change so don't worry about that".
+- **The glass case is in the plan** (`ideas.CASE` stays its geometry; its idea text is `ideas.CASE_IDEA`, out of `IDEAS`): two TRACK rows
+  (glass, oak and fittings: £90–170, phase 5), a To do row, costs.SHORT under "The chimney breast", step 9's "The glass display case on
+  the breast" (grooves, rebate, pin holes at 19/40/61, cleat at 212, LED), step 5's marking line, build_doc section 4 "The glass display
+  case on the chimney breast", fit `case_zone()` (sources `glasscut`). It replaces the two LP frames (their TRACK row and costs.SHORT went)
+  and so the picture-lights suggestion went too. 3D: `caseOn()` (not site A, not plant layout B) shows it; the frames hide. Stills
+  `3d_glass_case` (was `3d_ideas_breast`), `3d_case_mixed`, `3d_case_singles` retitled "THE GLASS CASE".
+- **The storage ottoman** (`geometry.OTTOMAN`, `SOFA_POUF` resized to it): our pick ISTOOLS Large Velvet Storage Ottoman 76 × 76 navy
+  (height and price not published: drawn 45, buy row £140–310 and a fit CHECK), Dunelm Square Opulent Velvet 62 square the smaller
+  choice, Dunelm Zoe 96 square too big, the Luxor navy jumbo cord footstool the only cord match (55 square, no storage). Sources
+  `istoolsott`, `opulent`, `zoe`, `luxorcord`. Section 2 "Your new storage ottoman", TRACK row (10 Finishing), costs.SHORT, fit
+  `ottoman_zone()` (replaces the old pouf zone). 3D: navy velvet (MeshPhysical sheen), a padded lid in its own group (`WORK.lid`,
+  `S.lid`; tap it: Lift the lid), a lining and a folded throw inside. Retailer sites are blocked from this sandbox: everything came
+  from search results (see the sources' text).
+- **A bar, two ways (suggestions `barcase`, `bartrolley`; not in the plan or the costs; fit `drinks_zone()`, kept out of the counts):**
+  A, a drinks cabinet under the glass case (`geometry.DRINKS`: the case's 90, 39.1 tall, 20 deep, from 96.4 to 135.5; inside 35.5 for the
+  tallest 70 cl bottle, 34.9, source `bottles`; nine across; an inset 18 mm oak-faced ply fall-front on a piano hinge, two Blum
+  soft-close stays (`flapstay`), a counter at 98.2 reaching 55.5 out; a 3 mm acrylic mirror back (`acrylicmirror`); an LED strip; the
+  "now playing" ledge comes off). 3D: `SUGG_G.barcase`, `WORK.barflap`/`S.barflap` (tap it: Open the bar), bottles, tumblers on the open
+  flap. B, the slim trolley dressed as a drinks trolley (`SUGG_G.bartrolley`, a child of `BES.trolley`; switching it on picks the
+  trolley beside the cabinet). The build for A is in the plan's appendix, "A bar for drinks: two ways". Later idea: a bar under the new
+  stairs (not drawn: the stairs will change).
+- **The trolley, re-routed.** v31–v33 said it "wheels out to the table's far end"; checked properly it can't: with six seated the sofa's
+  end (x 268) and the window-side chairs (from x 277.7) leave no way past, and the open table door's swing (90.5 from its hinge at
+  443.35, -178.65) covers the straight-out path. Now `WORK.trolley`: slide 4 along the wall (1.3 clear of the plant stand's corner at
+  z -278.5), then 119.5 out to x 326–346: 112 from the hinge, 13 behind the seated window-side chairs. It moves only while the table
+  door is shut (a live tween waits; a still or a link places it: `!cabSnap`). The plan, fit and captions say so.
+- **Edit room and taps** as in the parallel v33 (now on main's code): `placeWork()` in `applyState`; cards `beside`, `records`,
+  `sg:<key>` (a floor suggestion is a movable in `SUGG_G`: match its `.pivot`), `id:<key>`, `mov:pouf`; "See its card" opens Ideas at
+  `#it-<kind>-<key>` (build_viewer `item_card` ids, page_router `demma-open` `item`).
+- **Headless here:** jsDelivr is blocked (the proxy answers 403) and retailer sites too. `localcdn.py` serves three.js from an unpacked
+  npm package when `THREE_LOCAL` is set (`curl -sO https://registry.npmjs.org/three/-/three-0.160.0.tgz && tar xzf three-0.160.0.tgz`,
+  then `THREE_LOCAL=<dir>/package`); shot3d, qa, taptest, edit_probe and perf_probe use it. Playwright: `pip install playwright==1.56.0`
+  matches the preinstalled Chromium (build 1194).
+- Backups `*_v33_backup.*`; v33 outputs in `out/v33/`. QA: `qa.py` fails and errors [] at 390 and 1280 (it caught the Ideas sheet's "all suggestions" picture running 2144 wide, now in a
+  gallery); `taptest.py` every tap works at both, the new ones included (blind, records, trolley out and its wait, a suggestion's versions,
+  the drinks cabinet's front, the ottoman's lid; main's v33 phone-strip step needed an Escape first: a card was still up). Stills: all 86
+  rendered; a later ottoman (hollow box) and bar-still fix re-rendered those two and re-keyed the rest.
+
 ## Update 21 Oct 2026, round 27: v33 (one table and a more compact version; the six upgrades from the design review)
 - Client: "The compact cabinet is our only choice for the table now or any upgraded more compact version for this as we're trying to
   optimise space. Happy with upgrade plan, please perform it" (the plan: `UPGRADE_PLAN_v33.md`, "Design review of v32", and the design
@@ -97,7 +191,7 @@
   page_router `railOpen` keeps its twin in step; the rail opens above the dock). `fitFov` frames portrait tighter (1.45 instead of 16/9).
 - **One count, Decide, the shortlist, build day** (`plan_ui.py`, page.js `PICKS`, page.css v33 block): the Plan home has three rings
   (steps built, things bought out of 65, choices made out of 3), "Waiting on you" (`#waitl`), "Where the money goes" (costs.overview as
-  ranges, plus "Added by you") and "Checks on site" (the fit proof's {CHECKS} CHECK rows). Buy's tiles: the plan's total (with picks),
+  ranges, plus "Added by you") and "Checks on site" (the fit proof's 10 CHECK rows). Buy's tiles: the plan's total (with picks),
   bought of 65, paid, jobs of 25 apart; a "Things to buy" filter; "Added by you" (the beside pick and each added idea, Take out). Decide
   (`#decide`, a radio group per choice, the renders already made) saves to localStorage `mw33-picks` and the deck's db `picks/decide`,
   `picks/short` (`{v, by, at}`); the room follows (`cabw`, `decor.pads`, `beside`), the buy list follows (the pads' row says your
@@ -115,7 +209,7 @@
   your grey padded ones", £240–390 (an estimate, about £80–130 a pair: confirm the price). 3D: `paddedOpen` at the table, `K.fchair` /
   `fchairLying` draw them folded with grey cushions; the show's text updated. Decide is three choices now (beside, width, switch).
 - **Compare:** `options_card()` is the compact cabinet at 90 and at 80, side by side, with "Pick this one" (`[data-decide=cabw]`).
-- Backups `*_v32_backup.*`; v32 outputs in `out/v32/`. {QA}
+- Backups `*_v32_backup.*`; v32 outputs in `out/v32/`. QA wasn't run in this round (usage ran out); round 28 ran it on v34.
 
 ## Update 21 Oct 2026, round 26: v32 (Watch it open, slowly; every idea rendered and in the room; a cost overview; menus)
 - Client (after PR #28 merged): "make tools always appear in 3D view and the other buttons on the left to be the expandable menu as these

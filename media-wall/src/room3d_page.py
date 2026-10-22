@@ -293,7 +293,7 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "throw": "Knit throw on the sofa", "pclamp": "Mushroom lamp, PC shelf", "basket": "Seagrass basket",
               "candles": "LED candles on the shelf", "runner": "Table runner and vase", "floorcush": "Floor cushions",
               "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
-              "piclights": "Picture lights, LPs", "blind": "Blackout blind", "cablights": "Lights in the cabinet"}   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet"}   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
 IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
               "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
               "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
@@ -308,7 +308,7 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
          ("floor", "The floor", [("carpet", "Your grey carpet"), ("oatmeal", "Oatmeal carpet"), ("boards", "Oak floorboards")]),
          ("shelf", "Your shelf by the stairs", [("black", "Black (yours)"), ("oak", "Oak"), ("white", "White")]),
 ]   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
-DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case (an idea)", ("fill", "frame"))]
+DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]
 
 
 def tour():
@@ -429,7 +429,7 @@ def controls(gallery=""):
                  + '<div class="grp r3d-save"><button class="btn primary" type="button" id="r3d-save">Save as HD picture</button>'
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
-                 + '<p class="caption"><b>Tap something in the room to work it:</b> the dining cabinet opens, folds and shows its chairs; the drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch.</p>'
+                 + '<p class="caption"><b>Tap something in the room to work it:</b> the dining cabinet opens, folds and shows how it opens; the drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch; the blind rolls up; your vinyl stand\'s front records lift out; the trolley beside the cabinet wheels to the table; and any idea or suggestion you\'ve switched on changes version or goes.</p>'
                  + '<p class="caption">Drag to look round, pinch or scroll to zoom (looking round from where you stand, scrolling walks you forward and back). '
                  'On a keyboard: W A S D or the arrows walk, Q and E turn, R and F go up and down. Lost? Pick a view above, or Reset view.</p>',
         # v31, client: "upgrade the views and layouts area of the site to ensure it reflects our recent upgrades": grouped, the compact cabinet
