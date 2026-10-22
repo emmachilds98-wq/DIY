@@ -221,12 +221,26 @@ details.r3d-more[open] > summary::before { content: "– "; }
   font: 600 14px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); max-width: calc(100vw - 24px); }
 .r3d-toast[hidden] { display: none; }
 .r3d-sub { margin: 6px 0 -4px; font: 600 16px Fredoka, system-ui, sans-serif; color: var(--ink); }
-/* v36: Extras' option rows: a row per need, its mode tag, a line between rows */
-.r3d-optrow { padding: 8px 0 6px; border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
-.r3d-optrow:first-of-type { border-top: 0; }
-.r3d-optmode { margin-left: 6px; padding: 1px 8px; border-radius: 999px; font: 500 11.5px/1.6 system-ui, sans-serif; letter-spacing: .02em;
-  background: var(--chip, rgba(0,0,0,.06)); color: var(--muted, #6b6560); vertical-align: 2px; }
+/* v36: Extras' option rows: a row per need, its mode tag, a line between rows. v37, client: "Some buttons in the Extras tab are slightly
+   misaligned": each row is a grid (the heading and its tag, See it pinned on the right, the options in even columns, the caption under);
+   the heading's -4 bottom margin (it ran into the buttons) is gone here; the tag sits on the heading's centre line, not nudged 2px */
+.r3d-optrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "head see" "btns btns" "cap cap"; gap: 8px 10px;
+  align-items: center; padding: 12px 0; border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
+.r3d-opts > .r3d-optclear + .r3d-optrow, .r3d-opts > .r3d-opthow + .r3d-optrow { border-top: 0; }
+.r3d-optrow > .r3d-sub { grid-area: head; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; line-height: 1.25; min-width: 0; }
+.r3d-optrow > .r3d-optsee { grid-area: see; align-self: start; }
+.r3d-optrow > .seg { grid-area: btns; }
+.r3d-optrow > .caption { grid-area: cap; margin: 0; }
+.r3d-optmode { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; font: 500 11.5px system-ui, sans-serif; letter-spacing: .02em;
+  background: var(--chip, rgba(0,0,0,.06)); color: var(--muted, #6b6560); }
 .r3d-opthow { margin: 2px 0 6px; }
+/* v37: every list of choices in Extras on one column grid, so the buttons line up row to row; words start at the same left padding */
+.r3d-ui .seg.r3d-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 148px), 1fr)); gap: 6px; }
+.r3d-ui .seg.r3d-grid-s { grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr)); }
+.r3d-ui .seg.r3d-grid > button { width: 100%; text-align: left; line-height: 1.25; }
+#r3d-dp-extras .chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+#r3d-dp-extras .chip .ms { vertical-align: 0; }
+.r3d-allrow { margin-top: 2px; }
 .r3d-moments button .ms, .r3d-ui .chip .ms { font-size: 18px; vertical-align: -4px; }
 /* v31: the camera: its height, and the move buttons on the room (hold one to keep moving) */
 .r3d-eyerow { display: grid; grid-template-columns: auto 1fr 5.5em; gap: 10px; align-items: center; font-size: 14px; }
@@ -380,7 +394,7 @@ def controls(gallery=""):
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
               '<button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>')
     ideas_g = ('<div class="grp"><span class="label">Ideas (not in the plan)</span>'
-               '<div class="seg" role="group" aria-label="Ideas, not in the plan">'
+               '<div class="seg r3d-grid" role="group" aria-label="Ideas, not in the plan">'
                + "".join(f'<button type="button" data-idea="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(IDEA_SHORT[k])}</button>'
                          for k, _t, size, *_ in ideas.IDEAS if k != "cushions")      # the cushions are Decor's
                + '</div></div>')
@@ -395,13 +409,13 @@ def controls(gallery=""):
                     f'<label class="chip r3d-anycol">Any colour <input type="color" id="r3d-{key}" value="#f2efe8" aria-label="{lab}: any colour"></label></div></div>'
                     for key, lab in (("ceil", "The ceiling"), ("skirt", "Skirting, the door and its frame")))
     sugg_g = ('<div class="grp"><span class="label">Every suggestion, one by one (not in the plan)</span>'
-              '<div class="seg" role="group" aria-label="Suggested furniture and decor">'
+              '<div class="seg r3d-grid" role="group" aria-label="Suggested furniture and decor">'
               + "".join(f'<button type="button" data-sugg="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(SUGG_SHORT[k])}</button>' for k, _t, size, *_ in ideas.SUGGEST)
-              + '<button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>'
+              + '</div><div class="seg r3d-allrow"><button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>'
               # v28: two or three versions of each, a row for every suggestion that's switched on
               '<div class="grp r3d-svars" id="r3d-svars"><span class="label">Choose a version</span>'
               '<p class="caption" id="r3d-svnone">Switch a suggestion on and its versions show here.</p>'
-              + "".join(f'<div class="r3d-decrow" data-svrow="{k}" hidden><span>{html.escape(SUGG_SHORT[k])}</span><div class="seg" role="group" aria-label="{html.escape(SUGG_SHORT[k])}: version">'
+              + "".join(f'<div class="r3d-decrow" data-svrow="{k}" hidden><span>{html.escape(SUGG_SHORT[k])}</span><div class="seg r3d-grid r3d-grid-s" role="group" aria-label="{html.escape(SUGG_SHORT[k])}: version">'
                         + "".join(f'<button type="button" data-svar="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n, _c in ideas.SUGG_VARS[k]) + '</div></div>'
                         for k, *_ in ideas.SUGGEST)
               + '</div>'
@@ -513,17 +527,17 @@ def opts_html():
     for key, title, mode, note, items in ideas.OPTION_GROUPS:
         btns = ('<button type="button" data-opt="%s:none" aria-pressed="false">None</button>' % key) if mode == "one" else ""
         btns += "".join(f'<button type="button" data-opt="{key}:{v}" aria-pressed="false">{html.escape(label)}</button>' for v, label, _s in items)
-        btns += f'<button type="button" class="chip" data-optsee="{key}"><span class="ms" aria-hidden="true">visibility</span> See it</button>'
         how = {"one": "Pick one", "any": "Switch on any", "lid": "Open or shut"}[mode]
         rows += (f'<div class="r3d-optrow" data-optgrp="{key}"><h3 class="r3d-sub">{html.escape(title)} <span class="r3d-optmode">{how}</span></h3>'
-                 f'<div class="seg" role="group" aria-label="{html.escape(title)}">{btns}</div>'
+                 f'<button type="button" class="chip r3d-optsee" data-optsee="{key}" aria-label="See it: {html.escape(title)}"><span class="ms" aria-hidden="true">visibility</span> See it</button>'
+                 f'<div class="seg r3d-grid" role="group" aria-label="{html.escape(title)}">{btns}</div>'
                  f'<p class="caption" data-optcap="{key}" aria-live="polite">{html.escape(note)}</p></div>')
     return ('<div class="grp r3d-opts" id="r3d-opts"><span class="label">Storage and a bar: your options</span>'
             '<p class="caption r3d-opthow"><b>How it works:</b> pick an option and the room shows it and takes you to it; <b>None</b> takes it away; '
             '<b>See it</b> takes you back. Tap a piece in the room for its colours, to move it or to take it away. What you pick shows in '
             '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>'
             # v37: everything off in one go, back to the plan as it is
-            '<div class="seg"><button type="button" class="chip" data-optclear="1"><span class="ms" aria-hidden="true">restart_alt</span> Clear all extras</button></div>'
+            '<div class="seg r3d-optclear"><button type="button" class="chip" data-optclear="1"><span class="ms" aria-hidden="true">restart_alt</span> Clear all extras</button></div>'
             + rows + '</div>')
 
 
