@@ -1,6 +1,6 @@
 """v30: taps things in the 3D room (the cabinet, its doors, its two widths (v33), the media wall, the lamp, the curtains) at 1280 and 390
 and prints what each card offers and what each button did (v34: the blind, the vinyl stand, the trolley, a suggestion's versions, the
-storage ottoman's lid, the drinks case's flap).  python3 taptest.py [screenshot folder]"""
+storage ottoman's lid, the drinks case's flap; v36: the bar by the sofa, the lift-top coffee table).  python3 taptest.py [screenshot folder]"""
 import sys, json, threading, functools, http.server, pathlib
 from playwright.sync_api import sync_playwright
 import localcdn
@@ -78,6 +78,11 @@ def run(w, h):
         if tap((lambda c: [c[0], 120, -20.5])(pg.evaluate(CEN, "SUGG_G.barcase")), "the drinks cabinet's front"): press("Open the bar"); print("   barflap:", S("barflap"))
         pg.evaluate("() => R3D.set({sugg: {}, lid: false, aim: {eye: [300, 150, -60], at: [238, 30, -157], fov: 50}})"); pg.wait_for_timeout(800)
         if tap((lambda c: [c[0], 44, c[2]])(pg.evaluate(CEN, "MOV.pouf.pivot")), "the ottoman's lid"): press("Lift the lid"); print("   lid:", S("lid"))
+        # v36: the bar by the sofa's front, the lift-top coffee table's top
+        pg.evaluate("() => R3D.set({sugg: {barside: true}, barflap: false, aim: {eye: [170, 140, -150], at: [0, 112, -44], fov: 50}})"); pg.wait_for_timeout(800)
+        if tap((lambda c: [20.5, 120, c[2]])(pg.evaluate(CEN, "SUGG_G.barside")), "the bar by the sofa's front"): press("Open the bar"); print("   barflap:", S("barflap"))
+        pg.evaluate("() => R3D.set({sugg: {liftcoffee: true}, barflap: false, ctop: false, aim: {eye: [240, 135, -95], at: [148, 45, -166], fov: 46}})"); pg.wait_for_timeout(800)
+        if tap((lambda c: [c[0], 48, c[2]])(pg.evaluate(CEN, "SUGG_G.liftcoffee")), "the lift-top coffee table"): press("Lift the top"); print("   ctop:", S("ctop"))
         pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', sugg: {}, lid: false, view: 'room'})")
         print("  errors:", errs[:5])
         b.close()

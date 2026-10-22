@@ -1,6 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v36 (round 30, below): more places for a bar, the ottoman's games and cards, two homes for five blankets, more storage, a plant
+  shelf 10 off the stairs wall, and Extras opening on a row per need** (`ideas.OPTION_GROUPS`). All suggestions (not in TRACK or the
+  totals): fit 70/18/12/0 and £3,673–7,173 unchanged; plan 110 pages (17.0 MB), guide 53; 93 stills. Next:
+  `media-wall/UPGRADE_PLAN_v37.md` (the client's picks first).
 - **v35 (round 29, below): the 3D room's crashes, errors and lag (`UPGRADE_PLAN_v35.md`'s first item), worked through.** No shader
   rebuilds while the room's used (lights a fixed set per quality; hidden parts warmed off screen while idle), every device starts in
   Fast, nothing drawn behind the sheets, the room back by itself after a lost context, an error trap (`R3D.errors()`, the deck's db
@@ -73,6 +77,38 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 22 Oct 2026, round 30: v36 (bars, storage, blankets, the plant shelf; the options made easy to manage)
+- Client: "perfect currently the base plan is great, explore any more bar ideas and where we could put it as well as more storage and
+  where we could put it. in the ottoman we will likely have games and cards. then i'd also like a small 10cm gap from wall shelf with
+  the hanging plant from the right side wall. add storage solution options for our blankets also, around 5 blankets. make sure its clear
+  how to manage all these options in the 3D room". Earlier: "make sure it goes on main and is merged when ready" (v35 was, PR #31).
+- **Readings:** "the right side wall" = the stairs wall (x 467): on your right from the sofa facing the TV, and on the right of the 3D
+  room's first view. "The hanging plant" = `PLANT_B` (the trailing plant at the black shelf's window end). "10cm gap from wall" = the
+  shelf's back stands 10 off the wall, the strands falling through the gap; the plan says to ask if a 10-deep shelf was meant.
+- **Where things can't go (checked):** the stairs wall's window end (the open table door lies back over it to z -269.3, 23.4 off the
+  wall: only slim things, and only what you don't need while eating); the chair box and the linen shelf (full: a chair under and over
+  the chair box's shelf at 94; the linen shelf is 18.6 tall); the stair end's floor (the stairs' foot). The sofa's open end (x 0–97,
+  z -8 to -128) and the wall over it under the oak run (151.4) are the free places.
+- **geometry v36:** `BAR_SIDE` (C: DRINKS' build 60 wide, x 0–20, z -14 to -74, 96.4–135.5, five bottles), `GAME_BOX` 30 × 30 × 8,
+  `CARD_DECK`, `OTTO_GAMES` (12 games, a 10 strip for decks), `THROW_FOLDED` 38 × 33 × 8, `BLANKET_BASKET` (Cotswold 45 × 45 × 76 at the
+  sofa's open end, the floor plant's corner), `BESIDE["rail"]` (+ opts), `LIFT_COFFEE` (Homelife 90 × 50 × 48 → 53.5), `KUGGIS`,
+  `DOOR_SHELF` (91 × 27 at 206, over a 7 architrave: CHECK), `SHELF_BOXES`, `PLANT_SHELF` (30 × 15, 10 off, top 196, z -48.5 to -78.5).
+  Sources `ttr`, `bicycle`, `ofelia`, `cotswold`, `homelife`, `kuggis`, `oakdowel` (from search results; retailer sites are blocked
+  here). `fit.storage_zone()` after the bar's zone, kept out of `counts()`.
+- **ideas:** six suggestions (`barside`, `blanketbasket`, `liftcoffee`, `doorshelf`, `shelfboxes`, `plantshelf`) with versions, and
+  `OPTION_GROUPS` (bar: one of barcase/bartrolley/barside; games: the ottoman's lid; blankets: one of blanketbasket/beside rail;
+  storage: any; plant: plantshelf). Rules: the basket hides the floor plant (shared corner); the door shelf hides the clock; the plant
+  shelf hides `plantBG` (the plant moves); picking the rail turns the drinks trolley off and vice versa (one "beside" place).
+- **3D (`room3d.js`):** `drinksCab()` (v34's cabinet as a builder; C is built facing z and turned 90°), `buildStorage()`, the rail in
+  `buildBeside`, the ottoman's games and decks (merged per colour), `hangPlant()` (v15's plant as a builder: identical geometry on the
+  black shelf), the coffee table's own parts in `coffeePlain` (hidden under the lift-top; the tray rises 6), `S.ctop` + `WORK.ctop`,
+  `WORK.barflap2` (C opens with `S.barflap`). Extras starts with `room3d_page.opts_html()` / `opts_json()` (aims from `item_shots.AIM`):
+  `optPick`, `optSee`, `syncOpts` (captions: title, size, cost, where). Cards: "Open the bar" on C, "Lift the top" on the coffee table,
+  the ottoman's card names the games.
+- Backups `*_v35_backup.*`; v35 outputs in `out/v35/`. - Stills: `3d_sg_*` for the six (item_shots AIM, SUGG_STATE), `3d_beside_rail`, `3d_ottoman` now shows the games. The plan: a v36 box,
+  section 2's games and cards, the appendix's "three ways" bar (C) and "Storage and a bar: the options, and where they go" (a table, the
+  3D room's how-to, build notes for the rail and the plant shelf).
 
 ## Update 22 Oct 2026, round 29: v35 (the 3D room: crashes, errors and lag)
 - Client (21 Oct): "it currently still crashes in the claude version and has some errors in the web mode when trying to make changes.
