@@ -150,7 +150,7 @@ def run(test=False, only=None, force=False):
     prints = json.loads(PRINTS.read_text()) if PRINTS.exists() else {}
     todo = []
     for stem, opts, title in SHOTS:
-        if only and only not in stem:
+        if only and not any(o in stem for o in only.split(",")):   # v37: several, comma-separated
             continue
         rec = prints.get(stem, {})
         rec_files = [HERE.parent / f for f in rec.get("files", [])]

@@ -152,8 +152,10 @@ def fliptop_zones():
         ("Folded, under the shelf", f"top edge {r1(g.FOLDED_TOP)}, {r1(g.FOLDED_D)} off the wall", ref("photo20"), f"shelf's underside about {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
          f"{r1(g.SHELF_B['top'] - g.SHELF_B['t'] - g.FOLDED_TOP)}: the shelf and what's on it stay", PASS),
         ("Light over the table", "the existing pendant point, for bar 2", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})", "over the open table's stair side: the bar runs along it", PASS),
-        ("Your shelf and the pipe boxing (v16)", f"the shelf {r1(g.SHELF_B['z'][0] - g.SHELF_B['z'][1])} long", ref("photo20", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])}, {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} out",
-         f"drawn {r1(g.SHELF_B['z'][1] - g.PIPE_BOX['z'][1])} short of it, {r1(g.SHELF_B['z'][0] - g.STAIRS_WALL_Z[0])} past the stair box (your photo: about 41)", PASS),
+        ("Your shelf and the pipe boxing (v37: a fixed 10 gap)", f"the shelf {r1(g.SHELF_B['z'][0] - g.SHELF_B['z'][1])} long", ref("shelfgap", "photo20", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])}, {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} out",
+         f"ends {r1(g.SHELF_B['z'][1] - g.PIPE_BOX['z'][1])} short of it, always (as it's fixed); {r1(g.STAIRS_WALL_Z[0] - g.SHELF_B['z'][0])} past the stair box", PASS),
+        ("Your shelf's stairs end (v37)", f"2 m from the 10 gap", ref("shelfgap", "photo20"), "an earlier look at your photo put it about 41 past the stair box",
+         f"{r1(g.STAIRS_WALL_Z[0] - g.SHELF_B['z'][0])} past it: if you measure 41, the shelf is about {r1(200 - (41 - (g.STAIRS_WALL_Z[0] - g.SHELF_B['z'][0])))} long; the gap stays 10", CHECK),
         ("The OBEGRÄNSAD panel on the shelf (v16)", f"{r1(g.LIGHTBOX['z'][0] - g.LIGHTBOX['z'][1])} × {r1(g.LIGHTBOX['h'])} × {r1(g.LIGHTBOX['d'])}, standing landscape at the stair end", ref("obegransad"), f"shelf top {r1(g.SHELF_B['top'])} to the {r1(g.CEIL)} ceiling",
          f"{r1(g.CEIL - g.SHELF_B['top'] - g.LIGHTBOX['h'])} over it: this needs the shelf at 198 or lower (measure it); higher, hang the panel on the wall beside the shelf instead", CHECK),
         ("The window side's chairs and the pipe boxing", f"backs at z {r1(north_back)}", ref("terje", "room"), f"the boxing's face at z {r1(g.PIPE_BOX['z'][1])} (x {r1(g.PIPE_BOX['x'][0])} to the wall)",
@@ -1074,11 +1076,11 @@ ORDER.extend(["ttr", "bicycle", "ofelia", "cotswold", "homelife", "kuggis", "oak
 
 
 def storage_zone():
-    """v36: the options round the room: a third bar, the games and cards, the blankets, more storage, the plant shelf (suggestions)."""
+    """v36: the options round the room: a third bar, the games and cards, the blankets, more storage (suggestions; v37: the plant shelf went)."""
     g = G
-    C, O, Gm, Bb, Ra, Ds, Ps = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF, g.PLANT_SHELF
+    C, O, Gm, Bb, Ra, Ds = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF
     th, n = g.THROW_FOLDED, g.BLANKETS
-    return ("Storage and a bar: the options (suggestions)", "a third bar by the sofa, the ottoman's games, five blankets, three more places, the plant shelf", [
+    return ("Storage and a bar: the options (suggestions)", "a third bar by the sofa, the ottoman's games, five blankets, three more places", [
         ("C, the bar by the sofa: bottles", f"{C['n']} across, inside {r1(C['inner_h'])} high", ref("bottles"), f"the tallest 70 cl {r1(g.DRINKS_BOTTLE[0])}",
          f"{r1(C['inner_h'] - g.DRINKS_BOTTLE[0])} over it, as under the case", TIGHT),
         ("C: under the oak run", f"top at {r1(C['y'][1])}", ref("room"), f"the run's underside {r1(g.LEDGE_TOP - g.SIDE_RUN_T)}",
@@ -1101,10 +1103,6 @@ def storage_zone():
          f"the door's 198 and a {r1(g.ARCHITRAVE)} architrave", f"{r1(Ds['head'])} over two {r1(g.KUGGIS[2])}-high boxes; check your architrave", CHECK),
         ("Boxes on your black shelf", f"two {r1(g.KUGGIS[0])} × {r1(g.KUGGIS[1])} × {r1(g.KUGGIS[2])}", ref("kuggis"), "the shelf 25 deep, the laser in the middle",
          "1 over the shelf's front; either side of the laser", TIGHT),
-        ("The plant shelf", f"{r1(Ps['w'])} × {r1(Ps['d'])}, {r1(Ps['gap'])} off the wall, top {r1(Ps['top'])}", ref("room"),
-         f"the stairs end of the wall: z {r1(g.STAIRS_WALL_Z[0])} to {r1(g.CAB['z'][0])}", f"{r1(Ps['under'])} under it at the stairs' foot (the door's 198)", PASS),
-        ("The plant shelf: the strands", f"from {r1(Ps['top'])}, {r1(g.PLANT_B['trail'][0])}–{r1(g.PLANT_B['trail'][1])} long", ref("room"),
-         "the table door hinges at the cabinet's far end", f"their ends {r1(Ps['ends'][0])}–{r1(Ps['ends'][1])} up, clear of both doors", PASS),
     ])
 
 
@@ -1130,6 +1128,117 @@ def counts():
         for r in rows:
             c[r[-1]] += 1
     return c
+
+
+# ---------------------------------------------------------------- v37: the bar built in beside the cabinet, shoe storage, the window corner, more storage
+SOURCES["shelfgap"] = ("Client, 22 Oct 2026: \"The shelf on the wall alongside the stairs must always end 10cm short of the right-hand wall, "
+                       "regardless of any other sizing or positioning logic. It should never touch the right wall ... it reflects how the shelf is "
+                       "actually installed\" (facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side)")
+SOURCES["worktop"] = ("Homebuilding & Renovating: the UK's usual worktop height is 900 mm to the top (homebuilding.co.uk/advice/kitchen-worktop-height); "
+                      "a raised bar counter 1000 to 1200")
+SOURCES["glassrail"] = ("Dan Murphy's: Bev-Equip single-row glass hanger, chrome, 400 mm long, a 110 × 15 mm mount plate, 36 mm high, about four "
+                        "or five wine glasses (danmurphys.com.au, BEVCH-400)")
+SOURCES["wineglass"] = ("Stemmed wine glasses, makers' sizes: Rosendahl Grand Cru red 20.5 and 22.2 tall; CB2 Joplin 22.9; most 20 to 23 "
+                        "(culinaris.de, cb2.ca, dimensions.com)")
+SOURCES["trones"] = ("IKEA UK: TRONES shoe cabinet/storage, white, 52 × 18 × 39 cm, a pack of two £25, about four pairs each; must be fixed to "
+                     "the wall (ikea.com/gb, 003.973.07)")
+SOURCES["eket"] = ("IKEA: EKET wall cabinet with glass door, 35 × 35 × 35 cm, a suspension rail included, at least 5 cm to the ceiling; "
+                   "about 38 € (ikea.com/lv, ikea.com/cz)")
+SOURCES["floatshelf"] = ("B&Q: Shelf Depot oak floating shelf, L 900 × D 230 mm, a concealed steel bracket included (diy.com, 5060042781980); "
+                         "Wickes floating shelf brackets for solid walls")
+SOURCES["seat"] = ("Window seats: a seat 17 to 19 in (43 to 48 cm) high and at least 16 in (41 cm) deep, 18 to 22 in better "
+                   "(hunker.com, askthebuilder.com); a lift-up lid stores the most")
+SOURCES["shoebench"] = ("notonthehighstreet (Momentum): open-compartments shoe bench, 104 × 30 × 48 cm, a padded seat, 200 kg on the seat")
+SOURCES["wardrobe"] = ("FCI London: built-in wardrobes need 60 cm for a hanging rail (under 60, no standard rail); sliding doors 66 plus about "
+                       "5 for the track (fcilondon.co.uk/blog/how-deep-should-built-in-wardrobes-be)")
+SOURCES["overdoor"] = ("Linen Chest: metal over-door hanger, six hooks, 49 × 11 × 14 cm; UK-door racks fit doors 2.5 to 4.5 cm thick "
+                       "(linenchest.com; RISEMART, latestdeals.co.uk)")
+SOURCES["stepdrawers"] = ("The Day: building drawers into a staircase, the usable size set by the stringers and the treads; UK Workshop: each tread "
+                          "needs support once its riser is cut (theday.com/?p=192887; ukworkshop.co.uk/threads/understair-storage.151071)")
+SOURCES["capspec"] = ("SanMar: a structured six-panel cap's spec sheet, bill (visor) 2¾ in (7 cm), crown 6¾ in measured over the top "
+                      "(sanmar.com, 72788); the client's photo of their cap, 22 Oct 2026 (green crown, brown brim, gold embroidery)")
+ORDER.extend(["shelfgap", "worktop", "glassrail", "wineglass", "trones", "eket", "floatshelf", "seat", "shoebench", "wardrobe", "overdoor", "stepdrawers", "capspec"])
+
+
+def more_storage_zone():
+    """v37: the bar built in beside the cabinet, the shoe cabinets, the window corner's three, the alcove shelves, the wall cabinets, the step
+    drawers and the over-door rail (suggestions: out of the counts)."""
+    g = G
+    B, C, ws, hb, wd, al, wc, sd, od = g.BAR_BUILT, g.CORNER, g.WINDOW_SEAT, g.HALL_BENCH, g.WARDROBE, g.ALCOVE_SHELVES, g.WALL_CABS, g.STAIR_DRAWERS, g.OVERDOOR
+    return ("More storage, and a bar built in (suggestions)", "beside the cabinet, the window corner, the walls, the steps, the door", [
+        ("D, the built-in bar: its slot", f"{r1(B['w'])} wide, scribed", ref("room"), f"the cabinet's end z {r1(g.CAB['z'][1])} to the boxing {r1(g.PIPE_BOX['z'][1])}",
+         "fixed to the wall and the floor, the boxing and the cabinet's end", PASS),
+        ("D: its depth", f"the counter {r1(B['front'])} off the wall", ref("room"), f"the open table door lies back {r1(g.CAB['d'])} off it",
+         f"{r1(B['door_clear'])} behind the door; {r1(B['covered'])} of the bar is behind it while you eat", TIGHT),
+        ("D: the counter", f"top at {r1(B['counter'])}", ref("worktop"), "a usual worktop, 90", "standing height to pour at", PASS),
+        ("D: bottles", f"{B['bottles']}: {B['across']} across, {B['rows']} deep, two shelves", ref("bottles"), f"inside {r1(B['inner_w'])} × {r1(B['inner_d'])}; 70 cl up to {r1(g.DRINKS_BOTTLE[0])} × {r1(g.DRINKS_BOTTLE[1])}",
+         f"two deep need {r1(2 * g.DRINKS_BOTTLE[1])} of the {r1(B['inner_d'])}", TIGHT),
+        ("D: glasses on the rail", f"under the shelf at {r1(B['shelf'][0])}", ref("glassrail", "wineglass"), f"a tall glass {r1(g.BAR_GLASS_H)}, the rail {r1(g.BAR_RAIL[1])}",
+         f"their feet at {r1(B['glass_low'])}: {r1(B['glass_gap'])} over the counter", PASS),
+        ("D: your hanging plant above it", "the strands from the black shelf's window end", ref("photo20"), "they fall about 26 off the wall, in front of the 22.4 counter",
+         "trim them to above the first shelf, or turn the pot along the shelf", CHECK),
+        ("Shoe cabinets beside the cabinet", f"two {r1(g.TRONES[0])} × {r1(g.TRONES[1])} × {r1(g.TRONES[2])}", ref("trones"), f"the {r1(g.BESIDE['len'])} slot, the door's line at {r1(g.CAB['d'])}",
+         f"{r1(g.BESIDE['len'] - g.TRONES[0])} to spare along it, {r1(g.CAB['d'] - g.TRONES[1])} behind the door", PASS),
+        ("The window corner", f"{r1(C['w'])} wide", ref("room"), f"the curtains' stack (x {r1(C['x'][0])}) to the table door's line (x {r1(C['x'][1])})",
+         f"{r1(C['free'])} out from the window wall to the seated chairs' backs", PASS),
+        ("The window seat", f"{r1(ws['x'][1] - ws['x'][0])} × {r1(ws['d'])} × {r1(ws['h'])} with its cushion", ref("seat"), "43 to 48 high, at least 41 deep",
+         f"inside {r1(ws['inside'][0])} × {r1(ws['inside'][1])} × {r1(ws['inside'][2])}: your five blankets fit", PASS),
+        ("The bench with cubbies", f"{r1(hb['w'])} × {r1(hb['d'])} × {r1(hb['h'])}", ref("shoebench"), f"the corner's {r1(C['w'])}",
+         f"{r1((C['w'] - hb['w']) / 2)} to spare each side", TIGHT),
+        ("The built-in cupboard", f"{r1(wd['x'][1] - wd['x'][0])} × {r1(wd['d'])}, to the ceiling", ref("wardrobe"), "60 for a hanging rail; sliding doors need 71",
+         f"hinged doors; {r1(wd['behind_chairs'])} to the seated chairs' backs, so open it with the table folded", TIGHT),
+        ("The alcove shelves", f"two {r1(al['w'])} × {r1(al['d'])} at {r1(al['tops'][0])} and {r1(al['tops'][1])}", ref("floatshelf", "solidwall"), f"the plant stand's top {r1(g.PLANT_STAND['h'])}",
+         f"{r1(al['over_stand'])} over it; into the solid wall", PASS),
+        ("The wall cabinets", f"two {r1(g.EKET[0])} cubes, {r1(wc['y0'])} to {r1(wc['y0'] + g.EKET[2])}", ref("eket"), f"the ceiling at {r1(g.CEIL)}; EKET asks for 5 over it",
+         f"{r1(wc['head'])} over them; past the PC shelf's end (z {r1(g.PC_SHELF_Z[1])}) by 4", PASS),
+        ("The step drawers", f"three, fronts {r1(sd['w'])} × {r1(sd['h'])}, {r1(sd['depth'])} deep", ref("stepdrawers"), f"a riser {r1(g.STAIR_RISE)} under a 2.2 tread, the stairs {r1(g.STAIR_X[1] - g.STAIR_X[0])} wide",
+         "each tread needs a bearer under it once its riser comes out: a joiner's job, or build them into the new stairs", CHECK),
+        ("The hook rail over the door", f"{r1(od['w'])} × {r1(od['d'])} × {r1(od['h'])}", ref("overdoor"), f"the open door stands {r1(od['open_gap'])} off the breast's side",
+         f"slim things only on the room side ({r1(od['open_gap'] - od['d'])} left), or hang it on the hall side", TIGHT),
+    ])
+
+
+def shelf_zone():
+    """v37: your black shelf on the stairs wall, a fixed 10 short of the pipe boxing (the client's hard rule), and what stands on it."""
+    g = G
+    sb = g.SHELF_B
+    return ("Your black shelf on the stairs wall (v37: a fixed 10 cm gap)", f"2 m, {r1(sb['d'])} deep, its top at {r1(sb['top'])}, over the dining cabinet", [
+        ("Its window end and the pipe boxing", f"z {r1(sb['z'][1])}", ref("shelfgap", "photo20"), f"the boxing's side at z {r1(g.PIPE_BOX['z'][1])}, {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} out",
+         f"{r1(sb['z'][1] - g.PIPE_BOX['z'][1])} short of it, always: geometry.py and the 3D room both pin it there", PASS),
+        ("Its stairs end", f"z {r1(sb['z'][0])}, 2 m back from the gap", ref("shelfgap", "photo20"), "an earlier look at your photo put it about 41 past the stair box",
+         f"{r1(g.STAIRS_WALL_Z[0] - sb['z'][0])} past it: if you measure 41 there, the shelf is about {r1(200 - (41 - (g.STAIRS_WALL_Z[0] - sb['z'][0])))} long; the gap stays 10", CHECK),
+        ("Over the dining cabinet", f"its underside at {r1(sb['top'] - sb['t'])}", ref("room"), f"the cabinet {r1(g.CAB['h'])} tall, z {r1(g.CAB['z'][0])} to {r1(g.CAB['z'][1])}",
+         f"{r1(sb['top'] - sb['t'] - g.CAB['h'])} over it; the cabinet stays where it was (the shelf moved 8 towards the stairs)", PASS),
+        ("Your hanging plant at its window end", f"z {r1(g.PLANT_B['z'])}", ref("photo20"), "the shelf's end, 10 off the boxing", "9 in from the end, as in your photo", PASS),
+    ])
+
+
+_zones_v36 = zones
+
+
+def zones():
+    """v37: your black shelf's 10 gap after the compact cabinet; the bar built in beside the cabinet and more storage after the v36 options."""
+    out = []
+    for z in _zones_v36():
+        out.append(z)
+        if z[0].startswith("The compact dining cabinet"):
+            out.append(shelf_zone())
+        if z[0].startswith("Storage and a bar"):
+            out.append(more_storage_zone())
+    return out
+
+
+def counts():
+    """v37: suggestions stay out of the totals (the new zone too)."""
+    c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
+    for title, _, rows in zones():
+        if title == "How many can sit down" or title.startswith(("The more compact version", "A bar for drinks", "Storage and a bar", "More storage, and a bar")):
+            continue
+        for r in rows:
+            c[r[-1]] += 1
+    return c
+
+
 
 if __name__ == "__main__":
     for title, space, rows in zones():

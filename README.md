@@ -2,19 +2,26 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v36: more bar places, storage, five blankets and a plant shelf, all easy to try in the 3D room
+## Media wall and dining wall, v37: a bar built in beside the dining cabinet, more storage, your shelf 10 cm off the boxing, a proper cap on the lamp
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v36%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v37%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v37** (a built-in bar "next to the dining cabinet", more storage ideas, your shelf's 10 cm gap, the lamp's cap, the 3D room's menus)
+- **A bar built in beside the dining cabinet:** fixed joinery in the 52.5 cm between the cabinet and the pipe boxing, 22.4 deep so the open table door still lies back over it: a cupboard for 20 bottles, an oak counter at 90, a mirror back, glasses hanging from a rail, a display shelf. About £110–200 (a suggestion).
+- **Your black shelf ends 10 cm short of the pipe boxing, always:** fixed in the plan's numbers and in the 3D room, whatever else changes. Last round's small plant shelf is gone (it came from misreading your 10 cm gap).
+- **More storage, each where it fits:** drawers in the bottom three steps, two alcove shelves in the window corner, a storage window seat, a bench with cubbies (for the hall, or the window corner), a built-in cupboard, two wall cabinets over the sofa's corner, a hook rail over the door and two shoe cabinets. Sizes from real products; one thing per place.
+- **Your red lamp's cap is a baseball cap now:** a structured six-panel crown and a flat, stiff brim 1.8 times a usual one, green, brown and gold like your photo.
+- **The 3D room:** the lights are under **Views**; **Extras** is lined up into even rows, with **Clear all extras**; Layout has **Games night** and **Drinks** set-ups.
 
 **New in v36** ("explore any more bar ideas and where we could put it as well as more storage ... make sure its clear how to manage all these options in the 3D room")
 - **A third place for a bar:** a 60-wide drinks cabinet by the sofa, under the oak run, alongside the one under the glass case and the drinks trolley (and, later, under the new stairs).
 - **Games and cards in the ottoman:** twelve square board games in three layers, and a row of card games along one side.
 - **Your five blankets:** a tall lidded seagrass basket at the sofa's open end, or an oak rail on the wall beside the dining cabinet.
 - **More storage:** a lift-top coffee table, a shelf over the hall door with two lidded boxes, two boxes on your black shelf.
-- **Your hanging plant's own shelf:** a small oak shelf at the stairs end of the stairs wall, its back 10 cm off the wall so the strands fall through the gap.
+- **Your hanging plant's own shelf** (gone in v37: your 10 cm gap is the black shelf's own gap from the boxing).
 - **In the 3D room, Extras now starts with a row for each** (a bar, games and cards, blankets, more storage, the plant): pick an option and the room shows it and takes you there, with a line on where it goes and what it costs. All are suggestions, not in the plan's costs until you choose.
 
 **New in v35** (the 3D room: "it currently still crashes in the claude version and has some errors in the web mode when trying to make changes. it also is a bit slow on the render sometimes becoming HD")
@@ -81,7 +88,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **The brick under the stairs is painted**, as it has a wall in front of it.
 - **Edit room:** the flip-top's chair cupboard can come off the wall (select it, Remove; + Add puts it back). Things clip to a wall from 15 cm away (was 5), a quarter turn keeps a piece against its wall, and **Back to the wall** turns a piece and pushes it flat against the nearest wall.
 
-![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v36%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
+![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v37%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
 
 **v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
 - **Option C, a second way to build the dining wall** (the flip-top stays the plan): one oak cabinet under your shelf. The table, 225 × 90 open, stands up in one bay; all eight folding chairs fold into the other, behind two doors. Packed away, nothing shows. In the 3D room: Tools, Layout, "C: the dining cabinet".
@@ -279,8 +286,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v36.pdf`](media-wall/out/Home_Network_Plan_v36.pdf) (110 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v36.pdf`](media-wall/out/Build_Guide_v36.pdf) (53 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v37.pdf`](media-wall/out/Home_Network_Plan_v37.pdf) (110 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v37.pdf`](media-wall/out/Build_Guide_v37.pdf) (53 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account, still at v32 until it's republished: the room in 3D, the plan's chapters, build steps, buy tracker, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
