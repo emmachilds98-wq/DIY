@@ -3,7 +3,8 @@
 ## START HERE (next agent)
 - **v37 (round 31, below): a bar built in beside the dining cabinet (beside option "bar"), shoe cabinets ("shoes"), seven more
   storage suggestions, the black shelf pinned 10 cm short of the pipe boxing (a hard rule, `SHELF_B_GAP`), the red lamp's cap rebuilt as a
-  structured baseball cap, the lights moved into Views, Extras lined up on a grid.** All new pieces are suggestions (not in TRACK).
+  structured baseball cap, the lights moved into Views, Extras lined up on a grid.** All new pieces are suggestions (not in TRACK): fit
+  73/18/13/0 (the new CHECK: the shelf's stairs end), total £3,673–7,173 unchanged; plan 116 pages (18.9 MB), guide 53; 104 stills.
   Next: `media-wall/UPGRADE_PLAN_v38.md`. **Never write the cap's poem out in code or text**: its wording tripped the session's safety
   filter twice this round; the embroidery is drawn as stitched rows (`stitchTex`).
 - **v36 (round 30, below): more places for a bar, the ottoman's games and cards, two homes for five blankets, more storage, a plant

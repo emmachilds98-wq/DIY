@@ -286,7 +286,7 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v37.pdf`](media-wall/out/Home_Network_Plan_v37.pdf) (110 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v37.pdf`](media-wall/out/Home_Network_Plan_v37.pdf) (116 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
 - **The build guide:** [`media-wall/out/Build_Guide_v37.pdf`](media-wall/out/Build_Guide_v37.pdf) (53 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account, still at v32 until it's republished: the room in 3D, the plan's chapters, build steps, buy tracker, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
