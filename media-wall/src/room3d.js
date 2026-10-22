@@ -1434,7 +1434,7 @@ const MOMENTS = {
   games:   { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", curtains: true, lid: true, ctop: true, sugg: "+liftcoffee" },
              aim: { eye: [300, 150, -60], at: [200, 35, -170], fov: 52 }, say: "Games night: the ottoman's lid off, the coffee table's top up, the lights cosy" },
   drinks:  { set: { site: "C", cab: "compact", dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", beside: "bar", barflap: true },
-             aim: { eye: [330, 140, -205], at: [458, 112, -258], fov: 50 }, say: "Drinks: the bar beside the cabinet open, glasses down from the rail" },
+             aim: { eye: [345, 138, -180], at: [460, 108, -262], fov: 46 }, say: "Drinks: the bar beside the cabinet open, glasses down from the rail" },
 };
 function playMoment(k) {
   const m = MOMENTS[k]; if (!m) return;

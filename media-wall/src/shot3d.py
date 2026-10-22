@@ -80,13 +80,13 @@ SHOTS = [
      "THE STORAGE OTTOMAN - navy velvet, its lid lifted off - daytime"),
     # v37: the bar built in beside the cabinet (shut, then open in the evening), the shoe cabinets in the same place, your black shelf's
     # 10 cm gap at the pipe boxing, and the red lamp's cap
-    ("3d_beside_bar", dict(view="beside", site="C", dining="folded", scene="bright", beside="bar"), "BESIDE THE CABINET - a built-in bar, shut - bright"),
-    ("3d_beside_bar_open", dict(site="C", dining="folded", scene="cosy", beside="bar", barflap=True, aim=dict(eye=[330, 140, -205], at=[458, 112, -258], fov=50)),
+    ("3d_beside_bar", dict(site="C", dining="folded", scene="bright", beside="bar", aim=dict(eye=[330, 150, -170], at=[458, 105, -262], fov=52)), "BESIDE THE CABINET - a built-in bar, shut - bright"),
+    ("3d_beside_bar_open", dict(site="C", dining="folded", scene="cosy", beside="bar", barflap=True, aim=dict(eye=[345, 138, -180], at=[460, 108, -262], fov=46)),
      "BESIDE THE CABINET - the built-in bar open, glasses on its rail - cosy"),
-    ("3d_beside_shoes", dict(view="beside", site="C", dining="folded", scene="bright", beside="shoes"), "BESIDE THE CABINET - two shoe cabinets - bright"),
-    ("3d_shelf_gap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[360, 205, -215], at=[462, 192, -282], fov=40)),
+    ("3d_beside_shoes", dict(site="C", dining="folded", scene="bright", beside="shoes", aim=dict(eye=[330, 140, -170], at=[458, 55, -262], fov=52)), "BESIDE THE CABINET - two shoe cabinets - bright"),
+    ("3d_shelf_gap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[385, 198, -228], at=[458, 192, -282], fov=34)),
      "YOUR BLACK SHELF - its window end 10 cm short of the pipe boxing - daytime"),
-    ("3d_lamp_cap", dict(site="C", dining="folded", scene="bright", tod="day", aim=dict(eye=[235, 140, -300], at=[288, 132, -276], fov=30)),
+    ("3d_lamp_cap", dict(site="C", dining="folded", scene="bright", tod="day", master=55, aim=dict(eye=[205, 145, -302], at=[288, 130, -276], fov=34)),
      "THE RED LAMP - your cap, a structured baseball cap with an oversized brim - daytime"),
     ("3d_look", dict(view="room", site="C", dining="folded", scene="bright", decor=dict(oak="walnut", floor="boards", shelf="oak", curtains="linen")),
      "LOOK to try - walnut on the new oak pieces, oak floorboards, your shelf in oak, white linen curtains - bright"),
