@@ -91,6 +91,70 @@ gl.toneMapping = THREE.ACESFilmicToneMapping;
 gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
+/* v35, client: "it currently still crashes in the claude version ... it also is a bit slow on the render sometimes becoming HD".
+   three.js builds every material's shader for the number of lights it can see and how many cast shadows, so each light switched on or
+   off (a scene, the table rule, a suggestion, a hidden group with a light in it) rebuilt about 20 shaders: 10 s for "Film", 21 s to open
+   the table. Now, while you use the room, the lights the renderer sees are a fixed set for each quality (Fast leaves out the area lights
+   and every other bar head, as before), a light that's "off" is turned down to nothing, and only one head on each spot bar casts a
+   shadow (HD). A light inside something that can be hidden (an idea, a suggestion, the cabinet's bars) moves to an always-shown rig that
+   follows it: always in HD's set (at nothing while hidden), never in Fast's (their glowing materials still show). While still() renders a picture (LIVE false) every light
+   behaves as it always did, so the saved pictures don't change. */
+let LIVE = true;
+const lightRig = new THREE.Group(); lightRig.name = "lightRig";
+const RIGGED = [];
+function shownChain(o) { for (; o && o.parent; o = o.parent) if (!o.visible) return false; return true; }
+function lightIn(l) {                 // in the renderer's set for this quality
+  const hd = S.quality === "hd";
+  if (l.userData.owner) return hd;     // an idea's or a suggestion's light: always in HD's set (at nothing while it's hidden), never in Fast's
+  if (l.isRectAreaLight) return hd;
+  if (!hd && l.userData.barIx !== undefined) return l.userData.barIx % 2 === 0;
+  return true;
+}
+function adoptLight(l, scn) {
+  if (l.userData.adopted) return;
+  l.userData.adopted = true;
+  let v = l.visible, i = l.intensity, cs = l.castShadow;
+  const owner = l.parent && l.parent !== scn && l.parent !== fixtures ? l.parent : null;
+  if (owner) { l.userData.owner = owner; l.userData.lp = l.position.clone(); lightRig.add(l); RIGGED.push(l); }
+  const on = () => v && (!owner || shownChain(owner));
+  Object.defineProperty(l, "visible", { configurable: true, get: () => (LIVE ? lightIn(l) : on()), set: x => { v = x; } });
+  Object.defineProperty(l, "intensity", { configurable: true, get: () => (on() ? i : 0), set: x => { i = x; } });
+  Object.defineProperty(l, "castShadow", { configurable: true, set: x => { cs = x; },
+    get: () => (LIVE ? S.quality === "hd" && l.isSpotLight && (l === lights.bar1[0] || l === lights.bar2[0]) : cs) });
+}
+function adoptLights(scn) {           // after anything that builds lights (the start, applyState, Edit room's add)
+  const found = []; scn.traverse(o => { if (o.isLight && !o.userData.adopted) found.push(o); });
+  found.forEach(l => adoptLight(l, scn));
+}
+/* v35: the first time the table opened, 18 shaders compiled for the parts that had been hidden (the open table, the chairs round it,
+   the plates): 18 s here, a freeze on a phone. three's compile() can't make them ahead (it doesn't set up the cutaway's clipping, so
+   its shaders don't match), so once the room is on screen and still, each hidden part is drawn for one frame into a single pixel of the
+   real canvas (the next frame redraws it): its shaders are then ready when you open the table or switch something on. A few at a time,
+   only while nothing moves; again after a quality change */
+const PRE = { queue: [], done: 0 };
+function precompile() {
+  PRE.queue.length = 0;
+  const hiddenUp = o => { for (let p = o.parent; p; p = p.parent) if (!p.visible) return true; return false; };
+  scene.traverse(o => { if (!o.isLight && o.visible === false && !hiddenUp(o)) PRE.queue.push(o); });
+}
+function precompileStep() {           // from the frame loop, when nothing's moving: one hidden part, drawn into one pixel
+  if (!PRE.queue.length || !LIVE || (gl.shadowMap.enabled && gl.shadowMap.needsUpdate)) return false;   // never while the shadows are due a redraw
+  const o = PRE.queue.shift(), shown = [];
+  if (o.visible !== false || !o.parent) return true;
+  o.traverse(c => { if (!c.isLight && c.visible === false) { shown.push(c); c.visible = true; } });
+  gl.setScissorTest(true); gl.setScissor(0, 0, 1, 1);
+  try { gl.render(scene, camera); } finally { gl.setScissorTest(false); shown.forEach(c => { c.visible = false; }); }
+  PRE.done++;
+  return true;
+}
+function syncRig() {                  // each frame: a rigged light follows its owner, and leaves with it (a rebuilt cabinet)
+  for (let k = RIGGED.length - 1; k >= 0; k--) {
+    const l = RIGGED[k], o = l.userData.owner;
+    let top = o; while (top && top.parent) top = top.parent;
+    if (!l.parent || !o || top !== scene) { lightRig.remove(l); RIGGED.splice(k, 1); continue; }
+    o.updateWorldMatrix(true, false); l.position.copy(l.userData.lp).applyMatrix4(o.matrixWorld);
+  }
+}
 RectAreaLightUniformsLib.init();
 
 const scene = new THREE.Scene();
@@ -1525,17 +1589,7 @@ function buildSuggest() {
     const roll = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), mat("#7a8a6a")); roll.scale.set(1, 0.6, 1); roll.position.y = 0.41; g.add(shadow(roll)); }, SVAR_MATS.basket);
   // v32, client: "add anything else you haven't already suggested": three more
   // picture lights over the two framed LPs (a 27.9 shade, 12.5 out on its arm from a 10.6 × 7 back plate), each washing its LP
-  { const g = SUGG_G.piclights = new THREE.Group(), fw = 34, gap = 8, cx = R.TABLE_A.cx, y0 = R.FRAMES_Y + fw + 4;
-    const metal = reg(new THREE.MeshStandardMaterial({ color: "#b8913f", roughness: 0.3, metalness: 0.85 })); SVAR_MATS.piclights = [metal];
-    const glowP = new THREE.MeshBasicMaterial({ color: "#ffe0a8", toneMapped: false });
-    for (const xc of [cx - gap / 2 - fw / 2, cx + gap / 2 + fw / 2]) {
-      ibox(g, xc - 5.3, y0, -0.8, 10.6, 7, 0.8, metal);                                    // the back plate
-      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.12, 8), metal); arm.rotation.x = Math.PI / 2; arm.position.copy(v3(xc, y0 + 3.5, -6.5)); g.add(arm);
-      const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.279, 16), metal); shade.rotation.z = Math.PI / 2; shade.position.copy(v3(xc, y0 + 3.5, -12.5)); g.add(shadow(shade));
-      const led = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.002, 0.006), glowP); led.position.copy(v3(xc, y0 + 2.6, -12.2)); g.add(led);
-      const sp = new THREE.SpotLight("#ffe0a8", 2.2, 1.2, 0.9, 0.8, 2); sp.position.copy(v3(xc, y0 + 2.4, -12)); sp.target.position.copy(v3(xc, R.FRAMES_Y + 10, 0)); g.add(sp, sp.target); SVAR_MATS.piclights.push(sp);
-    }
-    shell.add(g); }
+  // v35: the picture lights went with the two framed LPs (v34): not built
   // a blackout roller blind, face-fixed just above the window and down to the sill's nose, in front of the reveal (its plants stay behind it)
   { const g = SUGG_G.blind = new THREE.Group(), [wx0, wx1] = R.WINDOW_X, [wy0, wy1] = R.WINDOW_Y, z = R.WINDOW_Z + 3.2, bw = wx1 - wx0 + 4;
     const cloth = reg(new THREE.MeshStandardMaterial({ color: "#cdbf9f", roughness: 0.95, side: THREE.DoubleSide })); SVAR_MATS.blind = [cloth];
@@ -1951,7 +2005,7 @@ const white = new THREE.MeshStandardMaterial({ color: "#f2f0eb", roughness: 0.4 
 const toppers = new THREE.MeshStandardMaterial({ color: "#d6a873", roughness: 0.5, map: OAK_TEX });
 const HEADS = {};
 function headMat(col) { return HEADS[col] || (HEADS[col] = reg(new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, side: THREE.DoubleSide }))); }
-function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat) {
+function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat, barIx) {
   const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.075, 0.13, 28, 1, true), shadeMat || headMat(col));
   const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.019, 0.038, 16), shadeMat || toppers);
   const glow = new THREE.Mesh(new THREE.CircleGeometry(0.06, 24), new THREE.MeshBasicMaterial({ color: "#fff3dc", toneMapped: false }));   // one each: it dims with its own light
@@ -1966,7 +2020,7 @@ function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat) {
   sp.position.copy(apex.clone().add(dir.clone().multiplyScalar(0.14)));
   sp.target.position.copy(apex.clone().add(dir.clone().multiplyScalar(3)));
   sp.shadow.mapSize.set(1024, 1024); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.camera.near = 0.05; sp.shadow.radius = 6;
-  sp.userData = { k: kSpot, glow, colKey };
+  sp.userData = { k: kSpot, glow, colKey, barIx };   // v35: barIx, its place on a spot bar (Fast lights every other one)
   scene.add(sp, sp.target); lightList.push(sp);
 }
 function buildBar(spec, list, colKey) {   // v15: the bar runs along z (TV to window) when spec.axis is "z"
@@ -1981,7 +2035,7 @@ function buildBar(spec, list, colKey) {   // v15: the bar runs along z (TV to wi
     const apex = v3(hx, C - 6.5, hz), tgt = v3(...h.tgt);
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 8), headMat(h.stem));
     stem.position.copy(v3(hx, C - 5, hz)); g.add(stem);
-    spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 140, colKey);
+    spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 140, colKey, undefined, spec.heads.indexOf(h));
   }
   fixtures.add(g); return g;
 }
@@ -2078,6 +2132,7 @@ function applyState() {
   placeAll();
   repaint();
   applyLight();
+  adoptLights(scene);                                                              // v35: new lights (a rebuilt bar or lamp) join the fixed set
   updateCaption();
   store.set(KEY, S);
   dirty();
@@ -2120,7 +2175,7 @@ function applyLight() {
   win.visible = hd || day;
   MATS.forEach(m => { if ("envMapIntensity" in m) m.envMapIntensity = day ? 0.25 : 0.12; });
   gl.toneMappingExposure = day ? 0.5 : 0.62;
-  if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); }
+  if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); if (LIVE && started) precompile(); }
   reshadow();
   dirty();
 }
@@ -3261,14 +3316,16 @@ function frame(now) {
   if (active) { still_t = now; if (!lowRes) { lowRes = true; sizeRenderer(); } }
   else if (lowRes && now - still_t > 180) { lowRes = false; sizeRenderer(); }
   if (updateCut()) need = 2;
+  if (need === 0 && !active && !SH && now - preT > 250 && precompileStep()) { preT = now; need = 1; }   // v35: one hidden part's shaders, then redraw
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
-    gl.render(scene, camera); need--; placeStickers();
+    syncRig(); gl.render(scene, camera); need--; placeStickers();
     if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
   }
 }
 // v14.1: if this device takes too long over a full HD frame, drop to Fast (unless you picked a quality yourself)
 let probe = 3; const probeT = [], PX = new Uint8Array(4);
+let preT = 0;
 function autoQuality() {
   const ms = probeT.sort((a, b) => a - b)[1];
   if (ms > 70 && S.quality === "hd" && !S.picked) {
@@ -3294,6 +3351,7 @@ function still(w, h) {
   const pr = gl.getPixelRatio(), size = gl.getSize(new THREE.Vector2()), asp = camera.aspect;
   const fov0 = camera.fov;
   gl.setPixelRatio(1); gl.setSize(w, h, false); camera.aspect = w / h; camera.fov = fitFov(baseFov); camera.clearViewOffset(); camera.updateProjectionMatrix();
+  LIVE = false; syncRig();                                                                 // v35: the lights as they always were, for the picture
   const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
   if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
   const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
@@ -3307,6 +3365,7 @@ function still(w, h) {
   gl.shadowMap.enabled = was;
   MATS.forEach(m => m.needsUpdate = true);
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(1024, 1024); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
+  LIVE = true;
   applyLight();
   gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.fov = fov0; applyShift(); dirty();
   return url;
@@ -3442,6 +3501,7 @@ function start() {
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
   gl.localClippingEnabled = true;
+  scene.add(lightRig);                                                                  // v35: the fixed set of lights
   buildShell(); buildLights(); buildFurniture(); buildSuggest(); buildSeatAndPouf();
   bar1 = buildBar(R.BAR1, lights.bar1, "bar1");
   gl.shadowMap.enabled = S.quality === "hd";
@@ -3455,6 +3515,7 @@ function start() {
   msg.hidden = true;
   root.classList.add("ready");
   requestAnimationFrame(frame);
+  precompile();                                                                         // v35: hidden parts' shaders, while the room's idle
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
     if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
@@ -3471,7 +3532,7 @@ function start() {
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE },
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }
