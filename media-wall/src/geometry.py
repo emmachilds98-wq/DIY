@@ -693,3 +693,57 @@ DRINKS = dict(x=((BREAST_X[0] + BREAST_X[1]) / 2 - 45.0, (BREAST_X[0] + BREAST_X
 DRINKS["y"] = (round(DRINKS["top"] - _dr_in - 2 * _dr_t, 1), DRINKS["top"])          # 96.4 .. 135.5
 DRINKS["counter"] = round(DRINKS["y"][0] + _dr_t, 1)                                 # 98.2: the inner floor, where the flap lands
 DRINKS["reach"] = round(DRINKS["d"] + _dr_in, 1)                                     # 55.5: the open counter's front, off the breast
+
+
+# ---------------------------------------------------------------- v36 (22 Oct), client: "explore any more bar ideas and where we could put it
+# as well as more storage and where we could put it. in the ottoman we will likely have games and cards. then i'd also like a small 10cm gap
+# from wall shelf with the hanging plant from the right side wall. add storage solution options for our blankets also, around 5 blankets.
+# make sure its clear how to manage all these options in the 3D room". All suggestions (ideas.SUGGEST, ideas.OPTION_GROUPS): not in the
+# plan or its costs until chosen. "The right side wall" is the stairs wall (on your right from the sofa, and in the 3D room's first view).
+
+# C, "barside": a third place for a bar, the same build as A (DRINKS) on the side wall at the sofa's open end, under the oak run: six bottles
+_bs_w = 60.0
+BAR_SIDE = dict(x=(0.0, DRINKS["d"]), z=(BASE_FRONT_Z - 6.0, BASE_FRONT_Z - 6.0 - _bs_w), y=DRINKS["y"], d=DRINKS["d"], t=_dr_t,
+                inner_h=_dr_in, counter=DRINKS["counter"], reach=DRINKS["reach"], w=_bs_w,
+                n=int((_bs_w - 2 * _dr_t) // DRINKS_BOTTLE[1]))                        # z -14 .. -74, five across
+BAR_SIDE["run_gap"] = round(LEDGE_TOP - SIDE_RUN_T - BAR_SIDE["y"][1], 1)              # 15.9 under the oak run: glasses on the run
+
+# the games and cards in the ottoman (OTTOMAN: 76 square, 3 walls, 28 deep inside under the lid)
+GAME_BOX = (30.0, 30.0, 8.0)       # a "medium" square board game (Ticket to Ride's box, the common size)
+CARD_DECK = (6.5, 9.2, 1.8)        # a boxed deck of cards (Bicycle), W × H × D
+_ot_in = OTTOMAN["w"] - 2 * OTTOMAN["wall"]                                            # 70 square inside
+OTTO_GAMES = dict(inner=_ot_in, across=int(_ot_in // GAME_BOX[0]), layers=int(OTTOMAN["inner_h"] // GAME_BOX[2]))
+OTTO_GAMES["games"] = OTTO_GAMES["across"] ** 2 * OTTO_GAMES["layers"]                 # 2 × 2 × 3 = 12
+OTTO_GAMES["strip"] = _ot_in - OTTO_GAMES["across"] * GAME_BOX[0]                      # 10: a strip along one side for the cards
+OTTO_GAMES["decks"] = int(_ot_in // CARD_DECK[2]) * int(OTTOMAN["inner_h"] // CARD_DECK[1])   # standing on edge, 38 a row, 3 rows
+
+# blankets: about five. A 130 × 170 throw folds to about 38 × 33 × 8 (IKEA OFELIA, as sold)
+THROW_FOLDED = (38.0, 33.0, 8.0)
+BLANKETS = 5
+# 1, "blanketbasket": a tall lidded seagrass basket at the sofa's open end, against the side wall (the floor plant's corner)
+BLANKET_BASKET = dict(w=45.0, d=45.0, h=76.0, wall=2.0, x=(2.0, 47.0),
+                      z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 45.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -80 .. -125: 3 off the sofa's end
+BLANKET_BASKET["holds"] = int((BLANKET_BASKET["h"] - 4.0) // THROW_FOLDED[2])           # folded flat, nine high (five use 40 of 72)
+# 2, BESIDE "rail": an oak wall rail beside the dining cabinet: four 28 mm oak dowels between two oak uprights, 12 off the wall, a
+# blanket folded over each (two on the lowest). Blankets over it stand about 18 off the wall: behind the open table door's line (23.4)
+BESIDE["rail"] = dict(w=45.0, h=150.0, up=(6.0, 2.2), rails=(40.0, 75.0, 110.0, 145.0), off=12.0, dowel=2.8, draped=18.0)
+BESIDE["opts"]["rail"] = dict(name="An oak blanket rail")
+
+# more storage: 1, "liftcoffee": a lift-top coffee table in the coffee table's place (Homelife, 90 × 50 × 48; the top lifts to 53.5)
+LIFT_COFFEE = dict(w=90.0, d=50.0, h=48.0, lift=53.5, inside=12.0)
+# 2, "doorshelf": an oak shelf over the hall door with two lidded boxes (IKEA KUGGIS 26 × 35 × 15); the clock suggestion's place
+KUGGIS = (35.0, 26.0, 15.0)        # along the shelf, deep, tall
+ARCHITRAVE = 7.0                   # a usual 69 mm architrave over the door's 198 opening (check yours)
+DOOR_SHELF = dict(x=(DOOR_X[0] - 4.0, DOOR_X[1] + 4.0), d=27.0, t=2.7, y=198.0 + ARCHITRAVE + 1.0)
+DOOR_SHELF["top"] = DOOR_SHELF["y"] + DOOR_SHELF["t"]                                 # 208.7
+DOOR_SHELF["head"] = round(CEIL - DOOR_SHELF["top"] - KUGGIS[2], 1)                   # 11.3 over the boxes
+# 3, "shelfboxes": two of the same boxes on your black shelf (25 deep: they stand 1 over its front), either side of the laser
+SHELF_BOXES = [(-144.0, -179.0), (-191.0, -226.0)]
+
+# the plant shelf: a small oak shelf at the stairs end of the right side wall, held 10 off the wall on two oak arms; your hanging
+# plant moves onto it from the window end of the black shelf (its strands then fall through the gap and over the front, not over the
+# dining cabinet's table door). The window end can't take it: the open table door lies back over that wall.
+PLANT_SHELF = dict(w=30.0, d=15.0, t=2.2, gap=10.0, top=SHELF_B["top"], arm=(25.0, 4.0, 2.2),
+                   z=(round(STAIRS_WALL_Z[0] - (STAIRS_WALL_Z[0] - CAB["z"][0]) / 2 + 15.0, 1), round(STAIRS_WALL_Z[0] - (STAIRS_WALL_Z[0] - CAB["z"][0]) / 2 - 15.0, 1)))
+PLANT_SHELF["under"] = round(PLANT_SHELF["top"] - PLANT_SHELF["t"], 1)                 # 193.8 headroom at the stairs' foot
+PLANT_SHELF["ends"] = (round(PLANT_SHELF["top"] - PLANT_B["trail"][1], 1), round(PLANT_SHELF["top"] - PLANT_B["trail"][0], 1))   # 86 .. 141

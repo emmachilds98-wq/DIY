@@ -62,6 +62,7 @@ SHOTS = [
     ("3d_beside_mirror", dict(view="beside", site="C", dining="folded", scene="bright", beside="mirror"), "BESIDE THE CABINET - a tall mirror - bright"),
     ("3d_beside_trolley", dict(view="beside", site="C", dining="folded", scene="bright", beside="trolley"), "BESIDE THE CABINET - a slim trolley - bright"),
     ("3d_beside_dresser", dict(view="beside", site="C", dining="folded", scene="bright", beside="dresser"), "BESIDE THE CABINET - a low oak shelf - bright"),
+    ("3d_beside_rail", dict(view="beside", site="C", dining="folded", scene="bright", beside="rail", sugg={"plantshelf": True}), "BESIDE THE CABINET - an oak blanket rail, five blankets (v36) - bright"),
     # v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version": the flip-top and the
     # sliding cabinet's stills are gone; the plan's table in daylight and the dolls' house; the 80-wide version, 10 shorter, four chairs inside
     ("3d_c_six_day", dict(view="door", site="C", dining="six", scene="bright", tod="day", master=0), "THE COMPACT DINING CABINET - from the door, open for six - daytime"),
@@ -87,7 +88,7 @@ SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
         "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear",
-        "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
+        "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False, "ctop": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():

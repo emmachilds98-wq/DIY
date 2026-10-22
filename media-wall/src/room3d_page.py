@@ -221,6 +221,12 @@ details.r3d-more[open] > summary::before { content: "– "; }
   font: 600 14px Fredoka, system-ui, sans-serif; box-shadow: var(--shade); max-width: calc(100vw - 24px); }
 .r3d-toast[hidden] { display: none; }
 .r3d-sub { margin: 6px 0 -4px; font: 600 16px Fredoka, system-ui, sans-serif; color: var(--ink); }
+/* v36: Extras' option rows: a row per need, its mode tag, a line between rows */
+.r3d-optrow { padding: 8px 0 6px; border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
+.r3d-optrow:first-of-type { border-top: 0; }
+.r3d-optmode { margin-left: 6px; padding: 1px 8px; border-radius: 999px; font: 500 11.5px/1.6 system-ui, sans-serif; letter-spacing: .02em;
+  background: var(--chip, rgba(0,0,0,.06)); color: var(--muted, #6b6560); vertical-align: 2px; }
+.r3d-opthow { margin: 2px 0 6px; }
 .r3d-moments button .ms, .r3d-ui .chip .ms { font-size: 18px; vertical-align: -4px; }
 /* v31: the camera: its height, and the move buttons on the room (hold one to keep moving) */
 .r3d-eyerow { display: grid; grid-template-columns: auto 1fr 5.5em; gap: 10px; align-items: center; font-size: 14px; }
@@ -293,7 +299,9 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "throw": "Knit throw on the sofa", "pclamp": "Mushroom lamp, PC shelf", "basket": "Seagrass basket",
               "candles": "LED candles on the shelf", "runner": "Table runner and vase", "floorcush": "Floor cushions",
               "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
-              "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet"}   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet",
+              "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
+              "shelfboxes": "Boxes on your shelf", "plantshelf": "Plant shelf, 10 off the wall"}   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
 IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
               "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
               "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
@@ -382,7 +390,7 @@ def controls(gallery=""):
                     f'<button type="button" data-{key}="match" aria-pressed="false">Same as the walls</button><button type="button" data-{key}="#f2efe8" aria-pressed="false">White</button>'
                     f'<label class="chip r3d-anycol">Any colour <input type="color" id="r3d-{key}" value="#f2efe8" aria-label="{lab}: any colour"></label></div></div>'
                     for key, lab in (("ceil", "The ceiling"), ("skirt", "Skirting, the door and its frame")))
-    sugg_g = ('<div class="grp"><span class="label">Suggested furniture and decor (not in the plan)</span>'
+    sugg_g = ('<div class="grp"><span class="label">Every suggestion, one by one (not in the plan)</span>'
               '<div class="seg" role="group" aria-label="Suggested furniture and decor">'
               + "".join(f'<button type="button" data-sugg="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(SUGG_SHORT[k])}</button>' for k, _t, size, *_ in ideas.SUGGEST)
               + '<button type="button" class="chip" data-suggall="on">All on</button><button type="button" class="chip" data-suggall="off">All off</button></div></div>'
@@ -459,8 +467,47 @@ def controls(gallery=""):
             '<p class="caption">Or tap the cabinet in the room: its card opens it for four or six, folds it, opens either door and swaps the table\'s width.</p>']),
         "lights": lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality"),
         "look": swatches + trims + decor_g,
-        "extras": picks + ideas_g + sugg_g,
+        "extras": opts_html() + picks + ideas_g + sugg_g,
     }
+
+
+def opts_json():
+    """v36: the option groups (ideas.OPTION_GROUPS) with what each item is, where it goes, its size and cost, and where to look."""
+    import item_shots
+    sug = {k: (t, size, c, where) for k, t, size, c, _why, where in ideas.SUGGEST}
+    B = G.BESIDE
+    extra = {"rail": ("An oak blanket rail beside the dining cabinet", f"{B['rail']['w']:g} wide, four 28 mm oak rails, 12 off the wall", (25, 45),
+                      "On the wall beside the dining cabinet, under your black shelf: the open table door lies back over it while you eat."),
+             "on": ("Your storage ottoman, the lid on", "76 × 76 × 45", None, "On the rug by the coffee table."),
+             "off": ("Your storage ottoman, the lid off", f"{G.OTTO_GAMES['games']} square games and the cards inside", None, "On the rug by the coffee table.")}
+    view = {"rail": dict(view="beside"), "on": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50), "off": dict(eye=[300, 150, -60], at=[238, 30, -157], fov=50)}
+    groups = []
+    for key, title, mode, note, items in ideas.OPTION_GROUPS:
+        its = []
+        for v, label, setv in items:
+            t, size, cost, where = sug[v] if v in sug else extra[v]
+            a = item_shots.AIM.get(f"3d_sg_{v}")
+            aim = view.get(v) or (dict(eye=a[0], at=a[1], fov=a[2]) if a else None)
+            its.append(dict(v=v, label=label, set=setv, title=t, size=size, cost=list(cost) if cost else None, where=where, aim=aim))
+        groups.append(dict(k=key, title=title, mode=mode, note=note, items=its))
+    return json.dumps(dict(groups=groups), separators=(",", ":"))
+
+
+def opts_html():
+    """v36, client: "make sure its clear how to manage all these options in the 3D room": Extras opens on one row per need."""
+    rows = ""
+    for key, title, mode, note, items in ideas.OPTION_GROUPS:
+        btns = ('<button type="button" data-opt="%s:none" aria-pressed="false">None</button>' % key) if mode == "one" else ""
+        btns += "".join(f'<button type="button" data-opt="{key}:{v}" aria-pressed="false">{html.escape(label)}</button>' for v, label, _s in items)
+        btns += f'<button type="button" class="chip" data-optsee="{key}"><span class="ms" aria-hidden="true">visibility</span> See it</button>'
+        how = {"one": "Pick one", "any": "Switch on any", "lid": "Open or shut"}[mode]
+        rows += (f'<div class="r3d-optrow" data-optgrp="{key}"><h3 class="r3d-sub">{html.escape(title)} <span class="r3d-optmode">{how}</span></h3>'
+                 f'<div class="seg" role="group" aria-label="{html.escape(title)}">{btns}</div>'
+                 f'<p class="caption" data-optcap="{key}" aria-live="polite">{html.escape(note)}</p></div>')
+    return ('<div class="grp r3d-opts" id="r3d-opts"><span class="label">Storage and a bar: your options</span>'
+            '<p class="caption r3d-opthow"><b>How it works:</b> pick an option and the room shows it and takes you to it; <b>None</b> takes it away; '
+            '<b>See it</b> takes you back. Tap a piece in the room for its colours, to move it or to take it away. What you pick shows in '
+            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>' + rows + '</div>')
 
 
 def picks_json():
@@ -561,6 +608,7 @@ def section(gallery=""):
 <script type="application/json" id="scenes-data">{scenes_json()}</script>
 <script type="application/json" id="lightrules-data">{rules_json()}</script>
 <script type="application/json" id="svar-data">{svar_json()}</script>
+<script type="application/json" id="opt-data">{opts_json()}</script>
 <script type="application/json" id="tour-data">{json.dumps(dict(stops=tour(), pages=PAGES_URL), separators=(",", ":"))}</script>
 <script type="application/json" id="hotspots-data">{json.dumps(hotspots(), separators=(",", ":"))}</script>
 <script type="module">{(HERE / "room3d.js").read_text()}</script>

@@ -158,6 +158,32 @@ SUGGEST += [
      "Beside the dining cabinet (Layout, Beside the cabinet: the slim trolley), behind the open table door's line."),
 ]
 
+# v36, client: "explore any more bar ideas and where we could put it as well as more storage and where we could put it ... a small 10cm
+# gap from wall shelf with the hanging plant from the right side wall. add storage solution options for our blankets also, around 5
+# blankets. make sure its clear how to manage all these options in the 3D room" (geometry v36; fit.storage_zone; OPTION_GROUPS below)
+SUGGEST += [
+    ("barside", "A drinks cabinet by the sofa, under the oak run", "60 × 39 × 20, oak; its front drops to a 60 × 36 counter at 98", (60, 100),
+     "The bar where you sit: the same build as the one under the glass case, 60 wide for five bottles, on the side wall at the sofa's "
+     "open end. The front drops on two soft-close stays to a counter; the glasses stand on the oak run 16 above it.",
+     "On the side wall by the sofa's open end, between the media wall and the sofa, 96 to 136 up: over the drawers' path, under the oak run."),
+    ("blanketbasket", "A tall lidded basket for your blankets at the sofa's open end", "45 × 45 × 76, seagrass, with a lid", (90, 110),
+     "Your five blankets folded flat in one basket (they use about 40 of its 72 inside), at the end of the sofa where you'd reach for them.",
+     "Against the side wall at the sofa's open end, 3 cm off its end (the floor plant suggestion's corner)."),
+    ("liftcoffee", "A lift-top coffee table", "90 × 50 × 48; the top lifts to 53.5", (39, 80),
+     "Your coffee table's footprint with room inside for the remotes, controllers and the card games you use most; lifted, it's a "
+     "table to eat or play at from the sofa.", "Where your coffee table stands."),
+    ("doorshelf", "An oak shelf over the hall door with two lidded boxes", "91 × 27 oak at 206; two boxes 35 × 26 × 15", (35, 60),
+     "Somewhere for what you use a few times a year (spare cables, gift wrap, candles), out of sight above the door.",
+     "Over the hall door, above its architrave (the wall clock suggestion's place)."),
+    ("shelfboxes", "Two lidded boxes on your black shelf", "35 × 26 × 15 each", (20, 30),
+     "Chargers, batteries and spare bulbs by the table, either side of the laser.", "On your black shelf by the stairs, in the middle."),
+    ("plantshelf", "A small plant shelf, 10 cm off the wall, for your hanging plant", "30 × 15 oak, its back 10 off the wall, at 196", (10, 25),
+     "Your hanging plant on its own little shelf: the strands fall through the 10 cm gap behind it and over its front, down the wall "
+     "instead of over the dining cabinet's doors, and it lines up with your black shelf.",
+     "On the right side wall (the stairs wall), at its stairs end, between the stairs and the dining cabinet. The plant moves here from "
+     "the black shelf's window end, where the open table door lies back."),
+]
+
 
 # v28, from the optimisation plan: "choices for each suggestion (two or three versions, like the decor rows)". The same piece in two or
 # three finishes; the size and the price stay. key: [(value, name, [colours])]; the first is the default. room3d.js (SVAR_MATS) puts
@@ -185,6 +211,12 @@ SUGG_VARS = {
     "barcase": [("oak", "Oak", ["#c48c57"]), ("green", "Card Room Green outside", ["#2d5a46"]), ("black", "Black outside", ["#2a2a2c"])],   # v34
     "bartrolley": [("gin", "Gin and tonics", ["#3f6b3a"]), ("whisky", "Whisky and rum", ["#9a5a22"]), ("clear", "Vodka and clear spirits", ["#e8eef0"])],
     "cablights": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("natural", "Natural white", ["#fff1dc", "#fff1dc"])],
+    "barside": [("oak", "Oak", ["#c48c57"]), ("green", "Card Room Green outside", ["#2d5a46"]), ("black", "Black outside", ["#2a2a2c"])],   # v36
+    "blanketbasket": [("sea", "Natural seagrass", ["#b89a6c"]), ("dark", "Dark seagrass", ["#6e5235"]), ("rope", "White cotton rope", ["#ece6da"])],
+    "liftcoffee": [("oak", "Oak effect", ["#b07d4f"]), ("black", "Black", ["#2c2a28"]), ("white", "White", ["#ece8e0"])],
+    "doorshelf": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],
+    "shelfboxes": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],
+    "plantshelf": [("oak", "Oak", ["#c48c57"]), ("black", "Black, like your shelf", ["#1a1a1b"])],
 }
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
 
@@ -201,3 +233,21 @@ def suggest_html():
                    for k, t, size, c, why, where in SUGGEST)
     return (f"<p>Not in the plan or the costs: all {len(SUGGEST)} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on, and two or three versions to try.</p>"
             f"<table class='tight'><tr><th>Suggestion</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")
+
+
+# v36, client: "make sure its clear how to manage all these options in the 3D room": the same suggestions, grouped by what they're for.
+# Extras opens on these rows; each picks or switches, flies the camera to it and says where it goes. (key, title, mode, note, items):
+# mode "one" picks one (or None), "any" switches each; an item is (value, label, what it sets in the room's state).
+OPTION_GROUPS = [
+    ("bar", "A bar for drinks", "one", "Three places, one at a time. Later, when the stairs change, the space under them could take a fourth.",
+     [("barcase", "Under the glass case", {"sugg": "barcase"}), ("bartrolley", "The trolley beside the cabinet", {"sugg": "bartrolley"}),
+      ("barside", "By the sofa, under the oak run", {"sugg": "barside"})]),
+    ("games", "Games and cards: in the ottoman", "lid", "Twelve square board games in three layers and a row of card games along one side.",
+     [("on", "Lid on", {"lid": False}), ("off", "Lift the lid", {"lid": True})]),
+    ("blankets", "Your blankets (about five)", "one", "Two places for five folded throws; pick one.",
+     [("blanketbasket", "A tall basket at the sofa's end", {"sugg": "blanketbasket"}), ("rail", "An oak rail beside the cabinet", {"beside": "rail"})]),
+    ("storage", "More storage", "any", "Switch on as many as you like. Later: cupboards under the new stairs.",
+     [("liftcoffee", "A lift-top coffee table", {"sugg": "liftcoffee"}), ("doorshelf", "A shelf over the hall door", {"sugg": "doorshelf"}),
+      ("shelfboxes", "Boxes on your black shelf", {"sugg": "shelfboxes"})]),
+    ("plant", "Your hanging plant", "any", "On its own shelf, 10 cm off the stairs wall.", [("plantshelf", "On a small shelf, 10 off the wall", {"sugg": "plantshelf"})]),
+]

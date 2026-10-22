@@ -169,6 +169,9 @@ def scene():
     room_spec.update(REAR_SPK=G.REAR_SPK, REAR_STAND=G.REAR_STAND, REAR_SPOTS=G.REAR_SPOTS)   # v27: your rear speakers on their stands
     room_spec["CHAIR"] = G.CHAIR; room_spec["SOFA_POUF"] = G.SOFA_POUF
     room_spec["OTTOMAN"] = G.OTTOMAN; room_spec["DRINKS"] = G.DRINKS   # v34: the storage ottoman; the drinks cabinet under the case
+    # v36: a third bar, the ottoman's games and cards, the blankets' basket, more storage, the plant shelf
+    for k in ("BAR_SIDE", "OTTO_GAMES", "GAME_BOX", "CARD_DECK", "THROW_FOLDED", "BLANKET_BASKET", "LIFT_COFFEE", "KUGGIS", "DOOR_SHELF", "SHELF_BOXES", "PLANT_SHELF", "ARCHITRAVE"):
+        room_spec[k] = getattr(G, k)
     return {"room": room_spec, "groups": groups}
 
 
