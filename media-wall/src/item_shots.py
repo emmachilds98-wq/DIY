@@ -19,7 +19,8 @@ ON_WALL = {"bookcase": 15.0, "ladder": 15.0, "mirror": 4.0}   # half its depth: 
 BASE = dict(site="C", cab="compact", dining="folded", tdoor=False, chairs="cupboard", scene="bright", tod="day", master=100)
 EVENING = dict(scene="cosy", tod="evening")
 SUGG_STATE = {"fairy": EVENING, "candles": EVENING, "shelfled": EVENING, "lantern": EVENING, "pclamp": EVENING, "barcase": dict(barflap=True, **EVENING), "bartrolley": dict(beside="trolley", trolley="out", dining="six", layout={"lamp": {"off": True}}, **EVENING),
-              "runner": dict(dining="six"), "cablights": dict(tdoor=True, **EVENING), "hanger": {}, "blind": {}}
+              "runner": dict(dining="six"), "cablights": dict(tdoor=True, **EVENING), "hanger": {}, "blind": {},
+              "barside": dict(barflap=True, **EVENING), "liftcoffee": dict(ctop=True)}
 IDEA_STATE = {"sync": dict(scene="film", tod="evening"), "plantlight": dict(scene="film", tod="evening"), "night": dict(scene="film", tod="evening")}
 
 # the cameras (room cm): eye, look-at, fov. Set by eye from test renders: the eye kept clear of the ottoman in the middle of the room
@@ -40,6 +41,10 @@ AIM = {
     "3d_sg_mirror": ([125, 150, -190], [32, 150, -305], 46), "3d_sg_shelfled": ([118, 205, -132], [444, 191, -184], 52),
     "3d_sg_barcase": ([245, 140, -130], [245, 115, 0], 48), "3d_sg_bartrolley": ([235, 165, -285], [345, 55, -245], 55), "3d_sg_blind": ([190, 150, -130], [190, 150, -305], 62),
     "3d_sg_cablights": ([300, 130, -110], [455, 140, -133], 50),
+    # v36: the third bar, the blankets' basket, more storage, the plant shelf
+    "3d_sg_barside": ([170, 140, -150], [0, 112, -44], 50), "3d_sg_blanketbasket": ([175, 130, -45], [24, 40, -102], 48),
+    "3d_sg_liftcoffee": ([240, 135, -95], [148, 45, -166], 46), "3d_sg_doorshelf": ([330, 150, -150], [357, 212, 35], 50),
+    "3d_sg_shelfboxes": ([320, 175, -200], [455, 205, -185], 50), "3d_sg_plantshelf": ([320, 150, -175], [455, 165, -63], 52),
 }
 _LOOK = {"armchair": 40, "sidetable": 25, "plant": 45, "beanbag": 28, "footstool": 20, "cushion": 7, "crate": 16, "rattan": 40, "bench": 22,
          "arclamp": 95, "vase": 65, "pouffe": 20, "basket": 26, "lantern": 23}

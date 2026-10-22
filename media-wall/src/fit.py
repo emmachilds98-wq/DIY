@@ -1016,8 +1016,8 @@ def ottoman_zone():
         ("Beside the coffee table", f"x {r1(P_['x'][0])}–{r1(P_['x'][1])}", ref("istoolsott"), f"coffee table to x {r1(g.COFFEE['x'][1])}",
          f"{r1(gap_c)} between them; {r1(gap_s)} off the sofa's front", PASS),
         ("Its height", f"about {r1(O['h'])}", ref("istoolsott"), "the sofa's seat about 45", "a footrest level with the seat; ISTOOLS don't publish it: check", CHECK),
-        ("Inside", f"about {r1(O['inner_h'])} deep under the lid", ref("istoolsott", "opulent"), "two throws or a blanket, folded",
-         "the Dunelm one (the smaller pick) is 18 deep inside: a throw or two", PASS),
+        ("Inside", f"about {r1(O['inner_h'])} deep under the lid", ref("istoolsott", "ttr"), "your games and cards",
+         f"{G.OTTO_GAMES['games']} square games and the cards (Storage and a bar, below); the Dunelm one is 18 deep: a layer or two", PASS),
     ])
 
 
@@ -1050,6 +1050,82 @@ def counts():
     c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
     for title, _, rows in zones():
         if title == "How many can sit down" or title.startswith(("The more compact version", "A bar for drinks")):
+            continue
+        for r in rows:
+            c[r[-1]] += 1
+    return c
+
+
+# ---------------------------------------------------------------- v36: more bars, storage, blankets, the plant shelf (suggestions)
+SOURCES["ttr"] = ("Wikipedia, Ticket to Ride (board game): its box is 30 × 30 × 8 cm, and became a common reference size for medium-size "
+                  "games; a retailer lists the 2023 Days of Wonder box at 30 × 30 × 7.6 (en.wikipedia.org/wiki/Ticket_to_Ride_(board_game))")
+SOURCES["bicycle"] = ("Kaufland (Austria): Bicycle Botanica playing cards, packaging 65 × 92 × 18 mm; Bicycle's poker-size cards are 88 × 63 mm "
+                      "(kaufland.at/product/400400869)")
+SOURCES["ofelia"] = ("IKEA: OFELIA throw, 130 × 170 cm, white: package 38 × 33 × 8 cm, 0.67 kg, as sold folded "
+                     "(ikea.com/lv/en/p/ofelia-throw-white-50613224)")
+SOURCES["cotswold"] = ("The Cotswold Company: Seagrass Basket With Lid, Large: 76 high × 45 wide × 45 deep (external), handwoven seagrass, "
+                       "£99 (cotswoldco.com/homeware/storage/baskets-and-general-storage/seagrass-basket-with-lid-large)")
+SOURCES["homelife"] = ("Sports Direct: Homelife Lifting Traditional Coffee Table, H48 × W90 × D50 cm, 53.5 high with the top lifted, a storage "
+                       "area inside, £39 (was £79.99) (sportsdirect.com/homelife-lifting-traditional-coffee-table-946062)")
+SOURCES["kuggis"] = ("IKEA: KUGGIS box with lid, 26 × 35 × 15 cm, recycled PET with a bamboo lid; fits storage at least 26 deep "
+                     "(ikea.com.tr/en/p09610214)")
+SOURCES["oakdowel"] = ("Tools & Timber: oak dowels, 18 to 30 mm across, cut from 350 to 2400 mm long (toolsandtimber.co.uk/oak-dowels)")
+ORDER.extend(["ttr", "bicycle", "ofelia", "cotswold", "homelife", "kuggis", "oakdowel"])
+
+
+def storage_zone():
+    """v36: the options round the room: a third bar, the games and cards, the blankets, more storage, the plant shelf (suggestions)."""
+    g = G
+    C, O, Gm, Bb, Ra, Ds, Ps = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF, g.PLANT_SHELF
+    th, n = g.THROW_FOLDED, g.BLANKETS
+    return ("Storage and a bar: the options (suggestions)", "a third bar by the sofa, the ottoman's games, five blankets, three more places, the plant shelf", [
+        ("C, the bar by the sofa: bottles", f"{C['n']} across, inside {r1(C['inner_h'])} high", ref("bottles"), f"the tallest 70 cl {r1(g.DRINKS_BOTTLE[0])}",
+         f"{r1(C['inner_h'] - g.DRINKS_BOTTLE[0])} over it, as under the case", TIGHT),
+        ("C: under the oak run", f"top at {r1(C['y'][1])}", ref("room"), f"the run's underside {r1(g.LEDGE_TOP - g.SIDE_RUN_T)}",
+         f"{r1(C['run_gap'])} between: glasses stand on the run", PASS),
+        ("C: over the media wall's drawers", f"from {r1(C['y'][0])}, z {r1(C['z'][0])} to {r1(C['z'][1])}", ref("room"), "the drawers pull out under the worktop (76)",
+         f"{r1(C['y'][0] - 76.0)} above them; its open counter at {r1(C['counter'])}, {r1(C['reach'])} off the wall", PASS),
+        ("The ottoman: board games", f"{Gm['games']}, {Gm['across']} × {Gm['across']} in {Gm['layers']} layers", ref("ttr", "istoolsott"),
+         f"inside {r1(Gm['inner'])} square × {r1(O['inner_h'])} deep (drawn: check the real one)", f"square boxes {r1(g.GAME_BOX[0])} × {r1(g.GAME_BOX[2])}", CHECK),
+        ("The ottoman: cards", f"a {r1(Gm['strip'])} strip along one side", ref("bicycle"), "decks 6.5 × 9.2 × 1.8, on edge",
+         f"up to {Gm['decks']} decks (about 38 a row, 3 rows); or boxed card games", PASS),
+        ("Blankets: the tall basket", f"{r1(Bb['w'])} × {r1(Bb['d'])} × {r1(Bb['h'])}", ref("cotswold", "ofelia"), f"five throws folded {r1(th[0])} × {r1(th[1])} × {r1(th[2])}",
+         f"flat, {n} use {r1(n * th[2])} of about {r1(Bb['h'] - 4)} inside (room for {Bb['holds']})", PASS),
+        ("Blankets: the basket's corner", f"x {r1(Bb['x'][0])}–{r1(Bb['x'][1])}, z {r1(Bb['z'][0])} to {r1(Bb['z'][1])}", ref("room"),
+         f"the sofa's open end at z {r1(g.SOFA_BACK_Z + g.SOFA_D)}", "3 off the sofa's end; it takes the floor plant suggestion's corner", PASS),
+        ("Blankets: the oak rail beside the cabinet", f"{r1(Ra['w'])} wide, {len(Ra['rails'])} rails, {r1(Ra['off'])} off the wall", ref("oakdowel"),
+         f"the open table door stands {r1(g.CAB['d'])} off the wall", f"the blankets over it about {r1(Ra['draped'])}: {r1(g.CAB['d'] - Ra['draped'])} behind the door", TIGHT),
+        ("The lift-top coffee table", f"{r1(g.LIFT_COFFEE['w'])} × {r1(g.LIFT_COFFEE['d'])} × {r1(g.LIFT_COFFEE['h'])}", ref("homelife"),
+         "your coffee table's 90 × 50", "the same footprint; 6 taller, and the top lifts to 53.5", PASS),
+        ("The shelf over the door", f"{r1(Ds['x'][1] - Ds['x'][0])} × {r1(Ds['d'])}, from {r1(Ds['y'])}", ref("kuggis", "room"),
+         f"the door's 198 and a {r1(g.ARCHITRAVE)} architrave", f"{r1(Ds['head'])} over two {r1(g.KUGGIS[2])}-high boxes; check your architrave", CHECK),
+        ("Boxes on your black shelf", f"two {r1(g.KUGGIS[0])} × {r1(g.KUGGIS[1])} × {r1(g.KUGGIS[2])}", ref("kuggis"), "the shelf 25 deep, the laser in the middle",
+         "1 over the shelf's front; either side of the laser", TIGHT),
+        ("The plant shelf", f"{r1(Ps['w'])} × {r1(Ps['d'])}, {r1(Ps['gap'])} off the wall, top {r1(Ps['top'])}", ref("room"),
+         f"the stairs end of the wall: z {r1(g.STAIRS_WALL_Z[0])} to {r1(g.CAB['z'][0])}", f"{r1(Ps['under'])} under it at the stairs' foot (the door's 198)", PASS),
+        ("The plant shelf: the strands", f"from {r1(Ps['top'])}, {r1(g.PLANT_B['trail'][0])}–{r1(g.PLANT_B['trail'][1])} long", ref("room"),
+         "the table door hinges at the cabinet's far end", f"their ends {r1(Ps['ends'][0])}–{r1(Ps['ends'][1])} up, clear of both doors", PASS),
+    ])
+
+
+_zones_v35 = zones
+
+
+def zones():
+    """v36: and the storage and bar options after the bar's first two ways."""
+    out = []
+    for z in _zones_v35():
+        out.append(z)
+        if z[0].startswith("A bar for drinks"):
+            out.append(storage_zone())
+    return out
+
+
+def counts():
+    """v36: suggestions (the bars, the storage options) stay out of the totals."""
+    c = {PASS: 0, TIGHT: 0, CHECK: 0, NO: 0}
+    for title, _, rows in zones():
+        if title == "How many can sit down" or title.startswith(("The more compact version", "A bar for drinks", "Storage and a bar")):
             continue
         for r in rows:
             c[r[-1]] += 1
