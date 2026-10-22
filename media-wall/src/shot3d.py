@@ -87,7 +87,7 @@ SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
         "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear",
-        "blind": "down", "lp": False, "trolley": "park"}   # v34: the blind, the records, the trolley   # v30: the compact cabinet; v31: the floor outline, beside it
+        "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
 
 
 def room_print():

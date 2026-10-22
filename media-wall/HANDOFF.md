@@ -1,6 +1,12 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v35 (round 29, below): the 3D room's crashes, errors and lag (`UPGRADE_PLAN_v35.md`'s first item), worked through.** No shader
+  rebuilds while the room's used (lights a fixed set per quality; hidden parts warmed off screen while idle), every device starts in
+  Fast, nothing drawn behind the sheets, the room back by itself after a lost context, an error trap (`R3D.errors()`, the deck's db
+  `errors/`), `R3D.perf()` and `?perf`. Not done: fewer draw calls (~450 in Fast; target ≤ 120) and fewer meshes. The plan, the buy list
+  and the stills are as v34 except the ottoman's lid, now shut (v34's showed it lifted wherever it was in view after its own still). Next: `media-wall/UPGRADE_PLAN_v36.md`; **read the error log
+  first** (ArtifactData `list` on `errors` on the deck; or ask the client to open the room and run `R3D.errors()` / send a `?perf` screenshot).
 - **v34 (round 28, below): the glass display case is in the plan; a storage ottoman; two ways to a bar (suggestions, built and
   rendered); more of the room works from a tap.** Fit 70/18/12/0, total £3,673–7,173 (the case +£90–170 less the frames' £20–40; the ottoman +£140–310), plan 102 pages (15.6 MB), guide 53. Round 28 also rebuilt
   this branch on main's v33 (PR #30) after a parallel v33 had been made on the older v32 (only what still applied came across; see
@@ -67,6 +73,50 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 22 Oct 2026, round 29: v35 (the 3D room: crashes, errors and lag)
+- Client (21 Oct): "it currently still crashes in the claude version and has some errors in the web mode when trying to make changes.
+  it also is a bit slow on the render sometimes becoming HD". Measured first (v34, `perf_probe.py`, 1280 × 800, headless SwiftShader:
+  times inflated, counts real): Film scene 10.7 s (shaders 73 → 92), opening the table 21 s, "Unknown color glass/art" warnings, the
+  dock's bubbles unclickable after Look changes (`edit_probe.py`).
+- **No shader rebuilds** (`room3d.js`, after `reshadow()`): every light is "adopted" (`adoptLight`): its `visible`, `intensity` and
+  `castShadow` become accessors. While `LIVE`, `visible` is the quality's fixed set (`lightIn`: HD all; Fast none of the rect-area
+  lights, the lights that belong to hideable parts, or every other bar head), "off" reads as intensity 0, and only the first head of
+  bar 1 and bar 2 casts a shadow, in HD. Lights inside hideable groups move onto `lightRig` (so a hidden group can't drop them out of
+  the count) and follow their owner each frame (`syncRig`, which also drops lights whose owner left the scene: the cabinet's rebuild
+  leaked 18 a time before). `still()` sets `LIVE = false`: saves light the room exactly as before (the stills didn't change).
+- **The warm-up** (`PRE`, `precompile`, `precompileStep`): each hidden part (the open table, the chairs, the suggestions...) is drawn on
+  its own (camera layer 31, every light on it) into a 1 × 1 target flagged `isXRRenderTarget` with the screen's colour space, which three
+  treats like the screen (same tone mapping and output: the same shader keys; a plain render target makes different ones). One part per
+  250 ms, only after a second with no input (`PRE.idleT`), none while a shadow redraw is due, after the speed check, again after a
+  quality change. Opening the table after the warm-up: 21 s → 45 ms here, shaders steady. `three.compile()` can't do this (it doesn't
+  set the cutaway's clipping, so its keys differ); a 1-pixel scissor on the canvas could, but needed a full redraw each step (that was
+  what kept the page too busy to click in round 29's first try).
+- **Look changes:** a plain white map (`BLANK`) and a flat bump (`FLAT`) stand in for "no map", so the shelf colours, the case frame and
+  the floorboards don't change a material's shader. `fillCol()` gives `boxGeo`/`softGeo`/`frameMesh` white for the kinds "glass",
+  "art", "brick" (the warnings).
+- **Lighter:** every device starts in Fast unless you picked (`S.picked`); `autoQuality` moves a laptop to HD if its Fast frames are
+  under 20 ms (then re-checks HD, back to Fast over 70 ms); the speed check's three frames happen at the start. The lower resolution
+  only while dragging on a slow device, after 150 ms (each switch resizes the canvas: a profile showed 4.2 s of `setSize` after a
+  Look change here). Nothing is drawn while `body.sheet-open` (the warm-up carries on). `webglcontextrestored`: the room comes back in
+  Fast without a reload. The labels' sizes are cached (`stickSz`), not read every frame.
+- **Errors:** `noteError()` (window `error`, `unhandledrejection`, `console.error`): a toast at most every 10 s, the last 20 in
+  localStorage `r3d-errors` (`R3D.errors()`), and on the deck `db.doc("errors/<time>")` with the message, stack, state, device and GPU.
+  `R3D.perf()` (calls, triangles, shaders, lights, shadows, quality, pixel ratio, median frame ms, warm-up left, errors) and `?perf` (an
+  overlay to screenshot). `qa.py` now fails if the lighting scenes make new shaders or the trap caught anything.
+- **After** (same probes): lighting scenes add no shaders (QA); table 45 ms; Look walnut/boards ~0.3 s; no console warnings; Edit room
+  add/turn/drag/undo no errors. In SwiftShader each new shader still takes ~1 s, so a click landing on a warm-up step can wait that
+  long (`edit_probe` uses 10 s timeouts); on a real GPU a shader is tens of ms.
+- **Not done (v36):** draw calls ~450 in Fast (merge the static oak, instance the LPs, spindles, chairs, plates); build ideas and
+  suggestions on first show instead of at load; textures ≤ 1024². The Claude-app crash couldn't be reproduced here: the trap is how
+  we'll see it.
+- Stills: before the version bump, `3d_room` and `3d_glass_case` were re-rendered and compared with v34: the same (0.01 % and 0 % of
+  pixels moved), so the lighting rework doesn't change saves. `3d_look` differed: **v34's stills after `3d_ottoman` showed the ottoman
+  with its lid lifted** (`S.lid` carried over from that still: `shot3d.BASE` had no `lid` or `barflap`); BASE now sets both shut. All 86
+  were then rendered as v35 (the version is in `scene3d.json`'s room, so a version bump always re-renders every still).
+- QA: `qa.py` fails and errors [] at 390 and 1280; `taptest.py` the same taps as v34, all working (the curtains now tappable at 390).
+- Backups `build_doc_v34_backup.py`, `room3d_v34_backup.js`; v34 outputs in `out/v34/`. Fit 70/18/12/0, total £3,673–7,173 (unchanged),
+  plan 102 pages (15.6 MB), guide 53 (5.6 MB). The deck: still not reachable from this session's account (Artifact read: not found).
 
 ## Update 22 Oct 2026, round 28: v34 (the glass case in the plan; a storage ottoman; two ways to a bar; more taps)
 - **What happened first.** This session started on `claude/optimistic-lovelace-7phxl6` from v32 and made its own "v33" (the flip-top's

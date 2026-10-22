@@ -95,6 +95,15 @@ def run(p, w, h):
         pg.evaluate("o => window.R3D.set(o)", opts)
         pg.wait_for_timeout(700)
     pg.screenshot(path=f"{OUT}/qa_{w}_room_six.png")
+    # v35: lighting changes never make new shaders (each quality has its fixed set of lights), and nothing went into the error trap
+    n0 = pg.evaluate("() => R3D.perf().programs")
+    for sc in ("film", "cosy", "bright", "film", "bright"):
+        pg.evaluate("s => window.R3D.set({scene: s})", sc); pg.evaluate("() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))")
+    perf = pg.evaluate("() => R3D.perf()"); rep["notes"].append(f"3D: {perf}")
+    if perf["programs"] > n0:
+        fail(f"lighting scenes made new shaders: {n0} -> {perf['programs']}")
+    if pg.evaluate("() => R3D.errors().length"):
+        fail(f"the 3D room's error trap: {pg.evaluate('() => R3D.errors()')}")
     sw, cw = pg.evaluate(OVER, None)
     if sw > cw:
         fail(f"page scrolls sideways after the 3D states {sw} > {cw}")

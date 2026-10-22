@@ -3376,6 +3376,20 @@ function frame(now) {
 let probe = 3; const probeT = [], PX = new Uint8Array(4);
 let preT = 0;
 const FT = []; FT.n = 0;   // v35: the last 60 frames' times, for R3D.perf()
+function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
+  const i = gl.info, ls = [], ms = FT.slice().sort((a, b) => a - b);
+  scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
+  return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
+    lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length };
+}
+if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
+  const box = document.createElement("div"); box.className = "r3d-perf";
+  box.style.cssText = "position:absolute;left:8px;bottom:8px;z-index:30;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.72);color:#fff;font:12px/1.35 ui-monospace,monospace;pointer-events:none;white-space:pre";
+  root.append(box); let n0 = FT.n, t0 = performance.now();
+  setInterval(() => { if (!gl || !started) return; const p = perfInfo(), t = performance.now(), fps = (FT.n - n0) * 1000 / (t - t0); n0 = FT.n; t0 = t;
+    box.textContent = `${p.quality} · ${fps.toFixed(0)} frames/s · ${p.frameMs} ms\ncalls ${p.calls} · tris ${Math.round(p.triangles / 1000)}k · shaders ${p.programs}\nlights ${p.lights} · shadows ${p.shadows} · ratio ${p.ratio} · errors ${p.errors}`; }, 1000);
+}
 function autoQuality() {
   const ms = probeT.sort((a, b) => a - b)[1];
   if (S.quality === "fast") slowDev = ms > 30;
@@ -3588,13 +3602,7 @@ function start() {
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
     still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE },
     errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
-    perf() {                                                                          // v35: the counts to watch each round
-      const i = gl.info, ls = [], ms = FT.slice().sort((a, b) => a - b);
-      scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
-      return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
-        lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
-        warm: PRE.queue.length, errors: store.get("r3d-errors", []).length };
-    },
+    perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
       const t = performance.now();
       for (let i = 0; i < n; i++) { controls.rotateLeft ? controls.rotateLeft(0.01) : 0; camera.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.004); camera.lookAt(controls.target); gl.render(scene, camera); }
