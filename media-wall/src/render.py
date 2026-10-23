@@ -54,6 +54,7 @@ BOX_X = UP_L[1] + 65.0 if G.MW_SWAP else 70.0
 PRINT_X = G.RZ[0] + 27.0 if G.MW_SWAP else 106.0
 BX1 = G.BREAST_X[1]  # west edge of the chimney breast
 STYLE = "joinery"    # "joinery" (main) or "slats"
+STAIRS_3D = False    # v38: export3d sets it while recording the stairwell (the 3D room builds the flight itself)
 
 
 def at(off, fn, *a, **kw):
@@ -900,6 +901,7 @@ def west_end(sk):
     # beyond the recess wall line the flight is in the hall: seen only through the stairwell opening (the gap in the
     # recess wall over the stair, and the opening in the ceiling above it), so that part is clipped to those openings
     far_z = sz + 6 + 11 * going
+    land_z = sz + 6 + (G.STAIR_N - 1) * going + G.LANDING_D    # v38: the stairwell's walls run on to the landing's far end
     hole = [P(sx0, 0, zb), P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx0, CEIL, zb)]
     # v13.2, client: the opening to upstairs starts just after the door, over the banister, and runs to the west wall
     hx0 = G.DOOR_X[1] + 1.5
@@ -907,11 +909,12 @@ def west_end(sk):
     cid = f"well{abs(hash((round(VX), round(S * 100), VIEW))) % 100000}"
     o.append(f'<clipPath id="{cid}"><polygon points="{pts(*hole)}"/><polygon points="{pts(*ceil_hole)}"/></clipPath>')
     near, far = [], []
-    far.append(quad_front(sx0, 0, far_z, sx1 - sx0, CEIL, "#1d3d30"))
+    wh = G.LANDING_Y + 6.0                                    # v38: the stairwell's walls run up past the landing
+    far.append(quad_front(sx0, 0, land_z, sx1 - sx0, wh, "#1d3d30"))
     # v17, client: "up the wall of the stairs is all one wall with no turns ... it should have the same colour making one wall clear": the
     # west wall carries on up the stairwell in the colour its room part ends in (the 3D room paints it with the walls)
-    far.append(poly([P(sx1, 0, zb), P(sx1, CEIL, zb), P(sx1, CEIL, far_z), P(sx1, 0, far_z)], "#2a5141"))
-    far.append(poly([P(sx0, 0, zb), P(sx0, CEIL, zb), P(sx0, CEIL, far_z), P(sx0, 0, far_z)], "#244a38"))
+    far.append(poly([P(sx1, 0, zb), P(sx1, wh, zb), P(sx1, wh, land_z), P(sx1, 0, land_z)], "#2a5141"))
+    far.append(poly([P(sx0, 0, zb), P(sx0, wh, zb), P(sx0, wh, land_z), P(sx0, 0, land_z)], "#244a38"))
     # looking up through the opening: the stairwell's walls carry on up to the landing's ceiling
     up = CEIL + 255.0
     hcid = cid + "c"
@@ -928,7 +931,9 @@ def west_end(sk):
     near.append(_line(ceil_hole[0], ceil_hole[1], "#264c3a", 1.4))
     # the flight: oak treads on risers in the wall colour, the first riser 6 cm behind the stair's front edge
     WOOD, WOOD_T, WOOD_S = "#b07a46", "#c89060", "#8a5c33"
-    for i in reversed(range(11)):       # far, higher steps first
+    for i in reversed(range(G.STAIR_N - 1)):       # far, higher steps first (v38: all twelve treads to the landing)
+        if STAIRS_3D:
+            break                       # v38: the 3D room builds the flight as one solid
         z0 = sz + 6 + i * going
         y1 = (i + 1) * rise
         tgt = far if z0 >= zb else near
@@ -946,8 +951,9 @@ def west_end(sk):
     def brick(z1, z2):
         return poly([P(sx0 - 0.5, 0, z1), P(sx0 - 0.5, 0, z2), P(sx0 - 0.5, sb(z2), z2), P(sx0 - 0.5, sb(z1), z1)], "url(#leftwall)")
     zbr = za + G.STAIR_STRING / rise * going        # where the string's underside leaves the floor
-    far.append(brick(zb, far_z)); far.append(string(zb, far_z))
-    near.append(brick(zbr, zb)); near.append(string(za, zb))
+    if not STAIRS_3D:
+        far.append(brick(zb, far_z)); far.append(string(zb, far_z))
+        near.append(brick(zbr, zb)); near.append(string(za, zb))
     # the banister (v17, client: "bannister could be improved"): a solid raking handrail 6.5 wide × 5.5 deep at 90 over the nosings, a base
     # rail capping the string, 3.2 cm square balusters at 10.5 centres (a 10 cm sphere mustn't pass: Approved Document K), and 9 × 9 newels
     # with a capped, pyramid top at the foot (the wall side has no rail or newel). Every face is a convex quad, so the 3D room builds it cleanly.

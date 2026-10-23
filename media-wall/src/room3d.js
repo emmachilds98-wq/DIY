@@ -778,7 +778,35 @@ function buildShell() {
   buildPlantsAndRecords();
   buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
   buildOptC(); buildCab(); buildBeside();                                                      // v26; v30: the compact cabinet; v31: beside it
+  buildStairs();
   flushCubes(shell);
+}
+/* v38, client: "Make the stairs solid until the landing": the flight as one solid, a stepped profile run across its width, 13 risers
+   up to a landing at the first floor, oak treads and a closed oak string on the open side. A stand-in shape (the stairs will change).
+   The cutaway leaves it whole (its materials carry no clipping planes), so it never shows in slices. */
+function buildStairs() {
+  const [sx0, sx1] = R.STAIR_X, n = R.STAIR_N || 13, r = R.STAIR_RISE, gq = R.STAIR_GOING, tb = 2.2, nose = 1.5;
+  const z0 = R.STAIR_FRONT + 6, zl = z0 + (n - 1) * gq, zl1 = zl + (R.LANDING_D || 90), top = n * r;
+  const noClip = m => { m.clippingPlanes = []; return m; };
+  const body = noClip(paintMat(lum("#2d5a46") / BASE_L, true, false).clone()); paintMats.set("stairbody", reg(body));
+  const oak = noClip(reg(new THREE.MeshStandardMaterial({ color: "#b07a46", map: OAK_TEX, roughness: 0.55 })));
+  const str = noClip(reg(new THREE.MeshStandardMaterial({ color: "#9c6a3f", map: OAK_TEX, roughness: 0.55 })));
+  const g = new THREE.Group(); g.name = "stairs"; shell.add(g);
+  const solid = (pts, xa, xb, mat) => {     // a profile in (z, y), run across x from xa to xb
+    const sh = new THREE.Shape(pts.map(([z, y]) => new THREE.Vector2(z * M, y * M)));
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: (xb - xa) * M, bevelEnabled: false });
+    geo.rotateY(-Math.PI / 2); geo.translate(-xa * M, 0, 0);
+    const uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / GRAIN, uv.getY(i) / GRAIN);
+    g.add(shadow(new THREE.Mesh(geo, mat)));
+  };
+  const prof = [[z0, 0]];                    // the body: risers and treads (under the boards) down to the floor, the landing on top
+  for (let i = 1; i < n; i++) prof.push([z0 + (i - 1) * gq, i * r - tb], [z0 + i * gq, i * r - tb]);
+  prof.push([zl, top - tb], [zl1, top - tb], [zl1, 0]);
+  solid(prof, sx0 + 0.2, sx1 - 0.2, body);
+  for (let i = 1; i < n; i++) solid([[z0 + (i - 1) * gq - nose, i * r - tb], [z0 + i * gq, i * r - tb], [z0 + i * gq, i * r], [z0 + (i - 1) * gq - nose, i * r]], sx0, sx1, oak);
+  solid([[zl - nose, top - tb], [zl1, top - tb], [zl1, top], [zl - nose, top]], sx0, sx1, oak);   // the landing's boards
+  const pitch = z => r + (z - z0) / gq * r, zf = z0 + (21 - r) / r * gq;   // the string: 24 deep along the pitch line, capped 3 over it
+  solid([[z0, 0], [zf, 0], [zl, top - 21], [zl1, top - 21], [zl1, top + 3], [zl, top + 3], [z0, pitch(z0) + 3]], sx0 - 2.2, sx0 - 0.2, str);
 }
 /* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
    end, flush with the pipe boxing, four chairs inside (two on its floor, two on its shelf, each pair two deep), two doors hinged on the

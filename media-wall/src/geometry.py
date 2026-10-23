@@ -36,6 +36,11 @@ STAIR_STRING = 24.0                          # v23: the closed string's board, a
 STAIR_D = 79.0        # from the alcove's back-wall line into the room (to confirm)
 STAIRS_UP = True      # v13, client: the stairs by the door go UP to the first floor (v12 drew them going down)
 STAIR_RISE, STAIR_GOING = 19.5, 22.0      # typical UK domestic stair (Approved Document K: rise up to 22, going at least 22)
+# v38, client: "Make the stairs solid until the landing": one solid flight, 13 risers to a landing at the first floor (235 ceiling and
+# about 18.5 of floor). A stand-in shape: the client says the stairs will change, and the count is to confirm.
+STAIR_N = 13
+LANDING_Y = STAIR_N * STAIR_RISE             # 253.5
+LANDING_D = 90.0                             # at least the flight's width (Approved Document K)
 DOOR_X = (BREAST_X[1] + 12.0, BREAST_X[1] + 95.0)   # 315.5 .. 398.5 in the recess (drawn where the agent's plan shows it)
 DOOR_SWING = 83.0     # if it opens into the room
 WINDOW_Z = ALC_D - ROOM_D                 # -309: the window wall in render coordinates
