@@ -13,8 +13,8 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "43"
-REVISION = "37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, the lights in Views, Extras lined up"
+VERSION = "44"
+REVISION = "39: Build in one card per thing you make, the plan and the buy list clearer, the plan PDF shorter, a sharper 3D room"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -1155,7 +1155,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> the C-table at the sofa's open end is in the plan (section 2), your window sill's plants as you have them, and four new options to look at (section 12).</div>
+<div class="decision"><b>What changed:</b> a shorter plan; the Build Guide in one chapter per thing you make, the C-table with its own; on the page, Build in one card per thing (Buy · Cut · Build); a sharper 3D room.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">

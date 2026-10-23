@@ -2,12 +2,19 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v43: the C-table in your plan, your sill's plants, four new options
+## Media wall and dining wall, v44: Build in one card per thing you make, a shorter plan, a sharper 3D room
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v43%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v44%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v44** ("read more clearly and be easier to follow while still having everything I need", "increase render quality")
+- **Build, one card per thing you make:** the media wall base, the worktop, the uprights, the side wall, the dining cabinet, the bar, the glass case, the record table, the C-table and the fitted pieces, each with **Buy · Cut · Build** tabs, plus five Jobs (network, cables, paint, lighting, connect). The 14 step ticks sit in one fold with a Next line; the merchant's cutting list is folded. About 3 phone screens closed (was 19).
+- **How to make it** from a piece's cost in Buy, or from the piece itself in the 3D room, opens its card.
+- **Plan and Buy say each thing once:** Up next and the 90/80 comparison are gone; the build-order shopping list is in one fold under the costs by piece.
+- **The plan PDF is 34 pages** (was 46): what the guide already has comes out, the pictures are smaller, the costs and sources run in two columns. **The C-table has its own chapter** in the build guide.
+- **A sharper 3D room:** truer colour (the wall nearer Card Room Green, the glass case and window no longer blown out); on a PC graphics card, HD at up to 2× sharpness, soft shadows as you look round and crisper textures; reflections by surface.
 
 **New in v43** ("I want the c table in the current main plan", your window sill's plants, "more item options")
 - **The C-table is in your plan:** an oak top 45 × 30 at 62, reaching 12 over the seat at the sofa's open end. Your sofa sits on the floor, so a bought C-table's foot couldn't slide under it; ours stands beside it on a foot weighed down by a steel plate, and holds about 12 kg on its far edge. About £8–15 (the oak is the spare board from the record table's pack).
@@ -324,8 +331,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v43.pdf`](media-wall/out/Home_Network_Plan_v43.pdf) (46 pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, buy first and the wiring plan, the cost overview, other options and sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v43.pdf`](media-wall/out/Build_Guide_v43.pdf) (59 pages: buy and adapt first, tools, techniques, order of work, the wiring plan, the cut list on the fewest sheets, step by step, each step with its own cut list and pictures)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v44.pdf`](media-wall/out/Home_Network_Plan_v44.pdf) (34 pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, the costs by piece, other options and sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v44.pdf`](media-wall/out/Build_Guide_v44.pdf) (61 pages: one chapter per thing you make, each with Buy, Cut and Build; the jobs; the merchant's cutting list and the sheets at the back)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
 - **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
