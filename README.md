@@ -324,8 +324,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v39.pdf`](media-wall/out/Home_Network_Plan_v39.pdf) (PLANPAGES pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, buy first and the wiring plan, the cost overview, other options and sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v39.pdf`](media-wall/out/Build_Guide_v39.pdf) (GUIDEPAGES pages: buy and adapt first, tools, techniques, order of work, the wiring plan, the cut list on the fewest sheets, step by step, each step with its own cut list and pictures)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v43.pdf`](media-wall/out/Home_Network_Plan_v43.pdf) (46 pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, buy first and the wiring plan, the cost overview, other options and sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v43.pdf`](media-wall/out/Build_Guide_v43.pdf) (59 pages: buy and adapt first, tools, techniques, order of work, the wiring plan, the cut list on the fewest sheets, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
 - **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
