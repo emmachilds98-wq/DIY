@@ -11,6 +11,10 @@ spindles**, white like the capping of the low wall under them. The 3D room, the 
 (`geometry.BANISTER`: slat tops 90 and 52 above the nosings, 9 tall, 2.5 thick; the post 9 × 9, 112 tall). The photo is the
 source (`inputs/photo_stairs_banister_23oct.jpg`).
 
+**Done 23 Oct (v40.2):** the price pill is off the room (it shows only while trying options); a **Whole room** button in its
+place (and the H key) flies back to the view from above whenever you're lost, and glows when you're up against a wall or looking
+straight down. The drawers' Reset view is gone. Items 6 and 7 below are partly done by this.
+
 ## What the review found
 
 **The build**

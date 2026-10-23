@@ -4037,7 +4037,7 @@ function frame(now) {
     need = 2;
   }
   const changed = controls.update();
-  if (changed) need = 2;
+  if (changed) { need = 2; lostCheck(); }
   if (cabTween(now)) need = 2;                                    // v30: the cabinet's doors swinging or sliding
   if (showTick(now)) need = 2;                                    // v32: "Watch it open"
   if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
@@ -4347,6 +4347,23 @@ function updatePlanBar() {
   if (!d.n) { el.textContent = "Tap a place to try something"; return; }
   const sign = (d.lo + d.hi) / 2 >= 0 ? "+" : "−", a = Math.min(Math.abs(d.lo), Math.abs(d.hi)), b = Math.max(Math.abs(d.lo), Math.abs(d.hi));
   el.textContent = `${d.n} option${d.n > 1 ? "s" : ""} on · ${sign}${gbp(a)}–${gbp(b).slice(1)}`;
+}
+/* v40.2: back to a good view whenever you're lost: the whole room from above, orbiting (not looking round from a spot) */
+function wholeRoom() {
+  if (SH) showStop(true);
+  if (actId) closeAct();
+  if (S.cam === "look") { S.cam = "orbit"; applyCam(false); syncButtons(); }
+  setView("room"); qs("#r3d-home")?.classList.remove("lost");
+}
+qs("#r3d-home")?.addEventListener("click", wholeRoom);
+document.addEventListener("keydown", e => { if ((e.key === "h" || e.key === "H") && !e.ctrlKey && !e.metaKey && !e.altKey && !/input|textarea|select/i.test(e.target.tagName)) wholeRoom(); });
+let lostT = 0;
+function lostCheck() {   // inside the room and nearly facing a wall, or looking at the floor or ceiling close up: the button glows, once a while
+  const now = performance.now(); if (now - lostT < 1500 || S.edit) return; lostT = now;
+  const d = new THREE.Vector3(); camera.getWorldDirection(d);
+  const dist = camera.position.distanceTo(controls.target), tooSteep = Math.abs(d.y) > 0.93 && camera.position.y < R.CEIL * M;
+  const b = qs("#r3d-home"); if (!b) return;
+  if ((dist < 0.12 || tooSteep) && !b.classList.contains("lost")) { b.classList.add("lost"); setTimeout(() => b.classList.remove("lost"), 5000); }
 }
 function backToPlan() {                   // the plan: your picks, the bar beside the cabinet, no ideas
   S.sugg = Object.assign({}, DEF.sugg); S.svar = Object.assign({}, DEF.svar); S.ideas = {}; S.beside = DEF.beside;

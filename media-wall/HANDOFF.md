@@ -1,6 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Round 36 (v40.2): the room's price pill off (it shows only while trying options), a Whole room button (and H) in its place
+  that flies back to the view from above and stops looking round; it glows when you're up against a wall or looking straight down.
+  The drawers' Reset view went (Whole room replaces it).** Merged to main.
 - **Round 35 (v40.1, below): your banister from the client's photo** (a square post, two flat slats, no spindles, white), merged to
   main. **The rest of `UPGRADE_PLAN_v41.md` (the picks' build step, the fit proof cleaned, the measuring sheet, the calmer page) waits
   for the client's go.**

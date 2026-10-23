@@ -284,6 +284,14 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-try[aria-checked=true] i { background: oklch(0.72 0.13 150); }
 .r3d-try[aria-checked=true] i::after { transform: translateX(16px); }
 .r3d.trying .r3d-plansum { background: var(--ink); color: var(--cream); }
+/* v40.2, client: "take your plan price off and make a button for getting a good view of the room again if I'm positioned wrong and getting
+   lost": the total shows only while trying options (as the change they make); Whole room flies back to the view from above */
+.r3d:not(.trying) .r3d-plansum { display: none; }
+.r3d-home { display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 18px 0 14px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink); font: 700 14px Figtree, system-ui, sans-serif; cursor: pointer; box-shadow: var(--shade); }
+.r3d-home .ms { font-size: 22px; }
+.r3d-home.lost { animation: r3dLost 1.6s ease-in-out 3; }
+@keyframes r3dLost { 50% { box-shadow: 0 0 0 6px oklch(0.8 0.12 85 / .55), var(--shade); } }
+.r3d.trying .r3d-home { display: none; }
 .r3d-back { position: absolute; left: 16px; top: max(84px, calc(env(safe-area-inset-top) + 72px)); z-index: 6; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink); font: 700 14px Figtree, system-ui, sans-serif; box-shadow: var(--shade); cursor: pointer; }
 .r3d-back[hidden] { display: none; }
 .r3d.tools-open .r3d-planbar, .r3d.editing .r3d-planbar, .r3d.touring .r3d-planbar, .r3d.nogl .r3d-planbar { display: none; }
@@ -665,7 +673,8 @@ def section(gallery=""):
     <p class="r3d-cap sr-only" id="r3d-cap"></p>
     <div class="r3d-stickers" id="r3d-stickers">{stickers}</div>
     <!-- v39: your plan and its total; Try options shows what else could go in each place, with the change to the total -->
-    <div class="r3d-planbar" id="r3d-planbar"><span class="r3d-plansum" id="r3d-plansum" aria-live="polite">Your plan</span>
+    <div class="r3d-planbar" id="r3d-planbar"><button type="button" class="r3d-home" id="r3d-home" title="The whole room, from above (H)"><span class="ms" aria-hidden="true">home</span> Whole room</button>
+      <span class="r3d-plansum" id="r3d-plansum" aria-live="polite">Your plan</span>
       <button type="button" class="r3d-try" id="r3d-try" role="switch" aria-checked="false">Try options <i aria-hidden="true"></i></button></div>
     <button type="button" class="r3d-back" id="r3d-back" hidden><span class="ms" aria-hidden="true">arrow_back</span> Back to my plan</button>
     <div class="r3d-tour" id="r3d-tour" role="region" aria-label="Tour of the room" aria-live="polite" hidden><span class="r3d-tourn" id="r3d-tourn"></span><h3 id="r3d-tourh"></h3><p id="r3d-tourp"></p>
@@ -695,7 +704,7 @@ def section(gallery=""):
       <button type="button" class="r3d-bub" id="r3d-editbtn" aria-pressed="false" style="--h:25" title="Move, turn, recolour, remove and add things; tap a wall to paint it"><i class="ms" aria-hidden="true">edit</i>Edit</button></div></div>
   <div class="r3d-panel" id="r3d-panel" role="region" aria-label="3D room controls" hidden><button type="button" class="r3d-px" data-tools-toggle aria-label="Close the tools"><span class="ms" aria-hidden="true">close</span></button>
     <div class="r3d-pscroll">{drawers}</div>
-    <div class="r3d-foot"><span class="r3d-litst" id="r3d-litst"></span><button type="button" id="r3d-reset">Reset view</button><button type="button" id="r3d-full">Full screen</button></div></div>
+    <div class="r3d-foot"><span class="r3d-litst" id="r3d-litst"></span><button type="button" id="r3d-full">Full screen</button></div></div>
 </div>
 <script type="application/json" id="picks-data">{picks_json()}</script>
 <script type="application/json" id="scene3d-data">{data}</script>

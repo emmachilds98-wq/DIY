@@ -9,7 +9,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 
 ![The media wall, main view](media-wall/out/Media%20wall%20v40%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New since v40:** your banister from your photo: a square post at the foot and two flat slats up to the wall by the door, in white.
+**New since v40:** a **Whole room** button on the room (or press H) takes you back to the view from above whenever you get lost; the price is off the room (Plan and Buy still show it). And your banister from your photo: a square post at the foot and two flat slats up to the wall by the door, in white.
 
 **New in v40** ("more HD realistic plants, better rendering and graphics", more options, optimisations)
 - **Real-looking plants:** every leaf is shaped, folded and textured (veins, variegation, its own shade of green), in seven kinds: golden pothos, snake plant, monstera, Boston fern, spider plant, calathea and a rubber plant. The pots are turned, with soil and a terracotta texture. They're quicker to draw than the old blobs.
