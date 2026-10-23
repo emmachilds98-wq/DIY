@@ -41,7 +41,13 @@ def decisions():
                            dict(v="hinge", label="On the other side of the door", note="The hinge side: the button moves with it", r3d={"view": "door"}, cost=[0, 0]),
                            dict(v="check", label="We'll look and tell you", note="Nothing to buy changes", r3d={"view": "door"}, cost=[0, 0])],
                   default=None, buy="Nothing on the buy list changes")
-    return [beside, width, switch]   # v33: the chairs are your padded ones, so the pads' colour went too
+    # v39: what goes beside the cabinet (the bar) and the table's width (90) are decided: they're the plan (geometry.FIRM). The one open
+    # measurement is the side wall's socket, beside the record trays since the media wall swapped
+    socket = dict(key="socket", title="The socket on the side wall", q="How far from the alcove's back wall, and how high? The record trays pull out beside it",
+                  options=[dict(v="drawn", label="About 30 up, in front of the drawer", note="As drawn: the trays clear it", art="3d_wall_drawers", r3d={"view": "wall", "drawers": True}, cost=[0, 0]),
+                           dict(v="measure", label="We'll measure it and tell you", note="Send the two numbers in your next message", r3d={"view": "wall", "drawers": True}, cost=[0, 0])],
+                  default=None, buy="Nothing on the buy list changes")
+    return [socket, switch]   # v33: the chairs are your padded ones, so the pads' colour went too
 
 
 def shortlist():

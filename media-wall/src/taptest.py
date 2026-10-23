@@ -27,12 +27,18 @@ def run(w, h):
             x, y = pg.evaluate(PROJ, pt); pg.mouse.click(x, y); pg.wait_for_timeout(400)
             vis = pg.evaluate("() => !document.getElementById('r3d-act').hidden")
             t = pg.evaluate("() => document.getElementById('r3d-act-h').textContent") if vis else None
-            bs = pg.evaluate("() => [...document.querySelectorAll('#r3d-acts button')].map(b => b.textContent)") if vis else []
+            bs = pg.evaluate("() => [...document.querySelectorAll('#r3d-act .acts button')].map(b => b.textContent)") if vis else []   # v39: Details too
             print(f"  tap {label} at ({x:.0f},{y:.0f}) -> {t!r} {bs} errs={errs[-3:]}")
             return t
-        def press(text):
-            pg.locator("#r3d-acts button", has_text=text).first.click(); pg.wait_for_timeout(900)
+        def press(text):   # v39: a card's buttons past the first three are under Details: open it first
+            b = pg.locator("#r3d-act .acts button", has_text=text).first
+            if not b.is_visible() and pg.locator("#r3d-act .r3d-actmore summary").count(): pg.locator("#r3d-act .r3d-actmore summary").first.click(); pg.wait_for_timeout(300)
+            b.click(); pg.wait_for_timeout(900)
         def S(k): return pg.evaluate(f"() => R3D._dbg.S.{k}")
+        def press_aria(a):
+            b = pg.locator(f"#r3d-act .acts button[aria-label='{a}']").first
+            if not b.is_visible() and pg.locator("#r3d-act .r3d-actmore summary").count(): pg.locator("#r3d-act .r3d-actmore summary").first.click(); pg.wait_for_timeout(300)
+            b.click()
         print(f"== {w}x{h}")
         pg.evaluate("() => R3D.set({site: 'C', cab: 'compact', dining: 'folded', chairs: 'cupboard', tdoor: false, view: 'dining'})"); pg.wait_for_timeout(600)
         tap([444, 45, -150], "the cabinet"); press("Open for six"); print("   dining:", S("dining")); pg.screenshot(path=f"{OUT}/tap_{w}_six.png")
@@ -51,7 +57,7 @@ def run(w, h):
         before = pos(); hxy = pg.evaluate("() => { const p = R3D._dbg.lights.bar1[1].position; return [-p.x * 100, p.y * 100 + 4, p.z * 100]; }")
         if tap(hxy, "spot bar 1"):
             press("⟳ 15°"); press("⟳ 15°"); print("   bar1 turned:", S("fix"), before, "->", pos())
-            press("Blue"); pg.locator("#r3d-acts button[aria-label='Aim it up']").click(); pg.wait_for_timeout(900); pg.locator("#r3d-acts button[aria-label='Dim this head']").click(); pg.wait_for_timeout(900); press("Colour"); print("   heads:", S("head"))
+            press("Blue"); press_aria("Aim it up"); pg.wait_for_timeout(900); press_aria("Dim this head"); pg.wait_for_timeout(900); press("Colour"); print("   heads:", S("head"))
             press("Reset"); print("   reset:", S("fix"), S("head"), pos() == before)
         pg.screenshot(path=f"{OUT}/tap_{w}_bar.png")
         pg.evaluate("() => R3D.set({view: 'door'})"); pg.wait_for_timeout(600)
@@ -62,12 +68,17 @@ def run(w, h):
         pg.screenshot(path=f"{OUT}/tap_{w}_curtains.png")
         pg.evaluate("() => R3D.set({site: 'B', cab: 'sliding', dining: 'folded', view: 'dining'})"); pg.wait_for_timeout(600)
         print("   v33, the compact cabinet only: site/cab after asking for the flip-top's:", S("site"), S("cab"))
-        if w < 600:   # v33, the phone home: a place from the strip opens its card
-            pg.evaluate("() => R3D.set({view: 'room'})"); pg.wait_for_timeout(600)
-            pg.keyboard.press("Escape"); pg.wait_for_timeout(300)                         # v34: the curtains' card was still up (it hides the strip)
-            pg.locator("[data-place=dining]").click(); pg.wait_for_timeout(1600)
-            print("   place card:", pg.evaluate("() => !document.getElementById('r3d-pop').hidden && document.getElementById('r3d-pop-h').textContent"))
-            pg.screenshot(path=f"{OUT}/tap_{w}_place.png"); pg.keyboard.press("Escape")
+        # v39 (the approved redesign): Try options: a place's card, › to the next option (the room shows it, the plan bar says the change),
+        # then Back to my plan
+        pg.evaluate("() => R3D.set({view: 'room'})"); pg.wait_for_timeout(600); pg.keyboard.press("Escape")
+        pg.locator("#r3d-try").click(); pg.wait_for_timeout(500)
+        pg.evaluate("() => document.querySelector('.stk[data-hot=sofa]').click()"); pg.wait_for_timeout(800)
+        print("   try card:", pg.evaluate("() => document.getElementById('r3d-act-h').textContent"))
+        pg.locator("#r3d-acts button[aria-label='The next one']").click(); pg.wait_for_timeout(1500)
+        print("   next:", pg.evaluate("() => document.getElementById('r3d-act-h').textContent"), "|", pg.evaluate("() => document.getElementById('r3d-plansum').textContent"))
+        pg.locator("#r3d-back").click(); pg.wait_for_timeout(800)
+        print("   back:", pg.evaluate("() => document.getElementById('r3d-plansum').textContent"), S("sugg.recordtable"), S("sugg.liftcoffee"))
+        pg.screenshot(path=f"{OUT}/tap_{w}_try.png")
         # v34: the blind, the records, the trolley, a suggestion's card
         CEN = "k => { const { THREE } = R3D._dbg; const o = k.split('.').reduce((a, p) => a[p], R3D._dbg); const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()); return [-c.x * 100, c.y * 100, c.z * 100]; }"
         pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', sugg: {blind: true}, blind: 'down', curtains: false, view: 'windowwall'})"); pg.wait_for_timeout(800)

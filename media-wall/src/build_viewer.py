@@ -991,8 +991,10 @@ def _page(site=False):
             + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
     def sheet(k, title, ic, h, body):
         return (f'<div class="sheet" id="sh-{k}" role="dialog" aria-modal="true" aria-labelledby="sh-{k}-h" aria-hidden="true" style="--h:{h}">'
-                f'<div class="shd"><span class="grab" aria-hidden="true"></span><h2 id="sh-{k}-h"><i class="ms" aria-hidden="true">{ic}</i><span>{title}</span></h2>'
-                f'<button type="button" class="close" data-close aria-label="Close {title}"><span class="ms" aria-hidden="true">close</span></button></div>'
+                f'<div class="shd"><span class="grab" aria-hidden="true"></span><h2 id="sh-{k}-h" class="sr-only">{title}</h2>'
+                + ('<nav class="shnav" aria-label="The plan">' + "".join(f'<button type="button" data-nav="{n}" aria-current="{str(n == k).lower()}">{t}</button>' for n, t in (("plan", "Plan"), ("build", "Build"), ("buy", "Buy"))) + '</nav>'
+                   if k in ("plan", "build", "buy") else f'<h2 aria-hidden="true"><i class="ms">{ic}</i><span>{title}</span></h2>')
+                + f'<button type="button" class="close" data-close aria-label="Close {title}"><span class="ms" aria-hidden="true">close</span></button></div>'
                 f'<div class="sbd">{body}</div></div>')
     sugg_chips = ('<div class="seg" role="group" aria-label="Suggestions in the room">'
                   + "".join(f'<button type="button" data-sproxy="{k}" aria-pressed="false">{html.escape(room3d_page.SUGG_SHORT[k])}</button>' for k, *_ in __import__("ideas").SUGGEST)
@@ -1131,13 +1133,12 @@ def _page(site=False):
 <button type="button" class="skip" data-tools-toggle>Open the room's controls</button>
 <div class="brand"><span class="mark" aria-hidden="true"><i style="background:var(--peach)"></i><i style="background:var(--mint)"></i><i style="background:var(--lilac)"></i><i style="background:var(--butter)"></i></span>
   <span><b>Demma<span class="ver" title="This page is version {VERSION}">v{VERSION}</span></b><small>Home Improvements</small></span></div>
-{rail}
+<nav class="hnav" aria-label="The plan">{"".join(f'<button type="button" data-nav="{k}" aria-current="false">{n}</button>' for k, n in (("plan", "Plan"), ("build", "Build"), ("buy", "Buy")))}</nav>
 <main id="room" aria-label="Your room in 3D">{room3d_page.section(gallery3d())}</main>
 {sheet("plan", "Your plan", "map", 300, plan_home + chapters)}
 {sheet("build", "Build", "construction", 50, build_body)}
 {sheet("buy", "Buy", "shopping_bag", 165, buy_body)}
 {sheet("ideas", "Ideas", "lightbulb", 95, ideas_body)}
-{bbar}
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="The picture at full size">
   <div class="lbbar"><span class="caption" id="lb-cap">Full size: drag or scroll to look round. Pinch to zoom on a phone.</span><button class="btn" id="lb-close" type="button">Close</button></div>
   <div class="lbscroll" id="lb-scroll"><div class="lbwrap"><img id="lb-img" alt=""><img id="lb-dims" alt="" hidden></div></div>

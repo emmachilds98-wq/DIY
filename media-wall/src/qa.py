@@ -148,6 +148,47 @@ def links():
     return bad
 
 
+# v39 (UPGRADE_PLAN_v38 item 11, "say less"): every piece of text has a budget, and anything over it is listed so it gets cut:
+# a caption 20 words, a panel's note 30, a plan paragraph 80, a toast 10
+BUDGET = {"caption": 20, "figcaption": 20, "note": 30, "p": 80, "toast": 10}
+
+
+def text_budget():
+    import html.parser, re
+    page = (ROOT / "index.html").read_text()
+    class P(html.parser.HTMLParser):
+        def __init__(self):
+            super().__init__(); self.stack = []; self.out = []
+        def handle_starttag(self, tag, attrs):
+            if tag in ("br", "img", "input", "meta", "link", "source", "hr", "wbr", "col", "area", "base", "embed", "param", "track"):
+                return
+            cls = dict(attrs).get("class") or ""
+            kind = ("figcaption" if tag == "figcaption" else "caption" if re.search(r"\b(caption|r3d-hint2)\b", cls)
+                    else "p" if tag == "p" and any(k == "doc" for k, _ in self.stack) else None)
+            self.stack.append(("doc" if re.search(r"\bdoc\b", cls) else tag, [kind, []]))
+        def handle_endtag(self, tag):
+            if not self.stack:
+                return
+            t, (kind, words) = self.stack.pop()
+            if kind:
+                txt = " ".join(words).split()
+                if len(txt) > BUDGET[kind]:
+                    self.out.append((kind, len(txt), " ".join(txt[:12])))
+            if self.stack:
+                self.stack[-1][1][1].extend(words)
+        def handle_data(self, d):
+            if self.stack:
+                self.stack[-1][1][1].append(d)
+    pr = P(); pr.feed(page.split("<script", 1)[0] if False else re.sub(r"<script.*?</script>", "", page, flags=re.S))
+    js = (pathlib.Path(__file__).parent / "room3d.js").read_text()
+    for m in re.finditer(r'toast\(\s*"([^"]+)"', js):
+        n = len(m.group(1).split())
+        if n > BUDGET["toast"]:
+            pr.out.append(("toast", n, " ".join(m.group(1).split()[:12])))
+    over = sorted(pr.out, key=lambda x: -x[1])
+    return {"over": len(over), "by_kind": {k: sum(1 for o in over if o[0] == k) for k in BUDGET}, "longest": [f"{k} {n}: {t}" for k, n, t in over[:25]]}
+
+
 if __name__ == "__main__":
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
@@ -155,7 +196,7 @@ if __name__ == "__main__":
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(ROOT)))
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     BASE = f"http://127.0.0.1:{srv.server_address[1]}/"
-    res = {"links": links()}
+    res = {"links": links(), "text": text_budget()}
     with sync_playwright() as p:
         res["runs"] = [run(p, 390, 844), run(p, 1280, 800)]
     print(json.dumps(res, indent=1))
