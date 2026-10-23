@@ -848,3 +848,27 @@ FIRM = dict(
 # pushing it to the sofa doesn't clear that); its dinner spot is in front of the media wall, clear of the table, the chairs and the
 # vinyl stand. The 3D room moves it there while the table is out (unless you've placed it yourself).
 SOFA_POUF["dinner"] = dict(x=(190.0, 266.0), z=(-115.0, -39.0))
+
+
+# ---------------------------------------------------------------- v38: the door and the plant, and the bar to suit
+# The table door (90.5, hinged at the cabinet's window end) swept through the hanging plant's strands once v37 moved the shelf 8 towards
+# the stairs (88.4 from the hinge). The strands now fall through the shelf's 10 cm gap at the boxing (102.6 from the hinge, clear), the
+# pot at the shelf's end; and the bar ends flush with the shelf, leaving that gap clear to the floor.
+PLANT_THROUGH_GAP = True
+PLANT_B["z"] = SHELF_B["z"][1] + PLANT_B["pot"] / 2 + 1.0                              # -268: the pot 1 in from the shelf's end
+BAR_BUILT["z"] = (BESIDE["z"][0] - 0.3, SHELF_B["z"][1])                                # -233.5 .. -276: 42.5 wide
+# over the counter, an IKEA ENHET wall frame (40 × 15 × 75, two shelves, 3 kg a shelf) from 112 to 187, glasses and bottles on it; the
+# glass rail is gone (a hanging glass would reach below the counter under a frame at 112)
+ENHET = (40.0, 15.0, 75.0)
+BAR_BUILT.update(enhet_y0=112.0, shelf=(112.0 + 25.0, 15.0), shelf2=(112.0 + 75.0, 15.0))
+_bb = BAR_BUILT
+_bb["w"] = round(_bb["z"][0] - _bb["z"][1], 1)
+_bb["inner_w"] = round(_bb["w"] - 2 * _bb["t"], 1)
+_bb["across"] = int(_bb["inner_w"] // DRINKS_BOTTLE[1])
+_bb["bottles"] = 2 * _bb["across"] * _bb["rows"]
+_bb["covered"] = round(_bb["z"][0] - CAB["door_t_open"][1], 1)
+_bb["enhet_gap"] = round(_bb["enhet_y0"] - _bb["counter"], 1)                            # 22 to work on the counter
+_bb["enhet_head"] = round(SHELF_B["top"] - SHELF_B["t"] - (_bb["enhet_y0"] + ENHET[2]), 1)   # 4 under your black shelf
+for _k in ("glass_low", "glass_gap"):
+    _bb.pop(_k, None)
+del _bb, _k

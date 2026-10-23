@@ -1138,7 +1138,10 @@ SOURCES["shelfgap"] = ("Client, 22 Oct 2026: \"The shelf on the wall alongside t
                        "actually installed\" (facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side)")
 SOURCES["worktop"] = ("Homebuilding & Renovating: the UK's usual worktop height is 900 mm to the top (homebuilding.co.uk/advice/kitchen-worktop-height); "
                       "a raised bar counter 1000 to 1200")
-SOURCES["glassrail"] = ("Dan Murphy's: Bev-Equip single-row glass hanger, chrome, 400 mm long, a 110 × 15 mm mount plate, 36 mm high, about four "
+SOURCES["enhet"] = ("IKEA: ENHET wall frame with shelves, 40 × 15 × 75 cm, anthracite or white, steel, two shelves, 3 kg a shelf, to be "
+                    "anchored to the wall; about 32–39 € (ikea.com/th 404.816.05; islas.ikea.es 304.489.37)")
+ORDER.append("enhet")
+_GLASSRAIL_V37 = ("Dan Murphy's: Bev-Equip single-row glass hanger, chrome, 400 mm long, a 110 × 15 mm mount plate, 36 mm high, about four "
                         "or five wine glasses (danmurphys.com.au, BEVCH-400)")
 SOURCES["wineglass"] = ("Stemmed wine glasses, makers' sizes: Rosendahl Grand Cru red 20.5 and 22.2 tall; CB2 Joplin 22.9; most 20 to 23 "
                         "(culinaris.de, cb2.ca, dimensions.com)")
@@ -1159,7 +1162,7 @@ SOURCES["stepdrawers"] = ("The Day: building drawers into a staircase, the usabl
                           "needs support once its riser is cut (theday.com/?p=192887; ukworkshop.co.uk/threads/understair-storage.151071)")
 SOURCES["capspec"] = ("SanMar: a structured six-panel cap's spec sheet, bill (visor) 2¾ in (7 cm), crown 6¾ in measured over the top "
                       "(sanmar.com, 72788); the client's photo of their cap, 22 Oct 2026 (green crown, brown brim, gold embroidery)")
-ORDER.extend(["shelfgap", "worktop", "glassrail", "wineglass", "trones", "eket", "floatshelf", "seat", "shoebench", "wardrobe", "overdoor", "stepdrawers", "capspec"])
+ORDER.extend(["shelfgap", "worktop", "wineglass", "trones", "eket", "floatshelf", "seat", "shoebench", "wardrobe", "overdoor", "stepdrawers", "capspec"])
 
 
 def more_storage_zone():
@@ -1175,10 +1178,13 @@ def more_storage_zone():
         ("D: the counter", f"top at {r1(B['counter'])}", ref("worktop"), "a usual worktop, 90", "standing height to pour at", PASS),
         ("D: bottles", f"{B['bottles']}: {B['across']} across, {B['rows']} deep, two shelves", ref("bottles"), f"inside {r1(B['inner_w'])} × {r1(B['inner_d'])}; 70 cl up to {r1(g.DRINKS_BOTTLE[0])} × {r1(g.DRINKS_BOTTLE[1])}",
          f"two deep need {r1(2 * g.DRINKS_BOTTLE[1])} of the {r1(B['inner_d'])}", TIGHT),
-        ("D: glasses on the rail", f"under the shelf at {r1(B['shelf'][0])}", ref("glassrail", "wineglass"), f"a tall glass {r1(g.BAR_GLASS_H)}, the rail {r1(g.BAR_RAIL[1])}",
-         f"their feet at {r1(B['glass_low'])}: {r1(B['glass_gap'])} over the counter", PASS),
-        ("D: your hanging plant above it", "the strands from the black shelf's window end", ref("photo20"), "they fall about 26 off the wall, in front of the 22.4 counter",
-         "trim them to above the first shelf, or turn the pot along the shelf", CHECK),
+        ("D: the ENHET frame over the counter", f"{r1(g.ENHET[0])} × {r1(g.ENHET[1])} × {r1(g.ENHET[2])}, from {r1(B['enhet_y0'])}", ref("enhet"),
+         f"the bar {r1(B['w'])} wide; your black shelf's underside at {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
+         f"{r1((B['w'] - g.ENHET[0]) / 2)} each side; {r1(B['enhet_gap'])} over the counter to work; {r1(B['enhet_head'])} under the shelf", PASS),
+        ("D: glasses on its shelves", f"a tall glass {r1(g.BAR_GLASS_H)}", ref("wineglass", "enhet"), f"{r1(g.ENHET[2] / 3)} between its shelves, 3 kg each",
+         "three glasses a shelf, or bottles to 22", PASS),
+        ("D and your hanging plant (v38)", "its strands fall through the shelf's 10 cm gap", ref("shelfgap", "photo20"), f"the bar ends at the shelf's end, z {r1(B['z'][1])}",
+         "the gap stays clear to the floor for them; the table door's swing stays 12 clear of them", PASS),
         ("Shoe cabinets beside the cabinet", f"two {r1(g.TRONES[0])} × {r1(g.TRONES[1])} × {r1(g.TRONES[2])}", ref("trones"), f"the {r1(g.BESIDE['len'])} slot, the door's line at {r1(g.CAB['d'])}",
          f"{r1(g.BESIDE['len'] - g.TRONES[0])} to spare along it, {r1(g.CAB['d'] - g.TRONES[1])} behind the door", PASS),
         ("The window corner", f"{r1(C['w'])} wide", ref("room"), f"the curtains' stack (x {r1(C['x'][0])}) to the table door's line (x {r1(C['x'][1])})",

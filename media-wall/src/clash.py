@@ -91,7 +91,7 @@ def strands_x():
 def strands_z():
     pb, sb = G.PLANT_B, G.SHELF_B
     if getattr(G, "PLANT_THROUGH_GAP", False):
-        return (G.PIPE_BOX["z"][1] + 0.5, sb["z"][1] - 0.5)
+        return (G.PIPE_BOX["z"][1] + 1.0, sb["z"][1] - 1.5)
     return (pb["z"] - pb["pot"] / 2, pb["z"] + pb["pot"] / 2)
 
 

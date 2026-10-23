@@ -746,7 +746,7 @@ function buildShell() {
   // v15: "make the hanging plant on the wall shelf actually hang": a pot at the window end, its strands trailing down off the shelf.
   // v36: its own group (plantBG). v37: it stays here, at the shelf's window end, now 10 short of the boxing (v36's plant shelf is gone)
   plantBG = new THREE.Group(); shell.add(plantBG);
-  hangPlant(plantBG, Wd - sb.d / 2 - 1, sb.top, R.PLANT_B.z, [Wd - sb.d - 1], 4);
+  hangPlant(plantBG, Wd - sb.d / 2 - 1, sb.top, R.PLANT_B.z, [Wd - sb.d - 1], 4, R.PLANT_THROUGH_GAP ? [sb.z[1], R.PIPE_BOX.z[1]] : null);   // v38: through the 10 cm gap
   // v15: "either add my hat there or give it a wallstand": an oak peg on the stairs wall with the hat on it. v16: off until the photo
   if (R.HAT_PEG) {
   const HP = R.HAT_PEG, oakM = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
@@ -1306,22 +1306,24 @@ function buildBeside() {
     bx(g, W - b.front, ct, z1, b.front, b.top_t, w, K.oak);                                                    // the oak counter
     const mir = new THREE.Mesh(new THREE.PlaneGeometry((w - 1) * M, (b.shelf2[0] - b.counter) * M), mat({ color: "#ffffff", map: MIRROR_SHEEN, roughness: 0.1, metalness: 0.3 }));
     mir.rotation.y = Math.PI / 2; mir.position.copy(v3(W - b.mirror - 0.05, (b.counter + b.shelf2[0]) / 2, (z0 + z1) / 2)); g.add(mir);   // the acrylic mirror back
-    for (const [y, dd] of [b.shelf, b.shelf2]) bx(g, W - dd, y - 2.7, z1 + 0.5, dd, 2.7, w - 1, K.oak);      // the two oak shelves, on hidden rods
-    const led = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.004, (w - 6) * M), new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false }));
-    led.position.copy(v3(W - b.shelf[1] + 3, b.shelf[0] - 2.7 - 0.25, (z0 + z1) / 2)); g.add(led);           // a warm strip under the first shelf
-    const steel = mat({ color: "#c9cbcd", roughness: 0.25, metalness: 0.9 }), [rl, rh] = R.BAR_RAIL, ry = b.shelf[0] - 2.7 - rh;
-    bx(g, W - 10, ry, (z0 + z1) / 2 - rl / 2, 5, 0.4, rl, steel);                                              // the glass rail
+    // v38: over the counter, an IKEA ENHET wall frame (40 × 15 × 75, steel, two shelves) from 112: glasses and bottles stand on it
+    const [ew, ed, eh] = R.ENHET, ey = b.enhet_y0, ez0 = (z0 + z1) / 2 - ew / 2, steelE = mat({ color: "#3a3b3d", roughness: 0.45, metalness: 0.5 });
+    for (const zz of [ez0, ez0 + ew - 1.2]) bx(g, W - ed, ey, zz, ed, eh, 1.2, steelE);                       // its two sides
+    for (const yy of [ey, ey + eh / 3, ey + eh * 2 / 3, ey + eh - 1.2]) bx(g, W - ed, yy, ez0, ed, 1.2, ew, steelE);   // bottom, two shelves, top
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.004, (ew - 6) * M), new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false }));
+    led.position.copy(v3(W - ed + 3, ey - 0.25, (z0 + z1) / 2)); g.add(led);                                  // a warm strip under it, over the counter
     const clear = reg(new THREE.MeshPhysicalMaterial({ color: "#eef3f4", roughness: 0.05, transmission: 0.6, transparent: true, opacity: 0.5 }));
     const glassGeo = new THREE.LatheGeometry([[0.0, 0], [3.6, 0], [3.6, 0.3], [0.35, 0.6], [0.35, 10], [2.2, 11.2], [4.2, 15.5], [4.0, 21], [3.6, R.BAR_GLASS_H]].map(([r, y]) => new THREE.Vector2(r * M, y * M)), 20);
-    for (let i = 0; i < 4; i++) { const gl2 = new THREE.Mesh(glassGeo, clear); gl2.rotation.x = Math.PI; gl2.position.copy(v3(W - 7.5, ry, (z0 + z1) / 2 - rl / 2 + 5 + i * (rl - 10) / 3)); g.add(gl2); }   // hanging by their feet
+    for (let i = 0; i < 3; i++) { const gl2 = new THREE.Mesh(glassGeo, clear); gl2.position.copy(v3(W - 7.5, ey + 1.2, ez0 + 8 + i * 12)); g.add(gl2); }   // three wine glasses on the bottom
+    const steel = mat({ color: "#c9cbcd", roughness: 0.25, metalness: 0.9 });
     const bottleGeo = new THREE.LatheGeometry([[0, 0], [4.2, 0], [4.4, 1], [4.4, 21], [3.6, 24], [1.4, 27.5], [1.4, 32], [1.6, 32.5], [1.6, 34], [0, 34]].map(([r, y]) => new THREE.Vector2(r * M, y * M)), 16);
     const glassC = ["#3f6b3a", "#c48a3a", "#e8eef0", "#6b2e1f", "#2f4e6e", "#d9c27a"].map(c => reg(new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.08, transmission: 0.35, transparent: true, opacity: 0.88 })));
     const r = rnd(41), pitch = (w - 2 * t) / b.across;
     for (const y of [b.floor, b.mid + t]) for (let i = 0; i < b.across; i++) {                                 // the front row of each shelf
       const bo = new THREE.Mesh(bottleGeo, glassC[(i + (y > 20 ? 3 : 0)) % glassC.length]), k = 0.78 + r() * 0.22; bo.scale.set(1, k, 1);
       bo.position.copy(v3(x0 + b.door + 6, y, z1 + t + pitch * (i + 0.5))); g.add(bo); }
-    for (const [dz, k] of [[-14, 0.95], [-4, 0.8], [8, 0.9]]) { const bo = new THREE.Mesh(bottleGeo, glassC[(dz + 20) % 6]); bo.scale.set(1, k, 1);
-      bo.position.copy(v3(W - 7, b.shelf2[0], (z0 + z1) / 2 + dz)); g.add(bo); }                               // three to show on the top shelf
+    for (const [dz, k] of [[-12, 0.62], [-2, 0.55], [9, 0.6]]) { const bo = new THREE.Mesh(bottleGeo, glassC[(dz + 20) % 6]); bo.scale.set(1, k, 1);
+      bo.position.copy(v3(W - 7, ey + eh / 3 + 1.2, (z0 + z1) / 2 + dz)); g.add(bo); }                          // three short bottles on its first shelf
     const shaker = new THREE.Mesh(new THREE.CylinderGeometry(3.4 * M, 4 * M, 20 * M, 18), steel); shaker.position.copy(v3(W - 9, b.counter + 10, z1 + 9)); g.add(shaker);
     bx(g, W - 16, b.counter, (z0 + z1) / 2 - 12, 12, 1.2, 24, K.oakIn);                                        // a small oak tray
     for (const dz of [-6, 4]) { const tu = new THREE.Mesh(new THREE.CylinderGeometry(3.8 * M, 3.3 * M, 9 * M, 18), clear); tu.position.copy(v3(W - 10, b.counter + 1.2 + 4.5, (z0 + z1) / 2 + dz)); g.add(tu); }
@@ -2565,16 +2567,24 @@ function capShadows(n) {   // the brightest n spotlights cast shadows; the rest 
 /* v15's hanging plant, as a builder (v36): a pot centred at x (room cm) on a shelf whose top is at top, its strands falling from the
    edges in edges (each strand picks one: the shelf's front, or v36's gap behind the plant shelf) */
 let plantBG = null;
-function hangPlant(par, x, top, z, edges, seed) {
+function hangPlant(par, x, top, z, edges, seed, gapZ) {   // v38: gapZ [the shelf's end, the boxing's face]: the strands fall through that gap
   const PB = R.PLANT_B, pot = reg(new THREE.MeshStandardMaterial({ color: "#e9e4da", roughness: 0.7 })), leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide }));
   const vine = reg(new THREE.MeshStandardMaterial({ color: "#4f6b3a", roughness: 0.8 }));
   const potM = new THREE.Mesh(new THREE.CylinderGeometry(PB.pot / 2 * M, PB.pot * 0.38 * M, 0.12, 24), pot); potM.position.copy(v3(x, top + 6, z)); par.add(shadow(potM));
   const r = rnd(seed), leaves = [], vines = [];
   for (let k = 0; k < PB.strands; k++) {
     const e = edges[k % edges.length], dir = e > x ? 1 : -1;   // behind the pot (towards the wall) or in front of it
-    const len = PB.trail[0] + r() * (PB.trail[1] - PB.trail[0]), z0 = z + (r() - 0.5) * 12, x0 = e + dir * r() * 3;
-    const pts = [v3(x + dir * 2 + (r() - 0.5) * 6, top + 10, z0), v3(x0 - dir * 2, top + 2, z0 + (r() - 0.5) * 4)];
+    const len = PB.trail[0] + r() * (PB.trail[1] - PB.trail[0]);
+    let pts;
+    if (gapZ) {                                     // over the shelf's end, then down the gap between it and the boxing
+      const zg = gapZ[0] - 1.5 - r() * (gapZ[0] - gapZ[1] - 3), xg = x + (r() - 0.5) * 16;
+      pts = [v3(x + (r() - 0.5) * 6, top + 10, z + (r() - 0.5) * 6), v3(xg, top + 2, gapZ[0] + 1)];
+      for (let j = 1; j <= 5; j++) pts.push(v3(xg + Math.sin(j + k) * 1.5, top - len * j / 5, zg + Math.sin(j * 1.3 + k) * 1.2));
+    } else {
+    const z0 = z + (r() - 0.5) * 12, x0 = e + dir * r() * 3;
+    pts = [v3(x + dir * 2 + (r() - 0.5) * 6, top + 10, z0), v3(x0 - dir * 2, top + 2, z0 + (r() - 0.5) * 4)];
     for (let j = 1; j <= 5; j++) pts.push(v3(x0 + dir * (j * 0.6 + r() * 1.5) * (dir > 0 ? 0.3 : 1), top - len * j / 5, z0 + Math.sin(j + k) * 4));
+    }
     const curve = new THREE.CatmullRomCurve3(pts);
     vines.push(new THREE.TubeGeometry(curve, 32, 0.0025, 5, false));
     for (let t = 0.06; t < 1; t += 0.055 + r() * 0.03) {
