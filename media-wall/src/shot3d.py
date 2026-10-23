@@ -13,6 +13,7 @@ import base64, hashlib, io, json, os, pathlib, shutil, sys
 from playwright.sync_api import sync_playwright
 import localcdn
 import room3d_page
+import geometry as G   # v38: the stills start from the client's plan (FIRM)
 
 HERE = pathlib.Path(__file__).parent
 OUT = HERE.parent / "out"
@@ -97,7 +98,7 @@ SHOTS = [
 SHOTS += __import__("item_shots").shots()
 
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
-        "sugg": {}, "svar": {}, "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": "clear",
+        "sugg": {k: True for k in G.FIRM["sugg"]}, "svar": dict(G.FIRM["svar"]), "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": G.FIRM["beside"],
         "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False, "ctop": False, "sdraw": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
 
 

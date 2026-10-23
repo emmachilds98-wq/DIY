@@ -1240,6 +1240,55 @@ def counts():
 
 
 
+
+# ---------------------------------------------------------------- v38: the client's picks (geometry.FIRM) are the plan: their rows counted
+FIRM_ROWS = ("Blankets: the tall basket", "Blankets: the basket's corner", "The lift-top coffee table", "The shelf over the door",
+             "Boxes on your black shelf", "D", "The alcove shelves", "The wall cabinets", "The step drawers")
+_zones_v37 = zones
+
+
+def zones():
+    """v38: the picks' rows leave the suggestion tables for a counted "Your picks" table, after the compact cabinet's."""
+    out, firm = [], []
+    for title, space, rows in _zones_v37():
+        if title.startswith(("Storage and a bar", "More storage, and a bar")):
+            keep = [r for r in rows if not r[0].startswith(FIRM_ROWS)]
+            firm += [r for r in rows if r[0].startswith(FIRM_ROWS)]
+            if keep:
+                out.append((title, space, keep))
+        else:
+            out.append((title, space, rows))
+    i = next(i for i, z in enumerate(out) if z[0].startswith("Your black shelf")) + 1
+    out.insert(i, ("Your picks (in the plan)", "the bar beside the cabinet, the wall storage, the step drawers, the basket, the coffee table", firm))
+    return out
+
+
+
+def measure_html():
+    """v38: the measuring sheet: every CHECK in the plan's tables on one page, what we drew, and a box to write yours in."""
+    rows = [(t, item, sp, spare) for t, _s, rs in zones() if not t.startswith(("Storage and a bar", "More storage", "The more compact", "A bar for drinks"))
+            for item, _size, _src, sp, spare, st in rs if st == CHECK]
+    trs = "".join(f"<tr><td>{item}<br><span class='note'>{t}</span></td><td>{sp}</td><td>{spare}</td><td class='box'></td></tr>" for t, item, sp, spare in rows)
+    return (f"<h3>Measuring sheet: {len(rows)} things to check before you buy</h3><p>Measure each, write it in, and send us the page: the plan "
+            "is redrawn to your numbers.</p><table class='fit measure'><tr><th>What</th><th>We drew</th><th>Why it matters</th><th>Yours (cm)</th></tr>"
+            + trs + "</table>")
+
+
+# v38: safety, where it matters (the build guide and the plan's build section)
+SAFETY = [
+    ("Wall cabinets, shoe cabinets, the bar and the media wall", "fix each to the wall with the anti-tip fittings for a solid wall; IKEA's own listings say they must be anchored"),
+    ("Drilling", "check for pipes and cables with a detector before every hole; the side wall carries the PC's leads"),
+    ("The step drawers", "a bearer under each tread once its riser is cut out: a joiner's job, or build them into the new stairs"),
+    ("An old textured (Artex) ceiling", "if it's older than about 2000, have it tested for asbestos before sanding, drilling or skimming it"),
+    ("Mains electrics", "the sockets and the light fittings: done to Part P, or by an electrician"),
+    ("The dining table", "never swing it up or down with anything on it; check all four legs have clicked before you load it"),
+]
+
+
+def safety_html():
+    return "<h3>Safety</h3><ul>" + "".join(f"<li><b>{w}:</b> {t}.</li>" for w, t in SAFETY) + "</ul>"
+
+
 if __name__ == "__main__":
     for title, space, rows in zones():
         print("==", title, "|", space)

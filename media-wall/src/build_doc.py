@@ -177,6 +177,23 @@ TRACK = [
     ("To buy", "A storage ottoman in navy velvet, about 76 × 76 × 45 with a lift-off padded lid, in place of your blue cord one: ISTOOLS Large Velvet Storage Ottoman, 76 × 76 (check its height and price on the listing), or Dunelm's Square Opulent Velvet Storage Footstool in navy, 62 square, if you'd like it smaller <b>(new in v34)</b>", "10 Finishing", "1", 140, 310),
     ("To buy", "A rug about 230 × 160 in front of the sofa: cream with deep blue, rust and ochre goes with the green, the oak and the blue sofa (the plan draws one as a guide) <b>(new in v15)</b>", "10 Finishing", "1", 120, 300),
 ]
+
+# v38: the client's picks (geometry.FIRM) are the plan now: each in the buy list and the build; the rest are options to look at
+TRACK += [
+    ("To buy", "The bar beside the dining cabinet: 18 mm oak-faced ply for a cupboard 42.5 × 22 × 87 on a 3 cm plinth (two ends, a floor, a shelf, a back, two doors), a 27 mm oak counter 42.5 × 22.4, two pairs of soft-close hinges, two brass knobs", "6 Dining wall", "1 set", 70, 120),
+    ("To buy", "Over the bar: an IKEA ENHET wall frame with shelves, 40 × 15 × 75, a 3 mm acrylic mirror cut to 42 × 75, a Bev-Equip 300 glass rail, a warm white LED strip", "6 Dining wall", "1 set", 60, 95),
+    ("To do", "Build the bar beside the dining cabinet: scribe it between the cabinet's end and the shelf's end, screw it to the wall and the floor; the mirror, then the ENHET frame over the counter (step 11)", "6 Dining wall", "", None, None),
+    ("To buy", "Two IKEA EKET wall cabinets with glass doors, 35 × 35 × 35, walnut effect, with their rails, and plugs and screws for a solid wall", "10 Finishing", "2", 70, 100),
+    ("To do", "Hang the two wall cabinets over the sofa's corner, 162 to 197 up, just past the PC shelf's end", "10 Finishing", "", None, None),
+    ("To buy", "Two oak floating shelves 900 × 230 with concealed brackets (B&Q Shelf Depot), for the window corner", "10 Finishing", "2", 70, 110),
+    ("To do", "Fix the two alcove shelves in the window corner, tops at 182 and 212, into the solid wall", "10 Finishing", "", None, None),
+    ("To buy", "An oak shelf over the hall door, 91 × 27, on two brackets, and two IKEA KUGGIS lidded boxes 35 × 26 × 15, white", "10 Finishing", "1 set", 35, 60),
+    ("To buy", "Two IKEA KUGGIS lidded boxes, 35 × 26 × 15, white, for your black shelf", "10 Finishing", "2", 20, 30),
+    ("To buy", "Drawers in the bottom three steps: three drawer boxes in 12 mm ply, 51 × 14.5 fronts in oak, three pairs of 350 mm runners, bearers under the treads", "10 Finishing", "1 set", 180, 320),
+    ("To do", "Have the step drawers made with the new stairs (a joiner: each tread needs a bearer once its riser is cut)", "10 Finishing", "", None, None),
+    ("To buy", "The blanket basket at the sofa's open end: The Cotswold Company's large seagrass basket with a lid, 76 × 45 × 45", "10 Finishing", "1", 90, 110),
+    ("To buy", "A lift-top coffee table, oak effect, 90 × 50 × 48 (Homelife), in your coffee table's place", "10 Finishing", "1", 39, 80),
+]
 PHASES = []
 for r in TRACK:
     if r[2] not in PHASES:
@@ -1064,6 +1081,8 @@ def _plan(deck=False):
 <h3>The fit proof: every item against its published size</h3>
 <p>Each zone lists what goes in it, its size and its source (section 12), the space, what's left and a verdict. {c[fit.PASS]} of the {nfit} checks fit outright and none fail; {c[fit.TIGHT]} are tight, most of them snug by design; {c[fit.CHECK]} need a check on site (the TV's plugs, the RetroTINK's size, the sub's vibration, the soundbar and the TV's remote eye, the stairs wall, and your shelf's height).</p>
 <!--fit-->{fit.tables_html()}<!--/fit-->
+{fit.measure_html()}
+{fit.safety_html()}
 
 <h3>Console sizes, every version</h3>
 <p>The bays are sized for the largest version of each console. The model number is on the label underneath; a smaller version just leaves more room.</p>

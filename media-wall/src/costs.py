@@ -116,3 +116,17 @@ def text(track, money):
         lines += ["", f"{p.upper()} (about £{money(lo, hi)})"] + [f"- {qty(q)} {n}: £{money(a, b)}" for q, n, a, b in rows]
     tl = sum(r[1] for r in overview(track)); th = sum(r[2] for r in overview(track))
     return f"Shopping list, about £{money(tl, th)} in all" + "\n".join(lines)
+
+
+# v38: the client's picks (geometry.FIRM) in the buy list
+SHORT += [
+    ("The dining cabinet", "The bar beside the dining cabinet", "1 set", "The bar: oak-faced ply cupboard, oak counter, hinges"),
+    ("The dining cabinet", "Over the bar", "1 set", "Over the bar: IKEA ENHET frame, mirror, glass rail, LED"),
+    ("Finishing touches", "Two IKEA EKET wall cabinets", "2", "IKEA EKET wall cabinet, 35 cube, glass door"),
+    ("Finishing touches", "Two oak floating shelves 900 × 230", "2", "Oak floating shelf, 900 × 230"),
+    ("Finishing touches", "An oak shelf over the hall door", "1 set", "Oak shelf over the door, two KUGGIS boxes"),
+    ("Finishing touches", "Two IKEA KUGGIS lidded boxes", "2", "IKEA KUGGIS box, 35 × 26 × 15"),
+    ("Finishing touches", "Drawers in the bottom three steps", "1 set", "Step drawers: ply boxes, oak fronts, runners"),
+    ("Finishing touches", "The blanket basket", "1", "Blanket basket with a lid"),
+    ("Finishing touches", "A lift-top coffee table", "1", "Lift-top coffee table, 90 × 50"),
+]

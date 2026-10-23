@@ -263,8 +263,16 @@ SUGG_VARS = {
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
 
 
+FIRM_SUGG = set(G.FIRM["sugg"])                    # v38: the client's picks are the plan (geometry.FIRM), not suggestions
+
+
+def options():
+    """v38: the suggestions that are still only options (not in the client's plan)."""
+    return [i for i in SUGGEST if i[0] not in FIRM_SUGG]
+
+
 def suggest_low_high():
-    return sum(i[3][0] for i in SUGGEST), sum(i[3][1] for i in SUGGEST)
+    return sum(i[3][0] for i in options()), sum(i[3][1] for i in options())
 
 
 def suggest_html():
@@ -272,8 +280,8 @@ def suggest_html():
     lo, hi = suggest_low_high()
     vers = lambda k: ", ".join(n for _v, n, _c in SUGG_VARS[k]).lower().capitalize()
     rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span><br><span class='note'>{vers(k)}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
-                   for k, t, size, c, why, where in SUGGEST)
-    return (f"<p>Not in the plan or the costs: all {len(SUGGEST)} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on, and two or three versions to try.</p>"
+                   for k, t, size, c, why, where in options())
+    return (f"<p>Not in the plan or the costs: all {len(options())} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on, and two or three versions to try.</p>"
             f"<table class='tight'><tr><th>Suggestion</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")
 
 

@@ -59,7 +59,11 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
               cam: "orbit", pad: false, foot: false, beside: "clear",
               blind: "down", lp: false, trolley: "park", lid: false, barflap: false, ctop: false, sdraw: false };   // v37: the step drawers out   // v34: the blind (a suggestion) down or rolled up; a record lifted out of the vinyl stand; the trolley parked or at the table   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
-DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
+DEF.lamp = R.LAMP_DEFAULT || "sofa";
+/* v38: the room opens on the client's plan (geometry.FIRM: their saved picks, the bar beside the cabinet, the sage-stripe rug); every
+   other choice is an option to look at */
+if (R.FIRM) { DEF.sugg = Object.fromEntries(R.FIRM.sugg.map(k => [k, true])); DEF.svar = Object.assign({}, R.FIRM.svar);
+  DEF.beside = R.FIRM.beside; DEF.cabw = R.FIRM.cabw; DEF.decor = Object.assign({}, DEF.decor, R.FIRM.decor); }   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});

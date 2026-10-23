@@ -92,3 +92,6 @@ table.steps td:first-child { width: 14pt; text-align: center; font-weight: 650; 
 figure.thumb { margin: 0; break-inside: avoid; }
 figure.thumb img { width: 100%; height: auto; display: block; border-radius: 1.5mm; }
 figure.thumb figcaption { font-size: 7.5pt; line-height: 1.25; margin-top: 1mm; color: #4a4a4a; }
+
+/* v38: the measuring sheet's boxes to write in */
+table.measure td.box { width: 16%; min-width: 4em; height: 2.4em; border: 1.2px solid #8a8378; background: #fff; }

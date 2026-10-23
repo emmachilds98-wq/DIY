@@ -832,3 +832,15 @@ STAIR_DRAWERS["w"] = round(STAIR_X[1] - STAIR_X[0] - 2 * STAIR_DRAWERS["inset"],
 # 7, "overdoor": a six-hook over-door rail on the hall door's room side (49 × 11 × 14)
 OVERDOOR = dict(w=49.0, d=11.0, h=14.0, hooks=6, door_t=4.0)
 OVERDOOR["open_gap"] = round(DOOR_X[0] - BREAST_X[1], 1)                                 # 12: the open door to the breast's side
+
+
+# ---------------------------------------------------------------- v38: the firm version (the plan), from the client's saved picks (23 Oct)
+# "Our picks from the 3D room" (Copy as a note): the blanket basket, the step drawers, the wall cabinets, the alcove shelves, the boxes on
+# the black shelf, the shelf over the door, the lift-top coffee table, the sage-stripe rug; and, from the brief, "dining cabinet with bar
+# beside it". These are in the buy list, the build and the HD stills; every other choice is an option, only to look at (CLAUDE.md).
+FIRM = dict(
+    sugg=["blanketbasket", "stairdrawers", "wallcabs", "alcoveshelves", "shelfboxes", "doorshelf", "liftcoffee"],
+    svar={"blanketbasket": "sea", "stairdrawers": "oak", "wallcabs": "walnut", "alcoveshelves": "oak", "shelfboxes": "white",
+          "doorshelf": "white", "liftcoffee": "oak"},
+    beside="bar", cabw="90", decor={"rug": "stripes"},
+)
