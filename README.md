@@ -13,7 +13,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **The room opens as you'd live in it:** Cosy lighting in the evening, with an Artex stipple ceiling. Cosy has a little more light (the ceiling strip and bar 2 up a touch), so you can still see the whole room. The other ceilings are still in Look.
 - **The dining table isn't washed out:** with the table open, bar 2 sits at 45–55 (it used to jump to 80) and the ceiling strip stays at 40 or less, so the oak top reads as oak.
 - **Whole room** and **Hide labels** are small buttons on the room, under Plan, Build and Buy; the bottom bar is View, Room, Look and Edit.
-- **A tidier repo:** the backups are in `media-wall/src/backups/`, the old upgrade plans in `media-wall/plans/`.
+- **A tidier repo:** old files are gone (the outputs of v9 to v43, about 920 replaced 3D pictures, old backups): about 5.4 GB less, and still in the git history if ever needed. Backups go in `media-wall/src/backups/`, old upgrade plans in `media-wall/plans/`.
 
 **New in v44** ("read more clearly and be easier to follow while still having everything I need", "increase render quality")
 - **Build, one card per thing you make:** the media wall base, the worktop, the uprights, the side wall, the dining cabinet, the bar, the glass case, the record table, the C-table and the fitted pieces, each with **Buy · Cut · Build** tabs, plus five Jobs (network, cables, paint, lighting, connect). The 14 step ticks sit in one fold with a Next line; the merchant's cutting list is folded. About 3 phone screens closed (was 19).
@@ -59,7 +59,7 @@ surge protection, switches and length · console model numbers · the second cei
 ### Documents
 - **The full plan:** [`media-wall/out/Home_Network_Plan_v45.pdf`](media-wall/out/Home_Network_Plan_v45.pdf) (34 pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, the costs by piece, other options and sources)
 - **The build guide:** [`media-wall/out/Build_Guide_v45.pdf`](media-wall/out/Build_Guide_v45.pdf) (61 pages: one chapter per thing you make, each with Buy, Cut and Build; the jobs; the merchant's cutting list and the sheets at the back)
-- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v44/`)
+- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (the previous version in `v44/`; older ones are in the git history)
 - **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 
