@@ -58,6 +58,10 @@ CSS = """
 .r3d-act .acts { flex-wrap: wrap; }
 .r3d-act .acts button { flex: 1 1 calc(50% - 4px); padding: 0 12px; }
 .r3d-act .acts button[aria-pressed=true] { background: var(--ink); color: var(--cream); }
+.r3d-act .acts { max-height: min(56vh, 420px); overflow-y: auto; }
+.r3d-act .acts button.sm { flex: 1 1 calc(33.3% - 6px); }
+.r3d-act .acts button.q { flex: 1 1 calc(25% - 6px); padding: 0; font-size: 18px; }
+.r3d-actsep { flex: 1 1 100%; margin: 6px 0 -2px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--mut); }
 .r3d-act.above::before { top: auto; bottom: -7px; }
 .r3d.editing .r3d-act { display: none; }
 /* the tools and their panel. v32, client: "make tools always appear in 3D view": the six buttons are always on the room, in a pill;
@@ -630,7 +634,7 @@ def section(gallery=""):
         <button type="button" class="r3d-share" id="r3d-share" hidden title="Save this layout so Emma and Dave both see it">Save for both of you</button><button type="button" class="r3d-share" id="r3d-useshared" hidden>Use the shared layout</button><span class="r3d-hint" id="r3d-sharest" aria-live="polite"></span>
         <span class="r3d-hint">Drag a thing to move it (it snaps to a wall within 15 cm); tap it to turn, recolour, copy or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
       <div class="r3d-addlist" id="r3d-addlist" hidden></div>
-      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn" title="A quarter turn; against a wall it stays against it">⟳ Turn</button><button type="button" data-sel="turn45" title="An eighth of a turn">45°</button><button type="button" data-sel="wall" title="Push it to the nearest wall, its back to the wall">⇥ Back to the wall</button>
+      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn" title="A quarter turn; against a wall it stays against it">⟳ Turn</button><button type="button" data-sel="turn45" title="An eighth of a turn">45°</button><button type="button" data-sel="turn15" title="15°; hold Shift for 5°">15°</button><button type="button" data-sel="wall" title="Push it to the nearest wall, its back to the wall">⇥ Back to the wall</button>
         <label>Colour <input type="color" id="r3d-selcol" value="#888888"></label><span id="r3d-swatches" hidden></span>
         <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
   </div>

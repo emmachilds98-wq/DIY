@@ -46,6 +46,14 @@ def run(w, h):
         lampxy = pg.evaluate("() => { const { MOV, THREE } = R3D._dbg; const b = new THREE.Box3().setFromObject(MOV.lamp.pivot), p = b.getCenter(new THREE.Vector3()); return [-p.x * 100, p.y * 100, p.z * 100]; }")
         tap(lampxy, "the lamp"); press("Turn it")
         print("   lamp level:", pg.evaluate("() => R3D._dbg.S.lv.lamp"))
+        # v38: a spot bar turns as a whole, and each head has its own switch, dimmer, aim and colour
+        pos = lambda: pg.evaluate("() => R3D._dbg.lights.bar1.map(l => [Math.round(-l.position.x * 100), Math.round(l.position.z * 100)])")
+        before = pos(); hxy = pg.evaluate("() => { const p = R3D._dbg.lights.bar1[1].position; return [-p.x * 100, p.y * 100 + 4, p.z * 100]; }")
+        if tap(hxy, "spot bar 1"):
+            press("⟳ 15°"); press("⟳ 15°"); print("   bar1 turned:", S("fix"), before, "->", pos())
+            press("Blue"); pg.locator("#r3d-acts button[aria-label='Aim it up']").click(); pg.wait_for_timeout(900); pg.locator("#r3d-acts button[aria-label='Dim this head']").click(); pg.wait_for_timeout(900); press("Colour"); print("   heads:", S("head"))
+            press("Reset"); print("   reset:", S("fix"), S("head"), pos() == before)
+        pg.screenshot(path=f"{OUT}/tap_{w}_bar.png")
         pg.evaluate("() => R3D.set({view: 'door'})"); pg.wait_for_timeout(600)
         cxy = pg.evaluate("() => { const { scene, THREE } = R3D._dbg; let best = null; scene.traverse(o => { if (o.isMesh && o.visible && o.parent && o.parent.visible && o.material && o.material.color && o.material.color.getHexString() === 'b9a47f' && !best) best = o; }); if (!best) return null; const c = new THREE.Box3().setFromObject(best).getCenter(new THREE.Vector3()); return [-c.x * 100, c.y * 100, c.z * 100]; }")
         print("   curtain centre:", cxy)

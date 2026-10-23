@@ -85,6 +85,24 @@ if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
 const WALLS = [["media", "Media wall"], ["breast", "Chimney breast"], ["door", "Door wall"], ["stairs", "Stairs wall"], ["window", "Window wall"], ["pc", "PC wall"]];
 const WALL_NAME = Object.fromEntries(WALLS);
 if (!S.walls || typeof S.walls !== "object") S.walls = {};
+/* v38, client: "Turning the light fixture as a whole as well as the light heads": each fixture (the two spot bars on their ceiling roses,
+   the red lamp on its base) turns as a whole, S.fix[id] in degrees from the plan's; each head, S.head["bar1:0"], has its own on/off,
+   level, colour and aim (turn and tilt, in degrees from its plan aim). A turn or an aim rebuilds that fixture with the same number of
+   lights, so the graphics card makes no new shaders (v35) */
+if (!S.fix || typeof S.fix !== "object" || Array.isArray(S.fix)) S.fix = {};
+if (!S.head || typeof S.head !== "object" || Array.isArray(S.head)) S.head = {};
+const FIX_NAME = { bar1: "Spot bar 1, over the sofa", bar2: "Spot bar 2, over the table", lamp: "Your red lamp" };
+const HEAD_COLS = [[null, "Its own colour"], ["#ffe2b8", "Warm white"], ["#f2f5ff", "Cool white"], ["#ffb35c", "Amber"], ["#ff7fb6", "Pink"], ["#7fd6ff", "Blue"], ["#8cf09a", "Green"]];
+const fixDeg = id => +(S.fix[id] || 0);
+const headOf = k => S.head[k] || {};
+const fixKey = id => JSON.stringify([fixDeg(id), Object.entries(S.head).filter(([k]) => k.startsWith(id + ":")).map(([k, h]) => [k, h.yaw || 0, h.tilt || 0])]);
+function aimDir(dir, rad, h) {          // a head's aim (world): its plan aim, turned with its fixture, then its own turn and tilt
+  const Y = new THREE.Vector3(0, 1, 0), d = dir.clone().applyAxisAngle(Y, rad);
+  if (h.yaw) d.applyAxisAngle(Y, h.yaw * Math.PI / 180);
+  if (h.tilt) { const ax = new THREE.Vector3().crossVectors(d, Y); if (ax.lengthSq() > 1e-6) d.applyAxisAngle(ax.normalize(), h.tilt * Math.PI / 180); }
+  if (d.y > -0.05) d.y = -0.05;          // a head can aim level, not at the ceiling
+  return d.normalize();
+}
 let lookWall = "all";            // Look's paint row: all the walls, or one
 function setWall(id, v) {        // a paint's key, a colour, or "match"; the walls' own paint counts as "match"
   const h = v === "match" ? null : R.PAINTS[v] ? R.PAINTS[v].hex : v;
@@ -2339,19 +2357,20 @@ function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat, bar
 }
 function buildBar(spec, list, colKey) {   // v15: the bar runs along z (TV to window) when spec.axis is "z"
   const g = new THREE.Group(); g.name = "bar";
-  const C = R.CEIL, along = spec.axis === "z";
-  const at = dx => along ? [spec.x, spec.z + dx] : [spec.x + dx, spec.z];
+  const C = R.CEIL, along = spec.axis === "z", th = fixDeg(colKey) * Math.PI / 180, c = Math.cos(th), s_ = Math.sin(th);
+  const at = dx => { const [ox, oz] = along ? [0, dx] : [dx, 0]; return [spec.x + ox * c - oz * s_, spec.z + ox * s_ + oz * c]; };   // v38: the bar turns on its rose
   const rose = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.025, 28), white); rose.position.copy(v3(spec.x, C - 1.25, spec.z)); g.add(rose);
   const barM = new THREE.Mesh(along ? new THREE.BoxGeometry(0.022, 0.013, 0.84) : new THREE.BoxGeometry(0.84, 0.013, 0.022), white);
-  barM.position.copy(v3(spec.x, C - 3.2, spec.z)); g.add(shadow(barM));
-  for (const h of spec.heads) {
-    const [hx, hz] = at(h.dx);
-    const apex = v3(hx, C - 6.5, hz), tgt = v3(...h.tgt);
+  barM.position.copy(v3(spec.x, C - 3.2, spec.z)); barM.rotation.y = th; g.add(shadow(barM));
+  spec.heads.forEach((h, i) => {
+    const [hx0, hz0] = along ? [spec.x, spec.z + h.dx] : [spec.x + h.dx, spec.z], [hx, hz] = at(h.dx);
+    const apex = v3(hx, C - 6.5, hz), plan = v3(...h.tgt).sub(v3(hx0, C - 6.5, hz0)).normalize();
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 8), headMat(h.stem));
     stem.position.copy(v3(hx, C - 5, hz)); g.add(stem);
-    spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 140, colKey, undefined, spec.heads.indexOf(h));
-  }
-  fixtures.add(g); return g;
+    spotHead(g, apex, aimDir(plan, th, headOf(`${colKey}:${i}`)), h.col, list, 140, colKey, undefined, i);
+    list[list.length - 1].userData.hk = `${colKey}:${i}`;
+  });
+  g.userData.spec = spec; fixtures.add(g); return g;
 }
 let lamp;
 const LAMP_RED = new THREE.MeshStandardMaterial({ color: R.LAMP_BODY, roughness: 0.28, metalness: 0.35 });   // v15: "the lamp is bright red"
@@ -2364,6 +2383,8 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.025, 32), red); base.position.copy(v3(spot.x, 1.25, spot.z)); g.add(shadow(base));
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, R.LAMP.h * M, 12), red); pole.position.copy(v3(spot.x, R.LAMP.h / 2, spot.z)); g.add(shadow(pole));
   const toward = new THREE.Vector3(...[233 - spot.x, 0, -135 - spot.z]).normalize();      // the room's middle, in room coords
+  const th = fixDeg("lamp") * Math.PI / 180, pivotW = v3(spot.x, 0, spot.z), Yax = new THREE.Vector3(0, 1, 0);   // v38: the lamp turns on its base
+  const turnP = p => p.sub(pivotW).applyAxisAngle(Yax, th).add(pivotW), turned = [];
   // v17, client: "green lamp should face down more slightly, its looking at the ceiling, face at the shelf wall": the top head aims at a
   // point on the stairs wall 30 below its own height, along the shelf (it was aimed 110 up, at the ceiling)
   const sbz = R.SHELF_B.z, wz = Math.min(Math.max(spot.z + 30, Math.min(sbz[0], sbz[1])), Math.max(sbz[0], sbz[1]));
@@ -2372,8 +2393,9 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
     const apex = v3(spot.x + toward.x * 9, y, spot.z + toward.z * 9);
     const tgt = v3(spot.x + off[0], y + off[1], spot.z + off[2]);
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.1, 8), red); arm.position.copy(v3(spot.x + toward.x * 5, y, spot.z + toward.z * 5));
-    arm.rotation.z = Math.PI / 2; arm.rotation.y = Math.atan2(toward.z, -toward.x); g.add(arm);
-    spotHead(g, apex, tgt.clone().sub(apex).normalize(), R.LAMP_BODY, lights.lamp, 55, "lamp" + i, red);
+    arm.rotation.z = Math.PI / 2; arm.rotation.y = Math.atan2(toward.z, -toward.x); g.add(arm); turned.push(arm);
+    spotHead(g, turnP(apex.clone()), aimDir(tgt.clone().sub(apex).normalize(), th, headOf("lamp:" + i)), R.LAMP_BODY, lights.lamp, 55, "lamp" + i, red);
+    lights.lamp[lights.lamp.length - 1].userData.hk = "lamp:" + i;
   });
   // v16, the client's photo ("Hat"): the hats live on the lamp: the graduation cap sits on the pole's top, tipped, and the navy cap with
   // the poem printed under its peak hangs on the pole below the top head, peak down, crown out
@@ -2386,15 +2408,17 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
     const tassel = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.006, 0.11, 8), reg(new THREE.MeshStandardMaterial({ color: "#1d1e22", roughness: 0.9 })));
     tassel.position.set(0.1, -0.05, 0.02);
     mb.add(shadow(skull), shadow(board), button, tassel);
-    mb.position.copy(v3(spot.x, R.LAMP.h + 5, spot.z)); mb.rotation.z = -0.22; mb.rotation.x = 0.12; g.add(mb);
+    mb.position.copy(v3(spot.x, R.LAMP.h + 5, spot.z)); mb.rotation.z = -0.22; mb.rotation.x = 0.12; g.add(mb); turned.push(mb);
     const perp = new THREE.Vector3(-toward.z, 0, toward.x);                         // room coords: across the heads
     const out = new THREE.Vector3(-perp.x, 0, perp.z).normalize(), up = new THREE.Vector3(0, 1, 0);   // world
     const cap = buildCap(H);                                                         // v37: a structured baseball cap, not a beret
     const xAxis = new THREE.Vector3().crossVectors(out, up), tilt = 0.4;               // v37: tipped so the stiff brim kicks out from the pole
     const yAx = out.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(up, Math.sin(tilt)), zAx = up.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(out, -Math.sin(tilt));
     cap.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAx, zAx));
-    cap.position.copy(v3(spot.x, H.cap_y, spot.z)).add(out.clone().multiplyScalar(0.02)); g.add(cap);
+    cap.position.copy(v3(spot.x, H.cap_y, spot.z)).add(out.clone().multiplyScalar(0.02)); g.add(cap); turned.push(cap);
   }
+  const q = new THREE.Quaternion().setFromAxisAngle(Yax, th);
+  turned.forEach(o => { turnP(o.position); o.quaternion.premultiply(q); });
   fixtures.add(g);
 }
 
@@ -2470,8 +2494,11 @@ function applyState() {
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
   const b2 = `${S.site === "C" ? "B" : S.site}_${S.site === "C" ? (S.dining === "folded" ? "folded" : "six") : S.dining}`;   // v26: C lights like B
-  if (built.bar2 !== b2) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2; }
-  const lk = S.lamp + JSON.stringify(S.layout.lamp || {});
+  const b2k = b2 + fixKey("bar2"), b1k = fixKey("bar1");
+  if (built.bar2 !== b2k) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2k; }
+  if (bar1 && built.bar1 !== b1k) { drop(bar1, lights.bar1); bar1 = buildBar(R.BAR1, lights.bar1, "bar1"); }   // v38: turned or aimed
+  built.bar1 = b1k;
+  const lk = S.lamp + JSON.stringify(S.layout.lamp || {}) + fixKey("lamp");
   if (built.lamp !== lk) { buildLamp(); built.lamp = lk; }
   if (G.now_ledge) G.now_ledge.visible = S.site !== "A" && S.plants !== "breast" && !(S.sugg.barcase && caseOn());   // v18: with the plants on the breast the ledge comes off; v34: the drinks cabinet takes its place
   placeChairs();                                                                   // v20: the chair cupboard, its doors, the chairs in it
@@ -2500,6 +2527,13 @@ function applyLight() {
   if (!hd) for (const bar of [lights.bar1, lights.bar2]) bar.forEach((l, i) => {   // v22: Fast lights each bar with two of its four heads, twice as bright
     if (i % 2) l.visible = false; else l.intensity *= 2; });
   set(lights.lamp, (S.layout.lamp || {}).off ? 0 : L.lamp);  // v15: the lamp's colour bulbs dim in their app (v18: or it's been removed)
+  for (const l of [...lights.bar1, ...lights.bar2, ...lights.lamp]) {   // v38: each head's own switch, level and colour
+    const h = headOf(l.userData.hk); if (!l.userData.hk || !Object.keys(h).length) continue;
+    const g = l.userData.glow;
+    if (h.on === false) { l.intensity = 0; if (g) g.material.color.set("#3a3a3a"); continue; }
+    if (h.lv !== undefined) l.intensity = l.intensity * Math.pow(Math.max(0, Math.min(100, h.lv)) / 100, 1.6);
+    if (h.col) { l.color.set(h.col); if (g && l.intensity > 0) g.material.color.set(h.col); }
+  }
   capShadows(hd ? SHADOW_CAP : 0);                            // v18: never more shadowed spots than the graphics card can take
   if (growGlow) growGlow.forEach(m => m.visible = !!S.grow);
   set(lights.tv, L.bias > 0 && hd ? 100 : 0);
@@ -2951,7 +2985,7 @@ function editPanel() {
     const chips = Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("");
     qs("#r3d-swatches").innerHTML = (one ? `<button type="button" class="chip" data-swatch="match">Same as the others</button>` + chips : selSurf === "walls" ? chips
       : `<button type="button" class="chip" data-swatch="match">Same as the walls</button><button type="button" class="chip" data-swatch="${selSurf === "ceil" ? "#f2f0ea" : "#ece8dd"}">${selSurf === "ceil" ? "White" : "Off-white"}</button>`);
-    qsa("[data-sel=turn],[data-sel=turn45],[data-sel=wall],[data-sel=remove],[data-sel=copy]").forEach(b => b.hidden = true); qs("#r3d-selsize").textContent = "";
+    qsa("[data-sel=turn],[data-sel=turn45],[data-sel=turn15],[data-sel=wall],[data-sel=remove],[data-sel=copy]").forEach(b => b.hidden = true); qs("#r3d-selsize").textContent = "";
     return;
   }
   if (!selId) return;
@@ -2960,7 +2994,7 @@ function editPanel() {
   qs("#r3d-selsize").textContent = it.w && it.d ? `${Math.round(it.w)} × ${Math.round(it.d)} cm` : "";   // v19: its footprint
   qsa("[data-sel=copy]").forEach(b => b.hidden = !it.added);
   qs("#r3d-swatches").hidden = true;
-  qsa("[data-sel=turn],[data-sel=turn45],[data-sel=wall]").forEach(b => b.hidden = !!it.lamp || !!it.fixed);
+  qsa("[data-sel=turn],[data-sel=turn45],[data-sel=turn15],[data-sel=wall]").forEach(b => b.hidden = !!it.lamp || !!it.fixed);
   qsa("[data-sel=remove]").forEach(b => b.hidden = false);
   qs("#r3d-selcol").parentElement.hidden = !it.mats.length;
   if (it.mats.length) qs("#r3d-selcol").value = L.col || it.base[0];
@@ -3045,13 +3079,14 @@ qs("#r3d-sel").addEventListener("click", e => {
   if (k === "done") { select(null); return; }
   if (!selId) return;
   const it = MOV[selId];
-  if (k === "turn" || k === "turn45" || k === "wall" || k === "remove" || k === "copy") pushUndo();
+  if (k === "turn" || k === "turn45" || k === "turn15" || k === "wall" || k === "remove" || k === "copy") pushUndo();
   if (k === "copy" && it.added) {     // v19: another of the same, a little way off, turned and coloured the same
     const src = S.added.find(a => a.id === selId), p = spotOf(selId), L = S.layout[selId] || {}, c = clampItem(it, p.x + 25, p.z + 25, p.rot);
     const a = { id: "a" + Date.now().toString(36), type: src.type, x: c.x, z: c.z };
     addThing(a); setLayout(a.id, { rot: p.rot, col: L.col }); placeAll(); store.set(KEY, S); select(a.id); applyState(); return;
   }
   if (k === "turn" || k === "turn45") { turnItem(selId, k === "turn" ? 90 : 45); placeAll(); store.set(KEY, S); }   // v27: a quarter turn, or an eighth
+  if (k === "turn15") { turnItem(selId, e && e.shiftKey ? 5 : 15); placeAll(); store.set(KEY, S); }                  // v38: finer, 5° with Shift
   if (k === "wall") { backToWall(selId); placeAll(); store.set(KEY, S); }
   if (k === "remove") {
     if (it.added) { movers.remove(it.pivot); delete MOV[selId]; S.added = S.added.filter(a => a.id !== selId); delete S.layout[selId]; }
@@ -3347,6 +3382,8 @@ function lookOf() {
   const sv = {}; for (const k of on(S.sugg)) if (svarOf(k) !== SVAR[k]?.[0][0]) sv[k] = svarOf(k);
   if (Object.keys(sv).length) o.svar = sv;
   if (!(sameAsScene() && S.master === 100)) { o.lv = S.lv; o.master = S.master; o.col = S.col; }
+  if (Object.keys(S.fix).length) o.fix = S.fix;                                                     // v38: each fixture's turn
+  if (Object.keys(S.head).length) o.head = S.head;                                                  //       and each head's settings
   return o;
 }
 const b64u = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -3381,6 +3418,12 @@ function applyLook(tok) {
   if (o.lv && typeof o.lv === "object") { S.lv = Object.assign({}, SCENES[S.scene].levels); for (const k of LAYERS) if (Number.isFinite(+o.lv[k])) S.lv[k] = Math.max(0, Math.min(100, +o.lv[k])); S.master = Number.isFinite(+o.master) ? Math.max(0, Math.min(100, +o.master)) : 100; }
   else { S.lv = Object.assign({}, SCENES[S.scene].levels); S.master = 100; }
   if (o.col && typeof o.col === "object") for (const k of Object.keys(DEF.col)) if (HEX.test(o.col[k] || "")) S.col[k] = o.col[k];
+  S.fix = {}; if (o.fix && typeof o.fix === "object") for (const k of Object.keys(FIX_NAME)) if (Number.isFinite(+o.fix[k])) S.fix[k] = Math.max(-180, Math.min(180, +o.fix[k]));   // v38
+  S.head = {}; if (o.head && typeof o.head === "object") for (const [k, h] of Object.entries(o.head)) {
+    if (!/^(bar1|bar2|lamp):[0-5]$/.test(k) || !h || typeof h !== "object") continue;
+    const c = {}; if (h.on === false) c.on = false;
+    for (const [f, lo, hi] of [["lv", 0, 100], ["yaw", -90, 90], ["tilt", -60, 60]]) if (Number.isFinite(+h[f])) c[f] = Math.max(lo, Math.min(hi, +h[f]));
+    if (HEX.test(h.col || "")) c.col = h.col; if (Object.keys(c).length) S.head[k] = c; }
   applyState(); syncButtons();
   setView(o.v in VIEWS ? o.v : "room", true);
   const c = Array.isArray(o.c) && o.c.length === 7 && o.c.every(Number.isFinite) ? o.c : null;
@@ -3540,7 +3583,7 @@ function pickItem(e) {
   }
   return null;
 }
-const btn = (label, attrs, on) => ({ label, attrs, on });
+const btn = (label, attrs, on, cls, aria) => ({ label, attrs, on, cls, aria });
 function actItems(id) {     // [title, how it is now, buttons]
   const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
   if (id === "cab" && S.site !== "C") id = "table";
@@ -3570,11 +3613,7 @@ function actItems(id) {     // [title, how it is now, buttons]
       btn("Look at it", { view: "wall" }), btn("Read about it", { actgo: "wall" })]];
   if (id === "tv") return ["The TV", lv("bias") ? "On, its bias light behind it" : "Off", [
       btn(lv("bias") ? "Turn it off" : "Turn it on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"), btn("Look at it", { view: "sofa" })]];
-  if (id === "lamp") return ["Your red lamp", lv("lamp") ? "On" : "Off", [
-      btn(lv("lamp") ? "Turn it off" : "Turn it on", { layer: "lamp:" + (lv("lamp") ? "off" : "on") }), btn("Move it", { actedit: "lamp" })]];
-  if (id === "bar1" || id === "bar2") return [id === "bar1" ? "Spot bar 1, over the sofa" : "Spot bar 2, over the table", lv(id) ? "On" : "Off", [
-      btn(lv(id) ? "Turn it off" : "Turn it on", { layer: id + ":" + (lv(id) ? "off" : "on") }),
-      btn("Bright", { scene: "bright" }, S.scene === "bright"), btn("Cosy", { scene: "cosy" }, S.scene === "cosy"), btn("Film", { scene: "film" }, S.scene === "film")]];
+  if (id === "lamp" || id === "bar1" || id === "bar2") return fixCard(id, lv(id));
   if (id === "curtains") return ["The curtains", S.curtains ? "Drawn" : "Open", [btn(S.curtains ? "Open them" : "Draw them", { tog: "curtains" })]];
   if (id === "lbox") return ["Your OBEGRÄNSAD light box", S.lbox ? "On" : "Off", [btn(S.lbox ? "Turn it off" : "Turn it on", { tog: "lbox" })]];
   if (id === "pc") return ["Your PC", S.pc ? "Lit" : "Dark", [btn(S.pc ? "Lights off" : "Lights on", { tog: "pc" }), btn("Look at it", { view: "pc" }), btn("Read about it", { actgo: "side" })]];
@@ -3605,6 +3644,45 @@ function actItems(id) {     // [title, how it is now, buttons]
     return [it.label, it.fixed ? "Built in: it can come off, but not move" : "Drag it in Edit room, or change its colour", [btn(it.fixed ? "Take it off or put it back" : "Move it", { actedit: it.id })]]; }
   return null;
 }
+/* v38: a fixture's card: on or off, turn it as a whole (15° a tap, 5° with Shift held), then one head at a time */
+const actHead = { bar1: 0, bar2: 0, lamp: 0 };
+function headNames(id) {
+  if (id === "lamp") return ["Top (green)", "Middle (pink)", "Bottom (purple)"];
+  const spec = id === "bar1" ? R.BAR1 : (bar2 && bar2.userData.spec) || R.BAR1, names = { "#a9c7ab": "Sage", "#a7d0d8": "Blue", "#e8b53f": "Mustard", "#e79c95": "Pink" };
+  return spec.heads.map((h, i) => names[(h.col || "").toLowerCase()] || `Head ${i + 1}`);
+}
+function fixCard(id, on) {
+  const d = fixDeg(id), names = headNames(id), i = Math.min(actHead[id] || 0, names.length - 1), k = `${id}:${i}`, h = headOf(k);
+  const ci = HEAD_COLS.findIndex(c => c[0] === (h.col || null)), aim = [h.yaw ? `${h.yaw > 0 ? "right" : "left"} ${Math.abs(h.yaw)}°` : "", h.tilt ? `${h.tilt > 0 ? "up" : "down"} ${Math.abs(h.tilt)}°` : ""].filter(Boolean).join(", ");
+  const st = `${on ? "On" : "Off"} · ${d ? `turned ${d}°` : "at the plan's angle"} · ${names[i]}: ${h.on === false ? "off" : `${h.lv ?? 100}%`}${aim ? `, aimed ${aim}` : ""}`;
+  return [FIX_NAME[id], st, [
+    btn(on ? "Turn it off" : "Turn it on", { layer: id + ":" + (on ? "off" : "on") }),
+    { sep: "Turn the whole fixture" },
+    btn("⟲ 15°", { fixturn: `${id}:-15` }, undefined, "sm", "Turn it 15° anticlockwise (Shift: 5°)"), btn("⟳ 15°", { fixturn: `${id}:15` }, undefined, "sm", "Turn it 15° clockwise (Shift: 5°)"),
+    ...(d || Object.keys(S.head).some(x => x.startsWith(id + ":")) ? [btn("Reset", { fixreset: id }, undefined, "sm", "Back to the plan's angle and aims")] : []),
+    { sep: "Each head" },
+    ...names.map((n, j) => btn(n, { headsel: `${id}:${j}` }, j === i)),
+    { sep: names[i] },
+    btn(h.on === false ? "On" : "Off", { headtog: k }, undefined, "sm", h.on === false ? "Switch this head on" : "Switch this head off"),
+    btn("−", { headlv: `${k}:-20` }, undefined, "sm", "Dim this head"), btn("+", { headlv: `${k}:20` }, undefined, "sm", "Brighten this head"),
+    btn("←", { headaim: `${k}:yaw:-10` }, undefined, "q", "Aim it left"), btn("→", { headaim: `${k}:yaw:10` }, undefined, "q", "Aim it right"),
+    btn("↑", { headaim: `${k}:tilt:10` }, undefined, "q", "Aim it up"), btn("↓", { headaim: `${k}:tilt:-10` }, undefined, "q", "Aim it down"),
+    btn(`Colour: ${HEAD_COLS[Math.max(0, ci)][1]}`, { headcol: k }),
+    ...(id === "lamp" ? [btn("Move it", { actedit: "lamp" })] : [])]];
+}
+function fixAct(d, fine) {             // the card's fixture and head buttons; true if one was handled
+  const keyOf = v => v.split(":").slice(0, 2).join(":"), edit = (k, f) => { const h = Object.assign({}, headOf(k)); f(h); if (Object.keys(h).length) S.head[k] = h; else delete S.head[k]; };
+  if (d.fixturn) { const [id, st] = d.fixturn.split(":"); const step = fine ? Math.sign(+st) * 5 : +st; S.fix[id] = (((fixDeg(id) + step) % 360) + 540) % 360 - 180; if (!S.fix[id]) delete S.fix[id]; }
+  else if (d.fixreset) { delete S.fix[d.fixreset]; for (const k of Object.keys(S.head)) if (k.startsWith(d.fixreset + ":")) delete S.head[k]; }
+  else if (d.headsel) { const [id, i] = d.headsel.split(":"); actHead[id] = +i; renderAct(); return true; }
+  else if (d.headtog) edit(d.headtog, h => { if (h.on === false) delete h.on; else h.on = false; });
+  else if (d.headlv) { const k = keyOf(d.headlv), st = +d.headlv.split(":")[2]; edit(k, h => { const v = Math.max(0, Math.min(100, (h.lv ?? 100) + st)); if (v === 100) delete h.lv; else h.lv = v; if (v > 0) delete h.on; }); }
+  else if (d.headaim) { const [id, i, ax, st] = d.headaim.split(":"), k = `${id}:${i}`, lim = ax === "tilt" ? 60 : 90;
+    edit(k, h => { const v = Math.max(-lim, Math.min(lim, (h[ax] || 0) + (fine ? Math.sign(+st) * 5 : +st))); if (v) h[ax] = v; else delete h[ax]; }); }
+  else if (d.headcol) edit(d.headcol, h => { const ci = HEAD_COLS.findIndex(c => c[0] === (h.col || null)), nx = HEAD_COLS[(Math.max(0, ci) + 1) % HEAD_COLS.length][0]; if (nx) h.col = nx; else delete h.col; });
+  else return false;
+  applyState(); syncButtons(); return true;
+}
 function renderAct() {
   const items = actId && actItems(actId);
   if (!items) { closeAct(); return; }
@@ -3612,8 +3690,10 @@ function renderAct() {
   qs("#r3d-act-h").textContent = title; qs("#r3d-act-st").textContent = st;
   const box = qs("#r3d-acts"); box.textContent = "";
   for (const b of bs) {
+    if (b.sep) { const h = document.createElement("span"); h.className = "r3d-actsep"; h.textContent = b.sep; box.appendChild(h); continue; }   // v38
     const el = document.createElement("button"); el.type = "button"; el.textContent = b.label;
     for (const [k, v] of Object.entries(b.attrs)) el.dataset[k] = v;
+    if (b.cls) el.className = b.cls; if (b.aria) { el.setAttribute("aria-label", b.aria); el.title = b.aria; }
     if (b.on !== undefined) el.setAttribute("aria-pressed", String(!!b.on));
     box.appendChild(el);
   }
@@ -3641,6 +3721,7 @@ if (act) {
     if (d.actgo) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: d.actgo } })); return; }
     if (d.actideas) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "ideas", item: d.actideas } })); return; }   // v34
     if (d.actedit) { const id = d.actedit; closeAct(); setEdit(true); select(id); return; }
+    if (fixAct(d, e.shiftKey)) return;                                   // v38: a fixture's turn, its heads
     if (d.view) setTimeout(closeAct, 0);                     // the room flies there; the card has done its job
   });
   canvas.addEventListener("pointerdown", e => { tapDown = (S.edit || e.button > 0) ? null : [e.clientX, e.clientY, performance.now()]; if (actId) closeAct(); });

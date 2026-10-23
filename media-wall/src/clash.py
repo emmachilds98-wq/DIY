@@ -157,6 +157,29 @@ def moving_pieces():
     return out
 
 
+def bar_sweeps():
+    """v38: each spot bar turns on its rose (the client: "turning the light fixture as a whole"): the 84 bar and its 15-wide shades sweep a
+    circle round the rose, down to the shades' drop. [(name, rose (x, z), radius, (y0, y1))]"""
+    r = G.BAR[0] / 2 + 7.5
+    y = (G.CEIL - G.BAR[2], G.CEIL)
+    return [("spot bar 1's turning circle", (G.PEND_X, G.PEND_Z), r, y), ("spot bar 2's turning circle", (G.BAR2_X, G.BAR2_Z), r, y)]
+
+
+def wall_room(x, z):
+    """The distance from a point to the nearest wall face (the side walls, the window, the breast's face or the alcove's back)."""
+    back = G.ALC_D if x < G.ALC_W else 0.0
+    return min(x, G.ROOM_W - x, z - G.WINDOW_Z, back - z)
+
+
+def in_circle(bx, sweep):
+    name, (cx, cz), rad, (y0, y1) = sweep
+    if min(bx[2][1], y1) - max(bx[2][0], y0) <= EPS:
+        return False
+    (x0, x1), (z0, z1) = bx[1], bx[3]
+    nx, nz = min(max(cx, x0), x1), min(max(cz, z0), z1)
+    return math.hypot(nx - cx, nz - cz) < rad - EPS
+
+
 def report():
     """[(kind, a, b, detail)]: kind "clash" (fails) or "close" (under 1 cm apart, a note)."""
     P = pieces()
@@ -178,6 +201,15 @@ def report():
                 continue
             if in_sweep(p, sw):
                 out.append(("clash", sw[0], p[0], f"inside its {sw[2]:.1f} swing"))
+    for sw in bar_sweeps():                                     # v38: a turned bar clears the walls and anything up at its height
+        clear = wall_room(*sw[1]) - sw[2]
+        if clear < 0:
+            out.append(("clash", sw[0], "a wall", f"{-clear:.1f} into it at some angles"))
+        elif clear < 1.0:
+            out.append(("close", sw[0], "a wall", f"{clear:.1f} clear"))
+        for p in P:
+            if in_circle(p, sw):
+                out.append(("clash", sw[0], p[0], "inside it at some angles"))
     skip = {"dining cabinet", "sofa seat", "sofa back", "chaise", "ottoman"}   # the table opens from the cabinet; chairs stop short of the sofa (fit.py); the ottoman moves
     D = dining_pieces()
     for i, d in enumerate(D):
