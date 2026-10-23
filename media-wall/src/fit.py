@@ -1345,3 +1345,22 @@ SOURCES["pubeam"] = ("Woodmosaic: PU faux wood ceiling beam, 12 × 12 cm, length
 SOURCES["orac"] = ("Mr Resistor: Orac C357 uplighting coving profile for LED tape, 2000 mm, £89.60 (mr-resistor.co.uk/product/28207); "
                    "fitted LED coving in a typical UK room £350–£700 (coving.online, LED coving cost, 2026)")
 ORDER.extend(["skimartex", "artextest", "pubeam", "orac"])
+
+
+# ---------------------------------------------------------------- v39: the plan's fit proof is the firm plan's (options: one line each, section 12)
+OPTION_ZONES = ("The more compact version", "Beside the compact cabinet", "A bar for drinks", "Storage and a bar", "More storage, and a bar")
+
+
+def firm_zones():
+    return [z for z in zones() if not z[0].startswith(OPTION_ZONES)]
+
+
+def tables_html():
+    out = []
+    for title, space, rows in firm_zones():
+        out.append(f"<div class='zonebox'><h4>{title}</h4><p class='zone'>{space}</p>")
+        out.append("<table class='fit'><tr><th>Item</th><th>Size (cm)</th><th>Space</th><th>Spare (cm)</th><th>Result</th></tr>")
+        for item, size, src, sp, spare, st in rows:
+            out.append(f"<tr><td>{item}</td><td>{size}{src}</td><td>{sp}</td><td>{spare}</td><td class='res {status_class(st)}'>{st}</td></tr>")
+        out.append("</table></div>")
+    return "\n".join(out)

@@ -75,7 +75,7 @@ def buildday(steps):
 
 def checks_html():
     """The fit proof's CHECK rows: the things to check on site."""
-    rows = [(z[0], r[0], r[4]) for z in fit.zones() for r in z[2] if r[-1] == fit.CHECK]
+    rows = [(z[0], r[0], r[4]) for z in fit.firm_zones() for r in z[2] if r[-1] == fit.CHECK]
     lis = "".join(f'<li><b>{html.escape(item)}</b><span>{html.escape(left[0].upper() + left[1:])}</span></li>' for _zone, item, left in rows)
     return f'<ul class="checks">{lis}</ul>', len(rows)
 

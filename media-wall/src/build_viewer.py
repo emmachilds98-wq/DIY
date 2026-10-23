@@ -54,7 +54,7 @@ def track_rows():
 def fit_html():
     out = []
     c = fit.counts()
-    for title, space, rows in fit.zones():
+    for title, space, rows in fit.firm_zones():
         n_t = sum(1 for r in rows if r[-1] == fit.TIGHT)
         n_c = sum(1 for r in rows if r[-1] == fit.CHECK)
         flags = "".join(f'<span class="pill {k}">{n} {lab}</span>' for n, k, lab in ((n_t, "tight", "tight"), (n_c, "check", "to check")) if n)
@@ -537,44 +537,44 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
          "3d_window_bright": "The Bright preset: every spot head straight down, evenly spread, the strips and the lamp filling in",
          "3d_pc_lit": "The Film preset with the PC lit: its fans and the RGB strip glowing behind the glass side",
-         "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended): two towers of five tiers and a taller plant in the open middle",
-         "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top, LPs between the wires below, under the \u201cnow playing\u201d ledge",
-         "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up), the vinyl stand back in the window corner",
+         "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended).",
+         "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top.",
+         "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up).",
          "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
-         "3d_glass_case": "The glass display case on the chimney breast, in the plan: 90 × 85 × 12, oak, three glass shelves lit inside, collectibles in it, above the \u201cnow playing\u201d ledge and your vinyl stand",
-         "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
+         "3d_glass_case": "The glass display case on the chimney breast, in the plan: 90 × 85 × 12, oak.",
+         "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants.",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
-         "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
-         "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf, the table and the six chairs inside, {G.CAB['freed']:.0f} cm of wall back by the pipe boxing",
-         "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long, three a side, bar 2 over it",
+         "3d_suggest": "Suggested furniture and decor, all of them on.",
+         "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf.",
+         "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long.",
          "3d_window_c_six": "From the window, the compact cabinet open for six, the coffee table where it is",
-         "3d_c_tdoor": "The table door open with the table still folded: the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
-         "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
+         "3d_c_tdoor": "The table door open with the table still folded: the table standing on its hinge rail.",
+         "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs.",
          "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
-         "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
-         "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet: the table, the six chairs and the table door's swing",
-         "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
-         "3d_beside_trolley_out": "The slim trolley pulled out for dinner, beside the window-side diners and clear of the table door's swing (tap it in the 3D room: Pull it out for dinner)",
+         "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side.",
+         "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet.",
+         "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light.",
+         "3d_beside_trolley_out": "The slim trolley pulled out for dinner, beside the window-side diners and clear of the table door's swing.",
          "3d_bar_shut": "The chimney breast: the glass case, and under it the drinks cabinet (a suggestion) with its oak front shut",
-         "3d_ottoman": "The new storage ottoman: navy velvet, 76 square, its padded lid lifted: twelve square board games in three layers and a row of card decks inside",
+         "3d_ottoman": "The new storage ottoman: navy velvet, 76 square, its padded lid lifted.",
          "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that pulls out for dinner to stand behind the window-side diners",
-         "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
-         "3d_beside_rail": "Beside the cabinet, an oak blanket rail: five blankets over four oak rails, 12 off the wall, behind the open table door's line",
+         "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles.",
+         "3d_beside_rail": "Beside the cabinet, an oak blanket rail: five blankets over four oak rails, 12 off the wall.",
          # v37: the bar built in beside the cabinet, the shoe cabinets, your black shelf's 10 cm gap, the red lamp's cap
-         "3d_beside_bar": "Beside the cabinet, a bar built in (a suggestion): a cupboard for 20 bottles, an oak counter at 90, a mirror back, glasses on a rail, a display shelf",
+         "3d_beside_bar": "Beside the cabinet, the bar built in: a cupboard for bottles, an oak counter at 90.",
          "3d_beside_bar_open": "The built-in bar open in the evening: its doors back, the bottles inside, glasses hanging from the rail",
          "3d_beside_shoes": "Beside the cabinet, two shoe cabinets (a suggestion): IKEA TRONES, 18 deep, behind the open table door's line",
          "3d_shelf_gap": "Your black shelf's window end, always 10 cm short of the pipe boxing, your hanging plant on it",
          "3d_lamp_cap": "Your red lamp's cap: a structured six-panel crown and a flat, stiff brim 1.8 times a usual one, gold stitching",
-         "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side, your hessian curtains on their wooden pole",
+         "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side.",
          "3d_doll": "Dolls\u2019 house view: the compact cabinet packed away under your shelf",
-         "3d_c80_folded": f"The more compact version packed away: the same two oak boxes round an 80-wide table, {G.CAB80['len']:.1f} long, {G.CAB80['freed']:.1f} cm of wall back",
+         "3d_c80_folded": f"The more compact version packed away: the same two oak boxes round an 80-wide table, {G.CAB80['len']:.1f} long.",
          "3d_c80_six": f"The more compact version open for six: the table {G.CAB80['len_open']:g} × {G.CAB80['top'][0]:g}, three a side",
-         "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down, so four go inside, not six",
+         "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down.",
          "3d_c80_plan": "Bird\u2019s eye, the more compact version open for six",
-         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
+         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains."}
 import item_shots as IS
 import plan_ui as PU   # v33: one count, Decide, the shortlist, build day
 CAP3D.update({stem: {"idea": "Idea (not in the plan): ", "sugg": "Suggested: ", "add": "In Edit room's Add list: "}[kd] + t
@@ -605,8 +605,7 @@ def ideas_panel():
     cards = [item_card(f"3d_id_{k}", "idea", k, title, size, cost, why, where) for k, title, size, cost, why, where, _in3d in I.IDEAS]
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
-            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. Every one is in the 3D room (Tools → Extras, “Ideas”), all off until you turn them on; '
-            f'“Show it in my room” turns it on and takes you to it. All of them together would be about £{lo}–{hi}.</p>'
+            f'<p class="caption">Each is off until you turn it on; “Show it in my room” takes you to it. All together about £{lo}–{hi}.</p>'
             f'<div class="opts">{"".join(cards)}</div>' + suggest_block() + add_block() + decor_block())
 
 
@@ -642,8 +641,7 @@ def decor_block():
     b = ("<button type='button' class='btn' data-r3d='" + json.dumps({"site": "C", "view": "door", "decor": {"rug": "stripes", "cushions": "rust", "curtains": "linen"}})
          + "'>Try decor in the 3D room</button>")
     return (f'<div class="qhead"><h2 class="ptitle">Decor to try</h2><span class="caption">In the 3D room, under “Decor”: your choices are kept on this device</span></div>'
-            f'<ul>{rows}</ul><p class="caption">The glass case on the chimney breast is in the plan: pick what goes in it and its frame here. '
-            f'In Edit room, “Add” now has a floor vase with grasses, a knitted pouffe, a seagrass basket for throws, an oak floor mirror and a lantern, as well as the armchair, bookcase and the rest.</p>'
+            f'<ul>{rows}</ul><p class="caption">Pick what goes in the glass case, and its frame, here.</p>'
             f'<div class="gallery">{figs}</div>{b}')
 
 
@@ -1090,7 +1088,7 @@ def _page(site=False):
     <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
-    <div class="doc">{sec["12"]}<!--keep--><h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details><!--/keep--></div></div>"""),
+    <div class="doc">{sec["12"]}</div></div>"""),
         chapter("downloads", f'<div class="block"><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn.</p>'
                              f'<p><a class="btn primary" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> '
                              f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>{downloads_html(site)}{notice}'

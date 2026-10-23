@@ -379,9 +379,8 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
                                 ("basket", "Basket weave"), ("beams", "Oak-effect beams"), ("coffers", "Coffers"), ("cove", "LED cove")]),
 ]
 # v38: one line each on what a ceiling design takes and costs (fit.SOURCES: skimartex, artextest, pubeam, orac)
-CEIL_NOTE = ("Smooth: skimmed over, £300–700. Artex patterns: a plasterer's day or two, about £200–600. Beams: three 12 × 12 faux oak, "
-             "about £1,050. Coffers: two or three days' work, about £450–900. LED cove: about 15 m of uplighter coving and tape, £750–850. "
-             "Test the old Artex for asbestos first (£35 kit) and don't sand it.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
+CEIL_NOTE = ("Smooth £300–700; a pattern £200–600; beams about £1,050; coffers £450–900; an LED cove £750–850. "
+             "Test old Artex for asbestos first.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
 DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]   # v39: the ceiling and the rug lead Look
 
 
@@ -522,9 +521,8 @@ def controls(gallery=""):
                  + '<div class="grp r3d-save"><button class="btn primary" type="button" id="r3d-save">Save as HD picture</button>'
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
-                 + '<p class="caption"><b>Tap something in the room to work it:</b> the dining cabinet opens, folds and shows how it opens; the drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch; the blind rolls up; your vinyl stand\'s front records lift out; the trolley beside the cabinet wheels to the table; and any idea or suggestion you\'ve switched on changes version or goes.</p>'
-                 + '<p class="caption">Drag to look round, pinch or scroll to zoom (looking round from where you stand, scrolling walks you forward and back). '
-                 'On a keyboard: W A S D or the arrows walk, Q and E turn, R and F go up and down. Lost? Pick a view above, or Reset view.</p></details>',
+                 + '<p class="caption"><b>Tap something in the room to work it:</b> doors open, drawers pull out, lights switch, the blind rolls up.</p>'
+                 + '<p class="caption">Drag to look round, pinch or scroll to zoom. Keys: W A S D walk, Q and E turn, R and F up and down.</p></details>',
         # v31, client: "upgrade the views and layouts area of the site to ensure it reflects our recent upgrades": grouped, the compact cabinet
         # first, with what goes beside it, how it opens, the floor it needs, and ready-made set-ups to try
         # v39: Room, by place (the approved redesign): the set-ups, then one main choice for each place; the rest under More
@@ -597,9 +595,7 @@ def opts_html():
                  f'<div class="seg r3d-grid" role="group" aria-label="{html.escape(title)}">{btns}</div>'
                  f'<p class="caption" data-optcap="{key}" aria-live="polite">{html.escape(note)}</p></div>')
     return ('<div class="grp r3d-opts" id="r3d-opts"><span class="label">Storage and a bar: your options</span>'
-            '<p class="caption r3d-opthow"><b>How it works:</b> pick an option and the room shows it and takes you to it; <b>None</b> takes it away; '
-            '<b>See it</b> takes you back. Tap a piece in the room for its colours, to move it or to take it away. What you pick shows in '
-            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>'
+            '<p class="caption r3d-opthow">Pick one and the room shows it; <b>None</b> takes it away. Your picks and their cost show below.</p>'
             # v37: everything off in one go, back to the plan as it is
             '<div class="seg r3d-optclear"><button type="button" class="chip" data-optclear="1"><span class="ms" aria-hidden="true">restart_alt</span> Clear all extras</button></div>'
             + rows + '</div>')
