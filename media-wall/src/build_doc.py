@@ -1224,7 +1224,7 @@ def _plan(deck=False):
 <li><b>Check:</b> loaded, about {g.RECORD_TABLE["kg"]} kg; the castors take 200. The records stand on the ply, not the KALLAX shelves.</li>
 </ul>
 <h3>The C-table</h3>
-<p>At the sofa's open end, x {n(ideas.CTABLE["x"][0])}–{n(ideas.CTABLE["x"][1])}: an oak top {n(CT["top"][0])} × {n(CT["top"][1])} at {n(ideas.CTABLE["top"])}, reaching {n(ideas.CTABLE["over"])} over the seat, for a drink, a pad or a laptop. Your sofa sits on the floor, so no foot can slide under it as a bought C-table's does{sup("ctablebuy")}: the upright stands {n(ideas.CTABLE["depth"] - ideas.CTABLE["over"])} out past the sofa's end and a 6 mm steel plate{sup("plazcutz")} weighs the foot down. It holds about {ideas.ctable_tip_kg()} kg on its far edge before it would tip{sup("oakdensity")}. About £8–15.</p>
+<p>At the sofa's open end: an oak top {n(CT["top"][0])} × {n(CT["top"][1])} at {n(ideas.CTABLE["top"])}, reaching {n(ideas.CTABLE["over"])} over the seat. Your sofa sits on the floor, so no foot can slide under it as a bought one's does{sup("ctablebuy")}; a 6 mm steel plate{sup("plazcutz")} weighs its foot down instead. It holds about {ideas.ctable_tip_kg()} kg on its far edge{sup("oakdensity")}. About £8–15.</p>
 <ul>
 <li><b>Cut:</b> from the Snowdon pack's second 18 mm board{sup("snowdonoak")}: the top {n(CT["top"][0])} × {n(CT["top"][1])}, the upright {n(CT["upright"][0])} × {n(CT["upright"][1])}, the foot {n(CT["foot"][0])} × {n(CT["foot"][1])}.</li>
 <li><b>Make:</b> glue and screw the upright to the top's and the foot's outer edges (three 40 mm screws each, plugged); round the corners; hardwax oil. Screw the plate under the foot, felt under the plate.</li>

@@ -136,8 +136,10 @@
   one line each in section 12; card pictures rendered small into `art/`, no HD): grow-light bars under the stand's tiers (inside the
   stand, a warm wash on the wall behind), motors on the curtain pole, two MOSSLANDA ledges on the side wall at 108 (under the PC shelf
   and under the wall cabinets), Habitat's mushroom lamp on the C-table (inside it). `shot3d.BASE` now opens with the plan's ideas.
-- **Checks:** CHECKS43
-- Plan PLANPAGES pages, guide GUIDEPAGES; v41 outputs in `out/v41/`. Also merged during this round: the WIP from v39's base (a separate
+- **Checks:** `qa.py` errors [] and fails [] at 390 and 1280, text budget 0 over; `taptest.py` every tap ok at both; `clash.py` 0 clashes,
+  0 close (the C-table's foot under the sofa's edge is MEANT).
+- Plan 46 pages, guide 59; v41 outputs in `out/v41/`. `make_images.py` deletes its intermediate PNGs (dims_, skirt_, p_, art_): earlier
+  rounds had committed them. Also merged during this round: the WIP from v39's base (a separate
   leaf builder) was dropped in favour of v40's leaf library.
 
 ## Update 23 Oct 2026, round 37: v41 (the build step for your picks, the measuring sheet, a calmer page, easier viewing)

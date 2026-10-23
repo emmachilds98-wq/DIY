@@ -1422,7 +1422,7 @@ def ctable_zone():
         ("The steel plate under the foot", f"{r1(P['plate'][0])} × {r1(P['plate'][1])} × {r1(P['plate'][2])}", ref("plazcutz"), f"the foot {r1(P['foot'][0])} × {r1(P['foot'][1])}", r1(P["foot"][1] - P["plate"][1]), PASS),
         ("What it holds on its far edge", f"{tip} kg before it tips", ref("plazcutz", "oakdensity"), "a mug, a pad or a laptop: under 3 kg", r1(tip - 3), PASS),
     ]
-    return ("The C-table at the sofa's open end (in the plan)", "x 40–85, from 12 over the seat to 18 out past the sofa's end; your sofa sits on the floor, so its foot can't go under", rows)
+    return ("The C-table at the sofa's open end (in the plan)", "x 40–85, 12 over the seat; its foot stands beside the sofa", rows)
 
 
 def zones():
