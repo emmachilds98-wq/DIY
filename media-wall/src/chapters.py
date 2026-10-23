@@ -45,6 +45,8 @@ MAKE = [
      ["The glass display case's glass", "The glass display case's oak"], "½ day", "You"),
     ("recordtable", "The record table", "Two KALLAX on their backs on a ply base with castors, under a hinged oak lid.",
      "render_v99_3d_sg_recordtable.png", [(14, ["The record table"])], ["The record table"], "½ day", "You"),
+    ("ctable", "The C-table", "An oak top over the sofa's open end, an upright and a foot weighed down by a steel plate.",
+     "render_v99_3d_sg_cordlamp.png", [(14, ["The C-table"])], ["The C-table: a 400 × 200 × 6 mm steel plate"], "½ day", "You"),   # v44
     ("fitted", "Bought and fitted: shelves, cabinets, the door shelf", "The alcove shelves, the two wall cabinets and the shelf over the door with its boxes. Nothing to cut but the door shelf.",
      "render_v99_3d_sg_alcoveshelves.png", [(14, ["The wall cabinets", "The alcove shelves", "Over the hall door"])],
      ["Two IKEA EKET wall cabinets", "Two oak floating shelves 900 × 230", "An oak shelf over the hall door", "Two IKEA KUGGIS lidded boxes"],
@@ -123,7 +125,7 @@ def buy_html(rows, money):
 def _project_of(row):
     import build_doc as B
     name, where = row[0], row[4]
-    m = {"The bar": "bar", "Glass case": "glasscase", "Record table": "recordtable", "Dining table": "cabinet"}
+    m = {"The bar": "bar", "Glass case": "glasscase", "Record table": "recordtable", "Dining table": "cabinet", "C-table": "ctable"}
     if where in m:
         return m[where]
     if where == "Media wall":
@@ -340,11 +342,11 @@ def others(money):
 # ---------- the guide around the chapters
 JOB_LETTER = {j[0]: "ABCDE"[i] for i, j in enumerate(JOBS)}
 STEP_TO = {1: "Start here", 2: "chapter A", 3: "chapter B", 4: "chapter C", 5: "Start here", 6: "chapter 1", 7: "chapter 2", 8: "chapter 1",
-           9: "chapter 3", 10: "chapter 4", 11: "chapter 5", 12: "chapter D", 13: "chapter E", 14: "chapters 6, 8 and 9"}
+           9: "chapter 3", 10: "chapter 4", 11: "chapter 5", 12: "chapter D", 13: "chapter E", 14: "chapters 6, 8, 9 and 10"}
 
 ORDER = [("A", "The network"), ("B", "Cables and the socket"), ("C", "Paint"), ("Start here", "Mark the heights"), ("1", "The media wall base"),
          ("2", "The oak worktop"), ("3", "The oak uprights and shelves"), ("4", "The side-wall run and the PC shelf"), ("5", "The dining cabinet and table"),
-         ("D", "Lighting"), ("E", "Connect and finish"), ("6–9", "The bar, the glass case, the record table, the fitted pieces")]
+         ("D", "Lighting"), ("E", "Connect and finish"), ("6–10", "The bar, the glass case, the record table, the C-table, the fitted pieces")]
 
 RULES = """<div class="callout"><b>Five rules</b><ul>
 <li><b>Check every wall before you drill</b> with the detector; never straight above, below or beside a socket or switch.</li>
