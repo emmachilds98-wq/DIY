@@ -1,6 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v39 (round 33, below): the 3D room quick on PC graphics cards, the approved page redesign, item 13 and item 7, the plan the firm
+  version only (75 pages), no more HD stills (the client takes them in the site).** Fit 86/22/14/0, £4,374–8,245. **Next:** the client
+  wants a place to save each set-up they make in the site and track design changes so the next agent can pick them up (round 33's
+  last bullet has the proposal); then the side-wall socket. **Never write the cap's poem out in code or text.**
 - **v38 (round 32, below): the client's picks are the plan (`geometry.FIRM`), and the brief's items 1–6, 8–10 and 12 of
   `UPGRADE_PLAN_v38.md` are done** (two sessions: `claude/clever-johnson-c9tqld`, then `claude/tender-dijkstra-vbfd96`). Fit
   85/22/15/0, total £4,374–8,245 (the picks are in TRACK now), plan 120 pages (19.4 MB), guide 54; 106 stills; `clash.py` 0.
@@ -89,6 +93,45 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 33: v39 (the 3D room quick on PC graphics cards; the approved page redesign; item 13; the plan slimmed to the firm version)
+- Client (23 Oct): the page redesign canvas came back with no changes (approval); "the render is still slow on PC ... PC should be using
+  GPU ... then do all improvements left in the plan and redesign"; and the curtain pole "roughly 10cm above ... shift it down and ensure
+  wall/radiator do not clip through and speakers sit infront at all times".
+- **Curtains and rear speakers** (`geometry.py`, backup `geometry_v39a_backup.py`): the pole 10 under the ceiling strip (rail 221.6), the
+  radiator modelled (`RADIATOR_Y`, `RADIATOR_FACE` -299), the curtains just clear of it, each rear speaker's stand based under the
+  radiator, its pole and speaker over the sofa back and in front of the cloth (which lies flat behind each speaker). `clash.py` 0 and 0;
+  `fit.rears_zone` rewritten.
+- **PC speed** (`room3d.js`, backups `room3d_v39a/b_backup.js`): no live transmission pass (glass's transmission restored only for HD
+  stills; draw calls 984 → 512), `BIG_GPU` (WEBGL_debug_renderer_info: GeForce/RTX/GTX/Radeon RX/Arc/Apple M) starts in HD so no second
+  shader set, warm-up 0.4 s after the last tap in 10 ms slices, frame-gap sampling (`MV`) sets `slowDev`, the rug's noise as a tile
+  (200 ms → 4 ms). `R3D.perf()` reports `gpu`, `bigGpu`, `slowDev`.
+- **The redesign** (`room3d_page.py`, `build_viewer.py`, `page.css`; backups `*_v39a_backup.*`): three drawers (View, Room, Look); three
+  hotspots; the plan bar ("Your plan · £4,374–8,245", or the options' ±£) with a Try options switch; a place's card cycles its options
+  ‹ › (Try it / Keep it / Back to my plan); cards show three buttons and the rest under More; Plan/Build/Buy in the header and on each
+  sheet; Decide asks only the socket. Tour five stops.
+- **Item 13:** Find (View); Measure (two taps, yellow line); your own light scenes (`mw39-scenes`); Save my plan (picks + look link to
+  the clipboard); feature-wall presets; the now-playing LP on the ledge (`NOWP`, your own photo too); the aim line from a spot head to where
+  it lands; before/after slider on the plan home (`art/ba_*.webp`); an installable page (`manifest.webmanifest`, `sw.js` cache
+  `demma-v39`, icons). Item 7: "Buy and adapt first" (`build_doc.buy_first_html`). The nested cut list (`nest.py`, `build_doc.nest_html`:
+  every ply part on the fewest boards, half and quarter sheets where they're enough, the biggest offcuts' uses). A one-page wiring plan
+  (`build_doc.wiring_html`, in section 9 and the guide).
+- **The plan, firm only:** one short "What changed" box; the bar, the record table and the picked storage moved into sections 5 and 2;
+  section 12 is "Other options and sources" (`build_doc.other_options_html`: one line each, with sources); the appendices, "Agreed so
+  far", "Later ideas", the beside-the-cabinet choices, the cabinet review and the 80-wide section are gone (HANDOFF and git hold them);
+  section 10 is buy-first, the order of work and the wiring (the full guide is its own PDF); section 11 drops the row-by-row tracker (the
+  guide's shopping list has it). Fit proof firm zones only (`fit.firm_zones`, also on the page and in Decide). 75 pages
+  (10.0 MB; was 120); guide 62.
+- **No HD stills** (client, 23 Oct: "we dont need the hd still i can take them in the site ... we will work on a place to save them and
+  track changes in the designs so you can pick them up. ie a way to save the setup i have in the site each time"). The rebuild stopped
+  after 13 firm stills; those were removed. `shot3d.py` (now with `is_firm`) is out of the rebuild; `build_doc.latest()` puts the newest
+  still made (v38) in the PDF; the page's `art/*.webp` keep whatever was last rendered (13 updated this round). Rebuild now:
+  `make_images.py && export3d.py && build_doc.py && build_viewer.py`.
+- **Text:** `qa.text_budget` skips the cutting list's textarea and SVGs; 76 over → 29 (most remaining are 21–35-word captions).
+- **Not done:** the code clean-up (the flip-top, sliding cabinet and site A/B paths; merging static oak for fewer draw calls); the plan is
+  75 pages, not 45 (the fit proof, ~10 pages, and the sources, ~4, are kept whole); the side-wall socket's distance and height
+  (still to ask).
+- **Checks:** CHECKS
 
 ## Update 23 Oct 2026, round 32: v38 (the picks are the plan; the door and the plant; the media wall swapped; solid stairs; each wall's colour; each light turns; a better basket; a record table; ceiling designs)
 - Client (22–23 Oct): the brief in `UPGRADE_PLAN_v38.md` (top), their saved picks (section 0), "Turning the light fixture as a whole as well

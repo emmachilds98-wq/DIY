@@ -16,6 +16,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **New in the room:** find any piece, measure between two taps, save your own light scenes, Save my plan, feature-wall colours, the LP on the ledge, and a line from each spot head to where it lands.
 - **The plan PDF is your plan only** (77 pages, was 120): every option is one line with its size, rough cost and source. The build guide adds what to buy and adapt first, the ply laid out on the fewest sheets, and a one-page wiring plan.
 - **The page installs like an app** and works offline; the plan home has a before/after slider.
+- **No more HD pictures from us:** take your own in the room (View → Save as HD picture). The plan uses the latest pictures we made.
 
 **New in v38** (your saved picks, and "the core plan build and info then the additional items are just for looking")
 - **Your picks are the plan:** the bar beside the dining cabinet, the step drawers, the wall cabinets, the alcove shelves, the boxes, the shelf over the door and the sage-stripe rug are in the build, the buy list and the fit proof. Everything else is an option to look at in the 3D room.
