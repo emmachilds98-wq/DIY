@@ -1140,6 +1140,9 @@ SOURCES["shelfgap"] = ("Client, 22 Oct 2026: \"The shelf on the wall alongside t
                        "actually installed\" (facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side)")
 SOURCES["worktop"] = ("Homebuilding & Renovating: the UK's usual worktop height is 900 mm to the top (homebuilding.co.uk/advice/kitchen-worktop-height); "
                       "a raised bar counter 1000 to 1200")
+SOURCES["fbcover"] = ("Farrow & Ball: Estate Emulsion covers up to 14 m² a litre a coat (70 m² per 5 L), two coats recommended "
+                      "(farrow-ball.com paint calculator; DIY.ie listing, 35 m² per 2.5 L)")
+ORDER.append("fbcover")
 SOURCES["enhet"] = ("IKEA: ENHET wall frame with shelves, 40 × 15 × 75 cm, anthracite or white, steel, two shelves, 3 kg a shelf, to be "
                     "anchored to the wall; about 32–39 € (ikea.com/th 404.816.05; islas.ikea.es 304.489.37)")
 ORDER.append("enhet")

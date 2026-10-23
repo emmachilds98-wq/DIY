@@ -889,3 +889,25 @@ _bb["enhet_head"] = round(SHELF_B["top"] - SHELF_B["t"] - (_bb["enhet_y0"] + ENH
 for _k in ("glass_low", "glass_gap"):
     _bb.pop(_k, None)
 del _bb, _k
+
+
+# v38, client: "change each walls colour individually": each wall's paintable area (m²), less the window and the door, for the plan's
+# paint table. The 3D room names the same six walls.
+WALL_NAMES = {"media": "Media wall", "breast": "Chimney breast", "door": "Door wall", "stairs": "Stairs wall", "window": "Window wall", "pc": "PC wall"}
+PAINT_COVER = 14.0      # m² a litre a coat (Farrow & Ball Estate Emulsion)
+
+
+def wall_areas():
+    c = CEIL
+    a = {"media": (ALC_W + 2 * ALC_D) * c,                                          # the alcove's back, its side and the breast's reveal
+         "breast": (BREAST_W + BREAST_D_WEST) * c,                                  # the face and its west return
+         "door": (STAIR_X[0] - BREAST_X[1]) * c - (DOOR_X[1] - DOOR_X[0]) * 198.0,  # the recess wall, less the door
+         "stairs": (ALC_D - STAIR_D - WINDOW_Z) * c,                                # the west wall, the stair box to the window
+         "window": ROOM_W * c - (WINDOW_X[1] - WINDOW_X[0]) * (WINDOW_Y[1] - WINDOW_Y[0])
+                   + WINDOW_REVEAL * (2 * (WINDOW_Y[1] - WINDOW_Y[0]) + WINDOW_X[1] - WINDOW_X[0]) + sum(NW_BOX) * c,
+         "pc": -WINDOW_Z * c}                                                       # the side wall, the window to the alcove
+    return {k: v / 1e4 for k, v in a.items()}
+
+
+def paint_litres(m2, coats=2):
+    return m2 * coats / PAINT_COVER

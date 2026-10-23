@@ -165,6 +165,7 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-sel b { font: 600 16px Fredoka, system-ui, sans-serif; margin: 0 4px 0 8px; }
 .r3d-sel label { font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
 .r3d-sel .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.r3d-wallpick { margin-bottom: 8px; } .r3d-wallpick .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -2px; background: var(--c, #2c5643); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
 .r3d-size { font-size: 12.5px; color: var(--mut); font-variant-numeric: tabular-nums; }
 .r3d.editing canvas { cursor: pointer; }
 @media (min-width: 900px) {
@@ -433,7 +434,12 @@ def controls(gallery=""):
              '<div class="seg"><button type="button" class="chip" id="r3d-pickcopy">Copy as a note</button>'
              '<button type="button" class="chip" id="r3d-picksave" hidden>Save for the next round</button><span class="r3d-hint2" id="r3d-pickst" aria-live="polite"></span></div></div>')
     paints = [(k, h, n.split(" No.")[0].replace("Farrow & Ball ", "").replace("Little Greene ", "")) for k, (h, n) in R.PAINTS.items()]
-    swatches = ('<div class="grp"><span class="label">Wall paint (or tap a wall in Edit room)</span><div class="r3d-swatches" role="group" aria-label="Wall paint">'
+    walls = [("all", "All walls"), ("media", "Media wall"), ("breast", "Chimney breast"), ("door", "Door wall"), ("stairs", "Stairs wall"), ("window", "Window wall"), ("pc", "PC wall")]   # v38
+    swatches = ('<div class="grp"><span class="label">Wall paint: all the walls or one (or tap a wall in Edit room)</span>'
+                '<div class="seg r3d-wallpick" role="group" aria-label="Which wall">'
+                + "".join(f'<button type="button" class="chip" data-lookwall="{k}" aria-pressed="{str(k == "all").lower()}"><i class="dot"></i>{n}</button>' for k, n in walls)
+                + '<button type="button" class="chip" data-wallmatch="1" hidden>Same as the others</button></div>'
+                '<div class="r3d-swatches" role="group" aria-label="Wall paint">'
                 + "".join(f'<button type="button" data-paint="{k}" aria-pressed="false"><i style="--c:{h}"></i>{html.escape(n)}</button>' for k, h, n in paints)
                 + '<button type="button" data-paintcustom="#2c5643" aria-pressed="false"><i style="--c:#2c5643"></i>Deep green</button>'
                 '<label><i><input type="color" id="r3d-custom" value="#899081" aria-label="Any colour for the walls"></i>Any colour</label></div></div>')

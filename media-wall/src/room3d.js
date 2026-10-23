@@ -80,6 +80,16 @@ if (!S.seen21) { S.view = "room"; S.seen21 = true; }   // v21: everyone starts o
 if (!S.seen27) { if (S.site === "B") S.site = "C"; S.seen27 = true; }   // v27: the dining cabinet is the plan now: the old default moves to it once
 if (S.dining === "eight") S.dining = "six";                              // v27: the cabinet seats six (v26 had eight)
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
+/* v38, client: "I want ability to change each walls colour individually": each wall is a named surface; S.walls holds a colour for any
+   wall that differs from the rest ("match" or missing: the walls' paint) */
+const WALLS = [["media", "Media wall"], ["breast", "Chimney breast"], ["door", "Door wall"], ["stairs", "Stairs wall"], ["window", "Window wall"], ["pc", "PC wall"]];
+const WALL_NAME = Object.fromEntries(WALLS);
+if (!S.walls || typeof S.walls !== "object") S.walls = {};
+let lookWall = "all";            // Look's paint row: all the walls, or one
+function setWall(id, v) {        // a paint's key, a colour, or "match"; the walls' own paint counts as "match"
+  const h = v === "match" ? null : R.PAINTS[v] ? R.PAINTS[v].hex : v;
+  if (h && /^#[0-9a-f]{6}$/i.test(h) && h.toLowerCase() !== paintHex().toLowerCase()) S.walls[id] = h; else delete S.walls[id];
+}
 
 /* ---------------------------------------------------------------- the lighting presets (scenes.py) and their two rules
    v25: three presets (bright, cosy, film); dinner is a rule (the table open lifts bar 2), daytime a switch (S.tod) that works with any
@@ -423,6 +433,7 @@ const paintMats = new Map();
 function paintHex() { return S.paint === "custom" ? S.custom : R.PAINTS[S.paint].hex; }
 /* v15: three paints: the walls, the ceiling, and the skirting with the door, its frame and the radiator ("match" = the walls' colour) */
 function chHex(ch) {
+  if (ch.startsWith("w:")) { const v = S.walls[ch.slice(2)]; if (/^#[0-9a-f]{6}$/i.test(v || "")) return v; }   // v38: one wall's own colour
   if (ch === "ceil" && S.ceil !== "match") return S.ceil;
   if (ch === "trim" && S.skirt !== "match") return S.skirt;
   return paintHex();
@@ -552,7 +563,7 @@ function buildGroup(items, name) {
     else { kind = kindOf(fill, flags); geo = polyGeo(it); }
     const high = it[0] === "p" && Math.min(...it[1].filter((_, i) => i % 3 === 1)) >= R.CEIL - 0.5;
     if (kind === "paint") {
-      const m = new THREE.Mesh(geo, paintMat(lum(fill) / BASE_L, it[0] === "b", it[0] === "p"));
+      const m = new THREE.Mesh(geo, paintMat(lum(fill) / BASE_L, it[0] === "b", it[0] === "p", (flags || "").includes("s") ? "w:stairs" : "wall"));
       shadow(m); (high ? above : grp).add(m); continue;
     }
     const key = kind + (it[0] === "p" ? "p" : "") + (high ? "h" : "");
@@ -610,18 +621,20 @@ function flushCubes(parent) {
   BUCKET.clear();
 }
 function buildShell() {
-  const wallP = paintMat(lum("#2d5a46") / BASE_L), recP = paintMat(lum("#264c3a") / BASE_L), ceilP = paintMat(lum("#33604a") / BASE_L, false, false, "ceil");
+  const wP = id => paintMat(lum("#2d5a46") / BASE_L, false, false, "w:" + id), rP = id => paintMat(lum("#264c3a") / BASE_L, false, false, "w:" + id);   // v38: per wall
+  const wallP = wP("window"), recP = rP("door"), ceilP = paintMat(lum("#33604a") / BASE_L, false, false, "ceil");
   const egg = paintMat(lum("#346650") / BASE_L, true, false, "trim");
   const C = R.CEIL, Wd = R.W, A = R.ALC_W, AD = R.ALC_D, [B0, B1] = R.BREAST_X, RZ = R.RECESS_Z, WZ = R.WINDOW_Z;
   const [dx0, dx1] = R.DOOR_X, [sx0, sx1] = R.STAIR_X, [wx0, wx1] = R.WINDOW_X, [wy0, wy1] = R.WINDOW_Y;
-  wall("x", 0, WZ, AD, 0, C, [1, 0, 0], wallP);                                   // the side (east) wall, into the alcove
-  wall("z", AD, 0, A, 0, C, [0, 0, -1], wallP);                                   // the alcove's back
-  wall("x", B0, 0, AD, 0, C, [-1, 0, 0], recP);                                    // the breast's reveal
-  wall("z", 0, B0, B1, 0, C, [0, 0, -1], wallP);                                   // the chimney breast
-  wall("x", B1, 0, RZ, 0, C, [1, 0, 0], recP);                                     // the recess's side
-  wall("z", RZ, B1, Wd, 0, C, [0, 0, -1], recP, [[dx0, dx1, 0, R.DOOR_H], [sx0, Wd, 0, C]]);   // the door wall, open over the stairs
-  wall("x", Wd, WZ, RZ, 0, C, [-1, 0, 0], wallP);                                  // the stairs (west) wall
-  wall("z", WZ, 0, Wd, 0, C, [0, 0, 1], wallP, [[wx0, wx1, wy0, wy1]]);            // the window wall
+  wall("x", 0, WZ, 0, 0, C, [1, 0, 0], wP("pc"));                                 // the side (east) wall: the PC wall
+  wall("x", 0, 0, AD, 0, C, [1, 0, 0], wP("media"));                              // ... and into the alcove, with the media wall
+  wall("z", AD, 0, A, 0, C, [0, 0, -1], wP("media"));                             // the alcove's back
+  wall("x", B0, 0, AD, 0, C, [-1, 0, 0], rP("media"));                             // the breast's reveal
+  wall("z", 0, B0, B1, 0, C, [0, 0, -1], wP("breast"));                            // the chimney breast
+  wall("x", B1, 0, RZ, 0, C, [1, 0, 0], rP("breast"));                             // the recess's side (the breast's return)
+  wall("z", RZ, B1, Wd, 0, C, [0, 0, -1], rP("door"), [[dx0, dx1, 0, R.DOOR_H], [sx0, Wd, 0, C]]);   // the door wall, open over the stairs
+  wall("x", Wd, WZ, RZ, 0, C, [-1, 0, 0], wP("stairs"));                           // the stairs (west) wall
+  wall("z", WZ, 0, Wd, 0, C, [0, 0, 1], wP("window"), [[wx0, wx1, wy0, wy1]]);     // the window wall
   // v16: the hollow pipe boxing in the window's west corner, floor to ceiling, painted with the walls
   const PX = R.PIPE_BOX;
   cube(PX.x[0], 0, PX.z[0], PX.x[1] - PX.x[0], C, PX.z[1] - PX.z[0], wallP);
@@ -788,7 +801,7 @@ function buildStairs() {
   const [sx0, sx1] = R.STAIR_X, n = R.STAIR_N || 13, r = R.STAIR_RISE, gq = R.STAIR_GOING, tb = 2.2, nose = 1.5;
   const z0 = R.STAIR_FRONT + 6, zl = z0 + (n - 1) * gq, zl1 = zl + (R.LANDING_D || 90), top = n * r;
   const noClip = m => { m.clippingPlanes = []; return m; };
-  const body = noClip(paintMat(lum("#2d5a46") / BASE_L, true, false).clone()); paintMats.set("stairbody", reg(body));
+  const body = noClip(paintMat(lum("#2d5a46") / BASE_L, true, false, "w:stairs").clone()); paintMats.set("stairbody", reg(body));
   const oak = noClip(reg(new THREE.MeshStandardMaterial({ color: "#b07a46", map: OAK_TEX, roughness: 0.55 })));
   const str = noClip(reg(new THREE.MeshStandardMaterial({ color: "#9c6a3f", map: OAK_TEX, roughness: 0.55 })));
   const g = new THREE.Group(); g.name = "stairs"; shell.add(g);
@@ -2863,7 +2876,7 @@ function hitSurface(e) {
   for (const h of ray.intersectObjects([shell, fixtures, ...Object.values(G)], true)) {
     if (!shown(h.object)) continue;
     const m = h.object.material; if (!m || Array.isArray(m)) return null;
-    if (m.userData && m.userData.ratio !== undefined) return m.userData.ch === "ceil" ? "ceil" : m.userData.ch === "trim" ? "skirt" : "walls";
+    if (m.userData && m.userData.ratio !== undefined) { const ch = m.userData.ch; return ch === "ceil" ? "ceil" : ch === "trim" ? "skirt" : ch.startsWith("w:") ? ch : "walls"; }   // v38: a wall by name
     return null;                                   // something else is in front
   }
   return null;
@@ -2929,12 +2942,14 @@ function editPanel() {
   const P = qs("#r3d-sel"); if (!P) return;
   P.hidden = !(selId || selSurf);
   if (selSurf) {
-    const lab = { walls: "Walls", ceil: "Ceiling", skirt: "Skirting and radiator" }[selSurf];
+    const one = selSurf.startsWith("w:") ? selSurf.slice(2) : null;
+    const lab = one ? WALL_NAME[one] : { walls: "All walls", ceil: "Ceiling", skirt: "Skirting and radiator" }[selSurf];
     qs("#r3d-selname").textContent = lab;
-    const wallHex = S.paint === "custom" ? S.custom : R.PAINTS[S.paint].hex, key = selSurf === "ceil" ? "ceil" : "skirt";
-    const cur = selSurf === "walls" || S[key] === "match" ? wallHex : S[key];
+    const wallHex = paintHex(), key = selSurf === "ceil" ? "ceil" : "skirt";
+    const cur = one ? chHex(selSurf) : selSurf === "walls" || S[key] === "match" ? wallHex : S[key];
     qs("#r3d-selcol").value = cur; qs("#r3d-swatches").hidden = false;
-    qs("#r3d-swatches").innerHTML = (selSurf === "walls" ? Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("")
+    const chips = Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("");
+    qs("#r3d-swatches").innerHTML = (one ? `<button type="button" class="chip" data-swatch="match">Same as the others</button>` + chips : selSurf === "walls" ? chips
       : `<button type="button" class="chip" data-swatch="match">Same as the walls</button><button type="button" class="chip" data-swatch="${selSurf === "ceil" ? "#f2f0ea" : "#ece8dd"}">${selSurf === "ceil" ? "White" : "Off-white"}</button>`);
     qsa("[data-sel=turn],[data-sel=turn45],[data-sel=wall],[data-sel=remove],[data-sel=copy]").forEach(b => b.hidden = true); qs("#r3d-selsize").textContent = "";
     return;
@@ -3023,7 +3038,8 @@ qs("#r3d-sel").addEventListener("click", e => {
   const k = b.dataset.sel;
   if (b.dataset.swatch) {
     const v = b.dataset.swatch;
-    if (selSurf === "walls") S.paint = v; else S[selSurf === "ceil" ? "ceil" : "skirt"] = v;
+    if (selSurf.startsWith("w:")) setWall(selSurf.slice(2), v);
+    else if (selSurf === "walls") S.paint = v; else S[selSurf === "ceil" ? "ceil" : "skirt"] = v;
     repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); editPanel(); return;
   }
   if (k === "done") { select(null); return; }
@@ -3046,7 +3062,8 @@ qs("#r3d-sel").addEventListener("click", e => {
 qs("#r3d-selcol").addEventListener("pointerdown", () => { if (selId) pushUndo(); });   // one undo step per colour pick
 qs("#r3d-selcol").addEventListener("input", e => {
   const v = e.target.value;
-  if (selSurf === "walls") { S.paint = "custom"; S.custom = v; repaint(); syncButtons(); updateCaption(); }
+  if (selSurf && selSurf.startsWith("w:")) { setWall(selSurf.slice(2), v); repaint(); syncButtons(); updateCaption(); }
+  else if (selSurf === "walls") { S.paint = "custom"; S.custom = v; repaint(); syncButtons(); updateCaption(); }
   else if (selSurf) { S[selSurf === "ceil" ? "ceil" : "skirt"] = v; repaint(); }
   else if (selId) { setLayout(selId, { col: v }); placeAll(); }
   store.set(KEY, S); dirty();
@@ -3320,6 +3337,7 @@ function lookOf() {
   for (const k of LOOK_BOOL) if (S[k] !== DEF[k]) o[k] = S[k] ? 1 : 0;
   if (S.paint === "custom") o.custom = S.custom;
   if (S.ceil !== "match") o.ceil = S.ceil;
+  const ws = Object.fromEntries(Object.entries(S.walls).filter(([k, v]) => k in WALL_NAME && HEX.test(v || ""))); if (Object.keys(ws).length) o.walls = ws;   // v38
   if (S.skirt !== "match") o.skirt = S.skirt;
   const dd = {}; for (const k of Object.keys(DEF.decor)) if (S.decor[k] !== DEF.decor[k]) dd[k] = S.decor[k];
   if (Object.keys(dd).length) o.decor = dd;
@@ -3354,6 +3372,7 @@ function applyLook(tok) {
   for (const k of Object.keys(LOOK_STR)) if (ok(k, o[k])) S[k] = o[k];
   for (const k of LOOK_BOOL) if (k in o) S[k] = !!o[k];
   if (HEX.test(o.custom || "")) S.custom = o.custom;
+  S.walls = {}; if (o.walls && typeof o.walls === "object") for (const [k, v] of Object.entries(o.walls)) if (k in WALL_NAME && HEX.test(v || "")) S.walls[k] = v;   // v38
   S.ceil = HEX.test(o.ceil || "") ? o.ceil : "match"; S.skirt = HEX.test(o.skirt || "") ? o.skirt : "match";
   S.decor = Object.assign({}, DEF.decor); if (o.decor && typeof o.decor === "object") for (const k of Object.keys(DEF.decor)) if (typeof o.decor[k] === "string") S.decor[k] = o.decor[k];
   const set = a => Object.fromEntries((Array.isArray(a) ? a : []).filter(k => typeof k === "string").map(k => [k, true]));
@@ -3862,7 +3881,11 @@ function syncButtons() {
   press("site", S.site); press("dining", S.dining); press("scene", S.scene); press("tod", S.tod);
   qsa("[data-scene]").forEach(b => b.classList.toggle("adjusted", b.dataset.scene === S.scene && !(sameAsScene() && S.master === 100)));   // v25: "Bright · adjusted"
   const ln = qs("#r3d-litst"); if (ln) ln.textContent = SCENES[S.scene].name + (sameAsScene() && S.master === 100 ? "" : " · adjusted") + (S.tod === "day" ? " · daytime" : "");
-  const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("paint", S.paint); press("lamp", S.lamp);
+  const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("lamp", S.lamp);
+  const wh = (lookWall === "all" ? paintHex() : chHex("w:" + lookWall)).toLowerCase();                 // v38: the paint row shows the chosen wall's paint
+  qsa("[data-paint]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === b.dataset.paint : R.PAINTS[b.dataset.paint].hex.toLowerCase() === wh)));
+  qsa("[data-lookwall]").forEach(b => { const k = b.dataset.lookwall; b.setAttribute("aria-pressed", String(k === lookWall)); const i = b.querySelector("i"); if (i) i.style.setProperty("--c", k === "all" ? paintHex() : chHex("w:" + k)); });
+  const wm = qs("[data-wallmatch]"); if (wm) { wm.hidden = lookWall === "all"; wm.disabled = !S.walls[lookWall]; }
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
   press("cab", S.cab); press("cabw", S.cabw); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
@@ -3874,8 +3897,8 @@ function syncButtons() {
   let anyOn = false; qsa("[data-svrow]").forEach(r => { const on = !!S.sugg[r.dataset.svrow]; r.hidden = !on; anyOn = anyOn || on; });
   const svn = qs("#r3d-svnone"); if (svn) svn.hidden = anyOn;
   qsa("[data-decor]").forEach(b => { const [k, v] = b.dataset.decor.split(":"); b.setAttribute("aria-pressed", String(S.decor[k] === v)); });
-  qs("#r3d-custom").value = S.custom;
-  qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase())));
+  qs("#r3d-custom").value = lookWall === "all" ? S.custom : chHex("w:" + lookWall);
+  qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase() : wh === b.dataset.paintcustom.toLowerCase())));
   if (S.ceil !== "match" && qs("#r3d-ceil")) qs("#r3d-ceil").value = S.ceil;
   if (S.skirt !== "match" && qs("#r3d-skirt")) qs("#r3d-skirt").value = S.skirt;
   qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : (S.lv[k] ?? 0); i.value = v; qs(`[data-lvout="${k}"]`).textContent = `${Math.round(v)}%`; });
@@ -3929,7 +3952,9 @@ root.addEventListener("click", e => {
   else if (d.plants) {           // v18: the layout puts the stand and the shelf back on their spots for it
     S.plants = d.plants; for (const k of ["plants", "records"]) if (S.layout[k]) { delete S.layout[k].x; delete S.layout[k].z; delete S.layout[k].rot; }
     applyState(); }
-  else if (d.paint) S.paint = d.paint, repaint(), updateCaption(), store.set(KEY, S), dirty();
+  else if (d.lookwall) lookWall = d.lookwall;                                                        // v38: which wall the paints go on
+  else if (d.wallmatch) setWall(lookWall, "match"), repaint(), updateCaption(), store.set(KEY, S), dirty();
+  else if (d.paint) (lookWall === "all" ? (S.paint = d.paint) : setWall(lookWall, d.paint)), repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
   else if (d.chairs) { S.chairs = d.chairs; if (d.chairs === "open") S.tdoor = false; applyState(); }   // v30: one door open at a time
@@ -3948,12 +3973,12 @@ root.addEventListener("click", e => {
   else if (d.pad) S.pad = d.pad === "on", applyPad(), store.set(KEY, S);
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
   else if (b.id === "r3d-full") { const st = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
-  else if (d.paintcustom) S.custom = d.paintcustom, S.paint = "custom", repaint(), updateCaption(), store.set(KEY, S), dirty();   // v25: Deep green, a ready-made custom colour
+  else if (d.paintcustom) (lookWall === "all" ? (S.custom = d.paintcustom, S.paint = "custom") : setWall(lookWall, d.paintcustom)), repaint(), updateCaption(), store.set(KEY, S), dirty();   // v25: Deep green, a ready-made custom colour
   else if (b.id === "r3d-reset") { setView(S.view); return; }
   else return;
   syncButtons();
 });
-qs("#r3d-custom").addEventListener("input", e => { S.custom = e.target.value; S.paint = "custom"; repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); });
+qs("#r3d-custom").addEventListener("input", e => { if (lookWall === "all") { S.custom = e.target.value; S.paint = "custom"; } else setWall(lookWall, e.target.value); repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); });
 // v15: the sliders, the colour bulbs, and the ceiling and skirting paints
 root.addEventListener("input", e => {
   const t = e.target, d = t.dataset;

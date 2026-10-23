@@ -235,6 +235,16 @@ def scenes_html():
             + rules + f"<!--scenes-->{figs}<!--/scenes-->")
 
 
+def paint_table():
+    """v38: each wall's area and the paint it needs (two coats). Every wall is Card Room Green in the plan; the 3D room's Look tries others."""
+    a = G.wall_areas()
+    rows = "".join(f"<tr><td>{G.WALL_NAMES[k]}</td><td>{v:.1f} m²</td><td>{G.paint_litres(v):.1f} L</td></tr>" for k, v in a.items())
+    t = sum(a.values())
+    return (f'<table class="tight"><tr><th>Wall</th><th>Area (less window and door)</th><th>Two coats</th></tr>{rows}'
+            f'<tr><td><b>All walls</b></td><td><b>{t:.1f} m²</b></td><td><b>{G.paint_litres(t):.1f} L: two 2.5 L tins</b><sup>{fit.ORDER.index("fbcover") + 1}</sup></td></tr></table>'
+            '<p class="caption">Trying a different colour on one wall in the 3D room (Look): that wall needs one 2.5 L tin.</p>')
+
+
 def scenes_v24_html():
     """v25: the five scenes of v13.7 to v24, for the appendix."""
     import scenes as SC
@@ -1239,6 +1249,7 @@ def _plan(deck=False):
 <li><b>Finishes:</b> Estate or Modern Emulsion on walls, ceiling, alcove and breast; Estate Eggshell in the same colour on skirting and radiator (the door stays white) (Modern Eggshell if the skirting takes knocks).</li>
 <li><b>Order:</b> paint before anything is fixed, so nothing needs cutting in round the uprights, shelves or the dining wall.</li>
 </ul>
+{paint_table()}
 <h3>Skirting: Card Room Green too</h3>
 <figure>{img("skirting_options.png", "Three skirting options")}</figure>
 <p>Recommended: Card Room Green in Estate Eggshell, which completes the drench and hides scuffs far better than white. Darker option: Green Smoke. Over the white gloss: wash, key, woodwork primer, two coats of eggshell.</p>
