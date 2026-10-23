@@ -479,4 +479,40 @@ def full():
             parts=["HDMI switch, RetroTINK, HDMI leads, optical and SCART cables, the active optical HDMI for the PC", "Stylus, preamp, RCA-to-3.5 mm lead, record brush", "Labels"],
             tools=["Phone with the Deco app", "Velcro ties"],
             draw=["av", "power", "network"]),
+        14: dict(   # v41: the client's picks, built and fitted
+            parts=["The bar's ply (the cutting list: ends, floor, shelf, doors, plinth front, back), its oak counter, an IKEA ENHET frame 40 × 15 × 75, a 3 mm acrylic mirror",
+                   "Two IKEA KALLAX 42 × 42, a 12 mm ply base, an 18 mm oak lid 90 × 50, four castors, two hinges and two lid stays",
+                   "Two IKEA EKET 35 × 35 × 35 with their rails; two oak floating shelves 90 × 23 with brackets; an oak shelf 91 × 27 on two brackets; four IKEA KUGGIS 35 × 26 × 15"],
+            hardware=["5 × 60 mm screws and brown plugs (solid wall)", "4 × 30 and 4 × 40 mm wood screws", "Two soft-close hinges and a push catch for the bar's doors"],
+            tools=["Detector", "SDS drill", "Drill-driver", "Spirit level", "Jigsaw or track saw", "Clamps"],
+            draw=[],
+            parts_full=[
+                ("The bar beside the cabinet", [
+                    f"Measure the gap at the floor, at 45 and at 90: the cabinet's end to your shelf's end, less the 10 cm gap. Drawn: {n(g.BAR_BUILT['w'])} wide, {n(g.BAR_BUILT['d'])} deep.",
+                    "Scribe the two ends to the cabinet's end and the wall, then glue and screw the floor, the shelf and the back between them; the plinth front set back 2.",
+                    "Stand it, check it's level, and screw it to the wall through the back's top rail and to the cabinet's end (4 × 30, from inside).",
+                    f"Fix the oak counter on top, {n(g.BAR_BUILT['top_t'])} thick, its front edge flush; hang the doors on soft-close hinges with a push catch (no handle to catch the table door).",
+                    f"Over it: the ENHET frame on the wall, its bottom at {n(g.BAR_BUILT['enhet_y0'])}, plugged into the solid wall; the mirror behind it; the glasses on its shelves.",
+                ]),
+                ("The record table", [
+                    "Assemble the two KALLAX as IKEA shows, then lay them on their backs side by side and screw them together through the sides (4 × 30).",
+                    f"Screw the 12 mm ply base to their open backs and the four castors to the base, 3 cm in from each corner.",
+                    f"Hinge the oak lid ({n(g.RECORD_TABLE['w'])} × {n(g.RECORD_TABLE['d'])}) along one long side; fit both lid stays so it can't drop. Full of LPs it's about {n(g.RECORD_TABLE['kg'])} kg: roll it, don't lift it.",
+                ]),
+                ("The wall cabinets", [
+                    f"Mark the rail's line over the sofa's corner, the cabinets' bottoms at {n(g.WALL_CABS['y0'])}; detector first.",
+                    "Screw IKEA's rail to the wall with 5 × 60 screws in brown plugs, level; hang the two EKET on it and tighten their fittings.",
+                ]),
+                ("The alcove shelves", [
+                    f"Mark the tops at {n(g.ALCOVE_SHELVES['tops'][0])} and {n(g.ALCOVE_SHELVES['tops'][1])} in the window corner; detector first.",
+                    "Fix each concealed bracket with its own screws into plugs in the solid wall, check it's level, and slide the shelf on.",
+                ]),
+                ("Over the hall door, and the boxes", [
+                    f"The oak shelf's top at {n(g.DOOR_SHELF['top'])}, on two brackets above the architrave (check it's no more than {n(g.ARCHITRAVE)} wide).",
+                    "Two KUGGIS boxes on it; two on your black shelf, either side of the laser, 1 over its front.",
+                ]),
+                ("The step drawers", [
+                    "With the new stairs: ask the joiner for three drawers in the bottom three risers, 51 × 14.5 oak fronts, boxes 35 deep on 350 mm runners, and a bearer under each tread.",
+                ]),
+            ]),
     }

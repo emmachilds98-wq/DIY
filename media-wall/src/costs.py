@@ -7,7 +7,8 @@ import re
 
 # (piece, the row's text starts with, quantity shown, short name); pieces in this order
 PIECES = ["The media wall", "The side wall and the PC", "The dining cabinet", "The chimney breast", "Lighting", "Paint",
-          "Network", "Electrics (your own job)", "Power and cables", "TV, consoles and AV", "Vinyl kit", "Finishing touches"]
+          "Network", "Electrics (your own job)", "Power and cables", "TV, consoles and AV", "Vinyl kit", "Your picks", "Finishing touches",
+          "Can wait (after you move in)"]   # v41: the picks on their own; what can wait split off
 SHORT = [
     ("The media wall", "Two IKEA BESTÅ 60×40×64 frames", "2", "IKEA BESTÅ frame, 60 × 40 × 64"),
     ("The media wall", "BESTÅ shelves, 56 × 36", "4", "IKEA BESTÅ shelf, 56 × 36"),
@@ -72,8 +73,8 @@ SHORT = [
     ("Vinyl kit", "External phono preamp", "1", "Phono preamp (only if needed)"),
     ("Vinyl kit", "RCA-to-3.5 mm lead", "1", "RCA to 3.5 mm lead, 2 m"),
     ("Vinyl kit", "Isolation feet for the turntable", "1 set", "Isolation feet and a record brush"),
-    ("Finishing touches", "A storage ottoman in navy velvet", "1", "Storage ottoman, navy velvet, 76 × 76 (ISTOOLS)"),
-    ("Finishing touches", "A rug about 230 × 160", "1", "Rug, about 230 × 160"),
+    ("Can wait (after you move in)", "A storage ottoman in navy velvet", "1", "Storage ottoman, navy velvet, 76 × 76 (ISTOOLS)"),
+    ("Can wait (after you move in)", "A rug about 230 × 160", "1", "Rug, about 230 × 160"),
     ("Finishing touches", "Drip trays or a waterproof mat", "1", "Drip trays for the plant stand"),
     ("Finishing touches", "Felt pads under the vinyl stand", "1 set", "Felt pads"),
 ]
@@ -122,11 +123,11 @@ def text(track, money):
 SHORT += [
     ("The dining cabinet", "The bar beside the dining cabinet", "1 set", "The bar: oak-faced ply cupboard, oak counter, hinges"),
     ("The dining cabinet", "Over the bar", "1 set", "Over the bar: IKEA ENHET frame, mirror, glass rail, LED"),
-    ("Finishing touches", "Two IKEA EKET wall cabinets", "2", "IKEA EKET wall cabinet, 35 cube, glass door"),
-    ("Finishing touches", "Two oak floating shelves 900 × 230", "2", "Oak floating shelf, 900 × 230"),
-    ("Finishing touches", "An oak shelf over the hall door", "1 set", "Oak shelf over the door, two KUGGIS boxes"),
-    ("Finishing touches", "Two IKEA KUGGIS lidded boxes", "2", "IKEA KUGGIS box, 35 × 26 × 15"),
-    ("Finishing touches", "Drawers in the bottom three steps", "1 set", "Step drawers: ply boxes, oak fronts, runners"),
-    ("Finishing touches", "The blanket basket", "1", "Blanket basket, water hyacinth, 59 × 51 × 29"),
-    ("Finishing touches", "The record table", "1 set", "Record table: two KALLAX, oak lid, ply base, castors"),
+    ("Your picks", "Two IKEA EKET wall cabinets", "2", "IKEA EKET wall cabinet, 35 cube, glass door"),
+    ("Your picks", "Two oak floating shelves 900 × 230", "2", "Oak floating shelf, 900 × 230"),
+    ("Your picks", "An oak shelf over the hall door", "1 set", "Oak shelf over the door, two KUGGIS boxes"),
+    ("Your picks", "Two IKEA KUGGIS lidded boxes", "2", "IKEA KUGGIS box, 35 × 26 × 15"),
+    ("Can wait (after you move in)", "Drawers in the bottom three steps", "1 set", "Step drawers: ply boxes, oak fronts, runners"),
+    ("Your picks", "The blanket basket", "1", "Blanket basket, water hyacinth, 59 × 51 × 29"),
+    ("Your picks", "The record table", "1 set", "Record table: two KALLAX, oak lid, ply base, castors"),
 ]
