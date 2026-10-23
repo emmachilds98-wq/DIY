@@ -1,6 +1,46 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+**Current: v45 (round 40, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
+viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 34 pages, guide 61. Next version: 46.
+**Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
+
+- **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
+  code), then the work merged to `main` in steps, the plan PDF and the viewer updated. Rules are in `CLAUDE.md` (core plan
+  `geometry.FIRM` gets the full build; options one line each; say less; no HD stills; every size from a cited source).
+- **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 build_doc.py && python3 build_viewer.py`
+  (no `shot3d.py`: the client takes pictures in the room). Version: `VERSION` in `build_doc.py`; move the last version's outputs to
+  `out/vNN/` first.
+- **Checks:** `python3 clash.py` (0 clashes), `python3 qa.py <dir>` and `python3 taptest.py <dir>` ("errors" and "fails" []). Headless
+  runs need `THREE_LOCAL` pointing at a local three@0.160 package (round 28) and Chromium at `/opt/pw-browsers/chromium`.
+- **The viewer artifact:** `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` to the URL above (no files map,
+  no `capabilities`). Pictures not yet in its asset store are inlined (`src/deck_assets_todo.txt`); round 13's notes below say how to
+  upload them.
+- **Backups:** `src/backups/` (copy a file there before a large edit); old upgrade plans in `media-wall/plans/`.
+- **Open with the client:**
+  - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
+  - the side-wall socket's distance and height;
+  - whether to drop the old outputs from the working tree: `out/v9`–`v42` (about 4.2 GB) and the superseded `src/render_v13`–`v39`
+    stills (about 1.2 GB). Both stay in git history; the published site carries all of it today.
+
+## Update 23 Oct 2026, round 40: v45 (the stipple ceiling and Cosy first, a softer light over the open table, two small room buttons, a tidy)
+- Client (23 Oct): "I want [Artex] stipple ceiling as default and cosy lighting that still allows nice view of the room and stop over
+  lighting the dining table it flushes it out too much. Then do a final review and upgrade of the repo. Make whole room and remove
+  labels button smaller buttons on the room not a part of the navigations tab buttons". Plan first: `UPGRADE_PLAN_v45.md` (#54).
+- **Defaults** (`room3d.js` DEF, `geometry.FIRM.decor.ceiling = "stipple"`): Cosy, evening, the stipple ceiling. `S.v45` moves a saved
+  room to them once. Cosy (`scenes.py`) strip 20→35, bar 2 30→40.
+- **The table rule** (`scenes.TABLE_BOOST`, `room3d.lvl`): bar 2 between 45 and 55 (was at least 80), the ceiling strip at most 40.
+  The open table's top measured 245 of 255 in v44; now 226 (Cosy) and 232 (Bright). Text in `scenes.RULES`, `diagrams`, step 12,
+  section 8 follows.
+- **Buttons** (`room3d_page.py`): `.r3d-mini` under the Plan/Build/Buy bar holds `#r3d-home` (Whole room) and `#r3d-lbl` (Hide/Show
+  labels, hidden since v39); icon only under 900 px. The dock is View, Room, Look, Edit.
+- **Tidy:** 392 backups into `src/backups/`, the plans v17–v43 into `plans/`, the README cut to v45 and v44 (364 → 100 lines; its
+  links checked), START HERE cut to the current state (the old notes follow, as they were).
+- **Checks:** `qa.py` errors [] fails [] at 390 and 1280, text budget 0 over; `taptest.py` errors []; `clash.py` 0. v44 outputs in `out/v44/`.
+- **Bug found and fixed on the way:** a comment put in the middle of DEF's line commented out `paint`, `lamp` and `drawers` (the room
+  didn't start); keep comments at line ends in DEF.
+
+## Earlier START HERE notes (rounds 13–39), as they were
 - **Round 39 (v44, below; `UPGRADE_PLAN_v44.md` done): Build in one card per thing you make (Buy · Cut · Build), Plan and Buy
   trimmed with How to make it from Buy and the room, the C-table's own guide chapter, the plan PDF 34 pages, AgX colour and sharper HD
   on real graphics cards.** Fit 92/22/12/0, £4,382–8,260. Plan 34 pages, guide 61. Merged to main in four steps (#50–#53). Next version
