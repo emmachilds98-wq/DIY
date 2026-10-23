@@ -131,7 +131,14 @@
 - **Not done:** the code clean-up (the flip-top, sliding cabinet and site A/B paths; merging static oak for fewer draw calls); the plan is
   75 pages, not 45 (the fit proof, ~10 pages, and the sources, ~4, are kept whole); the side-wall socket's distance and height
   (still to ask).
-- **Checks:** CHECKS
+- **Checks:** `qa.py` errors [] and fails [] at 390 and 1280 (programs 61, calls 596/629 in Fast on SwiftShader, frame 7 ms);
+  `taptest.py` every tap works at both, Try options ‹ › and Back to my plan included; `clash.py` 0 clashes, 0 close.
+- **Next, the client's ask: save each set-up made in the site, and track design changes for the next agent.** Proposal: on the shared
+  plan page (deck 71ff, which already has a shared database), a **Save this set-up** button writes the room's whole state (`S`), its look
+  link, a name, who and when to a `setups` collection; a **My set-ups** list reopens any of them, newest first, with what changed from
+  the plan (`FIRM`) in one line. The agent reads them with ArtifactData (`list` on `setups`) at the start of a round. The GitHub Pages copy
+  can't write anywhere, so there Save my plan's link stays the way to send one. Optional: a small picture with each (Save as HD picture,
+  stored with the set-up).
 
 ## Update 23 Oct 2026, round 32: v38 (the picks are the plan; the door and the plant; the media wall swapped; solid stairs; each wall's colour; each light turns; a better basket; a record table; ceiling designs)
 - Client (22–23 Oct): the brief in `UPGRADE_PLAN_v38.md` (top), their saved picks (section 0), "Turning the light fixture as a whole as well
