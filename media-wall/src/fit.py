@@ -1390,3 +1390,43 @@ def summary_html():
         out.append(f"<tr><td>{title}</td><td class='num'>{k[PASS]}</td><td class='num'>{k[TIGHT]}</td><td class='num'>{k[CHECK]}</td><td class='note'>{odd or '—'}</td></tr>")
     out.append("</table>")
     return "".join(out)
+
+
+# ---------------------------------------------------------------- v43: the C-table at the sofa's open end, in the plan
+SOURCES["plazcutz"] = ("PlazCutz (UK): 400 mm × 200 mm × 6 mm mild steel plate, S275, £3.57 incl. VAT "
+                       "(plazcutz.com/store/400mm-x-200mm-x-6mm-Mild-Steel-Plate-S275-p860680992); 6 mm steel weighs 47 kg/m², so 3.77 kg")
+SOURCES["oakdensity"] = "The Wood Database: European oak (Quercus robur), average dried weight 710 kg/m³ (wood-database.com/english-oak)"
+SOURCES["ctablebuy"] = ("Bought C-tables, compared: a C-shaped side table 48 × 61 × 30 cm, £25.99 (pricespy.co.uk/s/c-shape-table); GVAwood's "
+                        "oak C-shaped side table 50 × 30 × 65 cm (gvawood.com). Both steady themselves with a foot that slides under the sofa")
+ORDER.extend(["plazcutz", "oakdensity", "ctablebuy"])
+SOURCES["spiderglow"] = ("Spider Farmer UK: GlowBar 1FT full-spectrum LED grow light strips, 4 pack, linkable, 30 cm long, £44.99 "
+                         "(spiderfarmer.co.uk/products/1ft-full-spectrum-led-grow-light-strips-for-indoor-plants)")
+SOURCES["switchbotc3"] = ("SwitchBot UK: Curtain 3 Rod Type 1, 84 × 73 × 205 mm, 572 g, for 10–40 mm rods and curtains up to 15 kg, "
+                          "£99.99 (£80.00 on offer) (uk.switch-bot.com/products/switchbot-curtain-3-rod-type-1)")
+SOURCES["mosslanda"] = ("IKEA UK: MOSSLANDA picture ledge, oak effect, 55 cm: length 55, depth 12, max. load 5 kg, £6 (115 cm £7 more) "
+                        "(ikea.com/gb, 805.898.35)")
+SOURCES["habitatmush"] = ("Habitat (Argos): Rechargeable Mushroom LED Table Lamp, taupe: overall H31 × W14 cm, shade H7 × D14, base 9 across, "
+                          "£20 (habitat.co.uk/product/7275773)")
+ORDER.extend(["spiderglow", "switchbotc3", "mosslanda", "habitatmush"])
+_zones_v42 = zones
+
+
+def ctable_zone():
+    import ideas as I
+    T, P, B = I.CTABLE, I.ctable_parts(), G.BLANKET_BASKET
+    under, tip = T["top"] - T["t"], I.ctable_tip_kg()
+    rows = [
+        ("The C-table's top over the seat", f"underside at {r1(under)}", ref("sofa"), f"the seat cushion's top at {r1(T['seat_top'])}", r1(under - T["seat_top"]), PASS),
+        ("Its reach over the seat", f"{r1(T['over'])} in from the sofa's end", ref("sofa"), "the return's seat, 95 deep", r1(95 - T["over"]), PASS),
+        ("Its foot and the blanket basket", f"x {r1(T['x'][0])}–{r1(T['x'][1])}", ref("lakelyn"), f"the basket to x {r1(B['x'][1])}", r1(T["x"][0] - B["x"][1]), PASS),
+        ("The steel plate under the foot", f"{r1(P['plate'][0])} × {r1(P['plate'][1])} × {r1(P['plate'][2])}", ref("plazcutz"), f"the foot {r1(P['foot'][0])} × {r1(P['foot'][1])}", r1(P["foot"][1] - P["plate"][1]), PASS),
+        ("What it holds on its far edge", f"{tip} kg before it tips", ref("plazcutz", "oakdensity"), "a mug, a pad or a laptop: under 3 kg", r1(tip - 3), PASS),
+    ]
+    return ("The C-table at the sofa's open end (in the plan)", "x 40–85, 12 over the seat; its foot stands beside the sofa", rows)
+
+
+def zones():
+    out = _zones_v42()
+    i = next((i for i, z in enumerate(out) if z[0].startswith("Your picks")), len(out) - 1) + 1
+    out.insert(i, ctable_zone())
+    return out

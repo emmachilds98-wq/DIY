@@ -898,6 +898,7 @@ FIRM = dict(
     svar={"blanketbasket": "natural", "stairdrawers": "oak", "wallcabs": "walnut", "alcoveshelves": "oak", "shelfboxes": "white",
           "doorshelf": "white", "recordtable": "oak"},
     beside="bar", cabw="90", decor={"rug": "stripes"},
+    ideas=["ctable"],                         # v43, client: "I want the c table in the current main plan"
 )
 # v38 (the clash check): with the table out for six, the ottoman can't stay by the coffee table (the table's end reaches 7 into it, and
 # pushing it to the sofa doesn't clear that); its dinner spot is in front of the media wall, clear of the table, the chairs and the

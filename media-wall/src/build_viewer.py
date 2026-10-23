@@ -540,7 +540,7 @@ CAP3D = {"3d_room": "The whole room from above the window side, the window wall 
          "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top.",
          "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up).",
          "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
-         "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
+         "3d_ideas_ctable": "The oak C-table over the sofa's open end, in your plan",
          "3d_glass_case": "The glass display case on the chimney breast, in the plan: 90 × 85 × 12, oak.",
          "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants.",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
@@ -601,7 +601,7 @@ def item_card(stem, kind, k, title, size, cost, why, where):
 def ideas_panel():
     """v17: the ideas for later (ideas.py), a card each. v32: every one has its own full render and is in the 3D room."""
     import ideas as I
-    cards = [item_card(f"3d_id_{k}", "idea", k, title, size, cost, why, where) for k, title, size, cost, why, where, _in3d in I.IDEAS]
+    cards = [item_card(f"3d_id_{k}", "idea", k, title, size, cost, why, where) for k, title, size, cost, why, where, _in3d in I.idea_options()]   # v43: the C-table is in the plan
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
             f'<p class="caption">Each is off until you turn it on. All together about £{lo}–{hi}.</p>'

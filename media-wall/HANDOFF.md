@@ -1,6 +1,12 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Round 38 (v43, below; `UPGRADE_PLAN_v43.md` done): the C-table is in the plan (built, steel-weighted foot: the sofa sits on the
+  floor), the window sill's plants as the client has them (small left, tall middle, spider plants right), the plant stand our pick,
+  a rubber plant in the leaf library, four new options (grow lights, curtain motors, LP ledges, a cordless lamp).** Fit 92/22/12/0,
+  £4,382–8,260. Session `claude/tender-dijkstra-vbfd96`, in parallel with `claude/clever-johnson-c9tqld`. **v42's guide-by-chapter,
+  shorter PDF and page items (`UPGRADE_PLAN_v42.md` 2–4) are still open:** the C-table needs its own chapter there. Next version
+  number: 44. **Never write the cap's poem out in code or text.**
 - **Round 37 (v41, below): `UPGRADE_PLAN_v41.md` done, plus easier viewing: double-tap the floor to stand there, and the camera
   stays out of the furniture.** Fit 87/22/12/0, £4,374–8,245 (picks £401–552; can wait £440–930). Plan 76 pages, guide 65. QA fails []
   errors [] at 390 and 1280, text budget 0 over; taptest all taps ok. Merged to main. **Next:** the client's "save each set-up"
@@ -108,6 +114,33 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 38: v43 (the C-table in the plan, the sill's plants, the stand our pick, four new options)
+- Client (23 Oct): "I want the c table in the current main plan and then review the room and suggest improvements and more item
+  options. Make the plants better definition and more real we have taller ones in the middle, spider plants on the right and some
+  smaller ones on left", then "I meant for the window sill, the plant shelf is not built yet give it what you think will look best",
+  and "Write plan and put on GitHub first" (`UPGRADE_PLAN_v43.md`, merged as #46 before any code).
+- **The C-table** (`geometry.FIRM["ideas"] = ["ctable"]`; `ideas.CTABLE`, `ctable_parts()`, `ctable_tip_kg()`; backups `*_v43a_backup.*`):
+  top 45 × 30 at 62 (8 over the seat cushion's 52), 12 over the seat, upright 18 out past the sofa's end, foot 21 deep from 3 under
+  its edge, a 400 × 200 × 6 steel plate under the foot (`plazcutz`), oak 18 mm from the Snowdon pack's second board; holds 12.1 kg on its
+  far edge (`oakdensity`). Bought C-tables slide their foot under the sofa (`ctablebuy`); the client's sofa sits on the floor (photo).
+  TRACK two rows (£8–15), step 14's first line, the plan's section 2, the cut list (oak and the plate), Buy and adapt first, a fit zone
+  (5 rows), clash boxes (MEANT: its foot 3 under the sofa's edge). The room opens with it (DEF.ideas), Back to my plan keeps it, its
+  card says "In your plan", `optDelta` counts it as the plan. `ideas.idea_options()` (the ideas still ideas) feeds section 12 and the
+  page's cards.
+- **Plants** (`room3d.js`): `SILL_ROW`: three spider plants at the sill's low-x end (the room's right as you face the window), a snake
+  plant and a rubber plant in the middle, a calathea, a fern and a trailing pothos on the left, none behind a rear speaker. The stand: one
+  plant a tier (pothos and spider plants up top, calathea and fern, a snake plant and a rubber plant at the bottom), a monstera in the open
+  middle, a snake plant over it ("easy" style still picks its own). New `FLORA_BUILD.ficus` (a rubber plant: one stem, leaves spiralling).
+- **Four options** (`ideas.SUGGEST`, versions, short names, aims; sources `spiderglow`, `switchbotc3`, `mosslanda`, `habitatmush`;
+  one line each in section 12; card pictures rendered small into `art/`, no HD): grow-light bars under the stand's tiers (inside the
+  stand, a warm wash on the wall behind), motors on the curtain pole, two MOSSLANDA ledges on the side wall at 108 (under the PC shelf
+  and under the wall cabinets), Habitat's mushroom lamp on the C-table (inside it). `shot3d.BASE` now opens with the plan's ideas.
+- **Checks:** `qa.py` errors [] and fails [] at 390 and 1280, text budget 0 over; `taptest.py` every tap ok at both; `clash.py` 0 clashes,
+  0 close (the C-table's foot under the sofa's edge is MEANT).
+- Plan 46 pages, guide 59; v41 outputs in `out/v41/`. `make_images.py` deletes its intermediate PNGs (dims_, skirt_, p_, art_): earlier
+  rounds had committed them. Also merged during this round: the WIP from v39's base (a separate
+  leaf builder) was dropped in favour of v40's leaf library.
 
 ## Update 23 Oct 2026, round 37: v41 (the build step for your picks, the measuring sheet, a calmer page, easier viewing)
 - Client (23 Oct): "Yes do all except for the you are here and then execute the plan as well then merge to live" (after our offer:

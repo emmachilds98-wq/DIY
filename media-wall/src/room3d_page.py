@@ -371,7 +371,8 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "cotswoldbasket": "Lidded seagrass basket", "recordtable": "Record table", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
               "shelfboxes": "Boxes on your shelf",
               "stairdrawers": "Drawers in the steps", "alcoveshelves": "Alcove shelves", "windowseat": "Storage window seat", "hallbench": "Bench with cubbies",
-              "wardrobe": "Built-in cupboard", "wallcabs": "Wall cabinets, sofa", "overdoor": "Hook rail over the door"}   # v37   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
+              "wardrobe": "Built-in cupboard", "wallcabs": "Wall cabinets, sofa", "overdoor": "Hook rail over the door",
+              "growlights": "Grow lights, plant stand", "curtainmotor": "Curtain motors", "lpledges": "LP ledges, side wall", "cordlamp": "Lamp on the C-table"}   # v43   # v37   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
 IDEA_SHORT = {"case": "Glass case on the breast", "glass": "Glass plant shelves", "ctable": "Sofa C-table", "sync": "TV backlight, picture sync",
               "cushions": "Cushions and a throw", "plantlight": "Uplight under the plants", "rugpad": "Rug pad (corner turned back)",
               "button": "Scene button by the door", "night": "Stair nightlights", "clean": "Record-care caddy"}   # v32: every idea in the room
@@ -456,7 +457,7 @@ def controls(gallery=""):
     ideas_g = ('<div class="grp"><span class="label">Ideas (not in the plan)</span>'
                '<div class="seg r3d-grid" role="group" aria-label="Ideas, not in the plan">'
                + "".join(f'<button type="button" data-idea="{k}" aria-pressed="false" title="{html.escape(size)}">{html.escape(IDEA_SHORT[k])}</button>'
-                         for k, _t, size, *_ in ideas.IDEAS if k != "cushions")      # the cushions are Decor's
+                         for k, _t, size, *_ in ideas.idea_options() if k != "cushions")      # the cushions are Decor's
                + '</div></div>')
     dec = {k: (lab, opts) for k, lab, opts in DECOR}
     MAIN_DECOR = (("ceiling", "The ceiling (to try, for later)"), ("rug", "The rug"))   # v39: Look opens on the walls, the ceiling and the rug
