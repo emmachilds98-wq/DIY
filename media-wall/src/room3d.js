@@ -4032,6 +4032,29 @@ qs("#r3d-save").addEventListener("click", async () => {
   } else st.textContent = "Saving isn’t available in this view.";
 });
 
+/* v39 (the approved redesign): Find: type a piece or a view and the room flies to it */
+function findList() {
+  const names = new Set(Object.values(VIEWS).map(v => v.label));
+  for (const m of Object.values(MOV)) if (m.label && shown(m.pivot)) names.add(m.label.replace(/ \(suggested\)$/, ""));
+  const dl = qs("#r3d-findlist"); if (dl) dl.innerHTML = [...names].sort().map(n => `<option value="${n.replace(/"/g, "&quot;")}"></option>`).join("");
+}
+function findGo(q) {
+  q = (q || "").trim().toLowerCase(); if (!q) return;
+  const v = Object.entries(VIEWS).find(([, V]) => V.label.toLowerCase() === q) || Object.entries(VIEWS).find(([, V]) => V.label.toLowerCase().includes(q));
+  const m = Object.values(MOV).find(x => x.label && shown(x.pivot) && x.label.toLowerCase().startsWith(q)) || Object.values(MOV).find(x => x.label && shown(x.pivot) && x.label.toLowerCase().includes(q));
+  if (m && (!v || !v[1].label.toLowerCase().startsWith(q))) {
+    const b = new THREE.Box3().setFromObject(m.pivot), c = b.getCenter(new THREE.Vector3()), at = [-c.x / M, c.y / M, c.z / M];
+    const room = [R.W / 2, 0, -150], dx = room[0] - at[0], dz = room[2] - at[2], k = 170 / Math.max(1, Math.hypot(dx, dz));
+    flyTo([at[0] + dx * k, Math.max(120, at[1] + 70), at[2] + dz * k], at, 50); if (window.DemmaTools) window.DemmaTools.close(); return;
+  }
+  if (v) { setView(v[0]); if (window.DemmaTools) window.DemmaTools.close(); return; }
+  toast("Nothing by that name in the room");
+}
+qs("#r3d-find")?.addEventListener("focus", findList);
+qs("#r3d-find")?.addEventListener("change", e => findGo(e.target.value));
+qs("#r3d-find")?.addEventListener("keydown", e => { if (e.key === "Enter") findGo(e.target.value); });
+qs("#r3d-findgo")?.addEventListener("click", () => findGo(qs("#r3d-find").value));
+
 /* ---------------------------------------------------------------- the controls */
 function press(attr, val) { qsa(`[data-${attr}]`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === String(val)))); }
 const sameAsScene = () => LAYERS.every(k => (S.lv[k] ?? 0) === (SCENES[S.scene].levels[k] ?? 0));

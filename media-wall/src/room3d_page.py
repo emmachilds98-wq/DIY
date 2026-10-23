@@ -298,6 +298,7 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-momrow button { flex: none; }
 @media (max-width: 899px) { .r3d-planbar { bottom: calc(max(8px, env(safe-area-inset-bottom)) + 84px); } }
 @media (min-width: 900px) { .r3d-panel { top: 80px; } }   /* v39: under Plan · Build · Buy */
+.r3d-find .seg { flex-wrap: nowrap; } .r3d-find input { flex: 1; min-width: 0; min-height: 44px; border: 1.5px solid #e1d6c2; border-radius: 999px; padding: 0 16px; font: 500 15px Figtree, system-ui, sans-serif; background: #fff; color: var(--ink); }
 """
 
 
@@ -390,14 +391,9 @@ def tour():
     return [
         dict(view="room", title="The whole room", text=f"From above the window, the near wall cut away: the media wall, the breast, the door, the stairs and the dining cabinet, under a {g.CEIL:g} ceiling."),
         dict(view="wall", title="The media wall", text=f"Artisan oak in Card Room Green across the {g.ALC_W:g} cm alcove: the TV in line with the sofa, the turntable and the LP crates on the left, the consoles under the TV."),
-        dict(view="pc", title="The PC side wall", text=f"One oak run sweeps round the corner to the PC shelf at {g.PC_SHELF_TOP:g}, its leads inside the wall and a warm strip underneath."),
-        dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
         dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six", "cab": "compact"},
              text=f"The table door swings back flat and the table folds down to {g.CAB['len_open']:g} × {g.CAB['top'][0]:g} for six. Folded, the table and all six chairs pack into {g.CAB['len']:.0f} cm of wall."),
-        dict(view="sit", title="Sitting at the table", set={"site": "C", "dining": "six", "cab": "compact"},
-             text=f"At the table's far end, at a seated eye height: three a side with {g.CAB['len_open'] / 3:.0f} cm of edge each, the table door folded back flat behind them."),
         dict(view="sofa", title="From the sofa", text=f"About {s['view_dist'] / 100:.2f} m from the screen: the 55-inch fills about {s['view_angle']:.0f}° of your view, right for films and games."),
-        dict(view="window", title="From the window", text="The whole wall in one look, over the sofa's back: your plants on the sill behind you."),
         dict(view="plan", title="From above", text="Everything to scale from the plan's own measurements. Drag to look round when the tour ends."),
     ]
 
@@ -492,7 +488,11 @@ def controls(gallery=""):
                 + '<button type="button" data-paintcustom="#2c5643" aria-pressed="false"><i style="--c:#2c5643"></i>Deep green</button>'
                 '<label><i><input type="color" id="r3d-custom" value="#899081" aria-label="Any colour for the walls"></i>Any colour</label></div></div>')
     return {
-        "views": '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
+        # v39 (the approved redesign): Find flies to any piece or view, so nobody hunts through menus
+        "views": '<div class="grp r3d-find"><label class="label" for="r3d-find">Find something in the room</label><div class="seg">'
+                 '<input type="search" id="r3d-find" list="r3d-findlist" placeholder="The record table, the bar, the lamp…" autocomplete="off">'
+                 '<button type="button" class="chip" id="r3d-findgo">Go</button></div><datalist id="r3d-findlist"></datalist></div>'
+                 + '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
                  f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
                  # v37: the lights live here now (they were their own tab): the presets, daytime, every light's slider and colour, the quality
