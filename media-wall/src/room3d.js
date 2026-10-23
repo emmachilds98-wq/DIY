@@ -71,6 +71,7 @@ if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
 if (!S.svar || typeof S.svar !== "object" || Array.isArray(S.svar)) S.svar = {};   // v28: each suggestion's version (its first by default)
 S.decor = Object.assign({}, DEF.decor, (S.decor && typeof S.decor === "object") ? S.decor : {});
+if (!Number.isFinite(S.nowp)) S.nowp = 0;   // v39: the LP facing out on the ledge
 if (!S.picked) S.quality = "fast";   // v35: every device starts in Fast; HD follows if its first frames are quick (autoQuality)
 if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
 if (!Array.isArray(S.added)) S.added = [];
@@ -2615,6 +2616,7 @@ function applyState() {
   adoptLights(scene);                                                              // v35: new lights (a rebuilt bar or lamp) join the fixed set
   updateCaption();
   store.set(KEY, S);
+  try { applyNow(); } catch (e) {}                                       // v39: the ledge's LP
   dirty();
 }
 function applyLight() {
@@ -3682,6 +3684,7 @@ function pickItem(e) {
   if (m && MOV[m.userData.movId]) return "mov:" + m.userData.movId;
   for (const [k, g] of Object.entries(G)) if (under(o, g)) {
     if (k === "unit_in" || k === "unit_out") return "wall";
+    if (k === "now_ledge") return "nowplay";                                   // v39: the LP facing out on the ledge
     if (/^[AB]_/.test(k)) return "table";
     if (near(tvScreen, 70)) return "tv";                                       // the TV's own frame and stand are in the room's fixed parts
     if (near(lboxFace, 30)) return "lbox";
@@ -3693,6 +3696,12 @@ function pickItem(e) {
 const btn = (label, attrs, on, cls, aria) => ({ label, attrs, on, cls, aria });
 function actItems(id) {     // [title, how it is now, buttons]
   const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
+  if (id === "nowplay") return ["Now playing, on the ledge", `${NOWP[S.nowp % NOWP.length].name}`, [   // v39: which LP faces out
+      btn("‹", { nowp: "-1" }, false, "q", "The one before"), btn("›", { nowp: "1" }, false, "q", "The next one"),
+      btn("A photo of yours", { nowpic: "1" }), btn("Look at it", { view: "breast" })]];
+  if (id === "measure") { const d = MEAS.d;                               // v39: measure in 3D
+    return ["Measure", d ? `${d.toFixed(1)} cm between them (${MEAS.dh.toFixed(1)} across, ${MEAS.dv.toFixed(1)} up)` : MEAS.a ? "Now tap the second point" : "Tap the first point in the room", [
+      btn("Measure again", { measure: "again" }), btn("Done", { measure: "done" })]]; }
   if (id.startsWith("opt:")) {                                            // v39: Try options' card: this place's options, ‹ › through them
     const [, pl, ix] = id.split(":"), L = placeOpts(pl); if (!L.length) return null;
     const i = ((+ix % L.length) + L.length) % L.length, [g, it] = L[i], on = optOn(it), firm = isFirm(it);
@@ -3725,6 +3734,7 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id === "wall") return ["The media wall", S.drawers ? "Every drawer pulled out" : "Drawers shut", [
       btn(S.drawers ? "Push the drawers in" : "Pull the drawers out", { drawers: S.drawers ? "in" : "out" }),
       btn(lv("bias") ? "TV off" : "TV on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"),
+      btn("Choose the LP on the ledge", { actopen: "nowplay" }),               // v39: "a now playing swap: tap the turntable"
       btn("Look at it", { view: "wall" }), btn("Read about it", { actgo: "wall" })]];
   if (id === "tv") return ["The TV", lv("bias") ? "On, its bias light behind it" : "Off", [
       btn(lv("bias") ? "Turn it off" : "Turn it on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"), btn("Look at it", { view: "sofa" })]];
@@ -3850,12 +3860,17 @@ if (act) {
     if (d.optcyc) { const [pl, ix] = d.optcyc.split(":"), L = placeOpts(pl), i = ((+ix % L.length) + L.length) % L.length, [g, it] = L[i];   // v39
       if (!optOn(it)) optPick(g.k, it.v); actId = `opt:${pl}:${i}`; renderAct(); return; }
     if (d.optkeep) { closeAct(); return; }
+    if (d.actopen) { actId = d.actopen; renderAct(); return; }
+    if (d.nowp) { S.nowp = ((S.nowp || 0) + +d.nowp + NOWP.length) % NOWP.length; applyNow(); store.set(KEY, S); renderAct(); return; }
+    if (d.nowpic) { pickNowPic(); return; }
+    if (d.measure) { if (d.measure === "done") { endMeasure(); closeAct(); } else { clearMeasure(); renderAct(); } return; }
     if (d.view) setTimeout(closeAct, 0);                     // the room flies there; the card has done its job
   });
   canvas.addEventListener("pointerdown", e => { tapDown = (S.edit || e.button > 0) ? null : [e.clientX, e.clientY, performance.now()]; if (actId) closeAct(); });
   canvas.addEventListener("pointerup", e => {
     const t = tapDown; tapDown = null;
     if (!t || S.edit || Math.hypot(e.clientX - t[0], e.clientY - t[1]) > 6 || performance.now() - t[2] > 600) return;
+    if (MEAS.on) { measureTap(e); return; }                                   // v39: measure in 3D
     let id = pickItem(e); if (!id) return;
     const r = stage.getBoundingClientRect();
     if (tryOpts) { const pl = placeOf(id); if (pl) id = `opt:${pl}:${placeIx(pl, id)}`; }             // v39: Try options: what else could go here
@@ -4031,6 +4046,95 @@ qs("#r3d-save").addEventListener("click", async () => {
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = stillName(); a.click(); st.textContent = "Saved.";
   } else st.textContent = "Saving isn’t available in this view.";
 });
+
+/* v39, UPGRADE_PLAN_v38 item 13 ("measure in 3D: tap two points to read the distance, so you can check a gap yourselves") */
+const MEAS = { on: false, a: null, d: 0, dh: 0, dv: 0, g: null };
+function clearMeasure() { MEAS.a = null; MEAS.d = 0; if (MEAS.g) { scene.remove(MEAS.g); MEAS.g.traverse(o => o.geometry && o.geometry.dispose()); MEAS.g = null; } dirty(); }
+function endMeasure() { MEAS.on = false; clearMeasure(); root.classList.remove("measuring"); }
+function startMeasure() { if (window.DemmaTools) window.DemmaTools.close(); MEAS.on = true; clearMeasure(); root.classList.add("measuring");
+  openAct("measure", [stage.clientWidth / 2, 80]); }
+const measMat = new THREE.MeshBasicMaterial({ color: "#ffcc33", depthTest: false, toneMapped: false });
+function measureTap(e) {
+  ray.setFromCamera(ndc(e), camera);
+  const hit = ray.intersectObjects(scene.children, true).find(h => h.object.isMesh && shown(h.object) && !clippedAt(h.point) && h.object.material !== measMat);
+  if (!hit) return;
+  if (!MEAS.g || MEAS.d) { clearMeasure(); MEAS.g = new THREE.Group(); MEAS.g.renderOrder = 999; scene.add(MEAS.g); }
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 8), measMat); dot.position.copy(hit.point); dot.renderOrder = 999; MEAS.g.add(dot);
+  if (!MEAS.a) MEAS.a = hit.point.clone();
+  else { const a = MEAS.a, b = hit.point, d = b.clone().sub(a);
+    MEAS.d = d.length() / M; MEAS.dh = Math.hypot(d.x, d.z) / M; MEAS.dv = Math.abs(d.y) / M;
+    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, d.length(), 6), measMat);
+    line.position.copy(a).add(b).multiplyScalar(0.5); line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); line.renderOrder = 999; MEAS.g.add(line); }
+  dirty(); actId = "measure"; act.hidden = false; renderAct();
+}
+/* v39, item 13 ("a now playing swap: tap the turntable to choose which LP faces out on the ledge"): the left LP on the breast's ledge
+   wears one of these covers, or a photo of one of yours (kept on this device) */
+const NOWP = [{ name: "Sunburst", draw: (g, w) => { const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w * 0.7); gr.addColorStop(0, "#ffd36b"); gr.addColorStop(1, "#c8452f"); g.fillStyle = gr; g.fillRect(0, 0, w, w); } },
+  { name: "Blue stripes", draw: (g, w) => { g.fillStyle = "#1f2f4f"; g.fillRect(0, 0, w, w); g.fillStyle = "#7fb2e5"; for (let i = 0; i < 8; i++) g.fillRect(0, i * w / 8 + w / 32, w, w / 32); } },
+  { name: "Moon", draw: (g, w) => { g.fillStyle = "#121318"; g.fillRect(0, 0, w, w); g.fillStyle = "#f2efe8"; g.beginPath(); g.arc(w * 0.6, w * 0.4, w * 0.22, 0, 7); g.fill(); g.fillStyle = "#121318"; g.beginPath(); g.arc(w * 0.68, w * 0.36, w * 0.2, 0, 7); g.fill(); } },
+  { name: "Green grid", draw: (g, w) => { g.fillStyle = "#e8e2d0"; g.fillRect(0, 0, w, w); g.fillStyle = "#3f6b3a"; for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if ((i + j) % 2) g.fillRect(i * w / 6, j * w / 6, w / 6, w / 6); } },
+  { name: "Pink waves", draw: (g, w) => { g.fillStyle = "#ffd6e5"; g.fillRect(0, 0, w, w); g.strokeStyle = "#d24b7a"; g.lineWidth = w / 40; for (let i = 0; i < 9; i++) { g.beginPath(); for (let x = 0; x <= w; x += 8) g.lineTo(x, i * w / 8 + Math.sin(x / 30) * 10); g.stroke(); } } },
+  { name: "Plain black", draw: (g, w) => { g.fillStyle = "#151515"; g.fillRect(0, 0, w, w); g.fillStyle = "#c8a24a"; g.font = `bold ${w / 9}px sans-serif`; g.fillText("33⅓", w * 0.08, w * 0.9); } },
+  { name: "Your photo", draw: null }];
+let nowMesh = null, nowPic = null;
+function applyNow() {
+  if (!G.now_ledge) return;
+  if (!nowMesh) {                       // a cover over the ledge's left LP (its corners from the plan's drawing)
+    const c = [[194.82, 104.008, -5.059], [226.22, 104.008, -5.059], [226.22, 135.098, -0.689], [194.82, 135.098, -0.689]].map(p => v3(p[0], p[1], p[2] + 0.15));
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(c.flatMap(v => [v.x, v.y, v.z]), 3));
+    geo.setAttribute("uv", new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2)); geo.setIndex([0, 2, 1, 0, 3, 2]); geo.computeVertexNormals();
+    nowMesh = new THREE.Mesh(geo, reg(new THREE.MeshStandardMaterial({ roughness: 0.55, side: THREE.DoubleSide }))); G.now_ledge.add(nowMesh);
+  }
+  const k = (S.nowp || 0) % NOWP.length, P = NOWP[k];
+  if (!P.tex) P.tex = P.draw ? canvasTex(256, 256, (g, w) => P.draw(g, w)) : null;
+  const t = P.draw ? P.tex : nowPic;
+  nowMesh.visible = !!t; if (t && nowMesh.material.map !== t) { nowMesh.material.map = t; nowMesh.material.needsUpdate = true; } dirty();
+}
+function pickNowPic() {                 // a photo of one of your records: scaled to 512 square, kept on this device
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) return; const img = new Image(); img.onload = () => {
+    const c = document.createElement("canvas"); c.width = c.height = 512; const g = c.getContext("2d"), s0 = Math.min(img.width, img.height);
+    g.drawImage(img, (img.width - s0) / 2, (img.height - s0) / 2, s0, s0, 0, 0, 512, 512);
+    try { localStorage.setItem("mw39-nowpic", c.toDataURL("image/jpeg", 0.85)); } catch (e) {}
+    nowPic = new THREE.CanvasTexture(c); nowPic.colorSpace = THREE.SRGBColorSpace; S.nowp = NOWP.length - 1; applyNow(); store.set(KEY, S); renderAct(); };
+    img.src = URL.createObjectURL(f); }; inp.click();
+}
+try { const u = localStorage.getItem("mw39-nowpic"); if (u) { const img = new Image(); img.onload = () => { nowPic = new THREE.Texture(img); nowPic.colorSpace = THREE.SRGBColorSpace; nowPic.needsUpdate = true; applyNow(); }; img.src = u; } } catch (e) {}
+/* v39, item 13 ("your own light scenes: save a set of fixture angles and head settings as a named scene next to the presets"), kept on
+   this device; and "Save my plan": your picks and a link to this room, to paste to us */
+const MYK = "mw39-scenes";
+function myScenes() { try { return JSON.parse(localStorage.getItem(MYK) || "[]"); } catch (e) { return []; } }
+function drawMyScenes() {
+  const box = qs("#r3d-myscl"); if (!box) return; const L = myScenes();
+  box.innerHTML = L.length ? L.map((x, i) => `<span class="r3d-mysc"><button type="button" data-myscene="${i}">${x.name.replace(/[<&"]/g, "")}</button><button type="button" class="r3d-myx" data-mydel="${i}" aria-label="Delete ${x.name.replace(/[<&"]/g, "")}">×</button></span>`).join("")
+    : '<span class="caption">None yet: set the lights, name it, save.</span>';
+}
+function saveMyScene() {
+  const inp = qs("#r3d-myname"), name = (inp && inp.value.trim()) || `Scene ${myScenes().length + 1}`;
+  const L = myScenes().filter(x => x.name !== name); L.push({ name, scene: S.scene, tod: S.tod, lv: S.lv, master: S.master, col: S.col, fix: S.fix, head: S.head });
+  try { localStorage.setItem(MYK, JSON.stringify(L.slice(-12))); } catch (e) {} if (inp) inp.value = ""; drawMyScenes(); toast(`Saved: ${name}`);
+}
+function useMyScene(i) {
+  const x = myScenes()[i]; if (!x) return;
+  if (x.scene in SCENES) S.scene = x.scene; if (x.tod) S.tod = x.tod;
+  S.lv = Object.assign({}, S.lv, x.lv || {}); S.master = Number.isFinite(+x.master) ? +x.master : 100; S.col = Object.assign({}, S.col, x.col || {});
+  S.fix = Object.assign({}, x.fix || {}); S.head = JSON.parse(JSON.stringify(x.head || {}));
+  applyState(); syncButtons(); toast(x.name);
+}
+function saveMyPlan() {
+  const text = "Our plan from the 3D room:\n" + (pickText(picks()) || "Your plan as it is") + "\nThe room as we have it: " + lookUrl();
+  const st = qs("#r3d-myplanst");
+  const done = () => { if (st) st.textContent = "Copied: paste it into your next message to us."; toast("Plan copied"); };
+  try { navigator.clipboard.writeText(text).then(done, () => { if (st) st.textContent = text; }); } catch (e) { if (st) st.textContent = text; }
+}
+qs("#r3d-mysave")?.addEventListener("click", saveMyScene);
+qs("#r3d-myname")?.addEventListener("keydown", e => { if (e.key === "Enter") saveMyScene(); });
+qs("#r3d-myscl")?.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.mydel) { const L = myScenes(); L.splice(+b.dataset.mydel, 1); try { localStorage.setItem(MYK, JSON.stringify(L)); } catch (er) {} drawMyScenes(); }
+  else if (b.dataset.myscene) useMyScene(+b.dataset.myscene); });
+qsa("[data-myplan]").forEach(b => b.addEventListener("click", saveMyPlan));
+qs("#r3d-measure")?.addEventListener("click", startMeasure);
+drawMyScenes();
 
 /* v39 (the approved redesign): Find: type a piece or a view and the room flies to it */
 function findList() {
@@ -4247,6 +4351,8 @@ root.addEventListener("click", e => {
   else if (d.plants) {           // v18: the layout puts the stand and the shelf back on their spots for it
     S.plants = d.plants; for (const k of ["plants", "records"]) if (S.layout[k]) { delete S.layout[k].x; delete S.layout[k].z; delete S.layout[k].rot; }
     applyState(); }
+  else if (d.feature) {                                                                                // v39, item 13: feature-wall presets
+    S.walls = {}; if (d.feature !== "none") S.walls[d.feature] = "#5e6a5b"; repaint(); updateCaption(); store.set(KEY, S); dirty(); }
   else if (d.lookwall) lookWall = d.lookwall;                                                        // v38: which wall the paints go on
   else if (d.wallmatch) setWall(lookWall, "match"), repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.paint) (lookWall === "all" ? (S.paint = d.paint) : setWall(lookWall, d.paint)), repaint(), updateCaption(), store.set(KEY, S), dirty();

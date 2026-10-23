@@ -299,6 +299,8 @@ details.r3d-more[open] > summary::before { content: "– "; }
 @media (max-width: 899px) { .r3d-planbar { bottom: calc(max(8px, env(safe-area-inset-bottom)) + 84px); } }
 @media (min-width: 900px) { .r3d-panel { top: 80px; } }   /* v39: under Plan · Build · Buy */
 .r3d-find .seg { flex-wrap: nowrap; } .r3d-find input { flex: 1; min-width: 0; min-height: 44px; border: 1.5px solid #e1d6c2; border-radius: 999px; padding: 0 16px; font: 500 15px Figtree, system-ui, sans-serif; background: #fff; color: var(--ink); }
+.r3d-mysc { display: inline-flex; } .r3d-mysc button:first-child { border-radius: 999px 0 0 999px !important; } .r3d-myx { border-radius: 0 999px 999px 0 !important; padding: 0 12px !important; }
+.r3d.measuring canvas { cursor: crosshair; }
 """
 
 
@@ -425,6 +427,10 @@ def controls(gallery=""):
     tiles = "".join(f'<button type="button" data-scene="{k}" aria-pressed="false"><span class="ms" aria-hidden="true">{icons.get(k, "lightbulb")}</span><b>{html.escape(n)}</b>'
                     f'<span>{html.escape(TILE_SUB.get(k, d.split(":")[0].split(",")[0]))}</span></button>' for k, n, d, *_ in scenes.SCENES)
     lights = (f'<div class="grp"><span class="label">Three presets: tap one (tap it again to undo your changes)</span><div class="r3d-tiles" role="group" aria-label="Lighting presets">{tiles}</div></div>'
+              # v39, item 13: your own scenes, next to the presets (this device)
+              '<div class="grp" id="r3d-myscenes"><span class="label">Your own scenes</span><div class="seg" id="r3d-myscl"></div>'
+              '<div class="seg r3d-find"><input type="text" id="r3d-myname" placeholder="Our evening" aria-label="Name for these lights" maxlength="24">'
+              '<button type="button" class="chip" id="r3d-mysave">Save these lights</button></div></div>'
               f'<p class="r3d-boost" id="r3d-boost" hidden><span class="ms" aria-hidden="true">restaurant</span> The table\'s open, so bar 2 lights it.</p>'
               + seg("tod", scenes.TOD, "Time of day")
               + '<details class="r3d-more"><summary>Fine-tune each light</summary>'
@@ -492,6 +498,8 @@ def controls(gallery=""):
         "views": '<div class="grp r3d-find"><label class="label" for="r3d-find">Find something in the room</label><div class="seg">'
                  '<input type="search" id="r3d-find" list="r3d-findlist" placeholder="The record table, the bar, the lamp…" autocomplete="off">'
                  '<button type="button" class="chip" id="r3d-findgo">Go</button></div><datalist id="r3d-findlist"></datalist></div>'
+                 # v39, item 13: measure in 3D
+                 + '<div class="grp"><div class="seg"><button type="button" class="chip" id="r3d-measure"><span class="ms" aria-hidden="true">straighten</span> Measure: tap two points</button></div></div>'
                  + '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
                  f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
@@ -540,8 +548,13 @@ def controls(gallery=""):
             '</details>',
             '<details class="r3d-more r3d-fold" id="r3d-optfold"><summary>Options, ideas and your own furniture</summary>',
             opts_html(), picks, ideas_g, sugg_g,
-            '<p class="caption"><button type="button" class="chip" data-nav="ideas">Every idea, with pictures</button></p></details>']),
-        "look": swatches + decor_main + '<details class="r3d-more r3d-fold"><summary>More: the oak, the floor, cushions, curtains</summary>' + trims + decor_g + '</details>',
+            '<p class="caption"><button type="button" class="chip" data-nav="ideas">Every idea, with pictures</button></p></details>',
+            # v39, item 13: "Save my plan": your picks and a link to this room, to paste to us
+            '<div class="grp"><div class="seg"><button type="button" class="btn primary" data-myplan="1"><span class="ms" aria-hidden="true">send</span> Save my plan</button></div>'
+            '<span class="caption" id="r3d-myplanst" aria-live="polite">Copies your picks and a link to this room, to send us.</span></div>']),
+        "look": swatches + '<div class="grp"><span class="label">A feature wall</span><div class="seg" role="group" aria-label="A feature wall">'
+                 '<button type="button" data-feature="breast">The breast in Green Smoke</button><button type="button" data-feature="media">The media wall in Green Smoke</button>'
+                 '<button type="button" data-feature="none">All one colour</button></div></div>' + decor_main + '<details class="r3d-more r3d-fold"><summary>More: the oak, the floor, cushions, curtains</summary>' + trims + decor_g + '</details>',
     }
 
 
