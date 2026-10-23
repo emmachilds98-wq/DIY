@@ -1099,7 +1099,7 @@ def buy_first_html():
 
 
 def guide_html():
-    return (GUIDE_RULES + buy_first_html() + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html() + wiring_html()
+    return (GUIDE_RULES + fit.measure_html() + buy_first_html() + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html() + wiring_html()
             + GUIDE_TIME + GUIDE_PITFALLS + "<h3>The cutting list</h3>" + cuts_html() + nest_html())
 
 
