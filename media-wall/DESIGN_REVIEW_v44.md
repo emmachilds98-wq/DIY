@@ -49,3 +49,14 @@ the thing you came for.
 2. **Remove the repeats:** Up next and the 90/80 comparison from Plan; the build-order list into a fold on Buy.
 3. **Link the three:** How to make it from Buy and from a piece in the room straight to its Build card; one PDF button on Plan and
    Build.
+
+### After (v44, phone 390 wide)
+| Sheet | Before | After | What changed |
+|---|---|---|---|
+| Plan | about 9 screens | about 6 | Up next and the 90/80 comparison gone; the money table folded; a PDF button at the top |
+| Build | about 19 screens | about 3 closed | One card per thing you make (Buy · Cut · Build), Jobs (Buy · Do), Start here; the 14 step ticks in one fold; a Next line; the merchant list folded; one PDF button; one card open at a time |
+| Buy | about 4.5 screens | about 2.3 | By piece first, each with How to make it; the build-order list with ticks and Paid in one fold |
+| Room | | | How to make it on the cabinet, the media wall, the PC, the bar, the record table, the C-table and the fitted pieces |
+
+On a phone each card's buy list is one row per thing (name and £, the detail and shop under it) instead of a four-column table, and
+the cut drawings scroll sideways at a readable size.

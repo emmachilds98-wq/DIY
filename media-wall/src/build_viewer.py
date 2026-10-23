@@ -643,6 +643,74 @@ def decor_block():
             f'<div class="gallery">{figs}</div>{b}')
 
 
+# v44 (the design review): Build in one card per thing you make, the guide's chapters, each with Buy · Cut · Build tabs
+def _tabs(key, panes):
+    """[(label, html)] as a tab row and its panes, the first shown."""
+    bt = "".join(f'<button type="button" role="tab" id="tb-{key}-{i}" aria-selected="{str(i == 0).lower()}" aria-controls="tp-{key}-{i}" data-tab="{lab.lower()}">{lab}</button>'
+                 for i, (lab, _h) in enumerate(panes))
+    ps = "".join(f'<div class="tp doc" role="tabpanel" id="tp-{key}-{i}" aria-labelledby="tb-{key}-{i}" data-pane="{lab.lower()}"{"" if i == 0 else " hidden"}>{h}</div>'
+                 for i, (lab, h) in enumerate(panes))
+    return f'<div class="tabs" role="tablist" aria-label="Buy, cut, build">{bt}</div>{ps}'
+
+
+def buy_list(rows):
+    """A chapter's buy rows for a phone: name and £ on one line, the full text and the shop under it."""
+    if not rows:
+        return "<p class='note'>Nothing to buy.</p>"
+    li = "".join(f'<li><span class="bq">{html.escape(str(q))}</span><b>{nm}</b><span class="bm">£{money(a, b)}</span><small>{full} · <i>{w}</i></small></li>'
+                 for q, nm, full, a, b, w in rows)
+    return (f'<ul class="blist">{li}<li class="tot"><span></span><b>Total</b><span class="bm">£{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}</span></li></ul>'
+            '<p><a href="#buy" data-go="buy">Tick them off in Buy</a></p>')
+
+
+def build_cards():
+    """(the Things to make cards, the Jobs cards, the Start here card, {step: card id})."""
+    import build_doc as B, chapters as C
+    was, B.DECK = B.DECK, True
+    try:
+        to, mk, jb = {1: "mk-start", 5: "mk-start"}, [], []
+        days = lambda spec: [n for n, h in spec]
+        def head(num, title, meta, pic=None):
+            im = f'<span class="mkpic">{B.thumb(pic, title)}</span>' if pic else f'<span class="mkpic mkic" aria-hidden="true">{num}</span>'
+            return (f'<summary>{im}<span class="mkt"><b>{f"{num} · " if pic else ""}{html.escape(title)}</b><small>{meta}</small></span>'
+                    f'<span class="mkd ms" aria-hidden="true">check_circle</span></summary>')
+        def bday(spec):
+            ws = [n for n, h in spec if h is None]
+            return "".join(f'<p><button type="button" class="btn" data-bday="{n}"><span class="ms" aria-hidden="true">handyman</span> Build day: step <b>{n}</b> on one screen</button></p>' for n in ws)
+        for i, c in enumerate(C.MAKE, 1):
+            key, title, what, pic, spec, buy, time, who = c
+            rows = C.buy_rows(buy)
+            for n, _h in spec:
+                to.setdefault(n, f"mk-{key}")
+            body = _tabs(key, [("Buy", buy_list(rows)), ("Cut", C.cut_html(key)), ("Build", C.build_html(spec) + bday(spec))])
+            mk.append(f'<details class="mk" name="mk" id="mk-{key}" data-steps="{" ".join(map(str, days(spec)))}" style="--h:{(i * 37 + 20) % 360}">'
+                      + head(i, title, f"{time} · {who} · £{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}", pic)
+                      + f'<div class="mkb"><p class="lede">{what}</p>{body}</div></details>')
+        for j in C.JOBS:
+            key, title, what, spec, buy, time = j
+            rows = C.buy_rows(buy)
+            for n, _h in spec:
+                to.setdefault(n, f"job-{key}")
+            extra = B.wiring_html() if key == "cables" else ""
+            body = _tabs(key, [("Buy", buy_list(rows)), ("Do", C.build_html(spec) + extra + bday(spec))])
+            jb.append(f'<details class="mk job" name="mk" id="job-{key}" data-steps="{" ".join(map(str, days(spec)))}">'
+                      + head(C.JOB_LETTER[key], title, f"{time} · £{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}")
+                      + f'<div class="mkb"><p class="lede">{what}</p>{body}</div></details>')
+        start = ('<details class="mk job" name="mk" id="mk-start" data-steps="1 5">' + head("★", "Start here: mark the heights", "Steps 1 and 5 · ½ day")
+                 + '<div class="mkb"><div class="doc">' + C.RULES + C.build_html([(1, None), (5, None)], full_step_extras=False) + bday([(1, None), (5, None)])
+                 + f'<details class="fold"><summary>The measuring sheet</summary>{fit.measure_html()}</details></div></div></details>')
+        fix = lambda h: deck_section(C._retarget(h))
+        return fix("".join(mk)), fix("".join(jb)), fix(start), to
+    finally:
+        B.DECK = was
+
+
+# v44: each cost piece's card in Build
+HOW = {"The media wall": "mk-base", "The side wall and the PC": "mk-sidewall", "The dining cabinet": "mk-cabinet", "The chimney breast": "mk-glasscase",
+       "Your picks": "mk-fitted", "Lighting": "job-lighting", "Paint": "job-paint", "Network": "job-network", "Electrics (your own job)": "job-cables",
+       "Power and cables": "job-cables", "TV, consoles and AV": "job-connect", "Vinyl kit": "job-connect"}
+
+
 def cost_overview():
     """v32, client: "a cost overview that shows each piece and list breakdown of shopping items ... clear buy list and estimated cost
     without incorporating large explanations": each piece, its things to buy (quantity × short name) and their estimates."""
@@ -652,7 +720,8 @@ def cost_overview():
     cards = "".join(
         f'<details class="cpiece"><summary><span class="cpn">{html.escape(p)}</span><span class="cpc">£{money(lo, hi)}</span><span class="cpi">{len(items)} to buy</span></summary>'
         f'<table class="ctab"><tbody>' + "".join(f'<tr><td class="q">{html.escape(costs.qty(q))}</td><td>{html.escape(n)}</td><td class="m">£{money(a, b)}</td></tr>' for q, n, a, b in items)
-        + '</tbody></table></details>' for p, lo, hi, items in ov)
+        + '</tbody></table>' + (f'<p class="cmk"><a class="btn" href="#{HOW[p]}" data-mk="{HOW[p]}" data-tab="build"><span class="ms" aria-hidden="true">construction</span> How to make it</a></p>' if p in HOW else "")
+        + '</details>' for p, lo, hi, items in ov)
     return (f'<div class="qhead"><h3 class="ptitle">Cost overview</h3><span class="caption">Each piece, what to buy for it, and about what it costs: £{money(tl, th)} in all</span></div>'
             f'<div class="cpieces">{cards}</div>'
             f'<p class="cfoot"><button type="button" class="btn" id="co-copy"><span class="ms" aria-hidden="true">content_copy</span> Copy the shopping list</button>'
@@ -952,34 +1021,17 @@ def _page(site=False):
                    + lis.replace("in Olive (or Honey or Ivory)", '<span data-pickpads>in Olive (or Honey or Ivory)</span>'))
         ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{part_chip(PHASE_PART[p["name"]])} {html.escape(p["name"])}</span>'
                        f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')
-    step_cards = []
-    for s in steps():
-        buy = "".join(f'<a class="chip" href="#buy" data-go="buy" data-phase="{p["idx"]}">{html.escape(p["label"])} · {"£" + money(p["lo"], p["hi"]) if p["hi"] else "jobs"}</a>'
-                      for p in phases if p["name"] in s["buy"])
-        see = " · ".join(f'<a href="#{t}" data-go="{t}" data-find="{html.escape(lab)}">{html.escape(lab)}</a>' for t, lab in s["see"])
-        step_cards.append(
-            f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}" data-parts="{html.escape("|".join(s["part"]))}"><div class="shead"><span class="sn">{s["n"]}</span>'
-            f'<div><p class="sparts">{part_chip(s["part"])}</p><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></div>'
-            f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"> Done</label>'
-            f'<button type="button" class="sopen" aria-expanded="true" aria-controls="sb-{s["n"]}">Close</button></div>'
-            f'<p class="sbday"><button type="button" class="btn" data-bday="{s["n"]}"><span class="ms" aria-hidden="true">handyman</span> Build day: this step on one screen</button></p>'
-            f'<div class="sbody" id="sb-{s["n"]}">'
-            + (f'<p class="sbuy"><span class="label">Buy first</span>{buy}</p>' if buy else "")
-            + need_html(s)
-            + ("<details class=\"sdraw\" open><summary>" + ("Drawing" if len(s.get("draw", [])) == 1 else "Drawings") + " for this step</summary>"
-               + "".join(f'<figure class="dia">{getattr(D, DIAGRAMS[d])()}</figure>' for d in s["draw"]) + "</details>" if s.get("draw") else "")
-            + f'<details class="readmore sfullwrap" style="--h:50"><summary>Read the full step <span class="ms" aria-hidden="true">expand_more</span></summary><div class="sfull">{full_html(s)}</div></details>'
-            f'<p class="scheck"><b>Check before moving on:</b> {s["check"]}</p>'
-            f'<p class="ssee">Also see: {see}</p>'
-            f'<p class="snext"><button type="button" class="btn" data-next="{s["n"]}">Next step →</button></p></div></li>')
+    mk_cards, job_cards, start_card, STEP_CARD = build_cards()   # v44: one card per thing you make
+    step_cards = [
+        f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}" data-parts="{html.escape("|".join(s["part"]))}"><div class="shead"><span class="sn">{s["n"]}</span>'
+        f'<a class="sgo" href="#{STEP_CARD[s["n"]]}" data-mk="{STEP_CARD[s["n"]]}"><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></a>'
+        f'<label class="sdone" for="sd-{s["n"]}"><input type="checkbox" id="sd-{s["n"]}"><span class="sr-only">Step {s["n"]} done</span></label></div></li>'
+        for s in steps()]
     data = {"img": imgs, "track": [{k: r[k] for k in ("id", "phase", "lo", "hi", "done", "kind")} for r in rows],
             "phases": [{k: p[k] for k in ("name", "idx", "lo", "hi")} for p in phases], "top": 200 * -(-max(p["hi"] for p in phases) // 200),
             "steps": len(steps()), "tabs": [t for t, _ in TABS],
             # v33: one count, Decide, the shortlist, build day (plan_ui.py)
-            "plan": [lo_tot, hi_tot], "decide": PU.decisions(), "short": PU.shortlist(), "bday": PU.buildday(steps())}
-    used = [k for k in PARTS if any(k in st["part"] for st in steps())]
-    part_buttons = "".join(f'<button type="button" data-part="{html.escape(k)}" aria-pressed="false"><span class="dot" style="background:{PARTS[k]}"></span>{html.escape(k)}</button>' for k in used)
-    segbar = "".join(f'<i data-s="{s["n"]}" style="--pc:{PARTS[s["part"][0]]}" title="{s["n"]}. {html.escape(s["title"])}"></i>' for s in steps())
+            "plan": [lo_tot, hi_tot], "decide": PU.decisions(), "short": PU.shortlist(), "bday": PU.buildday(steps()), "stepcard": STEP_CARD}
     base = "media-wall/out/" if site else GITHUB_OUT
     TILE_ID = {"views": "tb-views", "wall": "tb-wall", "dining": "tb-dining", "paint": "tb-paint", "network": "tb-network", "fit": "tb-checks"}
     tiles = "".join(f'<button type="button" class="ctile"{(" id=" + chr(34) + TILE_ID[k] + chr(34)) if k in TILE_ID else ""} data-go="{k}" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i><span>{html.escape(t)}<br><small>{html.escape(sub)}</small></span></button>'
@@ -1012,17 +1064,16 @@ def _page(site=False):
               else f'<p class="caption">Also on <a href="{PAGES}" target="_blank" rel="noopener">GitHub Pages</a>.</p>')
 
     plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
-      <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the compact dining cabinet, the network and power: about <b id="d-total">£{money(lo_tot, hi_tot)}</b> in all.</p></div>
+      <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the compact dining cabinet, the network and power: about <b id="d-total">£{money(lo_tot, hi_tot)}</b> in all.</p>
+        <p class="row"><a class="btn" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> The plan (PDF)</a></p></div>
       {PU.plan_home(ring, sum(1 for r in rows if r["kind"] == "buy"), len(steps())).replace("{MONEY}", PU.money_html(TRACK))}
-      <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
+      <div class="upnext" hidden><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
       <div class="sec-h"><h2>Before and after</h2></div>
       {before_after(prefix)}
       <div class="sec-h"><h2>Chapters</h2></div>
       <div class="tilegrid">{tiles}</div>
-      <div class="sec-h"><h2>The table: 90 or 80 wide, side by side</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
-      {options_card()}
       <details class="fold"><summary>The plan on a page</summary><div class="doc">{s1}</div></details>
       <!--keep--><details class="fold changes"><summary>What changed in v{VERSION}</summary><div class="doc"><p>{decision}</p></div></details><!--/keep-->
     </div></div>"""
@@ -1093,19 +1144,23 @@ def _page(site=False):
                              f'<p class="caption">Demma Home Improvements · Portsmouth Close · living room · v{VERSION}</p></div>'),
     ])
     build_body = f"""<section class="panel" id="build">
-    <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div><label class="sdone sall" for="s-all"><input type="checkbox" id="s-all"> All open</label></div>
-    <div class="segbar" id="segbar" style="--n:{len(steps())}" aria-hidden="true">{segbar}</div>
+    <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div>
+      <a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> Build guide (PDF)</a></div>
     <p class="caption sr-only" id="s-note">Tick each step when it's done; it saves for both of you.</p>
-    <div class="group pfilter"><span class="label sr-only" id="l-part">Show one part</span>
-      <div class="seg" role="group" aria-labelledby="l-part" id="part-filter"><button type="button" data-part="" aria-pressed="true">All parts</button>{part_buttons}</div>
-      <p class="caption" id="pf-note" aria-live="polite"></p></div>
-    <ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol>
-    <div class="block" id="cuts">
-      <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
+    <div class="bnext" id="b-next" hidden><span class="label">Next</span><a href="#build" id="b-nexta" data-mk=""><b id="b-nextt"></b> <span class="caption" id="b-nextm"></span></a></div>
+    <details class="fold" id="order"><summary>The order of work: {len(steps())} steps, tick each when done</summary><ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol></details>
+    {start_card}
+    <div class="sec-h"><h2>Things to make</h2></div>
+    <div class="mks">{mk_cards}</div>
+    <div class="sec-h"><h2>Jobs</h2></div>
+    <div class="mks">{job_cards}</div>
+    <details class="fold" id="cuts"><summary>For the timber merchant: the cutting list</summary>
+      <div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div>
       <textarea id="cuts-box" class="caption" rows="8" hidden readonly aria-label="The cutting list as text">{html.escape(cuts_text())}</textarea>
+      <h2 class="ptitle sr-only">Cutting list for the timber merchant</h2>
       <div class="doc">{deck_section(cuts_html())}</div>
-    </div>
-    <details class="fold"><summary>Before you start: how the guide works, time, tools, techniques and pitfalls</summary><div class="doc">{GUIDE_RULES}{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div></details>
+    </details>
+    <details class="fold"><summary>Good to know: time, tools, techniques and pitfalls</summary><div class="doc">{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div></details>
   </section>"""
     buy_body = f"""<section class="panel" id="buy">
     <div class="tiles">
@@ -1116,7 +1171,8 @@ def _page(site=False):
     </div>
     <div class="picked" id="picked" hidden><div class="qhead"><h3 class="ptitle">Added by you</h3><span class="caption" id="picked-sum"></span></div><ul id="picked-l"></ul></div>
     {cost_overview()}
-    <div class="qhead"><h3 class="ptitle">The buy list, in build order</h3>
+    <details class="fold" id="buyorder"><summary>The shopping list in build order: tick it off, note what you paid</summary>
+    <div class="qhead">
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-filter="all" aria-pressed="true">Everything</button>
         <button type="button" data-filter="left" aria-pressed="false">Still to buy</button>
@@ -1125,7 +1181,7 @@ def _page(site=False):
       </div></div>
     <p class="caption" id="t-note">Each phase names the step it's for. Tick what you buy and note what you paid; you both see it.</p>
     <div id="tracker">{"".join(ph_html)}</div>
-    <details class="fold"><summary>Cost by phase, low to high</summary>{cost_chart(phases)}</details>
+    <details class="fold"><summary>Cost by phase, low to high</summary>{cost_chart(phases)}</details></details>
     <p class="notice">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles. Estimates are approximate UK prices.</p>
   </section>"""
     ideas_body = f"""<section class="panel" id="ideas">
@@ -1182,27 +1238,34 @@ SKIN_JS = r"""(() => {
 })();"""
 
 
-# v22: the build steps one at a time (the plan's review: 67 phone screens long). The head always shows; one step opens; "Next step"
-# opens the next shown step; links to a step (the overview's "Next", the buy list's "before step n") open it; "Show all steps open" reads straight through.
+# v44: Build in cards. A step's tick lives in the order of work; a card shows done when all its steps are; a link to a step
+# ("before step 6", the plan's next three, #step-6) opens that step's card on its Build tab.
 STEP_JS = r"""(() => {
-  const lis = $$(".steps-list > li.step"), all = document.getElementById("s-all"); if (!lis.length) return;
-  let cur = store.get("mw22-step", null), showAll = !!store.get("mw22-steps-all", false);
-  const set = n => { cur = n == null ? null : String(n); store.set("mw22-step", cur);
-    lis.forEach(li => { const on = showAll || li.dataset.s === cur, b = $(".sopen", li);
-      li.classList.toggle("open", on); $(".sbody", li).hidden = !on; b.setAttribute("aria-expanded", String(on)); b.textContent = on ? "Close" : "Open"; b.hidden = showAll; }); };
-  const firstTodo = () => (lis.find(li => !li.hidden && !li.classList.contains("done")) || lis[0]).dataset.s;
-  const go = n => { set(n); const li = document.getElementById("step-" + n); if (li) jumpTo(li); };
-  lis.forEach(li => {
-    $(".sopen", li).addEventListener("click", e => { e.stopPropagation(); set(li.classList.contains("open") ? null : li.dataset.s); });
-    $(".shead", li).addEventListener("click", e => { if (e.target.closest("label, input, button, a")) return; if (!li.classList.contains("open")) go(li.dataset.s); });
-    $("[data-next]", li).addEventListener("click", () => { const i = lis.indexOf(li), nx = lis.slice(i + 1).find(x => !x.hidden); if (nx) go(nx.dataset.s); });
-  });
-  document.addEventListener("click", e => { const a = e.target.closest("[data-step]"); if (a && !showAll) set(a.dataset.step); }, true);
-  all.checked = showAll;
-  all.addEventListener("change", () => { showAll = all.checked; store.set("mw22-steps-all", showAll); set(cur); });
-  set(cur && lis.some(li => li.dataset.s === cur) ? cur : null);
-  if (!cur && !showAll) setTimeout(() => { if (!cur) set(firstTodo()); }, 1500);   // after the saved ticks have loaded
-  $$(".step:last-child [data-next]").forEach(b => b.closest(".snext").hidden = true);
+  const cards = $$(".mk"), lis = $$(".steps-list > li.step"); if (!cards.length) return;
+  const tab = (card, name) => { const bs = $$(".tabs [data-tab]", card); if (!bs.length) return;
+    const b = bs.find(x => x.dataset.tab === name) || bs[0];
+    bs.forEach(x => { const on = x === b; x.setAttribute("aria-selected", String(on)); document.getElementById(x.getAttribute("aria-controls")).hidden = !on; }); };
+  const open = (id, name) => { const c = document.getElementById(id); if (!c) return null; c.open = true; if (name) tab(c, name); arts(c); return c; };
+  window.stepCard = n => open(DATA.stepcard[n], "build");
+  window.openCard = id => open(id, "build");
+  document.addEventListener("click", e => {
+    const t = e.target.closest(".tabs [data-tab]"); if (t) { tab(t.closest(".mk"), t.dataset.tab); return; }
+    const a = e.target.closest("[data-mk]"); if (!a || !a.dataset.mk) return;
+    e.preventDefault(); e.stopPropagation();
+    const show = () => { const c = open(a.dataset.mk, a.dataset.tab || "build"); if (c) jumpTo(c); };
+    if (!a.closest("#sh-build") && window.go) { window.go("build"); setTimeout(show, 60); } else show();
+  }, true);
+  cards.forEach(c => c.addEventListener("toggle", () => { if (c.open) arts(c); }));
+  const paint = () => {
+    const done = n => { const li = document.getElementById("step-" + n); return li && li.classList.contains("done"); };
+    cards.forEach(c => c.classList.toggle("done", c.dataset.steps.split(" ").every(done)));
+    const nx = lis.find(li => !li.classList.contains("done")), box = $("#b-next"); if (!box) return;
+    box.hidden = false;
+    if (nx) { $("#b-nextt").textContent = nx.dataset.s + " · " + $("h3", nx).textContent; $("#b-nextm").textContent = $(".smeta", nx).textContent; $("#b-nexta").dataset.mk = DATA.stepcard[nx.dataset.s]; }
+    else { $("#b-nextt").textContent = "Every step done"; $("#b-nextm").textContent = "Enjoy the room."; $("#b-nexta").dataset.mk = ""; }
+  };
+  const ol = $("#steps-ol"); if (ol) new MutationObserver(paint).observe(ol, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  paint();
 })();"""
 
 
