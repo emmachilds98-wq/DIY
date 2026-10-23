@@ -1,6 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Round 35 (v40.1, below): your banister from the client's photo** (a square post, two flat slats, no spindles, white), merged to
+  main. **The rest of `UPGRADE_PLAN_v41.md` (the picks' build step, the fit proof cleaned, the measuring sheet, the calmer page) waits
+  for the client's go.**
 - **v40 (round 34, below): HD plants (a leaf library, seven kinds, one texture atlas), ambient occlusion (GTAO) in every HD picture
   and live in HD on real graphics cards, plant style and pot finish in Look, three option lines in section 12, the flip-top's chair
   cupboard and fold-down seat removed.** Fit 86/22/14/0, £4,374–8,245 (unchanged: nothing new is in the build). Plan 75 pages, guide 62.
@@ -99,6 +102,15 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 35: v40.1 (the banister, from the client's photo)
+- Client (23 Oct, with `inputs/photo_stairs_banister_23oct.jpg`): "Stairs should have our bannister which is the two slat of wood going up
+  from one end pole. Add to plan and then implement and make sure it goes to main."
+- `geometry.BANISTER` (slat tops 90 and 52 above the nosings, 9 × 2.5; post 9 × 9 × 112; white). `render.west_end` draws a flat-topped
+  post and the two slats from it to the door wall (`zb`), with no spindles; the string and the low wall's capping are white; the 3D
+  room's string too (`buildStairs`). The plan's room table cites the photo (`fit.SOURCES["photo23stairs"]`). Backup
+  `render_v40_backup.py`. QA fails [] errors [] at 390 and 1280; taptest all taps ok.
+- Written into `UPGRADE_PLAN_v41.md` as item 0; the plan's other items are not started.
 
 ## Update 23 Oct 2026, round 34: v40 (HD plants, ambient occlusion, plant options, dead code out)
 - Client (23 Oct): "Another agent has been working within the GitHub repo tree. Look through branches and continue the work to write and

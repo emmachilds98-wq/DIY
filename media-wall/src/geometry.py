@@ -39,6 +39,10 @@ STAIR_RISE, STAIR_GOING = 19.5, 22.0      # typical UK domestic stair (Approved 
 # v38, client: "Make the stairs solid until the landing": one solid flight, 13 risers to a landing at the first floor (235 ceiling and
 # about 18.5 of floor). A stand-in shape: the client says the stairs will change, and the count is to confirm.
 STAIR_N = 13
+# v41, client (23 Oct, photo inputs/photo_stairs_banister_23oct.jpg): "Stairs should have our bannister which is the two slat of wood
+# going up from one end pole": a plain square newel post at the foot and two flat slats on edge raking up from it to the wall at the
+# top, no spindles, painted white like the capping of the low wall under them. Heights above the pitch line (the nosings).
+BANISTER = dict(slats=((90.0, 9.0), (52.0, 9.0)), slat_t=2.5, newel=9.0, newel_h=112.0, col=("#ece9e2", "#f7f5f0", "#cfcac0"))
 LANDING_Y = STAIR_N * STAIR_RISE             # 253.5
 LANDING_D = 90.0                             # at least the flight's width (Approved Document K)
 DOOR_X = (BREAST_X[1] + 12.0, BREAST_X[1] + 95.0)   # 315.5 .. 398.5 in the recess (drawn where the agent's plan shows it)

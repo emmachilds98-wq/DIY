@@ -765,7 +765,7 @@ def living_plan():
     o.append(t(X(mwx), Y(g.BASE_FRONT_Z) + 22, "media wall, 46 deep", 9, "middle", 650, "#7a5130"))
     o.append(t(X(mwx), Y(g.BASE_FRONT_Z) + 34, ("TV in line with the sofa · deck left" if g.MW_SWAP else "TV 25 cm nearer the side wall · deck right"), 8.5, "middle", 400, "#7a5130"))
     o.append(t(X(g.TABLE_CX), Y(0) + 26, "breast · “now playing” ledge", 9.5, "middle", 650, "#8f5b45"))
-    o.append(t(X(g.ROOM_W - 30), Y(g.ALC_D - g.STAIR_D) - 6, "stairs UP to the first floor, banister (direction to confirm)", 9, "middle", 400, MUTED))
+    o.append(t(X(g.ROOM_W - 30), Y(g.ALC_D - g.STAIR_D) - 6, "stairs UP to the first floor: a post and two slats", 9, "middle", 400, MUTED))
     o.append(t(X(g.DOOR_X[0] + 42), Y(g.BREAST_D_WEST) - 6, "door opens in · hinge by the breast", 9, "middle", 600, "#d0573b"))
     # side-wall labels
     o.append(t(X(0) + 10, Y((g.WRAP_Z[0] + g.WRAP_Z[1]) / 2) + 4, "one oak run: 4 LPs, then", 9, "start", 600, "#7a5130"))

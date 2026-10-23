@@ -891,7 +891,7 @@ function buildStairs() {
   const noClip = m => { m.clippingPlanes = []; return m; };
   const body = noClip(paintMat(lum("#2d5a46") / BASE_L, true, false, "w:stairs").clone()); paintMats.set("stairbody", reg(body));
   const oak = noClip(reg(new THREE.MeshStandardMaterial({ color: "#b07a46", map: OAK_TEX, roughness: 0.55 })));
-  const str = noClip(reg(new THREE.MeshStandardMaterial({ color: "#9c6a3f", map: OAK_TEX, roughness: 0.55 })));
+  const str = noClip(reg(new THREE.MeshStandardMaterial({ color: (R.BANISTER || {}).col ? R.BANISTER.col[0] : "#ece9e2", roughness: 0.45 })));   // v41: the string painted white, as in your photo
   const g = new THREE.Group(); g.name = "stairs"; shell.add(g);
   const solid = (pts, xa, xb, mat) => {     // a profile in (z, y), run across x from xa to xb
     const sh = new THREE.Shape(pts.map(([z, y]) => new THREE.Vector2(z * M, y * M)));
