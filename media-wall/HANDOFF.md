@@ -127,7 +127,7 @@
   line where a head lands (item 6, optional). Options still have HD stills this round (the firm-only set waits on item 11).
 - **Checks:** `qa.py` fails and errors [] at 390 and 1280, links all found, programs 81; `taptest.py` every tap works at both, including the light card (turn
   twice, Blue's aim, dimmer, colour, Reset back to `{}`) and the record table's lid; `clash.py` 0 clashes, 0 close.
-- Backups `*_v38a_backup.*`, `room3d_v38b_backup.js`; v37 outputs in `out/v37/`.
+- Backups `*_v38a_backup.*`, `room3d_v38b_backup.js`; v37 outputs in `out/v37/`. Deck 71ff published at v38 (version 1792736368-2c13; 132 new pictures in its store, `deck_assets.json` 153). PR #34 merged into main.
 
 ## Update 22 Oct 2026, round 31: v37 (a built-in bar, more storage, the shelf's 10 cm gap, the cap, Lights in Views, Extras lined up)
 - Client: (1) a "Bar" option "next to the dining cabinet ... a fixed, built-in counter-style unit (permanent joinery attached to the
