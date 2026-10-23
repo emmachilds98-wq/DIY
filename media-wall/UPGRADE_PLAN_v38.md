@@ -12,6 +12,12 @@ coffee table; everything fits and is accurate; keep the other options but don't 
 thing down to what they need, using Claude Design to make the flow easier. Then: "include option to view ceiling Alcatrazes in
 differing designs so we can decide if we want it in future" (item 12).
 
+## Standing rules (client, 23 Oct; also in `CLAUDE.md`)
+
+- **The core plan** (section 1's firm version) gets the full build, buy list, fit proof and HD renders. **Options are for looking at
+  only:** a switch in the 3D room and one line in the plan. There's no full build for an option unless the client asks for it by name.
+- **Say less, everywhere** (item 11's text limits), and **keep improving the flow** each round, not only adding to it.
+
 ## 0. The client's answers, and two still open
 
 1. **Your saved picks (answered, 23 Oct):** pasted from the 3D room's **Copy as a note**:
@@ -206,6 +212,30 @@ proposed ones) for the client to approve before any code. The proposal to start 
   becomes a small chip ("3 options on · £…") that opens the list.
 - The sheets: **Plan**, **Build** and **Buy**. The Ideas sheet folds into Room.
 - On a phone: no numbered labels by default, and one row of set-ups.
+
+**More flow upgrades (to include in the design pass):**
+
+- **One question per screen:** each panel opens on its main choice; anything else sits under a **More** fold.
+- **Cards:** a title, one line and at most three buttons; everything else under **Details**.
+- **The first view:** your plan, with three places to tap (the media wall, the dining wall and bar, the sofa) instead of six stickers.
+  The tour drops to five stops.
+- **Find:** a search box (or a list) that flies to any piece, so nobody hunts through menus.
+- **Options in place:** in Try options, tap a place in the room to see what could go there, and cycle through them with ‹ › on the
+  card, rather than finding it in a list.
+- **One way to do each thing:** set-ups appear in one place, picks in one place, and a choice isn't repeated across panels and
+  sheets. The plan and buy sheets open on a one-screen summary (the total, what's next, what to check), the detail below.
+- **Faster:** options are built the first time they're shown, not at load (a quicker start, fewer draw calls), and pictures load
+  lazily.
+
+**Text: say less (limits the code checks).** Every piece of text has a budget, and `qa.py` lists anything over it so it gets cut, not
+waved through:
+
+- a caption 20 words; a card's line 25; a toast 10; a panel's intro 30;
+- a plan paragraph 80, with each section saying what, where, size, cost and how;
+- an option one line;
+- no history in the page or the plan (it's in HANDOFF and git); quotes from the client only where they decide something.
+
+Rewrite the page's and the plan's longest texts first: Extras' how-to, the captions in Views, the v-boxes and the appendix.
 
 **The plan PDF:** the firm version only. Target about 45 pages (116 now). The history appendix and the "what changed" boxes from
 earlier rounds leave the PDF (they're in HANDOFF and git), and the options become a 2-page table without stills. **The build guide**
