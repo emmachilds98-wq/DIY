@@ -126,10 +126,8 @@ def scene():
     bar2 = {}
     for st in ("folded", "four", "six"):
         state(dining=st)
-        wall = strip(encode(rec(R.dining_wall)), frames)
-        chairs = encode(rec(R.dining_chairs))
-        groups[f"A_{st}"] = wall + chairs
-        groups[f"B_{st}"] = to_site_b(wall) + (to_site_b(chairs) if st == "four" or G.TABLE_STYLE == "fliptop" else chairs)   # v15: the flip-top stays on its wall
+        # v39: the flip-top table's groups (A_ and B_) are gone: since v33 the room always opens on the compact cabinet, so they were
+        # sent and never shown. bar 2's spots below still use their keys.
         bar2[f"A_{st}"] = R.spot_heads2()
         bx = (G.TABLE_B_OPEN_X[0] + G.TABLE_B_OPEN_X[1]) / 2 if st != "folded" else G.ROOM_W - 2.0   # v15: over the open flip-top
         by = G.TABLE_TOP if st != "folded" else G.FOLDED_TOP - 30.0
