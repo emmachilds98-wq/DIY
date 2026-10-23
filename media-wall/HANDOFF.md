@@ -1,6 +1,12 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v38 (round 32, below): the client's picks are the plan (`geometry.FIRM`), and the brief's items 1–6, 8–10 and 12 of
+  `UPGRADE_PLAN_v38.md` are done** (two sessions: `claude/clever-johnson-c9tqld`, then `claude/tender-dijkstra-vbfd96`). Fit
+  85/22/15/0, total £4,374–8,245 (the picks are in TRACK now), plan PAGES_TBD pages, guide GUIDE_TBD; STILLS_TBD stills; `clash.py` 0.
+  **Waiting on the client:** the page redesign canvas (item 11, https://claude.ai/artifact/Wasv3GQZKnnV6Cs1kcGjhd, private until
+  shared) and the side-wall socket's distance and height. Next: their answers, then item 11's slimmer page, PDF and stills, item 7
+  and item 13's remaining pieces (round 32 lists them). **Never write the cap's poem out in code or text.**
 - **v37 (round 31, below): a bar built in beside the dining cabinet (beside option "bar"), shoe cabinets ("shoes"), seven more
   storage suggestions, the black shelf pinned 10 cm short of the pipe boxing (a hard rule, `SHELF_B_GAP`), the red lamp's cap rebuilt as a
   structured baseball cap, the lights moved into Views, Extras lined up on a grid.** All new pieces are suggestions (not in TRACK): fit
@@ -83,6 +89,45 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 32: v38 (the picks are the plan; the door and the plant; the media wall swapped; solid stairs; each wall's colour; each light turns; a better basket; a record table; ceiling designs)
+- Client (22–23 Oct): the brief in `UPGRADE_PLAN_v38.md` (top), their saved picks (section 0), "Turning the light fixture as a whole as well
+  as the light heads", the core plan vs options rule (now in `CLAUDE.md`): "We want the core plan build and info then the additional
+  items are just for looking at possible other designs and we don't need full build unless I say", and "make sure we're not
+  overfilling the text everywhere".
+- **Session 1 (`claude/clever-johnson-c9tqld`, commits 5e5baaf..6bdb2fe):** item 1, `geometry.FIRM` (the 3D room, the stills, TRACK,
+  `costs.SHORT`, fit's "Your picks" zone; `ideas.options()` leaves the picks out), a measuring sheet (`fit.measure_html`) and a safety list
+  (`fit.SAFETY`); item 10, `clash.py` (in `qa.py`: boxes, door swings, the table and chairs out, the step drawers out; it moved the ottoman
+  to a dinner spot); item 2, the strands through the shelf's 10 gap and the bar 42.5 wide with an IKEA ENHET frame; item 3, the media
+  wall swapped (TV centre 118.25); item 4, one solid flight to a landing; item 5, six named walls each with its own paint.
+- **Item 6, the lights (`room3d.js`, backup `room3d_v38a_backup.js`).** `S.fix` (a fixture's turn in degrees: `bar1`, `bar2`, `lamp`) and
+  `S.head` (`"bar1:0"`..: `on`, `lv`, `yaw`, `tilt`, `col`); `aimDir`, `fixKey` (a fixture rebuilds when its key changes), `fixCard`/`fixAct`
+  (⟲ ⟳ 15°, Shift 5°; each head's chips, On/Off, − +, ← → ↑ ↓, Colour), carried in the link (`lookOf`/`applyLook` validate them). Edit
+  room gains a 15° turn. `clash.bar_sweeps()`: each bar's turning circle (r 49.5) clears the walls (bar 2 by 5.5) and every piece.
+- **Item 8, the basket.** Searched H&M (44 L: too small for five), John Lewis and Dunelm trunks (out of stock), Beliani (no UK stock). The
+  plan's is **Dibor's Lakelyn, large** (59 × 51 × 29, £42, lined, no lid: `lakelyn`): five throws folded long (`THROW_LONG` 47 × 25 × 8.5)
+  stack 42.5 of its 57, 29 out from the wall. The Cotswold basket is the fallback (`cotswoldbasket`, `BLANKET_COTSWOLD`).
+- **Item 9, the record table** (`RECORD_TABLE`, `KALLAX`; key `recordtable` in FIRM): two KALLAX 42 × 42 on their backs on 12 mm ply and
+  four 50 kg castors, an 18 mm oak lid 90 × 50 on a piano hinge (TV side) with two lid stays; 48.5 high, two 33 bins, about 160 LPs
+  spine-up, about 65 kg loaded. Sources `kallax`, `snowdonoak`, `wickesply`, `castor50`, `lidstay` (+ `piano32`); £170–210. The lift-top is
+  the fallback (`liftcoffee`). 3D: InstancedMesh LPs (one draw call), `WORK.rlid` on `S.ctop` ("Lift the lid"); Games night no longer
+  forces the lift-top. Extras: a "coffee" row (pick one) and the blankets row (three). A card for a pick now says "In your plan".
+- **Item 12, ceiling designs** (Look → "The ceiling (to try, for later)", `decor.ceiling`): as it is, smooth, Artex stipple/swirl/fan/basket
+  weave (canvas bump maps swapped on `ceilMat`: no new shaders, programs 81 before and after), oak-effect beams, coffers, an LED cove
+  (`CEIL_G` groups; `geometry.CEIL_DESIGNS`). The cove runs where it fits (window wall, side wall to the alcove, the breast, the recess):
+  the media wall's uprights and the light box reach the ceiling. `clash.ceiling_pieces()` checks all of it against the bars' circles and
+  every piece (0; the beam at x 250 is 1 over the glass case). Costs, one line each: `skimartex`, `artextest`, `pubeam`, `orac`.
+- **Item 11, the design canvas** (for the client's approval before page code): https://claude.ai/artifact/Wasv3GQZKnnV6Cs1kcGjhd: today's
+  home and a light's card beside six proposed phone screens (your plan with three places and Try options; Try options with ‹ › and a
+  live +£; Room by place; a three-button card; Look with walls and the ceiling; Plan/Build/Buy opening on a summary), a sticky with the
+  text limits and one with the socket question. It's private: the client can't open it until it's shared from its Share menu.
+- **Not done (next):** item 11 after approval (the page, the PDF to about 45 pages, firm-only stills, the code clean-up); item 7 (cheap
+  existing items in the guides, beyond the bar's ENHET); item 13's nested cut list, wiring plan, before/after, live total, measure in 3D,
+  your own light scenes (add `S.fix`/`S.head` to them), Save my plan, installable page, feature-wall presets, now-playing swap; a floor
+  line where a head lands (item 6, optional). Options still have HD stills this round (the firm-only set waits on item 11).
+- **Checks:** `qa.py` fails and errors [] at 390 and 1280 (QA_TBD); `taptest.py` every tap works at both, including the light card (turn
+  twice, Blue's aim, dimmer, colour, Reset back to `{}`) and the record table's lid; `clash.py` 0 clashes, 0 close.
+- Backups `*_v38a_backup.*`, `room3d_v38b_backup.js`; v37 outputs in `out/v37/`.
 
 ## Update 22 Oct 2026, round 31: v37 (a built-in bar, more storage, the shelf's 10 cm gap, the cap, Lights in Views, Extras lined up)
 - Client: (1) a "Bar" option "next to the dining cabinet ... a fixed, built-in counter-style unit (permanent joinery attached to the

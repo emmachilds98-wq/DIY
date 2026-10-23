@@ -2,12 +2,22 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v37: a bar built in beside the dining cabinet, more storage, your shelf 10 cm off the boxing, a proper cap on the lamp
+## Media wall and dining wall, v38: your picks are the plan, the TV in line with the sofa, lights you can turn, a record table
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v37%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v38%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v38** (your saved picks, and "the core plan build and info then the additional items are just for looking")
+- **Your picks are the plan:** the bar beside the dining cabinet, the step drawers, the wall cabinets, the alcove shelves, the boxes, the shelf over the door and the sage-stripe rug are in the build, the buy list and the fit proof. Everything else is an option to look at in the 3D room.
+- **A better blanket basket:** Dibor's water hyacinth basket (59 × 51 × 29, £42) holds all five throws folded long and stands 29 cm out from the wall. The lidded Cotswold one is the fallback.
+- **A record table:** two IKEA KALLAX cubes on their backs under a lifting oak lid, on castors, in your coffee table's 90 × 50: about 160 LPs spine-up to flick through from the sofa (£170–210). The lift-top is the fallback.
+- **The media wall swapped:** the TV is 17 cm off the sofa's middle, the turntable and records by the side wall.
+- **The door and the plant:** the strands hang through your shelf's 10 cm gap, clear of the table door; the bar is 42.5 wide to suit.
+- **Lights:** turn each spot bar and the red lamp as a whole, and set each head's switch, level, aim and colour.
+- **Each wall its own colour; the stairs solid to a landing; ceiling designs to try** (smooth, four Artex patterns, beams, coffers, an LED cove), with rough costs.
+- **Everything is checked for clashes:** every piece, door swing and turning light as a box in the room.
 
 **New in v37** (a built-in bar "next to the dining cabinet", more storage ideas, your shelf's 10 cm gap, the lamp's cap, the 3D room's menus)
 - **A bar built in beside the dining cabinet:** fixed joinery in the 52.5 cm between the cabinet and the pipe boxing, 22.4 deep so the open table door still lies back over it: a cupboard for 20 bottles, an oak counter at 90, a mirror back, glasses hanging from a rail, a display shelf. About £110–200 (a suggestion).

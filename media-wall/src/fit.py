@@ -1318,6 +1318,7 @@ SAFETY = [
     ("An old textured (Artex) ceiling", "if it's older than about 2000, have it tested for asbestos before sanding, drilling or skimming it"),
     ("Mains electrics", "the sockets and the light fittings: done to Part P, or by an electrician"),
     ("The dining table", "never swing it up or down with anything on it; check all four legs have clicked before you load it"),
+    ("The record table", "about 65 kg with its LPs: roll it, don't lift it, and fit both lid stays so the lid can't drop"),
 ]
 
 
