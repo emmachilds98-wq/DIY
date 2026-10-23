@@ -266,14 +266,13 @@ asbestos testing first for a pre-2000 ceiling, faux beams, an LED cove kit), and
 clear the spot bars, the rose and the door. **No HD stills or guide pages** (it's an option), except one comparison picture in the
 plan's options table if you want it.
 
-## 13. Further improvements we suggest (pick any; one line each)
+## 13. Further improvements (the client chose all but "order by date", 23 Oct)
 
 **For the build (core):**
 - **A measuring sheet:** one printable page of every CHECK (your shelf's stairs end, the architrave, the socket, the stairs' risers,
   the ottoman's inside, the sofa's return), with a box to write each in; your answers update `geometry.py`.
 - **Fewer sheets to buy:** nest every ply and oak part onto whole sheets in the cut list, so the guide orders the fewest boards and
   shows the offcuts' uses.
-- **Order by date:** the buy list in the order to order things (long lead times first), with a running total against a budget you set.
 - **Safety notes where they matter:** anti-tip fixings for the wall cabinets and shoe cabinets, an asbestos test before touching an
   old Artex ceiling, a bearer under each tread for the step drawers.
 - **A one-page wiring plan** for the swapped media wall: each lead's route, the 10-gang and the 6-way, before the carcass goes in.
@@ -300,5 +299,7 @@ plan's options table if you want it.
 4. Items 4, 5 and 6 (the stairs, the walls, the lights), then item 12 (the ceiling designs).
 5. Items 8 and 9 (the basket and the coffee table), with sources and "buy and adapt" builds.
 6. Item 11's design canvas to the client; after approval, the page and the slimmer PDF, guide and stills.
-7. Any of item 13's suggestions the client picks.
+7. Item 13: the measuring sheet and the safety notes with step 1 (they feed the numbers); the nested cut list and the wiring plan
+   with steps 3 and 5's guides; the page's six (before and after, the live total, measure in 3D, your own light scenes, Save my plan,
+   quicker on phones) inside step 6's design pass; the feature-wall presets with item 5; the now-playing swap last.
 8. Rebuild, `qa.py` and `taptest.py` at 390 and 1280 plus the clash check, HANDOFF and README, then a PR into `main` and the merge.
