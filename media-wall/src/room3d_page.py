@@ -375,13 +375,16 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
          ("floor", "The floor", [("carpet", "Your grey carpet"), ("oatmeal", "Oatmeal carpet"), ("boards", "Oak floorboards")]),
          ("shelf", "Your shelf by the stairs", [("black", "Black (yours)"), ("oak", "Oak"), ("white", "White")]),
          # v38 (item 12): ceiling designs to try, for later (an option, not the plan)
+         # v40: plants and pots to try (the plan keeps your mix)
+         ("plants", "Plant style", [("mix", "Your mix (the plan)"), ("lush", "Lush"), ("easy", "Easy care")]),
+         ("pots", "Pots", [("mine", "As they are"), ("terracotta", "Terracotta"), ("white", "White glazed"), ("black", "Matte black")]),
          ("ceiling", "Design", [("asis", "As it is"), ("smooth", "Smooth"), ("stipple", "Artex stipple"), ("swirl", "Artex swirl"), ("fan", "Artex fan"),
                                 ("basket", "Basket weave"), ("beams", "Oak-effect beams"), ("coffers", "Coffers"), ("cove", "LED cove")]),
 ]
 # v38: one line each on what a ceiling design takes and costs (fit.SOURCES: skimartex, artextest, pubeam, orac)
 CEIL_NOTE = ("Smooth £300–700; a pattern £200–600; beams about £1,050; coffers £450–900; an LED cove £750–850. "
              "Test old Artex for asbestos first.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
-DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]   # v39: the ceiling and the rug lead Look
+DECOR_GROUPS = [("Plants", ("plants", "pots")), ("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]   # v39: the ceiling and the rug lead Look
 
 
 def tour():
