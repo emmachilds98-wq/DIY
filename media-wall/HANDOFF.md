@@ -40,6 +40,12 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
   pictures before and after), the unused `src/parts/` and `t_join.svg`/`t_key.svg`, backups older than v44. About 5.4 GB off the working
   tree and the published site (`out/` 45 MB); all of it stays in git history. Rebuilt, `qa.py`/`taptest.py` errors [], `clash.py` 0.
   **Keep only the newest still of each stem from now on**, and move the last version's outputs to `out/vNN/` but drop the one before.
+- **More removed** (client: "Anything unneeded really"): the old upgrade plans (kept: `plans/UPGRADE_PLAN_v38.md`, which CLAUDE.md
+  cites, and v44; v45 is at `media-wall/`), `plans/optimisation_v21.html`, 13 pictures in `src/art/` nothing references (the old
+  sites A and B, two removed suggestions). `DESIGN_REVIEW_v44.md` moved to `plans/`.
+- **The banister meets its post** (client, from the phone view: "bannister does not connect to the bottom pole that supports the 2
+  slats going up"): in `render.py` the slats started 6 cm past the post's far face (`zt = za + nw`); they now start at its centre
+  (`zt = sz + nw / 2`), as in `inputs/photo_stairs_banister_23oct.jpg`. Checked in the 3D room close up at 390 wide.
 - **Bug found and fixed on the way:** a comment put in the middle of DEF's line commented out `paint`, `lamp` and `drawers` (the room
   didn't start); keep comments at line ends in DEF.
 

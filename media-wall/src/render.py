@@ -974,7 +974,8 @@ def west_end(sk):
     def base_rail(z1, z2):                       # the low wall's capping, white
         top, bot = (lambda z: ry(z) + 3.0), ry
         return [side(sx0 + 1.9, top, bot, z1, z2, WH_S), side(sx0 - 3.1, top, bot, z1, z2, WH), rake(sx0 - 3.1, sx0 + 1.9, top, z1, z2, WH_T)]
-    zt = za + nw                                 # v41, your photo: the slats run from the post up to the wall by the door, and stop there
+    zt = sz + nw / 2                             # v45, client: "bannister does not connect to the bottom pole": the slats now start inside the post (they
+                                                 # began 6 past its far face), and run up to the wall by the door, and stop there
     far += base_rail(zb, sz + 6 + (G.STAIR_N - 1) * going)
     near += base_rail(zt, zb)
     near += rail(zt, zb)
