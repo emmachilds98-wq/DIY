@@ -2,12 +2,20 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v38: your picks are the plan, the TV in line with the sofa, lights you can turn, a record table
+## Media wall and dining wall, v39: a quicker 3D room, the new page, a slimmer plan
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/v38/Media%20wall%20v38%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v39%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v39** (the new page you approved, "PC should be using GPU", and the curtain pole)
+- **The curtain pole is 10 cm lower**, under the ceiling strip; the curtains clear the radiator and the rear speakers stand in front of them.
+- **The 3D room is quicker on a PC:** a GeForce, Radeon or similar starts straight in HD, it draws about half as much each frame, and quick taps one after another no longer stall it.
+- **The new page:** three drawers (View, Room, Look), your plan's total at the bottom with a **Try options** switch, and Plan, Build and Buy at the top.
+- **New in the room:** find any piece, measure between two taps, save your own light scenes, Save my plan, feature-wall colours, the LP on the ledge, and a line from each spot head to where it lands.
+- **The plan PDF is your plan only** (77 pages, was 120): every option is one line with its size, rough cost and source. The build guide adds what to buy and adapt first, the ply laid out on the fewest sheets, and a one-page wiring plan.
+- **The page installs like an app** and works offline; the plan home has a before/after slider.
 
 **New in v38** (your saved picks, and "the core plan build and info then the additional items are just for looking")
 - **Your picks are the plan:** the bar beside the dining cabinet, the step drawers, the wall cabinets, the alcove shelves, the boxes, the shelf over the door and the sage-stripe rug are in the build, the buy list and the fit proof. Everything else is an option to look at in the 3D room.
@@ -98,7 +106,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **The brick under the stairs is painted**, as it has a wall in front of it.
 - **Edit room:** the flip-top's chair cupboard can come off the wall (select it, Remove; + Add puts it back). Things clip to a wall from 15 cm away (was 5), a quarter turn keeps a piece against its wall, and **Back to the wall** turns a piece and pushes it flat against the nearest wall.
 
-![The compact dining cabinet open for six](media-wall/out/v38/Media%20wall%20v38%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
+![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v39%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
 
 **v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
 - **Option C, a second way to build the dining wall** (the flip-top stays the plan): one oak cabinet under your shelf. The table, 225 × 90 open, stands up in one bay; all eight folding chairs fold into the other, behind two doors. Packed away, nothing shows. In the 3D room: Tools, Layout, "C: the dining cabinet".
@@ -296,8 +304,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/v38/Home_Network_Plan_v38.pdf`](media-wall/out/v38/Home_Network_Plan_v38.pdf) (120 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/v38/Build_Guide_v38.pdf`](media-wall/out/v38/Build_Guide_v38.pdf) (54 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v39.pdf`](media-wall/out/Home_Network_Plan_v39.pdf) (PLANPAGES pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, buy first and the wiring plan, the cost overview, other options and sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v39.pdf`](media-wall/out/Build_Guide_v39.pdf) (GUIDEPAGES pages: buy and adapt first, tools, techniques, order of work, the wiring plan, the cut list on the fewest sheets, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account, still at v32 until it's republished: the room in 3D, the plan's chapters, build steps, buy tracker, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
