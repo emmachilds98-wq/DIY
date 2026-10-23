@@ -181,6 +181,22 @@ def in_circle(bx, sweep):
     return math.hypot(nx - cx, nz - cz) < rad - EPS
 
 
+def ceiling_pieces():
+    """v38 (item 12): the feature ceilings to try (options), as boxes: the beams, the coffers' ribs, the LED cove round the walls."""
+    CD, C, out = G.CEIL_DESIGNS, G.CEIL, []
+    B = CD["beams"]
+    out += [box(f"ceiling beam at x {x:g}", (x - B["w"] / 2, x + B["w"] / 2), (C - B["d"], C), (z0, z1)) for x, z0, z1 in B["runs"]]
+    K = CD["coffers"]
+    out += [box(f"coffer rib at x {x:g}", (x - K["w"] / 2, x + K["w"] / 2), (C - K["d"], C), (z0, z1)) for x, z0, z1 in K["runs"]]
+    out += [box(f"coffer rib at z {z:g}", (0, K["x_to"]), (C - K["d"], C), (z - K["w"] / 2, z + K["w"] / 2)) for z in K["z"]]
+    V, W, WZ = CD["cove"], G.ROOM_W, G.WINDOW_Z
+    out += [box("LED cove, window wall", (0, W), (C - V["h"], C), (WZ, WZ + V["d"])),
+            box("LED cove, side wall", (0, V["d"]), (C - V["h"], C), (WZ, 0)),
+            box("LED cove, chimney breast", G.BREAST_X, (C - V["h"], C), (-V["d"], 0)),
+            box("LED cove, by the door", (G.BREAST_X[1], G.DOOR_X[1] + 1.5), (C - V["h"], C), (G.BREAST_D_WEST - V["d"], G.BREAST_D_WEST))]
+    return out
+
+
 def report():
     """[(kind, a, b, detail)]: kind "clash" (fails) or "close" (under 1 cm apart, a note)."""
     P = pieces()
@@ -211,6 +227,14 @@ def report():
         for p in P:
             if in_circle(p, sw):
                 out.append(("clash", sw[0], p[0], "inside it at some angles"))
+    for c in ceiling_pieces():                                  # v38: the ceiling designs clear the bars' circles and the pieces
+        for sw in bar_sweeps():
+            if in_circle(c, sw):
+                out.append(("clash", c[0], sw[0], "inside it at some angles"))
+        for p in P:
+            o = overlap(c, p)
+            if all(v > EPS for v in o):
+                out.append(("clash", c[0], p[0], f"overlap {o[0]:.1f} × {o[1]:.1f} × {o[2]:.1f}"))
     skip = {"dining cabinet", "sofa seat", "sofa back", "chaise", "ottoman"}   # the table opens from the cabinet; chairs stop short of the sofa (fit.py); the ottoman moves
     D = dining_pieces()
     for i, d in enumerate(D):
@@ -222,7 +246,7 @@ def report():
                 out.append(("clash", d[0] + " (dining for six)", p[0], f"overlap {o[0]:.1f} × {o[1]:.1f} × {o[2]:.1f}"))
     for m in moving_pieces():
         for p in P:
-            if p[0] == "coffee table" and m[0].startswith("coffee"):
+            if p[0] == "record table" and m[0].startswith("record table"):
                 continue
             o = overlap(m, p)
             if all(v > EPS for v in o):

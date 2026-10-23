@@ -933,3 +933,20 @@ def wall_areas():
 
 def paint_litres(m2, coats=2):
     return m2 * coats / PAINT_COVER
+
+
+# ---------------------------------------------------------------- v38 (item 12): ceiling designs to try, for later (an option, not the plan)
+# The client: "include option to view ceiling [Artex] in differing designs so we can decide if we want it in future". The textures are
+# bump maps in the 3D room; these are the feature ceilings' pieces, kept clear of the spot bars' turning circles (clash.py checks).
+# Faux oak beams 12 × 12 (Woodmosaic's PU beam, lengths to 395); each runs from the window wall to the wall it meets at its x.
+def _ceil_end(x):
+    return ALC_D if x < ALC_W else 0.0 if BREAST_X[0] <= x <= BREAST_X[1] else BREAST_D_WEST   # the recess by the door
+CEIL_DESIGNS = dict(
+    beams=dict(x=[160.0, 250.0, 340.0], w=12.0, d=12.0),
+    coffers=dict(x=[160.0, 250.0, 340.0], z=[-215.0], w=10.0, d=6.0, x_to=DOOR_X[1] + 1.5),   # to the stairwell's edge (export3d WELL_X0)
+    cove=dict(d=10.0, h=9.0),            # an uplighter coving profile (Orac C357's class) round the walls, the LED tape on its top
+)
+for _k in ("beams", "coffers"):
+    CEIL_DESIGNS[_k]["z"] = CEIL_DESIGNS[_k].get("z", [])
+    CEIL_DESIGNS[_k]["runs"] = [(x, WINDOW_Z, _ceil_end(x)) for x in CEIL_DESIGNS[_k]["x"]]
+CEIL_DESIGNS["beams"]["longest"] = max(e - s for _x, s, e in CEIL_DESIGNS["beams"]["runs"])   # 348: one 395 beam each, cut

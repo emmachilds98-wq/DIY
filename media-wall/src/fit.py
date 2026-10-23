@@ -1331,3 +1331,15 @@ if __name__ == "__main__":
         for r in rows:
             print("  ", r[0], "|", r[1], "|", r[3], "|", r[4], "|", r[5])
     print(counts())
+
+
+# v38 (item 12): the ceiling designs to try, for later (an option: Look → The ceiling)
+SOURCES["skimartex"] = ("Trade2Base, Plastering Costs UK 2026: skim coat £150–£350 a room, Artex removal (or skimming over it) £300–£700 a room, "
+                        "plasterers' day rates about £180–£300 (trade2base.com/blog/plastering-costs-uk)")
+SOURCES["artextest"] = ("Supernova Asbestos Surveys: Artex asbestos testing kit, £34.99 with PPE, a UK-accredited lab's result in 48 hours; Artex made "
+                        "before about 1985 can hold chrysotile, so don't sand, scrape or drill it until you know (asbestos-surveys.org.uk/shop/testing-kit/artex)")
+SOURCES["pubeam"] = ("Woodmosaic: PU faux wood ceiling beam, 12 × 12 cm, lengths 100, 195, 295 and 395 cm, 1–4 kg, £62–£349 by length "
+                     "(woodmosaic.co.uk/pu-faux-wood-beam-fake-wooden-decorative-ceiling-beams-false)")
+SOURCES["orac"] = ("Mr Resistor: Orac C357 uplighting coving profile for LED tape, 2000 mm, £89.60 (mr-resistor.co.uk/product/28207); "
+                   "fitted LED coving in a typical UK room £350–£700 (coving.online, LED coving cost, 2026)")
+ORDER.extend(["skimartex", "artextest", "pubeam", "orac"])

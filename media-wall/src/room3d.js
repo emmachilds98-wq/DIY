@@ -53,7 +53,7 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               plants: "corner", layout: {}, added: [], grow: true,
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
-              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive" },   // v26: the oak, the floor, your shelf; v31: the seat pads
+              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive", ceiling: "asis" },   // v26: the oak, the floor, your shelf; v31: the seat pads
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
               cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
@@ -797,6 +797,21 @@ function buildShell() {
   const ly = R.LED_Y - 0.8;
   [[0.5, WZ + 1, 1, AD - WZ - 2], [Wd - 1.5, WZ + 1, 1, front - WZ - 2]].forEach(([x, z, w, d]) => cube(x, ly, z, w, 0.8, d, ledMat, false));
   [[1, WZ + 0.5, Wd - 2], [1, AD - 1.5, A - 2], [B0, -1.5, B1 - B0], [B1, RZ - 1.5, wx - B1]].forEach(([x, z, w]) => cube(x, ly, z, w, 0.8, 1, ledMat, false));
+  // v38 (item 12): the feature ceilings to try (Look → The ceiling): hidden groups, shown by applyCeiling()
+  if (R.CEIL_DESIGNS) { const CD = R.CEIL_DESIGNS, put = (grp, x, y, z, w, h, d, mat) => {          // a box from its min corner, in a group
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat); m.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); m.receiveShadow = true; grp.add(m); };
+    const beamM = reg(new THREE.MeshStandardMaterial({ color: "#8a5f3c", map: OAK_TEX, roughness: 0.7, bumpMap: WALL_BUMP, bumpScale: 1.2 }));
+    CEIL_G.beams = new THREE.Group(); CEIL_G.coffers = new THREE.Group(); CEIL_G.cove = new THREE.Group();
+    const B = CD.beams; for (const [x, z0, z1] of B.runs) put(CEIL_G.beams, x - B.w / 2, C - B.d, z0, B.w, B.d, z1 - z0, beamM);
+    const K = CD.coffers; for (const [x, z0, z1] of K.runs) put(CEIL_G.coffers, x - K.w / 2, C - K.d, z0, K.w, K.d, z1 - z0, ceilP);
+    for (const z of K.z) put(CEIL_G.coffers, 0, C - K.d, z - K.w / 2, K.x_to, K.d, K.w, ceilP);
+    const V = CD.cove, cv = CEIL_G.cove;                                                                // the coving round the walls, its LED on top
+    // where it fits: the window wall, the side wall to the alcove, the breast, the recess (not the alcove: the media wall's uprights reach the ceiling; not the stairs wall: the light box)
+    for (const [x, z, w, d] of [[0, WZ + V.d, V.d, -WZ - V.d], [0, WZ, Wd, V.d], [B0, -V.d, B1 - B0, V.d], [B1, RZ - V.d, wx - B1, V.d]]) {
+      put(cv, x, C - V.h, z, w, V.h - 2, d, ceilP);
+      const lx = w > d ? x : x + (x < 1 ? V.d - 1 : 0), lz = w > d ? z + (z === WZ ? V.d - 1 : 0) : z;
+      put(cv, lx, C - 2, lz, w > d ? w : 1, 0.6, w > d ? 1 : d, ledMat); }
+    for (const g of Object.values(CEIL_G)) { g.visible = false; shell.add(g); } }
   // v15: the side run's LED strip, under its front edge (on the uprights' driver)
   runLed = new THREE.MeshBasicMaterial({ color: "#ffd9a8", toneMapped: false });
   const SR = R.SIDE_RUN;
@@ -2106,8 +2121,35 @@ function buildCushions(sofa) {      // three scatter cushions and a throw over t
   const hang = new THREE.Mesh(new THREE.BoxGeometry(0.012, 30 * M, 46 * M), cushM[2]); hang.position.copy(v3(so.x[1] + 0.8, 48, so.back + 50)); cushG.add(shadow(hang));
   sofa.add(cushG);
 }
+/* v38 (item 12), client: "include option to view ceiling [Artex] in differing designs so we can decide if we want it in future": the
+   ceiling's texture is one of these bump maps (ceilMat always has one, so no new shaders), and the feature ceilings are hidden groups */
+const CEIL_G = {};
+const bumpTex = draw => { const t = canvasTex(512, 512, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); draw(g, w, h); }, false); t.repeat.set(4, 3.5); return t; };
+const CEIL_BUMPS = {
+  smooth: bumpTex(() => {}),
+  stipple: bumpTex((g, w, h) => { const r = rnd(31);                                                  // peaks pulled up off a brush
+    for (let i = 0; i < 2600; i++) { const x = r() * w, y = r() * h, s = 3 + r() * 7, v = 150 + r() * 100 | 0, gr = g.createRadialGradient(x, y, 0, x, y, s);
+      gr.addColorStop(0, `rgb(${v},${v},${v})`); gr.addColorStop(1, "rgba(128,128,128,0)"); g.fillStyle = gr; g.fillRect(x - s, y - s, 2 * s, 2 * s); } }),
+  swirl: bumpTex((g, w, h) => { const r = rnd(5); g.lineCap = "round";                                // overlapping part-circles, a comb's ridges
+    for (let y = -40, row = 0; y < h + 60; y += 56, row++) for (let x = -40 + (row % 2) * 28; x < w + 60; x += 56) { const a0 = r() * 6.28;
+      for (let k = 0; k < 6; k++) { g.strokeStyle = k % 2 ? "#5c5c5c" : "#c4c4c4"; g.lineWidth = 3; g.beginPath(); g.arc(x, y, 6 + k * 6, a0, a0 + 3.8); g.stroke(); } } }),
+  fan: bumpTex((g, w, h) => { g.lineCap = "round";                                                   // rows of half-circle fans, each over the last
+    for (let y = 0, row = 0; y < h + 96; y += 48, row++) for (let x = (row % 2) * 48; x < w + 96; x += 96)
+      for (let k = 9; k >= 1; k--) { g.strokeStyle = k % 2 ? "#5c5c5c" : "#c4c4c4"; g.lineWidth = 4; g.beginPath(); g.arc(x, y, k * 9, Math.PI, 2 * Math.PI); g.stroke(); } }),
+  basket: bumpTex((g, w, h) => { const s = 64;                                                       // squares of combed lines, turned each time
+    for (let y = 0; y < h; y += s) for (let x = 0; x < w; x += s) for (let k = 4; k < s; k += 10) {
+      g.fillStyle = "#c4c4c4"; if ((x + y) / s % 2) g.fillRect(x + k, y + 3, 4, s - 6); else g.fillRect(x + 3, y + k, s - 6, 4); } }),
+};
+const CEIL_SCALE = { asis: 0.6, smooth: 0, stipple: 2.6, swirl: 2.2, fan: 2.2, basket: 1.8, beams: 0, coffers: 0, cove: 0 };
+function applyCeiling(k) {
+  if (!ceilMat) return; if (!(k in CEIL_SCALE)) k = "asis";
+  const t = CEIL_BUMPS[k] || (k === "asis" ? WALL_BUMP : CEIL_BUMPS.smooth);                         // the feature ceilings go on a skimmed one
+  if (ceilMat.bumpMap !== t) ceilMat.bumpMap = t; ceilMat.bumpScale = CEIL_SCALE[k];
+  for (const [n, g] of Object.entries(CEIL_G)) g.visible = n === k;
+}
 function applyDecor() {
   const D = S.decor;
+  applyCeiling(D.ceiling);
   if (rugMesh) { rugMesh.visible = D.rug !== "none"; const top = rugMesh.material[2], t = rugTex(D.rug), edge = (RUG_LOOKS[D.rug] || {}).edge || R.RUG.cols[3];
     if (top.map !== t) { top.map = t; top.needsUpdate = true; } rugMesh.material.forEach((m, i) => { if (i !== 2) m.color.set(edge); }); }
   if (curtCloth) curtCloth.color.set(CURTAIN_COLS[D.curtains] || CURTAIN_COLS.hessian);

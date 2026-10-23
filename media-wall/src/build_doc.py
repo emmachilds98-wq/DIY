@@ -1434,6 +1434,8 @@ def _plan(deck=False):
 </ul>
 <p><b>Later, with your new stairs:</b> when the stairs are redone, the space under them could take a bar or a wine rack too, and the step drawers above; we'll draw it when the new stairs are known.</p>
 
+<h3>The ceiling, to try for later</h3>
+<p>Look → The ceiling shows nine designs in the room, in any paint: as it is, smooth, four Artex patterns (stipple, swirl, fan, basket weave), oak-effect beams, coffers and an LED cove. Rough costs: smooth £300–700{sup("skimartex")}; a pattern £200–600, a plasterer's day or two{sup("skimartex")}; three 12 × 12 faux oak beams about £1,050{sup("pubeam")}; coffers £450–900; an LED cove £750–850 in uplighter coving and tape{sup("orac")}. Test the old Artex for asbestos before anyone sands it (a £35 kit{sup("artextest")}). The beams, ribs and cove all clear both spot bars' turning circles. The cove stops short of the media wall's uprights and the light box.</p>
 <h3>Storage and a bar: the options, and where they go (suggestions)</h3>
 <p>You asked for more places for a bar and for storage, room for your games and cards, a home for about five blankets, and a small shelf for your hanging plant, with "how to manage all these options in the 3D room" made clear. Each one below is a suggestion: not in the plan's costs until you pick it; the numbers are checked in the fit proof ("Storage and a bar").</p>
 <table class="tight"><tr><th>For</th><th>The option</th><th>Where it goes</th><th>Size</th><th class="num">About £</th></tr>

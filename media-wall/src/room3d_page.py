@@ -338,8 +338,16 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
          ("oak", "The oak, on everything new", [("artisan", "Artisan oak (the plan)"), ("pale", "Pale, white-oiled"), ("smoked", "Smoked oak"), ("walnut", "Walnut")]),
          ("floor", "The floor", [("carpet", "Your grey carpet"), ("oatmeal", "Oatmeal carpet"), ("boards", "Oak floorboards")]),
          ("shelf", "Your shelf by the stairs", [("black", "Black (yours)"), ("oak", "Oak"), ("white", "White")]),
-]   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
-DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]
+         # v38 (item 12): ceiling designs to try, for later (an option, not the plan)
+         ("ceiling", "Design", [("asis", "As it is"), ("smooth", "Smooth"), ("stipple", "Artex stipple"), ("swirl", "Artex swirl"), ("fan", "Artex fan"),
+                                ("basket", "Basket weave"), ("beams", "Oak-effect beams"), ("coffers", "Coffers"), ("cove", "LED cove")]),
+]
+# v38: one line each on what a ceiling design takes and costs (fit.SOURCES: skimartex, artextest, pubeam, orac)
+CEIL_NOTE = ("Smooth: skimmed over, £300–700. Artex patterns: a plasterer's day or two, about £200–600. Beams: three 12 × 12 faux oak, "
+             "about £1,050. Coffers: two or three days' work, about £450–900. LED cove: about 15 m of uplighter coving and tape, £750–850. "
+             "Test the old Artex for asbestos first (£35 kit) and don't sand it.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
+DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case on the breast", ("fill", "frame")),
+                ("The ceiling (to try, for later)", ("ceiling",))]
 
 
 def tour():
@@ -407,7 +415,7 @@ def controls(gallery=""):
     decor_g = "".join('<div class="grp r3d-decor"><span class="label">' + html.escape(title) + '</span>'
                + "".join(f'<div class="r3d-decrow"><span>{html.escape(dec[k][0])}</span><div class="seg" role="group" aria-label="{html.escape(dec[k][0])}">'
                          + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in dec[k][1]) + '</div></div>'
-                         for k in keys) + '</div>' for title, keys in DECOR_GROUPS)
+                         for k in keys) + (f'<p class="r3d-hint2">{html.escape(CEIL_NOTE)}</p>' if "ceiling" in keys else "") + '</div>' for title, keys in DECOR_GROUPS)
     # v26: the ceiling and the skirting (with the door and its frame) back in Look: the walls' colour, white, or any colour
     trims = "".join(f'<div class="grp"><span class="label">{lab}</span><div class="seg" role="group" aria-label="{lab}">'
                     f'<button type="button" data-{key}="match" aria-pressed="false">Same as the walls</button><button type="button" data-{key}="#f2efe8" aria-pressed="false">White</button>'

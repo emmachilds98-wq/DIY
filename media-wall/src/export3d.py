@@ -173,7 +173,7 @@ def scene():
     room_spec["OTTOMAN"] = G.OTTOMAN; room_spec["DRINKS"] = G.DRINKS   # v34: the storage ottoman; the drinks cabinet under the case
     # v36: a third bar, the ottoman's games and cards, the blankets' basket, more storage, the plant shelf
     for k in ("BAR_SIDE", "OTTO_GAMES", "GAME_BOX", "CARD_DECK", "THROW_FOLDED", "BLANKET_BASKET", "LIFT_COFFEE", "KUGGIS", "DOOR_SHELF", "SHELF_BOXES", "ARCHITRAVE",
-              "THROW_LONG", "BLANKET_COTSWOLD", "RECORD_TABLE", "KALLAX"):   # v38: the better basket, the record table
+              "THROW_LONG", "BLANKET_COTSWOLD", "RECORD_TABLE", "KALLAX", "CEIL_DESIGNS"):   # v38: the better basket, the record table, the ceiling designs
         room_spec[k] = getattr(G, k)
     # v37: the built-in bar beside the cabinet, its glass rail, the shoe cabinets, the window corner's three, the alcove shelves, the
     # wall cabinets, the step drawers, the over-door rail
