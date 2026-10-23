@@ -1039,9 +1039,9 @@ def nest_sheets():
     return out
 
 
-def nest_html():
+def nest_html(figs=True):
     import nest
-    rows, figs = [], []
+    rows, sheet_figs = [], []
     for grp, size, sheets in nest_sheets():
         cuts_n = sum(len(s["parts"]) for s in sheets)
         used = sum(l * w for s in sheets for _n, _x, _y, l, w in s["parts"]) / (len(sheets) * size[0] * size[1])
@@ -1049,10 +1049,10 @@ def nest_html():
         big = sorted(offs, key=lambda o: -o[0] * o[1])[:2]
         use = "; ".join(f"{n(a)} × {n(b)}: " + next(u for la, lb, u in OFFCUT_USE if max(a, b) >= la and min(a, b) >= lb) for a, b in big) or "none to speak of"
         rows.append(f"<tr><td>{grp}</td><td class='num'>{len(sheets)} × {n(size[0])} × {n(size[1])}</td><td class='num'>{cuts_n}</td><td class='num'>{used:.0%}</td><td>{use}</td></tr>")
-        figs += [f"<figure class='sheet'>{nest.svg(s, size)}<figcaption>{grp}, sheet {i + 1} of {len(sheets)}</figcaption></figure>" for i, s in enumerate(sheets)]
+        sheet_figs += [f"<figure class='sheet'>{nest.svg(s, size)}<figcaption>{grp}, sheet {i + 1} of {len(sheets)}</figcaption></figure>" for i, s in enumerate(sheets)]
     return ("<h3>Sheets to buy, nested</h3><p>Every ply part laid out on the fewest boards (a full sheet is 244 × 122; half and quarter sheets "
             "where a full one would be mostly offcut), a 4 mm saw cut between parts, grain along the long side. Hand these to the merchant with the cutting list.</p><table class='tight'><tr><th>Sheet</th><th class='num'>Boards (cm)</th>"
-            "<th class='num'>Parts</th><th class='num'>Used</th><th>Biggest offcuts, and what for</th></tr>" + "".join(rows) + "</table>" + "".join(figs))
+            "<th class='num'>Parts</th><th class='num'>Used</th><th>Biggest offcuts, and what for</th></tr>" + "".join(rows) + "</table>" + ("".join(sheet_figs) if figs else ""))
 
 
 def cuts_text():
@@ -1556,9 +1556,37 @@ def _plan(deck=False):
 <p class="note">Numbered sources are the item sizes used in the fit proof (section 3).</p>
 {fit.sources_html(OTHER_SOURCES)}
 </body></html>"""
+    if not deck:
+        html = concise(html)
     DECK = False
     html = tidy.strip_versions(html).replace("<!--keep-->", "").replace("<!--/keep-->", "")   # v24: no round markers in the text
     return html, tl, th, c, css
+
+
+# v42 (client: "optimise PDFs in there to be more concise for what I need"): the plan PDF drops what the build guide now carries (how
+# each thing's built, the cut lists, the wiring, the order of work) and the long reference pages; the plan page keeps them all
+PDF_DROP = ("Measuring sheet", "Console sizes", "The drawer layouts", "The game drawer", "How bay 3 works", "Storage options, to scale",
+            "How it's built", "Joinery cut list", "Three lighting presets", "Cable routes", "The wiring plan", "Sound layout",
+            "Buy and adapt first", "The order of work", "By phase")
+
+
+def concise(html):
+    import re, chapters
+    def drop(m):
+        title = re.sub(r"<[^>]+>", "", m.group(2))
+        return "" if title.startswith(PDF_DROP) else m.group(0)
+    html = re.sub(r"(<h3[^>]*>(.*?)</h3>.*?)(?=<h[23][ >]|</body>)", drop, html, flags=re.S)
+    html = re.sub(r"<!--fit-->.*?<!--/fit-->", lambda m: fit.summary_html(), html, flags=re.S)
+    html = re.sub(r"(<h2 class=\"pb\">10 · [^<]*</h2>).*?(?=<h2)", lambda m: m.group(1) + "<p>Everything to build is in the <b>Build Guide</b> (its own PDF): "
+                  "one chapter per thing you make, each with its buy list, its cutting diagram and its steps.</p>" + build_contents(), html, count=1, flags=re.S)
+    return html
+
+
+def build_contents():
+    import chapters
+    rows = "".join(f"<tr><td class='num'>{i}</td><td>{c[1]}</td><td>{c[6]}</td></tr>" for i, c in enumerate(chapters.MAKE, 1))
+    rows += "".join(f"<tr><td class='num'>{chapters.JOB_LETTER[j[0]]}</td><td>{j[1]}</td><td>{j[5]}</td></tr>" for j in chapters.JOBS)
+    return f"<table class='tight'><tr><th class='num'>Ch.</th><th>In the guide</th><th>Time</th></tr>{rows}</table>"
 
 
 def plan_sections():
@@ -1578,15 +1606,12 @@ def plan_sections():
 def build():
     html, tl, th, c, css = _plan()
     (HERE / "plan.html").write_text(html)
-    guide = f"""<!doctype html><html><head><meta charset="utf-8"><title>Build Guide</title><style>{css}</style></head><body>
+    import chapters                       # v42: one chapter per thing you make (buy, cut, build), then the jobs
+    guide = f"""<!doctype html><html><head><meta charset="utf-8"><title>Build Guide</title><style>{css}</style></head><body class="guide">
 <h1>Media Wall &amp; Dining Wall: Build Guide</h1>
-<p class="byline">Version {VERSION} · Oct 21, 2026 · for Emma and Dave · sizes in cm</p>
+<p class="byline">Version {VERSION} · for Emma and Dave · sizes in cm</p>
 <figure class="render small">{img("render_v13_join_clean.png", "The finished wall")}</figure>
-{guide_pdf_html()}
-<h2 class="pb">Shopping list</h2>
-<p>About £{money(tl, th)}, in build order; no electrician on top.</p>
-<table class="tracker"><thead><tr><th>Status</th><th>Item</th><th>Qty</th><th>Estimate (£)</th><th>Paid (£)</th></tr></thead><tbody>
-{tracker_rows()}</tbody></table>
+{chapters.guide_html(money)}
 </body></html>"""
     (HERE / "guide.html").write_text(tidy.strip_versions(guide))
     print("totals", tl, th, "fit", c)

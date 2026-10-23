@@ -95,3 +95,19 @@ figure.thumb figcaption { font-size: 7.5pt; line-height: 1.25; margin-top: 1mm; 
 
 /* v38: the measuring sheet's boxes to write in */
 table.measure td.box { width: 16%; min-width: 4em; height: 2.4em; border: 1.2px solid #8a8378; background: #fff; }
+/* v42: the build guide in chapters (chapters.py) */
+.guide .lede { font-size: 10.5pt; margin: 0 0 2pt; }
+.guide .meta { color: #6b6862; font-size: 9pt; margin: 0 0 6pt; }
+.guide figure.render.chap img { width: 72%; margin: 0 auto; }
+.guide figure.cutfig { margin: 4pt 0 8pt; }
+.guide table.buy td .note { font-size: 7.8pt; color: #6b6862; }
+.guide table.buy, .guide table.contents { width: 100%; }
+.guide tr.tot td { border-top: 1.2px solid #2a2430; }
+.guide .chap h3 { font-size: 12pt; margin-top: 12pt; padding-bottom: 2pt; border-bottom: 1px solid #e6e3dc; }
+.guide ol.order { columns: 2; font-size: 9pt; }
+.guide figure.sheet { display: inline-block; width: 48.5%; vertical-align: top; margin: 4pt 0.5% 8pt; }
+.guide figure.cutfig.half { display: inline-block; width: 48.5%; vertical-align: top; margin: 4pt 0.5% 6pt; }
+.guide figure.cutfig { break-inside: avoid; }
+.guide table.ckey, .guide table.buy { table-layout: fixed; }
+.guide table.ckey td { padding: 2pt 4pt; }
+.guide table.ckey td.note { font-size: 7.8pt; color: #4a4741; }

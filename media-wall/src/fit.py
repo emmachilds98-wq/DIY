@@ -1379,3 +1379,14 @@ def tables_html():
             out.append(f"<tr><td>{item}</td><td>{size}{src}</td><td>{sp}</td><td>{spare}</td><td class='res {status_class(st)}'>{st}</td></tr>")
         out.append("</table></div>")
     return "\n".join(out)
+
+
+def summary_html():
+    """v42 (the plan PDF, "more concise"): one row per zone, with what's tight and what to check; the full proof is on the page."""
+    out = ["<table class='tight fitsum'><tr><th>Where</th><th class='num'>Fit</th><th class='num'>Tight</th><th class='num'>Check</th><th>Tight or to check</th></tr>"]
+    for title, _space, rows in firm_zones():
+        k = {s: sum(1 for r in rows if r[5] == s) for s in (PASS, TIGHT, CHECK)}
+        odd = "; ".join(f"{r[0]} ({'check' if r[5] == CHECK else 'tight'})" for r in rows if r[5] in (TIGHT, CHECK))
+        out.append(f"<tr><td>{title}</td><td class='num'>{k[PASS]}</td><td class='num'>{k[TIGHT]}</td><td class='num'>{k[CHECK]}</td><td class='note'>{odd or '—'}</td></tr>")
+    out.append("</table>")
+    return "".join(out)
