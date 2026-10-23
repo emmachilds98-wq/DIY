@@ -1228,6 +1228,11 @@ gl.toneMapping = THREE.ACESFilmicToneMapping;
 const GPU = (() => { try { const c = gl.getContext(), e = c.getExtension("WEBGL_debug_renderer_info"); return String(e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)); } catch (e) { return ""; } })();
 const BIG_GPU = !SMALL && /nvidia|geforce|rtx|gtx|quadro|radeon\s*(rx|pro|r9)|radeon\(tm\) rx|intel.*\barc\b|apple m\d/i.test(GPU) && !/swiftshader|llvmpipe|software|basic render/i.test(GPU);
 if (BIG_GPU && !S.picked) S.quality = "hd";
+/* v39, client: "Mobile ... is slow and doesn't render full quality expected". Phones drew at 0.85 of a CSS pixel (a third of a 3× screen's
+   sharpness) and never left Fast. Now a phone draws at its own sharpness (2× on a capable chip, 1.5× otherwise; halved only while you
+   move), and a capable chip (any iPhone's Apple GPU, Adreno 6xx and up, Mali-G57 and up, Immortalis, Xclipse) goes on to HD when its
+   first frames are quick, and back to Fast if HD runs slow. */
+const GOOD_PHONE = SMALL && /apple gpu|adreno[^0-9]*([6-9]\d{2})|mali-g(5[7-9]|6\d|7\d|[1-9]\d{2})|immortalis|xclipse/i.test(GPU);
 gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
@@ -4929,7 +4934,7 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = !BIG_GPU;   // v35: slowDev until the speed check says otherwise (v39: not on a real graphics card)
 const MV = []; let mvLast = 0;   // v39: the gaps between frames while the room moves: slow ones turn on the lower resolution while you drag
 function dirty() { need = Math.max(need, 2); }
-function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
+function fullRatio() { const d = window.devicePixelRatio || 1; if (SMALL) return Math.min(d, GOOD_PHONE ? 2 : 1.5); return S.quality === "hd" ? Math.min(d, 1.5) : Math.min(d, 1) * 0.85; }   // v39: phones at their own sharpness
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
 let baseFov = 50;
 const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (asp < 0.8 ? 1.45 : 16 / 9) / asp) * 180 / Math.PI);   // v33: portrait, tighter
@@ -5011,7 +5016,7 @@ function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
   scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
   return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
     lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
-    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, slowDev };   // v39: which graphics card, and whether it starts in HD
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, goodPhone: GOOD_PHONE, slowDev };   // v39: which graphics card, and whether it starts in HD
 }
 if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
   const box = document.createElement("div"); box.className = "r3d-perf";
@@ -5024,9 +5029,9 @@ function autoQuality() {
   const ms = probeT.sort((a, b) => a - b)[1];
   if (S.quality === "fast") slowDev = ms > 30;
   if (S.picked) return;
-  if (S.quality === "fast" && !SMALL && ms < 20) {          // v35: quick in Fast on a laptop: on to HD, once, while the room is still
+  if (S.quality === "fast" && (!SMALL || GOOD_PHONE) && ms < (SMALL ? 18 : 20)) {   // v35: quick in Fast: on to HD, once, while the room is still (v39: capable phones too)
     S.quality = "hd"; applyLight(); syncButtons(); probe = 3; probeT.length = 0;
-  } else if (ms > 70 && S.quality === "hd") {
+  } else if (ms > (SMALL ? 45 : 70) && S.quality === "hd") {   // v39: a phone goes back sooner
     S.quality = "fast"; applyLight(); syncButtons();
     qs("#r3d-savest").textContent = "Switched to Fast for this device; pick HD for shadows (saved pictures always have them).";
   }

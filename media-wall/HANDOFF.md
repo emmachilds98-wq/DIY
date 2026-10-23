@@ -142,6 +142,11 @@
   `scene3d.json` (191 → 116 KB) are gone (code in `room3d_v39c_backup.js`, `export3d_v39a_backup.py`). Room view 513 → 448 calls;
   QA at 390 596 → 546 calls, 1,286 → 1,044 geometries. The glass case's fills and the dining cabinet's moving parts are left unmerged
   (their switches move or swap single meshes). Texts over budget 76 → 19 (16 captions of 21–27 words, two figcaptions, one toast).
+- **Phones (client: "Mobile on v38 is slow and doesn't render full quality expected").** Phones drew at 0.85 of a CSS pixel (a third
+  of a 3× screen) and never left Fast. `fullRatio()` now gives a phone its own sharpness (2× on `GOOD_PHONE`: Apple GPU, Adreno 6xx+,
+  Mali-G57+, Immortalis, Xclipse; 1.5× otherwise; halved only while moving on a slow device); a `GOOD_PHONE` steps up to HD when its first
+  frames are under 18 ms and back to Fast over 45 ms. `R3D.perf().goodPhone`. Emulated 390 × 844 at 3×: ratio 1.5, 13.8 ms, no errors
+  (SwiftShader isn't a phone chip, so the HD step wasn't exercised here: ask the client for `?perf` on their phone). Backup `room3d_v39d_backup.js`.
 - **Next, the client's ask: save each set-up made in the site, and track design changes for the next agent.** The client may set this
   up on **Firebase** themselves ("just to save later"); wait for that, or for their go-ahead on this alternative. Proposal: on the shared
   plan page (deck 71ff, which already has a shared database), a **Save this set-up** button writes the room's whole state (`S`), its look
