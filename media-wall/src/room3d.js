@@ -8,6 +8,10 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 const root = document.getElementById("r3d");
 const SC = JSON.parse(document.getElementById("scene3d-data").textContent);
@@ -210,16 +214,40 @@ function precompileStep() {           // from the frame loop, when nothing's mov
   const o = PRE.queue.shift(), shown = [], tagged = [];
   if (o.visible !== false || !o.parent) return true;
   if (!PRE.rt) { PRE.rt = new THREE.WebGLRenderTarget(1, 1); PRE.rt.isXRRenderTarget = true; PRE.rt.texture.colorSpace = gl.outputColorSpace; }
+  if (!PRE.rtAO) PRE.rtAO = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });   // v40: like the composer's (AO live)
   scene.traverse(c => { if (c.isLight) c.layers.enable(31); });
   o.traverse(c => { if (!c.isLight) { if (c.visible === false) { shown.push(c); c.visible = true; } if (!c.layers.isEnabled(31)) { tagged.push(c); c.layers.enable(31); } } });
   const mask = camera.layers.mask, was = gl.getRenderTarget();
-  camera.layers.set(31); gl.setRenderTarget(PRE.rt);
+  camera.layers.set(31); gl.setRenderTarget(aoLive() ? PRE.rtAO : PRE.rt);
   try { gl.render(scene, camera); } finally {
     gl.setRenderTarget(was); camera.layers.mask = mask;
     shown.forEach(c => { c.visible = false; }); tagged.forEach(c => c.layers.disable(31));
   }
   PRE.done++;
   return true;
+}
+/* v40, client: "better rendering and graphics": ambient occlusion (three's GTAO), the soft shade where things meet. Always in the HD
+   pictures; live in HD on a real graphics card (aoLive). With it the room draws into the composer's target (linear, tone-mapped at the
+   end), so the warm-up draws into a target of the same kind and the shaders match. */
+const AO = { c: null, g: null };
+const aoLive = () => S.quality === "hd" && (BIG_GPU || /[?&]ao\b/.test(location.search)) && !/[?&]noao\b/.test(location.search);   // ?ao tries it anywhere
+function aoComposer(w, h, pr) {
+  if (!AO.c) {
+    const rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: SMALL ? 0 : 4 });   // anti-aliased, as on screen
+    AO.c = new EffectComposer(gl, rt); AO.c.addPass(new RenderPass(scene, camera));
+    AO.g = new GTAOPass(scene, camera, w, h); AO.g.blendIntensity = 0.9;
+    AO.g.updateGtaoMaterial({ radius: 0.3, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 16, distanceFallOff: 1 });
+    AO.g.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
+    clipMat(AO.g.normalMaterial);                                    // the cutaway cuts the depth it shades from, too
+    AO.c.addPass(AO.g); AO.c.addPass(new OutputPass());
+  }
+  AO.c.setPixelRatio(pr); AO.c.setSize(w, h);
+  return AO.c;
+}
+function draw() {                     // a frame: through the composer with AO, or straight to the screen
+  if (aoLive()) { const sz = gl.getSize(new THREE.Vector2()); if (!AO.c || AO.w !== sz.x || AO.h !== sz.y || AO.pr !== gl.getPixelRatio()) { aoComposer(sz.x, sz.y, gl.getPixelRatio()); AO.w = sz.x; AO.h = sz.y; AO.pr = gl.getPixelRatio(); }
+    gl.info.autoReset = false; gl.info.reset(); AO.c.render(); gl.info.autoReset = true; }   // the count covers every pass
+  else gl.render(scene, camera);
 }
 function syncRig() {                  // each frame: a rigged light follows its owner, and leaves with it (a rebuilt cabinet)
   for (let k = RIGGED.length - 1; k >= 0; k--) {
@@ -4116,7 +4144,7 @@ function frame(now) {
   if (glLost || (document.body.classList.contains("sheet-open") && !SH && !tween)) return;   // v35: nothing drawn behind the Plan's sheets (the last picture stays)
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
-    const f0 = performance.now(); syncRig(); gl.render(scene, camera); FT.calls = gl.info.render.calls; FT.tris = gl.info.render.triangles; need--; placeStickers(); FT[FT.n++ % 60] = performance.now() - f0;
+    const f0 = performance.now(); syncRig(); draw(); FT.calls = gl.info.render.calls; FT.tris = gl.info.render.triangles; need--; placeStickers(); FT[FT.n++ % 60] = performance.now() - f0;
     if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
   }
 }
@@ -4129,7 +4157,7 @@ function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
   scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
   return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
     lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
-    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, goodPhone: GOOD_PHONE, slowDev };   // v39: which graphics card, and whether it starts in HD
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, ao: aoLive(), goodPhone: GOOD_PHONE, slowDev };   // v39: which graphics card, and whether it starts in HD
 }
 if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
   const box = document.createElement("div"); box.className = "r3d-perf";
@@ -4175,7 +4203,7 @@ function still(w, h) {
   capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
   MATS.forEach(m => { m.needsUpdate = true; if (m.userData.trans) m.transmission = m.userData.trans; });   // v39: real glass in the pictures
   updateCut(); reshadow();
-  gl.render(scene, camera);
+  aoComposer(w, h, 1).render();                                                           // v40: ambient occlusion in every picture
   MATS.forEach(m => { if (m.userData.trans) m.transmission = 0; });
   const url = canvas.toDataURL("image/png");
   gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
