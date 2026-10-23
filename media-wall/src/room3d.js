@@ -143,6 +143,12 @@ try {
 }
 gl.outputColorSpace = THREE.SRGBColorSpace;
 gl.toneMapping = THREE.ACESFilmicToneMapping;
+/* v39, client: "PC should be using GPU in order to speed up and keep frames high since most PCs will have 1060 or higher": the renderer
+   asks for the high-performance GPU; a PC whose browser reports a real graphics card starts in HD (no Fast-then-HD second set of shaders
+   to build) and keeps full resolution while you move unless its frames actually slow down. */
+const GPU = (() => { try { const c = gl.getContext(), e = c.getExtension("WEBGL_debug_renderer_info"); return String(e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)); } catch (e) { return ""; } })();
+const BIG_GPU = !SMALL && /nvidia|geforce|rtx|gtx|quadro|radeon\s*(rx|pro|r9)|radeon\(tm\) rx|intel.*\barc\b|apple m\d/i.test(GPU) && !/swiftshader|llvmpipe|software|basic render/i.test(GPU);
+if (BIG_GPU && !S.picked) S.quality = "hd";
 gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
@@ -352,13 +358,19 @@ const RUG_LOOKS = {
     let x = 0; while (x < w) for (const [c, bw] of band) { g.fillStyle = c; g.fillRect(x, 0, bw, h); x += bw; }
     g.fillStyle = "#5f6f52"; g.fillRect(0, 0, w, 16); g.fillRect(0, h - 16, w, 16); } },
 };
+let noiseTile = null;
+function NOISE_TILE() {   // v39: a 128 square of grey noise, made once, for the rugs' wool (getImageData on a whole rug took 170 ms)
+  if (noiseTile) return noiseTile;
+  const c = noiseTile = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"), im = g.createImageData(128, 128), d = im.data, r = rnd(22);
+  for (let i = 0; i < d.length; i += 4) { const n = 128 + (r() - 0.5) * 32; d[i] = d[i + 1] = d[i + 2] = n; d[i + 3] = 255; }
+  g.putImageData(im, 0, 0); return c;
+}
 function rugTex(k) {
   const L = RUG_LOOKS[k]; if (!L) return RUG_TEX;
   if (!L.tex) {
     L.tex = canvasTex(1150, 800, (g, w, h) => { L.draw(g, w, h);
-      const r = rnd(22), im = g.getImageData(0, 0, w, h), d = im.data;
-      for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * 16; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
-      g.putImageData(im, 0, 0); });
+      g.globalAlpha = 0.5; g.globalCompositeOperation = "overlay"; g.fillStyle = g.createPattern(NOISE_TILE(), "repeat"); g.fillRect(0, 0, w, h);   // v39: wool noise, tiled
+      g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; });
     L.tex.wrapS = L.tex.wrapT = THREE.ClampToEdgeWrapping;
   }
   return L.tex;
@@ -441,7 +453,11 @@ const MATS = [];
 const CUT_H = 95, CUT_IN = 32;
 const CLIP = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 1e3), new THREE.Plane(new THREE.Vector3(0, -1, 0), CUT_H * 0.01)];
 const clipMat = m => { m.clippingPlanes = CLIP; m.clipIntersection = true; m.clipShadows = true; return m; };
-const reg = m => (MATS.push(clipMat(m)), m);
+/* v39, client: "the render is still slow on PC ... lag and frame drop on movement": a material with transmission (the bar's bottles and
+   glasses) makes three draw the whole room a second time, every frame, to see through it (984 draw calls instead of about 500). In the
+   live room glass is plain see-through; still() puts the transmission back for the saved pictures. */
+const glassLive = m => { if (m.transmission > 0) { m.userData.trans = m.transmission; m.transmission = 0; } return m; };
+const reg = m => (MATS.push(clipMat(glassLive(m))), m);
 const OAKS = new Set(["#c48c57", "#d9a46c", "#9c6a3f", "#a87443", "#cfa575", "#ddb78a", "#b08756", "#c79a6b", "#d8ad80", "#a37a50",
   "#b07a46", "#c89060", "#8a5c33", "#c08a52", "#c9a26a", "#c79a63", "#a8834f", "#d8c39f", "#e6d2ae", "#b99e78", "#cdb38a", "#d9c09a"]);
 const PAINT_OLD = new Set(R.PAINT_OLD);
@@ -3360,7 +3376,7 @@ canvas.addEventListener("wheel", e => {
   e.preventDefault(); wheelAcc += e.deltaY;
   if (Math.abs(wheelAcc) >= 60) { walk(wheelAcc < 0 ? "f" : "b"); wheelAcc = 0; }
 }, { passive: false });
-["pointerdown", "pointermove", "keydown", "wheel"].forEach(t => root.addEventListener(t, () => { PRE.idleT = performance.now(); }, { passive: true, capture: true }));   // v35: the shader warm-up waits while you use the room
+["pointerdown", "pointermove", "keydown", "wheel"].forEach(t => root.addEventListener(t, e => { if (t !== "pointermove" || e.buttons) PRE.idleT = performance.now(); }, { passive: true, capture: true }));   // v39: a mouse just moving over the room doesn't hold up the warm-up   // v35: the shader warm-up waits while you use the room
 let padT = null;             // a move button held down keeps moving, in smaller steps
 const padStop = () => { if (padT) { clearTimeout(padT.t); clearInterval(padT.i); padT = null; } };
 root.addEventListener("pointerdown", e => {
@@ -3830,7 +3846,8 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 }
 
 /* ---------------------------------------------------------------- render loop, only when something changed */
-let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = true;   // v35: slowDev until the speed check says otherwise
+let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = !BIG_GPU;   // v35: slowDev until the speed check says otherwise (v39: not on a real graphics card)
+const MV = []; let mvLast = 0;   // v39: the gaps between frames while the room moves: slow ones turn on the lower resolution while you drag
 function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
@@ -3887,13 +3904,17 @@ function frame(now) {
   if (showTick(now)) need = 2;                                    // v32: "Watch it open"
   if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
   const active = moving || changed || !!tween;
+  if (active && mvLast && now - mvLast < 250) { MV.push(now - mvLast); if (MV.length >= 24) { const m = MV.sort((a, b) => a - b)[12]; MV.length = 0;
+    if (m > 28) slowDev = true; else if (m < 14 && !lowRes && BIG_GPU) slowDev = false; } }
+  mvLast = active ? now : 0;
   // v35: the lower resolution only while you hold and drag the room on a slow device, and only once the drag has lasted a moment:
   // each switch resizes the canvas (a new drawing buffer), which cost more than it saved after a tap, a fly-to or a Look change
   if (moving && slowDev) { if (!dragT) dragT = now; still_t = now; if (!lowRes && now - dragT > 150) { lowRes = true; sizeRenderer(); } }
   else { dragT = 0; if (active) still_t = now; else if (lowRes && now - still_t > 250) { lowRes = false; sizeRenderer(); } }
   if (updateCut()) need = 2;
   if (probe > 0 && !lowRes) need = Math.max(need, 1);                 // v35: the speed check's three frames come first, at the start
-  if (need === 0 && !active && !SH && probe === 0 && now - preT > 250 && now - PRE.idleT > 1000 && precompileStep()) preT = now;   // v35: one hidden part's shaders, off screen
+  if (need === 0 && !active && !SH && probe === 0 && now - preT > 120 && now - PRE.idleT > 400) {   // v35: hidden parts' shaders, off screen
+    const t0 = performance.now(); while (precompileStep() && performance.now() - t0 < 10) {} preT = now; }   // v39: as many as fit in 10 ms, sooner
   if (glLost || (document.body.classList.contains("sheet-open") && !SH && !tween)) return;   // v35: nothing drawn behind the Plan's sheets (the last picture stays)
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
@@ -3910,7 +3931,7 @@ function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
   scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
   return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
     lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
-    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length };
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, slowDev };   // v39: which graphics card, and whether it starts in HD
 }
 if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
   const box = document.createElement("div"); box.className = "r3d-perf";
@@ -3954,9 +3975,10 @@ function still(w, h) {
   const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(big, big); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
-  MATS.forEach(m => m.needsUpdate = true);
+  MATS.forEach(m => { m.needsUpdate = true; if (m.userData.trans) m.transmission = m.userData.trans; });   // v39: real glass in the pictures
   updateCut(); reshadow();
   gl.render(scene, camera);
+  MATS.forEach(m => { if (m.userData.trans) m.transmission = 0; });
   const url = canvas.toDataURL("image/png");
   gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
   gl.shadowMap.enabled = was;
