@@ -91,6 +91,9 @@ def run(w, h):
         if tap((lambda c: [20.5, 120, c[2]])(pg.evaluate(CEN, "SUGG_G.barside")), "the bar by the sofa's front"): press("Open the bar"); print("   barflap:", S("barflap"))
         pg.evaluate("() => R3D.set({sugg: {liftcoffee: true}, barflap: false, ctop: false, aim: {eye: [240, 135, -95], at: [148, 45, -166], fov: 46}})"); pg.wait_for_timeout(800)
         if tap((lambda c: [c[0], 48, c[2]])(pg.evaluate(CEN, "SUGG_G.liftcoffee")), "the lift-top coffee table"): press("Lift the top"); print("   ctop:", S("ctop"))
+        # v38: the record table (the plan's coffee table): its lid lifts
+        pg.evaluate("() => R3D.set({sugg: {recordtable: true}, ctop: false, aim: {eye: [150, 150, -250], at: [148, 40, -160], fov: 48}})"); pg.wait_for_timeout(800)
+        if tap((lambda c: [c[0], 48, c[2]])(pg.evaluate(CEN, "SUGG_G.recordtable")), "the record table"): press("Lift the lid"); print("   ctop:", S("ctop"))
         pg.evaluate("() => R3D.set({site: 'C', dining: 'folded', sugg: {}, lid: false, view: 'room'})")
         print("  errors:", errs[:5])
         b.close()

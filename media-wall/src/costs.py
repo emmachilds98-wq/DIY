@@ -127,6 +127,6 @@ SHORT += [
     ("Finishing touches", "An oak shelf over the hall door", "1 set", "Oak shelf over the door, two KUGGIS boxes"),
     ("Finishing touches", "Two IKEA KUGGIS lidded boxes", "2", "IKEA KUGGIS box, 35 × 26 × 15"),
     ("Finishing touches", "Drawers in the bottom three steps", "1 set", "Step drawers: ply boxes, oak fronts, runners"),
-    ("Finishing touches", "The blanket basket", "1", "Blanket basket with a lid"),
-    ("Finishing touches", "A lift-top coffee table", "1", "Lift-top coffee table, 90 × 50"),
+    ("Finishing touches", "The blanket basket", "1", "Blanket basket, water hyacinth, 59 × 51 × 29"),
+    ("Finishing touches", "The record table", "1 set", "Record table: two KALLAX, oak lid, ply base, castors"),
 ]

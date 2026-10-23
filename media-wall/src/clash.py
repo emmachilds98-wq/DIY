@@ -53,7 +53,7 @@ def pieces():
     b.append(box("sofa seat", (sx0, sx1), (0, 45), (g.SOFA_BACK_Z, g.SOFA_FRONT_Z)))
     b.append(box("sofa back", (sx0, sx1), (0, g.SOFA_H), (g.SOFA_BACK_Z, g.SOFA_BACK_Z + 20)))
     b.append(box("chaise", g.CHAISE_X, (0, 45), (g.SOFA_BACK_Z, g.CHAISE_END_Z)))
-    b.append(box("coffee table", g.COFFEE["x"], (0, g.LIFT_COFFEE["h"]), g.COFFEE["z"]))
+    b.append(box("record table", g.COFFEE["x"], (0, g.RECORD_TABLE["h"]), g.COFFEE["z"]))      # v38: the plan's coffee table
     po = g.SOFA_POUF
     b.append(box("ottoman", po["x"], (0, po["h"]), po["z"]))
     bb = g.BLANKET_BASKET
@@ -152,8 +152,9 @@ def moving_pieces():
         y = G.STAIR_RISE * i + 1.4
         out.append(box(f"step drawer {i + 1}, out", (G.STAIR_X[0] + D["inset"], G.STAIR_X[1] - D["inset"]), (y, y + D["h"]),
                        (zr - (D["depth"] - 8), zr)))
-    L, cf = G.LIFT_COFFEE, G.COFFEE
-    out.append(box("coffee table's top, lifted", cf["x"], (L["lift"] - 2.2, L["lift"]), (cf["z"][0] - 16, cf["z"][1] - 16)))
+    Rt, cf = G.RECORD_TABLE, G.COFFEE
+    # v38: the record table's lid, open on its piano hinge along the TV side (stood up about 80°, the stays' stop)
+    out.append(box("record table's lid, open", cf["x"], (Rt["h"], Rt["h"] + Rt["d"]), (cf["z"][1] - Rt["lid"] - 9.0, cf["z"][1])))
     return out
 
 

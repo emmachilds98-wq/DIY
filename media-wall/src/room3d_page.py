@@ -321,7 +321,7 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "candles": "LED candles on the shelf", "runner": "Table runner and vase", "floorcush": "Floor cushions",
               "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
               "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet",
-              "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
+              "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "cotswoldbasket": "Lidded seagrass basket", "recordtable": "Record table", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
               "shelfboxes": "Boxes on your shelf",
               "stairdrawers": "Drawers in the steps", "alcoveshelves": "Alcove shelves", "windowseat": "Storage window seat", "hallbench": "Bench with cubbies",
               "wardrobe": "Built-in cupboard", "wallcabs": "Wall cabinets, sofa", "overdoor": "Hook rail over the door"}   # v37   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST

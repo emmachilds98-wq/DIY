@@ -1442,6 +1442,7 @@ function placeWork() {      // v34
   twTo(WORK.barflap, S.barflap ? 1 : 0, 1400);
   twTo(WORK.barflap2, S.barflap ? 1 : 0, 1400);                                                    // v36: the bar by the sofa opens with it
   twTo(WORK.ctop, S.ctop ? 1 : 0, 1200);
+  if (WORK.rlid) twTo(WORK.rlid, S.ctop ? 1 : 0, 1200);                                          // v38: the record table's lid
   twTo(WORK.barflap3, S.barflap ? 1 : 0, 1400);                                                    // v37: the built-in bar's doors open with it
   twTo(WORK.sdraw, S.sdraw ? 1 : 0, 1500);                                                          // v37: the drawers in the bottom steps
   twTo(WORK.lid, S.lid ? 1 : 0, 1500);
@@ -1495,9 +1496,9 @@ const MOMENTS = {
              say: "Film night: everything packed away, the lights down" },
   morning: { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "bright", tod: "day", curtains: false }, view: "room",
              say: "An everyday morning: the cabinet shut, the room clear" },
-  // v37: the ottoman's games out, the lift-top coffee table up, cosy; and drinks at the bar built in beside the cabinet, its doors open
-  games:   { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", curtains: true, lid: true, ctop: true, sugg: "+liftcoffee" },
-             aim: { eye: [300, 150, -60], at: [200, 35, -170], fov: 52 }, say: "Games night: the ottoman's lid off, the coffee table's top up, the lights cosy" },
+  // v37: the ottoman's games out, cosy; and drinks at the bar built in beside the cabinet, its doors open (v38: the record table's lid stays down to play on)
+  games:   { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", curtains: true, lid: true, ctop: false },
+             aim: { eye: [300, 150, -60], at: [200, 35, -170], fov: 52 }, say: "Games night: the ottoman's lid off, the lights cosy" },
   drinks:  { set: { site: "C", cab: "compact", dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", beside: "bar", barflap: true },
              aim: { eye: [345, 138, -180], at: [460, 108, -262], fov: 46 }, say: "Drinks: the bar beside the cabinet open, glasses down from the rail" },
 };
@@ -1660,7 +1661,7 @@ function buildSuggest() {
   const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.6, side: THREE.DoubleSide }));
   const mat = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
   // the floor pieces: movable, shown only while switched on
-  const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] && !(k === "floorplant" && S.sugg.blanketbasket) }); };   // v36: the blanket basket takes the floor plant's corner
+  const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] && !(k === "floorplant" && (S.sugg.blanketbasket || S.sugg.cotswoldbasket)) }); };   // v36: the blanket basket takes the floor plant's corner
   const ownOak = () => reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));   // v28: each piece's own, for its versions
   const ownGlow = c => new THREE.MeshBasicMaterial({ color: c, toneMapped: false });
   { const pot = mat("#d8cfc0"); SVAR_MATS.floorplant = [pot];
@@ -1790,17 +1791,53 @@ function buildStorage(oak, mat) {
   const kuggis = (g, x0, y, z0, along, deep, h, m, alongZ) => {     // a lidded box: its body, a bamboo lid 1 thick
     if (alongZ) { ibox(g, x0, y, z0, deep, h - 1, along, m); ibox(g, x0 - 0.2, y + h - 1, z0 - 0.2, deep + 0.4, 1, along + 0.4, bamboo); }
     else { ibox(g, x0, y, z0, along, h - 1, deep, m); ibox(g, x0 - 0.2, y + h - 1, z0 - 0.2, along + 0.4, 1, deep + 0.4, bamboo); } };
-  // the tall lidded basket for the blankets, at the sofa's open end (a floor piece: it moves in Edit room)
-  if (R.BLANKET_BASKET) { const B = R.BLANKET_BASKET, weave = reg(new THREE.MeshStandardMaterial({ color: "#b89a6c", roughness: 1, bumpMap: HESSIAN, bumpScale: 2.2 }));
-    SVAR_MATS.blanketbasket = [weave];
+  // v38 (the plan): Dibor's Lakelyn basket for the blankets at the sofa's open end, 29 out from the wall and 51 along it, no lid: its
+  // cotton lining turned over the rim and the five throws, folded long, stacked flat inside (a floor piece: it moves in Edit room)
+  if (R.BLANKET_BASKET) { const B = R.BLANKET_BASKET, weave = reg(new THREE.MeshStandardMaterial({ color: "#9a7a50", roughness: 1, bumpMap: HESSIAN, bumpScale: 2.6 }));
+    const lining = own("#e9e2d2"); SVAR_MATS.blanketbasket = [weave];
+    const g = new THREE.Group(), w = B.w, d = B.d, h = B.h, t = 1.2;
+    lb(g, 0, 0, 0, w, 1.5, d, weave);                                                                     // its floor
+    for (const [x, z, ww, dd] of [[-w / 2 + t / 2, 0, t, d], [w / 2 - t / 2, 0, t, d], [0, -d / 2 + t / 2, w - 2 * t, t], [0, d / 2 - t / 2, w - 2 * t, t]]) {
+      lb(g, x, 1.5, z, ww, h - 1.5, dd, weave);
+      lb(g, x * 1.01, h - 5, z * 1.01, ww + (ww > t ? 0 : 0.6), 5, dd + (dd > t ? 0 : 0.6), lining); }  // the lining over the rim
+    const th = R.THROW_LONG || [47, 25, 8.5], cols = ["#efe7d8", "#a65a38", "#8b9878", "#d9a441", "#34507f"];
+    for (let k = 0; k < 5; k++) lb(g, 0, 1.5 + k * th[2], 0, th[1] - (k % 2), th[2] - 0.3, th[0] - (k % 2), own(cols[k]));   // the throws, flat
+    const top = own(cols[4]); lb(g, 1, h, 0, w - 2, 0.8, 22, top); lb(g, w / 2 + 0.5, h - 16, 0, 0.8, 16.8, 22, top);   // the top throw over the rim, hanging down the room side
+    const cx = (B.x[0] + B.x[1]) / 2, cz = (B.z[0] + B.z[1]) / 2;
+    SUGG_G.blanketbasket = movable("sg_blanketbasket", "Blanket basket", g, () => ({ x: cx, z: cz, rot: 0 }), B.w, B.d, [weave], false, { when: () => !!S.sugg.blanketbasket }); }
+  // the fallback: the tall lidded seagrass basket (The Cotswold Company), in the same corner
+  if (R.BLANKET_COTSWOLD) { const B = R.BLANKET_COTSWOLD, weave = reg(new THREE.MeshStandardMaterial({ color: "#b89a6c", roughness: 1, bumpMap: HESSIAN, bumpScale: 2.2 }));
+    SVAR_MATS.cotswoldbasket = [weave];
     const g = new THREE.Group(), body = new THREE.Mesh(new RoundedBoxGeometry(B.w * M, (B.h - 6) * M, B.d * M, 3, 0.03), weave);
     body.position.y = (B.h - 6) / 2 * M; g.add(shadow(body));
     const lid = new THREE.Mesh(new RoundedBoxGeometry((B.w + 1.5) * M, 6 * M, (B.d + 1.5) * M, 3, 0.025), weave); lid.position.y = (B.h - 3) * M; g.add(shadow(lid));
     const knob = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.008, 8, 20), weave); knob.position.y = (B.h + 1.5) * M; g.add(knob);
-    const throwC = ["#efe7d8", "#a65a38", "#8b9878", "#d9a441", "#34507f"].map(c => own(c));     // the top of the stack, peeking under the lid's edge
+    const throwC = ["#efe7d8", "#a65a38"].map(c => own(c));                                              // the top of the stack, peeking under the lid's edge
     for (let i = 0; i < 2; i++) { const t_ = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.012, 0.004), throwC[i]); t_.position.set(0, (B.h - 6.6 + i * 0.8) * M, (B.d / 2 + 0.1) * M); g.add(t_); }
     const cx = (B.x[0] + B.x[1]) / 2, cz = (B.z[0] + B.z[1]) / 2;
-    SUGG_G.blanketbasket = movable("sg_blanketbasket", "Blanket basket (suggested)", g, () => ({ x: cx, z: cz, rot: 0 }), B.w, B.d, [weave], false, { when: () => !!S.sugg.blanketbasket }); }
+    SUGG_G.cotswoldbasket = movable("sg_cotswoldbasket", "Lidded seagrass basket (an option)", g, () => ({ x: cx, z: cz, rot: 0 }), B.w, B.d, [weave], false, { when: () => !!S.sugg.cotswoldbasket }); }
+  // v38 (the plan): the record table in the coffee table's place: two KALLAX cubes on their backs on a ply base and castors, LPs
+  // spine-up in the two bins, an oak lid on a piano hinge along the TV side (+z here; the sofa is -z) that lifts on two stays
+  if (R.RECORD_TABLE && R.KALLAX && coffeeG) { const T = R.RECORD_TABLE, K = R.KALLAX, g = SUGG_G.recordtable = new THREE.Group();
+    const carc = own("#8d8780"), oakL = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 })), dark = own("#2a2724"), ply = own("#d9c29a");
+    SVAR_MATS.recordtable = [oakL, carc];
+    const cw = T.carcass[0], cd = T.carcass[1], y0 = T.castor + T.base, tx = (K.w - K.inner) / 2, tz = (cd - K.inner) / 2;
+    for (const [x, z] of [[-cw / 2 + 4, -cd / 2 + 4], [cw / 2 - 4, -cd / 2 + 4], [-cw / 2 + 4, cd / 2 - 4], [cw / 2 - 4, cd / 2 - 4]]) {
+      lb(g, x, 0, z, 3.6, T.castor - 1, 3.6, dark); lb(g, x, T.castor - 1, z, 5, 1, 5, dark); }         // the castors and their plates
+    lb(g, 0, T.castor, 0, cw + 1, T.base, cd + 0.3, ply);                                                // the 12 mm ply base
+    const sl = new THREE.BoxGeometry(T.lp * M, T.lp * M, 0.0036), per = T.per_bin, rows = [];
+    for (let u = 0; u < T.units; u++) { const x = (u - (T.units - 1) / 2) * K.w;
+      lb(g, x - K.w / 2 + tx / 2, y0, 0, tx, K.d, cd, carc); lb(g, x + K.w / 2 - tx / 2, y0, 0, tx, K.d, cd, carc);
+      lb(g, x, y0, -cd / 2 + tz / 2, K.inner, K.d, tz, carc); lb(g, x, y0, cd / 2 - tz / 2, K.inner, K.d, tz, carc);
+      for (let k = 0; k < per; k++) rows.push([x, -K.inner / 2 + 0.4 + k * (K.inner - 0.8) / per]); }
+    const lps = new THREE.InstancedMesh(sl, reg(new THREE.MeshStandardMaterial({ roughness: 0.55 })), rows.length), m4 = new THREE.Matrix4(), col = new THREE.Color();
+    const sc = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d", "#f0c24b", "#7a4fb0", "#e8603c"];
+    rows.forEach(([x, z], k) => { m4.makeRotationX(((k * 7919) % 9 - 4) * 0.006); m4.setPosition(x * M, (y0 + T.lp / 2) * M, z * M); lps.setMatrixAt(k, m4); lps.setColorAt(k, col.set(sc[(k * 5 + (k >> 3)) % sc.length])); });
+    lps.castShadow = false; lps.receiveShadow = true; g.add(lps);                                        // the LPs, spine-up (one draw call)
+    const pg = new THREE.Group(); pg.position.set(0, (y0 + K.d) * M, cd / 2 * M); g.add(pg);             // the hinge, on the TV side's top edge
+    lb(pg, 0, 0, -T.d / 2 + (T.d / 2 - cd / 2), T.w, T.lid, T.d, oakL);                                   // the oak lid, 90 × 50, centred over the pair
+    WORK.rlid = anim(v => { pg.rotation.x = 1.4 * v; });                                                  // up about 80°, on its stays
+    g.visible = false; coffeeG.add(g); }
   // the lift-top coffee table, in the coffee table's place (it goes where the coffee table goes); the top lifts and comes towards the sofa
   if (R.LIFT_COFFEE && coffeeG) { const L = R.LIFT_COFFEE, g = SUGG_G.liftcoffee = new THREE.Group(), body = own("#b07d4f"); SVAR_MATS.liftcoffee = [body];
     const dark = own("#2a2724"), w = L.w, d = L.d, legH = 6, top = 2.2, sh = L.h - legH - top;
@@ -2030,8 +2067,10 @@ function applySuggest() {
   for (const k of ["stairdrawers", "alcoveshelves", "windowseat", "wardrobe", "wallcabs", "overdoor"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];   // v37
   if (SUGG_G.alcoveshelves && S.sugg.wardrobe) SUGG_G.alcoveshelves.visible = false;                  // v37: the cupboard fills that corner
   if (SUGG_G.clock && S.sugg.doorshelf) SUGG_G.clock.visible = false;                                 // the shelf takes the clock's place
-  if (SUGG_G.liftcoffee) { SUGG_G.liftcoffee.visible = !!S.sugg.liftcoffee; if (coffeePlain) coffeePlain.visible = !S.sugg.liftcoffee;
-    if (SUGG_G.tray) SUGG_G.tray.position.y = S.sugg.liftcoffee ? (R.LIFT_COFFEE.h - 42) * M : 0; }
+  { const lc = !!(SUGG_G.liftcoffee && S.sugg.liftcoffee), rt = !!(SUGG_G.recordtable && S.sugg.recordtable && !lc);   // v38: the record table is the plan's; the lift-top the option
+    if (SUGG_G.liftcoffee) SUGG_G.liftcoffee.visible = lc; if (SUGG_G.recordtable) SUGG_G.recordtable.visible = rt;
+    if (coffeePlain) coffeePlain.visible = !lc && !rt;
+    if (SUGG_G.tray) SUGG_G.tray.position.y = lc ? (R.LIFT_COFFEE.h - 42) * M : rt ? (R.RECORD_TABLE.h - 42) * M : 0; }
   if (SUGG_G.piclights) { SUGG_G.piclights.visible = !!S.sugg.piclights && !caseOn();   // v32: over the two framed LPs, while they hang
     SUGG_G.piclights.position.y = S.site !== "A" && S.plants === "breast" ? 0.3 : 0; }
   // v26: the runner lies down the middle of whichever table is open
@@ -3630,10 +3669,12 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id.startsWith("sg:") || id.startsWith("id:")) {
     const sg = id.startsWith("sg:"), k = id.slice(3), nm = ((sg ? PD.sugg : PD.ideas)[k] || [k])[0], it = sg && MOV["sg_" + k];
     if (!(sg ? S.sugg : S.ideas)[k]) return null;                        // taken away: the card closes
-    return [nm, sg ? "A suggestion: not in the plan's costs" : "An idea: not in the plan's costs", [
+    const firm = sg && R.FIRM && R.FIRM.sugg.includes(k);                 // v38: the client's picks are the plan
+    return [nm, firm ? "In your plan" : sg ? "An option: not in the plan's costs" : "An idea: not in the plan's costs", [
       ...(k === "blind" ? [btn(S.blind === "up" ? "Pull it down" : "Roll it up", { blind: S.blind === "up" ? "down" : "up" })] : []),
       ...(k === "barcase" || k === "barside" ? [btn(S.barflap ? "Close the bar" : "Open the bar", { barflap: S.barflap ? "shut" : "open" })] : []),
       ...(k === "liftcoffee" ? [btn(S.ctop ? "Put the top down" : "Lift the top", { ctop: S.ctop ? "down" : "up" })] : []),
+      ...(k === "recordtable" ? [btn(S.ctop ? "Close the lid" : "Lift the lid", { ctop: S.ctop ? "down" : "up" })] : []),   // v38
       ...(k === "stairdrawers" ? [btn(S.sdraw ? "Push the drawers in" : "Pull the drawers out", { sdraw: S.sdraw ? "in" : "out" })] : []),   // v37
       ...(sg ? (SVAR[k] || []).map(([v, n]) => btn(n, { svar: `${k}:${v}` }, svarOf(k) === v)) : []),
       ...(it && !it.fixed ? [btn("Move it", { actedit: it.id })] : []),

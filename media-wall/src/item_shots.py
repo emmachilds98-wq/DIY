@@ -20,7 +20,7 @@ BASE = dict(site="C", cab="compact", dining="folded", tdoor=False, chairs="cupbo
 EVENING = dict(scene="cosy", tod="evening")
 SUGG_STATE = {"fairy": EVENING, "candles": EVENING, "shelfled": EVENING, "lantern": EVENING, "pclamp": EVENING, "barcase": dict(barflap=True, **EVENING), "bartrolley": dict(beside="trolley", trolley="out", dining="six", layout={"lamp": {"off": True}}, **EVENING),
               "runner": dict(dining="six"), "cablights": dict(tdoor=True, **EVENING), "hanger": {}, "blind": {},
-              "barside": dict(barflap=True, **EVENING), "liftcoffee": dict(ctop=True)}
+              "barside": dict(barflap=True, **EVENING), "liftcoffee": dict(ctop=True), "recordtable": dict(ctop=True)}
 SUGG_STATE.update(stairdrawers=dict(sdraw=True))   # v37: the step drawers pulled out
 IDEA_STATE = {"sync": dict(scene="film", tod="evening"), "plantlight": dict(scene="film", tod="evening"), "night": dict(scene="film", tod="evening")}
 
@@ -44,7 +44,8 @@ AIM = {
     "3d_sg_cablights": ([300, 130, -110], [455, 140, -133], 50),
     # v36: the third bar, the blankets' basket, more storage, the plant shelf
     "3d_sg_barside": ([170, 140, -150], [0, 112, -44], 50), "3d_sg_blanketbasket": ([175, 130, -45], [24, 40, -102], 48),
-    "3d_sg_liftcoffee": ([240, 135, -95], [148, 45, -166], 46), "3d_sg_doorshelf": ([330, 150, -150], [357, 212, 35], 50),
+    "3d_sg_liftcoffee": ([240, 135, -95], [148, 45, -166], 46), "3d_sg_recordtable": ([150, 150, -250], [148, 40, -160], 48),
+    "3d_sg_cotswoldbasket": ([175, 130, -45], [24, 40, -102], 48), "3d_sg_doorshelf": ([330, 150, -150], [357, 212, 35], 50),
     "3d_sg_shelfboxes": ([320, 175, -200], [455, 205, -185], 50),
     # v37: more storage (the window corner's three, the alcove shelves, the wall cabinets, the step drawers, the hook rail)
     "3d_sg_stairdrawers": ([330, 115, -150], [437, 28, -30], 46), "3d_sg_alcoveshelves": ([290, 165, -150], [391, 185, -300], 52),

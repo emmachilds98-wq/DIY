@@ -752,10 +752,20 @@ OTTO_GAMES["decks"] = int(_ot_in // CARD_DECK[2]) * int(OTTOMAN["inner_h"] // CA
 # blankets: about five. A 130 × 170 throw folds to about 38 × 33 × 8 (IKEA OFELIA, as sold)
 THROW_FOLDED = (38.0, 33.0, 8.0)
 BLANKETS = 5
-# 1, "blanketbasket": a tall lidded seagrass basket at the sofa's open end, against the side wall (the floor plant's corner)
-BLANKET_BASKET = dict(w=45.0, d=45.0, h=76.0, wall=2.0, x=(2.0, 47.0),
-                      z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 45.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -80 .. -125: 3 off the sofa's end
-BLANKET_BASKET["holds"] = int((BLANKET_BASKET["h"] - 4.0) // THROW_FOLDED[2])           # folded flat, nine high (five use 40 of 72)
+# 1, "blanketbasket" (v38: the plan): Dibor's Lakelyn water hyacinth lined basket, large, 59 high × 51 × 29, against the side wall at the
+# sofa's open end, its 51 along the wall (it stands 29 out, where the Cotswold one stood 45). No lid: the top throw lies over the rest.
+# A throw folded long (in four, then in half) is about 47 × 25 × 8.5, the same 10 litres as the 38 × 33 × 8 shop fold; five stack 43 high
+THROW_LONG = (47.0, 25.0, 8.5)
+BLANKET_BASKET = dict(w=29.0, d=51.0, h=59.0, wall=1.0, x=(2.0, 31.0),
+                      z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 51.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -74 .. -125: 3 off the sofa's end
+BLANKET_BASKET["inner"] = (BLANKET_BASKET["d"] - 2 * BLANKET_BASKET["wall"], BLANKET_BASKET["w"] - 2 * BLANKET_BASKET["wall"],
+                           BLANKET_BASKET["h"] - 2.0)                                   # 49 × 27 × 57 inside its lining
+BLANKET_BASKET["holds"] = int(BLANKET_BASKET["inner"][2] // THROW_LONG[2])              # six folded long; five stand 42.5 of 57
+BLANKET_BASKET["litres"] = round(BLANKET_BASKET["inner"][0] * BLANKET_BASKET["inner"][1] * BLANKET_BASKET["inner"][2] / 1000)
+# the fallback (the client's first pick, v36): The Cotswold Company's large seagrass basket with a lid, 76 × 45 × 45, in the same corner
+BLANKET_COTSWOLD = dict(w=45.0, d=45.0, h=76.0, wall=2.0, x=(2.0, 47.0),
+                        z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 45.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -80 .. -125
+BLANKET_COTSWOLD["holds"] = int((BLANKET_COTSWOLD["h"] - 4.0) // THROW_FOLDED[2])     # folded flat, nine high (five use 40 of 72)
 # 2, BESIDE "rail": an oak wall rail beside the dining cabinet: four 28 mm oak dowels between two oak uprights, 12 off the wall, a
 # blanket folded over each (two on the lowest). Blankets over it stand about 18 off the wall: behind the open table door's line (23.4)
 BESIDE["rail"] = dict(w=45.0, h=150.0, up=(6.0, 2.2), rails=(40.0, 75.0, 110.0, 145.0), off=12.0, dowel=2.8, draped=18.0)
@@ -763,6 +773,18 @@ BESIDE["opts"]["rail"] = dict(name="An oak blanket rail")
 
 # more storage: 1, "liftcoffee": a lift-top coffee table in the coffee table's place (Homelife, 90 × 50 × 48; the top lifts to 53.5)
 LIFT_COFFEE = dict(w=90.0, d=50.0, h=48.0, lift=53.5, inside=12.0)
+# v38 (the plan): "recordtable", a record-browsing coffee table in the coffee table's 90 × 50: two IKEA KALLAX 42 × 42 cube units
+# (41.5 × 39 × 40.7, open-backed) laid on their backs side by side on a 12 mm ply base on four 50 mm castors, an 18 mm oak lid 90 × 50 on
+# a piano hinge along the TV side, held open by two lid stays. Each cube is a 33 × 33 bin 39 deep: LPs (31.4 square) stand spine-up in
+# two rows of about 80, to flick through from the sofa with the lid up. The lift-top stays as the fallback (an option).
+KALLAX = dict(w=41.5, d=39.0, h=40.7, inner=33.0)
+RECORD_TABLE = dict(w=90.0, d=50.0, castor=6.5, base=1.2, lid=1.8, units=2, lp=31.4, lp_t=0.4)
+RECORD_TABLE["carcass"] = (KALLAX["w"] * 2, KALLAX["h"])                                 # 83 × 40.7 on the floor, 39 tall
+RECORD_TABLE["h"] = round(RECORD_TABLE["castor"] + RECORD_TABLE["base"] + KALLAX["d"] + RECORD_TABLE["lid"], 1)   # 48.5
+RECORD_TABLE["over_lp"] = round(KALLAX["d"] - RECORD_TABLE["lp"], 1)                     # 7.6 over a standing LP, under the lid
+RECORD_TABLE["per_bin"] = int(KALLAX["inner"] // RECORD_TABLE["lp_t"] * 0.98)            # about 80 a bin, sleeves and all
+RECORD_TABLE["lps"] = RECORD_TABLE["per_bin"] * RECORD_TABLE["units"]
+RECORD_TABLE["kg"] = round(RECORD_TABLE["lps"] * 0.23 + 2 * 9.0 + 6.0 + 4.0)           # LPs about 230 g each; KALLAX about 9 kg; the lid, the base
 # 2, "doorshelf": an oak shelf over the hall door with two lidded boxes (IKEA KUGGIS 26 × 35 × 15); the clock suggestion's place
 KUGGIS = (35.0, 26.0, 15.0)        # along the shelf, deep, tall
 ARCHITRAVE = 7.0                   # a usual 69 mm architrave over the door's 198 opening (check yours)
@@ -856,9 +878,9 @@ OVERDOOR["open_gap"] = round(DOOR_X[0] - BREAST_X[1], 1)                        
 # the black shelf, the shelf over the door, the lift-top coffee table, the sage-stripe rug; and, from the brief, "dining cabinet with bar
 # beside it". These are in the buy list, the build and the HD stills; every other choice is an option, only to look at (CLAUDE.md).
 FIRM = dict(
-    sugg=["blanketbasket", "stairdrawers", "wallcabs", "alcoveshelves", "shelfboxes", "doorshelf", "liftcoffee"],
-    svar={"blanketbasket": "sea", "stairdrawers": "oak", "wallcabs": "walnut", "alcoveshelves": "oak", "shelfboxes": "white",
-          "doorshelf": "white", "liftcoffee": "oak"},
+    sugg=["blanketbasket", "stairdrawers", "wallcabs", "alcoveshelves", "shelfboxes", "doorshelf", "recordtable"],
+    svar={"blanketbasket": "natural", "stairdrawers": "oak", "wallcabs": "walnut", "alcoveshelves": "oak", "shelfboxes": "white",
+          "doorshelf": "white", "recordtable": "oak"},
     beside="bar", cabw="90", decor={"rug": "stripes"},
 )
 # v38 (the clash check): with the table out for six, the ottoman can't stay by the coffee table (the table's end reaches 7 into it, and

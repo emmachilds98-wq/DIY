@@ -1077,12 +1077,26 @@ SOURCES["kuggis"] = ("IKEA: KUGGIS box with lid, 26 × 35 × 15 cm, recycled PET
                      "(ikea.com.tr/en/p09610214)")
 SOURCES["oakdowel"] = ("Tools & Timber: oak dowels, 18 to 30 mm across, cut from 350 to 2400 mm long (toolsandtimber.co.uk/oak-dowels)")
 ORDER.extend(["ttr", "bicycle", "ofelia", "cotswold", "homelife", "kuggis", "oakdowel"])
+# v38: the better basket and the record table (UPGRADE_PLAN_v38 items 8 and 9)
+SOURCES["lakelyn"] = ("Dibor: Lakelyn Water Hyacinth Lined Basket, large H59 × W51 × D29 cm (medium H48 × W41 × D21), water hyacinth with a "
+                      "removable cotton lining, natural, £42 (dibor.co.uk/products/lakelyn-water-hyacinth-lined-basket); no lid listed")
+SOURCES["kallax"] = ("IKEA: KALLAX cube storage unit, 42 × 42 cm, grey wood effect (also white, black-brown, white stained oak effect): "
+                     "W 41.5 × D 39 × H 40.7 cm, 13 kg a shelf, £19 (ikea.com/gb/en/p/kallax-shelving-unit-grey-wood-effect-60477933); "
+                     "open-backed, a 33 cm square compartment")
+SOURCES["snowdonoak"] = ("Snowdon Timber: oak furniture board, 18 × 600 × 1200 mm, £184.50 for a pack of three through Tesco Marketplace "
+                         "(tesco.com/shop/en-GB/products/326112258), single boards from snowdontimber.co.uk")
+SOURCES["wickesply"] = ("Wickes: non-structural hardwood plywood sheet, 12 × 607 × 1829 mm, £22.50 (wickes.co.uk, product 112957)")
+SOURCES["castor50"] = ("Toolstation: MOVE IT swivel wheel castor, 50 mm, non-marking rubber tyre, 50 kg each, £3.29 (toolstation.com/"
+                       "swivel-wheel-castor/p29715); about 6.5 high overall (check the listing)")
+SOURCES["lidstay"] = ("Eurofit Direct: toy box and lid stays, soft-down, for ottomans and toy boxes, £14.90 each or £29.81 a pair "
+                      "(eurofitdirect.co.uk/collections/toy-box-and-lid-stays)")
+ORDER.extend(["lakelyn", "kallax", "snowdonoak", "wickesply", "castor50", "lidstay"])
 
 
 def storage_zone():
     """v36: the options round the room: a third bar, the games and cards, the blankets, more storage (suggestions; v37: the plant shelf went)."""
     g = G
-    C, O, Gm, Bb, Ra, Ds = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF
+    C, O, Gm, Bb, Ra, Ds, Rt = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF, g.RECORD_TABLE
     th, n = g.THROW_FOLDED, g.BLANKETS
     return ("Storage and a bar: the options (suggestions)", "a third bar by the sofa, the ottoman's games, five blankets, three more places", [
         ("C, the bar by the sofa: bottles", f"{C['n']} across, inside {r1(C['inner_h'])} high", ref("bottles"), f"the tallest 70 cl {r1(g.DRINKS_BOTTLE[0])}",
@@ -1095,13 +1109,22 @@ def storage_zone():
          f"inside {r1(Gm['inner'])} square × {r1(O['inner_h'])} deep (drawn: check the real one)", f"square boxes {r1(g.GAME_BOX[0])} × {r1(g.GAME_BOX[2])}", CHECK),
         ("The ottoman: cards", f"a {r1(Gm['strip'])} strip along one side", ref("bicycle"), "decks 6.5 × 9.2 × 1.8, on edge",
          f"up to {Gm['decks']} decks (about 38 a row, 3 rows); or boxed card games", PASS),
-        ("Blankets: the tall basket", f"{r1(Bb['w'])} × {r1(Bb['d'])} × {r1(Bb['h'])}", ref("cotswold", "ofelia"), f"five throws folded {r1(th[0])} × {r1(th[1])} × {r1(th[2])}",
-         f"flat, {n} use {r1(n * th[2])} of about {r1(Bb['h'] - 4)} inside (room for {Bb['holds']})", PASS),
+        ("Blankets: the tall basket", f"{r1(Bb['d'])} × {r1(Bb['w'])} × {r1(Bb['h'])}, {r1(Bb['inner'][0])} × {r1(Bb['inner'][1])} inside", ref("lakelyn", "ofelia"),
+         f"five throws, each folded long to {r1(g.THROW_LONG[0])} × {r1(g.THROW_LONG[1])} × {r1(g.THROW_LONG[2])}",
+         f"flat, {n} use {r1(n * g.THROW_LONG[2])} of its {r1(Bb['inner'][2])} (about {Bb['litres']} litres)", PASS),
         ("Blankets: the basket's corner", f"x {r1(Bb['x'][0])}–{r1(Bb['x'][1])}, z {r1(Bb['z'][0])} to {r1(Bb['z'][1])}", ref("room"),
-         f"the sofa's open end at z {r1(g.SOFA_BACK_Z + g.SOFA_D)}", "3 off the sofa's end; it takes the floor plant suggestion's corner", PASS),
+         f"the sofa's open end at z {r1(g.SOFA_BACK_Z + g.SOFA_D)}", f"3 off the sofa's end, {r1(Bb['w'])} out from the wall; it takes the floor plant suggestion's corner", PASS),
+        ("Blankets: the lidded seagrass basket (an option)", f"{r1(g.BLANKET_COTSWOLD['w'])} × {r1(g.BLANKET_COTSWOLD['d'])} × {r1(g.BLANKET_COTSWOLD['h'])}", ref("cotswold", "ofelia"),
+         f"five throws folded {r1(th[0])} × {r1(th[1])} × {r1(th[2])}", f"flat, {n} use {r1(n * th[2])} of about {r1(g.BLANKET_COTSWOLD['h'] - 4)}", PASS),
         ("Blankets: the oak rail beside the cabinet", f"{r1(Ra['w'])} wide, {len(Ra['rails'])} rails, {r1(Ra['off'])} off the wall", ref("oakdowel"),
          f"the open table door stands {r1(g.CAB['d'])} off the wall", f"the blankets over it about {r1(Ra['draped'])}: {r1(g.CAB['d'] - Ra['draped'])} behind the door", TIGHT),
-        ("The lift-top coffee table", f"{r1(g.LIFT_COFFEE['w'])} × {r1(g.LIFT_COFFEE['d'])} × {r1(g.LIFT_COFFEE['h'])}", ref("homelife"),
+        ("The record table: its footprint", f"lid {r1(Rt['w'])} × {r1(Rt['d'])}, the KALLAX pair {r1(Rt['carcass'][0])} × {r1(Rt['carcass'][1])}", ref("kallax"),
+         "your coffee table's 90 × 50", f"the same footprint; {r1(Rt['h'])} high, {r1(Rt['h'] - 48.0)} over the lift-top", PASS),
+        ("The record table: LPs", f"two bins {r1(g.KALLAX['inner'])} square × {r1(g.KALLAX['d'])} deep", ref("kallax", "media", "crate"),
+         f"an LP {r1(Rt['lp'])} square in its sleeve", f"{r1(g.KALLAX['inner'] - Rt['lp'])} to spare across, {r1(Rt['over_lp'])} under the lid; about {Rt['per_bin']} a bin, {Rt['lps']} in all", TIGHT),
+        ("The record table: castors", f"four 50 mm, {r1(4 * 50.0)} kg together", ref("castor50"), f"loaded about {Rt['kg']} kg",
+         "the ply base carries the records, not the KALLAX's shelves", PASS),
+        ("The lift-top coffee table (an option)", f"{r1(g.LIFT_COFFEE['w'])} × {r1(g.LIFT_COFFEE['d'])} × {r1(g.LIFT_COFFEE['h'])}", ref("homelife"),
          "your coffee table's 90 × 50", "the same footprint; 6 taller, and the top lifts to 53.5", PASS),
         ("The shelf over the door", f"{r1(Ds['x'][1] - Ds['x'][0])} × {r1(Ds['d'])}, from {r1(Ds['y'])}", ref("kuggis", "room"),
          f"the door's 198 and a {r1(g.ARCHITRAVE)} architrave", f"{r1(Ds['head'])} over two {r1(g.KUGGIS[2])}-high boxes; check your architrave", CHECK),
@@ -1255,7 +1278,7 @@ def counts():
 
 
 # ---------------------------------------------------------------- v38: the client's picks (geometry.FIRM) are the plan: their rows counted
-FIRM_ROWS = ("Blankets: the tall basket", "Blankets: the basket's corner", "The lift-top coffee table", "The shelf over the door",
+FIRM_ROWS = ("Blankets: the tall basket", "Blankets: the basket's corner", "The record table", "The shelf over the door",
              "Boxes on your black shelf", "D", "The alcove shelves", "The wall cabinets", "The step drawers")
 _zones_v37 = zones
 
@@ -1272,7 +1295,7 @@ def zones():
         else:
             out.append((title, space, rows))
     i = next(i for i, z in enumerate(out) if z[0].startswith("Your black shelf")) + 1
-    out.insert(i, ("Your picks (in the plan)", "the bar beside the cabinet, the wall storage, the step drawers, the basket, the coffee table", firm))
+    out.insert(i, ("Your picks (in the plan)", "the bar beside the cabinet, the wall storage, the step drawers, the basket, the record table", firm))
     return out
 
 
