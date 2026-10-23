@@ -107,7 +107,7 @@ def full():
                 ]),
                 ("Across the back wall", [
                     f"Mark the uprights' positions from the side wall: the left one {n(g.UP_L[0])}–{n(g.UP_L[1])}, the right one {n(g.UP_R[0])}–{n(g.UP_R[1])}. Turn the laser to its vertical line and draw both lines from the worktop line to the ceiling.",
-                    f"Mark the base from the side wall along the floor: filler 0–{n(g.FILLER)}, bay 1 {n(g.BAYS[0][0])}–{n(g.BAYS[0][1])}, bay 2 {n(g.BAYS[1][0])}–{n(g.BAYS[1][1])}, bay 3 {n(g.BAYS[2][0])}–{n(g.BAYS[2][1])}, filler to {n(g.ALC_W)}.",
+                    f"Mark the base from the side wall along the floor: filler 0–{n(g.FILLER)}, then " + ", ".join(f"{nm} {n(a)}–{n(b)}" for (a, b), nm in sorted(zip(g.BAYS, ["bay 1", "bay 2", "bay 3"]))) + f", filler to {n(g.ALC_W)}.",
                 ]),
                 ("On the chimney breast", [
                     f"Find the breast's centre: {n(g.BREAST_W / 2)} cm from its alcove-side corner. Draw it plumb from the floor to 170.",
@@ -130,8 +130,8 @@ def full():
                 ("The plinth under bays 1 and 2", [
                     "Lay the two 120 × 9 rails on edge, 38 cm apart outside, and stand the three 34.4 × 9 cross-pieces between them: one at each end and one in the middle, at 60.",
                     "Pre-drill, glue and screw through the rails into each cross-piece end with two 4 × 40 screws.",
-                    "Measure both diagonals: when they're equal the frame is square. The plinth is 120 × 38 × 9. The opening between 60 and 120 stays clear: it's the hidden drawer's bay.",
-                    f"Stand it in the alcove {n(g.FILLER)} cm from the side wall and {n(g.CHAN)} cm off the back wall. Level it with shims, side to side and front to back.",
+                    "Measure both diagonals: when they're equal the frame is square. The plinth is 120 × 38 × 9. The opening between 0 and 60 (the end nearer the side wall) stays clear: it's the hidden drawer's bay, under bay 2.",
+                    f"Stand it in the alcove {n(min(g.BAYS[0][0], g.BAYS[1][0]))} cm from the side wall (bay 3 stands on the floor between it and the wall) and {n(g.CHAN)} cm off the back wall. Level it with shims, side to side and front to back.",
                 ]),
                 ("The BESTÅ frames", [
                     "Assemble both frames to IKEA's instructions, but leave the back panels off: the open backs are how the cables and the sub's port breathe.",
@@ -153,7 +153,7 @@ def full():
                 ]),
                 ("The cable channel", [
                     "Lay the flat two-compartment trunking on the floor in the 4 cm channel behind the base: mains on the wall side, data on the other.",
-                    "Run the leads in now: the two mains leads from the side-wall socket enter through the plinth's left end, the Cat6 and Deco B's lead come down the right-hand corner.",
+                    "Run the leads in now: the two mains leads from the side-wall socket enter through the face frame's notch and run back in the 3 cm filler beside bay 3; the Cat6 and Deco B's lead come down the right-hand corner.",
                     "Keep the channel behind bay 2 empty: the sub's port breathes into it. Switch 2 and the retro 6-way stand on edge behind bay 1.",
                 ]),
             ]),
@@ -259,10 +259,10 @@ def full():
                 ("The housings (both uprights)", [
                     f"Measure from each upright's foot (the end on the worktop). The high shelf's housing is {up_h(g.HIGH_UNDER)}–{up_h(g.HIGH_TOP)} up, the full 30 depth, 1.2 deep, on the TV-side face of both uprights.",
                     f"The record ledge's housing is {up_h(g.LEDGE_UNDER)}–{up_h(g.LEDGE_TOP)} up, 0–7 from the back edge, 1.2 deep, on the TV-side face of both.",
-                    f"On the right upright's other face (the turntable side), a second high shelf housing at {up_h(g.HIGH_UNDER)}–{up_h(g.HIGH_TOP)}, full depth, for the short length.",
+                    f"On the left upright's other face (the turntable side), a second high shelf housing at {up_h(g.HIGH_UNDER)}–{up_h(g.HIGH_TOP)}, full depth, for the short length.",
                     "Clamp a straight batten as a guide, set the router 4 mm deep and rout, then step down to 12 mm in passes. Square the ends with a chisel. Practise on an offcut first.",
                 ]),
-                ("The through-mortises (right upright)", [
+                ("The through-mortises (left upright)", [
                     f"Two mortises, each 6 wide and 2.4 tall, at {up_h(tenon[0])}–{up_h(tenon[1])} up from the foot, 12–18 and 20–26 cm from the back edge.",
                     "Mark them on both faces with a square and a knife. Drill most of each out with the 20 mm bit, halfway from each face, then chisel to the lines.",
                     "On the TV-side face, flare the top and bottom of each mortise outwards 3–4 mm, for the wedges.",
@@ -275,15 +275,15 @@ def full():
                 ]),
                 ("The grooves", [
                     "On each upright's TV-side face, rout a groove for the LED channel (usually about 1.7 wide × 0.8 deep: check yours), 2 cm in from the front edge, from 2 cm above the worktop to just under the high shelf's housing.",
-                    "On the right upright's back edge, rout a 2 × 1.5 cable groove the full length, for Deco B's 12 V and patch leads, the Series X's HDMI and power, and the vinyl lead.",
+                    "On each upright's back edge, rout a 2 × 1.5 cable groove the full length: the left one for the Series X's HDMI and power and the vinyl lead, the right one for Deco B's 12 V and patch leads.",
                     "Notch both uprights' tops for the ceiling LED strip.",
                 ]),
                 ("Dry-fit, then fix", [
                     "Lay each upright on the floor with its shelves in their housings. Check every joint closes before any glue.",
                     "Drill two 10 mm holes 3 cm deep in each upright's foot, and matching holes in the worktop at the marked positions (dowel centres make this exact). Glue the dowels into the uprights only, so they can come out.",
-                    "Lay Deco B's leads and the other cables into the right upright's back groove.",
-                    "Stand the left upright on its dowels against the side wall. Screw it to the side wall through three countersunk holes, with plugs, and plug the holes with oak.",
-                    "Stand the right upright on its dowels, check it's plumb with the laser, and fix it to the back wall with the concealed brackets.",
+                    "Lay the Series X's and the vinyl leads into the left upright's back groove, and Deco B's into the right one's.",
+                    "Stand the right upright on its dowels against the breast's side. Screw it to the reveal through three countersunk holes, with plugs, and plug the holes with oak.",
+                    "Stand the left upright on its dowels, check it's plumb with the laser, and fix it to the back wall with the concealed brackets.",
                     "Slide the long high shelf and the record ledge into their housings from the front.",
                     "Screw a 30 cm cleat to the breast's side face (the reveal) for the short high shelf, and another at the Series X shelf's underside height. Slide the short high shelf in from the front onto its cleat and into its housing.",
                     "Feed the Series X shelf's tenons through the mortises from the turntable side, onto its cleat. Glue the wedges and drive them into the kerfs from the TV side. When dry, saw them flush and plane: proud, they'd touch the TV.",
@@ -313,12 +313,11 @@ def full():
             draw=["pc_shelf"],
             parts_full=[
                 ("The cleats", [
-                    f"Screw the first cleat to the side wall with its top on the {n(g.LEDGE_UNDER)} line, from the left upright's front edge ({n(g.UP_D)} cm out from the back wall) to {n(g.ALC_D - g.WRAP_Z[1])} cm out. Plugs every 25 cm.",
+                    f"Screw the first cleat to the side wall with its top on the {n(g.LEDGE_UNDER)} line, from {n(g.UP_D)} cm out from the back wall (in line with the uprights' fronts) to {n(g.ALC_D - g.WRAP_Z[1])} cm out. Plugs every 25 cm.",
                     f"Screw the second with its top at {n(g.PC_SHELF_TOP - g.PC_SHELF_T)} (the PC shelf's underside), from {n(g.ALC_D - g.PC_SHELF_Z[0])} to {n(g.ALC_D - g.PC_SHELF_Z[1])} cm out.",
                 ]),
                 ("The wrap ledge", [
-                    "Drill two 10 mm dowel holes in the ledge's end and matching holes in the left upright's front edge, using the jig.",
-                    "Glue the dowels, push the ledge onto them and down onto its cleat, and screw up through the cleat into it.",
+                    "Lay the ledge on its cleat, its alcove end in line with the uprights' fronts, and screw up through the cleat into it.",
                     "Glue the lip along its front edge.",
                 ]),
                 ("The PC shelf and its tray", [

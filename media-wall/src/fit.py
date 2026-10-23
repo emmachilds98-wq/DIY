@@ -247,7 +247,7 @@ def zones():
             ("Switch 2 (TL-SG108) and the retro 6-way in the channel", "15.8 × 10.1 × 2.5; 6-way about 34 × 6 × 4", ref("sg108"), "4 cm channel", "on their edges", TIGHT),
         ])
     zs = [
-        ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the left one now a corner post on the side wall; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
+        ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the right one a corner post against the breast; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
             ("LG OLED C6 55 in, on its stand", f"{r1(g.TV_W)} × {r1(g.TV_H)} × {r1(g.TV_D)} panel; {r1(g.TV_STAND_H)} tall on the stand", ref("lg"), f"{r1(g.TV_GAP)} wide", f"{r1(g.TV_CLEAR)} each side", PASS),
             ("Top of the screen", f"{r1(g.TV_TOP)} (bottom {r1(g.TV_BOTTOM)}, centre {r1(g.TV_CENTRE)})", ref("lg"), f"ledge at {r1(g.LEDGE_UNDER)}", f"{r1(g.LEDGE_UNDER - g.TV_TOP)}", PASS),
             ("LG stand base", f"{r1(g.TV_STAND_W)} × {r1(g.TV_STAND_D)}", ref("lg"), f"worktop {r1(g.BASE_D)} deep", "set 2 cm off the wall: 11 cm in front of it for the soundbar's leads", PASS),
@@ -255,14 +255,14 @@ def zones():
             ("The TV's remote receiver, bottom centre of the screen's frame", f"screen bottom {r1(g.TV_BOTTOM)}", ref("lg"), f"soundbar top {r1(sb_top)}, in front of the stand's foot", f"{r1(sb_top - g.TV_BOTTOM)} over the frame's edge: sit the bar on the worktop 2 cm proud of the stand's foot, not against it, so the remote's beam from the sofa clears it; if a button stutters, pair LG's Magic Remote (it talks to the TV by radio)", CHECK),
             ("The TV's HDMI plugs, with the screen 2.15 from the corner post", "C6 sockets face sideways on the back panel", ref("lg"), "behind the screen", "plugs stay behind the panel; if a stiff lead pushes out, use 90° HDMI adapters", CHECK),
         ]),
-        ("The turntable zone, right of the TV", f"{r1(g.RZ_W)} wide × {r1(g.BASE_D)} deep, worktop {r1(g.WORKTOP)} to the Series X shelf's underside at {r1(g.LID_CLEAR_TO)}", [
+        ("The turntable zone, left of the TV", f"{r1(g.RZ_W)} wide × {r1(g.BASE_D)} deep, worktop {r1(g.WORKTOP)} to the Series X shelf's underside at {r1(g.LID_CLEAR_TO)}", [
             ("Turntable, AT-LP120X size (worst case)", f"{r1(g.DECK[0])} × {r1(g.DECK[2])} × {r1(g.DECK[1])} with its lid", ref("atlp120"), f"{r1(g.RZ_W)} wide", f"{r1(deck_side)} each side", TIGHT),
             ("Its depth, with room behind for the lid's hinges", f"{r1(g.DECK[2])}, front 2 cm in from the worktop's edge", ref("atlp120"), f"{r1(g.BASE_D)} deep, to the painted wall" if g.PLAIN else f"{r1(g.BASE_D)} deep, less the {r1(panel)} slatted panel", f"{r1(g.ALC_D - panel - g.DECK_Z[1])} behind it", TIGHT if g.ALC_D - panel - g.DECK_Z[1] < 8 else PASS),
             ("Lid open", f"cover {r1(g.LID[0])} × {r1(g.LID[1])}; standing up, its top at about {r1(round(g.LID_TOP_OPEN))}", ref("lid"), f"shelf underside {r1(g.LID_CLEAR_TO)}", f"about {r1(round(g.LID_CLEAR_TO - g.LID_TOP_OPEN))}", PASS),
             ("Phono preamp, hung under the shelf at the back", f"about {r1(g.PREAMP[0])} × {r1(g.PREAMP[2])} × {r1(g.PREAMP[1])}", "", f"{r1(pre_bottom)}–{r1(g.LID_CLEAR_TO)}, at the back", f"{r1(pre_bottom - g.LID_TOP_OPEN)} over the open lid's edge; lift the lid gently", TIGHT),
             ("Series X fan stand on the shelf", f"{r1(fx)} × {r1(fz)} (assumed; model to confirm)", "", f"{r1(g.RZ_W)} × {r1(g.RZ_SHELF_D)} shelf", f"{r1(sx_side)} each side", PASS),
             ("Xbox Series X, standing", f"{r1(sx)} × {r1(sd)} × {r1(sh)} tall", ref("xbox"), f"top at {r1(g.SX_TOP)}", f"{r1(g.HIGH_UNDER - g.SX_TOP)} clear above (Microsoft's minimum is 4); 15 each side, inside the 10–15 it recommends", PASS),
-            ("Deco B on the high shelf, right", "11 × 11 × 11.4", ref("deco"), f"{r1(g.RZ_W)} wide, {r1(g.CEIL - g.HIGH_TOP)} to the ceiling", "beside the framed 7-inch, 27 clear above", PASS),
+            ("Deco B on the high shelf, at the breast end", "11 × 11 × 11.4", ref("deco"), f"{r1(g.UP_R[0] - g.UP_L[1] - 95)} wide past the lidded box, {r1(g.CEIL - g.HIGH_TOP)} to the ceiling", "beside the lidded box, 27 clear above", PASS),
         ]),
         ("Shelves above the TV", f"ledge top {r1(g.LEDGE_TOP)}, 7 deep; high shelf top {r1(g.HIGH_TOP)}, {r1(g.HIGH_D)} deep; ceiling {r1(g.CEIL)}", [
             ("Four LPs on the record ledge", f"4 × {r1(g.LP)} = {r1(lp4)} wide", ref("media"), f"{r1(g.TV_GAP)} long", f"{r1(g.TV_GAP - lp4)}: snug, as drawn", PASS),
@@ -283,6 +283,8 @@ def zones():
              f"{r1(g.SLIM_DRAWERS[1]['yb'] - g.SLIM_DRAWERS[0]['yb'] - 1.2 - g.GAME_CASE[1] * 0.985)} clear over the cases", PASS),
             ("Pads in the top slim drawer", f"4 pads on edge, two side by side: 2 × {r1(g.PAD[2])} = {r1(2 * g.PAD[2])} across, {r1(g.PAD[0])} long", ref("pads"), f"{r1(g.SLIM_INSIDE)} wide, {r1(g.TRAY_TOP_PANEL - g.SLIM_DRAWERS[2]['yb'] - 1.2)} tall",
              f"{r1(g.SLIM_INSIDE - 2 * g.PAD[2])} across; {r1(g.PAD[1])} tall in {r1(g.TRAY_TOP_PANEL - g.SLIM_DRAWERS[2]['yb'] - 1.2)}; the remotes in front", TIGHT),
+            ("The side-wall socket beside the slim drawers (v38)", f"socket {r1(g.BASE_FRONT_Z - g.SOCKET['z'])} in front of the base, {r1(g.SOCKET['y'])} up", "",
+             f"the middle slim drawer pulled out passes {r1(g.BAYS[2][0] + 2.6)} from the wall", "the plugs must stand less than that off the wall: flat (angled) plugs, leads down; measure yours", CHECK),
         ]),
         ("The side wall: one oak run from the corner to the PC", f"one board line at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep along the LPs, sweeping out to {r1(g.PC_SHELF_D)} under the PC (v15)", [
             ("The sweep from the ledge to the PC shelf", f"front edge 7 → {r1(g.PC_SHELF_D)} over {r1(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} (z {r1(g.SIDE_SWEEP[0])} to {r1(g.SIDE_SWEEP[1])})", "", f"the last wrap LP ends at z {r1(g.WRAP_Z[0] - 1.5 - 4 * g.LP - 3 * 1.4)}; the PC starts at z {r1(g.PC_Z[0])}",
@@ -626,8 +628,9 @@ def optc_zone():
          f"three in comfort; backs at z {r1(w_back)}, {r1(w_back - plant_face)} clear of your plant stand", PASS),
         ("The far end and the coffee table", f"the table ends at x {r1(C['tx'][0])}", ref("dining"), f"the coffee table to x {r1(g.COFFEE['x'][1])}",
          f"{r1(C['tx'][0] - g.COFFEE['x'][1])} between them: the coffee table stays put; a seventh chair fits at the end ({r1(st['end_clear'])} behind its back)", PASS),
-        ("The ottoman", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
-         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end: push it to the sofa while you eat", CHECK),
+        ("The ottoman (v38: a dinner spot)", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
+         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end, so while you eat it goes in front of the media wall (x {r1(g.SOFA_POUF['dinner']['x'][0])}–{r1(g.SOFA_POUF['dinner']['x'][1])}): "
+         f"{r1(C['tx'][0] - g.SOFA_POUF['dinner']['x'][1])} clear of the table's end", PASS),
         ("The table's side and the sofa", f"window edge at z {r1(C['tz'][1])}", ref("sofa"), f"the sofa's front at z {r1(g.SOFA_FRONT_Z)}",
          f"{r1(C['tz'][1] - g.SOFA_FRONT_Z)} between them: the table passes the sofa's end", PASS),
         ("Light over the table", "bar 2 on the existing pendant point", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})",
@@ -807,8 +810,9 @@ def cab_zone():
          f"three in comfort; backs at z {r1(w_back)}, {r1(w_back - plant_face)} clear of your plant stand", PASS),
         ("The far end and the coffee table", f"the table ends at x {r1(C['tx'][0])}", ref("dining"), f"the coffee table to x {r1(g.COFFEE['x'][1])}",
          f"{r1(C['tx'][0] - g.COFFEE['x'][1])} between them: the coffee table stays put; a seventh chair fits at the end ({r1(st['end_clear'])} behind its back)", PASS),
-        ("The ottoman", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
-         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end: push it to the sofa while you eat", CHECK),
+        ("The ottoman (v38: a dinner spot)", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
+         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end, so while you eat it goes in front of the media wall (x {r1(g.SOFA_POUF['dinner']['x'][0])}–{r1(g.SOFA_POUF['dinner']['x'][1])}): "
+         f"{r1(C['tx'][0] - g.SOFA_POUF['dinner']['x'][1])} clear of the table's end", PASS),
         ("The table's side and the sofa", f"window edge at z {r1(C['tz'][1])}", ref("sofa"), f"the sofa's front at z {r1(g.SOFA_FRONT_Z)}",
          f"{r1(C['tz'][1] - g.SOFA_FRONT_Z)} between them: the table passes the sofa's end", PASS),
         ("Light over the table", "bar 2 on the existing pendant point", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})",
@@ -1073,12 +1077,26 @@ SOURCES["kuggis"] = ("IKEA: KUGGIS box with lid, 26 × 35 × 15 cm, recycled PET
                      "(ikea.com.tr/en/p09610214)")
 SOURCES["oakdowel"] = ("Tools & Timber: oak dowels, 18 to 30 mm across, cut from 350 to 2400 mm long (toolsandtimber.co.uk/oak-dowels)")
 ORDER.extend(["ttr", "bicycle", "ofelia", "cotswold", "homelife", "kuggis", "oakdowel"])
+# v38: the better basket and the record table (UPGRADE_PLAN_v38 items 8 and 9)
+SOURCES["lakelyn"] = ("Dibor: Lakelyn Water Hyacinth Lined Basket, large H59 × W51 × D29 cm (medium H48 × W41 × D21), water hyacinth with a "
+                      "removable cotton lining, natural, £42 (dibor.co.uk/products/lakelyn-water-hyacinth-lined-basket); no lid listed")
+SOURCES["kallax"] = ("IKEA: KALLAX cube storage unit, 42 × 42 cm, grey wood effect (also white, black-brown, white stained oak effect): "
+                     "W 41.5 × D 39 × H 40.7 cm, 13 kg a shelf, £19 (ikea.com/gb/en/p/kallax-shelving-unit-grey-wood-effect-60477933); "
+                     "open-backed, a 33 cm square compartment")
+SOURCES["snowdonoak"] = ("Snowdon Timber: oak furniture board, 18 × 600 × 1200 mm, £184.50 for a pack of three through Tesco Marketplace "
+                         "(tesco.com/shop/en-GB/products/326112258), single boards from snowdontimber.co.uk")
+SOURCES["wickesply"] = ("Wickes: non-structural hardwood plywood sheet, 12 × 607 × 1829 mm, £22.50 (wickes.co.uk, product 112957)")
+SOURCES["castor50"] = ("Toolstation: MOVE IT swivel wheel castor, 50 mm, non-marking rubber tyre, 50 kg each, £3.29 (toolstation.com/"
+                       "swivel-wheel-castor/p29715); about 6.5 high overall (check the listing)")
+SOURCES["lidstay"] = ("Eurofit Direct: toy box and lid stays, soft-down, for ottomans and toy boxes, £14.90 each or £29.81 a pair "
+                      "(eurofitdirect.co.uk/collections/toy-box-and-lid-stays)")
+ORDER.extend(["lakelyn", "kallax", "snowdonoak", "wickesply", "castor50", "lidstay"])
 
 
 def storage_zone():
     """v36: the options round the room: a third bar, the games and cards, the blankets, more storage (suggestions; v37: the plant shelf went)."""
     g = G
-    C, O, Gm, Bb, Ra, Ds = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF
+    C, O, Gm, Bb, Ra, Ds, Rt = g.BAR_SIDE, g.OTTOMAN, g.OTTO_GAMES, g.BLANKET_BASKET, g.BESIDE["rail"], g.DOOR_SHELF, g.RECORD_TABLE
     th, n = g.THROW_FOLDED, g.BLANKETS
     return ("Storage and a bar: the options (suggestions)", "a third bar by the sofa, the ottoman's games, five blankets, three more places", [
         ("C, the bar by the sofa: bottles", f"{C['n']} across, inside {r1(C['inner_h'])} high", ref("bottles"), f"the tallest 70 cl {r1(g.DRINKS_BOTTLE[0])}",
@@ -1091,13 +1109,22 @@ def storage_zone():
          f"inside {r1(Gm['inner'])} square × {r1(O['inner_h'])} deep (drawn: check the real one)", f"square boxes {r1(g.GAME_BOX[0])} × {r1(g.GAME_BOX[2])}", CHECK),
         ("The ottoman: cards", f"a {r1(Gm['strip'])} strip along one side", ref("bicycle"), "decks 6.5 × 9.2 × 1.8, on edge",
          f"up to {Gm['decks']} decks (about 38 a row, 3 rows); or boxed card games", PASS),
-        ("Blankets: the tall basket", f"{r1(Bb['w'])} × {r1(Bb['d'])} × {r1(Bb['h'])}", ref("cotswold", "ofelia"), f"five throws folded {r1(th[0])} × {r1(th[1])} × {r1(th[2])}",
-         f"flat, {n} use {r1(n * th[2])} of about {r1(Bb['h'] - 4)} inside (room for {Bb['holds']})", PASS),
+        ("Blankets: the tall basket", f"{r1(Bb['d'])} × {r1(Bb['w'])} × {r1(Bb['h'])}, {r1(Bb['inner'][0])} × {r1(Bb['inner'][1])} inside", ref("lakelyn", "ofelia"),
+         f"five throws, each folded long to {r1(g.THROW_LONG[0])} × {r1(g.THROW_LONG[1])} × {r1(g.THROW_LONG[2])}",
+         f"flat, {n} use {r1(n * g.THROW_LONG[2])} of its {r1(Bb['inner'][2])} (about {Bb['litres']} litres)", PASS),
         ("Blankets: the basket's corner", f"x {r1(Bb['x'][0])}–{r1(Bb['x'][1])}, z {r1(Bb['z'][0])} to {r1(Bb['z'][1])}", ref("room"),
-         f"the sofa's open end at z {r1(g.SOFA_BACK_Z + g.SOFA_D)}", "3 off the sofa's end; it takes the floor plant suggestion's corner", PASS),
+         f"the sofa's open end at z {r1(g.SOFA_BACK_Z + g.SOFA_D)}", f"3 off the sofa's end, {r1(Bb['w'])} out from the wall; it takes the floor plant suggestion's corner", PASS),
+        ("Blankets: the lidded seagrass basket (an option)", f"{r1(g.BLANKET_COTSWOLD['w'])} × {r1(g.BLANKET_COTSWOLD['d'])} × {r1(g.BLANKET_COTSWOLD['h'])}", ref("cotswold", "ofelia"),
+         f"five throws folded {r1(th[0])} × {r1(th[1])} × {r1(th[2])}", f"flat, {n} use {r1(n * th[2])} of about {r1(g.BLANKET_COTSWOLD['h'] - 4)}", PASS),
         ("Blankets: the oak rail beside the cabinet", f"{r1(Ra['w'])} wide, {len(Ra['rails'])} rails, {r1(Ra['off'])} off the wall", ref("oakdowel"),
          f"the open table door stands {r1(g.CAB['d'])} off the wall", f"the blankets over it about {r1(Ra['draped'])}: {r1(g.CAB['d'] - Ra['draped'])} behind the door", TIGHT),
-        ("The lift-top coffee table", f"{r1(g.LIFT_COFFEE['w'])} × {r1(g.LIFT_COFFEE['d'])} × {r1(g.LIFT_COFFEE['h'])}", ref("homelife"),
+        ("The record table: its footprint", f"lid {r1(Rt['w'])} × {r1(Rt['d'])}, the KALLAX pair {r1(Rt['carcass'][0])} × {r1(Rt['carcass'][1])}", ref("kallax"),
+         "your coffee table's 90 × 50", f"the same footprint; {r1(Rt['h'])} high, {r1(Rt['h'] - 48.0)} over the lift-top", PASS),
+        ("The record table: LPs", f"two bins {r1(g.KALLAX['inner'])} square × {r1(g.KALLAX['d'])} deep", ref("kallax", "media", "crate"),
+         f"an LP {r1(Rt['lp'])} square in its sleeve", f"{r1(g.KALLAX['inner'] - Rt['lp'])} to spare across, {r1(Rt['over_lp'])} under the lid; about {Rt['per_bin']} a bin, {Rt['lps']} in all", TIGHT),
+        ("The record table: castors", f"four 50 mm, {r1(4 * 50.0)} kg together", ref("castor50"), f"loaded about {Rt['kg']} kg",
+         "the ply base carries the records, not the KALLAX's shelves", PASS),
+        ("The lift-top coffee table (an option)", f"{r1(g.LIFT_COFFEE['w'])} × {r1(g.LIFT_COFFEE['d'])} × {r1(g.LIFT_COFFEE['h'])}", ref("homelife"),
          "your coffee table's 90 × 50", "the same footprint; 6 taller, and the top lifts to 53.5", PASS),
         ("The shelf over the door", f"{r1(Ds['x'][1] - Ds['x'][0])} × {r1(Ds['d'])}, from {r1(Ds['y'])}", ref("kuggis", "room"),
          f"the door's 198 and a {r1(g.ARCHITRAVE)} architrave", f"{r1(Ds['head'])} over two {r1(g.KUGGIS[2])}-high boxes; check your architrave", CHECK),
@@ -1136,7 +1163,13 @@ SOURCES["shelfgap"] = ("Client, 22 Oct 2026: \"The shelf on the wall alongside t
                        "actually installed\" (facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side)")
 SOURCES["worktop"] = ("Homebuilding & Renovating: the UK's usual worktop height is 900 mm to the top (homebuilding.co.uk/advice/kitchen-worktop-height); "
                       "a raised bar counter 1000 to 1200")
-SOURCES["glassrail"] = ("Dan Murphy's: Bev-Equip single-row glass hanger, chrome, 400 mm long, a 110 × 15 mm mount plate, 36 mm high, about four "
+SOURCES["fbcover"] = ("Farrow & Ball: Estate Emulsion covers up to 14 m² a litre a coat (70 m² per 5 L), two coats recommended "
+                      "(farrow-ball.com paint calculator; DIY.ie listing, 35 m² per 2.5 L)")
+ORDER.append("fbcover")
+SOURCES["enhet"] = ("IKEA: ENHET wall frame with shelves, 40 × 15 × 75 cm, anthracite or white, steel, two shelves, 3 kg a shelf, to be "
+                    "anchored to the wall; about 32–39 € (ikea.com/th 404.816.05; islas.ikea.es 304.489.37)")
+ORDER.append("enhet")
+_GLASSRAIL_V37 = ("Dan Murphy's: Bev-Equip single-row glass hanger, chrome, 400 mm long, a 110 × 15 mm mount plate, 36 mm high, about four "
                         "or five wine glasses (danmurphys.com.au, BEVCH-400)")
 SOURCES["wineglass"] = ("Stemmed wine glasses, makers' sizes: Rosendahl Grand Cru red 20.5 and 22.2 tall; CB2 Joplin 22.9; most 20 to 23 "
                         "(culinaris.de, cb2.ca, dimensions.com)")
@@ -1157,7 +1190,7 @@ SOURCES["stepdrawers"] = ("The Day: building drawers into a staircase, the usabl
                           "needs support once its riser is cut (theday.com/?p=192887; ukworkshop.co.uk/threads/understair-storage.151071)")
 SOURCES["capspec"] = ("SanMar: a structured six-panel cap's spec sheet, bill (visor) 2¾ in (7 cm), crown 6¾ in measured over the top "
                       "(sanmar.com, 72788); the client's photo of their cap, 22 Oct 2026 (green crown, brown brim, gold embroidery)")
-ORDER.extend(["shelfgap", "worktop", "glassrail", "wineglass", "trones", "eket", "floatshelf", "seat", "shoebench", "wardrobe", "overdoor", "stepdrawers", "capspec"])
+ORDER.extend(["shelfgap", "worktop", "wineglass", "trones", "eket", "floatshelf", "seat", "shoebench", "wardrobe", "overdoor", "stepdrawers", "capspec"])
 
 
 def more_storage_zone():
@@ -1173,10 +1206,13 @@ def more_storage_zone():
         ("D: the counter", f"top at {r1(B['counter'])}", ref("worktop"), "a usual worktop, 90", "standing height to pour at", PASS),
         ("D: bottles", f"{B['bottles']}: {B['across']} across, {B['rows']} deep, two shelves", ref("bottles"), f"inside {r1(B['inner_w'])} × {r1(B['inner_d'])}; 70 cl up to {r1(g.DRINKS_BOTTLE[0])} × {r1(g.DRINKS_BOTTLE[1])}",
          f"two deep need {r1(2 * g.DRINKS_BOTTLE[1])} of the {r1(B['inner_d'])}", TIGHT),
-        ("D: glasses on the rail", f"under the shelf at {r1(B['shelf'][0])}", ref("glassrail", "wineglass"), f"a tall glass {r1(g.BAR_GLASS_H)}, the rail {r1(g.BAR_RAIL[1])}",
-         f"their feet at {r1(B['glass_low'])}: {r1(B['glass_gap'])} over the counter", PASS),
-        ("D: your hanging plant above it", "the strands from the black shelf's window end", ref("photo20"), "they fall about 26 off the wall, in front of the 22.4 counter",
-         "trim them to above the first shelf, or turn the pot along the shelf", CHECK),
+        ("D: the ENHET frame over the counter", f"{r1(g.ENHET[0])} × {r1(g.ENHET[1])} × {r1(g.ENHET[2])}, from {r1(B['enhet_y0'])}", ref("enhet"),
+         f"the bar {r1(B['w'])} wide; your black shelf's underside at {r1(g.SHELF_B['top'] - g.SHELF_B['t'])}",
+         f"{r1((B['w'] - g.ENHET[0]) / 2)} each side; {r1(B['enhet_gap'])} over the counter to work; {r1(B['enhet_head'])} under the shelf", PASS),
+        ("D: glasses on its shelves", f"a tall glass {r1(g.BAR_GLASS_H)}", ref("wineglass", "enhet"), f"{r1(g.ENHET[2] / 3)} between its shelves, 3 kg each",
+         "three glasses a shelf, or bottles to 22", PASS),
+        ("D and your hanging plant (v38)", "its strands fall through the shelf's 10 cm gap", ref("shelfgap", "photo20"), f"the bar ends at the shelf's end, z {r1(B['z'][1])}",
+         "the gap stays clear to the floor for them; the table door's swing stays 12 clear of them", PASS),
         ("Shoe cabinets beside the cabinet", f"two {r1(g.TRONES[0])} × {r1(g.TRONES[1])} × {r1(g.TRONES[2])}", ref("trones"), f"the {r1(g.BESIDE['len'])} slot, the door's line at {r1(g.CAB['d'])}",
          f"{r1(g.BESIDE['len'] - g.TRONES[0])} to spare along it, {r1(g.CAB['d'] - g.TRONES[1])} behind the door", PASS),
         ("The window corner", f"{r1(C['w'])} wide", ref("room"), f"the curtains' stack (x {r1(C['x'][0])}) to the table door's line (x {r1(C['x'][1])})",
@@ -1240,9 +1276,71 @@ def counts():
 
 
 
+
+# ---------------------------------------------------------------- v38: the client's picks (geometry.FIRM) are the plan: their rows counted
+FIRM_ROWS = ("Blankets: the tall basket", "Blankets: the basket's corner", "The record table", "The shelf over the door",
+             "Boxes on your black shelf", "D", "The alcove shelves", "The wall cabinets", "The step drawers")
+_zones_v37 = zones
+
+
+def zones():
+    """v38: the picks' rows leave the suggestion tables for a counted "Your picks" table, after the compact cabinet's."""
+    out, firm = [], []
+    for title, space, rows in _zones_v37():
+        if title.startswith(("Storage and a bar", "More storage, and a bar")):
+            keep = [r for r in rows if not r[0].startswith(FIRM_ROWS)]
+            firm += [r for r in rows if r[0].startswith(FIRM_ROWS)]
+            if keep:
+                out.append((title, space, keep))
+        else:
+            out.append((title, space, rows))
+    i = next(i for i, z in enumerate(out) if z[0].startswith("Your black shelf")) + 1
+    out.insert(i, ("Your picks (in the plan)", "the bar beside the cabinet, the wall storage, the step drawers, the basket, the record table", firm))
+    return out
+
+
+
+def measure_html():
+    """v38: the measuring sheet: every CHECK in the plan's tables on one page, what we drew, and a box to write yours in."""
+    rows = [(t, item, sp, spare) for t, _s, rs in zones() if not t.startswith(("Storage and a bar", "More storage", "The more compact", "A bar for drinks"))
+            for item, _size, _src, sp, spare, st in rs if st == CHECK]
+    trs = "".join(f"<tr><td>{item}<br><span class='note'>{t}</span></td><td>{sp}</td><td>{spare}</td><td class='box'></td></tr>" for t, item, sp, spare in rows)
+    return (f"<h3>Measuring sheet: {len(rows)} things to check before you buy</h3><p>Measure each, write it in, and send us the page: the plan "
+            "is redrawn to your numbers.</p><table class='fit measure'><tr><th>What</th><th>We drew</th><th>Why it matters</th><th>Yours (cm)</th></tr>"
+            + trs + "</table>")
+
+
+# v38: safety, where it matters (the build guide and the plan's build section)
+SAFETY = [
+    ("Wall cabinets, shoe cabinets, the bar and the media wall", "fix each to the wall with the anti-tip fittings for a solid wall; IKEA's own listings say they must be anchored"),
+    ("Drilling", "check for pipes and cables with a detector before every hole; the side wall carries the PC's leads"),
+    ("The step drawers", "a bearer under each tread once its riser is cut out: a joiner's job, or build them into the new stairs"),
+    ("An old textured (Artex) ceiling", "if it's older than about 2000, have it tested for asbestos before sanding, drilling or skimming it"),
+    ("Mains electrics", "the sockets and the light fittings: done to Part P, or by an electrician"),
+    ("The dining table", "never swing it up or down with anything on it; check all four legs have clicked before you load it"),
+    ("The record table", "about 65 kg with its LPs: roll it, don't lift it, and fit both lid stays so the lid can't drop"),
+]
+
+
+def safety_html():
+    return "<h3>Safety</h3><ul>" + "".join(f"<li><b>{w}:</b> {t}.</li>" for w, t in SAFETY) + "</ul>"
+
+
 if __name__ == "__main__":
     for title, space, rows in zones():
         print("==", title, "|", space)
         for r in rows:
             print("  ", r[0], "|", r[1], "|", r[3], "|", r[4], "|", r[5])
     print(counts())
+
+
+# v38 (item 12): the ceiling designs to try, for later (an option: Look → The ceiling)
+SOURCES["skimartex"] = ("Trade2Base, Plastering Costs UK 2026: skim coat £150–£350 a room, Artex removal (or skimming over it) £300–£700 a room, "
+                        "plasterers' day rates about £180–£300 (trade2base.com/blog/plastering-costs-uk)")
+SOURCES["artextest"] = ("Supernova Asbestos Surveys: Artex asbestos testing kit, £34.99 with PPE, a UK-accredited lab's result in 48 hours; Artex made "
+                        "before about 1985 can hold chrysotile, so don't sand, scrape or drill it until you know (asbestos-surveys.org.uk/shop/testing-kit/artex)")
+SOURCES["pubeam"] = ("Woodmosaic: PU faux wood ceiling beam, 12 × 12 cm, lengths 100, 195, 295 and 395 cm, 1–4 kg, £62–£349 by length "
+                     "(woodmosaic.co.uk/pu-faux-wood-beam-fake-wooden-decorative-ceiling-beams-false)")
+SOURCES["orac"] = ("Mr Resistor: Orac C357 uplighting coving profile for LED tape, 2000 mm, £89.60 (mr-resistor.co.uk/product/28207); "
+                   "fitted LED coving in a typical UK room £350–£700 (coving.online, LED coving cost, 2026)")
+ORDER.extend(["skimartex", "artextest", "pubeam", "orac"])

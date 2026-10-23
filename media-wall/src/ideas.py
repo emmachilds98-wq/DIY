@@ -166,12 +166,17 @@ SUGGEST += [
      "The bar where you sit: the same build as the one under the glass case, 60 wide for five bottles, on the side wall at the sofa's "
      "open end. The front drops on two soft-close stays to a counter; the glasses stand on the oak run 16 above it.",
      "On the side wall by the sofa's open end, between the media wall and the sofa, 96 to 136 up: over the drawers' path, under the oak run."),
-    ("blanketbasket", "A tall lidded basket for your blankets at the sofa's open end", "45 × 45 × 76, seagrass, with a lid", (90, 110),
-     "Your five blankets folded flat in one basket (they use about 40 of its 72 inside), at the end of the sofa where you'd reach for them.",
-     "Against the side wall at the sofa's open end, 3 cm off its end (the floor plant suggestion's corner)."),
+    ("blanketbasket", "A tall water hyacinth basket for your blankets at the sofa's open end", "51 × 29 × 59, water hyacinth, lined", (36, 42),
+     "Your five blankets, each folded long, stacked flat in one basket (they use about 43 of its 57 inside), at the end of the sofa where "
+     "you'd reach for them. It stands 29 out from the wall, not 45.",
+     "Against the side wall at the sofa's open end, 3 cm off its end, its long side along the wall (the floor plant suggestion's corner)."),
+    ("cotswoldbasket", "A tall lidded seagrass basket for your blankets", "45 × 45 × 76, seagrass, with a lid", (90, 110),
+     "The first basket you picked, with a lid; it takes more floor and costs more.", "The same corner, at the sofa's open end."),
     ("liftcoffee", "A lift-top coffee table", "90 × 50 × 48; the top lifts to 53.5", (39, 80),
      "Your coffee table's footprint with room inside for the remotes, controllers and the card games you use most; lifted, it's a "
      "table to eat or play at from the sofa.", "Where your coffee table stands."),
+    ("recordtable", "A record-browsing coffee table", "90 × 50 × 48.5; two KALLAX cubes under a lifting oak lid", (170, 210),
+     "About 160 LPs spine-up in two bins under an oak lid, to flick through from the sofa; it rolls on castors.", "Where your coffee table stands."),
     ("doorshelf", "An oak shelf over the hall door with two lidded boxes", "91 × 27 oak at 206; two boxes 35 × 26 × 15", (35, 60),
      "Somewhere for what you use a few times a year (spare cables, gift wrap, candles), out of sight above the door.",
      "Over the hall door, above its architrave (the wall clock suggestion's place)."),
@@ -248,7 +253,10 @@ SUGG_VARS = {
     "bartrolley": [("gin", "Gin and tonics", ["#3f6b3a"]), ("whisky", "Whisky and rum", ["#9a5a22"]), ("clear", "Vodka and clear spirits", ["#e8eef0"])],
     "cablights": [("warm", "Warm white", ["#ffd59a", "#ffd29a"]), ("natural", "Natural white", ["#fff1dc", "#fff1dc"])],
     "barside": [("oak", "Oak", ["#c48c57"]), ("green", "Card Room Green outside", ["#2d5a46"]), ("black", "Black outside", ["#2a2a2c"])],   # v36
-    "blanketbasket": [("sea", "Natural seagrass", ["#b89a6c"]), ("dark", "Dark seagrass", ["#6e5235"]), ("rope", "White cotton rope", ["#ece6da"])],
+    "blanketbasket": [("natural", "Natural water hyacinth", ["#9a7a50"])],                     # v38: Dibor's Lakelyn comes in one colour
+    "cotswoldbasket": [("sea", "Natural seagrass", ["#b89a6c"])],
+    "recordtable": [("oak", "Oak lid, grey-wood KALLAX", ["#c48c57", "#8d8780"]), ("white", "Oak lid, white KALLAX", ["#c48c57", "#ece8e0"]),
+                    ("black", "Oak lid, black-brown KALLAX", ["#c48c57", "#3a312b"])],
     "liftcoffee": [("oak", "Oak effect", ["#b07d4f"]), ("black", "Black", ["#2c2a28"]), ("white", "White", ["#ece8e0"])],
     "doorshelf": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],
     "shelfboxes": [("white", "White boxes", ["#ece8e0"]), ("blue", "Black-blue boxes", ["#2a3346"]), ("grey", "Grey-beige boxes", ["#8f8a80"])],
@@ -263,8 +271,16 @@ SUGG_VARS = {
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
 
 
+FIRM_SUGG = set(G.FIRM["sugg"])                    # v38: the client's picks are the plan (geometry.FIRM), not suggestions
+
+
+def options():
+    """v38: the suggestions that are still only options (not in the client's plan)."""
+    return [i for i in SUGGEST if i[0] not in FIRM_SUGG]
+
+
 def suggest_low_high():
-    return sum(i[3][0] for i in SUGGEST), sum(i[3][1] for i in SUGGEST)
+    return sum(i[3][0] for i in options()), sum(i[3][1] for i in options())
 
 
 def suggest_html():
@@ -272,8 +288,8 @@ def suggest_html():
     lo, hi = suggest_low_high()
     vers = lambda k: ", ".join(n for _v, n, _c in SUGG_VARS[k]).lower().capitalize()
     rows = "".join(f"<tr><td><b>{t}</b><br><span class='note'>{size}</span><br><span class='note'>{vers(k)}</span></td><td>{why} <i>{where}</i></td><td class='num'>{c[0]}–{c[1]}</td></tr>"
-                   for k, t, size, c, why, where in SUGGEST)
-    return (f"<p>Not in the plan or the costs: all {len(SUGGEST)} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on, and two or three versions to try.</p>"
+                   for k, t, size, c, why, where in options())
+    return (f"<p>Not in the plan or the costs: all {len(options())} together would be about £{lo}–{hi}. Each has its own button in the 3D room, all off until you turn them on, and two or three versions to try.</p>"
             f"<table class='tight'><tr><th>Suggestion</th><th>Why, and where</th><th>About £</th></tr>{rows}</table>")
 
 
@@ -286,13 +302,16 @@ OPTION_GROUPS = [
       ("barside", "By the sofa, under the oak run", {"sugg": "barside"})]),
     ("games", "Games and cards: in the ottoman", "lid", "Twelve square board games in three layers and a row of card games along one side.",
      [("on", "Lid on", {"lid": False}), ("off", "Lift the lid", {"lid": True})]),
-    ("blankets", "Your blankets (about five)", "one", "Two places for five folded throws; pick one.",
-     [("blanketbasket", "A tall basket at the sofa's end", {"sugg": "blanketbasket"}), ("rail", "An oak rail beside the cabinet", {"beside": "rail"})]),
+    ("blankets", "Your blankets (about five)", "one", "The plan's basket, or one of two others; pick one.",
+     [("blanketbasket", "The plan's basket (water hyacinth)", {"sugg": "blanketbasket"}), ("cotswoldbasket", "The lidded seagrass one", {"sugg": "cotswoldbasket"}),
+      ("rail", "An oak rail beside the cabinet", {"beside": "rail"})]),
+    ("coffee", "The coffee table", "one", "The plan's record table, or the lift-top; None is your own.",
+     [("recordtable", "The record table (the plan)", {"sugg": "recordtable"}), ("liftcoffee", "A lift-top coffee table", {"sugg": "liftcoffee"})]),
     ("corner", "The window corner", "one", "Your plant stand stands here now. Pick one and it takes the corner (move the stand to the breast in Layout).",
      [("windowseat", "A storage window seat", {"sugg": "windowseat"}), ("hallbench", "A bench with cubbies", {"sugg": "hallbench"}),
       ("wardrobe", "A built-in cupboard", {"sugg": "wardrobe"})]),
     ("storage", "More storage", "any", "Switch on as many as you like.",
-     [("liftcoffee", "A lift-top coffee table", {"sugg": "liftcoffee"}), ("doorshelf", "A shelf over the hall door", {"sugg": "doorshelf"}),
+     [("doorshelf", "A shelf over the hall door", {"sugg": "doorshelf"}),
       ("shelfboxes", "Boxes on your black shelf", {"sugg": "shelfboxes"}), ("alcoveshelves", "Alcove shelves, window corner", {"sugg": "alcoveshelves"}),
       ("wallcabs", "Wall cabinets over the sofa", {"sugg": "wallcabs"}), ("stairdrawers", "Drawers in the bottom steps", {"sugg": "stairdrawers"}),
       ("overdoor", "A hook rail over the door", {"sugg": "overdoor"}), ("shoes", "Shoe cabinets beside the cabinet", {"beside": "shoes"})]),

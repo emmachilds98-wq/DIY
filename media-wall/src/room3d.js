@@ -53,13 +53,17 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               plants: "corner", layout: {}, added: [], grow: true,
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
-              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive" },   // v26: the oak, the floor, your shelf; v31: the seat pads
+              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive", ceiling: "asis" },   // v26: the oak, the floor, your shelf; v31: the seat pads
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
               cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
               cam: "orbit", pad: false, foot: false, beside: "clear",
               blind: "down", lp: false, trolley: "park", lid: false, barflap: false, ctop: false, sdraw: false };   // v37: the step drawers out   // v34: the blind (a suggestion) down or rolled up; a record lifted out of the vinyl stand; the trolley parked or at the table   // v31: what's beside the compact cabinet   // v31: a drag circles round a spot or looks round from where you stand; the move buttons on the room   // v30: the compact cabinet (the plan) or the sliding one; the table door open with the table folded   // v23: the fold-down seat at the stair end (an option): "off", "up" (folded) or "down"   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
-DEF.lamp = R.LAMP_DEFAULT || "sofa";   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
+DEF.lamp = R.LAMP_DEFAULT || "sofa";
+/* v38: the room opens on the client's plan (geometry.FIRM: their saved picks, the bar beside the cabinet, the sage-stripe rug); every
+   other choice is an option to look at */
+if (R.FIRM) { DEF.sugg = Object.fromEntries(R.FIRM.sugg.map(k => [k, true])); DEF.svar = Object.assign({}, R.FIRM.svar);
+  DEF.beside = R.FIRM.beside; DEF.cabw = R.FIRM.cabw; DEF.decor = Object.assign({}, DEF.decor, R.FIRM.decor); }   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
@@ -76,6 +80,34 @@ if (!S.seen21) { S.view = "room"; S.seen21 = true; }   // v21: everyone starts o
 if (!S.seen27) { if (S.site === "B") S.site = "C"; S.seen27 = true; }   // v27: the dining cabinet is the plan now: the old default moves to it once
 if (S.dining === "eight") S.dining = "six";                              // v27: the cabinet seats six (v26 had eight)
 if (!(S.paint in R.PAINTS) && S.paint !== "custom") S.paint = DEF.paint;
+/* v38, client: "I want ability to change each walls colour individually": each wall is a named surface; S.walls holds a colour for any
+   wall that differs from the rest ("match" or missing: the walls' paint) */
+const WALLS = [["media", "Media wall"], ["breast", "Chimney breast"], ["door", "Door wall"], ["stairs", "Stairs wall"], ["window", "Window wall"], ["pc", "PC wall"]];
+const WALL_NAME = Object.fromEntries(WALLS);
+if (!S.walls || typeof S.walls !== "object") S.walls = {};
+/* v38, client: "Turning the light fixture as a whole as well as the light heads": each fixture (the two spot bars on their ceiling roses,
+   the red lamp on its base) turns as a whole, S.fix[id] in degrees from the plan's; each head, S.head["bar1:0"], has its own on/off,
+   level, colour and aim (turn and tilt, in degrees from its plan aim). A turn or an aim rebuilds that fixture with the same number of
+   lights, so the graphics card makes no new shaders (v35) */
+if (!S.fix || typeof S.fix !== "object" || Array.isArray(S.fix)) S.fix = {};
+if (!S.head || typeof S.head !== "object" || Array.isArray(S.head)) S.head = {};
+const FIX_NAME = { bar1: "Spot bar 1, over the sofa", bar2: "Spot bar 2, over the table", lamp: "Your red lamp" };
+const HEAD_COLS = [[null, "Its own colour"], ["#ffe2b8", "Warm white"], ["#f2f5ff", "Cool white"], ["#ffb35c", "Amber"], ["#ff7fb6", "Pink"], ["#7fd6ff", "Blue"], ["#8cf09a", "Green"]];
+const fixDeg = id => +(S.fix[id] || 0);
+const headOf = k => S.head[k] || {};
+const fixKey = id => JSON.stringify([fixDeg(id), Object.entries(S.head).filter(([k]) => k.startsWith(id + ":")).map(([k, h]) => [k, h.yaw || 0, h.tilt || 0])]);
+function aimDir(dir, rad, h) {          // a head's aim (world): its plan aim, turned with its fixture, then its own turn and tilt
+  const Y = new THREE.Vector3(0, 1, 0), d = dir.clone().applyAxisAngle(Y, rad);
+  if (h.yaw) d.applyAxisAngle(Y, h.yaw * Math.PI / 180);
+  if (h.tilt) { const ax = new THREE.Vector3().crossVectors(d, Y); if (ax.lengthSq() > 1e-6) d.applyAxisAngle(ax.normalize(), h.tilt * Math.PI / 180); }
+  if (d.y > -0.05) d.y = -0.05;          // a head can aim level, not at the ceiling
+  return d.normalize();
+}
+let lookWall = "all";            // Look's paint row: all the walls, or one
+function setWall(id, v) {        // a paint's key, a colour, or "match"; the walls' own paint counts as "match"
+  const h = v === "match" ? null : R.PAINTS[v] ? R.PAINTS[v].hex : v;
+  if (h && /^#[0-9a-f]{6}$/i.test(h) && h.toLowerCase() !== paintHex().toLowerCase()) S.walls[id] = h; else delete S.walls[id];
+}
 
 /* ---------------------------------------------------------------- the lighting presets (scenes.py) and their two rules
    v25: three presets (bright, cosy, film); dinner is a rule (the table open lifts bar 2), daytime a switch (S.tod) that works with any
@@ -419,6 +451,7 @@ const paintMats = new Map();
 function paintHex() { return S.paint === "custom" ? S.custom : R.PAINTS[S.paint].hex; }
 /* v15: three paints: the walls, the ceiling, and the skirting with the door, its frame and the radiator ("match" = the walls' colour) */
 function chHex(ch) {
+  if (ch.startsWith("w:")) { const v = S.walls[ch.slice(2)]; if (/^#[0-9a-f]{6}$/i.test(v || "")) return v; }   // v38: one wall's own colour
   if (ch === "ceil" && S.ceil !== "match") return S.ceil;
   if (ch === "trim" && S.skirt !== "match") return S.skirt;
   return paintHex();
@@ -548,7 +581,7 @@ function buildGroup(items, name) {
     else { kind = kindOf(fill, flags); geo = polyGeo(it); }
     const high = it[0] === "p" && Math.min(...it[1].filter((_, i) => i % 3 === 1)) >= R.CEIL - 0.5;
     if (kind === "paint") {
-      const m = new THREE.Mesh(geo, paintMat(lum(fill) / BASE_L, it[0] === "b", it[0] === "p"));
+      const m = new THREE.Mesh(geo, paintMat(lum(fill) / BASE_L, it[0] === "b", it[0] === "p", (flags || "").includes("s") ? "w:stairs" : "wall"));
       shadow(m); (high ? above : grp).add(m); continue;
     }
     const key = kind + (it[0] === "p" ? "p" : "") + (high ? "h" : "");
@@ -606,18 +639,20 @@ function flushCubes(parent) {
   BUCKET.clear();
 }
 function buildShell() {
-  const wallP = paintMat(lum("#2d5a46") / BASE_L), recP = paintMat(lum("#264c3a") / BASE_L), ceilP = paintMat(lum("#33604a") / BASE_L, false, false, "ceil");
+  const wP = id => paintMat(lum("#2d5a46") / BASE_L, false, false, "w:" + id), rP = id => paintMat(lum("#264c3a") / BASE_L, false, false, "w:" + id);   // v38: per wall
+  const wallP = wP("window"), recP = rP("door"), ceilP = paintMat(lum("#33604a") / BASE_L, false, false, "ceil");
   const egg = paintMat(lum("#346650") / BASE_L, true, false, "trim");
   const C = R.CEIL, Wd = R.W, A = R.ALC_W, AD = R.ALC_D, [B0, B1] = R.BREAST_X, RZ = R.RECESS_Z, WZ = R.WINDOW_Z;
   const [dx0, dx1] = R.DOOR_X, [sx0, sx1] = R.STAIR_X, [wx0, wx1] = R.WINDOW_X, [wy0, wy1] = R.WINDOW_Y;
-  wall("x", 0, WZ, AD, 0, C, [1, 0, 0], wallP);                                   // the side (east) wall, into the alcove
-  wall("z", AD, 0, A, 0, C, [0, 0, -1], wallP);                                   // the alcove's back
-  wall("x", B0, 0, AD, 0, C, [-1, 0, 0], recP);                                    // the breast's reveal
-  wall("z", 0, B0, B1, 0, C, [0, 0, -1], wallP);                                   // the chimney breast
-  wall("x", B1, 0, RZ, 0, C, [1, 0, 0], recP);                                     // the recess's side
-  wall("z", RZ, B1, Wd, 0, C, [0, 0, -1], recP, [[dx0, dx1, 0, R.DOOR_H], [sx0, Wd, 0, C]]);   // the door wall, open over the stairs
-  wall("x", Wd, WZ, RZ, 0, C, [-1, 0, 0], wallP);                                  // the stairs (west) wall
-  wall("z", WZ, 0, Wd, 0, C, [0, 0, 1], wallP, [[wx0, wx1, wy0, wy1]]);            // the window wall
+  wall("x", 0, WZ, 0, 0, C, [1, 0, 0], wP("pc"));                                 // the side (east) wall: the PC wall
+  wall("x", 0, 0, AD, 0, C, [1, 0, 0], wP("media"));                              // ... and into the alcove, with the media wall
+  wall("z", AD, 0, A, 0, C, [0, 0, -1], wP("media"));                             // the alcove's back
+  wall("x", B0, 0, AD, 0, C, [-1, 0, 0], rP("media"));                             // the breast's reveal
+  wall("z", 0, B0, B1, 0, C, [0, 0, -1], wP("breast"));                            // the chimney breast
+  wall("x", B1, 0, RZ, 0, C, [1, 0, 0], rP("breast"));                             // the recess's side (the breast's return)
+  wall("z", RZ, B1, Wd, 0, C, [0, 0, -1], rP("door"), [[dx0, dx1, 0, R.DOOR_H], [sx0, Wd, 0, C]]);   // the door wall, open over the stairs
+  wall("x", Wd, WZ, RZ, 0, C, [-1, 0, 0], wP("stairs"));                           // the stairs (west) wall
+  wall("z", WZ, 0, Wd, 0, C, [0, 0, 1], wP("window"), [[wx0, wx1, wy0, wy1]]);     // the window wall
   // v16: the hollow pipe boxing in the window's west corner, floor to ceiling, painted with the walls
   const PX = R.PIPE_BOX;
   cube(PX.x[0], 0, PX.z[0], PX.x[1] - PX.x[0], C, PX.z[1] - PX.z[0], wallP);
@@ -742,7 +777,7 @@ function buildShell() {
   // v15: "make the hanging plant on the wall shelf actually hang": a pot at the window end, its strands trailing down off the shelf.
   // v36: its own group (plantBG). v37: it stays here, at the shelf's window end, now 10 short of the boxing (v36's plant shelf is gone)
   plantBG = new THREE.Group(); shell.add(plantBG);
-  hangPlant(plantBG, Wd - sb.d / 2 - 1, sb.top, R.PLANT_B.z, [Wd - sb.d - 1], 4);
+  hangPlant(plantBG, Wd - sb.d / 2 - 1, sb.top, R.PLANT_B.z, [Wd - sb.d - 1], 4, R.PLANT_THROUGH_GAP ? [sb.z[1], R.PIPE_BOX.z[1]] : null);   // v38: through the 10 cm gap
   // v15: "either add my hat there or give it a wallstand": an oak peg on the stairs wall with the hat on it. v16: off until the photo
   if (R.HAT_PEG) {
   const HP = R.HAT_PEG, oakM = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
@@ -762,6 +797,21 @@ function buildShell() {
   const ly = R.LED_Y - 0.8;
   [[0.5, WZ + 1, 1, AD - WZ - 2], [Wd - 1.5, WZ + 1, 1, front - WZ - 2]].forEach(([x, z, w, d]) => cube(x, ly, z, w, 0.8, d, ledMat, false));
   [[1, WZ + 0.5, Wd - 2], [1, AD - 1.5, A - 2], [B0, -1.5, B1 - B0], [B1, RZ - 1.5, wx - B1]].forEach(([x, z, w]) => cube(x, ly, z, w, 0.8, 1, ledMat, false));
+  // v38 (item 12): the feature ceilings to try (Look → The ceiling): hidden groups, shown by applyCeiling()
+  if (R.CEIL_DESIGNS) { const CD = R.CEIL_DESIGNS, put = (grp, x, y, z, w, h, d, mat) => {          // a box from its min corner, in a group
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), mat); m.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); m.receiveShadow = true; grp.add(m); };
+    const beamM = reg(new THREE.MeshStandardMaterial({ color: "#8a5f3c", map: OAK_TEX, roughness: 0.7, bumpMap: WALL_BUMP, bumpScale: 1.2 }));
+    CEIL_G.beams = new THREE.Group(); CEIL_G.coffers = new THREE.Group(); CEIL_G.cove = new THREE.Group();
+    const B = CD.beams; for (const [x, z0, z1] of B.runs) put(CEIL_G.beams, x - B.w / 2, C - B.d, z0, B.w, B.d, z1 - z0, beamM);
+    const K = CD.coffers; for (const [x, z0, z1] of K.runs) put(CEIL_G.coffers, x - K.w / 2, C - K.d, z0, K.w, K.d, z1 - z0, ceilP);
+    for (const z of K.z) put(CEIL_G.coffers, 0, C - K.d, z - K.w / 2, K.x_to, K.d, K.w, ceilP);
+    const V = CD.cove, cv = CEIL_G.cove;                                                                // the coving round the walls, its LED on top
+    // where it fits: the window wall, the side wall to the alcove, the breast, the recess (not the alcove: the media wall's uprights reach the ceiling; not the stairs wall: the light box)
+    for (const [x, z, w, d] of [[0, WZ + V.d, V.d, -WZ - V.d], [0, WZ, Wd, V.d], [B0, -V.d, B1 - B0, V.d], [B1, RZ - V.d, wx - B1, V.d]]) {
+      put(cv, x, C - V.h, z, w, V.h - 2, d, ceilP);
+      const lx = w > d ? x : x + (x < 1 ? V.d - 1 : 0), lz = w > d ? z + (z === WZ ? V.d - 1 : 0) : z;
+      put(cv, lx, C - 2, lz, w > d ? w : 1, 0.6, w > d ? 1 : d, ledMat); }
+    for (const g of Object.values(CEIL_G)) { g.visible = false; shell.add(g); } }
   // v15: the side run's LED strip, under its front edge (on the uprights' driver)
   runLed = new THREE.MeshBasicMaterial({ color: "#ffd9a8", toneMapped: false });
   const SR = R.SIDE_RUN;
@@ -774,7 +824,35 @@ function buildShell() {
   buildPlantsAndRecords();
   buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
   buildOptC(); buildCab(); buildBeside();                                                      // v26; v30: the compact cabinet; v31: beside it
+  buildStairs();
   flushCubes(shell);
+}
+/* v38, client: "Make the stairs solid until the landing": the flight as one solid, a stepped profile run across its width, 13 risers
+   up to a landing at the first floor, oak treads and a closed oak string on the open side. A stand-in shape (the stairs will change).
+   The cutaway leaves it whole (its materials carry no clipping planes), so it never shows in slices. */
+function buildStairs() {
+  const [sx0, sx1] = R.STAIR_X, n = R.STAIR_N || 13, r = R.STAIR_RISE, gq = R.STAIR_GOING, tb = 2.2, nose = 1.5;
+  const z0 = R.STAIR_FRONT + 6, zl = z0 + (n - 1) * gq, zl1 = zl + (R.LANDING_D || 90), top = n * r;
+  const noClip = m => { m.clippingPlanes = []; return m; };
+  const body = noClip(paintMat(lum("#2d5a46") / BASE_L, true, false, "w:stairs").clone()); paintMats.set("stairbody", reg(body));
+  const oak = noClip(reg(new THREE.MeshStandardMaterial({ color: "#b07a46", map: OAK_TEX, roughness: 0.55 })));
+  const str = noClip(reg(new THREE.MeshStandardMaterial({ color: "#9c6a3f", map: OAK_TEX, roughness: 0.55 })));
+  const g = new THREE.Group(); g.name = "stairs"; shell.add(g);
+  const solid = (pts, xa, xb, mat) => {     // a profile in (z, y), run across x from xa to xb
+    const sh = new THREE.Shape(pts.map(([z, y]) => new THREE.Vector2(z * M, y * M)));
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: (xb - xa) * M, bevelEnabled: false });
+    geo.rotateY(-Math.PI / 2); geo.translate(-xa * M, 0, 0);
+    const uv = geo.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / GRAIN, uv.getY(i) / GRAIN);
+    g.add(shadow(new THREE.Mesh(geo, mat)));
+  };
+  const prof = [[z0, 0]];                    // the body: risers and treads (under the boards) down to the floor, the landing on top
+  for (let i = 1; i < n; i++) prof.push([z0 + (i - 1) * gq, i * r - tb], [z0 + i * gq, i * r - tb]);
+  prof.push([zl, top - tb], [zl1, top - tb], [zl1, 0]);
+  solid(prof, sx0 + 0.2, sx1 - 0.2, body);
+  for (let i = 1; i < n; i++) solid([[z0 + (i - 1) * gq - nose, i * r - tb], [z0 + i * gq, i * r - tb], [z0 + i * gq, i * r], [z0 + (i - 1) * gq - nose, i * r]], sx0, sx1, oak);
+  solid([[zl - nose, top - tb], [zl1, top - tb], [zl1, top], [zl - nose, top]], sx0, sx1, oak);   // the landing's boards
+  const pitch = z => r + (z - z0) / gq * r, zf = z0 + (21 - r) / r * gq;   // the string: 24 deep along the pitch line, capped 3 over it
+  solid([[z0, 0], [zf, 0], [zl, top - 21], [zl1, top - 21], [zl1, top + 3], [zl, top + 3], [z0, pitch(z0) + 3]], sx0 - 2.2, sx0 - 0.2, str);
 }
 /* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
    end, flush with the pipe boxing, four chairs inside (two on its floor, two on its shelf, each pair two deep), two doors hinged on the
@@ -1302,22 +1380,24 @@ function buildBeside() {
     bx(g, W - b.front, ct, z1, b.front, b.top_t, w, K.oak);                                                    // the oak counter
     const mir = new THREE.Mesh(new THREE.PlaneGeometry((w - 1) * M, (b.shelf2[0] - b.counter) * M), mat({ color: "#ffffff", map: MIRROR_SHEEN, roughness: 0.1, metalness: 0.3 }));
     mir.rotation.y = Math.PI / 2; mir.position.copy(v3(W - b.mirror - 0.05, (b.counter + b.shelf2[0]) / 2, (z0 + z1) / 2)); g.add(mir);   // the acrylic mirror back
-    for (const [y, dd] of [b.shelf, b.shelf2]) bx(g, W - dd, y - 2.7, z1 + 0.5, dd, 2.7, w - 1, K.oak);      // the two oak shelves, on hidden rods
-    const led = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.004, (w - 6) * M), new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false }));
-    led.position.copy(v3(W - b.shelf[1] + 3, b.shelf[0] - 2.7 - 0.25, (z0 + z1) / 2)); g.add(led);           // a warm strip under the first shelf
-    const steel = mat({ color: "#c9cbcd", roughness: 0.25, metalness: 0.9 }), [rl, rh] = R.BAR_RAIL, ry = b.shelf[0] - 2.7 - rh;
-    bx(g, W - 10, ry, (z0 + z1) / 2 - rl / 2, 5, 0.4, rl, steel);                                              // the glass rail
+    // v38: over the counter, an IKEA ENHET wall frame (40 × 15 × 75, steel, two shelves) from 112: glasses and bottles stand on it
+    const [ew, ed, eh] = R.ENHET, ey = b.enhet_y0, ez0 = (z0 + z1) / 2 - ew / 2, steelE = mat({ color: "#3a3b3d", roughness: 0.45, metalness: 0.5 });
+    for (const zz of [ez0, ez0 + ew - 1.2]) bx(g, W - ed, ey, zz, ed, eh, 1.2, steelE);                       // its two sides
+    for (const yy of [ey, ey + eh / 3, ey + eh * 2 / 3, ey + eh - 1.2]) bx(g, W - ed, yy, ez0, ed, 1.2, ew, steelE);   // bottom, two shelves, top
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.004, (ew - 6) * M), new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false }));
+    led.position.copy(v3(W - ed + 3, ey - 0.25, (z0 + z1) / 2)); g.add(led);                                  // a warm strip under it, over the counter
     const clear = reg(new THREE.MeshPhysicalMaterial({ color: "#eef3f4", roughness: 0.05, transmission: 0.6, transparent: true, opacity: 0.5 }));
     const glassGeo = new THREE.LatheGeometry([[0.0, 0], [3.6, 0], [3.6, 0.3], [0.35, 0.6], [0.35, 10], [2.2, 11.2], [4.2, 15.5], [4.0, 21], [3.6, R.BAR_GLASS_H]].map(([r, y]) => new THREE.Vector2(r * M, y * M)), 20);
-    for (let i = 0; i < 4; i++) { const gl2 = new THREE.Mesh(glassGeo, clear); gl2.rotation.x = Math.PI; gl2.position.copy(v3(W - 7.5, ry, (z0 + z1) / 2 - rl / 2 + 5 + i * (rl - 10) / 3)); g.add(gl2); }   // hanging by their feet
+    for (let i = 0; i < 3; i++) { const gl2 = new THREE.Mesh(glassGeo, clear); gl2.position.copy(v3(W - 7.5, ey + 1.2, ez0 + 8 + i * 12)); g.add(gl2); }   // three wine glasses on the bottom
+    const steel = mat({ color: "#c9cbcd", roughness: 0.25, metalness: 0.9 });
     const bottleGeo = new THREE.LatheGeometry([[0, 0], [4.2, 0], [4.4, 1], [4.4, 21], [3.6, 24], [1.4, 27.5], [1.4, 32], [1.6, 32.5], [1.6, 34], [0, 34]].map(([r, y]) => new THREE.Vector2(r * M, y * M)), 16);
     const glassC = ["#3f6b3a", "#c48a3a", "#e8eef0", "#6b2e1f", "#2f4e6e", "#d9c27a"].map(c => reg(new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.08, transmission: 0.35, transparent: true, opacity: 0.88 })));
     const r = rnd(41), pitch = (w - 2 * t) / b.across;
     for (const y of [b.floor, b.mid + t]) for (let i = 0; i < b.across; i++) {                                 // the front row of each shelf
       const bo = new THREE.Mesh(bottleGeo, glassC[(i + (y > 20 ? 3 : 0)) % glassC.length]), k = 0.78 + r() * 0.22; bo.scale.set(1, k, 1);
       bo.position.copy(v3(x0 + b.door + 6, y, z1 + t + pitch * (i + 0.5))); g.add(bo); }
-    for (const [dz, k] of [[-14, 0.95], [-4, 0.8], [8, 0.9]]) { const bo = new THREE.Mesh(bottleGeo, glassC[(dz + 20) % 6]); bo.scale.set(1, k, 1);
-      bo.position.copy(v3(W - 7, b.shelf2[0], (z0 + z1) / 2 + dz)); g.add(bo); }                               // three to show on the top shelf
+    for (const [dz, k] of [[-12, 0.62], [-2, 0.55], [9, 0.6]]) { const bo = new THREE.Mesh(bottleGeo, glassC[(dz + 20) % 6]); bo.scale.set(1, k, 1);
+      bo.position.copy(v3(W - 7, ey + eh / 3 + 1.2, (z0 + z1) / 2 + dz)); g.add(bo); }                          // three short bottles on its first shelf
     const shaker = new THREE.Mesh(new THREE.CylinderGeometry(3.4 * M, 4 * M, 20 * M, 18), steel); shaker.position.copy(v3(W - 9, b.counter + 10, z1 + 9)); g.add(shaker);
     bx(g, W - 16, b.counter, (z0 + z1) / 2 - 12, 12, 1.2, 24, K.oakIn);                                        // a small oak tray
     for (const dz of [-6, 4]) { const tu = new THREE.Mesh(new THREE.CylinderGeometry(3.8 * M, 3.3 * M, 9 * M, 18), clear); tu.position.copy(v3(W - 10, b.counter + 1.2 + 4.5, (z0 + z1) / 2 + dz)); g.add(tu); }
@@ -1377,6 +1457,7 @@ function placeWork() {      // v34
   twTo(WORK.barflap, S.barflap ? 1 : 0, 1400);
   twTo(WORK.barflap2, S.barflap ? 1 : 0, 1400);                                                    // v36: the bar by the sofa opens with it
   twTo(WORK.ctop, S.ctop ? 1 : 0, 1200);
+  if (WORK.rlid) twTo(WORK.rlid, S.ctop ? 1 : 0, 1200);                                          // v38: the record table's lid
   twTo(WORK.barflap3, S.barflap ? 1 : 0, 1400);                                                    // v37: the built-in bar's doors open with it
   twTo(WORK.sdraw, S.sdraw ? 1 : 0, 1500);                                                          // v37: the drawers in the bottom steps
   twTo(WORK.lid, S.lid ? 1 : 0, 1500);
@@ -1430,9 +1511,9 @@ const MOMENTS = {
              say: "Film night: everything packed away, the lights down" },
   morning: { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "bright", tod: "day", curtains: false }, view: "room",
              say: "An everyday morning: the cabinet shut, the room clear" },
-  // v37: the ottoman's games out, the lift-top coffee table up, cosy; and drinks at the bar built in beside the cabinet, its doors open
-  games:   { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", curtains: true, lid: true, ctop: true, sugg: "+liftcoffee" },
-             aim: { eye: [300, 150, -60], at: [200, 35, -170], fov: 52 }, say: "Games night: the ottoman's lid off, the coffee table's top up, the lights cosy" },
+  // v37: the ottoman's games out, cosy; and drinks at the bar built in beside the cabinet, its doors open (v38: the record table's lid stays down to play on)
+  games:   { set: { dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", curtains: true, lid: true, ctop: false },
+             aim: { eye: [300, 150, -60], at: [200, 35, -170], fov: 52 }, say: "Games night: the ottoman's lid off, the lights cosy" },
   drinks:  { set: { site: "C", cab: "compact", dining: "folded", tdoor: false, chairs: "cupboard", scene: "cosy", tod: "evening", beside: "bar", barflap: true },
              aim: { eye: [345, 138, -180], at: [460, 108, -262], fov: 46 }, say: "Drinks: the bar beside the cabinet open, glasses down from the rail" },
 };
@@ -1595,7 +1676,7 @@ function buildSuggest() {
   const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.6, side: THREE.DoubleSide }));
   const mat = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
   // the floor pieces: movable, shown only while switched on
-  const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] && !(k === "floorplant" && S.sugg.blanketbasket) }); };   // v36: the blanket basket takes the floor plant's corner
+  const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] && !(k === "floorplant" && (S.sugg.blanketbasket || S.sugg.cotswoldbasket)) }); };   // v36: the blanket basket takes the floor plant's corner
   const ownOak = () => reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));   // v28: each piece's own, for its versions
   const ownGlow = c => new THREE.MeshBasicMaterial({ color: c, toneMapped: false });
   { const pot = mat("#d8cfc0"); SVAR_MATS.floorplant = [pot];
@@ -1725,17 +1806,53 @@ function buildStorage(oak, mat) {
   const kuggis = (g, x0, y, z0, along, deep, h, m, alongZ) => {     // a lidded box: its body, a bamboo lid 1 thick
     if (alongZ) { ibox(g, x0, y, z0, deep, h - 1, along, m); ibox(g, x0 - 0.2, y + h - 1, z0 - 0.2, deep + 0.4, 1, along + 0.4, bamboo); }
     else { ibox(g, x0, y, z0, along, h - 1, deep, m); ibox(g, x0 - 0.2, y + h - 1, z0 - 0.2, along + 0.4, 1, deep + 0.4, bamboo); } };
-  // the tall lidded basket for the blankets, at the sofa's open end (a floor piece: it moves in Edit room)
-  if (R.BLANKET_BASKET) { const B = R.BLANKET_BASKET, weave = reg(new THREE.MeshStandardMaterial({ color: "#b89a6c", roughness: 1, bumpMap: HESSIAN, bumpScale: 2.2 }));
-    SVAR_MATS.blanketbasket = [weave];
+  // v38 (the plan): Dibor's Lakelyn basket for the blankets at the sofa's open end, 29 out from the wall and 51 along it, no lid: its
+  // cotton lining turned over the rim and the five throws, folded long, stacked flat inside (a floor piece: it moves in Edit room)
+  if (R.BLANKET_BASKET) { const B = R.BLANKET_BASKET, weave = reg(new THREE.MeshStandardMaterial({ color: "#9a7a50", roughness: 1, bumpMap: HESSIAN, bumpScale: 2.6 }));
+    const lining = own("#e9e2d2"); SVAR_MATS.blanketbasket = [weave];
+    const g = new THREE.Group(), w = B.w, d = B.d, h = B.h, t = 1.2;
+    lb(g, 0, 0, 0, w, 1.5, d, weave);                                                                     // its floor
+    for (const [x, z, ww, dd] of [[-w / 2 + t / 2, 0, t, d], [w / 2 - t / 2, 0, t, d], [0, -d / 2 + t / 2, w - 2 * t, t], [0, d / 2 - t / 2, w - 2 * t, t]]) {
+      lb(g, x, 1.5, z, ww, h - 1.5, dd, weave);
+      lb(g, x * 1.01, h - 5, z * 1.01, ww + (ww > t ? 0 : 0.6), 5, dd + (dd > t ? 0 : 0.6), lining); }  // the lining over the rim
+    const th = R.THROW_LONG || [47, 25, 8.5], cols = ["#efe7d8", "#a65a38", "#8b9878", "#d9a441", "#34507f"];
+    for (let k = 0; k < 5; k++) lb(g, 0, 1.5 + k * th[2], 0, th[1] - (k % 2), th[2] - 0.3, th[0] - (k % 2), own(cols[k]));   // the throws, flat
+    const top = own(cols[4]); lb(g, 1, h, 0, w - 2, 0.8, 22, top); lb(g, w / 2 + 0.5, h - 16, 0, 0.8, 16.8, 22, top);   // the top throw over the rim, hanging down the room side
+    const cx = (B.x[0] + B.x[1]) / 2, cz = (B.z[0] + B.z[1]) / 2;
+    SUGG_G.blanketbasket = movable("sg_blanketbasket", "Blanket basket", g, () => ({ x: cx, z: cz, rot: 0 }), B.w, B.d, [weave], false, { when: () => !!S.sugg.blanketbasket }); }
+  // the fallback: the tall lidded seagrass basket (The Cotswold Company), in the same corner
+  if (R.BLANKET_COTSWOLD) { const B = R.BLANKET_COTSWOLD, weave = reg(new THREE.MeshStandardMaterial({ color: "#b89a6c", roughness: 1, bumpMap: HESSIAN, bumpScale: 2.2 }));
+    SVAR_MATS.cotswoldbasket = [weave];
     const g = new THREE.Group(), body = new THREE.Mesh(new RoundedBoxGeometry(B.w * M, (B.h - 6) * M, B.d * M, 3, 0.03), weave);
     body.position.y = (B.h - 6) / 2 * M; g.add(shadow(body));
     const lid = new THREE.Mesh(new RoundedBoxGeometry((B.w + 1.5) * M, 6 * M, (B.d + 1.5) * M, 3, 0.025), weave); lid.position.y = (B.h - 3) * M; g.add(shadow(lid));
     const knob = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.008, 8, 20), weave); knob.position.y = (B.h + 1.5) * M; g.add(knob);
-    const throwC = ["#efe7d8", "#a65a38", "#8b9878", "#d9a441", "#34507f"].map(c => own(c));     // the top of the stack, peeking under the lid's edge
+    const throwC = ["#efe7d8", "#a65a38"].map(c => own(c));                                              // the top of the stack, peeking under the lid's edge
     for (let i = 0; i < 2; i++) { const t_ = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.012, 0.004), throwC[i]); t_.position.set(0, (B.h - 6.6 + i * 0.8) * M, (B.d / 2 + 0.1) * M); g.add(t_); }
     const cx = (B.x[0] + B.x[1]) / 2, cz = (B.z[0] + B.z[1]) / 2;
-    SUGG_G.blanketbasket = movable("sg_blanketbasket", "Blanket basket (suggested)", g, () => ({ x: cx, z: cz, rot: 0 }), B.w, B.d, [weave], false, { when: () => !!S.sugg.blanketbasket }); }
+    SUGG_G.cotswoldbasket = movable("sg_cotswoldbasket", "Lidded seagrass basket (an option)", g, () => ({ x: cx, z: cz, rot: 0 }), B.w, B.d, [weave], false, { when: () => !!S.sugg.cotswoldbasket }); }
+  // v38 (the plan): the record table in the coffee table's place: two KALLAX cubes on their backs on a ply base and castors, LPs
+  // spine-up in the two bins, an oak lid on a piano hinge along the TV side (+z here; the sofa is -z) that lifts on two stays
+  if (R.RECORD_TABLE && R.KALLAX && coffeeG) { const T = R.RECORD_TABLE, K = R.KALLAX, g = SUGG_G.recordtable = new THREE.Group();
+    const carc = own("#8d8780"), oakL = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 })), dark = own("#2a2724"), ply = own("#d9c29a");
+    SVAR_MATS.recordtable = [oakL, carc];
+    const cw = T.carcass[0], cd = T.carcass[1], y0 = T.castor + T.base, tx = (K.w - K.inner) / 2, tz = (cd - K.inner) / 2;
+    for (const [x, z] of [[-cw / 2 + 4, -cd / 2 + 4], [cw / 2 - 4, -cd / 2 + 4], [-cw / 2 + 4, cd / 2 - 4], [cw / 2 - 4, cd / 2 - 4]]) {
+      lb(g, x, 0, z, 3.6, T.castor - 1, 3.6, dark); lb(g, x, T.castor - 1, z, 5, 1, 5, dark); }         // the castors and their plates
+    lb(g, 0, T.castor, 0, cw + 1, T.base, cd + 0.3, ply);                                                // the 12 mm ply base
+    const sl = new THREE.BoxGeometry(T.lp * M, T.lp * M, 0.0036), per = T.per_bin, rows = [];
+    for (let u = 0; u < T.units; u++) { const x = (u - (T.units - 1) / 2) * K.w;
+      lb(g, x - K.w / 2 + tx / 2, y0, 0, tx, K.d, cd, carc); lb(g, x + K.w / 2 - tx / 2, y0, 0, tx, K.d, cd, carc);
+      lb(g, x, y0, -cd / 2 + tz / 2, K.inner, K.d, tz, carc); lb(g, x, y0, cd / 2 - tz / 2, K.inner, K.d, tz, carc);
+      for (let k = 0; k < per; k++) rows.push([x, -K.inner / 2 + 0.4 + k * (K.inner - 0.8) / per]); }
+    const lps = new THREE.InstancedMesh(sl, reg(new THREE.MeshStandardMaterial({ roughness: 0.55 })), rows.length), m4 = new THREE.Matrix4(), col = new THREE.Color();
+    const sc = ["#e9e3d3", "#2f3e5c", "#d24b33", "#1f1f1f", "#14806d", "#f0c24b", "#7a4fb0", "#e8603c"];
+    rows.forEach(([x, z], k) => { m4.makeRotationX(((k * 7919) % 9 - 4) * 0.006); m4.setPosition(x * M, (y0 + T.lp / 2) * M, z * M); lps.setMatrixAt(k, m4); lps.setColorAt(k, col.set(sc[(k * 5 + (k >> 3)) % sc.length])); });
+    lps.castShadow = false; lps.receiveShadow = true; g.add(lps);                                        // the LPs, spine-up (one draw call)
+    const pg = new THREE.Group(); pg.position.set(0, (y0 + K.d) * M, cd / 2 * M); g.add(pg);             // the hinge, on the TV side's top edge
+    lb(pg, 0, 0, -T.d / 2 + (T.d / 2 - cd / 2), T.w, T.lid, T.d, oakL);                                   // the oak lid, 90 × 50, centred over the pair
+    WORK.rlid = anim(v => { pg.rotation.x = 1.4 * v; });                                                  // up about 80°, on its stays
+    g.visible = false; coffeeG.add(g); }
   // the lift-top coffee table, in the coffee table's place (it goes where the coffee table goes); the top lifts and comes towards the sofa
   if (R.LIFT_COFFEE && coffeeG) { const L = R.LIFT_COFFEE, g = SUGG_G.liftcoffee = new THREE.Group(), body = own("#b07d4f"); SVAR_MATS.liftcoffee = [body];
     const dark = own("#2a2724"), w = L.w, d = L.d, legH = 6, top = 2.2, sh = L.h - legH - top;
@@ -1938,7 +2055,8 @@ function buildSeatAndPouf() {
   const welt = new THREE.Mesh(new THREE.BoxGeometry((O.w - 1) * M, 0.006, (O.d - 1) * M), velvet); welt.position.y = (legH + boxH + 0.3) * M; lidG.add(welt);
   g.add(lidG);                                                                                    // a group: kept out of the merge, so it can lift
   WORK.lid = anim(v => { lidG.position.set(0.18 * Math.max(0, v - 0.4) / 0.6, 0.22 * Math.min(1, v / 0.4), 0); lidG.rotation.z = -0.28 * Math.max(0, v - 0.4) / 0.6; });   // up, then over to lean on its side
-  movable("pouf", "Your storage ottoman", g, () => ({ x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }), P_.w, P_.d, [velvet], false,
+  movable("pouf", "Your storage ottoman", g, () => { const D_ = P_.dinner, d = D_ && tableOpen();   // v38: while the table's out it moves clear (its dinner spot)
+      return d ? { x: (D_.x[0] + D_.x[1]) / 2, z: (D_.z[0] + D_.z[1]) / 2, rot: 0 } : { x: (P_.x[0] + P_.x[1]) / 2, z: (P_.z[0] + P_.z[1]) / 2, rot: 0 }; }, P_.w, P_.d, [velvet], false,
           { when: () => !(S.site === "C" && S.dining !== "folded") });   // v26: it moves aside while the cabinet's table is out
   // v27, client: "add my surround speakers to the build that exist standing behind the sofa": the soundbar's two rears on slim stands
   // behind the sofa's long side, movable in Edit room (drawn to the AX5100G's published size until your photo)
@@ -1964,8 +2082,10 @@ function applySuggest() {
   for (const k of ["stairdrawers", "alcoveshelves", "windowseat", "wardrobe", "wallcabs", "overdoor"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];   // v37
   if (SUGG_G.alcoveshelves && S.sugg.wardrobe) SUGG_G.alcoveshelves.visible = false;                  // v37: the cupboard fills that corner
   if (SUGG_G.clock && S.sugg.doorshelf) SUGG_G.clock.visible = false;                                 // the shelf takes the clock's place
-  if (SUGG_G.liftcoffee) { SUGG_G.liftcoffee.visible = !!S.sugg.liftcoffee; if (coffeePlain) coffeePlain.visible = !S.sugg.liftcoffee;
-    if (SUGG_G.tray) SUGG_G.tray.position.y = S.sugg.liftcoffee ? (R.LIFT_COFFEE.h - 42) * M : 0; }
+  { const lc = !!(SUGG_G.liftcoffee && S.sugg.liftcoffee), rt = !!(SUGG_G.recordtable && S.sugg.recordtable && !lc);   // v38: the record table is the plan's; the lift-top the option
+    if (SUGG_G.liftcoffee) SUGG_G.liftcoffee.visible = lc; if (SUGG_G.recordtable) SUGG_G.recordtable.visible = rt;
+    if (coffeePlain) coffeePlain.visible = !lc && !rt;
+    if (SUGG_G.tray) SUGG_G.tray.position.y = lc ? (R.LIFT_COFFEE.h - 42) * M : rt ? (R.RECORD_TABLE.h - 42) * M : 0; }
   if (SUGG_G.piclights) { SUGG_G.piclights.visible = !!S.sugg.piclights && !caseOn();   // v32: over the two framed LPs, while they hang
     SUGG_G.piclights.position.y = S.site !== "A" && S.plants === "breast" ? 0.3 : 0; }
   // v26: the runner lies down the middle of whichever table is open
@@ -2001,8 +2121,35 @@ function buildCushions(sofa) {      // three scatter cushions and a throw over t
   const hang = new THREE.Mesh(new THREE.BoxGeometry(0.012, 30 * M, 46 * M), cushM[2]); hang.position.copy(v3(so.x[1] + 0.8, 48, so.back + 50)); cushG.add(shadow(hang));
   sofa.add(cushG);
 }
+/* v38 (item 12), client: "include option to view ceiling [Artex] in differing designs so we can decide if we want it in future": the
+   ceiling's texture is one of these bump maps (ceilMat always has one, so no new shaders), and the feature ceilings are hidden groups */
+const CEIL_G = {};
+const bumpTex = draw => { const t = canvasTex(512, 512, (g, w, h) => { g.fillStyle = "#808080"; g.fillRect(0, 0, w, h); draw(g, w, h); }, false); t.repeat.set(4, 3.5); return t; };
+const CEIL_BUMPS = {
+  smooth: bumpTex(() => {}),
+  stipple: bumpTex((g, w, h) => { const r = rnd(31);                                                  // peaks pulled up off a brush
+    for (let i = 0; i < 2600; i++) { const x = r() * w, y = r() * h, s = 3 + r() * 7, v = 150 + r() * 100 | 0, gr = g.createRadialGradient(x, y, 0, x, y, s);
+      gr.addColorStop(0, `rgb(${v},${v},${v})`); gr.addColorStop(1, "rgba(128,128,128,0)"); g.fillStyle = gr; g.fillRect(x - s, y - s, 2 * s, 2 * s); } }),
+  swirl: bumpTex((g, w, h) => { const r = rnd(5); g.lineCap = "round";                                // overlapping part-circles, a comb's ridges
+    for (let y = -40, row = 0; y < h + 60; y += 56, row++) for (let x = -40 + (row % 2) * 28; x < w + 60; x += 56) { const a0 = r() * 6.28;
+      for (let k = 0; k < 6; k++) { g.strokeStyle = k % 2 ? "#5c5c5c" : "#c4c4c4"; g.lineWidth = 3; g.beginPath(); g.arc(x, y, 6 + k * 6, a0, a0 + 3.8); g.stroke(); } } }),
+  fan: bumpTex((g, w, h) => { g.lineCap = "round";                                                   // rows of half-circle fans, each over the last
+    for (let y = 0, row = 0; y < h + 96; y += 48, row++) for (let x = (row % 2) * 48; x < w + 96; x += 96)
+      for (let k = 9; k >= 1; k--) { g.strokeStyle = k % 2 ? "#5c5c5c" : "#c4c4c4"; g.lineWidth = 4; g.beginPath(); g.arc(x, y, k * 9, Math.PI, 2 * Math.PI); g.stroke(); } }),
+  basket: bumpTex((g, w, h) => { const s = 64;                                                       // squares of combed lines, turned each time
+    for (let y = 0; y < h; y += s) for (let x = 0; x < w; x += s) for (let k = 4; k < s; k += 10) {
+      g.fillStyle = "#c4c4c4"; if ((x + y) / s % 2) g.fillRect(x + k, y + 3, 4, s - 6); else g.fillRect(x + 3, y + k, s - 6, 4); } }),
+};
+const CEIL_SCALE = { asis: 0.6, smooth: 0, stipple: 2.6, swirl: 2.2, fan: 2.2, basket: 1.8, beams: 0, coffers: 0, cove: 0 };
+function applyCeiling(k) {
+  if (!ceilMat) return; if (!(k in CEIL_SCALE)) k = "asis";
+  const t = CEIL_BUMPS[k] || (k === "asis" ? WALL_BUMP : CEIL_BUMPS.smooth);                         // the feature ceilings go on a skimmed one
+  if (ceilMat.bumpMap !== t) ceilMat.bumpMap = t; ceilMat.bumpScale = CEIL_SCALE[k];
+  for (const [n, g] of Object.entries(CEIL_G)) g.visible = n === k;
+}
 function applyDecor() {
   const D = S.decor;
+  applyCeiling(D.ceiling);
   if (rugMesh) { rugMesh.visible = D.rug !== "none"; const top = rugMesh.material[2], t = rugTex(D.rug), edge = (RUG_LOOKS[D.rug] || {}).edge || R.RUG.cols[3];
     if (top.map !== t) { top.map = t; top.needsUpdate = true; } rugMesh.material.forEach((m, i) => { if (i !== 2) m.color.set(edge); }); }
   if (curtCloth) curtCloth.color.set(CURTAIN_COLS[D.curtains] || CURTAIN_COLS.hessian);
@@ -2251,7 +2398,7 @@ function buildLights() {
   lights.strip.push(area(warm, R.WELL_X0, 6, [R.WELL_X0 / 2, C - 4, -4], [R.WELL_X0 / 2, 0, -4]));
   lights.strip.forEach(l => l.userData.k = 520);
   // the uprights' grooves wash the wall either side of the TV
-  for (const x of [2.25, 133.25]) { const l = area("#ffcf96", 2, 112, [x, 134, 22], [x, 134, 40]); l.userData.k = 3500; l.userData.colKey = "strips"; lights.uprights.push(l); }
+  for (const x of [(R.UP_L[0] + R.UP_L[1]) / 2, (R.UP_R[0] + R.UP_R[1]) / 2]) { const l = area("#ffcf96", 2, 112, [x, 134, 22], [x, 134, 40]); l.userData.k = 3500; l.userData.colKey = "strips"; lights.uprights.push(l); }
   // v15: the side run's strip washes the side wall below it
   const SR = R.SIDE_RUN, zr0 = SR.edge[0][1], zr1 = SR.edge[SR.edge.length - 1][1];
   const sw = area("#ffcf96", zr0 - zr1, 3, [9, SR.under - 1, (zr0 + zr1) / 2], [0, SR.under - 60, (zr0 + zr1) / 2]); sw.userData.k = 260; sw.userData.colKey = "strips"; lights.uprights.push(sw);
@@ -2291,19 +2438,20 @@ function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat, bar
 }
 function buildBar(spec, list, colKey) {   // v15: the bar runs along z (TV to window) when spec.axis is "z"
   const g = new THREE.Group(); g.name = "bar";
-  const C = R.CEIL, along = spec.axis === "z";
-  const at = dx => along ? [spec.x, spec.z + dx] : [spec.x + dx, spec.z];
+  const C = R.CEIL, along = spec.axis === "z", th = fixDeg(colKey) * Math.PI / 180, c = Math.cos(th), s_ = Math.sin(th);
+  const at = dx => { const [ox, oz] = along ? [0, dx] : [dx, 0]; return [spec.x + ox * c - oz * s_, spec.z + ox * s_ + oz * c]; };   // v38: the bar turns on its rose
   const rose = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.025, 28), white); rose.position.copy(v3(spec.x, C - 1.25, spec.z)); g.add(rose);
   const barM = new THREE.Mesh(along ? new THREE.BoxGeometry(0.022, 0.013, 0.84) : new THREE.BoxGeometry(0.84, 0.013, 0.022), white);
-  barM.position.copy(v3(spec.x, C - 3.2, spec.z)); g.add(shadow(barM));
-  for (const h of spec.heads) {
-    const [hx, hz] = at(h.dx);
-    const apex = v3(hx, C - 6.5, hz), tgt = v3(...h.tgt);
+  barM.position.copy(v3(spec.x, C - 3.2, spec.z)); barM.rotation.y = th; g.add(shadow(barM));
+  spec.heads.forEach((h, i) => {
+    const [hx0, hz0] = along ? [spec.x, spec.z + h.dx] : [spec.x + h.dx, spec.z], [hx, hz] = at(h.dx);
+    const apex = v3(hx, C - 6.5, hz), plan = v3(...h.tgt).sub(v3(hx0, C - 6.5, hz0)).normalize();
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 8), headMat(h.stem));
     stem.position.copy(v3(hx, C - 5, hz)); g.add(stem);
-    spotHead(g, apex, tgt.clone().sub(apex).normalize(), h.col, list, 140, colKey, undefined, spec.heads.indexOf(h));
-  }
-  fixtures.add(g); return g;
+    spotHead(g, apex, aimDir(plan, th, headOf(`${colKey}:${i}`)), h.col, list, 140, colKey, undefined, i);
+    list[list.length - 1].userData.hk = `${colKey}:${i}`;
+  });
+  g.userData.spec = spec; fixtures.add(g); return g;
 }
 let lamp;
 const LAMP_RED = new THREE.MeshStandardMaterial({ color: R.LAMP_BODY, roughness: 0.28, metalness: 0.35 });   // v15: "the lamp is bright red"
@@ -2316,6 +2464,8 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.15, 0.025, 32), red); base.position.copy(v3(spot.x, 1.25, spot.z)); g.add(shadow(base));
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, R.LAMP.h * M, 12), red); pole.position.copy(v3(spot.x, R.LAMP.h / 2, spot.z)); g.add(shadow(pole));
   const toward = new THREE.Vector3(...[233 - spot.x, 0, -135 - spot.z]).normalize();      // the room's middle, in room coords
+  const th = fixDeg("lamp") * Math.PI / 180, pivotW = v3(spot.x, 0, spot.z), Yax = new THREE.Vector3(0, 1, 0);   // v38: the lamp turns on its base
+  const turnP = p => p.sub(pivotW).applyAxisAngle(Yax, th).add(pivotW), turned = [];
   // v17, client: "green lamp should face down more slightly, its looking at the ceiling, face at the shelf wall": the top head aims at a
   // point on the stairs wall 30 below its own height, along the shelf (it was aimed 110 up, at the ceiling)
   const sbz = R.SHELF_B.z, wz = Math.min(Math.max(spot.z + 30, Math.min(sbz[0], sbz[1])), Math.max(sbz[0], sbz[1]));
@@ -2324,8 +2474,9 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
     const apex = v3(spot.x + toward.x * 9, y, spot.z + toward.z * 9);
     const tgt = v3(spot.x + off[0], y + off[1], spot.z + off[2]);
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.1, 8), red); arm.position.copy(v3(spot.x + toward.x * 5, y, spot.z + toward.z * 5));
-    arm.rotation.z = Math.PI / 2; arm.rotation.y = Math.atan2(toward.z, -toward.x); g.add(arm);
-    spotHead(g, apex, tgt.clone().sub(apex).normalize(), R.LAMP_BODY, lights.lamp, 55, "lamp" + i, red);
+    arm.rotation.z = Math.PI / 2; arm.rotation.y = Math.atan2(toward.z, -toward.x); g.add(arm); turned.push(arm);
+    spotHead(g, turnP(apex.clone()), aimDir(tgt.clone().sub(apex).normalize(), th, headOf("lamp:" + i)), R.LAMP_BODY, lights.lamp, 55, "lamp" + i, red);
+    lights.lamp[lights.lamp.length - 1].userData.hk = "lamp:" + i;
   });
   // v16, the client's photo ("Hat"): the hats live on the lamp: the graduation cap sits on the pole's top, tipped, and the navy cap with
   // the poem printed under its peak hangs on the pole below the top head, peak down, crown out
@@ -2338,15 +2489,17 @@ function buildLamp() {   // three adjustable heads on a red pole, with colour bu
     const tassel = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.006, 0.11, 8), reg(new THREE.MeshStandardMaterial({ color: "#1d1e22", roughness: 0.9 })));
     tassel.position.set(0.1, -0.05, 0.02);
     mb.add(shadow(skull), shadow(board), button, tassel);
-    mb.position.copy(v3(spot.x, R.LAMP.h + 5, spot.z)); mb.rotation.z = -0.22; mb.rotation.x = 0.12; g.add(mb);
+    mb.position.copy(v3(spot.x, R.LAMP.h + 5, spot.z)); mb.rotation.z = -0.22; mb.rotation.x = 0.12; g.add(mb); turned.push(mb);
     const perp = new THREE.Vector3(-toward.z, 0, toward.x);                         // room coords: across the heads
     const out = new THREE.Vector3(-perp.x, 0, perp.z).normalize(), up = new THREE.Vector3(0, 1, 0);   // world
     const cap = buildCap(H);                                                         // v37: a structured baseball cap, not a beret
     const xAxis = new THREE.Vector3().crossVectors(out, up), tilt = 0.4;               // v37: tipped so the stiff brim kicks out from the pole
     const yAx = out.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(up, Math.sin(tilt)), zAx = up.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(out, -Math.sin(tilt));
     cap.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAx, zAx));
-    cap.position.copy(v3(spot.x, H.cap_y, spot.z)).add(out.clone().multiplyScalar(0.02)); g.add(cap);
+    cap.position.copy(v3(spot.x, H.cap_y, spot.z)).add(out.clone().multiplyScalar(0.02)); g.add(cap); turned.push(cap);
   }
+  const q = new THREE.Quaternion().setFromAxisAngle(Yax, th);
+  turned.forEach(o => { turnP(o.position); o.quaternion.premultiply(q); });
   fixtures.add(g);
 }
 
@@ -2422,8 +2575,11 @@ function applyState() {
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
   G.unit_in.visible = !S.drawers; G.unit_out.visible = S.drawers;
   const b2 = `${S.site === "C" ? "B" : S.site}_${S.site === "C" ? (S.dining === "folded" ? "folded" : "six") : S.dining}`;   // v26: C lights like B
-  if (built.bar2 !== b2) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2; }
-  const lk = S.lamp + JSON.stringify(S.layout.lamp || {});
+  const b2k = b2 + fixKey("bar2"), b1k = fixKey("bar1");
+  if (built.bar2 !== b2k) { if (bar2) drop(bar2, lights.bar2); bar2 = buildBar(R.BAR2[b2], lights.bar2, "bar2"); built.bar2 = b2k; }
+  if (bar1 && built.bar1 !== b1k) { drop(bar1, lights.bar1); bar1 = buildBar(R.BAR1, lights.bar1, "bar1"); }   // v38: turned or aimed
+  built.bar1 = b1k;
+  const lk = S.lamp + JSON.stringify(S.layout.lamp || {}) + fixKey("lamp");
   if (built.lamp !== lk) { buildLamp(); built.lamp = lk; }
   if (G.now_ledge) G.now_ledge.visible = S.site !== "A" && S.plants !== "breast" && !(S.sugg.barcase && caseOn());   // v18: with the plants on the breast the ledge comes off; v34: the drinks cabinet takes its place
   placeChairs();                                                                   // v20: the chair cupboard, its doors, the chairs in it
@@ -2452,6 +2608,13 @@ function applyLight() {
   if (!hd) for (const bar of [lights.bar1, lights.bar2]) bar.forEach((l, i) => {   // v22: Fast lights each bar with two of its four heads, twice as bright
     if (i % 2) l.visible = false; else l.intensity *= 2; });
   set(lights.lamp, (S.layout.lamp || {}).off ? 0 : L.lamp);  // v15: the lamp's colour bulbs dim in their app (v18: or it's been removed)
+  for (const l of [...lights.bar1, ...lights.bar2, ...lights.lamp]) {   // v38: each head's own switch, level and colour
+    const h = headOf(l.userData.hk); if (!l.userData.hk || !Object.keys(h).length) continue;
+    const g = l.userData.glow;
+    if (h.on === false) { l.intensity = 0; if (g) g.material.color.set("#3a3a3a"); continue; }
+    if (h.lv !== undefined) l.intensity = l.intensity * Math.pow(Math.max(0, Math.min(100, h.lv)) / 100, 1.6);
+    if (h.col) { l.color.set(h.col); if (g && l.intensity > 0) g.material.color.set(h.col); }
+  }
   capShadows(hd ? SHADOW_CAP : 0);                            // v18: never more shadowed spots than the graphics card can take
   if (growGlow) growGlow.forEach(m => m.visible = !!S.grow);
   set(lights.tv, L.bias > 0 && hd ? 100 : 0);
@@ -2560,16 +2723,24 @@ function capShadows(n) {   // the brightest n spotlights cast shadows; the rest 
 /* v15's hanging plant, as a builder (v36): a pot centred at x (room cm) on a shelf whose top is at top, its strands falling from the
    edges in edges (each strand picks one: the shelf's front, or v36's gap behind the plant shelf) */
 let plantBG = null;
-function hangPlant(par, x, top, z, edges, seed) {
+function hangPlant(par, x, top, z, edges, seed, gapZ) {   // v38: gapZ [the shelf's end, the boxing's face]: the strands fall through that gap
   const PB = R.PLANT_B, pot = reg(new THREE.MeshStandardMaterial({ color: "#e9e4da", roughness: 0.7 })), leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide }));
   const vine = reg(new THREE.MeshStandardMaterial({ color: "#4f6b3a", roughness: 0.8 }));
   const potM = new THREE.Mesh(new THREE.CylinderGeometry(PB.pot / 2 * M, PB.pot * 0.38 * M, 0.12, 24), pot); potM.position.copy(v3(x, top + 6, z)); par.add(shadow(potM));
   const r = rnd(seed), leaves = [], vines = [];
   for (let k = 0; k < PB.strands; k++) {
     const e = edges[k % edges.length], dir = e > x ? 1 : -1;   // behind the pot (towards the wall) or in front of it
-    const len = PB.trail[0] + r() * (PB.trail[1] - PB.trail[0]), z0 = z + (r() - 0.5) * 12, x0 = e + dir * r() * 3;
-    const pts = [v3(x + dir * 2 + (r() - 0.5) * 6, top + 10, z0), v3(x0 - dir * 2, top + 2, z0 + (r() - 0.5) * 4)];
+    const len = PB.trail[0] + r() * (PB.trail[1] - PB.trail[0]);
+    let pts;
+    if (gapZ) {                                     // over the shelf's end, then down the gap between it and the boxing
+      const zg = gapZ[0] - 1.5 - r() * (gapZ[0] - gapZ[1] - 3), xg = x + (r() - 0.5) * 16;
+      pts = [v3(x + (r() - 0.5) * 6, top + 10, z + (r() - 0.5) * 6), v3(xg, top + 2, gapZ[0] + 1)];
+      for (let j = 1; j <= 5; j++) pts.push(v3(xg + Math.sin(j + k) * 1.5, top - len * j / 5, zg + Math.sin(j * 1.3 + k) * 1.2));
+    } else {
+    const z0 = z + (r() - 0.5) * 12, x0 = e + dir * r() * 3;
+    pts = [v3(x + dir * 2 + (r() - 0.5) * 6, top + 10, z0), v3(x0 - dir * 2, top + 2, z0 + (r() - 0.5) * 4)];
     for (let j = 1; j <= 5; j++) pts.push(v3(x0 + dir * (j * 0.6 + r() * 1.5) * (dir > 0 ? 0.3 : 1), top - len * j / 5, z0 + Math.sin(j + k) * 4));
+    }
     const curve = new THREE.CatmullRomCurve3(pts);
     vines.push(new THREE.TubeGeometry(curve, 32, 0.0025, 5, false));
     for (let t = 0.06; t < 1; t += 0.055 + r() * 0.03) {
@@ -2820,7 +2991,7 @@ function hitSurface(e) {
   for (const h of ray.intersectObjects([shell, fixtures, ...Object.values(G)], true)) {
     if (!shown(h.object)) continue;
     const m = h.object.material; if (!m || Array.isArray(m)) return null;
-    if (m.userData && m.userData.ratio !== undefined) return m.userData.ch === "ceil" ? "ceil" : m.userData.ch === "trim" ? "skirt" : "walls";
+    if (m.userData && m.userData.ratio !== undefined) { const ch = m.userData.ch; return ch === "ceil" ? "ceil" : ch === "trim" ? "skirt" : ch.startsWith("w:") ? ch : "walls"; }   // v38: a wall by name
     return null;                                   // something else is in front
   }
   return null;
@@ -2886,14 +3057,16 @@ function editPanel() {
   const P = qs("#r3d-sel"); if (!P) return;
   P.hidden = !(selId || selSurf);
   if (selSurf) {
-    const lab = { walls: "Walls", ceil: "Ceiling", skirt: "Skirting and radiator" }[selSurf];
+    const one = selSurf.startsWith("w:") ? selSurf.slice(2) : null;
+    const lab = one ? WALL_NAME[one] : { walls: "All walls", ceil: "Ceiling", skirt: "Skirting and radiator" }[selSurf];
     qs("#r3d-selname").textContent = lab;
-    const wallHex = S.paint === "custom" ? S.custom : R.PAINTS[S.paint].hex, key = selSurf === "ceil" ? "ceil" : "skirt";
-    const cur = selSurf === "walls" || S[key] === "match" ? wallHex : S[key];
+    const wallHex = paintHex(), key = selSurf === "ceil" ? "ceil" : "skirt";
+    const cur = one ? chHex(selSurf) : selSurf === "walls" || S[key] === "match" ? wallHex : S[key];
     qs("#r3d-selcol").value = cur; qs("#r3d-swatches").hidden = false;
-    qs("#r3d-swatches").innerHTML = (selSurf === "walls" ? Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("")
+    const chips = Object.entries(R.PAINTS).map(([k, { hex: h, name: n }]) => `<button type="button" class="chip" data-swatch="${k}"><span class="dot" style="background:${h}"></span>${n.replace(/ No\..*/, "").replace("Farrow & Ball ", "").replace("Little Greene ", "")}</button>`).join("");
+    qs("#r3d-swatches").innerHTML = (one ? `<button type="button" class="chip" data-swatch="match">Same as the others</button>` + chips : selSurf === "walls" ? chips
       : `<button type="button" class="chip" data-swatch="match">Same as the walls</button><button type="button" class="chip" data-swatch="${selSurf === "ceil" ? "#f2f0ea" : "#ece8dd"}">${selSurf === "ceil" ? "White" : "Off-white"}</button>`);
-    qsa("[data-sel=turn],[data-sel=turn45],[data-sel=wall],[data-sel=remove],[data-sel=copy]").forEach(b => b.hidden = true); qs("#r3d-selsize").textContent = "";
+    qsa("[data-sel=turn],[data-sel=turn45],[data-sel=turn15],[data-sel=wall],[data-sel=remove],[data-sel=copy]").forEach(b => b.hidden = true); qs("#r3d-selsize").textContent = "";
     return;
   }
   if (!selId) return;
@@ -2902,7 +3075,7 @@ function editPanel() {
   qs("#r3d-selsize").textContent = it.w && it.d ? `${Math.round(it.w)} × ${Math.round(it.d)} cm` : "";   // v19: its footprint
   qsa("[data-sel=copy]").forEach(b => b.hidden = !it.added);
   qs("#r3d-swatches").hidden = true;
-  qsa("[data-sel=turn],[data-sel=turn45],[data-sel=wall]").forEach(b => b.hidden = !!it.lamp || !!it.fixed);
+  qsa("[data-sel=turn],[data-sel=turn45],[data-sel=turn15],[data-sel=wall]").forEach(b => b.hidden = !!it.lamp || !!it.fixed);
   qsa("[data-sel=remove]").forEach(b => b.hidden = false);
   qs("#r3d-selcol").parentElement.hidden = !it.mats.length;
   if (it.mats.length) qs("#r3d-selcol").value = L.col || it.base[0];
@@ -2980,19 +3153,21 @@ qs("#r3d-sel").addEventListener("click", e => {
   const k = b.dataset.sel;
   if (b.dataset.swatch) {
     const v = b.dataset.swatch;
-    if (selSurf === "walls") S.paint = v; else S[selSurf === "ceil" ? "ceil" : "skirt"] = v;
+    if (selSurf.startsWith("w:")) setWall(selSurf.slice(2), v);
+    else if (selSurf === "walls") S.paint = v; else S[selSurf === "ceil" ? "ceil" : "skirt"] = v;
     repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); editPanel(); return;
   }
   if (k === "done") { select(null); return; }
   if (!selId) return;
   const it = MOV[selId];
-  if (k === "turn" || k === "turn45" || k === "wall" || k === "remove" || k === "copy") pushUndo();
+  if (k === "turn" || k === "turn45" || k === "turn15" || k === "wall" || k === "remove" || k === "copy") pushUndo();
   if (k === "copy" && it.added) {     // v19: another of the same, a little way off, turned and coloured the same
     const src = S.added.find(a => a.id === selId), p = spotOf(selId), L = S.layout[selId] || {}, c = clampItem(it, p.x + 25, p.z + 25, p.rot);
     const a = { id: "a" + Date.now().toString(36), type: src.type, x: c.x, z: c.z };
     addThing(a); setLayout(a.id, { rot: p.rot, col: L.col }); placeAll(); store.set(KEY, S); select(a.id); applyState(); return;
   }
   if (k === "turn" || k === "turn45") { turnItem(selId, k === "turn" ? 90 : 45); placeAll(); store.set(KEY, S); }   // v27: a quarter turn, or an eighth
+  if (k === "turn15") { turnItem(selId, e && e.shiftKey ? 5 : 15); placeAll(); store.set(KEY, S); }                  // v38: finer, 5° with Shift
   if (k === "wall") { backToWall(selId); placeAll(); store.set(KEY, S); }
   if (k === "remove") {
     if (it.added) { movers.remove(it.pivot); delete MOV[selId]; S.added = S.added.filter(a => a.id !== selId); delete S.layout[selId]; }
@@ -3003,7 +3178,8 @@ qs("#r3d-sel").addEventListener("click", e => {
 qs("#r3d-selcol").addEventListener("pointerdown", () => { if (selId) pushUndo(); });   // one undo step per colour pick
 qs("#r3d-selcol").addEventListener("input", e => {
   const v = e.target.value;
-  if (selSurf === "walls") { S.paint = "custom"; S.custom = v; repaint(); syncButtons(); updateCaption(); }
+  if (selSurf && selSurf.startsWith("w:")) { setWall(selSurf.slice(2), v); repaint(); syncButtons(); updateCaption(); }
+  else if (selSurf === "walls") { S.paint = "custom"; S.custom = v; repaint(); syncButtons(); updateCaption(); }
   else if (selSurf) { S[selSurf === "ceil" ? "ceil" : "skirt"] = v; repaint(); }
   else if (selId) { setLayout(selId, { col: v }); placeAll(); }
   store.set(KEY, S); dirty();
@@ -3277,6 +3453,7 @@ function lookOf() {
   for (const k of LOOK_BOOL) if (S[k] !== DEF[k]) o[k] = S[k] ? 1 : 0;
   if (S.paint === "custom") o.custom = S.custom;
   if (S.ceil !== "match") o.ceil = S.ceil;
+  const ws = Object.fromEntries(Object.entries(S.walls).filter(([k, v]) => k in WALL_NAME && HEX.test(v || ""))); if (Object.keys(ws).length) o.walls = ws;   // v38
   if (S.skirt !== "match") o.skirt = S.skirt;
   const dd = {}; for (const k of Object.keys(DEF.decor)) if (S.decor[k] !== DEF.decor[k]) dd[k] = S.decor[k];
   if (Object.keys(dd).length) o.decor = dd;
@@ -3286,6 +3463,8 @@ function lookOf() {
   const sv = {}; for (const k of on(S.sugg)) if (svarOf(k) !== SVAR[k]?.[0][0]) sv[k] = svarOf(k);
   if (Object.keys(sv).length) o.svar = sv;
   if (!(sameAsScene() && S.master === 100)) { o.lv = S.lv; o.master = S.master; o.col = S.col; }
+  if (Object.keys(S.fix).length) o.fix = S.fix;                                                     // v38: each fixture's turn
+  if (Object.keys(S.head).length) o.head = S.head;                                                  //       and each head's settings
   return o;
 }
 const b64u = t => btoa(unescape(encodeURIComponent(t))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
@@ -3311,6 +3490,7 @@ function applyLook(tok) {
   for (const k of Object.keys(LOOK_STR)) if (ok(k, o[k])) S[k] = o[k];
   for (const k of LOOK_BOOL) if (k in o) S[k] = !!o[k];
   if (HEX.test(o.custom || "")) S.custom = o.custom;
+  S.walls = {}; if (o.walls && typeof o.walls === "object") for (const [k, v] of Object.entries(o.walls)) if (k in WALL_NAME && HEX.test(v || "")) S.walls[k] = v;   // v38
   S.ceil = HEX.test(o.ceil || "") ? o.ceil : "match"; S.skirt = HEX.test(o.skirt || "") ? o.skirt : "match";
   S.decor = Object.assign({}, DEF.decor); if (o.decor && typeof o.decor === "object") for (const k of Object.keys(DEF.decor)) if (typeof o.decor[k] === "string") S.decor[k] = o.decor[k];
   const set = a => Object.fromEntries((Array.isArray(a) ? a : []).filter(k => typeof k === "string").map(k => [k, true]));
@@ -3319,6 +3499,12 @@ function applyLook(tok) {
   if (o.lv && typeof o.lv === "object") { S.lv = Object.assign({}, SCENES[S.scene].levels); for (const k of LAYERS) if (Number.isFinite(+o.lv[k])) S.lv[k] = Math.max(0, Math.min(100, +o.lv[k])); S.master = Number.isFinite(+o.master) ? Math.max(0, Math.min(100, +o.master)) : 100; }
   else { S.lv = Object.assign({}, SCENES[S.scene].levels); S.master = 100; }
   if (o.col && typeof o.col === "object") for (const k of Object.keys(DEF.col)) if (HEX.test(o.col[k] || "")) S.col[k] = o.col[k];
+  S.fix = {}; if (o.fix && typeof o.fix === "object") for (const k of Object.keys(FIX_NAME)) if (Number.isFinite(+o.fix[k])) S.fix[k] = Math.max(-180, Math.min(180, +o.fix[k]));   // v38
+  S.head = {}; if (o.head && typeof o.head === "object") for (const [k, h] of Object.entries(o.head)) {
+    if (!/^(bar1|bar2|lamp):[0-5]$/.test(k) || !h || typeof h !== "object") continue;
+    const c = {}; if (h.on === false) c.on = false;
+    for (const [f, lo, hi] of [["lv", 0, 100], ["yaw", -90, 90], ["tilt", -60, 60]]) if (Number.isFinite(+h[f])) c[f] = Math.max(lo, Math.min(hi, +h[f]));
+    if (HEX.test(h.col || "")) c.col = h.col; if (Object.keys(c).length) S.head[k] = c; }
   applyState(); syncButtons();
   setView(o.v in VIEWS ? o.v : "room", true);
   const c = Array.isArray(o.c) && o.c.length === 7 && o.c.every(Number.isFinite) ? o.c : null;
@@ -3478,7 +3664,7 @@ function pickItem(e) {
   }
   return null;
 }
-const btn = (label, attrs, on) => ({ label, attrs, on });
+const btn = (label, attrs, on, cls, aria) => ({ label, attrs, on, cls, aria });
 function actItems(id) {     // [title, how it is now, buttons]
   const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
   if (id === "cab" && S.site !== "C") id = "table";
@@ -3508,11 +3694,7 @@ function actItems(id) {     // [title, how it is now, buttons]
       btn("Look at it", { view: "wall" }), btn("Read about it", { actgo: "wall" })]];
   if (id === "tv") return ["The TV", lv("bias") ? "On, its bias light behind it" : "Off", [
       btn(lv("bias") ? "Turn it off" : "Turn it on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"), btn("Look at it", { view: "sofa" })]];
-  if (id === "lamp") return ["Your red lamp", lv("lamp") ? "On" : "Off", [
-      btn(lv("lamp") ? "Turn it off" : "Turn it on", { layer: "lamp:" + (lv("lamp") ? "off" : "on") }), btn("Move it", { actedit: "lamp" })]];
-  if (id === "bar1" || id === "bar2") return [id === "bar1" ? "Spot bar 1, over the sofa" : "Spot bar 2, over the table", lv(id) ? "On" : "Off", [
-      btn(lv(id) ? "Turn it off" : "Turn it on", { layer: id + ":" + (lv(id) ? "off" : "on") }),
-      btn("Bright", { scene: "bright" }, S.scene === "bright"), btn("Cosy", { scene: "cosy" }, S.scene === "cosy"), btn("Film", { scene: "film" }, S.scene === "film")]];
+  if (id === "lamp" || id === "bar1" || id === "bar2") return fixCard(id, lv(id));
   if (id === "curtains") return ["The curtains", S.curtains ? "Drawn" : "Open", [btn(S.curtains ? "Open them" : "Draw them", { tog: "curtains" })]];
   if (id === "lbox") return ["Your OBEGRÄNSAD light box", S.lbox ? "On" : "Off", [btn(S.lbox ? "Turn it off" : "Turn it on", { tog: "lbox" })]];
   if (id === "pc") return ["Your PC", S.pc ? "Lit" : "Dark", [btn(S.pc ? "Lights off" : "Lights on", { tog: "pc" }), btn("Look at it", { view: "pc" }), btn("Read about it", { actgo: "side" })]];
@@ -3529,10 +3711,12 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id.startsWith("sg:") || id.startsWith("id:")) {
     const sg = id.startsWith("sg:"), k = id.slice(3), nm = ((sg ? PD.sugg : PD.ideas)[k] || [k])[0], it = sg && MOV["sg_" + k];
     if (!(sg ? S.sugg : S.ideas)[k]) return null;                        // taken away: the card closes
-    return [nm, sg ? "A suggestion: not in the plan's costs" : "An idea: not in the plan's costs", [
+    const firm = sg && R.FIRM && R.FIRM.sugg.includes(k);                 // v38: the client's picks are the plan
+    return [nm, firm ? "In your plan" : sg ? "An option: not in the plan's costs" : "An idea: not in the plan's costs", [
       ...(k === "blind" ? [btn(S.blind === "up" ? "Pull it down" : "Roll it up", { blind: S.blind === "up" ? "down" : "up" })] : []),
       ...(k === "barcase" || k === "barside" ? [btn(S.barflap ? "Close the bar" : "Open the bar", { barflap: S.barflap ? "shut" : "open" })] : []),
       ...(k === "liftcoffee" ? [btn(S.ctop ? "Put the top down" : "Lift the top", { ctop: S.ctop ? "down" : "up" })] : []),
+      ...(k === "recordtable" ? [btn(S.ctop ? "Close the lid" : "Lift the lid", { ctop: S.ctop ? "down" : "up" })] : []),   // v38
       ...(k === "stairdrawers" ? [btn(S.sdraw ? "Push the drawers in" : "Pull the drawers out", { sdraw: S.sdraw ? "in" : "out" })] : []),   // v37
       ...(sg ? (SVAR[k] || []).map(([v, n]) => btn(n, { svar: `${k}:${v}` }, svarOf(k) === v)) : []),
       ...(it && !it.fixed ? [btn("Move it", { actedit: it.id })] : []),
@@ -3543,6 +3727,45 @@ function actItems(id) {     // [title, how it is now, buttons]
     return [it.label, it.fixed ? "Built in: it can come off, but not move" : "Drag it in Edit room, or change its colour", [btn(it.fixed ? "Take it off or put it back" : "Move it", { actedit: it.id })]]; }
   return null;
 }
+/* v38: a fixture's card: on or off, turn it as a whole (15° a tap, 5° with Shift held), then one head at a time */
+const actHead = { bar1: 0, bar2: 0, lamp: 0 };
+function headNames(id) {
+  if (id === "lamp") return ["Top (green)", "Middle (pink)", "Bottom (purple)"];
+  const spec = id === "bar1" ? R.BAR1 : (bar2 && bar2.userData.spec) || R.BAR1, names = { "#a9c7ab": "Sage", "#a7d0d8": "Blue", "#e8b53f": "Mustard", "#e79c95": "Pink" };
+  return spec.heads.map((h, i) => names[(h.col || "").toLowerCase()] || `Head ${i + 1}`);
+}
+function fixCard(id, on) {
+  const d = fixDeg(id), names = headNames(id), i = Math.min(actHead[id] || 0, names.length - 1), k = `${id}:${i}`, h = headOf(k);
+  const ci = HEAD_COLS.findIndex(c => c[0] === (h.col || null)), aim = [h.yaw ? `${h.yaw > 0 ? "right" : "left"} ${Math.abs(h.yaw)}°` : "", h.tilt ? `${h.tilt > 0 ? "up" : "down"} ${Math.abs(h.tilt)}°` : ""].filter(Boolean).join(", ");
+  const st = `${on ? "On" : "Off"} · ${d ? `turned ${d}°` : "at the plan's angle"} · ${names[i]}: ${h.on === false ? "off" : `${h.lv ?? 100}%`}${aim ? `, aimed ${aim}` : ""}`;
+  return [FIX_NAME[id], st, [
+    btn(on ? "Turn it off" : "Turn it on", { layer: id + ":" + (on ? "off" : "on") }),
+    { sep: "Turn the whole fixture" },
+    btn("⟲ 15°", { fixturn: `${id}:-15` }, undefined, "sm", "Turn it 15° anticlockwise (Shift: 5°)"), btn("⟳ 15°", { fixturn: `${id}:15` }, undefined, "sm", "Turn it 15° clockwise (Shift: 5°)"),
+    ...(d || Object.keys(S.head).some(x => x.startsWith(id + ":")) ? [btn("Reset", { fixreset: id }, undefined, "sm", "Back to the plan's angle and aims")] : []),
+    { sep: "Each head" },
+    ...names.map((n, j) => btn(n, { headsel: `${id}:${j}` }, j === i)),
+    { sep: names[i] },
+    btn(h.on === false ? "On" : "Off", { headtog: k }, undefined, "sm", h.on === false ? "Switch this head on" : "Switch this head off"),
+    btn("−", { headlv: `${k}:-20` }, undefined, "sm", "Dim this head"), btn("+", { headlv: `${k}:20` }, undefined, "sm", "Brighten this head"),
+    btn("←", { headaim: `${k}:yaw:-10` }, undefined, "q", "Aim it left"), btn("→", { headaim: `${k}:yaw:10` }, undefined, "q", "Aim it right"),
+    btn("↑", { headaim: `${k}:tilt:10` }, undefined, "q", "Aim it up"), btn("↓", { headaim: `${k}:tilt:-10` }, undefined, "q", "Aim it down"),
+    btn(`Colour: ${HEAD_COLS[Math.max(0, ci)][1]}`, { headcol: k }),
+    ...(id === "lamp" ? [btn("Move it", { actedit: "lamp" })] : [])]];
+}
+function fixAct(d, fine) {             // the card's fixture and head buttons; true if one was handled
+  const keyOf = v => v.split(":").slice(0, 2).join(":"), edit = (k, f) => { const h = Object.assign({}, headOf(k)); f(h); if (Object.keys(h).length) S.head[k] = h; else delete S.head[k]; };
+  if (d.fixturn) { const [id, st] = d.fixturn.split(":"); const step = fine ? Math.sign(+st) * 5 : +st; S.fix[id] = (((fixDeg(id) + step) % 360) + 540) % 360 - 180; if (!S.fix[id]) delete S.fix[id]; }
+  else if (d.fixreset) { delete S.fix[d.fixreset]; for (const k of Object.keys(S.head)) if (k.startsWith(d.fixreset + ":")) delete S.head[k]; }
+  else if (d.headsel) { const [id, i] = d.headsel.split(":"); actHead[id] = +i; renderAct(); return true; }
+  else if (d.headtog) edit(d.headtog, h => { if (h.on === false) delete h.on; else h.on = false; });
+  else if (d.headlv) { const k = keyOf(d.headlv), st = +d.headlv.split(":")[2]; edit(k, h => { const v = Math.max(0, Math.min(100, (h.lv ?? 100) + st)); if (v === 100) delete h.lv; else h.lv = v; if (v > 0) delete h.on; }); }
+  else if (d.headaim) { const [id, i, ax, st] = d.headaim.split(":"), k = `${id}:${i}`, lim = ax === "tilt" ? 60 : 90;
+    edit(k, h => { const v = Math.max(-lim, Math.min(lim, (h[ax] || 0) + (fine ? Math.sign(+st) * 5 : +st))); if (v) h[ax] = v; else delete h[ax]; }); }
+  else if (d.headcol) edit(d.headcol, h => { const ci = HEAD_COLS.findIndex(c => c[0] === (h.col || null)), nx = HEAD_COLS[(Math.max(0, ci) + 1) % HEAD_COLS.length][0]; if (nx) h.col = nx; else delete h.col; });
+  else return false;
+  applyState(); syncButtons(); return true;
+}
 function renderAct() {
   const items = actId && actItems(actId);
   if (!items) { closeAct(); return; }
@@ -3550,8 +3773,10 @@ function renderAct() {
   qs("#r3d-act-h").textContent = title; qs("#r3d-act-st").textContent = st;
   const box = qs("#r3d-acts"); box.textContent = "";
   for (const b of bs) {
+    if (b.sep) { const h = document.createElement("span"); h.className = "r3d-actsep"; h.textContent = b.sep; box.appendChild(h); continue; }   // v38
     const el = document.createElement("button"); el.type = "button"; el.textContent = b.label;
     for (const [k, v] of Object.entries(b.attrs)) el.dataset[k] = v;
+    if (b.cls) el.className = b.cls; if (b.aria) { el.setAttribute("aria-label", b.aria); el.title = b.aria; }
     if (b.on !== undefined) el.setAttribute("aria-pressed", String(!!b.on));
     box.appendChild(el);
   }
@@ -3579,6 +3804,7 @@ if (act) {
     if (d.actgo) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: d.actgo } })); return; }
     if (d.actideas) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "ideas", item: d.actideas } })); return; }   // v34
     if (d.actedit) { const id = d.actedit; closeAct(); setEdit(true); select(id); return; }
+    if (fixAct(d, e.shiftKey)) return;                                   // v38: a fixture's turn, its heads
     if (d.view) setTimeout(closeAct, 0);                     // the room flies there; the card has done its job
   });
   canvas.addEventListener("pointerdown", e => { tapDown = (S.edit || e.button > 0) ? null : [e.clientX, e.clientY, performance.now()]; if (actId) closeAct(); });
@@ -3819,7 +4045,11 @@ function syncButtons() {
   press("site", S.site); press("dining", S.dining); press("scene", S.scene); press("tod", S.tod);
   qsa("[data-scene]").forEach(b => b.classList.toggle("adjusted", b.dataset.scene === S.scene && !(sameAsScene() && S.master === 100)));   // v25: "Bright · adjusted"
   const ln = qs("#r3d-litst"); if (ln) ln.textContent = SCENES[S.scene].name + (sameAsScene() && S.master === 100 ? "" : " · adjusted") + (S.tod === "day" ? " · daytime" : "");
-  const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("paint", S.paint); press("lamp", S.lamp);
+  const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("lamp", S.lamp);
+  const wh = (lookWall === "all" ? paintHex() : chHex("w:" + lookWall)).toLowerCase();                 // v38: the paint row shows the chosen wall's paint
+  qsa("[data-paint]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === b.dataset.paint : R.PAINTS[b.dataset.paint].hex.toLowerCase() === wh)));
+  qsa("[data-lookwall]").forEach(b => { const k = b.dataset.lookwall; b.setAttribute("aria-pressed", String(k === lookWall)); const i = b.querySelector("i"); if (i) i.style.setProperty("--c", k === "all" ? paintHex() : chHex("w:" + k)); });
+  const wm = qs("[data-wallmatch]"); if (wm) { wm.hidden = lookWall === "all"; wm.disabled = !S.walls[lookWall]; }
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
   press("ceil", S.ceil); press("skirt", S.skirt); press("plants", S.plants); press("chairs", S.chairs); press("seat", S.seat);
   press("cab", S.cab); press("cabw", S.cabw); press("tdoor", S.tdoor ? "open" : "shut");                                   // v30
@@ -3831,8 +4061,8 @@ function syncButtons() {
   let anyOn = false; qsa("[data-svrow]").forEach(r => { const on = !!S.sugg[r.dataset.svrow]; r.hidden = !on; anyOn = anyOn || on; });
   const svn = qs("#r3d-svnone"); if (svn) svn.hidden = anyOn;
   qsa("[data-decor]").forEach(b => { const [k, v] = b.dataset.decor.split(":"); b.setAttribute("aria-pressed", String(S.decor[k] === v)); });
-  qs("#r3d-custom").value = S.custom;
-  qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase())));
+  qs("#r3d-custom").value = lookWall === "all" ? S.custom : chHex("w:" + lookWall);
+  qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase() : wh === b.dataset.paintcustom.toLowerCase())));
   if (S.ceil !== "match" && qs("#r3d-ceil")) qs("#r3d-ceil").value = S.ceil;
   if (S.skirt !== "match" && qs("#r3d-skirt")) qs("#r3d-skirt").value = S.skirt;
   qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : (S.lv[k] ?? 0); i.value = v; qs(`[data-lvout="${k}"]`).textContent = `${Math.round(v)}%`; });
@@ -3886,7 +4116,9 @@ root.addEventListener("click", e => {
   else if (d.plants) {           // v18: the layout puts the stand and the shelf back on their spots for it
     S.plants = d.plants; for (const k of ["plants", "records"]) if (S.layout[k]) { delete S.layout[k].x; delete S.layout[k].z; delete S.layout[k].rot; }
     applyState(); }
-  else if (d.paint) S.paint = d.paint, repaint(), updateCaption(), store.set(KEY, S), dirty();
+  else if (d.lookwall) lookWall = d.lookwall;                                                        // v38: which wall the paints go on
+  else if (d.wallmatch) setWall(lookWall, "match"), repaint(), updateCaption(), store.set(KEY, S), dirty();
+  else if (d.paint) (lookWall === "all" ? (S.paint = d.paint) : setWall(lookWall, d.paint)), repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.lamp) S.lamp = d.lamp, applyState();
   else if (d.drawers) S.drawers = d.drawers === "out", applyState();
   else if (d.chairs) { S.chairs = d.chairs; if (d.chairs === "open") S.tdoor = false; applyState(); }   // v30: one door open at a time
@@ -3905,12 +4137,12 @@ root.addEventListener("click", e => {
   else if (d.pad) S.pad = d.pad === "on", applyPad(), store.set(KEY, S);
   else if (d.quality) S.quality = d.quality, S.picked = true, applyLight(), store.set(KEY, S);
   else if (b.id === "r3d-full") { const st = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : st.requestFullscreen?.())?.catch?.(() => {}); return; }
-  else if (d.paintcustom) S.custom = d.paintcustom, S.paint = "custom", repaint(), updateCaption(), store.set(KEY, S), dirty();   // v25: Deep green, a ready-made custom colour
+  else if (d.paintcustom) (lookWall === "all" ? (S.custom = d.paintcustom, S.paint = "custom") : setWall(lookWall, d.paintcustom)), repaint(), updateCaption(), store.set(KEY, S), dirty();   // v25: Deep green, a ready-made custom colour
   else if (b.id === "r3d-reset") { setView(S.view); return; }
   else return;
   syncButtons();
 });
-qs("#r3d-custom").addEventListener("input", e => { S.custom = e.target.value; S.paint = "custom"; repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); });
+qs("#r3d-custom").addEventListener("input", e => { if (lookWall === "all") { S.custom = e.target.value; S.paint = "custom"; } else setWall(lookWall, e.target.value); repaint(); syncButtons(); updateCaption(); store.set(KEY, S); dirty(); });
 // v15: the sliders, the colour bulbs, and the ceiling and skirting paints
 root.addEventListener("input", e => {
   const t = e.target, d = t.dataset;

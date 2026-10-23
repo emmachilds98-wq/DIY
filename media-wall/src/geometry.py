@@ -36,6 +36,11 @@ STAIR_STRING = 24.0                          # v23: the closed string's board, a
 STAIR_D = 79.0        # from the alcove's back-wall line into the room (to confirm)
 STAIRS_UP = True      # v13, client: the stairs by the door go UP to the first floor (v12 drew them going down)
 STAIR_RISE, STAIR_GOING = 19.5, 22.0      # typical UK domestic stair (Approved Document K: rise up to 22, going at least 22)
+# v38, client: "Make the stairs solid until the landing": one solid flight, 13 risers to a landing at the first floor (235 ceiling and
+# about 18.5 of floor). A stand-in shape: the client says the stairs will change, and the count is to confirm.
+STAIR_N = 13
+LANDING_Y = STAIR_N * STAIR_RISE             # 253.5
+LANDING_D = 90.0                             # at least the flight's width (Approved Document K)
 DOOR_X = (BREAST_X[1] + 12.0, BREAST_X[1] + 95.0)   # 315.5 .. 398.5 in the recess (drawn where the agent's plan shows it)
 DOOR_SWING = 83.0     # if it opens into the room
 WINDOW_Z = ALC_D - ROOM_D                 # -309: the window wall in render coordinates
@@ -54,7 +59,14 @@ WT = 3.0                                  # solid oak worktop
 WORKTOP = CARCASS_TOP + WT                # 76
 FILLER = 3.0
 BAY_W = 60.0
+# v38, client: "Move the vinyl and Xbox to the left side of the media cabinet so the tv is more centre to the sofa. Adjust the games to be
+# in line with the tv and vinyls on the left with the player": MW_SWAP mirrors the wall. The turntable zone (the deck, the Series X over
+# it) goes to the side wall's end, the TV to the breast's end (its centre 67.75 -> 118.25, the sofa's middle at 135), and the bays follow:
+# bay 3's records under the turntable on the left, bays 1 and 2 (the consoles and the games) under the TV.
+MW_SWAP = True
 BAYS = [(FILLER + i * BAY_W, FILLER + (i + 1) * BAY_W) for i in range(3)]   # (3,63) (63,123) (123,183)
+if MW_SWAP:
+    BAYS = BAYS[::-1]                                                         # bay 1 (Xbox) 123..183, bay 2 63..123, bay 3 (records) 3..63
 BAY_NAMES = ["Bay 1 · Xbox", "Bay 2 · PlayStation", "Bay 3 · records"]
 PLINTH_DRAWER = dict(x=(BAYS[1][0] + 3.0, BAYS[1][1] - 3.0), y=(1.6, 7.6), box=(52.0, 34.0, 5.0))   # hidden, push to open
 
@@ -67,6 +79,9 @@ TV_CLEAR = 2.15                           # each side of the screen, inside the 
 TV_GAP = TV_W + 2 * TV_CLEAR              # 126.5 between the uprights
 UP_L = (0.0, UP_T)                        # the left upright is now a corner post against the side wall
 UP_R = (UP_T + TV_GAP, 2 * UP_T + TV_GAP) # 131 .. 135.5
+if MW_SWAP:                               # v38: the corner post at the breast's end, the TV's other upright beside the turntable zone
+    UP_L = (ALC_W - 2 * UP_T - TV_GAP, ALC_W - UP_T - TV_GAP)   # 50.5 .. 55
+    UP_R = (ALC_W - UP_T, ALC_W)                                # 181.5 .. 186
 TV_CX = UP_L[1] + TV_GAP / 2              # 67.75
 TV_SHIFT = ALC_W / 2 - TV_CX              # 25.25 nearer the side wall than v10
 TV_X = (TV_CX - TV_W / 2, TV_CX + TV_W / 2)
@@ -79,6 +94,8 @@ SIDE_ZONE = 0.0                            # v10's left zone is gone
 
 # the right-hand zone: the turntable on the worktop, the Series X on an oak shelf above it
 RZ = (UP_R[1], ALC_W)                      # 135.5 .. 186
+if MW_SWAP:
+    RZ = (0.0, UP_L[0])                    # v38: 0 .. 50.5, by the side wall
 RZ_W = RZ[1] - RZ[0]                       # 50.5
 DECK = (45.2, 14.2, 35.2)                  # Audio-Technica AT-LP120XUSB, worst case (W, H with lid, D)
 DECK_X = (RZ[0] + (RZ_W - DECK[0]) / 2, RZ[0] + (RZ_W + DECK[0]) / 2)   # 138.15 .. 183.35
@@ -241,7 +258,7 @@ SOCKET = dict(x=0.0, z=-22.0, y=30.0)      # on the east wall, just in front of 
 # drawn at socket height, 30 up). The first is SOCKET above (one, which the plan swaps for a double); the other two are doubles.
 SOCKET2 = dict(x=0.0, z=-140.0, y=30.0)    # behind the sofa's return, a little nearer the media wall than the PC (-134 .. -179): the rears, the PC
 SOCKET3 = dict(x=WINDOW_X[1] + 44.0, z=WINDOW_Z, y=30.0)   # 352: on the window wall behind the plant stand (layout A), near the lamp
-SOCKETS = [dict(SOCKET, gang=1, wall="x", name="in the corner in front of the left Xbox game drawer"),
+SOCKETS = [dict(SOCKET, gang=1, wall="x", name="in the corner in front of the records bay" if MW_SWAP else "in the corner in front of the left Xbox game drawer"),
            dict(SOCKET2, gang=2, wall="x", name="behind the sofa's short side, left of and below the PC"),
            dict(SOCKET3, gang=2, wall="z", name="behind the plant stand in the window corner, near the lamp")]
 
@@ -735,10 +752,20 @@ OTTO_GAMES["decks"] = int(_ot_in // CARD_DECK[2]) * int(OTTOMAN["inner_h"] // CA
 # blankets: about five. A 130 × 170 throw folds to about 38 × 33 × 8 (IKEA OFELIA, as sold)
 THROW_FOLDED = (38.0, 33.0, 8.0)
 BLANKETS = 5
-# 1, "blanketbasket": a tall lidded seagrass basket at the sofa's open end, against the side wall (the floor plant's corner)
-BLANKET_BASKET = dict(w=45.0, d=45.0, h=76.0, wall=2.0, x=(2.0, 47.0),
-                      z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 45.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -80 .. -125: 3 off the sofa's end
-BLANKET_BASKET["holds"] = int((BLANKET_BASKET["h"] - 4.0) // THROW_FOLDED[2])           # folded flat, nine high (five use 40 of 72)
+# 1, "blanketbasket" (v38: the plan): Dibor's Lakelyn water hyacinth lined basket, large, 59 high × 51 × 29, against the side wall at the
+# sofa's open end, its 51 along the wall (it stands 29 out, where the Cotswold one stood 45). No lid: the top throw lies over the rest.
+# A throw folded long (in four, then in half) is about 47 × 25 × 8.5, the same 10 litres as the 38 × 33 × 8 shop fold; five stack 43 high
+THROW_LONG = (47.0, 25.0, 8.5)
+BLANKET_BASKET = dict(w=29.0, d=51.0, h=59.0, wall=1.0, x=(2.0, 31.0),
+                      z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 51.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -74 .. -125: 3 off the sofa's end
+BLANKET_BASKET["inner"] = (BLANKET_BASKET["d"] - 2 * BLANKET_BASKET["wall"], BLANKET_BASKET["w"] - 2 * BLANKET_BASKET["wall"],
+                           BLANKET_BASKET["h"] - 2.0)                                   # 49 × 27 × 57 inside its lining
+BLANKET_BASKET["holds"] = int(BLANKET_BASKET["inner"][2] // THROW_LONG[2])              # six folded long; five stand 42.5 of 57
+BLANKET_BASKET["litres"] = round(BLANKET_BASKET["inner"][0] * BLANKET_BASKET["inner"][1] * BLANKET_BASKET["inner"][2] / 1000)
+# the fallback (the client's first pick, v36): The Cotswold Company's large seagrass basket with a lid, 76 × 45 × 45, in the same corner
+BLANKET_COTSWOLD = dict(w=45.0, d=45.0, h=76.0, wall=2.0, x=(2.0, 47.0),
+                        z=(round(SOFA_BACK_Z + SOFA_D + 3.0 + 45.0, 1), round(SOFA_BACK_Z + SOFA_D + 3.0, 1)))   # -80 .. -125
+BLANKET_COTSWOLD["holds"] = int((BLANKET_COTSWOLD["h"] - 4.0) // THROW_FOLDED[2])     # folded flat, nine high (five use 40 of 72)
 # 2, BESIDE "rail": an oak wall rail beside the dining cabinet: four 28 mm oak dowels between two oak uprights, 12 off the wall, a
 # blanket folded over each (two on the lowest). Blankets over it stand about 18 off the wall: behind the open table door's line (23.4)
 BESIDE["rail"] = dict(w=45.0, h=150.0, up=(6.0, 2.2), rails=(40.0, 75.0, 110.0, 145.0), off=12.0, dowel=2.8, draped=18.0)
@@ -746,6 +773,18 @@ BESIDE["opts"]["rail"] = dict(name="An oak blanket rail")
 
 # more storage: 1, "liftcoffee": a lift-top coffee table in the coffee table's place (Homelife, 90 × 50 × 48; the top lifts to 53.5)
 LIFT_COFFEE = dict(w=90.0, d=50.0, h=48.0, lift=53.5, inside=12.0)
+# v38 (the plan): "recordtable", a record-browsing coffee table in the coffee table's 90 × 50: two IKEA KALLAX 42 × 42 cube units
+# (41.5 × 39 × 40.7, open-backed) laid on their backs side by side on a 12 mm ply base on four 50 mm castors, an 18 mm oak lid 90 × 50 on
+# a piano hinge along the TV side, held open by two lid stays. Each cube is a 33 × 33 bin 39 deep: LPs (31.4 square) stand spine-up in
+# two rows of about 80, to flick through from the sofa with the lid up. The lift-top stays as the fallback (an option).
+KALLAX = dict(w=41.5, d=39.0, h=40.7, inner=33.0)
+RECORD_TABLE = dict(w=90.0, d=50.0, castor=6.5, base=1.2, lid=1.8, units=2, lp=31.4, lp_t=0.4)
+RECORD_TABLE["carcass"] = (KALLAX["w"] * 2, KALLAX["h"])                                 # 83 × 40.7 on the floor, 39 tall
+RECORD_TABLE["h"] = round(RECORD_TABLE["castor"] + RECORD_TABLE["base"] + KALLAX["d"] + RECORD_TABLE["lid"], 1)   # 48.5
+RECORD_TABLE["over_lp"] = round(KALLAX["d"] - RECORD_TABLE["lp"], 1)                     # 7.6 over a standing LP, under the lid
+RECORD_TABLE["per_bin"] = int(KALLAX["inner"] // RECORD_TABLE["lp_t"] * 0.98)            # about 80 a bin, sleeves and all
+RECORD_TABLE["lps"] = RECORD_TABLE["per_bin"] * RECORD_TABLE["units"]
+RECORD_TABLE["kg"] = round(RECORD_TABLE["lps"] * 0.23 + 2 * 9.0 + 6.0 + 4.0)           # LPs about 230 g each; KALLAX about 9 kg; the lid, the base
 # 2, "doorshelf": an oak shelf over the hall door with two lidded boxes (IKEA KUGGIS 26 × 35 × 15); the clock suggestion's place
 KUGGIS = (35.0, 26.0, 15.0)        # along the shelf, deep, tall
 ARCHITRAVE = 7.0                   # a usual 69 mm architrave over the door's 198 opening (check yours)
@@ -832,3 +871,82 @@ STAIR_DRAWERS["w"] = round(STAIR_X[1] - STAIR_X[0] - 2 * STAIR_DRAWERS["inset"],
 # 7, "overdoor": a six-hook over-door rail on the hall door's room side (49 × 11 × 14)
 OVERDOOR = dict(w=49.0, d=11.0, h=14.0, hooks=6, door_t=4.0)
 OVERDOOR["open_gap"] = round(DOOR_X[0] - BREAST_X[1], 1)                                 # 12: the open door to the breast's side
+
+
+# ---------------------------------------------------------------- v38: the firm version (the plan), from the client's saved picks (23 Oct)
+# "Our picks from the 3D room" (Copy as a note): the blanket basket, the step drawers, the wall cabinets, the alcove shelves, the boxes on
+# the black shelf, the shelf over the door, the lift-top coffee table, the sage-stripe rug; and, from the brief, "dining cabinet with bar
+# beside it". These are in the buy list, the build and the HD stills; every other choice is an option, only to look at (CLAUDE.md).
+FIRM = dict(
+    sugg=["blanketbasket", "stairdrawers", "wallcabs", "alcoveshelves", "shelfboxes", "doorshelf", "recordtable"],
+    svar={"blanketbasket": "natural", "stairdrawers": "oak", "wallcabs": "walnut", "alcoveshelves": "oak", "shelfboxes": "white",
+          "doorshelf": "white", "recordtable": "oak"},
+    beside="bar", cabw="90", decor={"rug": "stripes"},
+)
+# v38 (the clash check): with the table out for six, the ottoman can't stay by the coffee table (the table's end reaches 7 into it, and
+# pushing it to the sofa doesn't clear that); its dinner spot is in front of the media wall, clear of the table, the chairs and the
+# vinyl stand. The 3D room moves it there while the table is out (unless you've placed it yourself).
+SOFA_POUF["dinner"] = dict(x=(190.0, 266.0), z=(-115.0, -39.0))
+
+
+# ---------------------------------------------------------------- v38: the door and the plant, and the bar to suit
+# The table door (90.5, hinged at the cabinet's window end) swept through the hanging plant's strands once v37 moved the shelf 8 towards
+# the stairs (88.4 from the hinge). The strands now fall through the shelf's 10 cm gap at the boxing (102.6 from the hinge, clear), the
+# pot at the shelf's end; and the bar ends flush with the shelf, leaving that gap clear to the floor.
+PLANT_THROUGH_GAP = True
+PLANT_B["z"] = SHELF_B["z"][1] + PLANT_B["pot"] / 2 + 1.0                              # -268: the pot 1 in from the shelf's end
+BAR_BUILT["z"] = (BESIDE["z"][0] - 0.3, SHELF_B["z"][1])                                # -233.5 .. -276: 42.5 wide
+# over the counter, an IKEA ENHET wall frame (40 × 15 × 75, two shelves, 3 kg a shelf) from 112 to 187, glasses and bottles on it; the
+# glass rail is gone (a hanging glass would reach below the counter under a frame at 112)
+ENHET = (40.0, 15.0, 75.0)
+BAR_BUILT.update(enhet_y0=112.0, shelf=(112.0 + 25.0, 15.0), shelf2=(112.0 + 75.0, 15.0))
+_bb = BAR_BUILT
+_bb["w"] = round(_bb["z"][0] - _bb["z"][1], 1)
+_bb["inner_w"] = round(_bb["w"] - 2 * _bb["t"], 1)
+_bb["across"] = int(_bb["inner_w"] // DRINKS_BOTTLE[1])
+_bb["bottles"] = 2 * _bb["across"] * _bb["rows"]
+_bb["covered"] = round(_bb["z"][0] - CAB["door_t_open"][1], 1)
+_bb["enhet_gap"] = round(_bb["enhet_y0"] - _bb["counter"], 1)                            # 22 to work on the counter
+_bb["enhet_head"] = round(SHELF_B["top"] - SHELF_B["t"] - (_bb["enhet_y0"] + ENHET[2]), 1)   # 4 under your black shelf
+for _k in ("glass_low", "glass_gap"):
+    _bb.pop(_k, None)
+del _bb, _k
+
+
+# v38, client: "change each walls colour individually": each wall's paintable area (m²), less the window and the door, for the plan's
+# paint table. The 3D room names the same six walls.
+WALL_NAMES = {"media": "Media wall", "breast": "Chimney breast", "door": "Door wall", "stairs": "Stairs wall", "window": "Window wall", "pc": "PC wall"}
+PAINT_COVER = 14.0      # m² a litre a coat (Farrow & Ball Estate Emulsion)
+
+
+def wall_areas():
+    c = CEIL
+    a = {"media": (ALC_W + 2 * ALC_D) * c,                                          # the alcove's back, its side and the breast's reveal
+         "breast": (BREAST_W + BREAST_D_WEST) * c,                                  # the face and its west return
+         "door": (STAIR_X[0] - BREAST_X[1]) * c - (DOOR_X[1] - DOOR_X[0]) * 198.0,  # the recess wall, less the door
+         "stairs": (ALC_D - STAIR_D - WINDOW_Z) * c,                                # the west wall, the stair box to the window
+         "window": ROOM_W * c - (WINDOW_X[1] - WINDOW_X[0]) * (WINDOW_Y[1] - WINDOW_Y[0])
+                   + WINDOW_REVEAL * (2 * (WINDOW_Y[1] - WINDOW_Y[0]) + WINDOW_X[1] - WINDOW_X[0]) + sum(NW_BOX) * c,
+         "pc": -WINDOW_Z * c}                                                       # the side wall, the window to the alcove
+    return {k: v / 1e4 for k, v in a.items()}
+
+
+def paint_litres(m2, coats=2):
+    return m2 * coats / PAINT_COVER
+
+
+# ---------------------------------------------------------------- v38 (item 12): ceiling designs to try, for later (an option, not the plan)
+# The client: "include option to view ceiling [Artex] in differing designs so we can decide if we want it in future". The textures are
+# bump maps in the 3D room; these are the feature ceilings' pieces, kept clear of the spot bars' turning circles (clash.py checks).
+# Faux oak beams 12 × 12 (Woodmosaic's PU beam, lengths to 395); each runs from the window wall to the wall it meets at its x.
+def _ceil_end(x):
+    return ALC_D if x < ALC_W else 0.0 if BREAST_X[0] <= x <= BREAST_X[1] else BREAST_D_WEST   # the recess by the door
+CEIL_DESIGNS = dict(
+    beams=dict(x=[160.0, 250.0, 340.0], w=12.0, d=12.0),
+    coffers=dict(x=[160.0, 250.0, 340.0], z=[-215.0], w=10.0, d=6.0, x_to=DOOR_X[1] + 1.5),   # to the stairwell's edge (export3d WELL_X0)
+    cove=dict(d=10.0, h=9.0),            # an uplighter coving profile (Orac C357's class) round the walls, the LED tape on its top
+)
+for _k in ("beams", "coffers"):
+    CEIL_DESIGNS[_k]["z"] = CEIL_DESIGNS[_k].get("z", [])
+    CEIL_DESIGNS[_k]["runs"] = [(x, WINDOW_Z, _ceil_end(x)) for x in CEIL_DESIGNS[_k]["x"]]
+CEIL_DESIGNS["beams"]["longest"] = max(e - s for _x, s, e in CEIL_DESIGNS["beams"]["runs"])   # 348: one 395 beam each, cut

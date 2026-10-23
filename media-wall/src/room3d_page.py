@@ -58,6 +58,10 @@ CSS = """
 .r3d-act .acts { flex-wrap: wrap; }
 .r3d-act .acts button { flex: 1 1 calc(50% - 4px); padding: 0 12px; }
 .r3d-act .acts button[aria-pressed=true] { background: var(--ink); color: var(--cream); }
+.r3d-act .acts { max-height: min(56vh, 420px); overflow-y: auto; }
+.r3d-act .acts button.sm { flex: 1 1 calc(33.3% - 6px); }
+.r3d-act .acts button.q { flex: 1 1 calc(25% - 6px); padding: 0; font-size: 18px; }
+.r3d-actsep { flex: 1 1 100%; margin: 6px 0 -2px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--mut); }
 .r3d-act.above::before { top: auto; bottom: -7px; }
 .r3d.editing .r3d-act { display: none; }
 /* the tools and their panel. v32, client: "make tools always appear in 3D view": the six buttons are always on the room, in a pill;
@@ -165,6 +169,7 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-sel b { font: 600 16px Fredoka, system-ui, sans-serif; margin: 0 4px 0 8px; }
 .r3d-sel label { font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
 .r3d-sel .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.r3d-wallpick { margin-bottom: 8px; } .r3d-wallpick .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -2px; background: var(--c, #2c5643); box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
 .r3d-size { font-size: 12.5px; color: var(--mut); font-variant-numeric: tabular-nums; }
 .r3d.editing canvas { cursor: pointer; }
 @media (min-width: 900px) {
@@ -316,7 +321,7 @@ SUGG_SHORT = {"floorplant": "Tall floor plant", "sidetable": "Round side table",
               "candles": "LED candles on the shelf", "runner": "Table runner and vase", "floorcush": "Floor cushions",
               "lantern": "Rattan floor lantern", "mirror": "Arched mirror", "shelfled": "LED strip under the shelf",
               "barcase": "Drinks cabinet, breast", "bartrolley": "Drinks trolley", "blind": "Blackout blind", "cablights": "Lights in the cabinet",
-              "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
+              "barside": "Drinks cabinet, by the sofa", "blanketbasket": "Blanket basket", "cotswoldbasket": "Lidded seagrass basket", "recordtable": "Record table", "liftcoffee": "Lift-top coffee table", "doorshelf": "Shelf over the door",
               "shelfboxes": "Boxes on your shelf",
               "stairdrawers": "Drawers in the steps", "alcoveshelves": "Alcove shelves", "windowseat": "Storage window seat", "hallbench": "Bench with cubbies",
               "wardrobe": "Built-in cupboard", "wallcabs": "Wall cabinets, sofa", "overdoor": "Hook rail over the door"}   # v37   # v36   # v32   # v26   # v23   # v21: the buttons' words for ideas.SUGGEST
@@ -333,8 +338,16 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
          ("oak", "The oak, on everything new", [("artisan", "Artisan oak (the plan)"), ("pale", "Pale, white-oiled"), ("smoked", "Smoked oak"), ("walnut", "Walnut")]),
          ("floor", "The floor", [("carpet", "Your grey carpet"), ("oatmeal", "Oatmeal carpet"), ("boards", "Oak floorboards")]),
          ("shelf", "Your shelf by the stairs", [("black", "Black (yours)"), ("oak", "Oak"), ("white", "White")]),
-]   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
-DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]
+         # v38 (item 12): ceiling designs to try, for later (an option, not the plan)
+         ("ceiling", "Design", [("asis", "As it is"), ("smooth", "Smooth"), ("stipple", "Artex stipple"), ("swirl", "Artex swirl"), ("fan", "Artex fan"),
+                                ("basket", "Basket weave"), ("beams", "Oak-effect beams"), ("coffers", "Coffers"), ("cove", "LED cove")]),
+]
+# v38: one line each on what a ceiling design takes and costs (fit.SOURCES: skimartex, artextest, pubeam, orac)
+CEIL_NOTE = ("Smooth: skimmed over, £300–700. Artex patterns: a plasterer's day or two, about £200–600. Beams: three 12 × 12 faux oak, "
+             "about £1,050. Coffers: two or three days' work, about £450–900. LED cove: about 15 m of uplighter coving and tape, £750–850. "
+             "Test the old Artex for asbestos first (£35 kit) and don't sand it.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
+DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case on the breast", ("fill", "frame")),
+                ("The ceiling (to try, for later)", ("ceiling",))]
 
 
 def tour():
@@ -344,7 +357,7 @@ def tour():
     s = g.summary()
     return [
         dict(view="room", title="The whole room", text=f"From above the window, the near wall cut away: the media wall, the breast, the door, the stairs and the dining cabinet, under a {g.CEIL:g} ceiling."),
-        dict(view="wall", title="The media wall", text=f"Artisan oak in Card Room Green across the {g.ALC_W:g} cm alcove: the TV centred at {g.TV_CENTRE:.1f}, the turntable on the right, the consoles and the LP crates below."),
+        dict(view="wall", title="The media wall", text=f"Artisan oak in Card Room Green across the {g.ALC_W:g} cm alcove: the TV in line with the sofa, the turntable and the LP crates on the left, the consoles under the TV."),
         dict(view="pc", title="The PC side wall", text=f"One oak run sweeps round the corner to the PC shelf at {g.PC_SHELF_TOP:g}, its leads inside the wall and a warm strip underneath."),
         dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
         dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six", "cab": "compact"},
@@ -402,7 +415,7 @@ def controls(gallery=""):
     decor_g = "".join('<div class="grp r3d-decor"><span class="label">' + html.escape(title) + '</span>'
                + "".join(f'<div class="r3d-decrow"><span>{html.escape(dec[k][0])}</span><div class="seg" role="group" aria-label="{html.escape(dec[k][0])}">'
                          + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in dec[k][1]) + '</div></div>'
-                         for k in keys) + '</div>' for title, keys in DECOR_GROUPS)
+                         for k in keys) + (f'<p class="r3d-hint2">{html.escape(CEIL_NOTE)}</p>' if "ceiling" in keys else "") + '</div>' for title, keys in DECOR_GROUPS)
     # v26: the ceiling and the skirting (with the door and its frame) back in Look: the walls' colour, white, or any colour
     trims = "".join(f'<div class="grp"><span class="label">{lab}</span><div class="seg" role="group" aria-label="{lab}">'
                     f'<button type="button" data-{key}="match" aria-pressed="false">Same as the walls</button><button type="button" data-{key}="#f2efe8" aria-pressed="false">White</button>'
@@ -433,7 +446,12 @@ def controls(gallery=""):
              '<div class="seg"><button type="button" class="chip" id="r3d-pickcopy">Copy as a note</button>'
              '<button type="button" class="chip" id="r3d-picksave" hidden>Save for the next round</button><span class="r3d-hint2" id="r3d-pickst" aria-live="polite"></span></div></div>')
     paints = [(k, h, n.split(" No.")[0].replace("Farrow & Ball ", "").replace("Little Greene ", "")) for k, (h, n) in R.PAINTS.items()]
-    swatches = ('<div class="grp"><span class="label">Wall paint (or tap a wall in Edit room)</span><div class="r3d-swatches" role="group" aria-label="Wall paint">'
+    walls = [("all", "All walls"), ("media", "Media wall"), ("breast", "Chimney breast"), ("door", "Door wall"), ("stairs", "Stairs wall"), ("window", "Window wall"), ("pc", "PC wall")]   # v38
+    swatches = ('<div class="grp"><span class="label">Wall paint: all the walls or one (or tap a wall in Edit room)</span>'
+                '<div class="seg r3d-wallpick" role="group" aria-label="Which wall">'
+                + "".join(f'<button type="button" class="chip" data-lookwall="{k}" aria-pressed="{str(k == "all").lower()}"><i class="dot"></i>{n}</button>' for k, n in walls)
+                + '<button type="button" class="chip" data-wallmatch="1" hidden>Same as the others</button></div>'
+                '<div class="r3d-swatches" role="group" aria-label="Wall paint">'
                 + "".join(f'<button type="button" data-paint="{k}" aria-pressed="false"><i style="--c:{h}"></i>{html.escape(n)}</button>' for k, h, n in paints)
                 + '<button type="button" data-paintcustom="#2c5643" aria-pressed="false"><i style="--c:#2c5643"></i>Deep green</button>'
                 '<label><i><input type="color" id="r3d-custom" value="#899081" aria-label="Any colour for the walls"></i>Any colour</label></div></div>')
@@ -624,7 +642,7 @@ def section(gallery=""):
         <button type="button" class="r3d-share" id="r3d-share" hidden title="Save this layout so Emma and Dave both see it">Save for both of you</button><button type="button" class="r3d-share" id="r3d-useshared" hidden>Use the shared layout</button><span class="r3d-hint" id="r3d-sharest" aria-live="polite"></span>
         <span class="r3d-hint">Drag a thing to move it (it snaps to a wall within 15 cm); tap it to turn, recolour, copy or remove it. Tap a wall, the ceiling or the skirting to paint it.</span></div>
       <div class="r3d-addlist" id="r3d-addlist" hidden></div>
-      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn" title="A quarter turn; against a wall it stays against it">⟳ Turn</button><button type="button" data-sel="turn45" title="An eighth of a turn">45°</button><button type="button" data-sel="wall" title="Push it to the nearest wall, its back to the wall">⇥ Back to the wall</button>
+      <div class="r3d-sel" id="r3d-sel" hidden><b id="r3d-selname"></b><span class="r3d-size" id="r3d-selsize"></span><button type="button" data-sel="turn" title="A quarter turn; against a wall it stays against it">⟳ Turn</button><button type="button" data-sel="turn45" title="An eighth of a turn">45°</button><button type="button" data-sel="turn15" title="15°; hold Shift for 5°">15°</button><button type="button" data-sel="wall" title="Push it to the nearest wall, its back to the wall">⇥ Back to the wall</button>
         <label>Colour <input type="color" id="r3d-selcol" value="#888888"></label><span id="r3d-swatches" hidden></span>
         <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
   </div>
