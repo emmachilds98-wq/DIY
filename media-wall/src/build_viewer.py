@@ -1,7 +1,7 @@
 """Builds the plan page (v13.3): the whole plan in tabs (overview, 3D views, media wall, dining, paint and light, network and
 power, build steps, buy list with cost by phase, questions, checks), the sections borrowed from build_doc.py, with
 answers, photos, buy ticks and step ticks saved for both of you. Images live in art/.
-python3 build_viewer.py  -> media_wall_viewer.html (published as the Claude artifact with art/ and files/ alongside it)
+python3 build_viewer.py  -> media_wall_viewer.html (the shared copy, with art/ and files/ alongside it)
                             and ../../index.html, the same page for GitHub Pages (plain download links; answers and
                             the tracker fall back to this device, with a copy-your-answers button)
 On claude.ai the page declares: db (answers/, tracker/), user (who saved what), assets (photos, editors), downloads."""
@@ -16,7 +16,6 @@ from build_doc import VERSION   # v28: one version for the plan, the guide and t
 DOWNLOADS_ON_GITHUB = True   # v13: the artifact refuses PDFs (and some large images) from an editor outside its organisation
 PAGES = "https://emmachilds98-wq.github.io/DIY/"                  # v14.1: main is published with GitHub Pages
 GITHUB_OUT = PAGES + "media-wall/out/"
-DECK_URL = "https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2"
 LPS = G.ALL_LPS   # v19: 291, the wall's 191 and the vinyl stand's 100
 SINGLES = 2 * G.TRAY_SINGLES
 
@@ -1009,7 +1008,7 @@ def _page(site=False):
     sugg_chips = ('<div class="seg" role="group" aria-label="Suggestions in the room">'
                   + "".join(f'<button type="button" data-sproxy="{k}" aria-pressed="false">{html.escape(room3d_page.SUGG_SHORT[k])}</button>' for k, *_ in __import__("ideas").SUGGEST)
                   + '<button type="button" class="chip" data-sproxyall="on">All on</button><button type="button" class="chip" data-sproxyall="off">All off</button></div>')
-    notice = (f'<p class="notice">Ticks and amounts on this page stay on this device. To share them, use <a href="{DECK_URL}" target="_blank" rel="noopener">the plan page on Claude</a>.</p>' if site
+    notice = ('<p class="notice">Ticks and amounts on this page stay on this device.</p>' if site
               else f'<p class="caption">Also on <a href="{PAGES}" target="_blank" rel="noopener">GitHub Pages</a>.</p>')
 
     plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
@@ -1136,7 +1135,6 @@ def _page(site=False):
   </section>"""
     page = f"""<title>Demma Home Improvements</title>
 {room3d_page.IMPORTMAP}
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fredoka:wght@500;600&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,500,1,0&display=block">
