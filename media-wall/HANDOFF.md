@@ -3,8 +3,9 @@
 ## START HERE (next agent)
 - **v39 (round 33, below): the 3D room quick on PC graphics cards, the approved page redesign, item 13 and item 7, the plan the firm
   version only (75 pages), no more HD stills (the client takes them in the site).** Fit 86/22/14/0, £4,374–8,245. **Next:** the client
-  wants a place to save each set-up they make in the site and track design changes so the next agent can pick them up (round 33's
-  last bullet has the proposal); then the side-wall socket. **Never write the cap's poem out in code or text.**
+  wants a place to save each set-up they make in the site and track design changes so the next agent can pick them up; they may set
+  up Firebase for it themselves (round 33's last bullet has our alternative). Then the side-wall socket. Draw calls 448 in the room
+  view (was 513); texts over budget 19. **Never write the cap's poem out in code or text.**
 - **v38 (round 32, below): the client's picks are the plan (`geometry.FIRM`), and the brief's items 1–6, 8–10 and 12 of
   `UPGRADE_PLAN_v38.md` are done** (two sessions: `claude/clever-johnson-c9tqld`, then `claude/tender-dijkstra-vbfd96`). Fit
   85/22/15/0, total £4,374–8,245 (the picks are in TRACK now), plan 120 pages (19.4 MB), guide 54; 106 stills; `clash.py` 0.
@@ -135,7 +136,14 @@
   `taptest.py` every tap works at both, Try options ‹ › and Back to my plan included; `clash.py` 0 clashes, 0 close.
 - PRs #36 (code) and #37 (outputs) merged into main. Backups `*_v39a_backup.*`, `fit_v39b_backup.py`, `room3d_v39b_backup.js`; v38 outputs in
   `out/v38/`. Deck 71ff published at v39 (version 1792776835-8d98; 20 new pictures in its store, `deck_assets.json` 157).
-- **Next, the client's ask: save each set-up made in the site, and track design changes for the next agent.** Proposal: on the shared
+- **After the merges (client: "I might set up a fire base just to save later but continue current plan"):** fewer draw calls:
+  `mergeStatic` now also runs on the picked storage groups, the step drawers (each drawer whole) and the beside-the-cabinet pieces
+  (not the trolley); the sliding cabinet's build (`buildOptC`, never shown since v33) and the flip-top table's A_/B_ groups in
+  `scene3d.json` (191 → 116 KB) are gone (code in `room3d_v39c_backup.js`, `export3d_v39a_backup.py`). Room view 513 → 448 calls;
+  QA at 390 596 → 546 calls, 1,286 → 1,044 geometries. The glass case's fills and the dining cabinet's moving parts are left unmerged
+  (their switches move or swap single meshes). Texts over budget 76 → 19 (16 captions of 21–27 words, two figcaptions, one toast).
+- **Next, the client's ask: save each set-up made in the site, and track design changes for the next agent.** The client may set this
+  up on **Firebase** themselves ("just to save later"); wait for that, or for their go-ahead on this alternative. Proposal: on the shared
   plan page (deck 71ff, which already has a shared database), a **Save this set-up** button writes the room's whole state (`S`), its look
   link, a name, who and when to a `setups` collection; a **My set-ups** list reopens any of them, newest first, with what changed from
   the plan (`FIRM`) in one line. The agent reads them with ArtifactData (`list` on `setups`) at the start of a round. The GitHub Pages copy

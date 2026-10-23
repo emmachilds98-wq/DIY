@@ -845,7 +845,8 @@ function buildShell() {
   buildIdeas();
   buildPlantsAndRecords();
   buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
-  buildOptC(); buildCab(); buildBeside();                                                      // v26; v30: the compact cabinet; v31: beside it
+  buildCab(); buildBeside();                                                      // v26; v30: the compact cabinet; v31: beside it
+  for (const k of ["mirror", "dresser", "rail", "bar", "shoes"]) if (BES[k]) mergeStatic(BES[k]);   // v39: fewer draws (doors and the trolley move: nested or left out)
   buildStairs();
   flushCubes(shell);
 }
@@ -1107,7 +1108,7 @@ function cabKit() {      // the parts both cabinets share: materials, the table 
   return K;
 }
 
-let optC = null, optCRig = null, optCChairsIn = null, optCDoors = {}, optCSeats = {};
+let optC = null;                                     // v39: the sliding cabinet isn't built any more (see below)
 /* v32: each cabinet's moving parts (cabP() the one on show): its table door and chair door, the chairs in the chair box (stand) and in
    the base (base), the pads on the table door, the table (rig), the chairs at the table (seats) */
 const CABP = {};
@@ -1115,64 +1116,8 @@ const cabP = () => (S.cab === "sliding" ? CABP.sliding : CABP.compact);
 function slideOut(parent, d = 60) {      // a folded chair (or the pads) drawn straight out of the cabinet into the room, then put down
   return fill => { const g = new THREE.Group(); fill(g); parent.add(g); return anim(v => { g.position.x = d * M * v; g.visible = v < 0.999; }); };
 }
-function buildOptC() {
-  /* v29, client: "i asked for a full upgrade of the tables design". Shut, the cabinet is one tidy run of oak: two sliding doors between
-     its ends (Häfele Slido Classic 40 IF C), a shadow-gap plinth, nothing of the table or the chairs on show. Door A (the stair end, front
-     track) slides over door B to open the table bay; B slides behind A to open the chair bay. Inside: the table standing up on its hinge
-     rail, the drawer under it, the linen shelf over it; six folding chairs and their pads beside it. v30: the alternative. */
-  const C = R.OPTC; if (!C) return;
-  const K = cabKit(), bx = K.bx;
-  const [cw, cdep] = R.CHAIR_FOLDED, W = R.W, xf = C.front, xi = C.inner, t = C.t;
-  const z0 = C.z[1], z1 = C.z[0], span = z1 - z0 - 2 * t, deepIn = W - C.back - xi;   // the window end, the stair end (z0 < z1)
-  optC = new THREE.Group(); optC.name = "optc";
-  // the carcass: two ends the full depth (the doors run between them), the 19 mm top with the track in its groove, the floor on a
-  // plinth set 2.5 back (a shadow line), the back
-  bx(optC, xf, 0, z0, C.d, C.h, t, K.oakV); bx(optC, xf, 0, z1 - t, C.d, C.h, t, K.oakV);
-  bx(optC, xf, C.h - C.t_top, z0 + t, C.d, C.t_top, span, K.oak);
-  bx(optC, xf, C.plinth - t, z0 + t, C.d, t, span, K.oak);
-  bx(optC, xf + 2.5, 0, z0 + t, C.d - 2.5, C.plinth - t, span, K.dark);
-  bx(optC, W - C.back, C.plinth, z0 + t, C.back, C.h - C.plinth - C.t_top, span, K.oakIn);
-  bx(optC, xf + 0.3, C.h - C.t_top - 0.7, z0 + t, C.slide - 0.6, 0.7, span, K.alu);            // the double top track
-  bx(optC, xf + 0.3, C.plinth, z0 + t, C.slide - 0.6, 0.25, span, K.alu);                      // the bottom guide track
-  // inside, behind the doors: the partition, the chair shelf, the linen shelf, the hinge rail, the drawer
-  const [bt0, bt1] = C.bay_t, [bc0, bc1] = C.bay_c;
-  bx(optC, xi, C.plinth, bt1 - t, deepIn, C.h - C.t_top - C.plinth, t, K.oakIn);
-  bx(optC, xi, C.shelf_y, bc1, deepIn, t, bc0 - bc1, K.oakIn);
-  bx(optC, xi, C.flap[0] - t, bt1, deepIn, t, bt0 - bt1, K.oakIn);
-  const rail = C.pivot[1] - 7;
-  bx(optC, xi, rail, bt1, deepIn, 7, bt0 - bt1, K.oak);
-  bx(optC, xi, C.plinth + 0.3, bt1 + 0.15, t, rail - C.plinth - 0.6, bt0 - bt1 - 0.3, K.oak);   // the drawer's front, inside
-  bx(optC, xi - 0.6, (C.plinth + rail) / 2 - 0.8, C.cz - 6, 0.6, 1.6, 12, K.dark);              // its finger slot
-  [[0, 0], [1, 1], [2, 2]].forEach(([i, c]) => bx(optC, xi + 3 + i * 0.4, C.flap[0] + i * 3.2, bt1 + 8 + i * 6, deepIn - 6, 3, 34, K.cloth[c]));   // the cloth, napkins and runner
-  // the two sliding doors: A on the front track over the table bay, B on the back track over the chair bay; a routed finger slot near
-  // each one's outer end. Each is a group placed at its stair-side edge (placeOptC slides it).
-  optCDoors = {};
-  for (const k of ["A", "B"]) {
-    const D = C.doors[k], [dx0] = C.door_x[D.track], g = new THREE.Group();
-    bx(g, dx0, C.plinth + 0.3, -C.door_w, C.door, C.door_h, C.door_w, K.oakV);
-    const zs = k === "A" ? -7 : -C.door_w + 4;
-    bx(g, dx0 - 0.05, 92, zs, 0.12, 26, 3, K.dark);
-    optC.add(g); optCDoors[k] = g;
-  }
-  optCRig = K.tableRig(C); optC.add(optCRig);
-  optCSeats = K.seats(C); Object.values(optCSeats).forEach(g => optC.add(g));
-  // six chairs folded in the chair bay: two across, two deep on the floor and one deep on the shelf; the six pads on edge in front of
-  // the two on the shelf. v32: the pads come out first, then each chair, the front ones first
-  optCChairsIn = new THREE.Group();
-  const out = slideOut(optCChairsIn), pads = [], chairs = [];
-  for (const cz of C.chair_z) {
-    for (let j = 1; j >= 0; j--) chairs.push(out(g => K.fchair(g, W - C.back - 0.3 - cdep - j * (cdep + 0.3), C.plinth, cz)));
-    chairs.push(out(g => K.fchair(g, W - C.back - 0.3 - cdep, C.shelf_y + t, cz)));
-    pads.push(g => { for (let k = 0; k < 3; k++) bx(g, xi + 0.6 + k * 3.1, C.shelf_y + t, cz - 19, 3, 38, 38, K.pad); });
-  }
-  const padA = out(g => pads.forEach(f => f(g)));
-  optC.add(optCChairsIn);
-  const shutZ = k => v3(0, 0, C.doors[k].shut[0]).z, slidZ = k => v3(0, 0, C.doors[k].slid[0]).z;
-  const slide = k => anim(v => { optCDoors[k].position.z = shutZ(k) + (slidZ(k) - shutZ(k)) * v; });
-  CABP.sliding = { sl: true, C, doorT: slide("A"), doorC: slide("B"), stand: [padA, ...chairs], base: [], pads: null, rig: optCRig.userData.rig,
-                   seats: { four: optCSeats.four.userData.chairs, six: optCSeats.six.userData.chairs } };
-  scene.add(optC);
-}
+/* v39: the sliding cabinet (v29's buildOptC) is gone: since v33 every state opens on the compact cabinet (applyState), so it was built
+   and never shown. Its numbers stay in geometry.OPTC; the code is in room3d_v39c_backup.js. */
 
 /* v30: the compact cabinet, two boxes side by side: the table box at the stair end (the table on its hinge rail, two chairs lying on
    their sides in the base under it, the linen shelf over it, the six seat pads on the door's back) and the chair box (four chairs, two
@@ -1900,6 +1845,8 @@ function buildStorage(oak, mat) {
     for (const [za, zb] of R.SHELF_BOXES) kuggis(g, W - K[1] - 0.5, sb.top, zb, K[0], K[1], K[2], box, true);
     shell.add(g); }
   buildStorage37(own, mat);                                                                         // v37
+  for (const k of ["doorshelf", "shelfboxes", "alcoveshelves", "wallcabs", "wardrobe", "overdoor", "windowseat", "stairdrawers"])   // v39: fewer draws;
+    if (SUGG_G[k] && SUGG_G[k].isGroup) mergeStatic(SUGG_G[k]);                                    // the step drawers' moving boxes are nested, so they stay
 }
 /* v37, client: "more storage options in Extras ... under-stair drawers, alcove shelving, window seat with storage, wall-mounted
    cabinets, built-in wardrobes, shoe storage, a hallway bench with cubbies, and over-door racks". The window corner (between the
@@ -1925,7 +1872,7 @@ function buildStorage37(own, mat) {
       ibox(dg, x0 + 1, y + 0.6, zr, D.w - 2, 0.6, D.depth - 2, box);                                        // its floor
       const things = [["#2f4e6e", 18, 4, 10], ["#a65a38", 12, 6, 14], ["#8b9878", 9, 3, 9]][i];
       ibox(dg, x0 + 5, y + 1.2, zr + 4, things[1], things[2], things[3], own(things[0]));                    // slippers, a lead, chargers
-      moves.push(dg); }
+      mergeStatic(dg); moves.push(dg); }                                                                    // v39: each drawer moves whole, so one mesh per material
     WORK.sdraw = anim(v => moves.forEach((dg, i) => dg.position.z = -(D.depth - 8) * v * M * (1 - i * 0.12)));
     shell.add(g); }
   // two oak floating shelves in the window corner, over the plant stand
@@ -4198,7 +4145,7 @@ function extrasRule(kind, k, on) {
   const off = (...ks) => { S.sugg = Object.assign({}, S.sugg); ks.forEach(x => { if (x !== k) S.sugg[x] = false; }); };
   if (kind === "sugg") {
     if (["windowseat", "hallbench", "wardrobe"].includes(k)) off("windowseat", "hallbench", "wardrobe");
-    if (k === "wardrobe") { off("alcoveshelves", "bartrolley"); if (S.beside !== "clear") { S.beside = "clear"; toast("The built-in cupboard leaves no room to reach the wall beside the dining cabinet, so that's clear now"); } }
+    if (k === "wardrobe") { off("alcoveshelves", "bartrolley"); if (S.beside !== "clear") { S.beside = "clear"; toast("The cupboard blocks the wall beside the cabinet, so it's clear now"); } }
     if (k === "alcoveshelves") off("wardrobe");
   }
   if (kind === "beside" && k !== "clear") { if (S.sugg.wardrobe) off("wardrobe"); if (k !== "trolley") off("bartrolley"); }
@@ -4273,14 +4220,14 @@ function setTry(on) {
   tryOpts = !!on; root.classList.toggle("trying", tryOpts);
   const t = qs("#r3d-try"); if (t) t.setAttribute("aria-checked", String(tryOpts));
   const bk = qs("#r3d-back"); if (bk) bk.hidden = !tryOpts;
-  if (!tryOpts) { closeAct(); backToPlan(); } else toast("Tap a place or a piece to see what else could go there");
+  if (!tryOpts) { closeAct(); backToPlan(); } else toast("Tap a place to see what else could go there");
   updatePlanBar();
 }
 qs("#r3d-try")?.addEventListener("click", () => setTry(!tryOpts));
 qs("#r3d-back")?.addEventListener("click", () => setTry(false));
 function optSee(gk, it) {
   const g = optGroup(gk); it = it || (g && g.items.find(optOn));
-  if (!it) { toast("Pick one first: it shows in the room and the camera goes to it"); return; }
+  if (!it) { toast("Pick one first: the room shows it"); return; }
   if (it.aim && it.aim.view) setView(it.aim.view); else if (it.aim) flyTo(it.aim.eye, it.aim.at, it.aim.fov || 55);
 }
 function syncOpts() {
@@ -4435,8 +4382,8 @@ function start() {
   precompile();                                                                         // v35: hidden parts' shaders, while the room's idle
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
-    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the dining cabinet, the drawers or the lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
-    else if (!localStorage.getItem("mw31-camhint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("New: Tools → Views → Move round sets your eye height and adds move buttons"), 1800); localStorage.setItem("mw31-camhint", "1"); }   // v31
+    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the cabinet, drawers or lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
+    else if (!localStorage.getItem("mw31-camhint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("View → Move round sets your eye height"), 1800); localStorage.setItem("mw31-camhint", "1"); }   // v31
   } catch (e) {}
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
   window.R3D = {

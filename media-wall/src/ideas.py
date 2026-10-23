@@ -151,8 +151,7 @@ SUGGEST += [
      "Your spirits behind an oak fall-front, built in under the case you picked: nine 70 cl bottles (the tallest made, 35) on a mirror "
      "back, lit from under the top. Down on its two soft-close stays the front is a counter to pour at; the glasses go on the case's "
      "bottom shelf, just above. Nothing stands on the floor.",
-     "On the chimney breast under the glass case, the case's width, from 96 to 136: it takes the “now playing” ledge's place (the vinyl "
-     "stand's face-out top bays show what's on)."),
+     "On the chimney breast under the glass case, 96 to 136 up, in the “now playing” ledge's place."),
     ("bartrolley", "The slim trolley beside the cabinet, as a drinks trolley", "VASAGLE, 20 × 43.2 × 86.5: bottles on top, glasses, mixers and an ice bucket below", (36, 70),
      "Nothing to build: it parks in the gap beside the dining cabinet and pulls out for dinner, before the table door opens, to stand behind the window-side diners, or over to the sofa.",
      "Beside the dining cabinet (Layout, Beside the cabinet: the slim trolley), behind the open table door's line."),
@@ -165,7 +164,7 @@ SUGGEST += [
     ("barside", "A drinks cabinet by the sofa, under the oak run", "60 × 39 × 20, oak; its front drops to a 60 × 36 counter at 98", (60, 100),
      "The bar where you sit: the same build as the one under the glass case, 60 wide for five bottles, on the side wall at the sofa's "
      "open end. The front drops on two soft-close stays to a counter; the glasses stand on the oak run 16 above it.",
-     "On the side wall by the sofa's open end, between the media wall and the sofa, 96 to 136 up: over the drawers' path, under the oak run."),
+     "On the side wall by the sofa's open end, 96 to 136 up, under the oak run."),
     ("blanketbasket", "A tall water hyacinth basket for your blankets at the sofa's open end", "51 × 29 × 59, water hyacinth, lined", (36, 42),
      "Your five blankets, each folded long, stacked flat in one basket (they use about 43 of its 57 inside), at the end of the sofa where "
      "you'd reach for them. It stands 29 out from the wall, not 45.",
@@ -221,8 +220,7 @@ SUGGEST += [
      f"On the side wall over the sofa's corner, just past the PC shelf's end, {_wc['y0']:g} to {_wc['y0'] + G.EKET[2]:g} up."),
     ("overdoor", "A hook rail over the hall door", f"six hooks, {_od['w']:g} × {_od['d']:g} × {_od['h']:g}, over the door's top", (12, 25),
      "Bags, the dog lead, a scarf, by the door you come in through, with no drilling.",
-     f"Over the hall door's top, on its room side. The open door stands {_od['open_gap']:g} off the breast's side, so keep it to slim things "
-     "there, or hang it on the hall side for coats."),
+     f"Over the hall door's top. The open door stands {_od['open_gap']:g} off the breast, so slim things only, or hang it hall side."),
 ]
 del _bb, _ws, _hb, _wd, _al, _wc, _sd, _od
 

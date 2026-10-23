@@ -530,7 +530,7 @@ STYLE_V25 = re.sub(r':root\[data-(?:theme="dark"|skin="[a-z]+")\][^{]*\{[^}]*\}'
 TABS = [("overview", "Overview"), ("room", "Room in 3D"), ("views", "Drawn views"), ("ideas", "Ideas"), ("wall", "Media wall"), ("dining", "Dining table"), ("paint", "Paint & light"),
         ("network", "Network & power"), ("build", "Build steps"), ("buy", "Buy & costs"), ("checks", "Checks & sources")]
 TAB_GROUPS = {"overview": "See it", "wall": "The plan", "build": "Do it"}   # v14: the tab bar in four groups
-CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above the window side with the window wall cut away, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture",
+CAP3D = {"3d_room": "The whole room from above the window side, the window wall cut away",
          "3d_wall_film": "The media wall with the Film preset: bias light on, bar 1 off, the strips low",
          "3d_wall_drawers": "Every drawer out, the Cosy preset: the LP crates under the turntable, a slim game drawer beside them",
          "3d_sofa_cosy": "From the sofa, the Cosy preset: light on the deck, the ledge and the LP crates",
@@ -618,8 +618,7 @@ def suggest_block():
     return (f'<div class="qhead"><h2 class="ptitle">Suggested furniture and decor</h2><span class="caption">Each one on or off, in the 3D room: none are in the plan or the costs</span></div>'
             f'<div class="gallery"><figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
             f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure></div>'
-            f'<p class="caption">Under “Suggested furniture and decor” in the 3D room each piece has its own button, all off to start, and two or three versions; the floor pieces move in Edit room. '
-            f'All {len(I.SUGGEST)} together would be about £{lo}–{hi}.</p>'
+            f'<p class="caption">Each is off until you turn it on, in two or three versions. All {len(I.SUGGEST)} together about £{lo}–{hi}.</p>'
             f'<div class="opts">{rows}</div>'
             f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'C', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
 
@@ -628,7 +627,7 @@ def add_block():
     """v32: Edit room's Add list, each piece with its own render; the button adds one to your room (drag it where you like)."""
     rows = "".join(item_card(f"3d_add_{k}", "add", k, lab, "", None, "", "") for k, lab in IS.ADD)
     return (f'<div class="qhead"><h2 class="ptitle">More to add, in Edit room</h2><span class="caption">Stand-ins at real-world sizes, each its own colour</span></div>'
-            f'<p class="caption">“Add it to my room” puts one in the 3D room, on the floor the table opens over (or against the stairs wall); then drag it, turn it or recolour it in Edit room.</p>'
+            f'<p class="caption">“Add it to my room” puts one in the room; move or recolour it in Edit room.</p>'
             f'<div class="opts">{rows}</div>')
 
 
@@ -908,8 +907,8 @@ def ring(key, hue, label, go):
 
 def before_after(prefix=""):
     """v39, UPGRADE_PLAN_v38 item 13 ("before and after: your own photos beside the 3D room from the same spot, with a slider")."""
-    pairs = (("stairs", "The stairs wall, from the sofa", "Your dining cabinet and the bar where the black shelf's clutter is"),
-             ("window", "The window and the sofa, from the stairs", "The media wall, the record table and your lamp"))
+    pairs = (("stairs", "The stairs wall, from the sofa", "The dining cabinet and the bar"),
+             ("window", "The window and the sofa, from the stairs", "The media wall and the record table"))
     out = ""
     for k, t, cap in pairs:
         out += (f'<figure class="ba" style="--ba:50%"><div class="ba-box"><img src="{prefix}art/ba_{k}_after.webp" alt="{html.escape(t)}: the plan in 3D" loading="lazy" width="1200" height="900">'
@@ -1082,10 +1081,10 @@ def _page(site=False):
         <div><strong>LPs</strong><span>only, in the trays: room to flip</span></div>
         <div><strong>4–7</strong><span>at the dining table; two spare chairs hang by it</span></div>
       </div>
-      <p class="caption">The numbered key works on the main view. Measurements are rough, in pale yellow, for checking against the real room; the drawings in the chapters are the exact ones.</p></section>
+      <p class="caption">The numbered key works on the main view. The pale yellow sizes are rough; the chapters' drawings are exact.</p></section>
   </div></div>"""),
         chapter("fit", f"""<div class="panel" id="checks">
-    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
+    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
     <div class="doc">{sec["12"]}</div></div>"""),

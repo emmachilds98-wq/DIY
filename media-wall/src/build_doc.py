@@ -1341,7 +1341,7 @@ def _plan(deck=False):
 <h2 class="pb">5 · The dining wall</h2>
 {cab_html()}
 <h3>The bar beside the cabinet</h3>
-<p>A back-bar {n(g.BAR_BUILT["w"])} wide between the cabinet and the pipe boxing, {n(g.BAR_BUILT["front"])} deep: no deeper than the open table door. Below, a cupboard on a recessed plinth, two doors and a shelf: {g.BAR_BUILT["bottles"]} bottles of 70 cl{sup("bottles")}. On top, an oak counter at {n(g.BAR_BUILT["counter"])}, worktop height{sup("worktop")}. Above, a 3 mm acrylic mirror{sup("acrylicmirror")} and an IKEA ENHET frame{sup("enhet")} ({n(g.ENHET[0])} × {n(g.ENHET[1])} × {n(g.ENHET[2])}) from {n(g.BAR_BUILT["enhet_y0"])}, {n(g.BAR_BUILT["enhet_head"])} under your black shelf. With the table door back, {n(g.BAR_BUILT["covered"])} of it is behind the door: set the drinks out first.</p>
+<p>A back-bar {n(g.BAR_BUILT["w"])} wide between the cabinet and the pipe boxing, {n(g.BAR_BUILT["front"])} deep: no deeper than the open table door. A cupboard for {g.BAR_BUILT["bottles"]} bottles{sup("bottles")}, an oak counter at {n(g.BAR_BUILT["counter"])}{sup("worktop")}, a 3 mm acrylic mirror{sup("acrylicmirror")} and an IKEA ENHET frame{sup("enhet")} over it, {n(g.BAR_BUILT["enhet_head"])} under your black shelf. With the table door back, {n(g.BAR_BUILT["covered"])} of it is behind the door: set the drinks out first.</p>
 <figure class="render">{img("render_v39_3d_beside_bar.png", "The bar beside the dining cabinet, shut")}
 <figcaption>The bar beside the dining cabinet, under your black shelf.</figcaption></figure>
 <figure class="render">{img("render_v39_3d_beside_bar_open.png", "The bar open")}
