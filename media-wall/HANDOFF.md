@@ -3,7 +3,7 @@
 ## START HERE (next agent)
 - **v38 (round 32, below): the client's picks are the plan (`geometry.FIRM`), and the brief's items 1–6, 8–10 and 12 of
   `UPGRADE_PLAN_v38.md` are done** (two sessions: `claude/clever-johnson-c9tqld`, then `claude/tender-dijkstra-vbfd96`). Fit
-  85/22/15/0, total £4,374–8,245 (the picks are in TRACK now), plan PAGES_TBD pages, guide GUIDE_TBD; STILLS_TBD stills; `clash.py` 0.
+  85/22/15/0, total £4,374–8,245 (the picks are in TRACK now), plan 120 pages (19.4 MB), guide 54; 106 stills; `clash.py` 0.
   **Waiting on the client:** the page redesign canvas (item 11, https://claude.ai/artifact/Wasv3GQZKnnV6Cs1kcGjhd, private until
   shared) and the side-wall socket's distance and height. Next: their answers, then item 11's slimmer page, PDF and stills, item 7
   and item 13's remaining pieces (round 32 lists them). **Never write the cap's poem out in code or text.**
@@ -125,7 +125,7 @@
   existing items in the guides, beyond the bar's ENHET); item 13's nested cut list, wiring plan, before/after, live total, measure in 3D,
   your own light scenes (add `S.fix`/`S.head` to them), Save my plan, installable page, feature-wall presets, now-playing swap; a floor
   line where a head lands (item 6, optional). Options still have HD stills this round (the firm-only set waits on item 11).
-- **Checks:** `qa.py` fails and errors [] at 390 and 1280 (QA_TBD); `taptest.py` every tap works at both, including the light card (turn
+- **Checks:** `qa.py` fails and errors [] at 390 and 1280, links all found, programs 81; `taptest.py` every tap works at both, including the light card (turn
   twice, Blue's aim, dimmer, colour, Reset back to `{}`) and the record table's lid; `clash.py` 0 clashes, 0 close.
 - Backups `*_v38a_backup.*`, `room3d_v38b_backup.js`; v37 outputs in `out/v37/`.
 

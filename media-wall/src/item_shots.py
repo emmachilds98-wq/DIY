@@ -95,4 +95,6 @@ def with_aim(stem, opts):
 def shots():
     """For shot3d.SHOTS: (stem, options, title for ../out)."""
     kind = {"idea": "IDEA (not in the plan)", "sugg": "SUGGESTED", "add": "EDIT ROOM, ADD"}
-    return [(stem, with_aim(stem, o), f"{kind[kd]} - {t.replace('“', '').replace('”', '')}") for stem, kd, _k, t, o in items()]
+    firm = set(__import__("geometry").FIRM["sugg"])                    # v38: the client's picks are the plan, not suggestions
+    lab = lambda kd, k: "YOUR PLAN" if kd == "sugg" and k in firm else kind[kd]
+    return [(stem, with_aim(stem, o), f"{lab(kd, k)} - {t.replace('“', '').replace('”', '')}") for stem, kd, k, t, o in items()]
