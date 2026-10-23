@@ -78,10 +78,10 @@ def run(p, w, h):
     # step 11, its body open
     pg.evaluate("() => { location.hash = '#step-11'; }")
     pg.wait_for_timeout(700)
-    st = pg.evaluate("""() => { const e = document.getElementById('step-11'); if (!e) return null;
-      const b = e.querySelector('.sbody'); return {open: e.classList.contains('open'), body: !!b && !b.hidden, text: e.innerText}; }""")
+    st = pg.evaluate("""() => { const e = document.getElementById('mk-cabinet'); if (!e) return null;   // v44: a step opens its card on Build
+      const b = e.querySelector('[data-pane=build]'); return {open: e.open, body: !!b && !b.hidden, text: b ? b.innerText : ''}; }""")
     if not st or not st["open"] or not st["body"]:
-        fail(f"step 11 not open: {st and {k: v for k, v in st.items() if k != 'text'}}")
+        fail(f"step 11's card not open: {st and {k: v for k, v in st.items() if k != 'text'}}")
     else:
         t = st["text"]
         for bad in ("170°", "Lid stays", "linen flap", "Slido", "sliding door"):

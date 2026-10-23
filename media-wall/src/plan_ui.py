@@ -98,7 +98,7 @@ def plan_home(ring, nbuy, nsteps):
       <p class="caption" id="d-paid">£0 paid so far</p>
       <div class="home2">
         <section class="wait"><div class="sec-h"><h2>Waiting on you</h2><button type="button" class="btn" data-decide-open="0">Decide</button></div><ul class="waitl" id="waitl"></ul></section>
-        <section class="mon"><div class="sec-h"><h2>Where the money goes</h2><a class="btn" href="#buy" data-go="buy">The buy list</a></div>{{MONEY}}</section>
+        <details class="fold mon"><summary>Where the money goes, by piece</summary>{{MONEY}}<p><a class="btn" href="#buy" data-go="buy">The buy list</a></p></details>
       </div>
       <details class="fold"><summary>Checks on site ({nchk}): the fit proof's “check” rows</summary>{chk}</details>"""
 

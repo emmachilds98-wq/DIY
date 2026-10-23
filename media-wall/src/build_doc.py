@@ -44,7 +44,10 @@ def latest(name):
     if p.exists() or not m:
         return p
     found = sorted(HERE.glob(f"render_v*_{m.group(1)}"), key=lambda q: int(re.match(r"render_v(\d+)_", q.name).group(1)))
-    return found[-1] if found else p
+    if found:
+        return found[-1]
+    art = HERE / "art" / (m.group(1).rsplit(".", 1)[0] + ".webp")    # v44: else the page's own picture of it (a card picture)
+    return art if art.exists() else p
 
 
 def img(name, alt=""):
@@ -931,7 +934,9 @@ def cuts():
     pc_len = g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]
     return [
         ("Solid oak, hardwax oil", "Ask for it planed all round; scribe the uprights and worktop on site", [
-            ("C-table top · upright · foot", f"{n(CT['top'][0])} × {n(CT['top'][1])} · {n(CT['upright'][0])} × {n(CT['upright'][1])} · {n(CT['foot'][0])} × {n(CT['foot'][1])}, all × {n(CT['top'][2])}", "1 · 1 · 1", "From the Snowdon pack's second board; corners rounded", "C-table"),
+            ("C-table top", f"{n(CT['top'][0])} × {n(CT['top'][1])} × {n(CT['top'][2])}", "1", "From the Snowdon pack's second board; outer corners rounded", "C-table"),
+            ("C-table upright", f"{n(CT['upright'][0])} × {n(CT['upright'][1])} × {n(CT['upright'][2])}", "1", "Screwed and plugged to the top's and the foot's outer edges", "C-table"),
+            ("C-table foot", f"{n(CT['foot'][0])} × {n(CT['foot'][1])} × {n(CT['foot'][2])}", "1", "The steel plate under it", "C-table"),
             ("Uprights", f"{n(g.UPRIGHT_LEN)} × 30 × 4.5", "2", "Buy 165 long and scribe to the ceiling; housings, mortises, LED and cable grooves cut on the bench", "Media wall"),
             ("High shelf, long length", "128.9 × 30 × 4", "1", "Housed 1.2 into both uprights and pegged", "Media wall"),
             ("High shelf, short length", "51.7 × 30 × 4", "1", "Housed into the left upright; cleat on the side wall", "Media wall"),

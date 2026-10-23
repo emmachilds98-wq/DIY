@@ -58,13 +58,15 @@ function routeHash(h, push) {
   h = (h || "").replace(/^#/, "");
   if (!h || h === "room") { closeSheets(); return; }
   let m;
-  if ((m = h.match(/^step-(\d+)$/))) { openSheet("build"); openStep(m[1]); jumpTo(document.getElementById(h)); return; }
+  if ((m = h.match(/^step-(\d+)$/))) { openSheet("build"); openStep(m[1]); jumpTo((window.stepCard && stepCard(m[1])) || document.getElementById(h)); return; }
+  if (/^(mk|job)-[a-z]+$/.test(h) && window.openCard) { openSheet("build"); jumpTo(openCard(h)); return; }
   if (/^q-/.test(h)) { openSheet("plan"); return; }
-  if ((m = h.match(/^ph-(\d+)$/))) { openSheet("buy"); const d = document.getElementById(h); if (d) { d.open = true; jumpTo(d); } return; }
+  if ((m = h.match(/^ph-(\d+)$/))) { openSheet("buy"); const d = document.getElementById(h); if (d) { reveal(d); d.open = true; jumpTo(d); } return; }
   const g = GO[h]; if (g) { if (!g[0]) closeSheets(); else openSheet(g[0], { chapter: g[1] }); }
 }
 addEventListener("popstate", () => routeHash(location.hash));
 addEventListener("demma-open", e => { const d = e.detail || {}; go(d.chapter || d.sheet);
+  if (d.mk && window.openCard) { const c = openCard(d.mk); if (c) setTimeout(() => jumpTo(c), 60); }   // v44: How to make it, from the room
   if (d.item) { const el = document.getElementById("it-" + d.item); if (el) { reveal(el); jumpTo(el); } } });   // v33: a tapped idea or suggestion's own card
 document.addEventListener("click", e => {
   const a = e.target.closest("[data-go], [data-nav], [data-close]"); if (!a) return;
@@ -73,8 +75,8 @@ document.addEventListener("click", e => {
   if (a.dataset.nav) { if (a.dataset.nav === curSheet && a.dataset.nav !== "plan") return; go(a.dataset.nav); return; }
   const box = go(a.dataset.go);
   if (!box) return;
-  if (a.dataset.step) { const li = document.getElementById("step-" + a.dataset.step); if (li) jumpTo(li); return; }
-  if (a.dataset.phase) { const d = document.getElementById("ph-" + a.dataset.phase); if (d) { d.open = true; jumpTo(d); } return; }
+  if (a.dataset.step) { const c = (window.stepCard && stepCard(a.dataset.step)) || document.getElementById("step-" + a.dataset.step); if (c) jumpTo(c); return; }
+  if (a.dataset.phase) { const d = document.getElementById("ph-" + a.dataset.phase); if (d) { reveal(d); d.open = true; jumpTo(d); } return; }
   if (a.dataset.find) { const h = $$("h2, h3, h4", box).find(h => h.textContent.includes(a.dataset.find)); if (h) { reveal(h); jumpTo(h); } }
 });
 /* Esc closes (after the lightbox and the room's popover); focus stays inside the open sheet */
