@@ -12,28 +12,48 @@ coffee table; everything fits and is accurate; keep the other options but don't 
 thing down to what they need, using Claude Design to make the flow easier. Then: "include option to view ceiling Alcatrazes in
 differing designs so we can decide if we want it in future" (item 12).
 
-## 0. Before any building: four questions for the client
+## 0. The client's answers, and two still open
 
-1. **Your saved picks.** What you saved on the GitHub page lives in your browser only, so we can't read it. In Extras, under **Your
-   picks**, press **Copy as a note**, or copy the address from **Copy link to this view** (Views), and paste either into a message. Until
-   then the firm version is: the compact dining cabinet (90 wide) with the bar built in beside it, plus everything already in the plan.
-2. **"Edit orientation".** We've read this as turning each light's head (where each spot points). If you also meant turning
+1. **Your saved picks (answered, 23 Oct):** pasted from the 3D room's **Copy as a note**:
+   - the tall lidded blanket basket at the sofa's open end (natural seagrass), £90–110
+   - drawers in the bottom three steps (oak fronts), £180–320
+   - two wall cabinets over the sofa's corner (walnut effect), £70–100
+   - two oak alcove shelves in the window corner (oak), £70–110
+   - two lidded boxes on your black shelf (white), £20–30
+   - an oak shelf over the hall door with two lidded boxes (white), £35–60
+   - a lift-top coffee table (oak effect), £39–80
+   - the rug in sage stripes (Decor)
+
+   Plus, from the brief, **the bar built in beside the dining cabinet**. "Your picks" doesn't list what stands beside the cabinet, which
+   is why it isn't in the note; make Your picks name the beside choice too (item 11).
+2. **"Edit orientation" (open).** We've read this as turning each light's head (where each spot points). If you also meant turning
    furniture to any angle (today Edit room turns in 90° and 45° steps), say so; it's in item 6 as an extra.
-3. **"The storage shelves on the wall".** Which of these stay: the two alcove shelves in the window corner, the two wall cabinets over
-   the sofa's corner, the shelf over the hall door, the boxes on your black shelf? The plan below assumes all four.
-4. **One measurement for the media wall swap:** how far the socket on the side wall is from the alcove's back wall, and how high it
-   is (it was "about 30 cm up, just in front of the Xbox game drawer"). The record trays would pull out beside it.
+3. **"The storage shelves on the wall" (answered by the picks):** all four stay: the alcove shelves, the wall cabinets, the shelf
+   over the door and the boxes on your black shelf.
+4. **One measurement for the media wall swap (open):** how far the socket on the side wall is from the alcove's back wall, and how
+   high it is (it was "about 30 cm up, just in front of the Xbox game drawer"). The record trays would pull out beside it.
 
 ## 1. The firm version (the plan) and the options
 
-- **The firm version** is one fixed set of choices: the compact cabinet at 90, **the bar built in beside it (D)**, the media wall as
-  swapped in item 3, the new coffee table (item 9), the new blanket basket (item 8), the wall storage you keep (question 3), and
-  everything already in the plan (the glass case, the storage ottoman, the plant stand in the window corner, your shelf 10 cm off the
-  boxing). Each chosen piece moves into `build_doc.TRACK` (with a `costs.SHORT` name), gets its build step and its fit rows in a counted
-  zone, and leaves `ideas.SUGGEST` / `OPTION_GROUPS`.
-- **Options stay** in the 3D room as switches (the other three bars, the 80-wide table, the window corner's seat, bench and cupboard,
-  the step drawers, decor and so on), but **no HD stills, no build steps and no plan pages** for them: one line each in a short "Other
-  options" table (what, where, size, rough cost, source). The 3D room is how you look at them.
+- **The firm version** is the compact cabinet at 90 with **the bar built in beside it (D)**, made as in item 2; the media wall
+  swapped as in item 3; **your picks above**; and everything already in the plan (the glass case, the storage ottoman, the plant stand
+  in the window corner, your shelf 10 cm off the boxing). Each piece moves into `build_doc.TRACK` (with a `costs.SHORT` name), gets its
+  build step and its fit rows in a counted zone, and leaves `ideas.SUGGEST` / `OPTION_GROUPS`. Where a pick and the brief overlap:
+  - **The blanket basket:** you picked the Cotswold one and asked for a better one, so item 8's choice takes its place at the same spot.
+    The Cotswold basket stays as the fallback.
+  - **The coffee table:** you picked the Homelife lift-top and asked for something more unique, so item 9's table takes its place,
+    with the lift-top as the fallback. Both fit the same 90 × 50.
+  - **The step drawers:** built into item 4's solid stairs, sized to its risers. The stairs will change, so they're drawn on today's
+    flight, and the build note says to have them made with the new stairs (each tread needs a bearer once its riser is cut).
+  - **The rug, sage stripes:** today it's a decor colourway, not a product. Find a real flat-weave rug about 230 × 160 (the rug's
+    place: x 100 to 330, z -198 to -38) in sage and cream stripes, with a source and a price for the buy list.
+  - **The wall storage:** the alcove shelves sit over the plant stand (20.2 clear); the wall cabinets just past the PC shelf's end;
+    the shelf over the door needs your architrave's height (CHECK); the boxes stand 1 over your black shelf's front.
+- **The plan's total goes up** by about £600–1,000 for these, plus the rug, before item 8 and 9's swaps (worked out properly when the
+  rows go into `TRACK`).
+- **Options stay** in the 3D room as switches: the other three bars, the 80-wide table, the window corner's seat, bench and
+  cupboard, the shoe cabinets, the hook rail, the other decor and so on. They get **no HD stills, no build steps and no plan pages**:
+  one line each in a short "Other options" table (what, where, size, rough cost, source). The 3D room is how you look at them.
 - `geometry.FIRM` (a dict of the picks) becomes the single source: export3d sends it, room3d.js opens on it (and **Reset to my plan**
   returns to it), build_doc and fit read it.
 
@@ -204,7 +224,7 @@ plan's options table if you want it.
 
 ## 13. Order of work
 
-1. The client's answers (section 0); `geometry.FIRM`.
+1. `geometry.FIRM` from section 0's picks (ask the two open questions in the same message as the design canvas, step 6).
 2. Item 10's clash check first, so every later change is checked as it's made.
 3. Item 2 (the door and the bar), then item 3 (the media wall swap, on its own branch, the main view checked before carrying on).
 4. Items 4, 5 and 6 (the stairs, the walls, the lights), then item 12 (the ceiling designs).
