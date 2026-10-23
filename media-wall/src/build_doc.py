@@ -2,7 +2,7 @@
 The plan reads in build order: decision, room, media wall and fit proof, records and turntable, dining wall, side wall,
 joinery, paint and light, power and network, build guide, buy list, then what's agreed, later ideas and sources.
 Numbers come from geometry.py and fit.py."""
-import base64, html as html_lib, pathlib
+import base64, html as html_lib, pathlib, re
 import geometry as G
 import fit
 import ideas
@@ -36,10 +36,21 @@ DECK_ART.update({f"render_v39_{k}.png": k for k in ("3d_sg_barside", "3d_sg_blan
 DECK_ART.update({f"render_v39_{k}.png": k for k in ("3d_beside_bar", "3d_beside_bar_open", "3d_beside_shoes", "3d_shelf_gap", "3d_lamp_cap", "3d_sg_windowseat",
                                                        "3d_sg_hallbench", "3d_sg_wardrobe", "3d_sg_alcoveshelves", "3d_sg_wallcabs", "3d_sg_stairdrawers", "3d_sg_overdoor")})   # v37
 
+def latest(name):
+    """v39, client: "we dont need the hd still i can take them in the site": no stills are rendered now, so a 3D picture is the newest
+    one made (render_vNN_<stem>.png, the highest NN)."""
+    p = HERE / name
+    m = re.match(r"render_v\d+_(.+)$", name)
+    if p.exists() or not m:
+        return p
+    found = sorted(HERE.glob(f"render_v*_{m.group(1)}"), key=lambda q: int(re.match(r"render_v(\d+)_", q.name).group(1)))
+    return found[-1] if found else p
+
+
 def img(name, alt=""):
     if DECK:
         return f'<img data-art="{DECK_ART[name]}" alt="{alt}" loading="lazy">'
-    p = HERE / name
+    p = latest(name)
     mime = "jpeg" if p.suffix.lower() in (".jpg", ".jpeg") else "png"
     data = p.read_bytes()
     if name.startswith("render_v") and "_3d_" in name and mime == "png":   # v31: the 3D stills go in as JPEG, so the plan stays under 50 MB
@@ -55,7 +66,7 @@ def thumb(name, alt=""):
         return f'<img data-art="{DECK_ART.get(name) or name.split("_", 2)[2].rsplit(".", 1)[0]}" alt="{alt}" loading="lazy">'   # render_vNN_<stem>.png
     import io
     from PIL import Image
-    im = Image.open(HERE / name).convert("RGB"); im.thumbnail((960, 540))
+    im = Image.open(latest(name)).convert("RGB"); im.thumbnail((960, 540))
     buf = io.BytesIO(); im.save(buf, "JPEG", quality=84)
     return f'<img src="data:image/jpeg;base64,{base64.b64encode(buf.getvalue()).decode()}" alt="{alt}">'
 

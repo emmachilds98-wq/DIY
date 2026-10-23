@@ -846,7 +846,7 @@ CHAPTERS = [("c-room", "The room", "home", 50, "Sizes, the door, the stairs, the
             ("network", "Network & power", "router", 25, "Decos, switches, the electrics"),
             ("views", "Drawn views", "draw", 125, "Every view in four greens"),
             ("fit", "Fit proof", "straighten", 95, "Every item against its size"),
-            ("downloads", "Downloads", "download", 165, "The PDFs and every HD picture")]
+            ("downloads", "Downloads", "download", 165, "The PDFs and the drawn pictures")]
 PAGE_PART = {"Prep": 95, "Network": 235, "Power & cables": 25, "Paint": 165, "Media wall": 300, "Dining table": 70, "Lighting": 125, "AV": 345}
 
 
@@ -881,7 +881,7 @@ def chapter_facts(rows, fc, nfit):
                          "The electrics are your own job: like for like, not notifiable under Part P, with the stop-and-call list", "The 10-gang feeds the PC"),
         "views": chips("5 views × 4 greens", "A numbered key", "Measurements over any view", "Full size, to pan and zoom"),
         "fit": chips(f"<b>{nfit}</b> checks", f"<b>{fc[fit.PASS]}</b> fit", f"<b>{fc[fit.TIGHT]}</b> tight", f"<b>{fc[fit.CHECK]}</b> to check on site", f"<b>{fc[fit.NO]}</b> don't fit"),
-        "downloads": chips(f"The plan, v{VERSION} (PDF)", f"The build guide, v{VERSION} (PDF)", "Every HD picture, 3D and drawn", "On GitHub Pages and the shared plan page"),
+        "downloads": chips(f"The plan, v{VERSION} (PDF)", f"The build guide, v{VERSION} (PDF)", "The drawn pictures; 3D ones from the room", "On GitHub Pages and the shared plan page"),
     }
 
 
@@ -1089,7 +1089,7 @@ def _page(site=False):
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
     <div class="doc">{sec["12"]}</div></div>"""),
-        chapter("downloads", f'<div class="block"><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn.</p>'
+        chapter("downloads", f'<div class="block"><p class="caption">The plan and the build guide as PDFs, and the drawn pictures. For a 3D picture, use Save as HD picture in the room (View).</p>'
                              f'<p><a class="btn primary" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> '
                              f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>{downloads_html(site)}{notice}'
                              f'<p class="caption">Demma Home Improvements · Portsmouth Close · living room · v{VERSION}</p></div>'),
