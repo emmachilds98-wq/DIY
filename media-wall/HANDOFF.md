@@ -20,8 +20,6 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
-  - whether to drop the old outputs from the working tree: `out/v9`–`v42` (about 4.2 GB) and the superseded `src/render_v13`–`v39`
-    stills (about 1.2 GB). Both stay in git history; the published site carries all of it today.
 
 ## Update 23 Oct 2026, round 40: v45 (the stipple ceiling and Cosy first, a softer light over the open table, two small room buttons, a tidy)
 - Client (23 Oct): "I want [Artex] stipple ceiling as default and cosy lighting that still allows nice view of the room and stop over
@@ -37,6 +35,11 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 - **Tidy:** 392 backups into `src/backups/`, the plans v17–v43 into `plans/`, the README cut to v45 and v44 (364 → 100 lines; its
   links checked), START HERE cut to the current state (the old notes follow, as they were).
 - **Checks:** `qa.py` errors [] fails [] at 390 and 1280, text budget 0 over; `taptest.py` errors []; `clash.py` 0. v44 outputs in `out/v44/`.
+- **Old files removed** (client: "Can you review and get rid of any old files then"): `out/v9`–`v43` (keeping `out/v44`), 920 superseded
+  `src/render_vNN_*` stills (every still the plan uses is the newest of its stem, so the outputs didn't change: plan 34 pages and 18
+  pictures before and after), the unused `src/parts/` and `t_join.svg`/`t_key.svg`, backups older than v44. About 5.4 GB off the working
+  tree and the published site (`out/` 45 MB); all of it stays in git history. Rebuilt, `qa.py`/`taptest.py` errors [], `clash.py` 0.
+  **Keep only the newest still of each stem from now on**, and move the last version's outputs to `out/vNN/` but drop the one before.
 - **Bug found and fixed on the way:** a comment put in the middle of DEF's line commented out `paint`, `lamp` and `drawers` (the room
   didn't start); keep comments at line ends in DEF.
 

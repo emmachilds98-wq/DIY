@@ -2069,7 +2069,7 @@ function buildStairs() {
   solid([[z0, 0], [zf, 0], [zl, top - 21], [zl1, top - 21], [zl1, top + 3], [zl, top + 3], [z0, pitch(z0) + 3]], sx0 - 2.2, sx0 - 0.2, str);
 }
 /* v40: the flip-top's chair cupboard, its hooks and the fold-down seat are gone (never shown since the dining cabinet became the only
-   table in v33; the code is in backups/room3d_v40a_backup.js) */
+   table in v33; the code is in git history, v40) */
 function placeChairs() { placeOptC(); }
 
 /* v26: option C, the dining cabinet; v27: the plan, made for six; v29: two sliding doors (OPTC). v30, client: "is there anyway you can
@@ -2243,7 +2243,7 @@ function slideOut(parent, d = 60) {      // a folded chair (or the pads) drawn s
   return fill => { const g = new THREE.Group(); fill(g); parent.add(g); return anim(v => { g.position.x = d * M * v; g.visible = v < 0.999; }); };
 }
 /* v39: the sliding cabinet (v29's buildOptC) is gone: since v33 every state opens on the compact cabinet (applyState), so it was built
-   and never shown. Its numbers stay in geometry.OPTC; the code is in backups/room3d_v39c_backup.js. */
+   and never shown. Its numbers stay in geometry.OPTC; the code is in git history, v39. */
 
 /* v30: the compact cabinet, two boxes side by side: the table box at the stair end (the table on its hinge rail, two chairs lying on
    their sides in the base under it, the linen shelf over it, the six seat pads on the door's back) and the chair box (four chairs, two
