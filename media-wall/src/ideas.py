@@ -26,10 +26,10 @@ IDEAS = [
      "Your deep sill already takes a row of plants; two glass shelves above it make the window a green screen that still lets the light "
      "through. Studs into the reveal's sides, and a slim steel rod down from the head at the middle so a 235 span can't sag.",
      "Inside the window's 22 cm reveal, in front of the glass, clear of the curtains.", True),
-    ("ctable", "An oak C-shaped side table for the sofa's open end",
-     "top 45 × 30, 60 tall", (25, 60),
-     "The ottoman end has no arm to put a drink on. A C-table's top slides over the end of the seat and its foot sits flat on the floor "
-     "beside it, so drinks and pads are at hand and it moves away when someone lies along the seat. Made from the oak offcuts.",
+    ("ctable", "The oak C-table at the sofa's open end (in your plan)",
+     "top 45 × 30 at 62, 12 over the seat", (8, 15),
+     "The ottoman end has no arm for a drink. Its top reaches over the seat; its foot stands beside the sofa, weighed down by a steel "
+     "plate. Oak from the second Snowdon board.",
      "At the sofa's open end, towards the TV.", True),
     ("sync", "TV backlight that follows the picture",
      "a sync box on the HDMI line and a strip behind the TV (in place of the plain bias light)", (60, 130),
@@ -63,12 +63,20 @@ IDEAS = [
 CASE = dict(x=((G.BREAST_X[0] + G.BREAST_X[1]) / 2 - 45.0, (G.BREAST_X[0] + G.BREAST_X[1]) / 2 + 45.0), y=(137.0, 222.0), d=12.0, frame=2.0,
             shelves=(158.0, 179.0, 200.0))   # v20, client: "make glass display cabinet on wall taller": 85 tall (was 50), three glass shelves
 GLASS = dict(x=G.WINDOW_X, ys=(130.0, 170.0), d=18.0, t=1.0)
-CTABLE = dict(x=(40.0, 85.0), top=60.0, depth=30.0, over=16.0, t=2.0)   # "over": how far the top reaches over the seat's end
+# v43, client: "I want the c table in the current main plan". Your sofa sits flat on the floor, so no foot can slide under it (as a
+# bought C-table's does): the upright stands out past the sofa's end and a steel plate weighs the foot down. "over": how far the top
+# reaches over the seat; the foot runs from 3 under the sofa's edge (its plinth's inset) to the upright's outer face.
+CTABLE = dict(x=(40.0, 85.0), top=62.0, depth=30.0, over=12.0, t=1.8, plate=(40.0, 20.0, 0.6), felt=0.3, seat_top=52.0)
 SPOTS = dict(case=CASE, glass=GLASS, ctable=CTABLE)   # v18: the plant ladder is dropped: your new plant stand does its job
 
 
+def idea_options():
+    """v43: the ideas still only ideas (the C-table is in the plan: geometry.FIRM["ideas"])."""
+    return [i for i in IDEAS if i[0] not in G.FIRM.get("ideas", [])]
+
+
 def low_high():
-    return sum(i[3][0] for i in IDEAS), sum(i[3][1] for i in IDEAS)
+    return sum(i[3][0] for i in idea_options()), sum(i[3][1] for i in idea_options())
 
 
 def pdf_html():
@@ -222,6 +230,23 @@ SUGGEST += [
 ]
 del _bb, _ws, _hb, _wd, _al, _wc, _sd, _od
 
+# v43, client: "review the room and suggest improvements and more item options": four more, to look at in the 3D room (options, not
+# the plan). Sizes and prices from their makers (fit.SOURCES: spiderglow, switchbotc3, mosslanda, habitatmush).
+SUGGEST += [
+    ("growlights", "Grow-light bars under the plant stand's tiers", "four 30 cm bars, linkable, on a smart plug", (45, 60),
+     "The window corner is dim by evening; four bars under the stand's tiers keep the plants growing and glow warm, as in the stand's own photo.",
+     "Under the plant stand's top and third tiers, both towers."),
+    ("curtainmotor", "Motors on the curtain pole", "two SwitchBot Curtain 3 (rod), 8.4 × 7.3 × 20.5 each", (160, 200),
+     "Film night draws the curtains by itself, and they open with the morning; the pole and the curtains stay as they are.",
+     "On the pole, one at each curtain's leading edge."),
+    ("lpledges", "Two picture ledges with LPs face-out", "two IKEA MOSSLANDA 55 × 12, 5 kg each", (12, 14),
+     "Two covers each, face-out, changed with what you're playing; the side wall over the sofa takes them under the PC shelf and the cabinets.",
+     "On the side wall over the sofa's return, 108 up: one under the PC shelf, one under the wall cabinets."),
+    ("cordlamp", "A cordless lamp on the C-table", "Habitat rechargeable mushroom lamp, 31 tall, 14 across", (20, 25),
+     "A warm pool of light at the sofa's open end with no lead to trip over; it charges by USB.",
+     "On the C-table's top, by its outer edge."),
+]
+
 # v28, from the optimisation plan: "choices for each suggestion (two or three versions, like the decor rows)". The same piece in two or
 # three finishes; the size and the price stay. key: [(value, name, [colours])]; the first is the default. room3d.js (SVAR_MATS) puts
 # colour i on the piece's material i.
@@ -263,6 +288,10 @@ SUGG_VARS = {
     "wardrobe": [("oak", "Oak doors", ["#c48c57"]), ("green", "Card Room Green doors", ["#2d5a46"]), ("white", "White doors", ["#ece8e0"])],
     "wallcabs": [("walnut", "Walnut effect", ["#6e4a2e"]), ("white", "White", ["#ece8e0"]), ("bluegrey", "Dark grey-blue", ["#3b4652"])],
     "overdoor": [("black", "Black", ["#2a2a2c"]), ("brass", "Brass", ["#b8913f"]), ("white", "White", ["#ece8e0"])],
+    "growlights": [("warm", "Warm white", ["#ffe3b0"]), ("full", "Full spectrum (pink)", ["#ff9ad8"])],                     # v43
+    "curtainmotor": [("white", "White", ["#efefec"]), ("black", "Black", ["#2a2a2c"])],
+    "lpledges": [("oak", "Oak effect", ["#c48c57"]), ("black", "Black", ["#2a2a2c"]), ("walnut", "Walnut effect", ["#6e4a2e"])],
+    "cordlamp": [("taupe", "Taupe", ["#a99886"]), ("black", "Black", ["#2a2a2c"]), ("brass", "Brass", ["#b8913f"])],
 }
 assert set(SUGG_VARS) == {k for k, *_ in SUGGEST}, "every suggestion has its versions"
 
@@ -312,3 +341,25 @@ OPTION_GROUPS = [
       ("wallcabs", "Wall cabinets over the sofa", {"sugg": "wallcabs"}), ("stairdrawers", "Drawers in the bottom steps", {"sugg": "stairdrawers"}),
       ("overdoor", "A hook rail over the door", {"sugg": "overdoor"}), ("shoes", "Shoe cabinets beside the cabinet", {"beside": "shoes"})]),
 ]
+
+
+def ctable_parts():
+    """v43: the C-table's oak parts (cm, L × W × T) from the second Snowdon board, and its steel plate."""
+    T = CTABLE
+    w, t = T["x"][1] - T["x"][0], T["t"]
+    foot = round(T["depth"] - T["over"] + 3, 1)                       # from 3 under the sofa's edge to the upright's outer face
+    upright = round(T["top"] - T["plate"][2] - T["felt"] - 2 * t, 1)
+    return dict(top=(w, T["depth"], t), upright=(w, upright, t), foot=(w, foot, t), plate=T["plate"])
+
+
+def ctable_tip_kg(oak=0.71, plate_kg=3.77):
+    """v43: the load on the top's far edge (over the seat) that would tip it towards the sofa, in kg. Moments about the plate's back
+    edge (where it meets the floor, 2 under the sofa's edge): the top, the upright, the foot and the plate against the load.
+    Oak at 0.71 g/cm³ (sources: oakdensity); the plate 400 × 200 × 6 mm of steel is 3.77 kg."""
+    T, P = CTABLE, ctable_parts()
+    kg = lambda d: d[0] * d[1] * d[2] * oak / 1000
+    back = -2.0                                                        # the plate's back edge, from the sofa's edge
+    zo = T["depth"] - T["over"]                                       # the upright's outer face
+    m = (kg(P["top"]) * (-T["over"] + T["depth"] / 2 - back) + kg(P["upright"]) * (zo - T["t"] / 2 - back)
+         + kg(P["foot"]) * ((-3 + zo) / 2 - back) + plate_kg * (back + P["plate"][1] / 2 - back))
+    return round(m / (back + T["over"]), 1)

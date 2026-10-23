@@ -52,6 +52,10 @@ AIM = {
     "3d_sg_windowseat": ([290, 140, -160], [391, 40, -290], 50), "3d_sg_hallbench": ([290, 140, -160], [391, 40, -295], 50),
     "3d_sg_wardrobe": ([240, 150, -110], [390, 115, -285], 58), "3d_sg_wallcabs": ([185, 150, -140], [5, 175, -251], 50),
     "3d_sg_overdoor": ([335, 140, -110], [357, 180, 35], 50),
+    "3d_sg_growlights": ([391, 120, -170], [391, 95, -293], 50),   # v43
+    "3d_sg_curtainmotor": ([190, 170, -150], [190, 200, -297], 60),
+    "3d_sg_lpledges": ([140, 140, -210], [0, 120, -211], 55),
+    "3d_sg_cordlamp": ([170, 125, -30], [62, 70, -128], 45),
 }
 _LOOK = {"armchair": 40, "sidetable": 25, "plant": 45, "beanbag": 28, "footstool": 20, "cushion": 7, "crate": 16, "rattan": 40, "bench": 22,
          "arclamp": 95, "vase": 65, "pouffe": 20, "basket": 26, "lantern": 23}

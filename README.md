@@ -2,12 +2,18 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v41: a build step for your picks, one measuring sheet, an easier room
+## Media wall and dining wall, v43: the C-table in your plan, your sill's plants, four new options
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v41%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v43%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v43** ("I want the c table in the current main plan", your window sill's plants, "more item options")
+- **The C-table is in your plan:** an oak top 45 × 30 at 62, reaching 12 over the seat at the sofa's open end. Your sofa sits on the floor, so a bought C-table's foot couldn't slide under it; ours stands beside it on a foot weighed down by a steel plate, and holds about 12 kg on its far edge. About £8–15 (the oak is the spare board from the record table's pack).
+- **Your window sill as you have it:** smaller plants on the left, a snake plant and a rubber plant in the middle, spider plants on the right.
+- **The plant stand, our pick:** one plant a tier, trailing pothos and spider plants up top, a monstera in the tall middle.
+- **Four new options to look at:** grow-light bars under the plant stand, motors on the curtain pole (Film night closes them), two picture ledges with LPs face-out, and a cordless lamp on the C-table. One line each in the plan.
 
 **New in v41** ("improve the build further and optimise the ui design")
 - **Easier to look round:** double-tap the floor to stand there; the camera no longer goes through the sofa or the units; **Whole room** (or H) flies back to the view from above.

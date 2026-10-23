@@ -8,7 +8,8 @@ import ideas
 
 EPS = 0.05          # an overlap smaller than half a millimetre is a touch, not a clash
 ONE_PIECE = (("sofa seat", "sofa back", "chaise"),)                    # parts of one thing: never a clash with each other
-MEANT = {frozenset(("dining cabinet", "bar")): "a 3 mm shadow gap, scribed"}   # gaps under 1 cm on purpose
+MEANT = {frozenset(("dining cabinet", "bar")): "a 3 mm shadow gap, scribed",
+         frozenset(("chaise", "C-table's foot and upright")): "its foot slips 3 under the sofa's edge, on purpose"}   # gaps under 1 cm on purpose
 # v39: the rear speakers' poles stand in the 3 cm between the radiator and the sofa; their flat bases slide under the radiator
 for _i in (1, 2):
     for _p in ("base", "pole"):
@@ -64,6 +65,10 @@ def pieces():
     b.append(box("sofa back", (sx0, sx1), (0, g.SOFA_H), (g.SOFA_BACK_Z, g.SOFA_BACK_Z + 20)))
     b.append(box("chaise", g.CHAISE_X, (0, 45), (g.SOFA_BACK_Z, g.CHAISE_END_Z)))
     b.append(box("record table", g.COFFEE["x"], (0, g.RECORD_TABLE["h"]), g.COFFEE["z"]))      # v38: the plan's coffee table
+    import ideas as _I                                                                              # v43: the C-table, in the plan
+    T, ze = _I.CTABLE, g.CHAISE_END_Z
+    b.append(box("C-table's top", T["x"], (T["top"] - T["t"], T["top"]), (ze - T["over"], ze - T["over"] + T["depth"])))
+    b.append(box("C-table's foot and upright", T["x"], (0, T["top"] - T["t"]), (ze - 3, ze - T["over"] + T["depth"])))
     po = g.SOFA_POUF
     b.append(box("ottoman", po["x"], (0, po["h"]), po["z"]))
     bb = g.BLANKET_BASKET

@@ -13,7 +13,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "41"
+VERSION = "43"
 REVISION = "37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, the lights in Views, Extras lined up"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
@@ -205,6 +205,9 @@ TRACK += [
     ("To buy", "The blanket basket at the sofa's open end: Dibor's Lakelyn water hyacinth lined basket, large, 59 × 51 × 29", "10 Finishing", "1", 36, 42),
     ("To buy", "The record table: two IKEA KALLAX 42 × 42, an 18 mm oak board 60 × 120 (the lid, 90 × 50), 12 mm ply for the base, four 50 mm castors, a piano hinge cut to 83, two lid stays", "10 Finishing", "1 set", 170, 210),
     ("To do", "Build the record table: the two KALLAX screwed together on their backs, the ply base and castors, the oak lid on its hinge and stays", "10 Finishing", "", None, None),
+    # v43, client: "I want the c table in the current main plan": oak from the Snowdon pack's second board, a steel plate under its foot
+    ("To buy", "The C-table: a 400 × 200 × 6 mm steel plate (PlazCutz), four felt pads, 4 × 40 mm screws and wood glue (the oak is the Snowdon pack's second board)", "10 Finishing", "1 set", 8, 15),
+    ("To do", "Build the C-table: the top, the upright and the foot glued and screwed, corners rounded, oiled; the plate screwed under the foot, felt under that", "10 Finishing", "", None, None),
 ]
 PHASES = []
 for r in TRACK:
@@ -491,18 +494,23 @@ def other_options_html():
         (f"An {n(C8['top'][0])}-wide table", "The dining cabinet", f"{n(C8['len'])} long; four chairs inside, not six", "about the same", sup("padded")),
         ("A smooth or patterned ceiling", "The ceiling (test the Artex first)", "the whole ceiling", "200–700", sup("skimartex", "artextest")),
         ("Oak-effect beams, coffers or an LED cove", "The ceiling", "12 × 12 beams; cove 2 m lengths", "450–1,050", sup("pubeam", "orac")),
+        ("Grow-light bars", "Under the plant stand's tiers", "four 30 cm bars", "45–60", sup("spiderglow")),            # v43: the room reviewed
+        ("Curtain motors (Film closes them)", "On the curtain pole", "two, 8.4 × 7.3 × 20.5", "160–200", sup("switchbotc3")),
+        ("Two LP ledges, covers face-out", "Side wall over the sofa, 108 up", "two 55 × 12", "12–14", sup("mosslanda")),
+        ("A cordless lamp", "On the C-table", "31 tall, 14 across", "20–25", sup("habitatmush")),
         ("Easy-care plants (Look: Plants)", "The stand and the sill", "snake plants and pothos in 12 cm pots", "9–15 each", sup("snakeplant")),
         ("One pot finish for all (Look: Pots)", "The stand, the sill, the shelf", "about 23 pots, 12–24 cm", "3–8 each", sup("persillade")),
         ("Self-watering inserts", "The stand's bigger pots", "15 across, 1.2 litres, in a 16–17 pot", "7 each", sup("elhoinsert")),
         (f"Decor to try ({len(deco)} pieces)", "Round the room", "typical shop sizes", f"{dlo:,}–{dhi:,} together", ""),
-        (f"Small ideas ({len(ideas.IDEAS)})", "Round the room", "drawn to the room", f"{ilo:,}–{ihi:,} together", ""),
+        (f"Small ideas ({len(ideas.idea_options())})", "Round the room", "drawn to the room", f"{ilo:,}–{ihi:,} together", ""),
     ]
     tr = "".join(f"<tr><td>{a}{s}</td><td>{b}</td><td>{c}</td><td class='num'>{d}</td></tr>" for a, b, c, d, s in rows)
     return ("<p>Not in the plan or the costs. Each one is a switch in the 3D room (Room, Try options); ask for a build by name.</p>"
             f"<table class='tight'><tr><th>Option</th><th>Where</th><th>Size (cm)</th><th class='num'>About £</th></tr>{tr}</table>")
 
 
-OPT_OWN = {"barcase", "bartrolley", "barside", "cotswoldbasket", "liftcoffee", "windowseat", "hallbench", "wardrobe", "overdoor"}
+OPT_OWN = {"barcase", "bartrolley", "barside", "cotswoldbasket", "liftcoffee", "windowseat", "hallbench", "wardrobe", "overdoor",
+           "growlights", "curtainmotor", "lpledges", "cordlamp"}
 
 
 def slide_html():
@@ -770,14 +778,15 @@ def steps():
                  "Label both outlets of the double socket and each HDMI switch input; set the sub and rear levels from the sofa."],
              check="Everything on the network's \"done when\" list, and every source plays through the soundbar."),
         # v41: the client's picks (geometry.FIRM) get their own step: they were in the buy list with no build
-        dict(n=14, part=["Your picks"], title="Your picks: the bar, the record table, the shelves and cabinets", who="You + a helper", time="1–2 days", buy=[], see=[("dining", "The bar")],
-             do=[f"The bar: scribe its ply cupboard ({n(G.BAR_BUILT['w'])} × {n(G.BAR_BUILT['d'])} × {n(G.BAR_BUILT['counter'] - G.BAR_BUILT['top_t'])} on a {n(G.BAR_BUILT['plinth'])} plinth) between the cabinet and your shelf's end, keeping the 10 cm gap clear; fix it to the wall and the cabinet, then the counter and the ENHET frame over it, its bottom at {n(G.BAR_BUILT['enhet_y0'])}.",
+        dict(n=14, part=["Your picks"], title="Your picks: the C-table, the bar, the record table, the shelves and cabinets", who="You + a helper", time="1–2 days", buy=[], see=[("dining", "The bar")],
+             do=[f"The C-table: from the second oak board, a top {n(CT['top'][0])} × {n(CT['top'][1])}, an upright {n(CT['upright'][0])} × {n(CT['upright'][1])} and a foot {n(CT['foot'][0])} × {n(CT['foot'][1])}; glue and screw the upright into the top's and the foot's outer edges with 40 mm screws, round the corners, oil it; screw the steel plate under the foot, felt under that.",
+                 f"The bar: scribe its ply cupboard ({n(G.BAR_BUILT['w'])} × {n(G.BAR_BUILT['d'])} × {n(G.BAR_BUILT['counter'] - G.BAR_BUILT['top_t'])} on a {n(G.BAR_BUILT['plinth'])} plinth) between the cabinet and your shelf's end, keeping the 10 cm gap clear; fix it to the wall and the cabinet, then the counter and the ENHET frame over it, its bottom at {n(G.BAR_BUILT['enhet_y0'])}.",
                  f"The record table: screw the two KALLAX together on their backs, the 12 mm ply base and four castors under them, the oak lid ({n(G.RECORD_TABLE['w'])} × {n(G.RECORD_TABLE['d'])}) on two hinges with two lid stays.",
                  f"The wall cabinets: the two EKET on IKEA's rail over the sofa's corner, bottoms at {n(G.WALL_CABS['y0'])}, the rail into the solid wall.",
                  f"The alcove shelves: two oak floating shelves {n(G.ALCOVE_SHELVES['w'])} × {n(G.ALCOVE_SHELVES['d'])}, tops at {n(G.ALCOVE_SHELVES['tops'][0])} and {n(G.ALCOVE_SHELVES['tops'][1])}, brackets into the solid wall.",
                  f"Over the hall door: the oak shelf {n(G.DOOR_SHELF['x'][1] - G.DOOR_SHELF['x'][0])} × {n(G.DOOR_SHELF['d'])}, top at {n(G.DOOR_SHELF['top'])}, clear of the architrave; two KUGGIS boxes on it and two on your black shelf.",
                  "The step drawers: with the new stairs, by the joiner (a bearer under each tread)."],
-             check="Each piece level and fixed; the bar's door clears the open table door; the record table rolls and its lid stays up; the 10 cm gap is clear."),
+             check="Each piece level and fixed; the C-table stands square and doesn't rock with a mug on its far edge; the bar's door clears the open table door; the record table rolls and its lid stays up; the 10 cm gap is clear."),
     ]]
 
 
@@ -922,6 +931,7 @@ def cuts():
     pc_len = g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]
     return [
         ("Solid oak, hardwax oil", "Ask for it planed all round; scribe the uprights and worktop on site", [
+            ("C-table top · upright · foot", f"{n(CT['top'][0])} × {n(CT['top'][1])} · {n(CT['upright'][0])} × {n(CT['upright'][1])} · {n(CT['foot'][0])} × {n(CT['foot'][1])}, all × {n(CT['top'][2])}", "1 · 1 · 1", "From the Snowdon pack's second board; corners rounded", "C-table"),
             ("Uprights", f"{n(g.UPRIGHT_LEN)} × 30 × 4.5", "2", "Buy 165 long and scribe to the ceiling; housings, mortises, LED and cable grooves cut on the bench", "Media wall"),
             ("High shelf, long length", "128.9 × 30 × 4", "1", "Housed 1.2 into both uprights and pegged", "Media wall"),
             ("High shelf, short length", "51.7 × 30 × 4", "1", "Housed into the left upright; cleat on the side wall", "Media wall"),
@@ -990,6 +1000,7 @@ def cuts():
             ("Slim drawer sides · backs and fronts", "40 × 10 · 14.1 × 10", "6 · 6", "Three boxes 15.3 wide, 14.1 inside (v16)", "Media wall"),
         ]),
         ("Hardware", "Runners are sold in pairs", [
+            ("C-table steel plate", "40 × 20 × 0.6", "1", "Mild steel (PlazCutz, cut to size); screwed under the foot, felt pads under it", "C-table"),
             ("LP crate runners · slim drawer runners", "400 mm full extension, 68–70 kg a pair · 400 mm light duty", "2 pairs · 3 pairs", "Into bay 3's sides and the divider (v16)", "Media wall"),
             ("Game drawer runners", "350 mm full extension, soft-close", "1 pair", "Accuride DZ3832EC or Screwfix 964VN", "Media wall"),
             ("Plinth drawer and keyboard tray runners", "300 mm full extension · 300 mm light duty", "1 pair · 1 pair", "", "Media wall"),
@@ -1096,6 +1107,7 @@ def buy_first_html():
         ("The bar beside the cabinet", "Build, then buy", f"The cupboard is scribed to a {n(G.BAR_BUILT['w'])} × {n(G.BAR_BUILT['d'])} gap; over it, an IKEA ENHET frame{sup('enhet')}; the counter from the worktop's offcut"),
         ("Glass case", "Buy and adapt", f"Toughened glass cut to size{sup('glasscut')}; the frame from the oak offcuts"),
         ("Record table", "Buy and adapt", f"Two IKEA KALLAX{sup('kallax')} on their backs, an oak lid, castors"),
+        ("C-table", "Build", f"Bought ones slide their foot under the sofa{sup('ctablebuy')}; yours sits on the floor, so ours stands beside it on a steel-weighted foot{sup('plazcutz')}"),
         ("Alcove shelves", "Buy", f"Two oak floating shelves{sup('floatshelf')}"),
         ("Wall cabinets", "Buy", f"Two IKEA EKET{sup('eket')}"),
         ("Shelf over the door", "Buy and adapt", f"Two IKEA KUGGIS boxes{sup('kuggis')}; the shelf from the worktop's offcut"),
@@ -1117,6 +1129,9 @@ def guide_pdf_html():
     return guide_html() + "<h2 class='pb'>Step by step, in full</h2>" + full_steps_html(pdf=True)
 
 
+CT = ideas.ctable_parts()   # v43: the C-table's parts
+
+
 def _plan(deck=False):
     """The plan as one HTML document. deck=True: images as art/ keys and markers kept, for the plan page's tabs."""
     global DECK
@@ -1135,7 +1150,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> a build step for your picks (step 14), one measuring sheet first in the guide, the costs split into for move-in and can wait, your banister from the photo, and the fit proof cleaned.</div>
+<div class="decision"><b>What changed:</b> the C-table at the sofa's open end is in the plan (section 2), your window sill's plants as you have them, and four new options to look at (section 12).</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -1207,6 +1222,13 @@ def _plan(deck=False):
 <li><b>Make:</b> build both KALLAX and screw them together side by side. Screw the ply ({n(g.RECORD_TABLE["carcass"][0] + 1)} × {n(g.RECORD_TABLE["carcass"][1] + 0.3)}) to the open backs; a castor 4 in from each corner.</li>
 <li><b>The lid:</b> the oak cut to 90 × 50, corners rounded, oiled; hinged to the TV side's top edge, 3.5 over each end; a stay each end, stopping at about 80°.</li>
 <li><b>Check:</b> loaded, about {g.RECORD_TABLE["kg"]} kg; the castors take 200. The records stand on the ply, not the KALLAX shelves.</li>
+</ul>
+<h3>The C-table</h3>
+<p>At the sofa's open end, x {n(ideas.CTABLE["x"][0])}–{n(ideas.CTABLE["x"][1])}: an oak top {n(CT["top"][0])} × {n(CT["top"][1])} at {n(ideas.CTABLE["top"])}, reaching {n(ideas.CTABLE["over"])} over the seat, for a drink, a pad or a laptop. Your sofa sits on the floor, so no foot can slide under it as a bought C-table's does{sup("ctablebuy")}: the upright stands {n(ideas.CTABLE["depth"] - ideas.CTABLE["over"])} out past the sofa's end and a 6 mm steel plate{sup("plazcutz")} weighs the foot down. It holds about {ideas.ctable_tip_kg()} kg on its far edge before it would tip{sup("oakdensity")}. About £8–15.</p>
+<ul>
+<li><b>Cut:</b> from the Snowdon pack's second 18 mm board{sup("snowdonoak")}: the top {n(CT["top"][0])} × {n(CT["top"][1])}, the upright {n(CT["upright"][0])} × {n(CT["upright"][1])}, the foot {n(CT["foot"][0])} × {n(CT["foot"][1])}.</li>
+<li><b>Make:</b> glue and screw the upright to the top's and the foot's outer edges (three 40 mm screws each, plugged); round the corners; hardwax oil. Screw the plate under the foot, felt under the plate.</li>
+<li><b>Check:</b> it stands square; with a full mug on the far edge it doesn't rock.</li>
 </ul>
 <h3>The house</h3>
 <figure>{house()}</figure>

@@ -67,7 +67,8 @@ DEF.lamp = R.LAMP_DEFAULT || "sofa";
 /* v38: the room opens on the client's plan (geometry.FIRM: their saved picks, the bar beside the cabinet, the sage-stripe rug); every
    other choice is an option to look at */
 if (R.FIRM) { DEF.sugg = Object.fromEntries(R.FIRM.sugg.map(k => [k, true])); DEF.svar = Object.assign({}, R.FIRM.svar);
-  DEF.beside = R.FIRM.beside; DEF.cabw = R.FIRM.cabw; DEF.decor = Object.assign({}, DEF.decor, R.FIRM.decor); }   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
+  DEF.beside = R.FIRM.beside; DEF.cabw = R.FIRM.cabw; DEF.decor = Object.assign({}, DEF.decor, R.FIRM.decor);
+  DEF.ideas = Object.fromEntries((R.FIRM.ideas || []).map(k => [k, true])); }   // v43: the C-table is in the plan   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
 S.col = Object.assign({}, DEF.col, S.col || {});
@@ -1902,6 +1903,16 @@ function buildStorage37(own, mat) {
     ibox(g, x0 + 6, top - O.h - 42, zf - 7, 26, 36, 5, cloth("#b89a6c"));                                      // a canvas tote
     ibox(g, x0 + 35, top - O.h - 58, zf - 3.2, 9, 56, 1.4, cloth("#a65a38"));                                   // a scarf
     shell.add(g); }
+  // v43, client: "suggest improvements and more item options": motors on the curtain pole, LP ledges on the side wall (options)
+  { const CU = R.CURTAIN, g = SUGG_G.curtainmotor = new THREE.Group(), body = own("#efefec"), [wx0, wx1] = R.WINDOW_X; SVAR_MATS.curtainmotor = [body];
+    for (const x of [wx0 - CU.ext + CU.stack, wx1 + CU.ext - CU.stack]) ibox(g, x - 3.65, CU.rail_y - 17.5, CU.z - 1, 7.3, 20.5, 8.4, body);   // SwitchBot Curtain 3, at each curtain's leading edge
+    shell.add(g); }
+  { const g = SUGG_G.lpledges = new THREE.Group(), wood = own("#c48c57"), y = 108; SVAR_MATS.lpledges = [wood];
+    const covers = ["#d94f2b", "#2f4e6e", "#e9c46a", "#1b1c1f"].map(c => own(c));
+    [-171, -251].forEach((zc, j) => { const z0 = zc - 27.5;                                                   // under the PC shelf, under the wall cabinets
+      ibox(g, 0, y - 2, z0, 12, 2, 55, wood); ibox(g, 10.5, y, z0, 1.5, 3.5, 55, wood);                       // MOSSLANDA: the shelf and its lip
+      ibox(g, 1.2, y, z0 + 0.5, 0.4, 31.4, 31.4, covers[j * 2]); ibox(g, 1.8, y, z0 + 23, 0.4, 31.4, 31.4, covers[j * 2 + 1]); });   // two covers, face-out
+    shell.add(g); }
 }
 /* v34's drinks cabinet as a builder (v36): against a wall at z 0, from x0 to x1, its front at -B.d; its versions SVAR_MATS[key]; its
    fall-front WORK[work] */
@@ -2000,6 +2011,7 @@ function applySuggest() {
   if (SUGG_G.barcase) SUGG_G.barcase.visible = !!S.sugg.barcase && caseOn();                          // v34: under the case
   for (const k of ["barside", "doorshelf", "shelfboxes"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];   // v36
   for (const k of ["stairdrawers", "alcoveshelves", "windowseat", "wardrobe", "wallcabs", "overdoor"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];   // v37
+  for (const k of ["growlights", "curtainmotor", "lpledges", "cordlamp"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];   // v43: the four new options
   if (SUGG_G.alcoveshelves && S.sugg.wardrobe) SUGG_G.alcoveshelves.visible = false;                  // v37: the cupboard fills that corner
   if (SUGG_G.clock && S.sugg.doorshelf) SUGG_G.clock.visible = false;                                 // the shelf takes the clock's place
   { const lc = !!(SUGG_G.liftcoffee && S.sugg.liftcoffee), rt = !!(SUGG_G.recordtable && S.sugg.recordtable && !lc);   // v38: the record table is the plan's; the lift-top the option
@@ -2179,12 +2191,20 @@ function buildIdeas() {
     shell.add(g); }
   // 3. the oak C-table over the sofa's open end: its top reaches over the seat, its foot on the floor beside it
   { const g = IDEA_G.ctable = new THREE.Group(), T = I.ctable, [x0, x1] = T.x, ze = R.SOFA.end, t = T.t;
-    const zo = ze + T.depth - T.over;                                               // the upright's outer face, out from the sofa's end
+    const zo = ze + T.depth - T.over, [pw, pd, pt] = T.plate, fy = pt + T.felt;   // the upright's outer face, out from the sofa's end
     ibox(g, x0, T.top - t, ze - T.over, x1 - x0, t, T.depth, oak);                // the top
-    ibox(g, x0, 0, zo - t, x1 - x0, T.top - t, t, oak);                           // the upright
-    ibox(g, x0, 0, ze - 3, x1 - x0, 1.6, zo - ze + 3 - t, oak);                    // the foot, just under the plinth's 3 cm inset
+    ibox(g, x0, fy + t, zo - t, x1 - x0, T.top - fy - 2 * t, t, oak);             // the upright, on the foot
+    ibox(g, x0, fy, ze - 3, x1 - x0, t, zo - ze + 3, oak);                        // the foot, from 3 under the sofa's edge to the upright
+    ibox(g, (x0 + x1 - pw) / 2, T.felt, ze - 2, pw, pt, pd, reg(new THREE.MeshStandardMaterial({ color: "#2b2c2e", roughness: 0.5, metalness: 0.6 })));   // v43: the steel plate under it
     const glassCup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.1, 16), glassM); glassCup.position.copy(v3(x0 + 14, T.top + 5, ze - 2)); g.add(glassCup);
     ibox(g, x1 - 20, T.top, ze - 6, 15, 4, 10, reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.5 })));   // a pad
+    { const lg = SUGG_G.cordlamp = new THREE.Group(), lm = reg(new THREE.MeshStandardMaterial({ color: "#a99886", roughness: 0.45, metalness: 0.2 })); SVAR_MATS.cordlamp = [lm];
+      const lx = x1 - 10, lz = ze + 10, ly = T.top;                                   // v43: an option, Habitat's mushroom lamp, 31 tall
+      const part = (geo, y) => { const m = new THREE.Mesh(geo, lm); m.position.copy(v3(lx, ly + y, lz)); lg.add(shadow(m)); };
+      part(new THREE.CylinderGeometry(4.5 * M, 4.5 * M, 1.5 * M, 24), 0.75); part(new THREE.CylinderGeometry(0.6 * M, 0.6 * M, 22.5 * M, 12), 12.75);
+      part(new THREE.SphereGeometry(7 * M, 24, 10, 0, Math.PI * 2, 0, Math.PI / 2), 24);
+      const glowD = new THREE.Mesh(new THREE.CircleGeometry(6.6 * M, 24), new THREE.MeshBasicMaterial({ color: "#ffd9a0", toneMapped: false })); glowD.rotation.x = Math.PI / 2; glowD.position.copy(v3(lx, ly + 23.95, lz)); lg.add(glowD);
+      g.add(lg); }
     shell.add(g); }
   // v32, client: "i want all suggested extra items, furniture and more to have full renders": the other six ideas in the room too.
   // 4. the TV's backlight following the picture: the wall behind it glows in the screen's colours (and the screen shows a film)
@@ -2930,6 +2950,13 @@ function buildPlantsAndRecords() {
      [L, 0, 7, 12, "snake", 0, 4], [Rr, 0, 7, 11, "ficus", 0, 1]]
       .forEach(([t, ti, rad, hh, kind, tr, pm]) => standPots.push([cx(t), TOP(PS.tower[ti]), 0, rad, hh, tr, pm, kind]));
     standPots.push([0, TOP(PS.middle[0]), 0, 9.5, 24, 0, 0, "monstera"], [0, TOP(PS.middle[1]), 0, 7.5, 18, 0, 4, "snake"]);
+    { const gl_ = SUGG_G.growlights = new THREE.Group(), glow = new THREE.MeshBasicMaterial({ color: "#ffe3b0", toneMapped: false });   // v43: an option
+      const case_ = reg(new THREE.MeshStandardMaterial({ color: "#1d1e20", roughness: 0.5 })); SVAR_MATS.growlights = [glow];
+      for (const t of [L, Rr]) for (const ti of [2, 4]) { const cxx = (t[0] + t[1]) / 2, y = PS.tower[ti] - 2;
+        lb(gl_, cxx, y - 1.2, 2, 30, 1.2, 2.4, case_, false); lb(gl_, cxx, y - 1.4, 2, 28, 0.25, 1.8, glow, false);
+        const pool = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.36), new THREE.MeshBasicMaterial({ map: GLOW_TEX, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+        pool.position.copy(v3(cxx, y - 18, -d / 2 + 0.6)); gl_.add(pool); }                      // the warm wash on the wall behind, as in the stand's photo
+      g.add(gl_); }
     floraSpot(g, () => { const rr = rnd(173); g.userData.floraHold = true;
       for (const [px, py, pz, rad, h, tr, pm, kind] of standPots) potPlant(g, px, py, pz, rad, h, tr, rr, pots[pm], null,
         { terracotta: pm === 2, edgeZ: d / 2, kind: FLORA_STYLE === "easy" ? undefined : kind });
@@ -2992,7 +3019,7 @@ function buildPlantsAndRecords() {
   if (IDEA_G.ctable) {
     const T = R.IDEAS.ctable, cx = (T.x[0] + T.x[1]) / 2, cz = R.SOFA.end;
     shell.remove(IDEA_G.ctable); IDEA_G.ctable.position.copy(v3(-cx, 0, -cz)); IDEA_G.ctable.position.x = cx * M; IDEA_G.ctable.visible = true;
-    movable("ctable", "The C-table (an idea)", IDEA_G.ctable, () => ({ x: cx, z: cz, rot: 0 }), T.x[1] - T.x[0], T.depth, [], false, { when: () => !!S.ideas.ctable });
+    movable("ctable", "The C-table", IDEA_G.ctable, () => ({ x: cx, z: cz, rot: 0 }), T.x[1] - T.x[0], T.depth, [], false, { when: () => !!S.ideas.ctable });
     delete IDEA_G.ctable;
   }
   S.added.forEach(a => addThing(a, false));
@@ -3909,7 +3936,7 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id.startsWith("sg:") || id.startsWith("id:")) {
     const sg = id.startsWith("sg:"), k = id.slice(3), nm = ((sg ? PD.sugg : PD.ideas)[k] || [k])[0], it = sg && MOV["sg_" + k];
     if (!(sg ? S.sugg : S.ideas)[k]) return null;                        // taken away: the card closes
-    const firm = sg && R.FIRM && R.FIRM.sugg.includes(k);                 // v38: the client's picks are the plan
+    const firm = R.FIRM && (sg ? R.FIRM.sugg : R.FIRM.ideas || []).includes(k);   // v38: the client's picks are the plan (v43: the C-table too)
     return [nm, firm ? "In your plan" : sg ? "An option: not in the plan's costs" : "An idea: not in the plan's costs", [
       ...(k === "blind" ? [btn(S.blind === "up" ? "Pull it down" : "Roll it up", { blind: S.blind === "up" ? "down" : "up" })] : []),
       ...(k === "barcase" || k === "barside" ? [btn(S.barflap ? "Close the bar" : "Open the bar", { barflap: S.barflap ? "shut" : "open" })] : []),
@@ -4407,7 +4434,9 @@ function optDelta() {
   let n = 0, lo = 0, hi = 0;
   for (const [k, on] of Object.entries(S.sugg)) if (on && !FIRMS.has(k) && PD.sugg[k]) { n++; lo += PD.sugg[k][1]; hi += PD.sugg[k][2]; }
   let off = 0; for (const k of FIRMS) if (!S.sugg[k] && PD.sugg[k]) { off++; lo -= PD.sugg[k][1]; hi -= PD.sugg[k][2]; }   // a pick taken away: a swap counts once
-  for (const [k, on] of Object.entries(S.ideas)) if (on && PD.ideas[k]) { n++; lo += PD.ideas[k][1]; hi += PD.ideas[k][2]; }
+  const FI = new Set((R.FIRM && R.FIRM.ideas) || []);                                           // v43: the C-table is in the plan
+  for (const [k, on] of Object.entries(S.ideas)) if (on && !FI.has(k) && PD.ideas[k]) { n++; lo += PD.ideas[k][1]; hi += PD.ideas[k][2]; }
+  for (const k of FI) if (!S.ideas[k] && PD.ideas[k]) { off++; lo -= PD.ideas[k][1]; hi -= PD.ideas[k][2]; }
   const fb = R.FIRM ? R.FIRM.beside : "clear";
   if (S.beside !== fb) { n++; const c = besideCost(S.beside), f = besideCost(fb); lo += c[0] - f[0]; hi += c[1] - f[1]; }
   return { n: Math.max(n, off), lo, hi };
@@ -4441,7 +4470,7 @@ function lostCheck() {   // inside the room and nearly facing a wall, or looking
   if ((dist < 0.12 || tooSteep) && !b.classList.contains("lost")) { b.classList.add("lost"); setTimeout(() => b.classList.remove("lost"), 5000); }
 }
 function backToPlan() {                   // the plan: your picks, the bar beside the cabinet, no ideas
-  S.sugg = Object.assign({}, DEF.sugg); S.svar = Object.assign({}, DEF.svar); S.ideas = {}; S.beside = DEF.beside;
+  S.sugg = Object.assign({}, DEF.sugg); S.svar = Object.assign({}, DEF.svar); S.ideas = Object.assign({}, DEF.ideas); S.beside = DEF.beside;
   S.barflap = S.lid = S.ctop = S.sdraw = false; S.trolley = "park"; applySvar(); applyState();
 }
 function setTry(on) {
