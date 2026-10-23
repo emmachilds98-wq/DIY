@@ -266,7 +266,33 @@ asbestos testing first for a pre-2000 ceiling, faux beams, an LED cove kit), and
 clear the spot bars, the rose and the door. **No HD stills or guide pages** (it's an option), except one comparison picture in the
 plan's options table if you want it.
 
-## 13. Order of work
+## 13. Further improvements we suggest (pick any; one line each)
+
+**For the build (core):**
+- **A measuring sheet:** one printable page of every CHECK (your shelf's stairs end, the architrave, the socket, the stairs' risers,
+  the ottoman's inside, the sofa's return), with a box to write each in; your answers update `geometry.py`.
+- **Fewer sheets to buy:** nest every ply and oak part onto whole sheets in the cut list, so the guide orders the fewest boards and
+  shows the offcuts' uses.
+- **Order by date:** the buy list in the order to order things (long lead times first), with a running total against a budget you set.
+- **Safety notes where they matter:** anti-tip fixings for the wall cabinets and shoe cabinets, an asbestos test before touching an
+  old Artex ceiling, a bearer under each tread for the step drawers.
+- **A one-page wiring plan** for the swapped media wall: each lead's route, the 10-gang and the 6-way, before the carcass goes in.
+
+**For the page:**
+- **Before and after:** your own photos beside the 3D room from the same spot, with a slider between them.
+- **A live total:** in Try options, the plan's total changes as you switch things on (+£… on the chip).
+- **Measure in 3D:** tap two points to read the distance, so you can check a gap yourselves.
+- **Your own light scenes:** save a set of fixture angles and head settings as a named scene ("Our evening") next to the presets.
+- **A saved plan that isn't only in one browser:** **Save my plan** gives a short code or link to paste to us, so your picks reach
+  the next round (the GitHub page can't save to the repo).
+- **Quicker on phones:** the room as an installable page (works offline, opens fast), with a lighter first load.
+
+**For the room (options, look only):**
+- **Feature-wall presets** in Look: the breast or the media wall's alcove a shade darker than the rest (Card Room Green with Green
+  Smoke), now that each wall has its own colour.
+- **A "now playing" swap:** tap the turntable to choose which LP faces out on the ledge.
+
+## 14. Order of work
 
 1. `geometry.FIRM` from section 0's picks (ask the one open question, the socket, with the design canvas in step 6).
 2. Item 10's clash check first, so every later change is checked as it's made.
@@ -274,4 +300,5 @@ plan's options table if you want it.
 4. Items 4, 5 and 6 (the stairs, the walls, the lights), then item 12 (the ceiling designs).
 5. Items 8 and 9 (the basket and the coffee table), with sources and "buy and adapt" builds.
 6. Item 11's design canvas to the client; after approval, the page and the slimmer PDF, guide and stills.
-7. Rebuild, `qa.py` and `taptest.py` at 390 and 1280 plus the clash check, HANDOFF and README, then a PR into `main` and the merge.
+7. Any of item 13's suggestions the client picks.
+8. Rebuild, `qa.py` and `taptest.py` at 390 and 1280 plus the clash check, HANDOFF and README, then a PR into `main` and the merge.
