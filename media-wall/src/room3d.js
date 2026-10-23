@@ -8,6 +8,10 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 const root = document.getElementById("r3d");
 const SC = JSON.parse(document.getElementById("scene3d-data").textContent);
@@ -53,7 +57,7 @@ const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the p
               plants: "corner", layout: {}, added: [], grow: true,
               chairs: "cupboard",   // v20: the chair cupboard beside the table (doors shut); "open", "hooks" or "away" (the garage)
               // v20, client: "give more decor variation and options": the rug, sofa cushions, the curtains, what's in the glass case and its frame
-              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive", ceiling: "asis" },   // v26: the oak, the floor, your shelf; v31: the seat pads
+              decor: { rug: "yours", cushions: "none", curtains: "hessian", fill: "collect", frame: "oak", oak: "artisan", floor: "carpet", shelf: "black", pads: "olive", ceiling: "asis", plants: "mix", pots: "mine" },   // v26: the oak, the floor, your shelf; v31: the seat pads
               sugg: {},     // v21: the suggested furniture and decor, all off
               seat: "off",
               cab: "compact", cabw: "90", tdoor: false,   // v33: cabw, the compact cabinet's table: 90 wide (the plan) or 80 (10 shorter)
@@ -210,16 +214,40 @@ function precompileStep() {           // from the frame loop, when nothing's mov
   const o = PRE.queue.shift(), shown = [], tagged = [];
   if (o.visible !== false || !o.parent) return true;
   if (!PRE.rt) { PRE.rt = new THREE.WebGLRenderTarget(1, 1); PRE.rt.isXRRenderTarget = true; PRE.rt.texture.colorSpace = gl.outputColorSpace; }
+  if (!PRE.rtAO) PRE.rtAO = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });   // v40: like the composer's (AO live)
   scene.traverse(c => { if (c.isLight) c.layers.enable(31); });
   o.traverse(c => { if (!c.isLight) { if (c.visible === false) { shown.push(c); c.visible = true; } if (!c.layers.isEnabled(31)) { tagged.push(c); c.layers.enable(31); } } });
   const mask = camera.layers.mask, was = gl.getRenderTarget();
-  camera.layers.set(31); gl.setRenderTarget(PRE.rt);
+  camera.layers.set(31); gl.setRenderTarget(aoLive() ? PRE.rtAO : PRE.rt);
   try { gl.render(scene, camera); } finally {
     gl.setRenderTarget(was); camera.layers.mask = mask;
     shown.forEach(c => { c.visible = false; }); tagged.forEach(c => c.layers.disable(31));
   }
   PRE.done++;
   return true;
+}
+/* v40, client: "better rendering and graphics": ambient occlusion (three's GTAO), the soft shade where things meet. Always in the HD
+   pictures; live in HD on a real graphics card (aoLive). With it the room draws into the composer's target (linear, tone-mapped at the
+   end), so the warm-up draws into a target of the same kind and the shaders match. */
+const AO = { c: null, g: null };
+const aoLive = () => S.quality === "hd" && (BIG_GPU || /[?&]ao\b/.test(location.search)) && !/[?&]noao\b/.test(location.search);   // ?ao tries it anywhere
+function aoComposer(w, h, pr) {
+  if (!AO.c) {
+    const rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: SMALL ? 0 : 4 });   // anti-aliased, as on screen
+    AO.c = new EffectComposer(gl, rt); AO.c.addPass(new RenderPass(scene, camera));
+    AO.g = new GTAOPass(scene, camera, w, h); AO.g.blendIntensity = 0.9;
+    AO.g.updateGtaoMaterial({ radius: 0.3, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 16, distanceFallOff: 1 });
+    AO.g.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
+    clipMat(AO.g.normalMaterial);                                    // the cutaway cuts the depth it shades from, too
+    AO.c.addPass(AO.g); AO.c.addPass(new OutputPass());
+  }
+  AO.c.setPixelRatio(pr); AO.c.setSize(w, h);
+  return AO.c;
+}
+function draw() {                     // a frame: through the composer with AO, or straight to the screen
+  if (aoLive()) { const sz = gl.getSize(new THREE.Vector2()); if (!AO.c || AO.w !== sz.x || AO.h !== sz.y || AO.pr !== gl.getPixelRatio()) { aoComposer(sz.x, sz.y, gl.getPixelRatio()); AO.w = sz.x; AO.h = sz.y; AO.pr = gl.getPixelRatio(); }
+    gl.info.autoReset = false; gl.info.reset(); AO.c.render(); gl.info.autoReset = true; }   // the count covers every pass
+  else gl.render(scene, camera);
 }
 function syncRig() {                  // each frame: a rigged light follows its owner, and leaves with it (a rebuilt cabinet)
   for (let k = RIGGED.length - 1; k >= 0; k--) {
@@ -804,7 +832,7 @@ function buildShell() {
   // v15: "make the hanging plant on the wall shelf actually hang": a pot at the window end, its strands trailing down off the shelf.
   // v36: its own group (plantBG). v37: it stays here, at the shelf's window end, now 10 short of the boxing (v36's plant shelf is gone)
   plantBG = new THREE.Group(); shell.add(plantBG);
-  hangPlant(plantBG, Wd - sb.d / 2 - 1, sb.top, R.PLANT_B.z, [Wd - sb.d - 1], 4, R.PLANT_THROUGH_GAP ? [sb.z[1], R.PIPE_BOX.z[1]] : null);   // v38: through the 10 cm gap
+  floraSpot(plantBG, () => hangPlant(plantBG, Wd - sb.d / 2 - 1, sb.top, R.PLANT_B.z, [Wd - sb.d - 1], 4, R.PLANT_THROUGH_GAP ? [sb.z[1], R.PIPE_BOX.z[1]] : null));   // v40: rebuilt with Look's plants   // v38: through the 10 cm gap
   // v15: "either add my hat there or give it a wallstand": an oak peg on the stairs wall with the hat on it. v16: off until the photo
   if (R.HAT_PEG) {
   const HP = R.HAT_PEG, oakM = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
@@ -849,7 +877,6 @@ function buildShell() {
   pcLit();
   buildIdeas();
   buildPlantsAndRecords();
-  buildChairStore(); [chairCab, chairsIn, chairsHook].forEach(g => g && mergeStatic(g));   // v22: fewer draws
   buildCab(); buildBeside();                                                      // v26; v30: the compact cabinet; v31: beside it
   for (const k of ["mirror", "dresser", "rail", "bar", "shoes"]) if (BES[k]) mergeStatic(BES[k]);   // v39: fewer draws (doors and the trolley move: nested or left out)
   buildStairs();
@@ -882,74 +909,9 @@ function buildStairs() {
   const pitch = z => r + (z - z0) / gq * r, zf = z0 + (21 - r) / r * gq;   // the string: 24 deep along the pitch line, capped 3 over it
   solid([[z0, 0], [zf, 0], [zl, top - 21], [zl1, top - 21], [zl1, top + 3], [zl, top + 3], [z0, pitch(z0) + 3]], sx0 - 2.2, sx0 - 0.2, str);
 }
-/* v19: folded FRÖSVI chairs off the table. v20 ("a fully pack away setup"): an oak chair cupboard built in beside the table's window
-   end, flush with the pipe boxing, four chairs inside (two on its floor, two on its shelf, each pair two deep), two doors hinged on the
-   table's side. S.chairs: "cupboard" (doors shut), "open" (doors open), "hooks" (the cheaper open hooks), "away" (the garage). */
-let chairStore = null, chairCab = null, chairDoors = [], chairsIn = null, chairsHook = null;
-function buildChairStore() {
-  const CS = R.CHAIR_STORE, H = CS.hooks, CB = CS.cupboard, [cw, cdep, ch] = R.CHAIR_FOLDED;
-  const wood = reg(new THREE.MeshStandardMaterial({ color: "#b07f50", map: OAK_TEX, roughness: 0.6 }));
-  const pad = reg(new THREE.MeshStandardMaterial({ color: "#77736b", roughness: 0.92 }));
-  const alu = reg(new THREE.MeshStandardMaterial({ color: "#b9bcc0", roughness: 0.35, metalness: 0.8 }));
-  const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
-  const bx = (g, x, y, z, w, h, d, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w * M, h * M, d * M), m); me.position.copy(v3(x + w / 2, y + h / 2, z + d / 2)); g.add(shadow(me)); return me; };
-  const chair = (g, x0, y0, cz) => {                                                         // one folded chair, its face towards the room
-    for (const sd of [-1, 1]) bx(g, x0, y0, cz + sd * (cw / 2 - 1.5) - 1.5, cdep, ch, 3, wood);   // the frames, legs folded together
-    bx(g, x0 + 1.5, y0 + 28, cz - (cw / 2 - 3), 2.2, 38, cw - 6, pad);                             // the seat, folded up
-    bx(g, x0 + 4, y0 + ch - 27, cz - (cw / 2 - 3), 3, 22, cw - 6, pad);                            // the padded back
-    bx(g, x0 + 2, y0 + 12, cz - (cw / 2 - 3), 1.8, 3, cw - 6, wood);                               // a stretcher low down
-  };
-  const W = R.W, z0 = CB.z[1], z1 = CB.z[0], cz = (z0 + z1) / 2, t = CB.t, xf = W - CB.d;   // the gap along the wall; xf = its front face
-  // the cupboard: sides, top, floor, the shelf and its lip, the back
-  chairCab = new THREE.Group(); chairCab.name = "chaircab";
-  bx(chairCab, xf + CB.door, 0, z0, CB.d - CB.door, CB.h, t, oak); bx(chairCab, xf + CB.door, 0, z1 - t, CB.d - CB.door, CB.h, t, oak);
-  bx(chairCab, xf + CB.door, CB.h - t, z0 + t, CB.d - CB.door, t, z1 - z0 - 2 * t, oak);
-  bx(chairCab, xf + CB.door, CB.plinth - t, z0 + t, CB.d - CB.door, t, z1 - z0 - 2 * t, oak);
-  bx(chairCab, xf + CB.door, CB.shelf_y, z0 + t, CB.d - CB.door, t, z1 - z0 - 2 * t, oak);
-  bx(chairCab, xf + CB.door, CB.shelf_y + t, z0 + t, t, CB.lip, z1 - z0 - 2 * t, oak);
-  bx(chairCab, W - CB.back, CB.plinth, z0 + t, CB.back, CB.h - CB.plinth - t, z1 - z0 - 2 * t, oak);
-  bx(chairCab, xf + CB.door + 1, 0, z0 + t, CB.d - CB.door - 2, CB.plinth - t, z1 - z0 - 2 * t, oak);       // the plinth
-  // two doors, hinged on the table's side (z1): each a pivot at the hinge line on the cupboard's front
-  chairDoors = [];
-  for (const [ya, yb] of [[0, CB.shelf_y + t / 2 - 0.15], [CB.shelf_y + t / 2 + 0.15, CB.h]]) {
-    const piv = new THREE.Group(); piv.position.copy(v3(xf, 0, z1));
-    const d = new THREE.Mesh(new THREE.BoxGeometry(CB.door * M, (yb - ya) * M, (z1 - z0 - 0.3) * M), oak);
-    d.position.set(-CB.door / 2 * M, (ya + yb) / 2 * M, -(z1 - z0) / 2 * M);   // its room face on the hinge line (three's x is the room's, mirrored)
-    piv.add(shadow(d));
-    const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.02, 12), alu); knob.rotation.z = Math.PI / 2;
-    knob.position.set(0.01, (ya + yb) / 2 * M, -(z1 - z0 - 5) * M); piv.add(knob);
-    chairCab.add(piv); chairDoors.push(piv);
-  }
-  scene.add(chairCab);
-  // v27, client: "ensure i can also take the chair cupboard that exists currently off the wall when im customising": in Edit room it can be
-  // selected and removed (and put back from + Add); it stays on its wall (no dragging or turning: it's built in)
-  chairCab.userData.movId = "chaircab";
-  MOV.chaircab = { id: "chaircab", label: "The flip-top's chair cupboard", pivot: chairCab, def: () => ({ x: 0, z: 0, rot: 0 }), w: CB.d, d: z1 - z0, mats: [],
-                   base: [], fixed: true, when: () => S.site !== "C" && (S.chairs === "cupboard" || S.chairs === "open" || !S.chairs) };
-  // the four chairs inside (two on the floor, two on the shelf, each pair one behind the other)
-  chairsIn = new THREE.Group(); chairsIn.name = "chairs";
-  for (const y0 of [CB.plinth, CB.shelf_y + t]) for (let j = 0; j < 2; j++) chair(chairsIn, W - CB.back - 0.4 - cdep - j * (cdep + 0.3), y0, cz);
-  scene.add(chairsIn);
-  // the cheaper option: the same four on two open hooks, two on each
-  chairsHook = new THREE.Group(); chairsHook.name = "chairs";
-  const hz = (H.z[0] + H.z[1]) / 2;
-  H.chair_y.forEach(([y0], i) => {
-    for (let j = 0; j < (H.per_hook || 1); j++) chair(chairsHook, H.x - 1.5 - cdep - j * (cdep + 0.4), y0 - j * 0.8, hz);
-    bx(chairsHook, H.x - R.HOOK[1], H.hook_y[i] - 1, hz - R.HOOK[0] / 2, R.HOOK[1], 1.6, R.HOOK[0], alu);
-  });
-  scene.add(chairsHook);
-  chairStore = chairsIn;
-}
-function placeChairs() {
-  if (!chairCab) return;
-  const mode = S.chairs || "cupboard", folded = S.dining === "folded";
-  placeOptC();
-  if (S.site === "C") { chairCab.visible = chairsIn.visible = chairsHook.visible = false; return; }   // v26: the cabinet keeps its chairs in its own bay
-  chairCab.visible = (mode === "cupboard" || mode === "open") && !(S.layout.chaircab || {}).off;   // v27: or it's been taken off the wall
-  chairDoors.forEach(d => { d.rotation.y = mode === "open" ? -2.88 : 0; });   // 165° hinges: open, the doors fold back against the folded table
-  chairsIn.visible = chairCab.visible && folded;                 // with the table open, they're round it
-  chairsHook.visible = mode === "hooks" && folded;
-}
+/* v40: the flip-top's chair cupboard, its hooks and the fold-down seat are gone (never shown since the dining cabinet became the only
+   table in v33; the code is in room3d_v40a_backup.js) */
+function placeChairs() { placeOptC(); }
 
 /* v26: option C, the dining cabinet; v27: the plan, made for six; v29: two sliding doors (OPTC). v30, client: "is there anyway you can
    optimise the dining cabinet build to fit the chairs in a better way so the cabinet doesnt have to be so big", "show me both versions":
@@ -1645,7 +1607,7 @@ const PRINT_TEX = canvasTex(720, 500, (g, w, h) => {      // a mid-century print
 });
 function buildSuggest() {
   const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
-  const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.6, side: THREE.DoubleSide }));
+  const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.6, side: THREE.DoubleSide }));   // the vase's grass stems (the plants bring their own leaves)
   const mat = c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 }));
   // the floor pieces: movable, shown only while switched on
   const floor = (k, label, w, d, x, z, build, mats = []) => { const g = new THREE.Group(); build(g); SUGG_G[k] = movable("sg_" + k, label, g, () => ({ x, z, rot: 0 }), w, d, mats, false, { when: () => !!S.sugg[k] && !(k === "floorplant" && (S.sugg.blanketbasket || S.sugg.cotswoldbasket)) }); };   // v36: the blanket basket takes the floor plant's corner
@@ -1653,13 +1615,13 @@ function buildSuggest() {
   const ownGlow = c => new THREE.MeshBasicMaterial({ color: c, toneMapped: false });
   { const pot = mat("#d8cfc0"); SVAR_MATS.floorplant = [pot];
     floor("floorplant", "Floor plant (suggested)", 40, 40, 24, -92, g => {
-      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.32, 24), pot); p.position.y = 0.16; g.add(shadow(p));
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 1.0, 8), mat("#6b5238")); trunk.position.y = 0.8; g.add(trunk);
-      const r = rnd(61), gs = [];
-      for (let i = 0; i < 34; i++) { const y = 0.62 + r() * 0.85, a = r() * Math.PI * 2, rr = 0.06 + r() * 0.2 * (1.5 - (y - 0.6));
-        const lg = new THREE.SphereGeometry(0.075 + r() * 0.03, 8, 6); lg.scale(1, 0.25, 0.75); lg.rotateZ((r() - 0.5) * 0.9); lg.rotateY(a);
-        lg.translate(Math.cos(a) * rr, y, Math.sin(a) * rr); gs.push(lg); }
-      g.add(shadow(new THREE.Mesh(mergeGeometries(gs), leaf))); }, [pot]); }
+      const hold = { userData: {} }, B = floraBatch(hold), r = rnd(61), pg = potGeo(15, 32); floraAdd(B, pot, pg);   // v40: a rubber plant on its trunk
+      const soil = new THREE.CircleGeometry(0.14, 20); soil.rotateX(-Math.PI / 2); soil.translate(0, 0.28, 0); floraAdd(B, floraMat("soil"), soil, null, "soil");
+      stemAlong(B, [new THREE.Vector3(0, 0.27, 0), new THREE.Vector3(0.01, 0.8, 0), new THREE.Vector3(-0.01, 1.3, 0.01)], 0.012, "#6b5238");
+      for (let i = 0; i < 30; i++) { const y = 0.62 + r() * 0.85, a = r() * Math.PI * 2, rr = 0.03 + r() * 0.12 * (1.5 - (y - 0.6)), p = new THREE.Vector3(Math.cos(a) * rr, y, Math.sin(a) * rr);
+        stemAlong(B, [new THREE.Vector3(0, y - 0.04, 0), p], 0.002, "#5d6b3a");
+        leafAt(B, "ficus", p, dirOf(a, 0.1 + r() * 0.5), (16 + r() * 10) * M, r, { fold: 0.12, curl: 0.1 }); }
+      floraFlush(hold, g); }, [pot]); }
   { const oak = ownOak(); SVAR_MATS.sidetable = [oak];
   floor("sidetable", "Side table (suggested)", 40, 40, 76, -108, g => {
     const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 32), oak); top.position.y = 0.4875; g.add(shadow(top));
@@ -1886,9 +1848,7 @@ function buildStorage37(own, mat) {
     for (const top of A.tops) { ibox(g, A.x[0], top - A.t, WZ, A.w, A.t, A.d, wood);
       let x = A.x[0] + 4;
       if (top === A.tops[0]) { while (x < A.x[0] + 46) { const bw = 2 + r() * 2.5, bh = 18 + r() * 6; ibox(g, x, top, WZ + 3, bw, bh, 15 + r() * 3, cols[Math.floor(r() * cols.length)]); x += bw + 0.2; } }
-      const pot = new THREE.Mesh(new THREE.CylinderGeometry(6.5 * M, 5 * M, 11 * M, 18), own(top === A.tops[0] ? "#c46c45" : "#e9e4da")); pot.position.copy(v3(A.x[1] - 18, top + 5.5, WZ + 11)); g.add(shadow(pot));
-      const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65 }));
-      for (let k = 0; k < 9; k++) { const l = new THREE.Mesh(new THREE.SphereGeometry(3.2 * M, 8, 6), leaf); l.scale.set(1, 0.5, 1); l.position.copy(v3(A.x[1] - 18 + (r() - 0.5) * 12, top + 12 + r() * 6, WZ + 11 + (r() - 0.5) * 10)); g.add(l); }
+      potPlant(g, A.x[1] - 18, top, WZ + 11, 6.5, top === A.tops[0] ? 6 : 9, top === A.tops[0] ? 3 : 0, r, own(top === A.tops[0] ? "#c46c45" : "#e9e4da"), null, { edgeZ: WZ + A.d });   // v40
       if (top === A.tops[1]) { const vase = new THREE.Mesh(new THREE.CylinderGeometry(4 * M, 3 * M, 16 * M, 16), own("#2f4e6e")); vase.position.copy(v3(A.x[0] + 22, top + 8, WZ + 10)); g.add(shadow(vase)); } }
     shell.add(g); }
   // the storage window seat: an oak box with a lift-up lid, a seat cushion, two back cushions against the window wall
@@ -1983,23 +1943,8 @@ function drinksCab(B, x0, x1, key, work, seed) {
     WORK[work] = anim(v => { flap.rotation.x = -Math.PI / 2 * v; onTop.visible = v > 0.98; stays.visible = v > 0.9; });
     return g; }
 }
-/* v23: the fold-down oak seat in the gap at the stair end (an option, geometry.WALL_SEAT), and your sofa's square ottoman */
-let seatUp = null, seatDown = null;
+/* the sofa's square ottoman (v23's fold-down seat beside it went with the flip-top in v40) */
 function buildSeatAndPouf() {
-  const S_ = R.WALL_SEAT, W = R.W, [za, zb] = S_.z, w = za - zb;
-  const oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
-  const steel = reg(new THREE.MeshStandardMaterial({ color: "#7c7a74", roughness: 0.5, metalness: 0.5 }));
-  seatUp = new THREE.Group(); seatDown = new THREE.Group();
-  for (const z of [zb + 6, za - 6 - 8.2]) {
-    ibox(seatUp, W - S_.fold, S_.h - 20, z, S_.fold, 30, 8.2, steel);
-    ibox(seatDown, W - S_.fold, S_.h - 32, z, S_.fold, 29, 8.2, steel);          // the bracket's wall plate, under the seat
-    const A = v3(W - 0.5, S_.h - 28, z + 4.1), B = v3(W - S_.d + 4, S_.h - S_.t, z + 4.1), dv = B.clone().sub(A);   // the bracket's arm: wall to the seat's front
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(dv.length(), 0.025, 0.025), steel);
-    arm.position.copy(A.clone().add(B).multiplyScalar(0.5)); arm.rotation.z = Math.atan2(dv.y, dv.x); seatDown.add(arm);
-  }
-  ibox(seatUp, W - S_.fold - S_.t, S_.h - 2, zb, S_.t, S_.d, w, oak);                  // folded: standing up against its brackets
-  ibox(seatDown, W - S_.d, S_.h - S_.t, zb, S_.d - 0.5, S_.t, w, oak);                // down: a seat at 46
-  shell.add(seatUp, seatDown);
   // the ottoman, movable in Edit room. v34, client: "we'd like to get a new ottoman that is actually a storage ottoman ... similar size to
   // what we have right now and would match the room or current sofa": navy velvet, a padded lid that lifts off (S.lid), a box inside
   const P_ = R.SOFA_POUF, O = R.OTTOMAN || { w: P_.w, d: P_.d, h: P_.h, lid: 10, inner_h: 28, wall: 3, col: R.SOFA_CORD[0] };
@@ -2051,7 +1996,6 @@ function buildSeatAndPouf() {
   }
 }
 function applySuggest() {
-  if (seatUp) { seatUp.visible = S.seat === "up" && S.site !== "C"; seatDown.visible = S.seat === "down" && S.site !== "C"; }
   for (const k of ["art", "clock", "tray", "fairy", "hanger", "trail", "throw", "pclamp", "candles", "mirror", "shelfled", "blind", "cablights", "bartrolley"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];
   if (SUGG_G.barcase) SUGG_G.barcase.visible = !!S.sugg.barcase && caseOn();                          // v34: under the case
   for (const k of ["barside", "doorshelf", "shelfboxes"]) if (SUGG_G[k]) SUGG_G[k].visible = !!S.sugg[k];   // v36
@@ -2125,6 +2069,7 @@ function applyCeiling(k) {
 }
 function applyDecor() {
   const D = S.decor;
+  if ((D.plants || "mix") !== FLORA_STYLE || (D.pots || "mine") !== FLORA_POTS) { FLORA_STYLE = D.plants || "mix"; FLORA_POTS = D.pots || "mine"; if (FLORA_SPOTS.length) floraRebuild(); }   // v40
   applyCeiling(D.ceiling);
   if (rugMesh) { rugMesh.visible = D.rug !== "none"; const top = rugMesh.material[2], t = rugTex(D.rug), edge = (RUG_LOOKS[D.rug] || {}).edge || R.RUG.cols[3];
     if (top.map !== t) { top.map = t; top.needsUpdate = true; } rugMesh.material.forEach((m, i) => { if (i !== 2) m.color.set(edge); }); }
@@ -2157,20 +2102,9 @@ function buildIdeas() {
   const I = R.IDEAS, oak = reg(new THREE.MeshStandardMaterial({ color: "#c48c57", map: OAK_TEX, roughness: 0.55 }));
   const glassM = reg(new THREE.MeshPhysicalMaterial({ color: "#dfeef0", roughness: 0.04, transparent: true, opacity: 0.22, depthWrite: false }));
   const steel = reg(new THREE.MeshStandardMaterial({ color: "#9a9ea3", metalness: 0.8, roughness: 0.35 }));
-  const leaf = reg(new THREE.MeshStandardMaterial({ color: "#4a8640", roughness: 0.65, side: THREE.DoubleSide }));
   const potM = reg(new THREE.MeshStandardMaterial({ color: "#e4ddcf", roughness: 0.7 })), potT = reg(new THREE.MeshStandardMaterial({ color: "#b5643f", roughness: 0.75 }));
   const r = rnd(41);
-  const plant = (grp, x, y, z, rad, trail) => {          // a pot with leaves on top, and a few trailing strands if asked
-    const p = new THREE.Mesh(new THREE.CylinderGeometry(rad * M, rad * 0.78 * M, rad * 1.6 * M, 16), r() < 0.5 ? potM : potT);
-    p.position.copy(v3(x, y + rad * 0.8, z)); grp.add(shadow(p));
-    const gs = [];
-    for (let k = 0; k < 10; k++) { const g = new THREE.SphereGeometry((0.018 + r() * 0.01), 7, 5); g.scale(0.7, 0.5, 0.3); g.rotateY(r() * 3);
-      const q = v3(x + (r() - 0.5) * rad * 1.8, y + rad * 1.6 + 1 + r() * 7, z + (r() - 0.5) * rad * 1.4); g.translate(q.x, q.y, q.z); gs.push(g); }
-    for (let s = 0; s < trail; s++) { const zz = z + (r() - 0.5) * rad, xx = x + (r() - 0.5) * rad * 1.6, len = 14 + r() * 22;
-      for (let t = 0; t < len; t += 3.2) { const g = new THREE.SphereGeometry(0.014, 6, 4); g.scale(0.8, 0.45, 0.4); g.rotateY(r() * 3);
-        const q = v3(xx + Math.sin(t / 5 + s) * 1.5, y + rad * 1.4 - t, zz + rad * 0.9); g.translate(q.x, q.y, q.z); gs.push(g); } }
-    grp.add(shadow(new THREE.Mesh(mergeGeometries(gs), leaf)));
-  };
+  const plant = (grp, x, y, z, rad, trail) => { const t = r() < 0.5; potPlant(grp, x, y, z, rad, 6 + r() * 4, trail, r, t ? potT : potM, null, { terracotta: t }); };   // v40
   // 1. the tall glass display case on the breast (it faces the room: the breast's face is z = 0). v20, client: "make glass display
   // cabinet on wall taller and give more decor variation and options": 85 tall (was 50), three glass shelves, five things to put in
   // it and three frame finishes (Decor), each fill built once and shown on its own
@@ -2320,41 +2254,261 @@ function pcLit() {
   pcLight = new THREE.PointLight("#9d7bff", 3, 0.6, 2); pcLight.position.copy(v3(2.5 + cw / 2, st + ch / 2, (cz0 + cz1) / 2)); shell.add(pcLight);
 }
 // v17: "i also have deep window sills that allow for lots of plants there": a row of pots along the sill, upright and trailing
-function sillPlants(x0, x1, y, zBack, zFront) {
-  const r = rnd(29), pots = [], leaves = [], vines = [];
-  const potCols = ["#d8cfc0", "#b5643f", "#2f2f2f", "#e9e4da", "#8a9a7b"], potMs = potCols.map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 })));
-  const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide })), leaf2 = reg(new THREE.MeshStandardMaterial({ color: "#5d8f45", roughness: 0.65, side: THREE.DoubleSide }));
-  const vine = reg(new THREE.MeshStandardMaterial({ color: "#4f6b3a", roughness: 0.8 }));
-  const n = 7, zc = (zBack + zFront) / 2, step = (x1 - x0 - 30) / (n - 1), leaves2 = [];
-  for (let i = 0; i < n; i++) {
-    const x = x0 + 15 + i * step + (r() - 0.5) * 6, rad = 5 + r() * 4, h = 9 + r() * 6, z = zc + (r() - 0.5) * 6;
-    const p = new THREE.Mesh(new THREE.CylinderGeometry(rad * M, rad * 0.78 * M, h * M, 20), potMs[i % potMs.length]);
-    p.position.copy(v3(x, y + h / 2, z)); shell.add(shadow(p));
-    const tall = i % 3 !== 1, top = y + h;
-    if (tall) {                 // an upright plant: a cluster of leaves on short stems
-      const H = 14 + r() * 26;
-      for (let k = 0; k < 16; k++) {
-        const t = k / 16, g = new THREE.SphereGeometry((0.022 + r() * 0.012) * (1.2 - t * 0.5), 8, 6); g.scale(0.55, 1.3, 0.25);
-        g.rotateZ((r() - 0.5) * 1.1); g.rotateY(r() * Math.PI);
-        const q = v3(x + (r() - 0.5) * rad * 1.6, top + 3 + t * H, z + (r() - 0.5) * rad * 1.2); g.translate(q.x, q.y, q.z);
-        (k % 2 ? leaves : leaves2).push(g);
+/* ---------------------------------------------------------------- v40: the plants, in HD
+   Client: "more HD realistic plants". Every leaf is a shaped mesh (a grid along its outline, folded on the midrib and curled to the tip)
+   with a painted texture (midrib, veins, variegation) and its own shade of green; six kinds suit the room's spots. Each group's leaves
+   merge into one mesh a material and its pots into one a finish, so a shelf of plants is a handful of draw calls. */
+const FLORA_KINDS = {     // outline (half-width over the length, a fraction of it), texture, roughness, cut-outs
+  pothos: { w: t => 0.44 * Math.pow(Math.sin(Math.PI * Math.pow(t, 0.62)), 0.7) + (t < 0.1 ? 0.06 : 0), rough: 0.55 },
+  snake: { w: t => 0.075 * (1 - Math.pow(t, 4)) * (0.75 + 0.25 * Math.sin(Math.PI * t)) + 0.004, rough: 0.5, rows: 12 },
+  monstera: { w: t => 0.44 * Math.pow(Math.sin(Math.PI * Math.pow(t, 0.8)), 0.8) + 0.02, rough: 0.34, cut: true },
+  fern: { w: t => 0.15 * Math.sin(Math.PI * Math.min(1, t * 1.05)) + 0.01, rough: 0.7, cut: true, rows: 12 },
+  spider: { w: t => 0.035 * (1 - t * t) + 0.003, rough: 0.6, rows: 12 },
+  calathea: { w: t => 0.3 * Math.pow(Math.sin(Math.PI * t), 0.9) + 0.01, rough: 0.48 },
+  ficus: { w: t => 0.3 * Math.pow(Math.sin(Math.PI * Math.pow(t, 0.9)), 0.8) + 0.01, rough: 0.3 },
+};
+function leafTexture(kind) {         // u across the leaf (0 and 1 its edges, 0.5 the midrib), v from stem (0) to tip (1)
+  const W = 256, H = 512;
+  return canvasTex(W, H, (g, w, h) => {
+    const r = rnd(kind.length * 977 + 13), vy = v => h - v * h;
+    const base = { pothos: ["#2f6a2c", "#4f9a3c"], snake: ["#264d2c", "#3d6b3a"], monstera: ["#1f4f24", "#2f6d2f"], fern: ["#3f7f32", "#68a84a"],
+      spider: ["#3f8a3a", "#5aa24a"], calathea: ["#24502f", "#2f6a3c"], ficus: ["#1d3d22", "#2c5a2e"] }[kind];
+    const gr = g.createLinearGradient(0, h, 0, 0); gr.addColorStop(0, base[0]); gr.addColorStop(1, base[1]);
+    const cut = FLORA_KINDS[kind].cut;
+    if (!cut) { g.fillStyle = gr; g.fillRect(0, 0, w, h); }
+    if (kind === "fern") {            // leaflets (pinnae) either side of the rachis, slanting towards the tip; clear between
+      g.fillStyle = gr;
+      for (let v = 0.04; v < 0.98; v += 0.045) for (const s of [-1, 1]) {
+        g.save(); g.translate(w / 2, vy(v)); g.rotate(s * 1.05); g.beginPath(); g.ellipse(s * w * 0.24, 0, w * 0.25, h * 0.016, 0, 0, Math.PI * 2); g.fill(); g.restore();
       }
-    } else {                    // a trailing one, hanging a little over the sill's nose
-      for (let k = 0; k < 5; k++) {
-        const z0 = z + (r() - 0.5) * 6, len = 10 + r() * 14;
-        const pts = [v3(x + (r() - 0.5) * 4, top + 2, z0), v3(x + (r() - 0.5) * 6, top, zFront + 1)];
-        for (let j = 1; j <= 4; j++) pts.push(v3(x + (r() - 0.5) * 8, y - len * j / 4, zFront + 1.5 + j * 0.4));
-        const curve = new THREE.CatmullRomCurve3(pts);
-        vines.push(new THREE.TubeGeometry(curve, 24, 0.002, 5, false));
-        for (let t = 0.1; t < 1; t += 0.09 + r() * 0.04) {
-          const q = curve.getPoint(t), g = new THREE.SphereGeometry(0.02 + r() * 0.008, 8, 6); g.scale(1, 0.2, 0.8); g.rotateY(r() * Math.PI); g.translate(q.x, q.y, q.z); leaves.push(g);
-        }
+      g.fillStyle = "#5d8f3a"; g.fillRect(w / 2 - 3, 0, 6, h);
+      return;
+    }
+    if (kind === "monstera") {        // the leaf, then the splits from the edge towards the midrib and a row of holes, cut out
+      g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      g.globalCompositeOperation = "destination-out";
+      for (let v = 0.16; v < 0.9; v += 0.1 + r() * 0.03) for (const s of [-1, 1]) {
+        const x0 = s < 0 ? 0 : w, x1 = w / 2 + s * w * (0.1 + r() * 0.1), y0 = vy(v), y1 = vy(v + 0.06);
+        g.beginPath(); g.moveTo(x0, y0 - h * 0.012); g.lineTo(x1, y1); g.lineTo(x0, y0 + h * 0.012); g.closePath(); g.fill();
       }
+      for (let v = 0.22; v < 0.7; v += 0.12) for (const s of [-1, 1]) { g.beginPath(); g.ellipse(w / 2 + s * w * 0.14, vy(v), w * 0.025, h * 0.02, 0, 0, Math.PI * 2); g.fill(); }
+      g.globalCompositeOperation = "source-over";
+    }
+    // the edge a touch darker, the midrib lighter, the veins
+    const eg = g.createLinearGradient(0, 0, w, 0); eg.addColorStop(0, "rgba(10,30,10,0.35)"); eg.addColorStop(0.08, "rgba(10,30,10,0)");
+    eg.addColorStop(0.92, "rgba(10,30,10,0)"); eg.addColorStop(1, "rgba(10,30,10,0.35)");
+    g.globalCompositeOperation = "source-atop"; g.fillStyle = eg; g.fillRect(0, 0, w, h);
+    if (kind === "snake") {           // wavy bands across, and the yellow edges of a 'Laurentii'
+      for (let v = 0; v < 1; v += 0.035 + r() * 0.02) { g.strokeStyle = r() < 0.5 ? "rgba(140,180,120,0.35)" : "rgba(15,40,20,0.45)"; g.lineWidth = 3 + r() * 6;
+        g.beginPath(); for (let x = 0; x <= w; x += 16) g.lineTo(x, vy(v) + Math.sin(x / 30 + v * 40) * 6); g.stroke(); }
+      g.fillStyle = "#d8c75a"; g.fillRect(0, 0, w * 0.1, h); g.fillRect(w * 0.9, 0, w * 0.1, h);
+    }
+    if (kind === "spider") { g.fillStyle = "#f1efd2"; g.fillRect(w * 0.36, 0, w * 0.28, h); g.fillStyle = "rgba(90,160,70,0.6)"; g.fillRect(w * 0.47, 0, w * 0.06, h); }
+    if (kind === "calathea") {        // the feathered pale pattern along the midrib, dark between
+      for (let v = 0.06; v < 0.94; v += 0.07) for (const s of [-1, 1]) { g.fillStyle = "rgba(170,205,140,0.55)";
+        g.beginPath(); g.ellipse(w / 2 + s * w * 0.18, vy(v), w * 0.16, h * 0.018, s * 0.5, 0, Math.PI * 2); g.fill(); }
+    }
+    g.strokeStyle = kind === "spider" ? "rgba(0,0,0,0)" : "rgba(200,222,160,0.4)"; g.lineWidth = kind === "snake" ? 0 : 4;
+    g.beginPath(); g.moveTo(w / 2, h); g.lineTo(w / 2, 0); g.stroke();
+    if (kind === "pothos" || kind === "calathea" || kind === "ficus" || kind === "monstera") {
+      g.strokeStyle = "rgba(190,215,150,0.2)"; g.lineWidth = 2;
+      for (let v = 0.08; v < 0.9; v += 0.11) for (const s of [-1, 1]) { g.beginPath(); g.moveTo(w / 2, vy(v)); g.quadraticCurveTo(w / 2 + s * w * 0.25, vy(v + 0.05), w / 2 + s * w * 0.46, vy(v + 0.14)); g.stroke(); }
+    }
+    if (kind === "pothos") {          // golden pothos: cream-yellow streaks
+      for (let k = 0; k < 14; k++) { g.strokeStyle = `rgba(220,205,110,${0.12 + r() * 0.22})`; g.lineWidth = 3 + r() * 8; const v = r(), s = r() < 0.5 ? -1 : 1;
+        g.beginPath(); g.moveTo(w / 2 + s * r() * w * 0.1, vy(v)); g.lineTo(w / 2 + s * w * (0.2 + r() * 0.3), vy(v + 0.04 + r() * 0.08)); g.stroke(); }
+    }
+    const sh = g.createLinearGradient(0, h, 0, 0); sh.addColorStop(0, "rgba(255,255,255,0)"); sh.addColorStop(0.6, "rgba(255,255,240,0.05)"); sh.addColorStop(1, "rgba(255,255,240,0.12)");
+    g.fillStyle = sh; g.fillRect(0, 0, w, h);    // new growth lighter towards the tip
+    g.globalCompositeOperation = "source-over";
+  });
+}
+const FLORA = new Map(), ATLAS_KINDS = ["pothos", "snake", "monstera", "fern", "spider", "calathea", "ficus"];
+/* every leaf kind, the stalks and the soil share one texture (four cells by two: the kinds, then a cell half stalk grey, half soil),
+   so a group's greenery is one mesh, one draw call */
+let FLORA_ATLAS = null;
+function floraAtlas() {
+  if (FLORA_ATLAS) return FLORA_ATLAS;
+  const tex = canvasTex(1024, 1024, (g, w, h) => {
+    ATLAS_KINDS.forEach((k, i) => { const t = leafTexture(k); g.drawImage(t.image, (i % 4) * 256, (1 - Math.floor(i / 4)) * 512); t.dispose(); });
+    g.fillStyle = "#d9d9d4"; g.fillRect(768, 256, 256, 256);                                 // the stalks (their colour is per vertex)
+    g.drawImage(SOIL_TEX.image, 768, 0, 256, 256);
+  });
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  const m = new THREE.MeshStandardMaterial({ map: tex, vertexColors: true, roughness: 0.55, side: THREE.DoubleSide, alphaTest: 0.5 });
+  m.userData.depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: tex, alphaTest: 0.5 });
+  return FLORA_ATLAS = clipMat(reg(m));
+}
+function atlasUV(geo, kind) {        // a kind's (u, v) into its cell
+  const uv = geo.attributes.uv, i = ATLAS_KINDS.indexOf(kind);
+  for (let k = 0; k < uv.count; k++) {
+    let u = uv.getX(k), v = uv.getY(k);
+    if (i >= 0) { u = ((i % 4) + 0.02 + u * 0.96) / 4; v = (Math.floor(i / 4) + 0.01 + v * 0.98) / 2; }
+    else if (kind === "stem") { u = 0.8 + u * 0.15; v = 0.53 + (v % 1) * 0.2; }
+    else { u = 0.76 + u * 0.23; v = 0.76 + v * 0.23; }                                      // the soil
+    uv.setXY(k, u, v);
+  }
+}
+function floraMat(kind) {            // the atlas for leaves, stalks and soil; terracotta its own
+  if (kind !== "terracotta") return floraAtlas();
+  if (!FLORA.has(kind)) FLORA.set(kind, clipMat(reg(new THREE.MeshStandardMaterial({ map: TERRACOTTA, roughness: 0.88, color: "#ffffff" }))));
+  return FLORA.get(kind);
+}
+const SOIL_TEX = canvasTex(128, 128, (g, w, h) => { const r = rnd(7); g.fillStyle = "#3a2a1f"; g.fillRect(0, 0, w, h);
+  for (let k = 0; k < 900; k++) { const c = 30 + r() * 50; g.fillStyle = `rgb(${c + 18},${c + 6},${c - 4})`; g.fillRect(r() * w, r() * h, 1 + r() * 3, 1 + r() * 3); }
+  for (let k = 0; k < 40; k++) { g.fillStyle = "rgba(220,215,200,0.6)"; g.fillRect(r() * w, r() * h, 2, 2); } });   // a little perlite
+const TERRACOTTA = canvasTex(256, 128, (g, w, h) => { const r = rnd(11); g.fillStyle = "#b8653f"; g.fillRect(0, 0, w, h);
+  for (let k = 0; k < 700; k++) { const a = r() * 0.12; g.fillStyle = r() < 0.5 ? `rgba(90,40,20,${a})` : `rgba(240,200,170,${a})`; g.fillRect(r() * w, r() * h, 2 + r() * 8, 1 + r() * 4); }
+  g.fillStyle = "rgba(235,225,205,0.25)"; for (let k = 0; k < 12; k++) g.fillRect(r() * w, h * (0.7 + r() * 0.3), 6 + r() * 30, 3 + r() * 8); });   // mineral bloom near the foot
+function floraBatch(g) { return g.userData.flora || (g.userData.flora = new Map()); }
+function floraAdd(B, mat, geo, col, kind) {
+  if (geo.index) geo = geo.toNonIndexed();
+  if (kind && !col) col = new THREE.Color(1, 1, 1);
+  if (col) { const n = geo.attributes.position.count, a = new Float32Array(n * 3), uv = geo.attributes.uv, leaf = ATLAS_KINDS.includes(kind);
+    for (let i = 0; i < n; i++) { const k = leaf ? 0.8 + 0.2 * uv.getY(i) : 1; a[i * 3] = col.r * k; a[i * 3 + 1] = col.g * k; a[i * 3 + 2] = col.b * k; }   // darker at the stalk
+    geo.setAttribute("color", new THREE.BufferAttribute(a, 3)); }
+  if (kind) atlasUV(geo, kind);
+  if (!B.has(mat)) B.set(mat, []); B.get(mat).push(geo);
+}
+function floraFlush(g, parent = g) {     // the group's plants, merged: one mesh a material
+  const B = g.userData.flora; if (!B) return;
+  for (const [mat, geos] of B) {
+    const keep = ["position", "normal", "uv", "color"].filter(k => geos.every(q => q.attributes[k]));
+    geos.forEach(q => Object.keys(q.attributes).forEach(k => { if (!keep.includes(k)) q.deleteAttribute(k); }));
+    const m = new THREE.Mesh(mergeGeometries(geos), mat); m.userData.flora = true;
+    if (mat.userData.depth) m.customDepthMaterial = mat.userData.depth;
+    parent.add(shadow(m)); geos.forEach(q => q.dispose());
+  }
+  g.userData.flora = null;
+}
+function leafGeo(kind, len, fold, curl, twist = 0) {   // a leaf len metres long along +y, its face +z, folded and curled
+  const K = FLORA_KINDS[kind], NL = K.rows || 9, NC = 4, P = [], U = [], I = [];
+  for (let i = 0; i <= NL; i++) {
+    const t = i / NL, w = K.w(t) * len;
+    for (let j = 0; j <= NC; j++) {
+      const s = j / NC * 2 - 1, x = s * w, z = fold * Math.abs(s) * w - curl * len * t * t, c = Math.cos(twist * t), sn = Math.sin(twist * t);
+      P.push(x * c - z * sn, t * len, x * sn + z * c); U.push(0.5 + s * 0.5, t);
     }
   }
-  if (leaves.length) shell.add(shadow(new THREE.Mesh(mergeGeometries(leaves), leaf)));
-  if (leaves2.length) shell.add(shadow(new THREE.Mesh(mergeGeometries(leaves2), leaf2)));
-  if (vines.length) shell.add(new THREE.Mesh(mergeGeometries(vines), vine));
+  for (let i = 0; i < NL; i++) for (let j = 0; j < NC; j++) { const a = i * (NC + 1) + j, b = a + NC + 1; I.push(a, b, a + 1, a + 1, b, b + 1); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute("uv", new THREE.Float32BufferAttribute(U, 2));
+  geo.setIndex(I); geo.computeVertexNormals(); return geo;
+}
+const _fx = new THREE.Vector3(), _fz = new THREE.Vector3(), _fm = new THREE.Matrix4();
+function leafAt(B, kind, pos, dir, len, r, o = {}) {   // a leaf from pos (world) pointing along dir, face up, rolled a little at random
+  const Y = dir.clone().normalize(), ref = Math.abs(Y.y) > 0.92 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+  _fx.crossVectors(Y, ref).normalize(); _fz.crossVectors(_fx, Y).normalize();
+  const roll = o.roll ?? (r() - 0.5) * 0.7; _fx.applyAxisAngle(Y, roll); _fz.applyAxisAngle(Y, roll);
+  const geo = leafGeo(kind, len, o.fold ?? 0.25, o.curl ?? 0.12, o.twist ?? 0);
+  geo.applyMatrix4(_fm.makeBasis(_fx, Y, _fz).setPosition(pos));
+  const tone = o.tone ?? (0.74 + r() * 0.3), hue = (r() - 0.5) * 0.06;
+  floraAdd(B, floraMat(kind), geo, new THREE.Color(tone * (1 + hue), tone, tone * (1 - hue)), kind);
+}
+function stemAlong(B, pts, rad, col) {   // a stalk or a vine through world points
+  const curve = new THREE.CatmullRomCurve3(pts), geo = new THREE.TubeGeometry(curve, Math.max(6, pts.length * 5), rad, 5, false);
+  floraAdd(B, floraMat("stem"), geo, new THREE.Color(col), "stem"); return curve;
+}
+const dirOf = (az, el) => new THREE.Vector3(Math.cos(el) * Math.cos(az), Math.sin(el), Math.cos(el) * Math.sin(az));
+/* the kinds; base is the soil's centre (world), size the plant's reach in cm, spread the pot's radius in cm */
+const FLORA_BUILD = {
+  pothos(B, base, size, r, spread) {          // a mound of heart-shaped leaves on short stalks
+    const n = 12 + Math.round(size / 1.6);
+    for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2, rr = (0.2 + r() * 0.85) * spread * M, h = (1 + r() * size * 0.22) * M;   // a low mound, spilling over the rim
+      const p = base.clone().add(new THREE.Vector3(Math.cos(a) * rr, h, Math.sin(a) * rr));
+      stemAlong(B, [base.clone().add(new THREE.Vector3(Math.cos(a) * rr * 0.2, 0, Math.sin(a) * rr * 0.2)), p], 0.0015, "#5f7d3a");
+      leafAt(B, "pothos", p, dirOf(a + (r() - 0.5) * 0.8, -0.35 + r() * 0.75), (4.5 + r() * 4) * M, r, { fold: 0.1, curl: 0.22 }); }
+  },
+  snake(B, base, size, r, spread) {           // upright banded blades
+    const n = 5 + Math.round(r() * 4);
+    for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2, rr = r() * spread * 0.45 * M;
+      const p = base.clone().add(new THREE.Vector3(Math.cos(a) * rr, -0.01, Math.sin(a) * rr));
+      leafAt(B, "snake", p, dirOf(a, Math.PI / 2 - 0.08 - r() * 0.22), (size * (0.6 + r() * 0.4)) * M, r, { fold: 0.35, curl: 0.02, twist: (r() - 0.5) * 1.2 }); }
+  },
+  monstera(B, base, size, r) {                // split leaves on long stalks, arching out
+    const n = 5 + Math.round(r() * 3);
+    for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2 + r() * 0.6, el = 0.55 + r() * 0.6, L = size * (0.45 + r() * 0.35) * M;
+      const end = base.clone().add(dirOf(a, el).multiplyScalar(L)), mid = base.clone().add(dirOf(a, el + 0.25).multiplyScalar(L * 0.5));
+      stemAlong(B, [base.clone(), mid, end], 0.0035, "#3f6b30");
+      leafAt(B, "monstera", end, dirOf(a + (r() - 0.5) * 0.4, -0.1 + r() * 0.35), size * (0.32 + r() * 0.14) * M, r, { fold: 0.12, curl: 0.12 }); }
+  },
+  fern(B, base, size, r) {                    // arching fronds all round
+    const n = 14 + Math.round(r() * 8);
+    for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2;
+      leafAt(B, "fern", base.clone().add(new THREE.Vector3(0, 0.01, 0)), dirOf(a, 0.5 + r() * 0.8), size * (0.6 + r() * 0.4) * M, r, { fold: 0.05, curl: 0.45 + r() * 0.3, roll: 0 }); }
+  },
+  spider(B, base, size, r) {                  // arching striped blades
+    const n = 18 + Math.round(r() * 10);
+    for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2;
+      leafAt(B, "spider", base.clone(), dirOf(a, 0.7 + r() * 0.7), size * (0.5 + r() * 0.5) * M, r, { fold: 0.3, curl: 0.5 + r() * 0.4, twist: (r() - 0.5) * 0.8 }); }
+  },
+  calathea(B, base, size, r) {                // oval patterned leaves on upright stalks
+    const n = 7 + Math.round(r() * 5);
+    for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2, el = 1.0 + r() * 0.45, L = size * (0.35 + r() * 0.3) * M;
+      const end = base.clone().add(dirOf(a, el).multiplyScalar(L));
+      stemAlong(B, [base.clone(), end], 0.0018, "#4f6b34");
+      leafAt(B, "calathea", end, dirOf(a + (r() - 0.5) * 0.3, 0.5 + r() * 0.6), size * (0.3 + r() * 0.12) * M, r, { fold: 0.15, curl: 0.06 }); }
+  },
+};
+/* a trailing pothos vine through world points, its leaves alternating along it */
+function vineAlong(B, pts, r, leafCm = 5) {
+  const curve = stemAlong(B, pts, 0.0018, "#5f7d3a"), L = curve.getLength(), step = (leafCm * 0.75) * M;
+  let side = 1;
+  for (let d = 0.04; d < L; d += step * (0.8 + r() * 0.5)) {
+    const t = d / L, p = curve.getPointAt(t), tg = curve.getTangentAt(t), out = new THREE.Vector3(-tg.z, 0, tg.x).normalize().multiplyScalar(side);
+    const dir = out.clone().multiplyScalar(0.8).add(new THREE.Vector3(0, -0.35 - r() * 0.4, 0)).add(tg.clone().multiplyScalar(0.3));
+    leafAt(B, "pothos", p, dir, leafCm * (0.65 + r() * 0.5) * (1 - 0.35 * t) * M, r, { fold: 0.1, curl: 0.15, tone: 0.85 + r() * 0.28 }); side = -side;
+  }
+}
+function potGeo(rad, h) {            // a turned pot (cm): a rolled rim, a slight taper, its inner lip
+  const p = [[0, 0], [rad * 0.78, 0], [rad * 0.8, h * 0.04], [rad * 0.95, h * 0.82], [rad * 1.04, h * 0.84], [rad * 1.05, h], [rad * 0.94, h], [rad * 0.93, h * 0.88], [0, h * 0.88]];
+  return new THREE.LatheGeometry(p.map(([x, y]) => new THREE.Vector2(x * M, y * M)), 28);
+}
+let FLORA_STYLE = "mix", FLORA_POTS = "mine";   // Look's plant style ("mix", the plan; "lush"; "easy") and pot finish ("mine" or one for all)
+const POT_FINISH = { white: ["#f1eee8", 0.25], black: ["#26262a", 0.85] };
+function potFinish(k) { if (k === "terracotta") return floraMat("terracotta"); const key = "pot_" + k;
+  if (!FLORA.has(key)) FLORA.set(key, clipMat(reg(new THREE.MeshStandardMaterial({ color: POT_FINISH[k][0], roughness: POT_FINISH[k][1] })))); return FLORA.get(key); }
+const FLORA_SPOTS = [];              // the plan's plants (the stand, the sill, the shelf's pothos): rebuilt when the style or the pots change
+function floraSpot(g, build) { FLORA_SPOTS.push({ g, build }); build(); }
+function floraRebuild() {
+  for (const { g, build } of FLORA_SPOTS) { [...g.children].forEach(c => { if (c.userData.flora) { g.remove(c); c.geometry.dispose(); } }); build(); }
+  reshadow(); dirty();
+}
+function floraKind(r, big, h) {      // which kind for a pot, by its size and the style
+  if (FLORA_STYLE === "easy") return big ? "snake" : r() < 0.5 ? "snake" : "pothos";
+  if (big) return FLORA_STYLE === "lush" || r() < 0.6 ? "monstera" : "snake";
+  const pick = r(); return h > 9 ? (pick < 0.5 ? "snake" : "calathea") : pick < 0.3 ? "fern" : pick < 0.55 ? "spider" : pick < 0.8 ? "calathea" : "pothos";
+}
+/* a pot at (x, y, z) room cm, rad its radius, h how tall the plant grows, trail strands over its front: the plant's kind is picked to
+   suit; potM the pot's own material (its versions recolour it). Into g's batch: floraFlush(g) once the group's plants are in */
+function potPlant(g, x, y, z, rad, h, trail, r, potM, leafM, o = {}) {
+  const B = floraBatch(g), ph = rad * 1.5, pot = potGeo(rad, ph); pot.translate(-x * M, y * M, z * M);
+  floraAdd(B, FLORA_POTS !== "mine" ? potFinish(FLORA_POTS) : o.terracotta ? floraMat("terracotta") : potM, pot);
+  const soil = new THREE.CircleGeometry(rad * 0.93 * M, 20); soil.rotateX(-Math.PI / 2); soil.translate(-x * M, (y + ph * 0.86) * M, z * M); floraAdd(B, floraMat("soil"), soil, null, "soil");
+  const base = v3(x, y + ph * 0.86, z), lush = FLORA_STYLE === "lush" ? 1.25 : 1;
+  const kind = o.kind || (trail > 0 ? "pothos" : floraKind(r, rad >= 9 || h >= 20, h));
+  FLORA_BUILD[kind](B, base, Math.max(10, h * 2.2) * lush, r, rad);
+  for (let s = 0; s < Math.round(trail * lush); s++) {
+    const a = (r() - 0.5) * 2.2 + (o.trailAz ?? Math.PI / 2), len = 14 + r() * 24 * lush, ex = x + Math.cos(a) * rad * 1.05, ez = z + Math.sin(a) * rad * 1.05;
+    const pts = [v3(x + Math.cos(a) * rad * 0.4, y + ph + 1, z + Math.sin(a) * rad * 0.4), v3(ex, y + ph + 1.5, ez)];
+    let fx = ex, fz = ez, fy = y + ph;
+    if (o.edgeZ !== undefined) { fx = ex + (r() - 0.5) * 4; fz = o.edgeZ + 1.2; fy = y + 0.5; pts.push(v3((ex + fx) / 2, y + ph * 0.5 + 1, (ez + fz) / 2), v3(fx, fy + 0.8, fz)); }   // over the shelf's front, then down
+    for (let j = 1; j <= 4; j++) pts.push(v3(fx + Math.cos(a) * j * 0.6 + Math.sin(j + s) * 1.2, fy - len * j / 4, fz + (o.edgeZ !== undefined ? 0.6 * j : Math.sin(a) * j * 0.9)));
+    vineAlong(B, pts, r);
+  }
+  if (!g.userData.floraHold) floraFlush(g);
+}
+
+function sillPlants(x0, x1, y, zBack, zFront) {   // v40: seven pots on the deep sill, the trailers over its nose
+  const potCols = ["#d8cfc0", "#b5643f", "#2f2f2f", "#e9e4da", "#8a9a7b"], potMs = potCols.map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: c === "#e9e4da" ? 0.3 : 0.7 })));
+  const g = new THREE.Group(); g.name = "sillplants"; shell.add(g);
+  floraSpot(g, () => {
+    const r = rnd(29), hold = { userData: { floraHold: true } }, n = 7, zc = (zBack + zFront) / 2, step = (x1 - x0 - 30) / (n - 1);
+    for (let i = 0; i < n; i++) {
+      const x = x0 + 15 + i * step + (r() - 0.5) * 6, rad = 5 + r() * 3.5, z = zc + (r() - 0.5) * 4, trail = i % 3 === 1;
+      potPlant(hold, x, y, z, rad, trail ? 6 : 8 + r() * 10, trail ? 3 : 0, r, potMs[i % potMs.length], null, { terracotta: i % potMs.length === 1, edgeZ: zFront });
+    }
+    floraFlush(hold, g); });
+
 }
 
 /* ---------------------------------------------------------------- lights */
@@ -2653,7 +2807,7 @@ function lb(g, x, y, z, w, h, d, mat, cast = true) {      // a box in a movable'
 function mergeStatic(g) {
   g.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), by = new Map();
-  for (const o of g.children) if (o.isMesh && !o.children.length && o.visible && !Array.isArray(o.material) && !o.isInstancedMesh && !o.isSkinnedMesh) {
+  for (const o of g.children) if (o.isMesh && !o.children.length && o.visible && !Array.isArray(o.material) && !o.isInstancedMesh && !o.isSkinnedMesh && !o.userData.flora) {
     const k = o.material.uuid + (o.castShadow ? "c" : "") + (o.receiveShadow ? "r" : "");
     if (!by.has(k)) by.set(k, []); by.get(k).push(o);
   }
@@ -2701,10 +2855,10 @@ function capShadows(n) {   // the brightest n spotlights cast shadows; the rest 
    edges in edges (each strand picks one: the shelf's front, or v36's gap behind the plant shelf) */
 let plantBG = null;
 function hangPlant(par, x, top, z, edges, seed, gapZ) {   // v38: gapZ [the shelf's end, the boxing's face]: the strands fall through that gap
-  const PB = R.PLANT_B, pot = reg(new THREE.MeshStandardMaterial({ color: "#e9e4da", roughness: 0.7 })), leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide }));
-  const vine = reg(new THREE.MeshStandardMaterial({ color: "#4f6b3a", roughness: 0.8 }));
-  const potM = new THREE.Mesh(new THREE.CylinderGeometry(PB.pot / 2 * M, PB.pot * 0.38 * M, 0.12, 24), pot); potM.position.copy(v3(x, top + 6, z)); par.add(shadow(potM));
-  const r = rnd(seed), leaves = [], vines = [];
+  const PB = R.PLANT_B, pot = FLORA_POTS !== "mine" ? potFinish(FLORA_POTS) : (hangPlant.pot = hangPlant.pot || reg(new THREE.MeshStandardMaterial({ color: "#e9e4da", roughness: 0.3 })));   // v40: a glazed pot, a real pothos
+  const hold = { userData: {} }, B = floraBatch(hold), pg = potGeo(PB.pot / 2, 12); pg.translate(-x * M, top * M, z * M); floraAdd(B, pot, pg);
+  const soil = new THREE.CircleGeometry(PB.pot / 2 * 0.93 * M, 20); soil.rotateX(-Math.PI / 2); soil.translate(-x * M, (top + 10.3) * M, z * M); floraAdd(B, floraMat("soil"), soil, null, "soil");
+  const r = rnd(seed);
   for (let k = 0; k < PB.strands; k++) {
     const e = edges[k % edges.length], dir = e > x ? 1 : -1;   // behind the pot (towards the wall) or in front of it
     const len = PB.trail[0] + r() * (PB.trail[1] - PB.trail[0]);
@@ -2718,57 +2872,41 @@ function hangPlant(par, x, top, z, edges, seed, gapZ) {   // v38: gapZ [the shel
     pts = [v3(x + dir * 2 + (r() - 0.5) * 6, top + 10, z0), v3(x0 - dir * 2, top + 2, z0 + (r() - 0.5) * 4)];
     for (let j = 1; j <= 5; j++) pts.push(v3(x0 + dir * (j * 0.6 + r() * 1.5) * (dir > 0 ? 0.3 : 1), top - len * j / 5, z0 + Math.sin(j + k) * 4));
     }
-    const curve = new THREE.CatmullRomCurve3(pts);
-    vines.push(new THREE.TubeGeometry(curve, 32, 0.0025, 5, false));
-    for (let t = 0.06; t < 1; t += 0.055 + r() * 0.03) {
-      const q = curve.getPoint(t), g = new THREE.SphereGeometry(0.026 + r() * 0.01, 8, 6);
-      g.scale(1, 0.18, 0.8); g.rotateZ((r() - 0.5) * 1.2); g.rotateY(r() * Math.PI); g.translate(q.x - 0.012 * dir * -1, q.y, q.z); leaves.push(g);
-    }
+    vineAlong(B, pts, r, 6);
   }
-  for (let i = 0; i < 18; i++) { const g = new THREE.SphereGeometry(0.03, 8, 6); g.scale(1, 0.3, 1); const q = v3(x + (r() - 0.5) * 12, top + 13 + r() * 6, z + (r() - 0.5) * 14); g.translate(q.x, q.y, q.z); leaves.push(g); }
-  par.add(shadow(new THREE.Mesh(mergeGeometries(leaves), leaf))); par.add(new THREE.Mesh(mergeGeometries(vines), vine));
-}
-function potPlant(g, x, y, z, rad, h, trail, r, potM, leafM) {
-  const p = new THREE.Mesh(new THREE.CylinderGeometry(rad * M, rad * 0.8 * M, rad * 1.5 * M, 16), potM);
-  p.position.copy(v3(x, y + rad * 0.75, z)); g.add(shadow(p));
-  const gs = [];
-  for (let k = 0; k < 9 + h; k++) {
-    const t = k / (9 + h), q = v3(x + (r() - 0.5) * rad * 2, y + rad * 1.5 + 1 + t * h * 2.2, z + (r() - 0.5) * rad * 1.6);
-    const s = new THREE.SphereGeometry((0.02 + r() * 0.014) * (1.2 - t * 0.4), 7, 5); s.scale(0.8, 0.55, 0.32); s.rotateZ((r() - 0.5) * 1.4); s.rotateY(r() * 3);
-    s.translate(q.x, q.y, q.z); gs.push(s);
-  }
-  for (let sI = 0; sI < trail; sI++) {
-    const xx = x + (r() - 0.5) * rad * 1.6, zz = z + rad * 0.7, len = 12 + r() * 20;
-    for (let t = 0; t < len; t += 3) { const s = new THREE.SphereGeometry(0.013, 6, 4); s.scale(0.8, 0.45, 0.4); const q = v3(xx + Math.sin(t / 5 + sI) * 1.5, y + rad * 1.3 - t, zz); s.translate(q.x, q.y, q.z); gs.push(s); }
-  }
-  g.add(shadow(new THREE.Mesh(mergeGeometries(gs), leafM)));
+  FLORA_BUILD.pothos(B, v3(x, top + 10.3, z), 20, r, PB.pot / 2);
+  floraFlush(hold, par);
 }
 let growGlow = [];
 const GLOW_TEX = canvasTex(128, 128, (c, w, h) => { const gr = c.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2);
   gr.addColorStop(0, "rgba(255,214,160,0.75)"); gr.addColorStop(1, "rgba(255,214,160,0)"); c.fillStyle = gr; c.fillRect(0, 0, w, h); });
 function buildPlantsAndRecords() {
   const r = rnd(73), PS = R.PLANT_STAND, RS = R.RECORD_SHELF;
-  const leafM = reg(new THREE.MeshStandardMaterial({ color: "#4a8640", roughness: 0.65, side: THREE.DoubleSide }));
   const pots = ["#ece6da", "#c9c2b4", "#b5643f", "#7f8f72", "#2f2f2f"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.75 })));
   // v18.1: the plant stand from the client's listing: 98 × 29.5 × 158, slatted wood, two five-tier towers and an open middle with two shelves
   { const g = new THREE.Group(), wood = reg(new THREE.MeshStandardMaterial({ color: PS.col, map: OAK_TEX, roughness: 0.6 })); wood.userData.noTint = true;
     const w = PS.w, d = PS.d, h = PS.h, [cl, cm, cr] = PS.cols, pt = PS.post;
     const xs = [-w / 2 + pt / 2, -w / 2 + cl, w / 2 - cr, w / 2 - pt / 2];                  // the four post lines across
     for (const x of xs) for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, x, 0, z, pt, h, pt, wood);
+    const standPots = [];                                                                       // v40: where the stand's pots go; its plants are a spot
     const tier = (xa, xb, y, plants) => {                                                    // slats front to back, rails at front and back
       for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, (xa + xb) / 2, y - 2, z, xb - xa, 2, pt, wood);
       const n = Math.max(4, Math.round((xb - xa) / 4.5));
       for (let k = 0; k < n; k++) lb(g, xa + 1.5 + k * (xb - xa - 3) / (n - 1), y, 0, 2.2, 1.2, d - 3, wood);
       for (let j = 0; j < plants; j++) {
         const rad = 5 + r() * 3.5, px = xa + (j + 0.5) * (xb - xa) / plants;
-        potPlant(g, px, y + 1.2, (r() - 0.5) * 6, rad, Math.round(4 + r() * 8), r() < 0.35 ? 2 : 0, r, pots[Math.floor(r() * pots.length)], leafM);
+        const pm = Math.floor(r() * pots.length);
+        standPots.push([px, y + 1.2, (r() - 0.5) * 6, rad, Math.round(4 + r() * 8), r() < 0.35 ? 2 : 0, pm]);
       }
     };
     const L = [xs[0] - pt / 2, xs[1]], Rr = [xs[2], xs[3] + pt / 2], Mi = [xs[1], xs[2]];
     PS.tower.forEach((y, ti) => { tier(L[0], L[1], y, ti === 4 ? 1 : 1 + (r() < 0.5 ? 1 : 0)); tier(Rr[0], Rr[1], y, ti === 4 ? 1 : 1 + (r() < 0.5 ? 1 : 0)); });
     PS.middle.forEach((y, mi) => tier(Mi[0], Mi[1], y, 1));
     for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, 0, h - 2, z, w, 2, pt, wood);  // the top rails across the open middle
-    potPlant(g, 0, PS.middle[0] + 1.2, 0, 9, 22, 0, r, pots[0], leafM);
+    standPots.push([0, PS.middle[0] + 1.2, 0, 9, 22, 0, 0]);
+    floraSpot(g, () => { const rr = rnd(173); g.userData.floraHold = true;
+      for (const [px, py, pz, rad, h, tr, pm] of standPots) potPlant(g, px, py, pz, rad, h, tr, rr, pots[pm], null, { terracotta: pm === 2, edgeZ: d / 2 });
+      g.userData.floraHold = false; floraFlush(g); });
     movable("plants", "Your plant stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].plants; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood], false, { when: () => !cornerHides("plants") });   // v37: a window-corner pick takes its place
     // v32: the idea of an uplight on the floor under the stand's open middle, throwing the leaves up the wall behind
     const upl = IDEA_G.plantlight = new THREE.Group(), blk = reg(new THREE.MeshStandardMaterial({ color: "#1b1c1f", roughness: 0.45 }));
@@ -2845,8 +2983,7 @@ const CATALOGUE = {
   sidetable: { label: "Side table", w: 45, d: 45, col: "#c48c57", build(g, m) {
     lb(g, 0, 48, 0, 45, 2.5, 45, m); for (const [x, z] of [[-19, -19], [19, -19], [-19, 19], [19, 19]]) lb(g, x, 0, z, 3.5, 48, 3.5, m); } },
   plant: { label: "Tall floor plant", w: 40, d: 40, col: "#d8cfc0", build(g, m) {
-    const leaf = reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide }));
-    potPlant(g, 0, 0, 0, 16, 26, 0, rnd(5), m, leaf); } },
+    potPlant(g, 0, 0, 0, 16, 26, 0, rnd(5), m, null); } },
   bookcase: { label: "Slim bookcase", w: 60, d: 30, col: "#c48c57", build(g, m) {
     // v34: closer to a real one: a recessed plinth, an overhanging top, books of every size (some leaning, a stack lying flat), two
     // baskets on the bottom shelf, a trailing plant, a framed print, a vase and a candle
@@ -2869,7 +3006,7 @@ const CATALOGUE = {
     let x = row(44, -26, 12); book(x + 3.2, 44, 2.6, 27, 19, 0.32); book(x + 7.4, 44, 3, 24, 17, 0.34);
     // a stack lying flat, a small trailing plant, a framed print
     for (let i = 0, yy = 80; i < 4; i++) { const bh = 2.2 + r() * 2; lb(g, -18 + (r() - 0.5) * 2, yy, 2, 22 - i * 1.5, bh, 17 - i, spines[(i * 3 + 1) % spines.length]); yy += bh; }
-    potPlant(g, 2, 80, 4, 6, 6, 3, rnd(41), mt("#d8cfc0"), reg(new THREE.MeshStandardMaterial({ color: "#3f7a3a", roughness: 0.65, side: THREE.DoubleSide })));
+    potPlant(g, 2, 80, 4, 6, 6, 3, rnd(41), mt("#d8cfc0"), null);
     const fr = lb(g, 18, 80, -10, 17, 22, 1.6, mt("#1f1f21")); fr.rotation.x = 0.12;
     lb(g, 18, 82.4, -9.0, 13, 17, 0.2, mt("#e7c9a0")).rotation.x = 0.12;
     // books again, and a bookend
@@ -3618,8 +3755,6 @@ function pickItem(e) {
   const o = hit.object, p = hit.point;
   const near = (obj, r) => !!obj && obj.getWorldPosition(new THREE.Vector3()).distanceTo(p) < r * M;
   if (S.site === "C" && (under(o, cab) || under(o, optC))) return "cab";
-  if (under(o, chairCab) || under(o, chairsIn) || under(o, chairsHook)) return "chaircab";
-  if (under(o, seatUp) || under(o, seatDown)) return "seat";
   if (under(o, lamp)) return "lamp";
   if (under(o, bar1)) return "bar1";
   if (under(o, bar2)) return "bar2";
@@ -3679,10 +3814,6 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id === "table") return [S.site === "A" ? "The flip-top on the breast (the alternative)" : "The flip-top by the stairs (the alternative)", folded ? "Folded" : `Open for ${S.dining}`, [
       btn("Open for six", { dining: "six" }, S.dining === "six"), btn("Open for four", { dining: "four" }, S.dining === "four"),
       btn(folded ? "Folded" : "Fold it", { dining: "folded" }, folded), btn("Show the dining cabinet", { site: "C" }), btn("Look at it", { view: "dining" })]];
-  if (id === "chaircab") return ["The flip-top's chair cupboard", S.chairs === "open" ? "Doors open" : "Doors shut", [
-      btn(S.chairs === "open" ? "Shut the doors" : "Open the doors", { chairs: S.chairs === "open" ? "cupboard" : "open" }), btn("Look at it", { view: "chairs" })]];
-  if (id === "seat") return ["The fold-down seat", S.seat === "down" ? "Down" : "Folded up", [
-      btn(S.seat === "down" ? "Fold it up" : "Fold it down", { seat: S.seat === "down" ? "up" : "down" })]];
   if (id === "wall") return ["The media wall", S.drawers ? "Every drawer pulled out" : "Drawers shut", [
       btn(S.drawers ? "Push the drawers in" : "Pull the drawers out", { drawers: S.drawers ? "in" : "out" }),
       btn(lv("bias") ? "TV off" : "TV on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"),
@@ -3925,7 +4056,7 @@ function frame(now) {
   if (glLost || (document.body.classList.contains("sheet-open") && !SH && !tween)) return;   // v35: nothing drawn behind the Plan's sheets (the last picture stays)
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
-    const f0 = performance.now(); syncRig(); gl.render(scene, camera); FT.calls = gl.info.render.calls; FT.tris = gl.info.render.triangles; need--; placeStickers(); FT[FT.n++ % 60] = performance.now() - f0;
+    const f0 = performance.now(); syncRig(); draw(); FT.calls = gl.info.render.calls; FT.tris = gl.info.render.triangles; need--; placeStickers(); FT[FT.n++ % 60] = performance.now() - f0;
     if (t) { const c = gl.getContext(); c.readPixels(0, 0, 1, 1, c.RGBA, c.UNSIGNED_BYTE, PX); probeT.push(performance.now() - t); probe--; if (!probe) autoQuality(); }
   }
 }
@@ -3938,7 +4069,7 @@ function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
   scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
   return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
     lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
-    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, goodPhone: GOOD_PHONE, slowDev };   // v39: which graphics card, and whether it starts in HD
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, ao: aoLive(), goodPhone: GOOD_PHONE, slowDev };   // v39: which graphics card, and whether it starts in HD
 }
 if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
   const box = document.createElement("div"); box.className = "r3d-perf";
@@ -3984,7 +4115,7 @@ function still(w, h) {
   capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
   MATS.forEach(m => { m.needsUpdate = true; if (m.userData.trans) m.transmission = m.userData.trans; });   // v39: real glass in the pictures
   updateCut(); reshadow();
-  gl.render(scene, camera);
+  aoComposer(w, h, 1).render();                                                           // v40: ambient occlusion in every picture
   MATS.forEach(m => { if (m.userData.trans) m.transmission = 0; });
   const url = canvas.toDataURL("image/png");
   gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
@@ -4401,7 +4532,7 @@ function start() {
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, leafTexture, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
     errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
     perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning

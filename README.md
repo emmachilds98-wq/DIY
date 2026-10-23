@@ -2,12 +2,18 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v39: a quicker 3D room, the new page, a slimmer plan
+## Media wall and dining wall, v40: real-looking plants, softer shading, plant options
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v39%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v40%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v40** ("more HD realistic plants, better rendering and graphics", more options, optimisations)
+- **Real-looking plants:** every leaf is shaped, folded and textured (veins, variegation, its own shade of green), in seven kinds: golden pothos, snake plant, monstera, Boston fern, spider plant, calathea and a rubber plant. The pots are turned, with soil and a terracotta texture. They're quicker to draw than the old blobs.
+- **Softer, more solid pictures:** ambient occlusion, the soft shade where things meet (under the sofa, between the books, in the corners), in every HD picture you save and live in HD on a PC graphics card.
+- **Plants to try in Look:** a plant style (your mix, lush, easy care) and one pot finish for all (terracotta, white glazed, matte black). The plan lists them with self-watering inserts, one line each with a price.
+- **Tidier code:** the flip-top's chair cupboard and fold-down seat, never shown since the dining cabinet became the only table, are gone.
 
 **New in v39** (the new page you approved, "PC should be using GPU", and the curtain pole)
 - **The curtain pole is 10 cm lower**, under the ceiling strip; the curtains clear the radiator and the rear speakers stand in front of them.

@@ -13,7 +13,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "39"
+VERSION = "40"
 REVISION = "37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, the lights in Views, Extras lined up"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
@@ -491,6 +491,9 @@ def other_options_html():
         (f"An {n(C8['top'][0])}-wide table", "The dining cabinet", f"{n(C8['len'])} long; four chairs inside, not six", "about the same", sup("padded")),
         ("A smooth or patterned ceiling", "The ceiling (test the Artex first)", "the whole ceiling", "200–700", sup("skimartex", "artextest")),
         ("Oak-effect beams, coffers or an LED cove", "The ceiling", "12 × 12 beams; cove 2 m lengths", "450–1,050", sup("pubeam", "orac")),
+        ("Easy-care plants (Look: Plants)", "The stand and the sill", "snake plants and pothos in 12 cm pots", "9–15 each", sup("snakeplant")),
+        ("One pot finish for all (Look: Pots)", "The stand, the sill, the shelf", "about 23 pots, 12–24 cm", "3–8 each", sup("persillade")),
+        ("Self-watering inserts", "The stand's bigger pots", "15 across, 1.2 litres, in a 16–17 pot", "7 each", sup("elhoinsert")),
         (f"Decor to try ({len(deco)} pieces)", "Round the room", "typical shop sizes", f"{dlo:,}–{dhi:,} together", ""),
         (f"Small ideas ({len(ideas.IDEAS)})", "Round the room", "drawn to the room", f"{ilo:,}–{ihi:,} together", ""),
     ]
@@ -1121,9 +1124,9 @@ def _plan(deck=False):
 
 <div class="p1">
 <h1>Home Network &amp; Media Wall Plan</h1>
-<p class="byline">Revised Oct 22, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
+<p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> the curtain pole 10 under the ceiling strip and the curtains just clear of the radiator, the rear speakers always in front of them, a quicker 3D room on PCs, and a slimmer plan: the firm version only. The other options are one line each in section 12; the 3D room shows them.</div>
+<div class="decision"><b>What changed:</b> real-looking plants in the 3D room and its pictures, soft shading where things meet, and three plant options to try (a plant style, one pot finish, self-watering inserts), one line each in section 12. The build is unchanged.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
