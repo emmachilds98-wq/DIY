@@ -286,12 +286,15 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d.trying .r3d-plansum { background: var(--ink); color: var(--cream); }
 /* v40.2, client: "take your plan price off and make a button for getting a good view of the room again if I'm positioned wrong and getting
    lost": the total shows only while trying options (as the change they make); Whole room flies back to the view from above */
-.r3d:not(.trying) .r3d-plansum { display: none; }
-.r3d-home { display: inline-flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 18px 0 14px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink); font: 700 14px Figtree, system-ui, sans-serif; cursor: pointer; box-shadow: var(--shade); }
-.r3d-home .ms { font-size: 22px; }
-.r3d-home.lost { animation: r3dLost 1.6s ease-in-out 3; }
+.r3d:not(.trying) .r3d-plansum, .r3d:not(.trying) .r3d-planbar { display: none; }
+.r3d-planbar { justify-content: center; }
+.r3d-bub.lost i { animation: r3dLost 1.6s ease-in-out 3; }
+#r3d-home { width: auto; min-width: 58px; white-space: nowrap; }
+.r3d-tryrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.r3d-painth { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.r3d-wallsel { min-height: 40px; border: 0; border-radius: 999px; padding: 0 14px; background: #efe7d8; color: var(--ink); font: 600 14px Figtree, system-ui, sans-serif; }
+#r3d-lightsh .r3d-litst { font: 500 13px Figtree, system-ui, sans-serif; color: var(--mut); margin-left: 6px; }
 @keyframes r3dLost { 50% { box-shadow: 0 0 0 6px oklch(0.8 0.12 85 / .55), var(--shade); } }
-.r3d.trying .r3d-home { display: none; }
 .r3d-back { position: absolute; left: 16px; top: max(84px, calc(env(safe-area-inset-top) + 72px)); z-index: 6; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink); font: 700 14px Figtree, system-ui, sans-serif; box-shadow: var(--shade); cursor: pointer; }
 .r3d-back[hidden] { display: none; }
 .r3d.tools-open .r3d-planbar, .r3d.editing .r3d-planbar, .r3d.touring .r3d-planbar, .r3d.nogl .r3d-planbar { display: none; }
@@ -487,7 +490,7 @@ def controls(gallery=""):
     # v31, client: "explore what could go next to the dining cabinet in the compact version": the wall between it and the pipe boxing
     BESIDE_SEG = ('<h3 class="r3d-sub">Beside the cabinet</h3>'
                   + seg("beside", [(k, v["name"]) for k, v in G.BESIDE["opts"].items()], f"The {G.BESIDE['len']:.0f} cm of wall by the pipe boxing")
-                  + '<p class="caption">The open table door lies back over this wall while you eat, so anything here stays slim: '
+                  + '<p class="caption">The open table door covers this wall, so keep it slim: '
                   f'{G.BESIDE["depth"]:g} cm deep at most. <button type="button" class="chip" data-view="beside">See it</button></p>')
     picks = ('<div class="grp r3d-picks" id="r3d-picks"><span class="label">Your picks</span>'
              '<p class="r3d-picklist" id="r3d-picklist" aria-live="polite">Nothing switched on yet: turn on an idea, a suggestion or a decor choice and it shows here.</p>'
@@ -495,10 +498,9 @@ def controls(gallery=""):
              '<button type="button" class="chip" id="r3d-picksave" hidden>Save for the next round</button><span class="r3d-hint2" id="r3d-pickst" aria-live="polite"></span></div></div>')
     paints = [(k, h, n.split(" No.")[0].replace("Farrow & Ball ", "").replace("Little Greene ", "")) for k, (h, n) in R.PAINTS.items()]
     walls = [("all", "All walls"), ("media", "Media wall"), ("breast", "Chimney breast"), ("door", "Door wall"), ("stairs", "Stairs wall"), ("window", "Window wall"), ("pc", "PC wall")]   # v38
-    swatches = ('<div class="grp"><span class="label">Wall paint: all the walls or one (or tap a wall in Edit room)</span>'
-                '<div class="seg r3d-wallpick" role="group" aria-label="Which wall">'
-                + "".join(f'<button type="button" class="chip" data-lookwall="{k}" aria-pressed="{str(k == "all").lower()}"><i class="dot"></i>{n}</button>' for k, n in walls)
-                + '<button type="button" class="chip" data-wallmatch="1" hidden>Same as the others</button></div>'
+    swatches = ('<div class="grp"><div class="r3d-painth"><span class="label">Paint</span>'   # v41: the paints first; one wall from the list
+                '<select id="r3d-wallsel" class="r3d-wallsel" aria-label="Which wall">' + "".join(f'<option value="{k}">{n}</option>' for k, n in walls) + '</select>'
+                '<button type="button" class="chip" data-wallmatch="1" hidden>Same as the others</button></div>'
                 '<div class="r3d-swatches" role="group" aria-label="Wall paint">'
                 + "".join(f'<button type="button" data-paint="{k}" aria-pressed="false"><i style="--c:{h}"></i>{html.escape(n)}</button>' for k, h, n in paints)
                 + '<button type="button" data-paintcustom="#2c5643" aria-pressed="false"><i style="--c:#2c5643"></i>Deep green</button>'
@@ -510,11 +512,11 @@ def controls(gallery=""):
                  '<button type="button" class="chip" id="r3d-findgo">Go</button></div><datalist id="r3d-findlist"></datalist></div>'
                  # v39, item 13: measure in 3D
                  + '<div class="grp"><div class="seg"><button type="button" class="chip" id="r3d-measure"><span class="ms" aria-hidden="true">straighten</span> Measure: tap two points</button></div></div>'
-                 + '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
-                 f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
+                 + f'<div class="grp r3d-tourgo"><div class="seg"><button class="chip" type="button" id="r3d-tourbtn" title="{len(tour())} stops, about a minute"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
+                 '<button type="button" class="chip" id="r3d-full"><span class="ms" aria-hidden="true">fullscreen</span> Full screen</button></div></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
                  # v37: the lights live here now (they were their own tab): the presets, daytime, every light's slider and colour, the quality
-                 + '<h3 class="r3d-sub" id="r3d-lightsh">Lights</h3>' + lights
+                 + '<h3 class="r3d-sub" id="r3d-lightsh">Lights <span class="r3d-litst" id="r3d-litst"></span></h3>' + lights
                  + '<details class="r3d-more r3d-fold"><summary>More: quality, moving round, sharing, pictures</summary>'
                  + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality")
                  + '<h3 class="r3d-sub">Moving round and sharing</h3>'
@@ -533,11 +535,13 @@ def controls(gallery=""):
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
                  + '<p class="caption"><b>Tap something in the room to work it:</b> doors open, drawers pull out, lights switch, the blind rolls up.</p>'
-                 + '<p class="caption">Drag to look round, pinch or scroll to zoom. Keys: W A S D walk, Q and E turn, R and F up and down.</p></details>',
+                 + '<p class="caption">Drag to look round, pinch to zoom. Keys: WASD walk, Q E turn, R F up and down.</p></details>',
         # v31, client: "upgrade the views and layouts area of the site to ensure it reflects our recent upgrades": grouped, the compact cabinet
         # first, with what goes beside it, how it opens, the floor it needs, and ready-made set-ups to try
         # v39: Room, by place (the approved redesign): the set-ups, then one main choice for each place; the rest under More
         "room": "".join([
+            '<div class="grp r3d-tryrow"><button type="button" class="r3d-try" id="r3d-try" role="switch" aria-checked="false">Try options <i aria-hidden="true"></i></button>'
+            '<span class="caption">What else could go in each place</span></div>',
             '<div class="seg r3d-moments r3d-momrow" role="group" aria-label="Try a set-up">'
             '<button type="button" data-moment="dinner">Dinner for six</button><button type="button" data-moment="film">Film night</button>'
             '<button type="button" data-moment="games">Games night</button><button type="button" data-moment="drinks">Drinks</button>'
@@ -673,9 +677,7 @@ def section(gallery=""):
     <p class="r3d-cap sr-only" id="r3d-cap"></p>
     <div class="r3d-stickers" id="r3d-stickers">{stickers}</div>
     <!-- v39: your plan and its total; Try options shows what else could go in each place, with the change to the total -->
-    <div class="r3d-planbar" id="r3d-planbar"><button type="button" class="r3d-home" id="r3d-home" title="The whole room, from above (H)"><span class="ms" aria-hidden="true">home</span> Whole room</button>
-      <span class="r3d-plansum" id="r3d-plansum" aria-live="polite">Your plan</span>
-      <button type="button" class="r3d-try" id="r3d-try" role="switch" aria-checked="false">Try options <i aria-hidden="true"></i></button></div>
+    <div class="r3d-planbar" id="r3d-planbar"><span class="r3d-plansum" id="r3d-plansum" aria-live="polite">Your plan</span></div>
     <button type="button" class="r3d-back" id="r3d-back" hidden><span class="ms" aria-hidden="true">arrow_back</span> Back to my plan</button>
     <div class="r3d-tour" id="r3d-tour" role="region" aria-label="Tour of the room" aria-live="polite" hidden><span class="r3d-tourn" id="r3d-tourn"></span><h3 id="r3d-tourh"></h3><p id="r3d-tourp"></p>
       <div class="acts"><button type="button" data-tour="prev" aria-label="Back one stop"><span class="ms" aria-hidden="true">skip_previous</span></button><button type="button" data-tour="pause" aria-label="Pause"><span class="ms" aria-hidden="true">pause</span></button><button type="button" data-tour="next" aria-label="Next stop"><span class="ms" aria-hidden="true">skip_next</span></button><button type="button" class="end" data-tour="stop">End the tour</button></div>
@@ -700,11 +702,11 @@ def section(gallery=""):
         <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
   </div>
   <div class="r3d-dock"><button type="button" class="r3d-toolsbtn" data-tools-toggle aria-expanded="false" aria-controls="r3d-panel"><span class="ms" aria-hidden="true">tune</span>Tools</button>
-    <div class="r3d-bubbles" role="tablist" aria-label="3D room controls"><button type="button" class="r3d-bub r3d-menub" id="r3d-menub" aria-expanded="false" aria-controls="rail-list" style="--h:280" hidden><i class="ms" aria-hidden="true">menu</i>Menu</button>{bubbles}
+    <div class="r3d-bubbles" role="tablist" aria-label="3D room controls"><button type="button" class="r3d-bub" id="r3d-home" style="--h:200" title="The whole room, from above (H)"><i class="ms" aria-hidden="true">home</i>Whole room</button><button type="button" class="r3d-bub r3d-menub" id="r3d-menub" aria-expanded="false" aria-controls="rail-list" style="--h:280" hidden><i class="ms" aria-hidden="true">menu</i>Menu</button>{bubbles}
       <button type="button" class="r3d-bub" id="r3d-editbtn" aria-pressed="false" style="--h:25" title="Move, turn, recolour, remove and add things; tap a wall to paint it"><i class="ms" aria-hidden="true">edit</i>Edit</button></div></div>
   <div class="r3d-panel" id="r3d-panel" role="region" aria-label="3D room controls" hidden><button type="button" class="r3d-px" data-tools-toggle aria-label="Close the tools"><span class="ms" aria-hidden="true">close</span></button>
     <div class="r3d-pscroll">{drawers}</div>
-    <div class="r3d-foot"><span class="r3d-litst" id="r3d-litst"></span><button type="button" id="r3d-full">Full screen</button></div></div>
+    </div>
 </div>
 <script type="application/json" id="picks-data">{picks_json()}</script>
 <script type="application/json" id="scene3d-data">{data}</script>

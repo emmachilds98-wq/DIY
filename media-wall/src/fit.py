@@ -223,7 +223,7 @@ def zones():
             ("Game drawer", "box 54.3 × 35 on 350 mm runners; cases 19 × 13.5 × 1.4", ref("runners", "media"), "25.2 tall row, 40 deep", "about 3 above the leaning cases; 5 behind the box", PASS),
             ("Depth with the leads", "console 27.4 + HDMI plug about 5", ref("consoles"), "40 deep, back open", "about 7.6, then the 4 cm channel", PASS),
         ])
-        bay2 = ("Bay 2, PlayStation and the sub (BESTÅ frame on the plinth)", f"56.8 wide inside, 40 deep; under the PS3's shelf, the sub's column {r1(sc)} wide, a 12 mm ply divider, then {r1(pc_)} for the PS2 over the PS1", [
+        bay2 = ("Bay 2, PlayStation and the sub (BESTÅ frame on the plinth)", f"56.8 × 40 inside: the sub's column {r1(sc)}, a 12 mm divider, then {r1(pc_)} for the PS2 over the PS1", [
             ("PS3, original, + controller basket", "32.5 × 27.4 × 9.8", ref("consoles"), "23.7 tall row, full width", "13.9 above; 24.3 beside for the basket", PASS),
             ("The sub in its column", f"{r1(g.SUB[0])} × {r1(g.SUB[2])} × {r1(g.SUB[1])} tall, on a {r1(g.SUB_RISER_H)} isolation riser", ref("hisense"), f"{r1(sc)} wide × {r1(g.SUB_COL_TOP - g.SUB_COL_FLOOR)} tall", f"1 each side, {r1(g.SUB_COL_TOP - g.SUB_IN['y'][1])} above; it mustn't touch the divider or the frame", TIGHT),
             ("The sub's driver and port", "front-firing driver, rear port; its front flush with the face frame", ref("hisense", "subport"), f"{r1(g.SUB_PORT_GAP)} from the port to the wall, through the open back and the channel", "inside the 15–30 advised for a rear port, at its low end: keep the channel behind bay 2 clear (Switch 2 and the retro 6-way go behind bay 1)", TIGHT),
@@ -286,7 +286,7 @@ def zones():
             ("The side-wall socket beside the slim drawers (v38)", f"socket {r1(g.BASE_FRONT_Z - g.SOCKET['z'])} in front of the base, {r1(g.SOCKET['y'])} up", "",
              f"the middle slim drawer pulled out passes {r1(g.BAYS[2][0] + 2.6)} from the wall", "the plugs must stand less than that off the wall: flat (angled) plugs, leads down; measure yours", CHECK),
         ]),
-        ("The side wall: one oak run from the corner to the PC", f"one board line at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep along the LPs, sweeping out to {r1(g.PC_SHELF_D)} under the PC (v15)", [
+        ("The side wall: one oak run from the corner to the PC", f"at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep by the LPs, {r1(g.PC_SHELF_D)} under the PC", [
             ("The sweep from the ledge to the PC shelf", f"front edge 7 → {r1(g.PC_SHELF_D)} over {r1(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} (z {r1(g.SIDE_SWEEP[0])} to {r1(g.SIDE_SWEEP[1])})", "", f"the last wrap LP ends at z {r1(g.WRAP_Z[0] - 1.5 - 4 * g.LP - 3 * 1.4)}; the PC starts at z {r1(g.PC_Z[0])}",
              f"the LP stands on the start of the curve; {r1(g.SIDE_SWEEP[1] - g.PC_Z[0])} between the full depth and the case", PASS),
             ("Four more LPs on the wrap ledge", f"4 × {r1(g.LP)} + gaps = {r1(4 * g.LP + 3 * 1.4)}", ref("media"), f"{r1(wrap_len)} long", f"{r1(wrap_len - 4 * g.LP - 3 * 1.4 - 1.5)}", PASS),
@@ -762,8 +762,8 @@ def cab_zone():
     lo_top, up0, up_top = C["plinth"] + ch, C["shelf_y"] + C["t"], C["shelf_y"] + C["t"] + ch
     near = max(x for x, z, f in C["seats"]["six"] if f == "w") + g.CHAIR_PADDED["w"] / 2      # the window side's chair nearest the cabinet: its side
     slide = G.OPTC["z"][0] - G.OPTC["z"][1]
-    return ("The compact dining cabinet (the plan)", f"two oak boxes side by side, {r1(C['len'])} × {r1(C['d'])} × {r1(C['h'])} under your shelf, hinged doors; "
-            f"the table {r1(C['len_open'])} × {r1(C['top'][0])} open, six chairs inside", [
+    return ("The compact dining cabinet (the plan)", f"two oak boxes, {r1(C['len'])} × {r1(C['d'])} × {r1(C['h'])}, hinged doors; "
+            f"table {r1(C['len_open'])} × {r1(C['top'][0])} open, six chairs inside", [
         ("The cabinet under your shelf", f"{r1(C['h'])} tall", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - C['h'])}: room to tip it up into place", PASS),
         ("Its length", f"z {r1(C['z'][0])} to {r1(C['z'][1])}: the table box {r1(C['z_t'][0] - C['z_t'][1])}, the chair box {r1(C['z_c'][0] - C['z_c'][1])}",
          ref("photo20", "room", "solidwall"), "the shelf's length; the stair's foot before it stays clear",

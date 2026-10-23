@@ -168,7 +168,7 @@ SUGGEST += [
     ("blanketbasket", "A tall water hyacinth basket for your blankets at the sofa's open end", "51 × 29 × 59, water hyacinth, lined", (36, 42),
      "Your five blankets, each folded long, stacked flat in one basket (they use about 43 of its 57 inside), at the end of the sofa where "
      "you'd reach for them. It stands 29 out from the wall, not 45.",
-     "Against the side wall at the sofa's open end, 3 cm off its end, its long side along the wall (the floor plant suggestion's corner)."),
+     "Along the side wall, 3 cm past the sofa's open end."),
     ("cotswoldbasket", "A tall lidded seagrass basket for your blankets", "45 × 45 × 76, seagrass, with a lid", (90, 110),
      "The first basket you picked, with a lid; it takes more floor and costs more.", "The same corner, at the sofa's open end."),
     ("liftcoffee", "A lift-top coffee table", "90 × 50 × 48; the top lifts to 53.5", (39, 80),
@@ -202,8 +202,7 @@ SUGGEST += [
     ("windowseat", "A storage window seat in the window corner", f"{_ws['x'][1] - _ws['x'][0]:g} × {_ws['d']:g} × {_ws['h']:g} with its cushion; a lift-up lid", (160, 280),
      "A built-in oak seat with a lift-up lid: your five blankets, the cushions' covers or board games inside, a reading seat by the window "
      "on top. The sofa and the radiator fill the window itself, so it goes in the corner beside it, in the plant stand's place.",
-     "The window corner, against the window wall, between the curtains and the pipe boxing (the plant stand moves to the breast: Layout, "
-     "Plant stand and vinyl stand)."),
+     "The window corner, between the curtains and the pipe boxing (the plant stand moves to the breast)."),
     ("hallbench", "A bench with cubbies (shoes and baskets)", f"{_hb['w']:g} × {_hb['d']:g} × {_hb['h']:g}, ten open cubbies under a padded seat", (80, 130),
      "Made for a hall: sit to take your shoes off, ten pairs in the cubbies under you. Your hall isn't in the 3D room, so it's shown in "
      "the window corner, where it also fits (with 0.8 cm to spare each side).",
@@ -212,15 +211,14 @@ SUGGEST += [
      "A hanging-depth cupboard for coats, the hoover, the ironing board and the big games: the only place in the room with 60 cm of free "
      "floor. It is big for a living room, it takes the plant stand's corner and it leaves only a slot to reach the far end of the "
      "beside-the-cabinet wall, so the beside pieces go when you pick it.",
-     f"The window corner, from the curtains' stack to {_wd['x'][1]:g} from the side wall, {_wd['behind_chairs']:g} behind the seated "
-     "window-side chairs; open its doors with the table folded."),
+     f"The window corner, up to {_wd['x'][1]:g} from the side wall; open its doors with the table folded."),
     ("wallcabs", "Two wall cabinets over the sofa's corner", "two IKEA EKET 35 × 35 × 35 with glass doors", (70, 100),
      "Closed storage at head height where nothing else can go: cables, the consoles' spare controllers, candles, the cards. Glass doors "
      "keep it light over the sofa; on EKET's own rail.",
      f"On the side wall over the sofa's corner, just past the PC shelf's end, {_wc['y0']:g} to {_wc['y0'] + G.EKET[2]:g} up."),
     ("overdoor", "A hook rail over the hall door", f"six hooks, {_od['w']:g} × {_od['d']:g} × {_od['h']:g}, over the door's top", (12, 25),
      "Bags, the dog lead, a scarf, by the door you come in through, with no drilling.",
-     f"Over the hall door's top. The open door stands {_od['open_gap']:g} off the breast, so slim things only, or hang it hall side."),
+     f"Over the hall door. The open door stands {_od['open_gap']:g} off the breast: slim things only."),
 ]
 del _bb, _ws, _hb, _wd, _al, _wc, _sd, _od
 
@@ -295,7 +293,7 @@ def suggest_html():
 # Extras opens on these rows; each picks or switches, flies the camera to it and says where it goes. (key, title, mode, note, items):
 # mode "one" picks one (or None), "any" switches each; an item is (value, label, what it sets in the room's state).
 OPTION_GROUPS = [
-    ("bar", "A bar for drinks", "one", "Four places, one at a time: built in beside the dining cabinet, under the glass case, the trolley, or by the sofa.",
+    ("bar", "A bar for drinks", "one", "One of four: beside the dining cabinet, under the glass case, a trolley, or by the sofa.",
      [("barbeside", "Built in beside the cabinet", {"beside": "bar"}), ("barcase", "Under the glass case", {"sugg": "barcase"}), ("bartrolley", "The trolley beside the cabinet", {"sugg": "bartrolley"}),
       ("barside", "By the sofa, under the oak run", {"sugg": "barside"})]),
     ("games", "Games and cards: in the ottoman", "lid", "Twelve square board games in three layers and a row of card games along one side.",
@@ -305,7 +303,7 @@ OPTION_GROUPS = [
       ("rail", "An oak rail beside the cabinet", {"beside": "rail"})]),
     ("coffee", "The coffee table", "one", "The plan's record table, or the lift-top; None is your own.",
      [("recordtable", "The record table (the plan)", {"sugg": "recordtable"}), ("liftcoffee", "A lift-top coffee table", {"sugg": "liftcoffee"})]),
-    ("corner", "The window corner", "one", "Your plant stand stands here now. Pick one and it takes the corner (move the stand to the breast in Layout).",
+    ("corner", "The window corner", "one", "Your plant stand is here now. Pick one and it takes the corner.",
      [("windowseat", "A storage window seat", {"sugg": "windowseat"}), ("hallbench", "A bench with cubbies", {"sugg": "hallbench"}),
       ("wardrobe", "A built-in cupboard", {"sugg": "wardrobe"})]),
     ("storage", "More storage", "any", "Switch on as many as you like.",

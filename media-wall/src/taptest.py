@@ -71,7 +71,7 @@ def run(w, h):
         # v39 (the approved redesign): Try options: a place's card, › to the next option (the room shows it, the plan bar says the change),
         # then Back to my plan
         pg.evaluate("() => R3D.set({view: 'room'})"); pg.wait_for_timeout(600); pg.keyboard.press("Escape")
-        pg.locator("#r3d-try").click(); pg.wait_for_timeout(500)
+        pg.locator("#r3d-dt-room").click(); pg.wait_for_timeout(400); pg.locator("#r3d-try").click(); pg.wait_for_timeout(500)   # v41: Try options is in Room
         pg.evaluate("() => document.querySelector('.stk[data-hot=sofa]').click()"); pg.wait_for_timeout(800)
         print("   try card:", pg.evaluate("() => document.getElementById('r3d-act-h').textContent"))
         pg.locator("#r3d-acts button[aria-label='The next one']").click(); pg.wait_for_timeout(1500)

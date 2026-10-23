@@ -4330,7 +4330,7 @@ function extrasRule(kind, k, on) {
   const off = (...ks) => { S.sugg = Object.assign({}, S.sugg); ks.forEach(x => { if (x !== k) S.sugg[x] = false; }); };
   if (kind === "sugg") {
     if (["windowseat", "hallbench", "wardrobe"].includes(k)) off("windowseat", "hallbench", "wardrobe");
-    if (k === "wardrobe") { off("alcoveshelves", "bartrolley"); if (S.beside !== "clear") { S.beside = "clear"; toast("The cupboard blocks the wall beside the cabinet, so it's clear now"); } }
+    if (k === "wardrobe") { off("alcoveshelves", "bartrolley"); if (S.beside !== "clear") { S.beside = "clear"; toast("The cupboard takes the wall beside the cabinet"); } }
     if (k === "alcoveshelves") off("wardrobe");
   }
   if (kind === "beside" && k !== "clear") { if (S.sugg.wardrobe) off("wardrobe"); if (k !== "trolley") off("bartrolley"); }
@@ -4405,6 +4405,7 @@ function wholeRoom() {
   setView("room"); qs("#r3d-home")?.classList.remove("lost");
 }
 qs("#r3d-home")?.addEventListener("click", wholeRoom);
+qs("#r3d-wallsel")?.addEventListener("change", e => { lookWall = e.target.value; syncButtons(); });   // v41: which wall the paints go on
 document.addEventListener("keydown", e => { if ((e.key === "h" || e.key === "H") && !e.ctrlKey && !e.metaKey && !e.altKey && !/input|textarea|select/i.test(e.target.tagName)) wholeRoom(); });
 let lostT = 0;
 function lostCheck() {   // inside the room and nearly facing a wall, or looking at the floor or ceiling close up: the button glows, once a while
@@ -4422,7 +4423,7 @@ function setTry(on) {
   tryOpts = !!on; root.classList.toggle("trying", tryOpts);
   const t = qs("#r3d-try"); if (t) t.setAttribute("aria-checked", String(tryOpts));
   const bk = qs("#r3d-back"); if (bk) bk.hidden = !tryOpts;
-  if (!tryOpts) { closeAct(); backToPlan(); } else toast("Tap a place to see what else could go there");
+  if (!tryOpts) { closeAct(); backToPlan(); } else { window.DemmaTools?.close(); toast("Tap a place to see what else could go there"); }
   updatePlanBar();
 }
 qs("#r3d-try")?.addEventListener("click", () => setTry(!tryOpts));
@@ -4449,6 +4450,7 @@ function syncButtons() {
   const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("lamp", S.lamp);
   const wh = (lookWall === "all" ? paintHex() : chHex("w:" + lookWall)).toLowerCase();                 // v38: the paint row shows the chosen wall's paint
   qsa("[data-paint]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === b.dataset.paint : R.PAINTS[b.dataset.paint].hex.toLowerCase() === wh)));
+  const ws = qs("#r3d-wallsel"); if (ws && ws.value !== lookWall) ws.value = lookWall;   // v41: the wall picker is a list now
   qsa("[data-lookwall]").forEach(b => { const k = b.dataset.lookwall; b.setAttribute("aria-pressed", String(k === lookWall)); const i = b.querySelector("i"); if (i) i.style.setProperty("--c", k === "all" ? paintHex() : chHex("w:" + k)); });
   const wm = qs("[data-wallmatch]"); if (wm) { wm.hidden = lookWall === "all"; wm.disabled = !S.walls[lookWall]; }
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
@@ -4584,7 +4586,7 @@ function start() {
   precompile();                                                                         // v35: hidden parts' shaders, while the room's idle
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
-    if (!localStorage.getItem("mw41-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap things to work them; double-tap the floor to stand there"), 1800); localStorage.setItem("mw41-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
+    if (!localStorage.getItem("mw41-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tap things to work them. Double-tap the floor to walk."), 1800); localStorage.setItem("mw41-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
     else if (!localStorage.getItem("mw31-camhint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("View → Move round sets your eye height"), 1800); localStorage.setItem("mw31-camhint", "1"); }   // v31
   } catch (e) {}
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
