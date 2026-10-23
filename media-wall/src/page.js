@@ -1,4 +1,4 @@
-const use = n => (window.claude && window.claude.use) ? window.claude.use(n) : Promise.resolve(null);
+const use = n => (window.sharedStore && window.sharedStore.use) ? window.sharedStore.use(n) : Promise.resolve(null);
 const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
@@ -126,7 +126,7 @@ function write(path, body) {
 }
 function onWriteError(e, stEl) {
   if (e && e.code === "invalid_argument") { readOnly = true; lockInputs(); }
-  if (stEl) { stEl.textContent = e && e.code === "quota_exceeded" ? "The page's storage is full; tell Claude." : "Couldn't save. Try again in a moment."; stEl.className = "st err"; }
+  if (stEl) { stEl.textContent = e && e.code === "quota_exceeded" ? "The page's storage is full." : "Couldn't save. Try again in a moment."; stEl.className = "st err"; }
 }
 function lockInputs() { $$(".items input, .sdone input").forEach(el => el.disabled = true); }
 
@@ -306,7 +306,7 @@ document.addEventListener("click", e => {
 });
 
 /* ---------- v33, from the design review (plan_ui.py): the open choices (Decide), the ideas shortlist, and build day. The picks are kept
-   on this device and, on the plan page on Claude, for both of you (the "picks" collection); the plan's totals and the buy list follow. */
+   on this device and, where the page has a shared store, for both of you (the "picks" collection); the plan's totals and the buy list follow. */
 window.PICKS = (() => {
   const K = "mw33-picks", TK = "mw33-tasks", D = DATA.decide, SH = DATA.short, BD = DATA.bday;
   const st = Object.assign({ decide: {}, short: {} }, store.get(K, {}));

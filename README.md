@@ -5,7 +5,7 @@ Home projects for Emma and Dave's house (Portsmouth Close).
 ## Media wall and dining wall, v41: a build step for your picks, one measuring sheet, an easier room
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
-with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
+with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device)
 
 ![The media wall, main view](media-wall/out/Media%20wall%20v41%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
@@ -56,7 +56,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **Your hanging plant's own shelf** (gone in v37: your 10 cm gap is the black shelf's own gap from the boxing).
 - **In the 3D room, Extras now starts with a row for each** (a bar, games and cards, blankets, more storage, the plant): pick an option and the room shows it and takes you there, with a line on where it goes and what it costs. All are suggestions, not in the plan's costs until you choose.
 
-**New in v35** (the 3D room: "it currently still crashes in the claude version and has some errors in the web mode when trying to make changes. it also is a bit slow on the render sometimes becoming HD")
+**New in v35** (the 3D room: "it currently still crashes in the shared version and has some errors in the web mode when trying to make changes. it also is a bit slow on the render sometimes becoming HD")
 - **No more freezes when you change things:** lighting scenes, opening the table and Look changes used to make the graphics card rebuild up to 90 small drawing programs (a freeze on a laptop, a crash on a phone). Now the lights are a fixed set and the hidden parts are prepared in the quiet moments, so once the room has settled, opening the table took under 0.1 s in our test browser (it was 18–21 s).
 - **Every device starts in Fast** and moves to HD only if it's quick enough; nothing is drawn while the plan's pages cover the room; if the graphics card gives up, the room comes back by itself.
 - **Anything that goes wrong is noted** (a small message, and a log with the device it happened on), so if you still see a problem we'll see it too. Add `?perf` to the room's address to see its speed in a corner.
@@ -265,7 +265,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **Plain oak where it was slatted.** The sub stands on a low oak riser; the folded table is plain oiled oak between its pegged breadboard ends.
 - **The stairs go up** to the first floor beside the door, behind the wooden banister. Drawn rising away from the room: tell us if they run the other way.
 - **The drawer layouts:** every drawer in the base, to scale, with what goes in it (below).
-- **v13.8: back on your own deck.** The viewer is published again to https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your account, with your saved answers); the plan's summaries now follow the fit proof and the questions list.
+- **v13.8:** the plan's summaries now follow the fit proof and the questions list.
 - **v13.7: lighting scenes.** TV night, dinner, records and everyday evening, each drawn on the room plan with where to set every dimmer (Paint & light tab, section 8 of the plan).
 - **v13.6: the leaf carries the legs.** A slim oak frame under the 60 × 80 leaf holds all eight tapered oak legs in clips, so the folded table stays plain and the leaf stores with the chairs.
 - **v13.6: the electrics are your own job.** The socket swapped for a double, the two dimmers and the two spot bars are like-for-like and not notifiable under Part P in England; steps 3 and 12 have the safe routine (isolate, lock off, prove dead) and a stop-and-call-an-electrician list. No new socket, no fused spur; the PC runs from the 10-gang. Total about £2,764–5,317, no electrician on top.
@@ -321,7 +321,7 @@ surge protection, switches and length · console model numbers · the second cei
 - **The full plan:** [`media-wall/out/Home_Network_Plan_v39.pdf`](media-wall/out/Home_Network_Plan_v39.pdf) (PLANPAGES pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, buy first and the wiring plan, the cost overview, other options and sources)
 - **The build guide:** [`media-wall/out/Build_Guide_v39.pdf`](media-wall/out/Build_Guide_v39.pdf) (GUIDEPAGES pages: buy and adapt first, tools, techniques, order of work, the wiring plan, the cut list on the fewest sheets, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
-- **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account, still at v32 until it's republished: the room in 3D, the plan's chapters, build steps, buy tracker, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
+- **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 
 ### Rebuilding the plan and renders

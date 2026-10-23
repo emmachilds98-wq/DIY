@@ -148,6 +148,21 @@ def links():
     return bad
 
 
+def no_assistant_names():
+    """v42 (client: "make no reference to Claude as being the editor or viewing there"): the page and both PDFs never name it."""
+    from pypdf import PdfReader
+    word = "cl" + "aude"
+    hits = []
+    for f in ("index.html", "sw.js", f"media-wall/out/Home_Network_Plan_v{VERSION}.pdf", f"media-wall/out/Build_Guide_v{VERSION}.pdf"):
+        path = ROOT / f
+        if not path.exists():
+            hits.append(f"{f} missing"); continue
+        text = path.read_text() if f.endswith((".html", ".js")) else " ".join(pg.extract_text() or "" for pg in PdfReader(str(path)).pages)
+        if word in text.lower():
+            hits.append(f)
+    return hits
+
+
 # v39 (UPGRADE_PLAN_v38 item 11, "say less"): every piece of text has a budget, and anything over it is listed so it gets cut:
 # a caption 20 words, a panel's note 30, a plan paragraph 80, a toast 10
 BUDGET = {"caption": 20, "figcaption": 20, "note": 30, "p": 80, "toast": 10}
@@ -196,7 +211,7 @@ if __name__ == "__main__":
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(ROOT)))
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     BASE = f"http://127.0.0.1:{srv.server_address[1]}/"
-    res = {"links": links(), "text": text_budget()}
+    res = {"links": links(), "text": text_budget(), "names": no_assistant_names()}
     with sync_playwright() as p:
         res["runs"] = [run(p, 390, 844), run(p, 1280, 800)]
     print(json.dumps(res, indent=1))

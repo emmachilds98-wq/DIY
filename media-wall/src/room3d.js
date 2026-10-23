@@ -38,7 +38,7 @@ function noteError(kind, m, stack) {
       ua: navigator.userAgent, dpr: devicePixelRatio, size: [innerWidth, innerHeight], frame: window.top !== window ? "embedded" : "page",
       gpu: dbg ? String(c.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : "", state: (() => { try { return JSON.stringify(S).slice(0, 3000); } catch (x) { return ""; } })() };
     const log = store.get("r3d-errors", []); log.push(e); store.set("r3d-errors", log.slice(-20));
-    if (window.claude && window.claude.use) (ERRS.db || (ERRS.db = window.claude.use("db"))).then(db => db && db.doc("errors/" + e.at.replace(/[^0-9]/g, "")).set(e)).catch(() => {});
+    if (window.sharedStore && window.sharedStore.use) (ERRS.db || (ERRS.db = window.sharedStore.use("db"))).then(db => db && db.doc("errors/" + e.at.replace(/[^0-9]/g, "")).set(e)).catch(() => {});
     if (performance.now() - ERRS.t > 10000) { ERRS.t = performance.now(); toast("Something went wrong in the 3D room: it's been noted. " + e.msg.slice(0, 90)); }
   } catch (x) {} finally { ERRS.busy = false; }
 }
@@ -162,7 +162,7 @@ const GOOD_PHONE = SMALL && /apple gpu|adreno[^0-9]*([6-9]\d{2})|mali-g(5[7-9]|6
 gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
-/* v35, client: "it currently still crashes in the claude version ... it also is a bit slow on the render sometimes becoming HD".
+/* v35, client: "it currently still crashes in the shared version ... it also is a bit slow on the render sometimes becoming HD".
    three.js builds every material's shader for the number of lights it can see and how many cast shadows, so each light switched on or
    off (a scene, the table rule, a suggestion, a hidden group with a light in it) rebuilt about 20 shaders: 10 s for "Film", 21 s to open
    the table. Now, while you use the room, the lights the renderer sees are a fixed set for each quality (Fast leaves out the area lights
@@ -3301,10 +3301,10 @@ qs("#r3d-selcol").addEventListener("input", e => {
   store.set(KEY, S); dirty();
 });
 document.addEventListener("keydown", e => { if (S.edit && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) { e.preventDefault(); undo(); } });
-/* v19: one layout for both of you, kept in the plan page's shared database (only where the page has one: the Claude deck) */
+/* v19: one layout for both of you, kept in the plan page's shared database (only where the page has one) */
 let ldb = null, sharedDoc = null, sharing = Promise.resolve();
 (async () => {
-  try { ldb = (window.claude && window.claude.use) ? await window.claude.use("db") : null; } catch (e) { ldb = null; }
+  try { ldb = (window.sharedStore && window.sharedStore.use) ? await window.sharedStore.use("db") : null; } catch (e) { ldb = null; }
   if (!ldb) return;
   qsa(".r3d-share").forEach(b => b.hidden = false);
   if (qs("#r3d-picksave")) qs("#r3d-picksave").hidden = false;   // v22: picks can be saved for the next round
@@ -4187,11 +4187,11 @@ qs("#r3d-save").addEventListener("click", async () => {
   await new Promise(r => setTimeout(r, 30));
   const url = still(sw, sh);
   const blob = await (await fetch(url)).blob();
-  const dl = (window.claude && window.claude.use) ? await window.claude.use("downloads") : null;
+  const dl = (window.sharedStore && window.sharedStore.use) ? await window.sharedStore.use("downloads") : null;
   if (dl) {
     try { await dl.save({ filename: stillName(), data: blob }); st.textContent = "Saved."; }
     catch (e) { st.textContent = e && e.code === "declined" ? "Not saved." : "Couldn’t save here: right-click the picture instead."; }
-  } else if (!window.claude) {
+  } else if (!window.sharedStore) {
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = stillName(); a.click(); st.textContent = "Saved.";
   } else st.textContent = "Saving isn’t available in this view.";
 });
