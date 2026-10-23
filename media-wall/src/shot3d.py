@@ -97,6 +97,13 @@ SHOTS = [
 # v32: a full render of every idea, suggestion and piece in Edit room's Add list (item_shots.py)
 SHOTS += __import__("item_shots").shots()
 
+# v39, client (23 Oct): "the core plan build and info then the additional items are just for looking": HD stills for the firm plan
+# only. An option keeps last round's small picture in art/ for its card on the page; the live 3D room is how to look at it.
+OPTION_STEMS = ("3d_plants_breast", "3d_ideas_", "3d_case_singles", "3d_decor", "3d_suggest", "3d_beside_mirror", "3d_beside_trolley",
+                "3d_beside_dresser", "3d_beside_rail", "3d_beside_shoes", "3d_c80_", "3d_bar_shut", "3d_look", "3d_id_", "3d_add_")
+FIRM_SG = {f"3d_sg_{k}" for k in G.FIRM["sugg"]}
+is_firm = lambda stem: not stem.startswith(OPTION_STEMS) and (not stem.startswith("3d_sg_") or stem in FIRM_SG)
+
 BASE = {"drawers": False, "ideas": {}, "pc": True, "plants": "corner", "layout": {}, "added": [], "grow": True, "chairs": "cupboard", "decor": {},
         "sugg": {k: True for k in G.FIRM["sugg"]}, "svar": dict(G.FIRM["svar"]), "seat": "off", "tod": "evening", "master": 100, "cab": "compact", "cabw": "90", "tdoor": False, "foot": False, "beside": G.FIRM["beside"],
         "blind": "down", "lp": False, "trolley": "park", "lid": False, "barflap": False, "ctop": False, "sdraw": False}   # v34: the blind, the records, the trolley; v35: the ottoman's lid and the bar's flap shut (they carried over from the still before)   # v30: the compact cabinet; v31: the floor outline, beside it
@@ -153,6 +160,8 @@ def run(test=False, only=None, force=False):
     for stem, opts, title in SHOTS:
         if only and not any(o in stem for o in only.split(",")):   # v37: several, comma-separated
             continue
+        if not only and not is_firm(stem):                          # v39: options get no HD still
+            continue
         rec = prints.get(stem, {})
         rec_files = [HERE.parent / f for f in rec.get("files", [])]
         if not test and not force and not only and rec.get("print") == shot_print(room, opts, w, h) and reuse(dict(rec, files=rec_files), stem, title):
@@ -163,7 +172,7 @@ def run(test=False, only=None, force=False):
         todo.append((stem, opts, title))
     if not test:
         PRINTS.write_text(json.dumps(prints, indent=1, sort_keys=True) + "\n")
-    print(f"{len(todo)} of {len(SHOTS)} stills to render")
+    print(f"{len(todo)} of {sum(map(is_firm, (x[0] for x in SHOTS)))} firm stills to render")
     if not todo:
         return
     with sync_playwright() as p:

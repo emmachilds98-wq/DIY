@@ -9,6 +9,16 @@ import ideas
 EPS = 0.05          # an overlap smaller than half a millimetre is a touch, not a clash
 ONE_PIECE = (("sofa seat", "sofa back", "chaise"),)                    # parts of one thing: never a clash with each other
 MEANT = {frozenset(("dining cabinet", "bar")): "a 3 mm shadow gap, scribed"}   # gaps under 1 cm on purpose
+# v39: the rear speakers' poles stand in the 3 cm between the radiator and the sofa; their flat bases slide under the radiator
+for _i in (1, 2):
+    for _p in ("base", "pole"):
+        for _o in ("sofa seat", "sofa back", "chaise", "radiator", "curtains, drawn"):
+            MEANT[frozenset((f"rear speaker {_i}'s {_p}", _o))] = "the gap behind the sofa"
+MEANT[frozenset(("radiator", "curtains, drawn"))] = "the curtains hang just clear of the radiator"
+for _i in (1, 2):
+    MEANT[frozenset((f"rear speaker {_i}", "curtains, drawn"))] = "the speaker sits just in front of the curtains"
+for _o in ("sofa seat", "sofa back", "chaise"):
+    MEANT[frozenset((_o, "curtains, drawn"))] = "the curtains hang just behind the sofa"
 
 
 def box(name, x, y, z):
@@ -58,8 +68,19 @@ def pieces():
     b.append(box("ottoman", po["x"], (0, po["h"]), po["z"]))
     bb = g.BLANKET_BASKET
     b.append(box("blanket basket", bb["x"], (0, bb["h"]), bb["z"]))
+    ST, SP = g.REAR_STAND, g.REAR_SPK                            # v39: each rear speaker as its base, pole and speaker
     for i, (x, z) in enumerate(g.REAR_SPOTS):
-        b.append(box(f"rear speaker {i + 1}", (x - 5.5, x + 5.5), (0, g.REAR_STAND["top"] + g.REAR_SPK[1]), (z - 5.5, z + 5.5)))
+        b.append(box(f"rear speaker {i + 1}'s base", (x - ST["base"][0] / 2, x + ST["base"][0] / 2), (0, ST["base"][2]), ST["base_z"]))
+        b.append(box(f"rear speaker {i + 1}'s pole", (x - ST["pole"] / 2, x + ST["pole"] / 2), (ST["base"][2], ST["top"]), (ST["pole_z"] - ST["pole"] / 2, ST["pole_z"] + ST["pole"] / 2)))
+        b.append(box(f"rear speaker {i + 1}", (x - SP[0] / 2, x + SP[0] / 2), (ST["top"], ST["top"] + SP[1]), (z - SP[2] / 2, z + SP[2] / 2)))
+    b.append(box("radiator", g.RADIATOR_X, g.RADIATOR_Y, (g.WINDOW_Z + 3.0, g.RADIATOR_FACE)))
+    CU = g.CURTAIN                                                 # the drawn curtains, their folds' depth either way
+    x0, x1, hw = g.WINDOW_X[0] - CU["ext"], g.WINDOW_X[1] + CU["ext"], g.REAR_SPK[0] / 2 + 2
+    flat = sorted((sx - hw - 6, sx + hw + 6) for sx, _z in g.REAR_SPOTS if x0 < sx < x1)   # behind a pole the cloth lies flat at the dent
+    for a0, a1 in zip([x0] + [f[1] for f in flat], [f[0] for f in flat] + [x1]):
+        b.append(box("curtains, drawn", (a0, a1), (CU["drop_to"], CU["rail_y"]), (CU["z"] - CU["amp"], CU["z"] + CU["amp"])))
+    for f0, f1 in flat:
+        b.append(box("curtains, drawn", (f0, f1), (CU["drop_to"], CU["rail_y"]), (ST["dent"] - 0.05, ST["dent"] + 0.05)))
     # the stairs wall: the dining cabinet, the bar beside it, your black shelf and what's on it, the hanging plant's strands
     C = g.CAB
     b.append(box("dining cabinet", (C["front"], W), (0, C["h"]), C["z"]))

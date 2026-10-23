@@ -191,7 +191,7 @@ details.r3d-more[open] > summary::before { content: "– "; }
 /* v33, the phone home ("On a phone the room is small and buried"): numbered pins, the places in a strip, the set-ups as chips, Menu in the dock */
 .r3d-phone, .r3d-menub { display: none !important; }
 @media (max-width: 599px) {
-  .stk { padding: 4px; gap: 0; min-height: 44px; min-width: 44px; justify-content: center; } .stk b { width: 34px; height: 34px; font-size: 15px; } .stk .t { display: none; }
+  .stk { padding: 8px 12px; gap: 6px; min-height: 40px; } .stk b { width: 9px; height: 9px; } .stk .t { display: inline; }   /* v39: three named places */
   .r3d-lbl { padding: 0; width: 44px; justify-content: center; } .r3d-lbl .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .r3d-phone { display: grid !important; position: fixed; left: 0; right: 0; bottom: calc(max(8px, env(safe-area-inset-bottom)) + 76px); z-index: 5; gap: 6px; pointer-events: none; }
   .r3d-moms, .r3d-places { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 10px; pointer-events: auto; }
@@ -268,6 +268,39 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .r3d-linkbox { width: 100%; margin-top: 4px; min-height: 40px; border: 0; border-radius: 12px; padding: 6px 10px; background: var(--soft); color: var(--ink); font: 500 13px Figtree, system-ui, sans-serif; }
 @media (max-width: 899px) { .r3d-tour { left: 12px; right: 12px; transform: none; width: auto; bottom: 92px; } }
 @media (prefers-reduced-motion: reduce) { .r3d *, .stk { transition: none !important; } }
+
+/* v39 (the approved redesign): three places as cream pins with a coloured dot; the plan bar (your plan's total, or what the options on add)
+   and the Try options switch above the dock; Back to my plan while trying; a card's extra buttons under Details; panels' More folds */
+.stk { background: var(--cream); padding: 10px 16px; gap: 8px; transform: translate(-50%, -50%); }
+.stk b { width: 10px; height: 10px; background: oklch(0.6 0.12 var(--h)); }
+.stk:hover, .stk[aria-expanded=true] { transform: translate(-50%, -50%) scale(1.06); }
+.r3d-lbl { display: none !important; }
+.r3d-planbar { position: absolute; left: 50%; transform: translateX(-50%); bottom: 104px; z-index: 6; display: flex; gap: 8px; align-items: center; width: min(560px, calc(100% - 24px)); justify-content: space-between; pointer-events: none; }
+.r3d-planbar > * { pointer-events: auto; }
+.r3d-plansum { background: color-mix(in oklab, var(--cream) 94%, transparent); border-radius: 999px; padding: 12px 16px; font: 600 14px Figtree, system-ui, sans-serif; box-shadow: var(--shade); }
+.r3d-try { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 10px 0 16px; border: 0; border-radius: 999px; background: var(--ink); color: var(--cream); font: 700 14px Figtree, system-ui, sans-serif; cursor: pointer; box-shadow: var(--shade); }
+.r3d-try i { width: 40px; height: 24px; border-radius: 999px; background: #57505e; position: relative; transition: background .2s; }
+.r3d-try i::after { content: ""; position: absolute; left: 2px; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--cream); transition: transform .25s var(--spring); }
+.r3d-try[aria-checked=true] i { background: oklch(0.72 0.13 150); }
+.r3d-try[aria-checked=true] i::after { transform: translateX(16px); }
+.r3d.trying .r3d-plansum { background: var(--ink); color: var(--cream); }
+.r3d-back { position: absolute; left: 16px; top: max(84px, calc(env(safe-area-inset-top) + 72px)); z-index: 6; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink); font: 700 14px Figtree, system-ui, sans-serif; box-shadow: var(--shade); cursor: pointer; }
+.r3d-back[hidden] { display: none; }
+.r3d.tools-open .r3d-planbar, .r3d.editing .r3d-planbar, .r3d.touring .r3d-planbar, .r3d.nogl .r3d-planbar { display: none; }
+.r3d-actmore { margin-top: 8px; }
+.r3d-actmore > summary { cursor: pointer; list-style: none; text-align: center; min-height: 40px; display: grid; place-items: center; border: 1.5px solid #e1d6c2; border-radius: 999px; font: 700 14px Figtree, system-ui, sans-serif; }
+.r3d-actmore > summary::after { content: " ▾"; }
+.r3d-actmore[open] > summary::after { content: " ▴"; }
+.r3d-actmore .acts { margin-top: 8px; }
+.r3d-fold { border-top: 2px dashed #e5dccb; padding-top: 6px; }
+.r3d-fold > summary { min-height: 44px; display: flex; align-items: center; }
+.r3d-momrow { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.r3d-momrow button { flex: none; }
+@media (max-width: 899px) { .r3d-planbar { bottom: calc(max(8px, env(safe-area-inset-bottom)) + 84px); } }
+@media (min-width: 900px) { .r3d-panel { top: 80px; } }   /* v39: under Plan · Build · Buy */
+.r3d-find .seg { flex-wrap: nowrap; } .r3d-find input { flex: 1; min-width: 0; min-height: 44px; border: 1.5px solid #e1d6c2; border-radius: 999px; padding: 0 16px; font: 500 15px Figtree, system-ui, sans-serif; background: #fff; color: var(--ink); }
+.r3d-mysc { display: inline-flex; } .r3d-mysc button:first-child { border-radius: 999px 0 0 999px !important; } .r3d-myx { border-radius: 0 999px 999px 0 !important; padding: 0 12px !important; }
+.r3d.measuring canvas { cursor: crosshair; }
 """
 
 
@@ -287,14 +320,17 @@ CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
 # v25: the five Tools tabs (were v22's drawers): (key, name, icon, hue)
 # v37, client: "Relocate the lights controls so they sit under 'View' in the main buttons menu": four tabs, the lights in Views
-DRAWERS = [("views", "Views", "photo_camera", 235), ("layout", "Layout", "chair", 50), ("look", "Look", "palette", 165), ("extras", "Extras", "auto_awesome", 300)]
+DRAWERS = [("views", "View", "photo_camera", 235), ("room", "Room", "chair", 50), ("look", "Look", "palette", 165)]
+# v39 (the redesign the client approved, 23 Oct): four dock buttons, View, Room, Look and Edit. Room holds Layout and Extras, grouped by
+# place; each panel opens on its main choices with everything else under a More fold
 # One Tools button holds every 3D control: the pill (on a laptop) or the bottom bar's Tools button (on a phone, [data-tools-toggle])
 # opens the bubble row; a bubble opens its panel. The last tab is remembered (mw22-drawer); Esc and the pill close it.
 DRAWER_JS = """(() => { const r = document.getElementById("r3d"); if (!r) return;
   const K = "mw22-drawer", tabs = [...r.querySelectorAll("[data-drawer]")], panel = document.getElementById("r3d-panel"), btns = [...document.querySelectorAll("[data-tools-toggle]")];
-  let cur = "layout", shown = ""; try { cur = localStorage.getItem(K) || "layout"; } catch (e) {}
+  let cur = "room", shown = ""; try { cur = localStorage.getItem(K) || "room"; } catch (e) {}
   if (cur === "lights") cur = "views";                                   // v37: the lights moved into Views
-  if (!tabs.some(t => t.dataset.drawer === cur)) cur = "layout";
+  if (cur === "layout" || cur === "extras") cur = "room";                // v39: Layout and Extras are Room
+  if (!tabs.some(t => t.dataset.drawer === cur)) cur = "room";
   const sync = open => { r.classList.toggle("tools-open", open); document.body.classList.toggle("tools-open", open);
     document.querySelectorAll("[data-tools-toggle]").forEach(b => { b.setAttribute("aria-expanded", String(open)); const i = b.querySelector(".ms"); if (i) i.textContent = open ? "close" : "tune"; }); };
   const showing = () => !panel.hidden;
@@ -343,11 +379,9 @@ DECOR = [("rug", "Rug", [("yours", "Arches (the plan's)"), ("jute", "Jute flatwe
                                 ("basket", "Basket weave"), ("beams", "Oak-effect beams"), ("coffers", "Coffers"), ("cove", "LED cove")]),
 ]
 # v38: one line each on what a ceiling design takes and costs (fit.SOURCES: skimartex, artextest, pubeam, orac)
-CEIL_NOTE = ("Smooth: skimmed over, £300–700. Artex patterns: a plasterer's day or two, about £200–600. Beams: three 12 × 12 faux oak, "
-             "about £1,050. Coffers: two or three days' work, about £450–900. LED cove: about 15 m of uplighter coving and tape, £750–850. "
-             "Test the old Artex for asbestos first (£35 kit) and don't sand it.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
-DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("rug", "cushions", "curtains")), ("The glass case on the breast", ("fill", "frame")),
-                ("The ceiling (to try, for later)", ("ceiling",))]
+CEIL_NOTE = ("Smooth £300–700; a pattern £200–600; beams about £1,050; coffers £450–900; an LED cove £750–850. "
+             "Test old Artex for asbestos first.")   # v33: the tie-on seat pads went with the FRÖSVI (your padded chairs need none)
+DECOR_GROUPS = [("Wood and floor", ("oak", "floor", "shelf")), ("Soft things", ("cushions", "curtains")), ("The glass case on the breast", ("fill", "frame"))]   # v39: the ceiling and the rug lead Look
 
 
 def tour():
@@ -358,14 +392,9 @@ def tour():
     return [
         dict(view="room", title="The whole room", text=f"From above the window, the near wall cut away: the media wall, the breast, the door, the stairs and the dining cabinet, under a {g.CEIL:g} ceiling."),
         dict(view="wall", title="The media wall", text=f"Artisan oak in Card Room Green across the {g.ALC_W:g} cm alcove: the TV in line with the sofa, the turntable and the LP crates on the left, the consoles under the TV."),
-        dict(view="pc", title="The PC side wall", text=f"One oak run sweeps round the corner to the PC shelf at {g.PC_SHELF_TOP:g}, its leads inside the wall and a warm strip underneath."),
-        dict(view="breast", title="The chimney breast", text=f"Your vinyl stand with {g.STAND_LPS} LPs and the “now playing” ledge at {g.NOW_LEDGE['top']:g}: about {g.ALL_LPS} LPs in the room in all."),
         dict(view="dining", title="The dining cabinet, open", set={"site": "C", "dining": "six", "cab": "compact"},
              text=f"The table door swings back flat and the table folds down to {g.CAB['len_open']:g} × {g.CAB['top'][0]:g} for six. Folded, the table and all six chairs pack into {g.CAB['len']:.0f} cm of wall."),
-        dict(view="sit", title="Sitting at the table", set={"site": "C", "dining": "six", "cab": "compact"},
-             text=f"At the table's far end, at a seated eye height: three a side with {g.CAB['len_open'] / 3:.0f} cm of edge each, the table door folded back flat behind them."),
         dict(view="sofa", title="From the sofa", text=f"About {s['view_dist'] / 100:.2f} m from the screen: the 55-inch fills about {s['view_angle']:.0f}° of your view, right for films and games."),
-        dict(view="window", title="From the window", text="The whole wall in one look, over the sofa's back: your plants on the sill behind you."),
         dict(view="plan", title="From above", text="Everything to scale from the plan's own measurements. Drag to look round when the tour ends."),
     ]
 
@@ -397,6 +426,10 @@ def controls(gallery=""):
     tiles = "".join(f'<button type="button" data-scene="{k}" aria-pressed="false"><span class="ms" aria-hidden="true">{icons.get(k, "lightbulb")}</span><b>{html.escape(n)}</b>'
                     f'<span>{html.escape(TILE_SUB.get(k, d.split(":")[0].split(",")[0]))}</span></button>' for k, n, d, *_ in scenes.SCENES)
     lights = (f'<div class="grp"><span class="label">Three presets: tap one (tap it again to undo your changes)</span><div class="r3d-tiles" role="group" aria-label="Lighting presets">{tiles}</div></div>'
+              # v39, item 13: your own scenes, next to the presets (this device)
+              '<div class="grp" id="r3d-myscenes"><span class="label">Your own scenes</span><div class="seg" id="r3d-myscl"></div>'
+              '<div class="seg r3d-find"><input type="text" id="r3d-myname" placeholder="Our evening" aria-label="Name for these lights" maxlength="24">'
+              '<button type="button" class="chip" id="r3d-mysave">Save these lights</button></div></div>'
               f'<p class="r3d-boost" id="r3d-boost" hidden><span class="ms" aria-hidden="true">restaurant</span> The table\'s open, so bar 2 lights it.</p>'
               + seg("tod", scenes.TOD, "Time of day")
               + '<details class="r3d-more"><summary>Fine-tune each light</summary>'
@@ -412,6 +445,10 @@ def controls(gallery=""):
                          for k, _t, size, *_ in ideas.IDEAS if k != "cushions")      # the cushions are Decor's
                + '</div></div>')
     dec = {k: (lab, opts) for k, lab, opts in DECOR}
+    MAIN_DECOR = (("ceiling", "The ceiling (to try, for later)"), ("rug", "The rug"))   # v39: Look opens on the walls, the ceiling and the rug
+    decor_main = "".join(f'<div class="grp r3d-decor"><span class="label">{html.escape(t)}</span><div class="seg" role="group" aria-label="{html.escape(t)}">'
+                         + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in dec[k][1]) + '</div>'
+                         + (f'<p class="r3d-hint2">{html.escape(CEIL_NOTE)}</p>' if k == "ceiling" else "") + '</div>' for k, t in MAIN_DECOR)
     decor_g = "".join('<div class="grp r3d-decor"><span class="label">' + html.escape(title) + '</span>'
                + "".join(f'<div class="r3d-decrow"><span>{html.escape(dec[k][0])}</span><div class="seg" role="group" aria-label="{html.escape(dec[k][0])}">'
                          + "".join(f'<button type="button" data-decor="{k}:{v}" aria-pressed="false">{html.escape(n)}</button>' for v, n in dec[k][1]) + '</div></div>'
@@ -456,11 +493,19 @@ def controls(gallery=""):
                 + '<button type="button" data-paintcustom="#2c5643" aria-pressed="false"><i style="--c:#2c5643"></i>Deep green</button>'
                 '<label><i><input type="color" id="r3d-custom" value="#899081" aria-label="Any colour for the walls"></i>Any colour</label></div></div>')
     return {
-        "views": '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
+        # v39 (the approved redesign): Find flies to any piece or view, so nobody hunts through menus
+        "views": '<div class="grp r3d-find"><label class="label" for="r3d-find">Find something in the room</label><div class="seg">'
+                 '<input type="search" id="r3d-find" list="r3d-findlist" placeholder="The record table, the bar, the lamp…" autocomplete="off">'
+                 '<button type="button" class="chip" id="r3d-findgo">Go</button></div><datalist id="r3d-findlist"></datalist></div>'
+                 # v39, item 13: measure in 3D
+                 + '<div class="grp"><div class="seg"><button type="button" class="chip" id="r3d-measure"><span class="ms" aria-hidden="true">straighten</span> Measure: tap two points</button></div></div>'
+                 + '<div class="grp r3d-tourgo"><button class="btn primary" type="button" id="r3d-tourbtn"><span class="ms" aria-hidden="true">play_circle</span> Take the tour</button>'
                  f'<span class="caption">{len(tour())} stops round the room, about a minute; tap the room to stop.</span></div>'
                  + f'<div class="grp"><span class="label">Where you look from</span><div class="r3d-views" role="group" aria-label="Camera">{views}</div></div>'
                  # v37: the lights live here now (they were their own tab): the presets, daytime, every light's slider and colour, the quality
-                 + '<h3 class="r3d-sub" id="r3d-lightsh">Lights</h3>' + lights + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality")
+                 + '<h3 class="r3d-sub" id="r3d-lightsh">Lights</h3>' + lights
+                 + '<details class="r3d-more r3d-fold"><summary>More: quality, moving round, sharing, pictures</summary>'
+                 + seg("quality", [("hd", "HD, with shadows"), ("fast", "Fast")], "Quality")
                  + '<h3 class="r3d-sub">Moving round and sharing</h3>'
                  # v31, client: "make camera movement easier within the 3d render. being able to adjust height would be good"
                  + '<div class="grp r3d-move"><span class="label">Move round</span>'
@@ -476,39 +521,38 @@ def controls(gallery=""):
                  + '<div class="grp r3d-save"><button class="btn primary" type="button" id="r3d-save">Save as HD picture</button>'
                  '<span class="caption" id="r3d-savest" aria-live="polite">3840 × 2160, with shadows</span></div>'
                  + (f'<div class="grp"><span class="label">HD pictures (tap one to see it big)</span>{gallery.replace(chr(34) + "gallery" + chr(34), chr(34) + "gallery r3d-gal" + chr(34), 1)}</div>' if gallery else "")
-                 + '<p class="caption"><b>Tap something in the room to work it:</b> the dining cabinet opens, folds and shows how it opens; the drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch; the blind rolls up; your vinyl stand\'s front records lift out; the trolley beside the cabinet wheels to the table; and any idea or suggestion you\'ve switched on changes version or goes.</p>'
-                 + '<p class="caption">Drag to look round, pinch or scroll to zoom (looking round from where you stand, scrolling walks you forward and back). '
-                 'On a keyboard: W A S D or the arrows walk, Q and E turn, R and F go up and down. Lost? Pick a view above, or Reset view.</p>',
+                 + '<p class="caption"><b>Tap something in the room to work it:</b> doors open, drawers pull out, lights switch, the blind rolls up.</p>'
+                 + '<p class="caption">Drag to look round, pinch or scroll to zoom. Keys: W A S D walk, Q and E turn, R and F up and down.</p></details>',
         # v31, client: "upgrade the views and layouts area of the site to ensure it reflects our recent upgrades": grouped, the compact cabinet
         # first, with what goes beside it, how it opens, the floor it needs, and ready-made set-ups to try
-        "layout": "".join([
-            '<h3 class="r3d-sub">The dining cabinet</h3>',
-            # v33, client: "The compact cabinet is our only choice for the table now or any upgraded more compact version for this"
-            seg("cabw", [("90", f"{G.CAB['top'][0]:g} wide, {G.CAB['len']:.1f} long, six chairs inside (the plan)"),
-                         ("80", f"{G.CAB80['top'][0]:g} wide, {G.CAB80['len']:.1f} long, four chairs inside")], "The compact cabinet: its table's width"),
-            seg("dining", [("folded", "Folded"), ("four", "Open, four"), ("six", "Open, six")], "Folded or open"),
-            seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The table door, with the table folded"),
-            seg("chairs", [("cupboard", "Shut"), ("open", "Open")], "The chair door, with the table folded"),
-            '<div class="grp"><span class="label">See how it works</span><div class="seg"><button type="button" class="chip" data-showopen="1"><span class="ms" aria-hidden="true">play_arrow</span> Watch it open</button></div>'
-            '<span class="caption">Slowly, step by step: the doors, the chairs, then the table unfolding joint by joint, about 40 seconds. '
-            'Pause it or step back and on; you can look round while it plays.</span></div>',
-            seg("foot", [("off", "Hide"), ("on", "Show")], "The floor it needs when it's open (table, chairs, the door's swing)"),
-            '<div class="grp"><span class="label">Try a set-up</span><div class="seg r3d-moments">'
-            '<button type="button" data-moment="dinner"><span class="ms" aria-hidden="true">dinner_dining</span> Dinner for six</button>'
-            '<button type="button" data-moment="four"><span class="ms" aria-hidden="true">lunch_dining</span> Lunch for four</button>'
-            '<button type="button" data-moment="film"><span class="ms" aria-hidden="true">movie</span> Film night</button>'
-            '<button type="button" data-moment="morning"><span class="ms" aria-hidden="true">wb_sunny</span> Everyday morning</button>'
-            # v37: the games out of the ottoman, and drinks at the bar built in beside the cabinet
-            '<button type="button" data-moment="games"><span class="ms" aria-hidden="true">casino</span> Games night</button>'
-            '<button type="button" data-moment="drinks"><span class="ms" aria-hidden="true">local_bar</span> Drinks</button></div>'
-            '<span class="caption">Each sets the table, the lights and the curtains together, then shows you the room.</span></div>',
+        # v39: Room, by place (the approved redesign): the set-ups, then one main choice for each place; the rest under More
+        "room": "".join([
+            '<div class="seg r3d-moments r3d-momrow" role="group" aria-label="Try a set-up">'
+            '<button type="button" data-moment="dinner">Dinner for six</button><button type="button" data-moment="film">Film night</button>'
+            '<button type="button" data-moment="games">Games night</button><button type="button" data-moment="drinks">Drinks</button>'
+            '<button type="button" data-moment="four">Lunch for four</button><button type="button" data-moment="morning">Morning</button></div>',
+            seg("dining", [("folded", "Folded"), ("four", "Four"), ("six", "Six")], "Dining wall and bar · the table"),
+            seg("drawers", [("in", "In"), ("out", "Out")], "Media wall · the drawers"),
+            seg("ctop", [("down", "Lid down"), ("up", "Lid up")], "The sofa · the record table"),
+            seg("plants", [(k, {"corner": "In the corner", "breast": "By the breast"}.get(k, v["name"])) for k, v in G.PLANT_LAYOUTS.items()], "Window corner · the plant stand"),
+            '<details class="r3d-more r3d-fold"><summary>More: the chair door, watch it open, the curtains</summary>',
+            seg("cabw", [("90", f"{G.CAB['top'][0]:g} wide (the plan)"), ("80", f"{G.CAB80['top'][0]:g} wide, four chairs")], "The table's width"),
+            seg("tdoor", [("shut", "Shut"), ("open", "Open")], "The table door"),
+            seg("chairs", [("cupboard", "Shut"), ("open", "Open")], "The chair door"),
+            '<div class="grp"><div class="seg"><button type="button" class="chip" data-showopen="1"><span class="ms" aria-hidden="true">play_arrow</span> Watch it open</button></div></div>',
+            seg("foot", [("off", "Hide"), ("on", "Show")], "The floor it needs, open"),
+            '<div class="grp"><div class="seg"><button type="button" data-tog="curtains" aria-pressed="false">Curtains drawn</button></div></div>',
             BESIDE_SEG,
-            '<h3 class="r3d-sub">Around the room</h3>',
-            seg("plants", [(k, v["name"]) for k, v in G.PLANT_LAYOUTS.items()], "Plant stand and vinyl stand"),
-            seg("drawers", [("in", "Shut"), ("out", "Pulled out")], "The media wall's drawers"),
-            '<p class="caption">Or tap the cabinet in the room: its card opens it for four or six, folds it, opens either door and swaps the table\'s width.</p>']),
-        "look": swatches + trims + decor_g,
-        "extras": opts_html() + picks + ideas_g + sugg_g,
+            '</details>',
+            '<details class="r3d-more r3d-fold" id="r3d-optfold"><summary>Options, ideas and your own furniture</summary>',
+            opts_html(), picks, ideas_g, sugg_g,
+            '<p class="caption"><button type="button" class="chip" data-nav="ideas">Every idea, with pictures</button></p></details>',
+            # v39, item 13: "Save my plan": your picks and a link to this room, to paste to us
+            '<div class="grp"><div class="seg"><button type="button" class="btn primary" data-myplan="1"><span class="ms" aria-hidden="true">send</span> Save my plan</button></div>'
+            '<span class="caption" id="r3d-myplanst" aria-live="polite">Copies your picks and a link to this room, to send us.</span></div>']),
+        "look": swatches + '<div class="grp"><span class="label">A feature wall</span><div class="seg" role="group" aria-label="A feature wall">'
+                 '<button type="button" data-feature="breast">The breast in Green Smoke</button><button type="button" data-feature="media">The media wall in Green Smoke</button>'
+                 '<button type="button" data-feature="none">All one colour</button></div></div>' + decor_main + '<details class="r3d-more r3d-fold"><summary>More: the oak, the floor, cushions, curtains</summary>' + trims + decor_g + '</details>',
     }
 
 
@@ -551,9 +595,7 @@ def opts_html():
                  f'<div class="seg r3d-grid" role="group" aria-label="{html.escape(title)}">{btns}</div>'
                  f'<p class="caption" data-optcap="{key}" aria-live="polite">{html.escape(note)}</p></div>')
     return ('<div class="grp r3d-opts" id="r3d-opts"><span class="label">Storage and a bar: your options</span>'
-            '<p class="caption r3d-opthow"><b>How it works:</b> pick an option and the room shows it and takes you to it; <b>None</b> takes it away; '
-            '<b>See it</b> takes you back. Tap a piece in the room for its colours, to move it or to take it away. What you pick shows in '
-            '<b>Your picks</b> below with a rough cost, and goes with <b>Copy link to this view</b> (Views).</p>'
+            '<p class="caption r3d-opthow">Pick one and the room shows it; <b>None</b> takes it away. Your picks and their cost show below.</p>'
             # v37: everything off in one go, back to the plan as it is
             '<div class="seg r3d-optclear"><button type="button" class="chip" data-optclear="1"><span class="ms" aria-hidden="true">restart_alt</span> Clear all extras</button></div>'
             + rows + '</div>')
@@ -565,6 +607,8 @@ def picks_json():
            "sugg": {k: [t, c[0], c[1]] for k, t, _s, c, *_ in ideas.SUGGEST},
            "decor": {k: [lab, dict(opts)] for k, lab, opts in DECOR},
            "svar": {k: {v: n for v, n, _c in vs} for k, vs in ideas.SUGG_VARS.items()}}   # v28
+    import costs, build_doc                                                              # v39: the plan's total, for the plan bar
+    ov = costs.overview(build_doc.TRACK); out["plan"] = [sum(r[1] for r in ov), sum(r[2] for r in ov)]
     return json.dumps(out, separators=(",", ":"))
 
 
@@ -585,19 +629,14 @@ def hotspots():
     rug_w, rug_d = g.RUG["x"][1] - g.RUG["x"][0], g.RUG["z"][1] - g.RUG["z"][0]
     pl = g.PLANT_LAYOUTS["corner"]["plants"]
     PS = g.PLANT_STAND
+    # v39 (the approved redesign): three places to tap, not six stickers
     return [
-        dict(id="wall", short="Media wall", n=1, name="The media wall", hue=300, at=[g.ALC_W / 2, 150, g.ALC_D - 26], nrm=[0, -1], cut="wall", view="wall", chapter="wall",
-             facts=['LG C6 55" at 116.5', "Artisan oak in Card Room Green", "Steps 6–10", ph("4 Base unit", "5 Oak joinery")]),
-        dict(id="pc", short="PC wall", n=2, name="The PC side wall", hue=235, at=[8, g.PC_SHELF_TOP + 32, pc_z], nrm=[1, 0], cut="pc", view="pc", chapter="side",
-             facts=[f"PC shelf at {g.PC_SHELF_TOP:g}", "Leads inside the wall", "Warm LED strip underneath", "Step 10"]),
-        dict(id="breast", short="Breast", n=3, name="Chimney breast", hue=345, at=[(g.BREAST_X[0] + g.BREAST_X[1]) / 2, 120, -6], nrm=[0, -1], cut="", view="breast", chapter="records",
-             facts=[f"Vinyl stand, {g.STAND_LPS} LPs", f"“Now playing” ledge at {g.NOW_LEDGE['top']:g}", "Two framed LPs", "Vinyl kit " + ph("9 Vinyl kit")]),
-        dict(id="dining", short="Cabinet", n=4, name="Dining cabinet", hue=50, at=[g.ROOM_W - 12, 110, g.CAB["cz"]], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
-             facts=[f"Table {g.CAB['len_open']:g} × {g.CAB['top'][0]:g}, six in comfort", f"{g.CAB['len']:.1f} long, six chairs inside", f"Or {g.CAB80['top'][0]:g} wide: {g.CAB80['len']:.1f} long, four chairs inside", "Tap it to open it", "Step 11", ph("6 Dining wall")]),
-        dict(id="window", short="Window", n=5, name="Window & plants", hue=165, at=[pl[0], PS["h"] - 20, pl[1] + 8], nrm=[0, 1], cut="win", view="windowwall", chapter="c-room",
-             facts=[f"Plant stand {PS['w']:g} × {PS['d']:g} × {PS['h']:g}", f"Window ledge {g.WINDOW_REVEAL + g.SILL['nose']:g} deep", "Hessian curtains"]),
-        dict(id="sofa", short="Sofa", n=6, name="Sofa & rug", hue=95, at=[(g.SOFA_X[0] + g.SOFA_X[1]) / 2, 70, g.SOFA_BACK_Z + 55], nrm=None, cut="", view="sofa", chapter="c-room",
-             facts=["Blue corduroy L-sofa", f"Rug {rug_w:g} × {rug_d:g}", "Ottoman end"]),
+        dict(id="wall", short="Media wall", n=1, name="Media wall", hue=40, at=[g.ALC_W / 2, 150, g.ALC_D - 26], nrm=[0, -1], cut="wall", view="wall", chapter="wall",
+             facts=['LG C6 55" at 116.5', "Artisan oak, Card Room Green", ph("4 Base unit", "5 Oak joinery")]),
+        dict(id="dining", short="Dining wall", n=2, name="Dining wall and bar", hue=60, at=[g.ROOM_W - 12, 110, g.CAB["cz"]], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
+             facts=[f"Table {g.CAB['len_open']:g} × {g.CAB['top'][0]:g}, six in comfort", "The bar beside it", ph("6 Dining wall")]),
+        dict(id="sofa", short="The sofa", n=3, name="The sofa", hue=250, at=[(g.SOFA_X[0] + g.SOFA_X[1]) / 2, 70, g.SOFA_BACK_Z + 55], nrm=None, cut="", view="sofa", chapter="c-room",
+             facts=["The record table", "The blanket basket", f"Rug {rug_w:g} × {rug_d:g}"]),
     ]
 
 
@@ -608,8 +647,8 @@ def section(gallery=""):
     bubbles = "".join(f'<button type="button" class="r3d-bub" role="tab" id="r3d-dt-{k}" aria-controls="r3d-dp-{k}" aria-selected="false" data-drawer="{k}" style="--h:{h}">'
                       f'<i class="ms" aria-hidden="true">{ic}</i>{html.escape(n)}</button>' for k, n, ic, h in DRAWERS)
     drawers = "".join(f'<div class="r3d-ui r3d-dpanel" role="tabpanel" id="r3d-dp-{k}" aria-labelledby="r3d-dt-{k}" hidden><h2>{html.escape(n)}</h2>{panels[k]}</div>' for k, n, *_ in DRAWERS)
-    stickers = "".join(f'<button type="button" class="stk" data-hot="{h["id"]}" style="--h:{h["hue"]};--tilt:{(-3, 2, -1, 3, -2, 1)[h["n"] - 1]}deg" aria-expanded="false" aria-controls="r3d-pop" aria-label="{h["n"]}, {html.escape(h["name"])}" hidden>'
-                       f'<b>{h["n"]}</b><span class="t">{html.escape(h["name"])}</span></button>' for h in hotspots())
+    stickers = "".join(f'<button type="button" class="stk" data-hot="{h["id"]}" style="--h:{h["hue"]};--tilt:0deg" aria-expanded="false" aria-controls="r3d-pop" aria-label="{html.escape(h["name"])}" hidden>'
+                       f'<b aria-hidden="true"></b><span class="t">{html.escape(h["name"])}</span></button>' for h in hotspots())
     # v33, the phone home: a strip of the places (tap one to fly there and open its card) and the set-ups as chips, under the room
     places = "".join(f'<button type="button" data-place="{h["id"]}" style="--h:{h["hue"]}"><b>{h["n"]}</b>{html.escape(h.get("short", h["name"]))}</button>' for h in hotspots())
     moments = "".join(f'<button type="button" data-moment="{k}"><span class="ms" aria-hidden="true">{ic}</span>{t}</button>'
@@ -622,8 +661,10 @@ def section(gallery=""):
     <div class="r3d-msg" id="r3d-msg">Loading the 3D room…</div>
     <p class="r3d-cap sr-only" id="r3d-cap"></p>
     <div class="r3d-stickers" id="r3d-stickers">{stickers}</div>
-    <div class="r3d-phone"><div class="r3d-moms" role="group" aria-label="Try a set-up">{moments}</div>
-      <div class="r3d-places" role="group" aria-label="Places in the room">{places}</div></div>
+    <!-- v39: your plan and its total; Try options shows what else could go in each place, with the change to the total -->
+    <div class="r3d-planbar" id="r3d-planbar"><span class="r3d-plansum" id="r3d-plansum" aria-live="polite">Your plan</span>
+      <button type="button" class="r3d-try" id="r3d-try" role="switch" aria-checked="false">Try options <i aria-hidden="true"></i></button></div>
+    <button type="button" class="r3d-back" id="r3d-back" hidden><span class="ms" aria-hidden="true">arrow_back</span> Back to my plan</button>
     <div class="r3d-tour" id="r3d-tour" role="region" aria-label="Tour of the room" aria-live="polite" hidden><span class="r3d-tourn" id="r3d-tourn"></span><h3 id="r3d-tourh"></h3><p id="r3d-tourp"></p>
       <div class="acts"><button type="button" data-tour="prev" aria-label="Back one stop"><span class="ms" aria-hidden="true">skip_previous</span></button><button type="button" data-tour="pause" aria-label="Pause"><span class="ms" aria-hidden="true">pause</span></button><button type="button" data-tour="next" aria-label="Next stop"><span class="ms" aria-hidden="true">skip_next</span></button><button type="button" class="end" data-tour="stop">End the tour</button></div>
       <i class="r3d-tourbar"><b id="r3d-tourbar"></b></i></div>

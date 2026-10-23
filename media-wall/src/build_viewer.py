@@ -54,7 +54,7 @@ def track_rows():
 def fit_html():
     out = []
     c = fit.counts()
-    for title, space, rows in fit.zones():
+    for title, space, rows in fit.firm_zones():
         n_t = sum(1 for r in rows if r[-1] == fit.TIGHT)
         n_c = sum(1 for r in rows if r[-1] == fit.CHECK)
         flags = "".join(f'<span class="pill {k}">{n} {lab}</span>' for n, k, lab in ((n_t, "tight", "tight"), (n_c, "check", "to check")) if n)
@@ -537,44 +537,44 @@ CAP3D = {"3d_room": "The whole room (v21, the 3D room's first view): from above 
          "3d_pc_day": "The side wall in daylight: one oak run sweeping out to the PC, your blue sofa, the curtains",
          "3d_window_bright": "The Bright preset: every spot head straight down, evenly spread, the strips and the lamp filling in",
          "3d_pc_lit": "The Film preset with the PC lit: its fans and the RGB strip glowing behind the glass side",
-         "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended): two towers of five tiers and a taller plant in the open middle",
-         "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top, LPs between the wires below, under the \u201cnow playing\u201d ledge",
-         "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up), the vinyl stand back in the window corner",
+         "3d_plants_corner": "Your plant stand (98 \u00d7 29.5 \u00d7 158) in the window's west corner (layout A, recommended).",
+         "3d_records_breast": "Your vinyl stand (70 \u00d7 32 \u00d7 78) on the chimney breast (layout A): two face-out bays on top.",
+         "3d_plants_breast": "Layout B: the plant stand on the breast instead (the ledge comes off, the frames go up).",
          "3d_ideas_window": "Idea, not in the plan: glass plant shelves across the window's reveal, beside your plant stand in the west corner",
          "3d_ideas_ctable": "Idea, not in the plan: the oak C-table over the sofa's open end",
-         "3d_glass_case": "The glass display case on the chimney breast, in the plan: 90 × 85 × 12, oak, three glass shelves lit inside, collectibles in it, above the \u201cnow playing\u201d ledge and your vinyl stand",
-         "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games",
+         "3d_glass_case": "The glass display case on the chimney breast, in the plan: 90 × 85 × 12, oak.",
+         "3d_case_mixed": "The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants.",
          "3d_case_singles": "The same case with a white frame, 7-inch singles face-out and a stack of tapes, in the Cosy preset",
          "3d_decor": "Decor to try (v20): sage-stripe rug, rust and ochre cushions and a throw on the sofa, white linen curtains",
-         "3d_suggest": "Suggested furniture and decor, all of them on: a floor plant, side table and knit throw at the sofa's open end, a pouffe, floor cushions, a print, a clock, an arched mirror, fairy lights, candles, a lantern and more",
-         "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf, the table and the six chairs inside, {G.CAB['freed']:.0f} cm of wall back by the pipe boxing",
-         "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long, three a side, bar 2 over it",
+         "3d_suggest": "Suggested furniture and decor, all of them on.",
+         "3d_c_folded": f"The compact dining cabinet packed away: two oak boxes {G.CAB['len']:.0f} long under your shelf.",
+         "3d_c_six": f"The compact cabinet open for six: the table door turned back flat over the chair door, the table {G.CAB['len_open']:g} long.",
          "3d_window_c_six": "From the window, the compact cabinet open for six, the coffee table where it is",
-         "3d_c_tdoor": "The table door open with the table still folded: the table standing on its hinge rail, two chairs lying in the base under it, the linen shelf over it",
-         "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf",
+         "3d_c_tdoor": "The table door open with the table still folded: the table standing on its hinge rail.",
+         "3d_c_chairs": "The chair door open, turned back flat over the table door: four folded chairs.",
          "3d_c_plan": "Bird\u2019s eye, the compact cabinet open for six",
-         "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side, the table door folded back flat behind them",
-         "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet: the table, the six chairs and the table door's swing",
-         "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light, no floor",
-         "3d_beside_trolley_out": "The slim trolley pulled out for dinner, beside the window-side diners and clear of the table door's swing (tap it in the 3D room: Pull it out for dinner)",
+         "3d_c_sit": "Sitting at the open table's far end, at a seated eye height: three a side.",
+         "3d_c_foot": "From above, the cabinet folded, with the floor it needs once it's open drawn on the carpet.",
+         "3d_beside_mirror": "Beside the cabinet, a tall mirror (IKEA NISSEDAL, 40 × 150) between it and the pipe boxing: more light.",
+         "3d_beside_trolley_out": "The slim trolley pulled out for dinner, beside the window-side diners and clear of the table door's swing.",
          "3d_bar_shut": "The chimney breast: the glass case, and under it the drinks cabinet (a suggestion) with its oak front shut",
-         "3d_ottoman": "The new storage ottoman: navy velvet, 76 square, its padded lid lifted: twelve square board games in three layers and a row of card decks inside",
+         "3d_ottoman": "The new storage ottoman: navy velvet, 76 square, its padded lid lifted.",
          "3d_beside_trolley": "Beside the cabinet, a slim trolley (VASAGLE, 20 deep) that pulls out for dinner to stand behind the window-side diners",
-         "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles, under the trailing plant",
-         "3d_beside_rail": "Beside the cabinet, an oak blanket rail: five blankets over four oak rails, 12 off the wall, behind the open table door's line",
+         "3d_beside_dresser": "Beside the cabinet, a low oak shelf in the cabinet's ply: plates on edge, glasses and bottles.",
+         "3d_beside_rail": "Beside the cabinet, an oak blanket rail: five blankets over four oak rails, 12 off the wall.",
          # v37: the bar built in beside the cabinet, the shoe cabinets, your black shelf's 10 cm gap, the red lamp's cap
-         "3d_beside_bar": "Beside the cabinet, a bar built in (a suggestion): a cupboard for 20 bottles, an oak counter at 90, a mirror back, glasses on a rail, a display shelf",
+         "3d_beside_bar": "Beside the cabinet, the bar built in: a cupboard for bottles, an oak counter at 90.",
          "3d_beside_bar_open": "The built-in bar open in the evening: its doors back, the bottles inside, glasses hanging from the rail",
          "3d_beside_shoes": "Beside the cabinet, two shoe cabinets (a suggestion): IKEA TRONES, 18 deep, behind the open table door's line",
          "3d_shelf_gap": "Your black shelf's window end, always 10 cm short of the pipe boxing, your hanging plant on it",
          "3d_lamp_cap": "Your red lamp's cap: a structured six-panel crown and a flat, stiff brim 1.8 times a usual one, gold stitching",
-         "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side, your hessian curtains on their wooden pole",
+         "3d_c_six_day": f"From the door in daylight: the compact cabinet open for six, the table {G.CAB['len_open']:g} long, three a side.",
          "3d_doll": "Dolls\u2019 house view: the compact cabinet packed away under your shelf",
-         "3d_c80_folded": f"The more compact version packed away: the same two oak boxes round an 80-wide table, {G.CAB80['len']:.1f} long, {G.CAB80['freed']:.1f} cm of wall back",
+         "3d_c80_folded": f"The more compact version packed away: the same two oak boxes round an 80-wide table, {G.CAB80['len']:.1f} long.",
          "3d_c80_six": f"The more compact version open for six: the table {G.CAB80['len_open']:g} × {G.CAB80['top'][0]:g}, three a side",
-         "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down, so four go inside, not six",
+         "3d_c80_tdoor": "The more compact version, the table door open: its base is too narrow for two chairs lying down.",
          "3d_c80_plan": "Bird\u2019s eye, the more compact version open for six",
-         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains (the cabinet packed away)"}
+         "3d_look": "Look to try: walnut on every new oak piece, oak floorboards, your shelf in oak and white linen curtains."}
 import item_shots as IS
 import plan_ui as PU   # v33: one count, Decide, the shortlist, build day
 CAP3D.update({stem: {"idea": "Idea (not in the plan): ", "sugg": "Suggested: ", "add": "In Edit room's Add list: "}[kd] + t
@@ -605,8 +605,7 @@ def ideas_panel():
     cards = [item_card(f"3d_id_{k}", "idea", k, title, size, cost, why, where) for k, title, size, cost, why, where, _in3d in I.IDEAS]
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
-            f'<p class="caption">Small enough for this room: nothing new on the floor bigger than a side table. Every one is in the 3D room (Tools → Extras, “Ideas”), all off until you turn them on; '
-            f'“Show it in my room” turns it on and takes you to it. All of them together would be about £{lo}–{hi}.</p>'
+            f'<p class="caption">Each is off until you turn it on; “Show it in my room” takes you to it. All together about £{lo}–{hi}.</p>'
             f'<div class="opts">{"".join(cards)}</div>' + suggest_block() + add_block() + decor_block())
 
 
@@ -642,8 +641,7 @@ def decor_block():
     b = ("<button type='button' class='btn' data-r3d='" + json.dumps({"site": "C", "view": "door", "decor": {"rug": "stripes", "cushions": "rust", "curtains": "linen"}})
          + "'>Try decor in the 3D room</button>")
     return (f'<div class="qhead"><h2 class="ptitle">Decor to try</h2><span class="caption">In the 3D room, under “Decor”: your choices are kept on this device</span></div>'
-            f'<ul>{rows}</ul><p class="caption">The glass case on the chimney breast is in the plan: pick what goes in it and its frame here. '
-            f'In Edit room, “Add” now has a floor vase with grasses, a knitted pouffe, a seagrass basket for throws, an oak floor mirror and a lantern, as well as the armchair, bookcase and the rest.</p>'
+            f'<ul>{rows}</ul><p class="caption">Pick what goes in the glass case, and its frame, here.</p>'
             f'<div class="gallery">{figs}</div>{b}')
 
 
@@ -908,6 +906,19 @@ def ring(key, hue, label, go):
             f'<circle class="vl" cx="40" cy="40" r="34"/></svg><b id="d-{k}">0</b><span>{label}</span></a>')
 
 
+def before_after(prefix=""):
+    """v39, UPGRADE_PLAN_v38 item 13 ("before and after: your own photos beside the 3D room from the same spot, with a slider")."""
+    pairs = (("stairs", "The stairs wall, from the sofa", "Your dining cabinet and the bar where the black shelf's clutter is"),
+             ("window", "The window and the sofa, from the stairs", "The media wall, the record table and your lamp"))
+    out = ""
+    for k, t, cap in pairs:
+        out += (f'<figure class="ba" style="--ba:50%"><div class="ba-box"><img src="{prefix}art/ba_{k}_after.webp" alt="{html.escape(t)}: the plan in 3D" loading="lazy" width="1200" height="900">'
+                f'<img class="ba-before" src="{prefix}art/ba_{k}_before.webp" alt="{html.escape(t)}: your photo" loading="lazy" width="1200" height="900">'
+                f'<input type="range" min="0" max="100" value="50" aria-label="{html.escape(t)}: slide between your photo and the plan" oninput="this.closest(\'.ba\').style.setProperty(\'--ba\', this.value + \'%\')"></div>'
+                f'<figcaption><b>{html.escape(t)}.</b> {html.escape(cap)}. Slide: your photo on the left, the plan on the right.</figcaption></figure>')
+    return f'<div class="ba-grid">{out}</div>'
+
+
 def _page(site=False):
     """v25 (Demma Home Improvements, option 1c "Room as map"): the 3D room is the home screen; a rail (a bottom bar on phones) opens
     the Plan, Build, Buy and Ideas sheets over it (v30: the Ask sheet is gone); the Tools button holds every 3D control. Every v24 panel id, data-* hook and
@@ -991,8 +1002,10 @@ def _page(site=False):
             + "".join(f'<button type="button" data-nav="{k}" aria-current="false" style="--h:{h}"><i class="ms" aria-hidden="true">{ic}</i>{n}</button>' for k, n, ic, h in nav) + '</nav>')
     def sheet(k, title, ic, h, body):
         return (f'<div class="sheet" id="sh-{k}" role="dialog" aria-modal="true" aria-labelledby="sh-{k}-h" aria-hidden="true" style="--h:{h}">'
-                f'<div class="shd"><span class="grab" aria-hidden="true"></span><h2 id="sh-{k}-h"><i class="ms" aria-hidden="true">{ic}</i><span>{title}</span></h2>'
-                f'<button type="button" class="close" data-close aria-label="Close {title}"><span class="ms" aria-hidden="true">close</span></button></div>'
+                f'<div class="shd"><span class="grab" aria-hidden="true"></span><h2 id="sh-{k}-h" class="sr-only">{title}</h2>'
+                + ('<nav class="shnav" aria-label="The plan">' + "".join(f'<button type="button" data-nav="{n}" aria-current="{str(n == k).lower()}">{t}</button>' for n, t in (("plan", "Plan"), ("build", "Build"), ("buy", "Buy"))) + '</nav>'
+                   if k in ("plan", "build", "buy") else f'<h2 aria-hidden="true"><i class="ms">{ic}</i><span>{title}</span></h2>')
+                + f'<button type="button" class="close" data-close aria-label="Close {title}"><span class="ms" aria-hidden="true">close</span></button></div>'
                 f'<div class="sbd">{body}</div></div>')
     sugg_chips = ('<div class="seg" role="group" aria-label="Suggestions in the room">'
                   + "".join(f'<button type="button" data-sproxy="{k}" aria-pressed="false">{html.escape(room3d_page.SUGG_SHORT[k])}</button>' for k, *_ in __import__("ideas").SUGGEST)
@@ -1006,6 +1019,8 @@ def _page(site=False):
       <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
+      <div class="sec-h"><h2>Before and after</h2></div>
+      {before_after(prefix)}
       <div class="sec-h"><h2>Chapters</h2></div>
       <div class="tilegrid">{tiles}</div>
       <div class="sec-h"><h2>The table: 90 or 80 wide, side by side</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
@@ -1073,7 +1088,7 @@ def _page(site=False):
     <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site. Source numbers refer to the Sources list below.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
-    <div class="doc">{sec["12"]}<!--keep--><h2>Options we set aside</h2>{sec["appendix"]}<details><summary>Earlier rounds (v13 to v14)</summary>{sec["earlier"]}</details><!--/keep--></div></div>"""),
+    <div class="doc">{sec["12"]}</div></div>"""),
         chapter("downloads", f'<div class="block"><p class="caption">The full plan and the build guide as PDFs for printing, and every HD picture, 3D and drawn.</p>'
                              f'<p><a class="btn primary" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> '
                              f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>{downloads_html(site)}{notice}'
@@ -1131,13 +1146,12 @@ def _page(site=False):
 <button type="button" class="skip" data-tools-toggle>Open the room's controls</button>
 <div class="brand"><span class="mark" aria-hidden="true"><i style="background:var(--peach)"></i><i style="background:var(--mint)"></i><i style="background:var(--lilac)"></i><i style="background:var(--butter)"></i></span>
   <span><b>Demma<span class="ver" title="This page is version {VERSION}">v{VERSION}</span></b><small>Home Improvements</small></span></div>
-{rail}
+<nav class="hnav" aria-label="The plan">{"".join(f'<button type="button" data-nav="{k}" aria-current="false">{n}</button>' for k, n in (("plan", "Plan"), ("build", "Build"), ("buy", "Buy")))}</nav>
 <main id="room" aria-label="Your room in 3D">{room3d_page.section(gallery3d())}</main>
 {sheet("plan", "Your plan", "map", 300, plan_home + chapters)}
 {sheet("build", "Build", "construction", 50, build_body)}
 {sheet("buy", "Buy", "shopping_bag", 165, buy_body)}
 {sheet("ideas", "Ideas", "lightbulb", 95, ideas_body)}
-{bbar}
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="The picture at full size">
   <div class="lbbar"><span class="caption" id="lb-cap">Full size: drag or scroll to look round. Pinch to zoom on a phone.</span><button class="btn" id="lb-close" type="button">Close</button></div>
   <div class="lbscroll" id="lb-scroll"><div class="lbwrap"><img id="lb-img" alt=""><img id="lb-dims" alt="" hidden></div></div>
@@ -1202,8 +1216,43 @@ def site():
     head, rest = body.split("</style>", 1)
     return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            # v39, item 13 ("quicker on phones: the room as an installable page, works offline, opens fast"): a manifest, an icon and a service worker
+            '<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2f4a3c">\n<link rel="apple-touch-icon" href="media-wall/src/art/icon-192.png">\n'
             '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%239a6634%22/%3E%3C/svg%3E">\n'
-            + head + "</style>\n</head>\n<body>" + rest + "</body>\n</html>\n")
+            + head + "</style>\n</head>\n<body>" + rest
+            + "<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>\n"
+            + "</body>\n</html>\n")
+
+
+def pwa_files():
+    """v39, item 13: the installable page's manifest, service worker and icons (GitHub Pages serves them from the repo's root)."""
+    from PIL import Image, ImageDraw
+    root = HERE.parent.parent
+    for size in (192, 512):
+        im = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+        d.rounded_rectangle((0, 0, size - 1, size - 1), radius=size // 5, fill="#2b2638")
+        r, gap = size * 0.16, size * 0.08
+        for i, col in enumerate(("#f6b89a", "#9fdcc0", "#c8b6f0", "#f2d878")):
+            cx = size / 2 + (-1 if i % 2 == 0 else 1) * (r + gap / 2); cy = size / 2 + (-1 if i < 2 else 1) * (r + gap / 2)
+            d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=col)
+        im.save(HERE / "art" / f"icon-{size}.png")
+    (root / "manifest.webmanifest").write_text(json.dumps({
+        "name": "Demma Home Improvements", "short_name": "Demma", "start_url": "./", "scope": "./", "display": "standalone",
+        "background_color": "#151a16", "theme_color": "#2f4a3c",
+        "icons": [{"src": f"media-wall/src/art/icon-{n}.png", "sizes": f"{n}x{n}", "type": "image/png", "purpose": "any maskable"} for n in (192, 512)]}, indent=1))
+    (root / "sw.js").write_text(f"""// v39: the page opens from the device after the first visit (network first for the page, so a new round shows; cache first for the
+// rest: three.js from its CDN, the fonts and the pictures). Version {VERSION}.
+const C = "demma-v{VERSION}";
+self.addEventListener("install", e => {{ self.skipWaiting(); e.waitUntil(caches.open(C).then(c => c.addAll(["./", "manifest.webmanifest"]).catch(() => {{}}))); }});
+self.addEventListener("activate", e => {{ e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())); }});
+self.addEventListener("fetch", e => {{
+  const r = e.request; if (r.method !== "GET") return;
+  const u = new URL(r.url), page = r.mode === "navigate" || (u.origin === location.origin && (u.pathname.endsWith("/") || u.pathname.endsWith("index.html")));
+  if (page) {{ e.respondWith(fetch(r).then(res => {{ const cp = res.clone(); caches.open(C).then(c => c.put(r, cp)); return res; }}).catch(() => caches.match(r).then(m => m || caches.match("./")))); return; }}
+  if (/\\.pdf$/.test(u.pathname)) return;                                   // the PDFs come from the network
+  e.respondWith(caches.match(r).then(m => m || fetch(r).then(res => {{ if (res.ok || res.type === "opaque") {{ const cp = res.clone(); caches.open(C).then(c => c.put(r, cp)); }} return res; }})));
+}});
+""")
 
 
 def publish_files():
@@ -1257,6 +1306,7 @@ if __name__ == "__main__":
     (HERE / "media_wall_viewer.html").write_text(page())
     (HERE / "media_wall_viewer_inline.html").write_text(inline_images(page()))
     (HERE.parent.parent / "index.html").write_text(site())
+    pwa_files()                                                     # v39: installable from GitHub Pages
     (HERE / "publish_files.json").write_text(json.dumps(publish_files(), indent=1))
     todo = deck_assets_todo()
     print("viewer ok", len(publish_files()), "files;", len(todo), "pictures not yet in the deck's asset store" + (" (inlined)" if todo else ""))

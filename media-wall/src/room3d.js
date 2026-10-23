@@ -71,6 +71,7 @@ if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
 if (!S.svar || typeof S.svar !== "object" || Array.isArray(S.svar)) S.svar = {};   // v28: each suggestion's version (its first by default)
 S.decor = Object.assign({}, DEF.decor, (S.decor && typeof S.decor === "object") ? S.decor : {});
+if (!Number.isFinite(S.nowp)) S.nowp = 0;   // v39: the LP facing out on the ledge
 if (!S.picked) S.quality = "fast";   // v35: every device starts in Fast; HD follows if its first frames are quick (autoQuality)
 if (!S.layout || typeof S.layout !== "object" || Array.isArray(S.layout)) S.layout = {};
 if (!Array.isArray(S.added)) S.added = [];
@@ -143,6 +144,12 @@ try {
 }
 gl.outputColorSpace = THREE.SRGBColorSpace;
 gl.toneMapping = THREE.ACESFilmicToneMapping;
+/* v39, client: "PC should be using GPU in order to speed up and keep frames high since most PCs will have 1060 or higher": the renderer
+   asks for the high-performance GPU; a PC whose browser reports a real graphics card starts in HD (no Fast-then-HD second set of shaders
+   to build) and keeps full resolution while you move unless its frames actually slow down. */
+const GPU = (() => { try { const c = gl.getContext(), e = c.getExtension("WEBGL_debug_renderer_info"); return String(e ? c.getParameter(e.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER)); } catch (e) { return ""; } })();
+const BIG_GPU = !SMALL && /nvidia|geforce|rtx|gtx|quadro|radeon\s*(rx|pro|r9)|radeon\(tm\) rx|intel.*\barc\b|apple m\d/i.test(GPU) && !/swiftshader|llvmpipe|software|basic render/i.test(GPU);
+if (BIG_GPU && !S.picked) S.quality = "hd";
 gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
@@ -352,13 +359,19 @@ const RUG_LOOKS = {
     let x = 0; while (x < w) for (const [c, bw] of band) { g.fillStyle = c; g.fillRect(x, 0, bw, h); x += bw; }
     g.fillStyle = "#5f6f52"; g.fillRect(0, 0, w, 16); g.fillRect(0, h - 16, w, 16); } },
 };
+let noiseTile = null;
+function NOISE_TILE() {   // v39: a 128 square of grey noise, made once, for the rugs' wool (getImageData on a whole rug took 170 ms)
+  if (noiseTile) return noiseTile;
+  const c = noiseTile = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"), im = g.createImageData(128, 128), d = im.data, r = rnd(22);
+  for (let i = 0; i < d.length; i += 4) { const n = 128 + (r() - 0.5) * 32; d[i] = d[i + 1] = d[i + 2] = n; d[i + 3] = 255; }
+  g.putImageData(im, 0, 0); return c;
+}
 function rugTex(k) {
   const L = RUG_LOOKS[k]; if (!L) return RUG_TEX;
   if (!L.tex) {
     L.tex = canvasTex(1150, 800, (g, w, h) => { L.draw(g, w, h);
-      const r = rnd(22), im = g.getImageData(0, 0, w, h), d = im.data;
-      for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * 16; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
-      g.putImageData(im, 0, 0); });
+      g.globalAlpha = 0.5; g.globalCompositeOperation = "overlay"; g.fillStyle = g.createPattern(NOISE_TILE(), "repeat"); g.fillRect(0, 0, w, h);   // v39: wool noise, tiled
+      g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; });
     L.tex.wrapS = L.tex.wrapT = THREE.ClampToEdgeWrapping;
   }
   return L.tex;
@@ -441,7 +454,11 @@ const MATS = [];
 const CUT_H = 95, CUT_IN = 32;
 const CLIP = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 1e3), new THREE.Plane(new THREE.Vector3(0, -1, 0), CUT_H * 0.01)];
 const clipMat = m => { m.clippingPlanes = CLIP; m.clipIntersection = true; m.clipShadows = true; return m; };
-const reg = m => (MATS.push(clipMat(m)), m);
+/* v39, client: "the render is still slow on PC ... lag and frame drop on movement": a material with transmission (the bar's bottles and
+   glasses) makes three draw the whole room a second time, every frame, to see through it (984 draw calls instead of about 500). In the
+   live room glass is plain see-through; still() puts the transmission back for the saved pictures. */
+const glassLive = m => { if (m.transmission > 0) { m.userData.trans = m.transmission; m.transmission = 0; } return m; };
+const reg = m => (MATS.push(clipMat(glassLive(m))), m);
 const OAKS = new Set(["#c48c57", "#d9a46c", "#9c6a3f", "#a87443", "#cfa575", "#ddb78a", "#b08756", "#c79a6b", "#d8ad80", "#a37a50",
   "#b07a46", "#c89060", "#8a5c33", "#c08a52", "#c9a26a", "#c79a63", "#a8834f", "#d8c39f", "#e6d2ae", "#b99e78", "#cdb38a", "#d9c09a"]);
 const PAINT_OLD = new Set(R.PAINT_OLD);
@@ -740,7 +757,12 @@ function buildShell() {
     shell.add(new THREE.Mesh(mergeGeometries(rings), wood)); }
   const panel = (x0, w, folds) => {
     const g = new THREE.PlaneGeometry(w * M, (CU.rail_y - CU.drop_to) * M, Math.round(folds * 8), 1), pos = g.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * 0.026);
+    // v39: folds CU.amp deep (clear of the radiator's face); behind each rear speaker's pole the cloth lies flat at the stand's dent
+    const amp = (CU.amp || 2.6) * M, ST = R.REAR_STAND, dentZ = ST && ST.dent !== undefined ? (CU.z - ST.dent) * M : 0, hw = (R.REAR_SPK ? R.REAR_SPK[0] / 2 : 0) + 2;
+    for (let i = 0; i < pos.count; i++) {
+      const rx = x0 + w / 2 + pos.getX(i) / M, fold = Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * amp;
+      let k = 0; if (ST && ST.dent !== undefined) for (const [sx] of R.REAR_SPOTS) { const d = Math.abs(rx - sx); k = Math.max(k, d <= hw ? 1 : d < hw + 6 ? 1 - (d - hw) / 6 : 0); }
+      pos.setZ(i, fold * (1 - k) + dentZ * k); }
     g.computeVertexNormals();
     const m = new THREE.Mesh(g, cloth); m.position.copy(v3(x0 + w / 2, (CU.rail_y + CU.drop_to) / 2, CU.z)); m.rotation.y = Math.PI;
     return shadow(m);
@@ -2065,8 +2087,10 @@ function buildSeatAndPouf() {
     const grille = reg(new THREE.MeshStandardMaterial({ color: "#2b2c30", roughness: 0.95 })), steel = reg(new THREE.MeshStandardMaterial({ color: "#2a2a2c", roughness: 0.4, metalness: 0.6 }));
     R.REAR_SPOTS.forEach(([x, z], i) => {
       const g = new THREE.Group();
-      lb(g, 0, 0, 0, ST.base[0], ST.base[2], ST.base[1], steel);                     // the weighted base
-      lb(g, 0, ST.base[2], 0, ST.pole, ST.top - ST.base[2] - 0.8, ST.pole, steel);   // the pole
+      // v39: the speaker sits in front of the curtains; its pole stands in the gap behind the sofa, its flat base under the radiator
+      const pz = ST.pole_z !== undefined ? ST.pole_z - z : 0, bz = ST.base_z ? [ST.base_z[0] - z, ST.base_z[1] - z] : [-ST.base[1] / 2, ST.base[1] / 2];
+      lb(g, 0, 0, (bz[0] + bz[1]) / 2, ST.base[0], ST.base[2], bz[1] - bz[0], steel);  // the weighted base
+      lb(g, 0, ST.base[2], pz, ST.pole, ST.top - ST.base[2] - 0.8, ST.pole, steel);  // the pole
       lb(g, 0, ST.top - 0.8, 0, sw + 1, 0.8, sd, steel);                             // the top plate
       lb(g, 0, ST.top, 0, sw, sh, sd, blk);                                          // the speaker
       lb(g, 0, ST.top + 0.8, sd / 2 - 0.2, sw - 1.2, sh - 1.6, 0.6, grille);         // its grille, facing the room
@@ -2592,6 +2616,7 @@ function applyState() {
   adoptLights(scene);                                                              // v35: new lights (a rebuilt bar or lamp) join the fixed set
   updateCaption();
   store.set(KEY, S);
+  try { applyNow(); } catch (e) {}                                       // v39: the ledge's LP
   dirty();
 }
 function applyLight() {
@@ -3224,6 +3249,7 @@ function picks() {
 }
 const pickText = items => items.map(i => `${i.kind}: ${i.name}${i.hi ? ` (about £${i.lo}–${i.hi})` : ""}`).join("\n");
 function updatePicks() {
+  updatePlanBar();                                                        // v39
   const el = qs("#r3d-picklist"); if (!el) return;
   const items = picks(), lo = items.reduce((a, i) => a + i.lo, 0), hi = items.reduce((a, i) => a + i.hi, 0);
   el.innerHTML = items.length ? items.map(i => `<b>${i.name}</b>${i.hi ? ` <span class="r3d-cost">£${i.lo}–${i.hi}</span>` : ""}`).join(" · ")
@@ -3353,7 +3379,7 @@ canvas.addEventListener("wheel", e => {
   e.preventDefault(); wheelAcc += e.deltaY;
   if (Math.abs(wheelAcc) >= 60) { walk(wheelAcc < 0 ? "f" : "b"); wheelAcc = 0; }
 }, { passive: false });
-["pointerdown", "pointermove", "keydown", "wheel"].forEach(t => root.addEventListener(t, () => { PRE.idleT = performance.now(); }, { passive: true, capture: true }));   // v35: the shader warm-up waits while you use the room
+["pointerdown", "pointermove", "keydown", "wheel"].forEach(t => root.addEventListener(t, e => { if (t !== "pointermove" || e.buttons) PRE.idleT = performance.now(); }, { passive: true, capture: true }));   // v39: a mouse just moving over the room doesn't hold up the warm-up   // v35: the shader warm-up waits while you use the room
 let padT = null;             // a move button held down keeps moving, in smaller steps
 const padStop = () => { if (padT) { clearTimeout(padT.t); clearInterval(padT.i); padT = null; } };
 root.addEventListener("pointerdown", e => {
@@ -3594,13 +3620,15 @@ function openPop(id) {
   if (popId) stickEls[popId].setAttribute("aria-expanded", "false");
   popId = id; const el = stickEls[id]; el.setAttribute("aria-expanded", "true");
   pop.style.setProperty("--h", H.hue);
-  qs("#r3d-pop-h").textContent = `${H.n} · ${H.name}`;
+  qs("#r3d-pop-h").textContent = H.name;                                 // v39: three places, no numbers
   const ul = qs(".facts", pop); ul.textContent = "";
   H.facts.forEach(f => { const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); });
   pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true }); syncPlaces();
 }
 function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; try { syncPlaces(); } catch (e) {} }
-qsa(".stk").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); popId === b.dataset.hot ? closePop() : openPop(b.dataset.hot); }));
+qsa(".stk").forEach(b => b.addEventListener("click", e => { e.stopPropagation();
+  if (tryOpts && placeOpts(b.dataset.hot).length) { const r = stage.getBoundingClientRect(), q = b.getBoundingClientRect(); openAct(`opt:${b.dataset.hot}:${placeIx(b.dataset.hot)}`, [q.left + q.width / 2 - r.left, q.bottom - r.top]); return; }   // v39
+  popId === b.dataset.hot ? closePop() : openPop(b.dataset.hot); }));
 if (pop) pop.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const H = HOTS.find(h => h.id === popId);
@@ -3656,6 +3684,7 @@ function pickItem(e) {
   if (m && MOV[m.userData.movId]) return "mov:" + m.userData.movId;
   for (const [k, g] of Object.entries(G)) if (under(o, g)) {
     if (k === "unit_in" || k === "unit_out") return "wall";
+    if (k === "now_ledge") return "nowplay";                                   // v39: the LP facing out on the ledge
     if (/^[AB]_/.test(k)) return "table";
     if (near(tvScreen, 70)) return "tv";                                       // the TV's own frame and stand are in the room's fixed parts
     if (near(lboxFace, 30)) return "lbox";
@@ -3667,6 +3696,20 @@ function pickItem(e) {
 const btn = (label, attrs, on, cls, aria) => ({ label, attrs, on, cls, aria });
 function actItems(id) {     // [title, how it is now, buttons]
   const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
+  if (id === "nowplay") return ["Now playing, on the ledge", `${NOWP[S.nowp % NOWP.length].name}`, [   // v39: which LP faces out
+      btn("‹", { nowp: "-1" }, false, "q", "The one before"), btn("›", { nowp: "1" }, false, "q", "The next one"),
+      btn("A photo of yours", { nowpic: "1" }), btn("Look at it", { view: "breast" })]];
+  if (id === "measure") { const d = MEAS.d;                               // v39: measure in 3D
+    return ["Measure", d ? `${d.toFixed(1)} cm between them (${MEAS.dh.toFixed(1)} across, ${MEAS.dv.toFixed(1)} up)` : MEAS.a ? "Now tap the second point" : "Tap the first point in the room", [
+      btn("Measure again", { measure: "again" }), btn("Done", { measure: "done" })]]; }
+  if (id.startsWith("opt:")) {                                            // v39: Try options' card: this place's options, ‹ › through them
+    const [, pl, ix] = id.split(":"), L = placeOpts(pl); if (!L.length) return null;
+    const i = ((+ix % L.length) + L.length) % L.length, [g, it] = L[i], on = optOn(it), firm = isFirm(it);
+    return [it.title + (firm ? " (your plan)" : ""), `${g.title} · ${i + 1} of ${L.length} · ${it.size}${it.cost ? ` · £${it.cost[0]}–${it.cost[1]}` : ""}`, [
+      btn("‹", { optcyc: `${pl}:${i - 1}` }, false, "q", "The one before"), btn("›", { optcyc: `${pl}:${i + 1}` }, false, "q", "The next one"),
+      on ? btn("Keep it", { optkeep: "1" }, true) : btn("Try it", { optcyc: `${pl}:${i}` }),
+      ...(it.aim ? [btn("See it", { optsee: g.k })] : []), btn("Back to my plan", { optclear: "1" })]];
+  }
   if (id === "cab" && S.site !== "C") id = "table";
   if (id === "table" && S.site === "C") id = "cab";
   if (id === "cab") {
@@ -3691,6 +3734,7 @@ function actItems(id) {     // [title, how it is now, buttons]
   if (id === "wall") return ["The media wall", S.drawers ? "Every drawer pulled out" : "Drawers shut", [
       btn(S.drawers ? "Push the drawers in" : "Pull the drawers out", { drawers: S.drawers ? "in" : "out" }),
       btn(lv("bias") ? "TV off" : "TV on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"),
+      btn("Choose the LP on the ledge", { actopen: "nowplay" }),               // v39: "a now playing swap: tap the turntable"
       btn("Look at it", { view: "wall" }), btn("Read about it", { actgo: "wall" })]];
   if (id === "tv") return ["The TV", lv("bias") ? "On, its bias light behind it" : "Off", [
       btn(lv("bias") ? "Turn it off" : "Turn it on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"), btn("Look at it", { view: "sofa" })]];
@@ -3734,8 +3778,25 @@ function headNames(id) {
   const spec = id === "bar1" ? R.BAR1 : (bar2 && bar2.userData.spec) || R.BAR1, names = { "#a9c7ab": "Sage", "#a7d0d8": "Blue", "#e8b53f": "Mustard", "#e79c95": "Pink" };
   return spec.heads.map((h, i) => names[(h.col || "").toLowerCase()] || `Head ${i + 1}`);
 }
+/* v39 (item 6's floor line): while a fixture's card is open, a line from its chosen head to where its beam lands, and a ring there */
+const AIMG = { g: null, k: "" };
+function clearAim() { if (AIMG.g) { scene.remove(AIMG.g); AIMG.g.traverse(o => o.geometry && o.geometry.dispose()); AIMG.g = null; AIMG.k = ""; dirty(); } }
+function showAim(k) {
+  clearAim(); const id = k.split(":")[0], l = (lights[id] || []).find(x => x.userData.hk === k); if (!l || !l.isSpotLight) return;
+  scene.updateMatrixWorld(); const p = l.getWorldPosition(new THREE.Vector3()), dir = l.target.getWorldPosition(new THREE.Vector3()).sub(p).normalize();
+  const near0 = ray.near; ray.set(p, dir); ray.near = 0.2;
+  const hit = ray.intersectObjects(scene.children, true).find(h => h.object.isMesh && shown(h.object) && h.object.material !== measMat && !clippedAt(h.point)); ray.near = near0;
+  const end = hit ? hit.point : p.clone().addScaledVector(dir, p.y / Math.max(0.05, -dir.y)), len = end.distanceTo(p);
+  const g = AIMG.g = new THREE.Group(); g.renderOrder = 998;
+  const line = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, len, 6), measMat); line.position.copy(p).add(end).multiplyScalar(0.5);
+  line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); line.renderOrder = 998; g.add(line);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.075, 32), measMat), nrm = hit && hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
+  ring.position.copy(end).addScaledVector(nrm, 0.005); ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), nrm); ring.renderOrder = 998; g.add(ring);
+  scene.add(g); AIMG.k = k; dirty();
+}
 function fixCard(id, on) {
   const d = fixDeg(id), names = headNames(id), i = Math.min(actHead[id] || 0, names.length - 1), k = `${id}:${i}`, h = headOf(k);
+  requestAnimationFrame(() => { if (actId) showAim(k); });                 // v39: where this head lands
   const ci = HEAD_COLS.findIndex(c => c[0] === (h.col || null)), aim = [h.yaw ? `${h.yaw > 0 ? "right" : "left"} ${Math.abs(h.yaw)}°` : "", h.tilt ? `${h.tilt > 0 ? "up" : "down"} ${Math.abs(h.tilt)}°` : ""].filter(Boolean).join(", ");
   const st = `${on ? "On" : "Off"} · ${d ? `turned ${d}°` : "at the plan's angle"} · ${names[i]}: ${h.on === false ? "off" : `${h.lv ?? 100}%`}${aim ? `, aimed ${aim}` : ""}`;
   return [FIX_NAME[id], st, [
@@ -3771,14 +3832,20 @@ function renderAct() {
   if (!items) { closeAct(); return; }
   const [title, st, bs] = items;
   qs("#r3d-act-h").textContent = title; qs("#r3d-act-st").textContent = st;
+  qsa(".r3d-actmore", act).forEach(m => m.remove());
   const box = qs("#r3d-acts"); box.textContent = "";
+  // v39 (the approved redesign): a card shows its first three buttons; everything else sits under Details
+  let shownN = 0, into = box, more = null;
   for (const b of bs) {
-    if (b.sep) { const h = document.createElement("span"); h.className = "r3d-actsep"; h.textContent = b.sep; box.appendChild(h); continue; }   // v38
+    if (shownN >= 3 && !more) { more = document.createElement("details"); more.className = "r3d-actmore"; more.open = actMoreOpen;
+      more.innerHTML = '<summary>Details</summary><div class="acts"></div>'; more.addEventListener("toggle", () => { actMoreOpen = more.open; placeAct(); }); box.after(more); into = more.querySelector(".acts"); }
+    if (b.sep) { const h = document.createElement("span"); h.className = "r3d-actsep"; h.textContent = b.sep; (shownN >= 3 ? into : box).appendChild(h); continue; }   // v38
+    shownN++;
     const el = document.createElement("button"); el.type = "button"; el.textContent = b.label;
     for (const [k, v] of Object.entries(b.attrs)) el.dataset[k] = v;
     if (b.cls) el.className = b.cls; if (b.aria) { el.setAttribute("aria-label", b.aria); el.title = b.aria; }
     if (b.on !== undefined) el.setAttribute("aria-pressed", String(!!b.on));
-    box.appendChild(el);
+    into.appendChild(el);
   }
   placeAct();
 }
@@ -3790,12 +3857,14 @@ function placeAct() {
   act.style.left = left + "px"; act.style.top = top + "px"; act.style.setProperty("--ax", (actXY[0] - left) + "px");
   act.classList.toggle("above", !below);
 }
+let actMoreOpen = false;
 function openAct(id, xy) {
-  if (popId) closePop();
+  if (popId) closePop(); clearAim();
+  if (String(id).split(":").slice(0, 2).join(":") !== String(actId || "").split(":").slice(0, 2).join(":")) actMoreOpen = false;   // v39: a new card opens folded
   actId = id; actXY = xy; act.hidden = false; renderAct();
   if (!act.hidden) { const f = qs("#r3d-acts button"); if (f) f.focus({ preventScroll: true }); }
 }
-function closeAct() { actId = null; if (act) act.hidden = true; }
+function closeAct() { actId = null; if (act) act.hidden = true; clearAim(); }
 if (act) {
   act.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -3805,14 +3874,23 @@ if (act) {
     if (d.actideas) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "ideas", item: d.actideas } })); return; }   // v34
     if (d.actedit) { const id = d.actedit; closeAct(); setEdit(true); select(id); return; }
     if (fixAct(d, e.shiftKey)) return;                                   // v38: a fixture's turn, its heads
+    if (d.optcyc) { const [pl, ix] = d.optcyc.split(":"), L = placeOpts(pl), i = ((+ix % L.length) + L.length) % L.length, [g, it] = L[i];   // v39
+      if (!optOn(it)) optPick(g.k, it.v); actId = `opt:${pl}:${i}`; renderAct(); return; }
+    if (d.optkeep) { closeAct(); return; }
+    if (d.actopen) { actId = d.actopen; renderAct(); return; }
+    if (d.nowp) { S.nowp = ((S.nowp || 0) + +d.nowp + NOWP.length) % NOWP.length; applyNow(); store.set(KEY, S); renderAct(); return; }
+    if (d.nowpic) { pickNowPic(); return; }
+    if (d.measure) { if (d.measure === "done") { endMeasure(); closeAct(); } else { clearMeasure(); renderAct(); } return; }
     if (d.view) setTimeout(closeAct, 0);                     // the room flies there; the card has done its job
   });
   canvas.addEventListener("pointerdown", e => { tapDown = (S.edit || e.button > 0) ? null : [e.clientX, e.clientY, performance.now()]; if (actId) closeAct(); });
   canvas.addEventListener("pointerup", e => {
     const t = tapDown; tapDown = null;
     if (!t || S.edit || Math.hypot(e.clientX - t[0], e.clientY - t[1]) > 6 || performance.now() - t[2] > 600) return;
-    const id = pickItem(e); if (!id) return;
+    if (MEAS.on) { measureTap(e); return; }                                   // v39: measure in 3D
+    let id = pickItem(e); if (!id) return;
     const r = stage.getBoundingClientRect();
+    if (tryOpts) { const pl = placeOf(id); if (pl) id = `opt:${pl}:${placeIx(pl, id)}`; }             // v39: Try options: what else could go here
     openAct(id, [e.clientX - r.left, e.clientY - r.top]);
   });
   document.addEventListener("keydown", e => { if (e.key === "Escape" && actId) closeAct(); });
@@ -3823,7 +3901,8 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 }
 
 /* ---------------------------------------------------------------- render loop, only when something changed */
-let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = true;   // v35: slowDev until the speed check says otherwise
+let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = !BIG_GPU;   // v35: slowDev until the speed check says otherwise (v39: not on a real graphics card)
+const MV = []; let mvLast = 0;   // v39: the gaps between frames while the room moves: slow ones turn on the lower resolution while you drag
 function dirty() { need = Math.max(need, 2); }
 function fullRatio() { return S.quality === "hd" ? Math.min(window.devicePixelRatio || 1, 1.5) : Math.min(window.devicePixelRatio || 1, 1) * 0.85; }
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
@@ -3880,13 +3959,17 @@ function frame(now) {
   if (showTick(now)) need = 2;                                    // v32: "Watch it open"
   if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
   const active = moving || changed || !!tween;
+  if (active && mvLast && now - mvLast < 250) { MV.push(now - mvLast); if (MV.length >= 24) { const m = MV.sort((a, b) => a - b)[12]; MV.length = 0;
+    if (m > 28) slowDev = true; else if (m < 14 && !lowRes && BIG_GPU) slowDev = false; } }
+  mvLast = active ? now : 0;
   // v35: the lower resolution only while you hold and drag the room on a slow device, and only once the drag has lasted a moment:
   // each switch resizes the canvas (a new drawing buffer), which cost more than it saved after a tap, a fly-to or a Look change
   if (moving && slowDev) { if (!dragT) dragT = now; still_t = now; if (!lowRes && now - dragT > 150) { lowRes = true; sizeRenderer(); } }
   else { dragT = 0; if (active) still_t = now; else if (lowRes && now - still_t > 250) { lowRes = false; sizeRenderer(); } }
   if (updateCut()) need = 2;
   if (probe > 0 && !lowRes) need = Math.max(need, 1);                 // v35: the speed check's three frames come first, at the start
-  if (need === 0 && !active && !SH && probe === 0 && now - preT > 250 && now - PRE.idleT > 1000 && precompileStep()) preT = now;   // v35: one hidden part's shaders, off screen
+  if (need === 0 && !active && !SH && probe === 0 && now - preT > 120 && now - PRE.idleT > 400) {   // v35: hidden parts' shaders, off screen
+    const t0 = performance.now(); while (precompileStep() && performance.now() - t0 < 10) {} preT = now; }   // v39: as many as fit in 10 ms, sooner
   if (glLost || (document.body.classList.contains("sheet-open") && !SH && !tween)) return;   // v35: nothing drawn behind the Plan's sheets (the last picture stays)
   if (need > 0) {
     const t = probe > 0 && !lowRes ? performance.now() : 0;
@@ -3903,7 +3986,7 @@ function perfInfo() {   // v35: the counts to watch each round (R3D.perf())
   scene.traverseVisible(o => { if (o.isLight) ls.push(o); });
   return { calls: FT.calls, triangles: FT.tris, geometries: i.memory.geometries, textures: i.memory.textures, programs: i.programs.length,
     lights: ls.length, shadows: ls.filter(l => l.castShadow).length, quality: S.quality, ratio: gl.getPixelRatio(), frameMs: ms.length ? +ms[ms.length >> 1].toFixed(1) : null,
-    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length };
+    warm: PRE.queue.length, errors: store.get("r3d-errors", []).length, gpu: GPU.slice(0, 80), bigGpu: BIG_GPU, slowDev };   // v39: which graphics card, and whether it starts in HD
 }
 if (/[?&]perf\b/.test(location.search)) {   // v35: ?perf in the address shows the counts in a corner (for a screenshot)
   const box = document.createElement("div"); box.className = "r3d-perf";
@@ -3947,9 +4030,10 @@ function still(w, h) {
   const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(big, big); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
-  MATS.forEach(m => m.needsUpdate = true);
+  MATS.forEach(m => { m.needsUpdate = true; if (m.userData.trans) m.transmission = m.userData.trans; });   // v39: real glass in the pictures
   updateCut(); reshadow();
   gl.render(scene, camera);
+  MATS.forEach(m => { if (m.userData.trans) m.transmission = 0; });
   const url = canvas.toDataURL("image/png");
   gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
   gl.shadowMap.enabled = was;
@@ -3979,6 +4063,118 @@ qs("#r3d-save").addEventListener("click", async () => {
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = stillName(); a.click(); st.textContent = "Saved.";
   } else st.textContent = "Saving isn’t available in this view.";
 });
+
+/* v39, UPGRADE_PLAN_v38 item 13 ("measure in 3D: tap two points to read the distance, so you can check a gap yourselves") */
+const MEAS = { on: false, a: null, d: 0, dh: 0, dv: 0, g: null };
+function clearMeasure() { MEAS.a = null; MEAS.d = 0; if (MEAS.g) { scene.remove(MEAS.g); MEAS.g.traverse(o => o.geometry && o.geometry.dispose()); MEAS.g = null; } dirty(); }
+function endMeasure() { MEAS.on = false; clearMeasure(); root.classList.remove("measuring"); }
+function startMeasure() { if (window.DemmaTools) window.DemmaTools.close(); MEAS.on = true; clearMeasure(); root.classList.add("measuring");
+  openAct("measure", [stage.clientWidth / 2, 80]); }
+const measMat = new THREE.MeshBasicMaterial({ color: "#ffcc33", depthTest: false, toneMapped: false });
+function measureTap(e) {
+  ray.setFromCamera(ndc(e), camera);
+  const hit = ray.intersectObjects(scene.children, true).find(h => h.object.isMesh && shown(h.object) && !clippedAt(h.point) && h.object.material !== measMat);
+  if (!hit) return;
+  if (!MEAS.g || MEAS.d) { clearMeasure(); MEAS.g = new THREE.Group(); MEAS.g.renderOrder = 999; scene.add(MEAS.g); }
+  const dot = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 8), measMat); dot.position.copy(hit.point); dot.renderOrder = 999; MEAS.g.add(dot);
+  if (!MEAS.a) MEAS.a = hit.point.clone();
+  else { const a = MEAS.a, b = hit.point, d = b.clone().sub(a);
+    MEAS.d = d.length() / M; MEAS.dh = Math.hypot(d.x, d.z) / M; MEAS.dv = Math.abs(d.y) / M;
+    const line = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, d.length(), 6), measMat);
+    line.position.copy(a).add(b).multiplyScalar(0.5); line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); line.renderOrder = 999; MEAS.g.add(line); }
+  dirty(); actId = "measure"; act.hidden = false; renderAct();
+}
+/* v39, item 13 ("a now playing swap: tap the turntable to choose which LP faces out on the ledge"): the left LP on the breast's ledge
+   wears one of these covers, or a photo of one of yours (kept on this device) */
+const NOWP = [{ name: "Sunburst", draw: (g, w) => { const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w * 0.7); gr.addColorStop(0, "#ffd36b"); gr.addColorStop(1, "#c8452f"); g.fillStyle = gr; g.fillRect(0, 0, w, w); } },
+  { name: "Blue stripes", draw: (g, w) => { g.fillStyle = "#1f2f4f"; g.fillRect(0, 0, w, w); g.fillStyle = "#7fb2e5"; for (let i = 0; i < 8; i++) g.fillRect(0, i * w / 8 + w / 32, w, w / 32); } },
+  { name: "Moon", draw: (g, w) => { g.fillStyle = "#121318"; g.fillRect(0, 0, w, w); g.fillStyle = "#f2efe8"; g.beginPath(); g.arc(w * 0.6, w * 0.4, w * 0.22, 0, 7); g.fill(); g.fillStyle = "#121318"; g.beginPath(); g.arc(w * 0.68, w * 0.36, w * 0.2, 0, 7); g.fill(); } },
+  { name: "Green grid", draw: (g, w) => { g.fillStyle = "#e8e2d0"; g.fillRect(0, 0, w, w); g.fillStyle = "#3f6b3a"; for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if ((i + j) % 2) g.fillRect(i * w / 6, j * w / 6, w / 6, w / 6); } },
+  { name: "Pink waves", draw: (g, w) => { g.fillStyle = "#ffd6e5"; g.fillRect(0, 0, w, w); g.strokeStyle = "#d24b7a"; g.lineWidth = w / 40; for (let i = 0; i < 9; i++) { g.beginPath(); for (let x = 0; x <= w; x += 8) g.lineTo(x, i * w / 8 + Math.sin(x / 30) * 10); g.stroke(); } } },
+  { name: "Plain black", draw: (g, w) => { g.fillStyle = "#151515"; g.fillRect(0, 0, w, w); g.fillStyle = "#c8a24a"; g.font = `bold ${w / 9}px sans-serif`; g.fillText("33⅓", w * 0.08, w * 0.9); } },
+  { name: "Your photo", draw: null }];
+let nowMesh = null, nowPic = null;
+function applyNow() {
+  if (!G.now_ledge) return;
+  if (!nowMesh) {                       // a cover over the ledge's left LP (its corners from the plan's drawing)
+    const c = [[194.82, 104.008, -5.059], [226.22, 104.008, -5.059], [226.22, 135.098, -0.689], [194.82, 135.098, -0.689]].map(p => v3(p[0], p[1], p[2] + 0.15));
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(c.flatMap(v => [v.x, v.y, v.z]), 3));
+    geo.setAttribute("uv", new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2)); geo.setIndex([0, 2, 1, 0, 3, 2]); geo.computeVertexNormals();
+    nowMesh = new THREE.Mesh(geo, reg(new THREE.MeshStandardMaterial({ roughness: 0.55, side: THREE.DoubleSide }))); G.now_ledge.add(nowMesh);
+  }
+  const k = (S.nowp || 0) % NOWP.length, P = NOWP[k];
+  if (!P.tex) P.tex = P.draw ? canvasTex(256, 256, (g, w) => P.draw(g, w)) : null;
+  const t = P.draw ? P.tex : nowPic;
+  nowMesh.visible = !!t; if (t && nowMesh.material.map !== t) { nowMesh.material.map = t; nowMesh.material.needsUpdate = true; } dirty();
+}
+function pickNowPic() {                 // a photo of one of your records: scaled to 512 square, kept on this device
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) return; const img = new Image(); img.onload = () => {
+    const c = document.createElement("canvas"); c.width = c.height = 512; const g = c.getContext("2d"), s0 = Math.min(img.width, img.height);
+    g.drawImage(img, (img.width - s0) / 2, (img.height - s0) / 2, s0, s0, 0, 0, 512, 512);
+    try { localStorage.setItem("mw39-nowpic", c.toDataURL("image/jpeg", 0.85)); } catch (e) {}
+    nowPic = new THREE.CanvasTexture(c); nowPic.colorSpace = THREE.SRGBColorSpace; S.nowp = NOWP.length - 1; applyNow(); store.set(KEY, S); renderAct(); };
+    img.src = URL.createObjectURL(f); }; inp.click();
+}
+try { const u = localStorage.getItem("mw39-nowpic"); if (u) { const img = new Image(); img.onload = () => { nowPic = new THREE.Texture(img); nowPic.colorSpace = THREE.SRGBColorSpace; nowPic.needsUpdate = true; applyNow(); }; img.src = u; } } catch (e) {}
+/* v39, item 13 ("your own light scenes: save a set of fixture angles and head settings as a named scene next to the presets"), kept on
+   this device; and "Save my plan": your picks and a link to this room, to paste to us */
+const MYK = "mw39-scenes";
+function myScenes() { try { return JSON.parse(localStorage.getItem(MYK) || "[]"); } catch (e) { return []; } }
+function drawMyScenes() {
+  const box = qs("#r3d-myscl"); if (!box) return; const L = myScenes();
+  box.innerHTML = L.length ? L.map((x, i) => `<span class="r3d-mysc"><button type="button" data-myscene="${i}">${x.name.replace(/[<&"]/g, "")}</button><button type="button" class="r3d-myx" data-mydel="${i}" aria-label="Delete ${x.name.replace(/[<&"]/g, "")}">×</button></span>`).join("")
+    : '<span class="caption">None yet: set the lights, name it, save.</span>';
+}
+function saveMyScene() {
+  const inp = qs("#r3d-myname"), name = (inp && inp.value.trim()) || `Scene ${myScenes().length + 1}`;
+  const L = myScenes().filter(x => x.name !== name); L.push({ name, scene: S.scene, tod: S.tod, lv: S.lv, master: S.master, col: S.col, fix: S.fix, head: S.head });
+  try { localStorage.setItem(MYK, JSON.stringify(L.slice(-12))); } catch (e) {} if (inp) inp.value = ""; drawMyScenes(); toast(`Saved: ${name}`);
+}
+function useMyScene(i) {
+  const x = myScenes()[i]; if (!x) return;
+  if (x.scene in SCENES) S.scene = x.scene; if (x.tod) S.tod = x.tod;
+  S.lv = Object.assign({}, S.lv, x.lv || {}); S.master = Number.isFinite(+x.master) ? +x.master : 100; S.col = Object.assign({}, S.col, x.col || {});
+  S.fix = Object.assign({}, x.fix || {}); S.head = JSON.parse(JSON.stringify(x.head || {}));
+  applyState(); syncButtons(); toast(x.name);
+}
+function saveMyPlan() {
+  const text = "Our plan from the 3D room:\n" + (pickText(picks()) || "Your plan as it is") + "\nThe room as we have it: " + lookUrl();
+  const st = qs("#r3d-myplanst");
+  const done = () => { if (st) st.textContent = "Copied: paste it into your next message to us."; toast("Plan copied"); };
+  try { navigator.clipboard.writeText(text).then(done, () => { if (st) st.textContent = text; }); } catch (e) { if (st) st.textContent = text; }
+}
+qs("#r3d-mysave")?.addEventListener("click", saveMyScene);
+qs("#r3d-myname")?.addEventListener("keydown", e => { if (e.key === "Enter") saveMyScene(); });
+qs("#r3d-myscl")?.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.mydel) { const L = myScenes(); L.splice(+b.dataset.mydel, 1); try { localStorage.setItem(MYK, JSON.stringify(L)); } catch (er) {} drawMyScenes(); }
+  else if (b.dataset.myscene) useMyScene(+b.dataset.myscene); });
+qsa("[data-myplan]").forEach(b => b.addEventListener("click", saveMyPlan));
+qs("#r3d-measure")?.addEventListener("click", startMeasure);
+drawMyScenes();
+
+/* v39 (the approved redesign): Find: type a piece or a view and the room flies to it */
+function findList() {
+  const names = new Set(Object.values(VIEWS).map(v => v.label));
+  for (const m of Object.values(MOV)) if (m.label && shown(m.pivot)) names.add(m.label.replace(/ \(suggested\)$/, ""));
+  const dl = qs("#r3d-findlist"); if (dl) dl.innerHTML = [...names].sort().map(n => `<option value="${n.replace(/"/g, "&quot;")}"></option>`).join("");
+}
+function findGo(q) {
+  q = (q || "").trim().toLowerCase(); if (!q) return;
+  const v = Object.entries(VIEWS).find(([, V]) => V.label.toLowerCase() === q) || Object.entries(VIEWS).find(([, V]) => V.label.toLowerCase().includes(q));
+  const m = Object.values(MOV).find(x => x.label && shown(x.pivot) && x.label.toLowerCase().startsWith(q)) || Object.values(MOV).find(x => x.label && shown(x.pivot) && x.label.toLowerCase().includes(q));
+  if (m && (!v || !v[1].label.toLowerCase().startsWith(q))) {
+    const b = new THREE.Box3().setFromObject(m.pivot), c = b.getCenter(new THREE.Vector3()), at = [-c.x / M, c.y / M, c.z / M];
+    const room = [R.W / 2, 0, -150], dx = room[0] - at[0], dz = room[2] - at[2], k = 170 / Math.max(1, Math.hypot(dx, dz));
+    flyTo([at[0] + dx * k, Math.max(120, at[1] + 70), at[2] + dz * k], at, 50); if (window.DemmaTools) window.DemmaTools.close(); return;
+  }
+  if (v) { setView(v[0]); if (window.DemmaTools) window.DemmaTools.close(); return; }
+  toast("Nothing by that name in the room");
+}
+qs("#r3d-find")?.addEventListener("focus", findList);
+qs("#r3d-find")?.addEventListener("change", e => findGo(e.target.value));
+qs("#r3d-find")?.addEventListener("keydown", e => { if (e.key === "Enter") findGo(e.target.value); });
+qs("#r3d-findgo")?.addEventListener("click", () => findGo(qs("#r3d-find").value));
 
 /* ---------------------------------------------------------------- the controls */
 function press(attr, val) { qsa(`[data-${attr}]`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === String(val)))); }
@@ -4026,6 +4222,62 @@ function optPick(gk, v) {
   applyState();
   if (it && optOn(it)) optSee(gk, it);
 }
+/* v39 (the approved redesign): the room opens on your plan; Try options shows what else could go in each place (tap a place or a piece,
+   then ‹ › on its card), and the plan bar says how many options are on and what they add to the plan or take off it. Back to my plan
+   (or Try options off) puts everything back. */
+let tryOpts = false;
+const FIRMS = new Set((R.FIRM && R.FIRM.sugg) || []);
+const PLACE_GROUPS = { wall: ["storage"], dining: ["bar"], sofa: ["coffee", "blankets", "corner"] };
+const placeOpts = pl => (PLACE_GROUPS[pl] || []).flatMap(gk => { const g = optGroup(gk); return g ? g.items.map(it => [g, it]) : []; });
+const isFirm = it => (it.set.sugg && FIRMS.has(it.set.sugg)) || (it.set.beside && R.FIRM && it.set.beside === R.FIRM.beside);
+function placeOf(id) {                    // the place whose options include the piece you tapped
+  const k = id.startsWith("sg:") ? id.slice(3) : null;
+  for (const pl of Object.keys(PLACE_GROUPS)) for (const [, it] of placeOpts(pl)) {
+    if (k && it.set.sugg === k) return pl;
+    if ((id === "beside" || id.startsWith("bes")) && it.set.beside) return pl;
+  }
+  if (id === "cab") return "dining";
+  return null;
+}
+function placeIx(pl, id) {                // which option the card opens on: the one you tapped, else the one that's on, else the first
+  const L = placeOpts(pl), k = id && id.startsWith("sg:") ? id.slice(3) : null;
+  let i = k ? L.findIndex(([, it]) => it.set.sugg === k) : -1;
+  if (i < 0) i = L.findIndex(([, it]) => optOn(it));
+  return Math.max(0, i);
+}
+const besideCost = k => { for (const g of OPT.groups) for (const it of g.items) if (it.set.beside === k && it.cost) return it.cost; return [0, 0]; };
+function optDelta() {
+  let n = 0, lo = 0, hi = 0;
+  for (const [k, on] of Object.entries(S.sugg)) if (on && !FIRMS.has(k) && PD.sugg[k]) { n++; lo += PD.sugg[k][1]; hi += PD.sugg[k][2]; }
+  let off = 0; for (const k of FIRMS) if (!S.sugg[k] && PD.sugg[k]) { off++; lo -= PD.sugg[k][1]; hi -= PD.sugg[k][2]; }   // a pick taken away: a swap counts once
+  for (const [k, on] of Object.entries(S.ideas)) if (on && PD.ideas[k]) { n++; lo += PD.ideas[k][1]; hi += PD.ideas[k][2]; }
+  const fb = R.FIRM ? R.FIRM.beside : "clear";
+  if (S.beside !== fb) { n++; const c = besideCost(S.beside), f = besideCost(fb); lo += c[0] - f[0]; hi += c[1] - f[1]; }
+  return { n: Math.max(n, off), lo, hi };
+}
+const gbp = v => "£" + Math.round(Math.abs(v)).toLocaleString("en-GB");
+function updatePlanBar() {
+  const el = qs("#r3d-plansum"); if (!el) return;
+  const P = PD.plan || [0, 0];
+  if (!tryOpts) { el.textContent = `Your plan · ${gbp(P[0])}–${gbp(P[1]).slice(1)}`; return; }
+  const d = optDelta();
+  if (!d.n) { el.textContent = "Tap a place to try something"; return; }
+  const sign = (d.lo + d.hi) / 2 >= 0 ? "+" : "−", a = Math.min(Math.abs(d.lo), Math.abs(d.hi)), b = Math.max(Math.abs(d.lo), Math.abs(d.hi));
+  el.textContent = `${d.n} option${d.n > 1 ? "s" : ""} on · ${sign}${gbp(a)}–${gbp(b).slice(1)}`;
+}
+function backToPlan() {                   // the plan: your picks, the bar beside the cabinet, no ideas
+  S.sugg = Object.assign({}, DEF.sugg); S.svar = Object.assign({}, DEF.svar); S.ideas = {}; S.beside = DEF.beside;
+  S.barflap = S.lid = S.ctop = S.sdraw = false; S.trolley = "park"; applySvar(); applyState();
+}
+function setTry(on) {
+  tryOpts = !!on; root.classList.toggle("trying", tryOpts);
+  const t = qs("#r3d-try"); if (t) t.setAttribute("aria-checked", String(tryOpts));
+  const bk = qs("#r3d-back"); if (bk) bk.hidden = !tryOpts;
+  if (!tryOpts) { closeAct(); backToPlan(); } else toast("Tap a place or a piece to see what else could go there");
+  updatePlanBar();
+}
+qs("#r3d-try")?.addEventListener("click", () => setTry(!tryOpts));
+qs("#r3d-back")?.addEventListener("click", () => setTry(false));
 function optSee(gk, it) {
   const g = optGroup(gk); it = it || (g && g.items.find(optOn));
   if (!it) { toast("Pick one first: it shows in the room and the camera goes to it"); return; }
@@ -4103,7 +4355,7 @@ root.addEventListener("click", e => {
     else if (on) { S.sugg.hallbench = S.sugg.wardrobe = false; S.sugg.windowseat = true; S.sugg.alcoveshelves = true; }   // all on: the corner takes the seat
     applyState(); }
   else if (d.optclear) {                                                                               // v37: every extra off, back to the plan
-    S.sugg = {}; S.ideas = {}; S.beside = "clear"; S.barflap = S.lid = S.ctop = S.sdraw = false; S.trolley = "park"; applyState(); toast("Back to the plan: every option, idea and suggestion off"); }
+    backToPlan(); closeAct(); toast("Back to your plan"); }                                            // v39: your picks stay (they're the plan)
   else if (d.svar) { const [k, v] = d.svar.split(":"); S.svar = Object.assign({}, S.svar, { [k]: v }); applySvar(); placeAll(); updateCaption(); store.set(KEY, S); dirty(); }   // v28
   else if (d.tour) { tourCtl(d.tour); return; }
   else if (b.id === "r3d-tourbtn") { tourStart(); return; }
@@ -4116,6 +4368,8 @@ root.addEventListener("click", e => {
   else if (d.plants) {           // v18: the layout puts the stand and the shelf back on their spots for it
     S.plants = d.plants; for (const k of ["plants", "records"]) if (S.layout[k]) { delete S.layout[k].x; delete S.layout[k].z; delete S.layout[k].rot; }
     applyState(); }
+  else if (d.feature) {                                                                                // v39, item 13: feature-wall presets
+    S.walls = {}; if (d.feature !== "none") S.walls[d.feature] = "#5e6a5b"; repaint(); updateCaption(); store.set(KEY, S); dirty(); }
   else if (d.lookwall) lookWall = d.lookwall;                                                        // v38: which wall the paints go on
   else if (d.wallmatch) setWall(lookWall, "match"), repaint(), updateCaption(), store.set(KEY, S), dirty();
   else if (d.paint) (lookWall === "all" ? (S.paint = d.paint) : setWall(lookWall, d.paint)), repaint(), updateCaption(), store.set(KEY, S), dirty();
@@ -4195,7 +4449,7 @@ function start() {
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
     errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
     perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning

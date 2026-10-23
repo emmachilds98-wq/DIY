@@ -13,7 +13,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "38"
+VERSION = "39"
 REVISION = "37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, the lights in Views, Extras lined up"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
@@ -24,16 +24,16 @@ DECK_ART = {"render_v13_join_clean.png": "art_join_card_room", "render_v13_join_
             "render_v13_drawers.png": "art_drawers_card_room", "render_v13_dining_four.png": "art_four_card_room",
             "render_v13_dining_six.png": "art_six_card_room", "render_v13_side.png": "art_side_card_room",
             "paint_grid.png": "doc_paint", "skirting_options.png": "doc_skirt",
-            "render_v38_3d_ideas_window.png": "3d_ideas_window", "render_v38_3d_glass_case.png": "3d_glass_case", "render_v38_3d_bar_shut.png": "3d_bar_shut", "render_v38_3d_ottoman.png": "3d_ottoman", "render_v38_3d_beside_trolley_out.png": "3d_beside_trolley_out", "render_v38_3d_sg_barcase.png": "3d_sg_barcase", "render_v38_3d_sg_bartrolley.png": "3d_sg_bartrolley",
-            "render_v38_3d_plants_corner.png": "3d_plants_corner", "render_v38_3d_records_breast.png": "3d_records_breast", "render_v38_3d_plants_breast.png": "3d_plants_breast",
-            "render_v38_3d_room.png": "3d_room", "render_v38_3d_suggest.png": "3d_suggest", "render_v38_3d_case_mixed.png": "3d_case_mixed", "render_v38_3d_case_singles.png": "3d_case_singles", "render_v38_3d_decor.png": "3d_decor",
-            "render_v38_3d_c_folded.png": "3d_c_folded", "render_v38_3d_c_six.png": "3d_c_six", "render_v38_3d_window_c_six.png": "3d_window_c_six", "render_v38_3d_c_chairs.png": "3d_c_chairs", "render_v38_3d_c_plan.png": "3d_c_plan",
-            "render_v38_3d_c_tdoor.png": "3d_c_tdoor", "render_v38_3d_c_sit.png": "3d_c_sit", "render_v38_3d_c_foot.png": "3d_c_foot", "render_v38_3d_beside_mirror.png": "3d_beside_mirror",
-            "render_v38_3d_beside_trolley.png": "3d_beside_trolley", "render_v38_3d_beside_dresser.png": "3d_beside_dresser",
-            "render_v38_3d_c80_folded.png": "3d_c80_folded", "render_v38_3d_c80_six.png": "3d_c80_six", "render_v38_3d_c80_tdoor.png": "3d_c80_tdoor", "render_v38_3d_c80_plan.png": "3d_c80_plan"}
+            "render_v39_3d_ideas_window.png": "3d_ideas_window", "render_v39_3d_glass_case.png": "3d_glass_case", "render_v39_3d_bar_shut.png": "3d_bar_shut", "render_v39_3d_ottoman.png": "3d_ottoman", "render_v39_3d_beside_trolley_out.png": "3d_beside_trolley_out", "render_v39_3d_sg_barcase.png": "3d_sg_barcase", "render_v39_3d_sg_bartrolley.png": "3d_sg_bartrolley",
+            "render_v39_3d_plants_corner.png": "3d_plants_corner", "render_v39_3d_records_breast.png": "3d_records_breast", "render_v39_3d_plants_breast.png": "3d_plants_breast",
+            "render_v39_3d_room.png": "3d_room", "render_v39_3d_suggest.png": "3d_suggest", "render_v39_3d_case_mixed.png": "3d_case_mixed", "render_v39_3d_case_singles.png": "3d_case_singles", "render_v39_3d_decor.png": "3d_decor",
+            "render_v39_3d_c_folded.png": "3d_c_folded", "render_v39_3d_c_six.png": "3d_c_six", "render_v39_3d_window_c_six.png": "3d_window_c_six", "render_v39_3d_c_chairs.png": "3d_c_chairs", "render_v39_3d_c_plan.png": "3d_c_plan",
+            "render_v39_3d_c_tdoor.png": "3d_c_tdoor", "render_v39_3d_c_sit.png": "3d_c_sit", "render_v39_3d_c_foot.png": "3d_c_foot", "render_v39_3d_beside_mirror.png": "3d_beside_mirror",
+            "render_v39_3d_beside_trolley.png": "3d_beside_trolley", "render_v39_3d_beside_dresser.png": "3d_beside_dresser",
+            "render_v39_3d_c80_folded.png": "3d_c80_folded", "render_v39_3d_c80_six.png": "3d_c80_six", "render_v39_3d_c80_tdoor.png": "3d_c80_tdoor", "render_v39_3d_c80_plan.png": "3d_c80_plan"}
 
-DECK_ART.update({f"render_v38_{k}.png": k for k in ("3d_sg_barside", "3d_sg_blanketbasket", "3d_beside_rail", "3d_sg_recordtable", "3d_sg_doorshelf")})   # v36
-DECK_ART.update({f"render_v38_{k}.png": k for k in ("3d_beside_bar", "3d_beside_bar_open", "3d_beside_shoes", "3d_shelf_gap", "3d_lamp_cap", "3d_sg_windowseat",
+DECK_ART.update({f"render_v39_{k}.png": k for k in ("3d_sg_barside", "3d_sg_blanketbasket", "3d_beside_rail", "3d_sg_recordtable", "3d_sg_doorshelf")})   # v36
+DECK_ART.update({f"render_v39_{k}.png": k for k in ("3d_beside_bar", "3d_beside_bar_open", "3d_beside_shoes", "3d_shelf_gap", "3d_lamp_cap", "3d_sg_windowseat",
                                                        "3d_sg_hallbench", "3d_sg_wardrobe", "3d_sg_alcoveshelves", "3d_sg_wallcabs", "3d_sg_stairdrawers", "3d_sg_overdoor")})   # v37
 
 def img(name, alt=""):
@@ -314,9 +314,9 @@ def cab_html():
     sl_len = G.OPTC["z"][0] - G.OPTC["z"][1]
     sup = lambda *k: "<sup>" + ",".join(str(F.ORDER.index(x) + 1) for x in k) + "</sup>"
     return f"""
-<p><b>The compact dining cabinet is the plan:</b> you asked for "a smaller build on the cabinet", so the same table and the same six chairs now pack into <b>two oak boxes side by side</b>, {n(C['len'])} × {n(C['d'])} × {n(C['h'])}, under your shelf by the stairs, its front {n(C['d'] - (G.PIPE_BOX['x'][1] - G.PIPE_BOX['x'][0]))} cm proud of the pipe boxing's face (deep enough for your padded chairs two deep): {n(sl_len - C['len'])} cm shorter than the sliding cabinet we set aside. That gives you <b>{n(C['freed'])} cm of bare wall</b> back by the pipe boxing. Shut, it's two plain oak doors with nothing on show. Open, the table is {n(C['len_open'])} × {n(C['top'][0])} and six sit in comfort, three a side, on your grey padded chairs.</p>
-<figure class="render">{img("render_v38_3d_c_folded.png", "The compact dining cabinet packed away: two oak boxes under the shelf")}
-<figcaption>Packed away, in the 3D room: the table box and the chair box side by side, one plain oak door on each, a routed finger slot near each free edge; the wall beyond it is clear to the pipe boxing.</figcaption></figure>
+<p><b>The compact dining cabinet is the plan:</b> you asked for "a smaller build on the cabinet", so the same table and the same six chairs now pack into <b>two oak boxes side by side</b>, {n(C['len'])} × {n(C['d'])} × {n(C['h'])}, under your shelf by the stairs, {n(C['d'] - (G.PIPE_BOX['x'][1] - G.PIPE_BOX['x'][0]))} cm proud of the pipe boxing. Shut, it's two plain oak doors. Open, the table is {n(C['len_open'])} × {n(C['top'][0])} and six sit in comfort, three a side, on your grey padded chairs.</p>
+<figure class="render">{img("render_v39_3d_c_folded.png", "The compact dining cabinet packed away: two oak boxes under the shelf")}
+<figcaption>Packed away, in the 3D room: the table box and the chair box side by side.</figcaption></figure>
 <ul>
 <li><b>Where the length went.</b> Two chairs now <b>lie on their sides in the table box's base</b>, under the hinge rail, where the sliding cabinet had its drawer. The other four <b>stand in a box one chair wide</b>: two deep on its floor and two deep on its shelf. The chairs are padded, so there are no seat pads to keep.</li>
 <li><b>Hinged doors that turn right back.</b> Each door hangs on a full-height stainless piano hinge{sup("piano32")} with its knuckle just in front of the faces, so it turns 180° and lies flat over its neighbour. Nothing stands out into the room. Open, the table door reaches {n(C['z'][1] - C['door_t_open'][1])} past the cabinet's window end, {n(C['door_t_open'][1] - (G.PLANT_LAYOUTS['corner']['plants'][1] + G.PLANT_STAND['d'] / 2))} clear of your plant stand.</li>
@@ -332,28 +332,23 @@ def cab_html():
 <li><b>Folding away:</b> do it the other way round. Fold the legs and the outer half, swing the table up until the catches take it, then put the two chairs in the base and shut the table door. Then the four chairs go in the chair box. Use two hands, and never fold it with anything on the table.</li>
 </ol>
 <h3>The chairs: your grey padded ones</h3>
-<p>You asked for these chairs "or similar", then sent their listing{sup("padded")} and a photo: Brayden Studio's <b>wooden folding chairs in linen</b> (grey in the listing; drawn in your photo's warm grey-beige), sold in pairs, with bent-wood sides (each back upright curves forward into the front leg) and buttoned cushions, with "a generously sized 47×47cm seat paired with a 6.5cm thick high-density sponge cushion", a back reclined to {G.CHAIR_PADDED['back_deg']}° and {G.CHAIR_PADDED['kg']} kg each. <b>Folded they're {n(G.CHAIR_PADDED['folded'][2])} × {n(G.CHAIR_PADDED['folded'][1])} × {n(G.CHAIR_PADDED['folded'][0])}</b>: only 1 cm thicker and 1 cm taller than the beech FRÖSVI the cabinet was drawn for, so they pack in the same way with three small changes:</p>
+<p>Your chairs{sup("padded")}: Brayden Studio's <b>wooden folding chairs in linen</b>, sold in pairs, a 47 × 47 seat with a 6.5 cm cushion, {G.CHAIR_PADDED['kg']} kg each. <b>Folded they're {n(G.CHAIR_PADDED['folded'][2])} × {n(G.CHAIR_PADDED['folded'][1])} × {n(G.CHAIR_PADDED['folded'][0])}</b>: only 1 cm thicker and 1 cm taller than the beech FRÖSVI the cabinet was drawn for, so they pack in the same way with three small changes:</p>
 <ul>
 <li><b>{n(C['d'])} deep instead of 22</b>, so two stand one behind the other ({n(C['in_d'])} inside for two at {n(G.CHAIR_PADDED['folded'][1])}). The cabinet stands {n(C['d'] - (G.PIPE_BOX['x'][1] - G.PIPE_BOX['x'][0]))} cm proud of the pipe boxing.</li>
 <li><b>The chair box {n(C['bay_c'])} wide inside</b> (was 46), for a {n(G.CHAIR_PADDED['folded'][0])} chair: the cabinet is {n(C['len'])} long.</li>
 <li><b>The chair shelf at {n(C['shelf_y'])}</b> (was 93.5), so a {n(G.CHAIR_PADDED['folded'][2])} chair stands under it and over it with a centimetre to spare. Two still lie in the table box's base, 0.5 clear at each end.</li>
 </ul>
-<p>The listing doesn't give the open chair's depth, height or seat height, so those are drawn at a like-for-like chair's{sup("costwaychair")}: {n(G.CHAIR_PADDED['d'])} deep, {n(G.CHAIR_PADDED['h'])} tall, the seat at {n(G.CHAIR_PADDED['seat_h'])}. One thing hangs on the depth: seated on the stair side, a {n(G.CHAIR_PADDED['d'])}-deep chair's back reaches into the room door's swing, so <b>keep the door shut while you eat</b> unless they measure {n(G.BREAST_D_WEST - G.DOOR_SWING - C['tz'][0] + G.CHAIR_TUCK)} deep or less (a check on site). The price isn't in what you sent: the buy list estimates about £80–130 a pair.</p>
-<p>The beech FRÖSVI with Dunelm Esme tie-on pads (£20 and £9 each) would still fit, and cost less: say if you'd rather.</p>
-<figure class="render">{img("render_v38_3d_c_sit.png", "Sitting at the open table on the grey padded chairs")}
-<figcaption>Sitting at the table's far end, at a seated eye height: three a side, the linen shelf and the table door, turned back flat, behind them.</figcaption></figure>
+<p>The listing doesn't give the open chair's depth, height or seat height, so those are drawn at a like-for-like chair's{sup("costwaychair")}: {n(G.CHAIR_PADDED['d'])} deep, {n(G.CHAIR_PADDED['h'])} tall, the seat at {n(G.CHAIR_PADDED['seat_h'])}. Seated on the stair side, a chair's back reaches into the door's swing: <b>keep the door shut while you eat</b> unless they measure {n(G.BREAST_D_WEST - G.DOOR_SWING - C['tz'][0] + G.CHAIR_TUCK)} deep or less. About £80–130 a pair.</p>
 <p class="note">The idea is a proven one: fold-down tables built into wall units are made this way{sup("foldtable")}. Your stairs wall is solid (your answer){sup("solidwall")}, so the boxes stand on the floor and are screwed to the wall at the top with plugs and screws so they can't tip.</p>
 <figure>{cab_elevation()}</figure>
-<figure class="render">{img("render_v38_3d_c_tdoor.png", "The compact cabinet: the table door open, the table still folded")}
-<figcaption>The table door turned back flat: the folded table on its hinge rail, the two chairs lying in the base under it, the linen shelf over it.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_c_chairs.png", "The compact cabinet: the chair door open, four chairs inside")}
-<figcaption>The chair door turned back flat over the table door: four folded chairs, two deep on the floor and two deep on the shelf.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_c_chairs.png", "The compact cabinet: the chair door open, four chairs inside")}
+<figcaption>The chair door turned back flat over the table door: four folded chairs.</figcaption></figure>
 <h3>How many sit down</h3>
 <p><b>Six, all in comfort:</b> three on the stair side ({st['stair'][1]:.1f} cm of edge each) and three on the window side ({st['window'][1]:.1f} each, from the sofa's arm to the cabinet). The open table door clears the nearest window-side chair by {n(C['door_t_face'] - (max(x for x, z, f in C['seats']['six'] if f == 'w') + G.CHAIR_PADDED['w'] / 2))} cm. The coffee table stays where it is, and a seventh chair fits at the far end if you bring one.</p>
 <table class="tight"><tr><th>Table</th><th>Seats</th><th>How</th><th>Notes</th></tr>{seats}</table>
 <figure>{cab_plan()}</figure>
-<figure class="render">{img("render_v38_3d_c_six.png", "The compact dining cabinet open for six")}
-<figcaption>Open for six in the 3D room: the table door turned back flat over the chair door, three a side on the grey padded chairs, and bar 2 turned up over the table by the table rule.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_c_six.png", "The compact dining cabinet open for six")}
+<figcaption>Open for six in the 3D room: the table door turned back flat over the chair door.</figcaption></figure>
 <h3>How it's built</h3>
 <p>Step 11 of the build guide builds it in order, with every size. You build the two boxes and screw them together and to the wall. Then the hinge rail, the two halves with their aprons and legs, and the joint. Then you hang the table, the catches, and the two doors on their piano hinges. The drawings below are the ones to have open on the bench.</p>
 <figure>{cab_carcass()}</figure>
@@ -365,10 +360,8 @@ def cab_html():
 <li><b>The hinge rail:</b> solid oak, {n(C['bay_t'])} × {n(C['rail_x'][1] - C['rail_x'][0])} × 7, across the table box with its top at {n(C['pivot'][1])}, its front {n(C['pads'])} behind the door (the cloth bag hangs on the door in front of it). The table's piano hinge sits {n(C['pivot'][0] - C['rail_x'][0])} back from its front. It carries the table's whole weight when it's open.</li>
 <li><b>The halves and the joint</b> are as before: edge-glued oak with pegged breadboard ends, each on an apron frame, the legs folding flat inside on self-locking brackets, three brass flip-top hinges at the joint.</li>
 </ul>
-<p>It costs about £{money(lo, hi)}, the chairs included: the "6 Dining wall" rows of the buy list (section 11). The more compact version below uses the same list.</p>
+<p>It costs about £{money(lo, hi)}, the chairs included: the "6 Dining wall" rows of the buy list (section 11).</p>
 <p class="note">Safety: never swing the table up or down with anything on it. Check all four legs have clicked before you load it, and let the catches take it when it's folded. Hang the table door, open it flat and check its far end doesn't drop before you load the cabinet: piano hinges don't publish a load, so that's the test.</p>
-{cab_review_html()}
-{beside_html()}
 """
 
 
@@ -399,8 +392,8 @@ def cab_review_html():
 <p>You asked for "the best compact build that doesnt bulk up the living room while keeping as many chairs as we can in the unit". All six chairs are inside, so we went through every way it could take less room. With your padded chairs it's {n(C['d'])} deep, {n(C['d'] - (G.PIPE_BOX['x'][1] - G.PIPE_BOX['x'][0]))} proud of the pipe boxing's face (with the FRÖSVI it was 22, flush). For a {n(C['len_open'])} × {n(C['top'][0])} table and six folding chairs, the rest is already as small as it goes. The table's width sets the table box, one chair's width the chair box, and two folded chairs the depth.</p>
 <table class="tight"><tr><th>Change</th><th>What it would save</th><th>Our call</th></tr>{tr}</table>
 <p>Against the long sliding cabinet we set aside ({n(O['z'][0] - O['z'][1])} × {n(O['d'])}), it takes {(1 - C['len'] * C['d'] / ((O['z'][0] - O['z'][1]) * O['d'])) * 100:.0f}% less floor along the wall.</p>
-<figure class="render">{img("render_v38_3d_c_foot.png", "From above: the cabinet folded, and the floor it needs open")}
-<figcaption>From above, folded, with the floor it needs once it's open drawn on the carpet (in the 3D room: Layout, "The floor it needs"): the table, the six chairs and the table door's swing. Folded, all of that is free floor.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_c_foot.png", "From above: the cabinet folded, and the floor it needs open")}
+<figcaption>From above, folded, with the floor it needs once it's open drawn on the carpet.</figcaption></figure>
 """
 
 
@@ -419,9 +412,9 @@ def beside_html():
 <li><b>A slim trolley:</b> VASAGLE's 4-tier slim trolley{sup("vasagle")}, {n(tr['w'])} long × {n(tr['d'])} deep × {n(tr['h'])}, £35.99. It parks here, and for dinner it pulls out, before the table door opens, to stand behind the window-side diners with the plates, the glasses and a jug (it can't reach the table's far end: with six sat down the sofa's end and the chairs leave no way past). Its top reaches {n(tr['h'] - B['strands'])} into the plant's longest strands, so trim them a little.</li>
 <li><b>A low oak shelf:</b> one more box in the cabinet's oak-faced ply, {n(d['w'])} × {n(d['d'])} × {n(d['h'])}, open to the room: six dinner plates on edge{sup("plates")}, glasses and three bottles, its top under the strands. The open door covers {n(covered)} of its {n(d['w'])}, so take what you need out before the table comes down. About £40–80 more in ply and oil, from the cabinet's sheets.</li>
 </ul>
-<figure class="render">{img("render_v38_3d_beside_mirror.png", "Beside the cabinet: a tall mirror")}
-<figcaption>Beside the cabinet with the mirror: IKEA NISSEDAL, 40 × 150, between the cabinet and the pipe boxing, the trailing plant in front of it.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_beside_trolley.png", "Beside the cabinet: a slim trolley")}
+<figure class="render">{img("render_v39_3d_beside_mirror.png", "Beside the cabinet: a tall mirror")}
+<figcaption>Beside the cabinet with the mirror: IKEA NISSEDAL, 40 × 150, between the cabinet and the pipe boxing.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_beside_trolley.png", "Beside the cabinet: a slim trolley")}
 <figcaption>The slim trolley parked beside the cabinet, ready to pull out for dinner.</figcaption></figure>
 """
 
@@ -449,18 +442,53 @@ def cab80_html():
     return f"""<h3>The more compact version: an {n(C8['top'][0])}-wide table</h3>
 <p>You said the compact cabinet is "our only choice for the table now or any upgraded more compact version for this as we're trying to optimise space". So the long sliding cabinet and the flip-top are set aside (appendix), and here is the one way it gets shorter still: <b>the same two oak boxes round a table {n(C8['top'][0])} wide instead of {n(C['top'][0])}</b>. The folded halves stand {n(C['top'][0] - C8['top'][0])} narrower, so the table box is {n(C['bay_t'] - C8['bay_t'])} shorter and the cabinet is <b>{n(C8['len'])} long</b>, {n(C8['freed'])} cm of bare wall back by the pipe boxing instead of {n(C['freed'])}. Six still sit, three a side: the table's length doesn't change.</p>
 <p><b>The catch is the chairs.</b> In the plan two of your padded chairs{sup("padded")} lie on their sides in the table box's base, and a folded one stands {n(ch)} tall, so they need {n(ch + 1)}. The narrower base is {n(C8['bay_t'])}: <b>four chairs go inside, not six</b>, and the other two live in the garage or folded behind a door. Down the middle of the table, between two places, there's {n(C8['top'][0] - 2 * plate)} for dishes instead of {n(C['top'][0] - 2 * plate)}: a jug and one dish at a time. The buy list is the same, with a little less oak and ply.</p>
-<figure class="render">{img("render_v38_3d_c80_folded.png", "The more compact version packed away")}
-<figcaption>The more compact version packed away, in the 3D room (Layout, "The compact cabinet: its table's width", or tap the cabinet): the same two oak boxes, {n(C['len'] - C8['len'])} shorter, more bare wall by the pipe boxing.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_c80_six.png", "The more compact version open for six")}
+<figure class="render">{img("render_v39_3d_c80_folded.png", "The more compact version packed away")}
+<figcaption>The more compact version packed away, in the 3D room.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_c80_six.png", "The more compact version open for six")}
 <figcaption>Open for six: the table {n(C8['len_open'])} × {n(C8['top'][0])}, three a side, the table door turned back flat.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_c80_tdoor.png", "The more compact version, the table door open")}
-<figcaption>The table door open, the table folded: the base under it is too narrow for the two chairs lying down, so it's empty (or a place for the linen).</figcaption></figure>
+<figure class="render">{img("render_v39_3d_c80_tdoor.png", "The more compact version, the table door open")}
+<figcaption>The table door open, the table folded: the base under it is too narrow for the two chairs lying down.</figcaption></figure>
 <h3>The two widths side by side</h3>
 <table class="tight"><tr><th></th><th>{n(C['top'][0])} wide (the plan)</th><th>{n(C8['top'][0])} wide (the more compact version)</th></tr>{tr}</table>
 <h3>The more compact version, checked</h3>
 <table class="tight"><tr><th>Check</th><th>Item</th><th>Space</th><th>Left</th><th>Fits</th></tr>{fr}</table>
 <p><b>Our call:</b> keep the {n(C['top'][0])}-wide table. The {n(C['len'] - C8['len'])} cm it saves isn't worth two chairs in the garage and a tighter table, and that bare wall already takes a mirror, a slim trolley or a low shelf (above). Pick either on the plan page's <b>Plan</b> home, under "Waiting on you": the buy list and the 3D room follow your pick.</p>
 """
+
+
+def other_options_html():
+    """v39, client (23 Oct): options are only to look at in the 3D room, one line each: what, where, size, rough cost, source."""
+    g, sup = G, lambda *k: "<sup>" + ",".join(str(fit.ORDER.index(x) + 1) for x in k) + "</sup>"
+    D, C8 = g.DRINKS, g.CAB80
+    deco = [i for i in ideas.options() if i[0] not in OPT_OWN]
+    dlo, dhi = sum(i[3][0] for i in deco), sum(i[3][1] for i in deco)
+    ilo, ihi = ideas.low_high()
+    rows = [
+        ("A bar under the glass case", "Chimney breast, under the case", f"{n(D['x'][1] - D['x'][0])} × {n(D['y'][1] - D['y'][0])} × {n(D['d'])}", "80–130", sup("flapstay", "piano32")),
+        ("A slim drinks trolley", "Beside the dining cabinet", "20 × 43.2 × 86.5", "36–70", sup("vasagle")),
+        ("A bar by the sofa", "Side wall at the sofa's open end", f"{n(g.BAR_SIDE['w'])} × 39 × 20", "60–100", sup("flapstay")),
+        ("The lidded seagrass basket", "Sofa's open end", f"{n(g.BLANKET_COTSWOLD['w'])} × {n(g.BLANKET_COTSWOLD['d'])} × {n(g.BLANKET_COTSWOLD['h'])}", "90–110", sup("cotswold")),
+        ("An oak blanket rail", "Beside the dining cabinet", f"{n(g.BESIDE['rail']['w'])} wide, 12 off the wall", "25–45", sup("oakdowel")),
+        ("A tall mirror", "Beside the dining cabinet", f"{n(g.BESIDE['mirror']['w'])} × {n(g.BESIDE['mirror']['h'])}", "25", sup("nissedal")),
+        ("A low oak shelf for plates", "Beside the dining cabinet", f"{n(g.BESIDE['dresser']['w'])} × {n(g.BESIDE['dresser']['d'])} × {n(g.BESIDE['dresser']['h'])}", "40–70", sup("plates")),
+        ("Two shoe cabinets", "Beside the dining cabinet", f"two {n(g.TRONES[0])} × {n(g.TRONES[1])} × {n(g.TRONES[2])}", "25–30", sup("trones")),
+        ("A lift-top coffee table", "Coffee table's place", "90 × 50 × 48", "39–80", sup("homelife")),
+        ("A storage window seat", "Window corner", f"{n(g.WINDOW_SEAT['x'][1] - g.WINDOW_SEAT['x'][0])} × {n(g.WINDOW_SEAT['d'])} × {n(g.WINDOW_SEAT['h'])}", "160–280", sup("seat")),
+        ("A bench with cubbies", "Your hall, or the window corner", f"{n(g.HALL_BENCH['w'])} × {n(g.HALL_BENCH['d'])} × {n(g.HALL_BENCH['h'])}", "80–130", sup("shoebench")),
+        ("A built-in cupboard", "Window corner, floor to ceiling", f"{n(g.WARDROBE['x'][1] - g.WARDROBE['x'][0])} × {n(g.WARDROBE['d'])}", "450–800", sup("wardrobe")),
+        ("A hook rail over the door", "Over the hall door", f"{n(g.OVERDOOR['w'])} × {n(g.OVERDOOR['d'])} × {n(g.OVERDOOR['h'])}", "12–25", sup("overdoor")),
+        (f"An {n(C8['top'][0])}-wide table", "The dining cabinet", f"{n(C8['len'])} long; four chairs inside, not six", "about the same", sup("padded")),
+        ("A smooth or patterned ceiling", "The ceiling (test the Artex first)", "the whole ceiling", "200–700", sup("skimartex", "artextest")),
+        ("Oak-effect beams, coffers or an LED cove", "The ceiling", "12 × 12 beams; cove 2 m lengths", "450–1,050", sup("pubeam", "orac")),
+        (f"Decor to try ({len(deco)} pieces)", "Round the room", "typical shop sizes", f"{dlo:,}–{dhi:,} together", ""),
+        (f"Small ideas ({len(ideas.IDEAS)})", "Round the room", "drawn to the room", f"{ilo:,}–{ihi:,} together", ""),
+    ]
+    tr = "".join(f"<tr><td>{a}{s}</td><td>{b}</td><td>{c}</td><td class='num'>{d}</td></tr>" for a, b, c, d, s in rows)
+    return ("<p>Not in the plan or the costs. Each one is a switch in the 3D room (Room, Try options); ask for a build by name.</p>"
+            f"<table class='tight'><tr><th>Option</th><th>Where</th><th>Size (cm)</th><th class='num'>About £</th></tr>{tr}</table>")
+
+
+OPT_OWN = {"barcase", "bartrolley", "barside", "cotswoldbasket", "liftcoffee", "windowseat", "hallbench", "wardrobe", "overdoor"}
 
 
 def slide_html():
@@ -472,10 +500,10 @@ def slide_html():
     return f"""
 <h3>The alternative: the sliding cabinet</h3>
 <p>Before the compact cabinet, the plan was one long cabinet with <b>two sliding oak doors</b>, {n(L)} × {n(C['d'])} × {n(C['h'])}. It stays here, drawn, checked and costed, in case you'd rather have it: about £{money(lo, hi)} with the chairs. It holds the same table and the same six chairs, but it's {n(L - G.CAB['len'])} cm longer. In return, nothing ever swings: door A slides over door B and the table comes down; door B slides behind A and the chairs come out. It also has a drawer for the mats under the folded table. The doors run on a soft-close Häfele Slido double track<sup>{F.ORDER.index("slido") + 1}</sup>. Its fit checks are in section 3. In the 3D room, tap the cabinet and choose "Show the sliding one", or pick it under Layout, "The dining cabinet: which version".</p>
-<figure class="render">{img("render_v38_3d_s_folded.png", "The sliding cabinet packed away")}
+<figure class="render">{img("render_v39_3d_s_folded.png", "The sliding cabinet packed away")}
 <figcaption>The sliding cabinet packed away: two sliding doors between two oak ends, reaching almost to the pipe boxing.</figcaption></figure>
 <figure>{option_c_elevation()}</figure>
-<figure class="render">{img("render_v38_3d_s_six.png", "The sliding cabinet open for six")}
+<figure class="render">{img("render_v39_3d_s_six.png", "The sliding cabinet open for six")}
 <figcaption>Open for six: door A slid over door B, the linen shelf behind it.</figcaption></figure>
 <ul>
 <li><b>Inside:</b> the table bay at the stair end, with the drawer under the folded table and the linen shelf over it. The chair bay at the window end has four chairs on its floor, two side by side and two deep, two on its shelf and the pads on edge in front of them.</li>
@@ -769,8 +797,8 @@ SEE_FIG = {("wall", "Front view"): ("render_v13_join_key_scene.png", "The media 
            ("wall", "Drawer layouts"): ("render_v13_drawers.png", "Every drawer out, in place"),
            ("wall", "Built to your alcove"): ("render_v13_join_clean.png", "The finished media wall"),
            ("wall", "The side wall"): ("render_v13_side.png", "The side-wall run and the PC end"),
-           ("dining", "The dining wall"): ("render_v38_3d_c_six.png", "The dining cabinet open for six"),
-           ("overview", "The room"): ("render_v38_3d_room.png", "The whole room")}
+           ("dining", "The dining wall"): ("render_v39_3d_c_six.png", "The dining cabinet open for six"),
+           ("overview", "The room"): ("render_v39_3d_room.png", "The whole room")}
 
 
 def step_cuts(k):
@@ -867,7 +895,7 @@ GUIDE_PITFALLS = """<h3>Where beginners usually go wrong</h3>
 def cuts():
     """Every made part in one cutting list, grouped by what the timber merchant cuts it from (sizes in cm, L × W × T).
     Rows: (part, size, qty, notes, where it goes). Drawn from the cut lists in sections 3, 5 and 7 and v6.1's game drawer."""
-    g, K = G, G.CAB
+    g, K, BB = G, G.CAB, G.BAR_BUILT
     pc_len = g.PC_SHELF_Z[0] - g.PC_SHELF_Z[1]
     return [
         ("Solid oak, hardwax oil", "Ask for it planed all round; scribe the uprights and worktop on site", [
@@ -896,13 +924,19 @@ def cuts():
             ("Door stops (the cabinet)", "8 × 2.5 × 1.2", "2", "Under each box's top, behind its door's free edge; a magnetic catch let into each", "Dining table"),
         ]),
         # v30: the compact cabinet (geometry.CAB): two boxes side by side, the doors inset between each box's top and floor
-        ("Oak-faced ply, 18 mm (the dining cabinet)", "Ask the merchant to cut it to size and edge the visible edges with oak lipping", [
+        ("Oak-faced ply, 18 mm (the dining cabinet and the bar)", "Ask the merchant to cut it to size and edge the visible edges with oak lipping", [
             ("Cabinet ends", f"{n(K['h'])} × {n(K['d'])}", "4", "Full height and depth, two for each box; the doors sit between them", "Dining table"),
             ("Cabinet tops · floors", f"{n(K['bay_t'])} × {n(K['d'])} · {n(K['bay_c'])} × {n(K['d'])}", "2 · 2", f"One of each per box, between its ends; the floors' top faces at {n(K['plinth'])}", "Dining table"),
             ("Cabinet linen shelf · chair shelf", f"{n(K['bay_t'])} × {n(K['linen_d'])} · {n(K['bay_c'])} × {n(K['in_d'])}", "1 · 1",
              f"Top faces at {n(K['linen'][0])} (the table box, set {n(K['pads'])} back for the cloth bag) and {n(K['shelf_y'] + K['t'])} (the chair box)", "Dining table"),
             ("Cabinet doors", f"{n(K['door_tw'])} · {n(K['door_cw'])}, both × {n(K['door_h'])}", "1 · 1",
              "The table door, then the chair door: oak-faced both sides, grain upright, all four edges lipped; a piano hinge on the edge by the boxes' join, a finger slot near the other", "Dining table"),
+            ("Bar ends", f"{n(BB['inner_top'])} × {n(BB['d'])}", "2", "Scribed to the cabinet's end and the wall", "The bar"),
+            ("Bar floor · shelf", f"{n(BB['inner_w'])} × {n(BB['d'])} · {n(BB['inner_w'])} × {n(BB['inner_d'])}", "1 · 1", f"The floor on a {n(BB['plinth'])} plinth set back {n(BB['recess'])}; the shelf's top at {n(BB['mid'])}", "The bar"),
+            ("Bar doors · plinth front", f"{n(BB['inner_top'] - BB['floor'] - 0.3)} × {n(BB['inner_w'] / 2 - 0.2)} · {n(BB['inner_w'])} × {n(BB['plinth'])}", "2 · 1", "Soft-close hinges; edges lipped", "The bar"),
+        ]),
+        ("Oak-faced ply, 6 mm", "", [
+            ("Glass case back", "86 × 81", "1", "Pinned into the frame's rebate", "Glass case"),
         ]),
         ("Birch ply, 18 mm", "", [
             ("Bay 3 sides", "73 × 40", "2", "The record carcass, standing on the floor", "Media wall"),
@@ -918,6 +952,7 @@ def cuts():
             ("Plinth drawer sides · ends", "34 × 4.4 · 49.6 × 4.4", "2 · 2", "A 52 × 34 × 5 box", "Media wall"),
             ("Bay 2 divider · part shelf", "35.3 × 38 · 32.2 × 36", "1 · 1", "The sub's column on the left; the PS2 over the PS1 on the right", "Media wall"),
             ("Keyboard tray", "54 × 26", "1", "Oak lip on its front edge", "Media wall"),
+            ("Record table base", f"{n(G.RECORD_TABLE['carcass'][0] + 1)} × {n(G.RECORD_TABLE['carcass'][1] + 0.3)}", "1", "Screwed to the two KALLAX's open backs; the castors under it", "Record table"),
         ]),
         ("Birch ply, 9 mm", "", [
             ("Game drawer base", "52.5 × 34.4", "1", "In a 6 mm groove", "Media wall"),
@@ -928,6 +963,7 @@ def cuts():
             ("Game drawer cross divider", "51.9 × 9", "1", "13 cm back from the front", "Media wall"),
             ("Game drawer bin walls · bin floors", "12.6 × 9 · 16 × 12.6", "2 · 2", "Floors raked so the cases lean about 13°", "Media wall"),
             ("Plinth drawer base", "52 × 34", "1", "Screwed under the box", "Media wall"),
+            ("Bar back", f"{n(BB['inner_w'])} × {n(BB['inner_top'] - BB['floor'])}", "1", "Glued and pinned between the ends", "The bar"),
             ("Slim drawer sides · backs and fronts", "40 × 10 · 14.1 × 10", "6 · 6", "Three boxes 15.3 wide, 14.1 inside (v16)", "Media wall"),
         ]),
         ("Hardware", "Runners are sold in pairs", [
@@ -957,6 +993,45 @@ def cuts_html():
     return "\n".join(out)
 
 
+OFFCUT_USE = [(60, 25, "a spare shelf or a drawer box"), (40, 15, "drawer sides, cleats or jigs"), (0, 0, "packers, shims and test cuts")]
+
+
+def nest_sheets():
+    """v39: each ply in the cutting list nested onto full 244 × 122 sheets (nest.py)."""
+    import nest
+    out = []
+    for grp, _note, rows in cuts():
+        if "ply" not in grp.lower():
+            continue
+        parts = [(a.split(" · ")[0] if len(p) == 1 else a, l, w) for a, b, c, _d, _e in rows if (p := nest.parse(b, c)) for l, w, k in p for _ in range(k)]
+        best = None
+        for size in nest.SIZES:                        # a half or quarter sheet where a full one would be mostly offcut
+            try:
+                sh = nest.pack(parts, sheet=size)
+            except ValueError:
+                continue
+            if best is None or len(sh) * size[0] * size[1] < len(best[1]) * best[0][0] * best[0][1]:
+                best = (size, sh)
+        out.append((grp, *best))
+    return out
+
+
+def nest_html():
+    import nest
+    rows, figs = [], []
+    for grp, size, sheets in nest_sheets():
+        cuts_n = sum(len(s["parts"]) for s in sheets)
+        used = sum(l * w for s in sheets for _n, _x, _y, l, w in s["parts"]) / (len(sheets) * size[0] * size[1])
+        offs = [o for s in sheets for o in nest.offcuts(s, size)]
+        big = sorted(offs, key=lambda o: -o[0] * o[1])[:2]
+        use = "; ".join(f"{n(a)} × {n(b)}: " + next(u for la, lb, u in OFFCUT_USE if max(a, b) >= la and min(a, b) >= lb) for a, b in big) or "none to speak of"
+        rows.append(f"<tr><td>{grp}</td><td class='num'>{len(sheets)} × {n(size[0])} × {n(size[1])}</td><td class='num'>{cuts_n}</td><td class='num'>{used:.0%}</td><td>{use}</td></tr>")
+        figs += [f"<figure class='sheet'>{nest.svg(s, size)}<figcaption>{grp}, sheet {i + 1} of {len(sheets)}</figcaption></figure>" for i, s in enumerate(sheets)]
+    return ("<h3>Sheets to buy, nested</h3><p>Every ply part laid out on the fewest boards (a full sheet is 244 × 122; half and quarter sheets "
+            "where a full one would be mostly offcut), a 4 mm saw cut between parts, grain along the long side. Hand these to the merchant with the cutting list.</p><table class='tight'><tr><th>Sheet</th><th class='num'>Boards (cm)</th>"
+            "<th class='num'>Parts</th><th class='num'>Used</th><th>Biggest offcuts, and what for</th></tr>" + "".join(rows) + "</table>" + "".join(figs))
+
+
 def cuts_text():
     lines = ["Cutting list: media wall and dining wall (finished sizes in cm, length x width x thickness)"]
     for grp, note, rows in cuts():
@@ -965,9 +1040,53 @@ def cuts_text():
     return "\n".join(lines)
 
 
+def wiring_html():
+    """v39 (item 13): the swapped media wall's leads on one page, laid before the carcass goes in."""
+    TEN, SIX = "10-gang (left outlet)", "Retro 6-way (right outlet)"
+    rows = [
+        ("TV", f"mains → {TEN}", "Behind the TV, on the worktop"),
+        ("Soundbar", f"mains → {TEN}; HDMI eARC → TV HDMI 2", "Along the worktop's back edge"),
+        ("Sub", f"mains → {TEN}", "Down the slot behind the TV to the back of bay 2; keep its port clear"),
+        ("Series X", f"mains → {TEN}; HDMI → TV HDMI 3", "Down the groove behind the turntable-side upright"),
+        ("PC", f"mains (5 m C13) → {TEN}; HDMI (active optical, 5 m) → TV HDMI 1; Cat6 → Switch 2", "Brush grommet, then the two conduits chased into the side wall, behind the skirting to the plinth"),
+        ("Deco B · Switch 2", f"12 V → {TEN} · mains → {TEN}; Cat6 from the landing", "Deco B down the other upright's groove; Switch 2 on edge in the channel"),
+        ("Turntable · preamp", f"mains → {TEN}; RCA → 3.5 mm (2 m) → soundbar AUX", "The vinyl lead down the turntable-side groove"),
+        ("USB charger", f"mains → {TEN}: fan stand, pad dock, bias light, HDMI switch", "On the worktop behind the TV"),
+        ("Xbox One · Xbox 360 · PS3", f"mains → {SIX}; HDMI → switch → TV HDMI 4", "The channel's data side"),
+        ("PS2", f"mains → {SIX}; component → RetroTINK; optical → soundbar", "The channel"),
+        ("PS1 · RetroTINK", f"mains → {SIX} · USB 5 V 2 A → {SIX}; SCART → RetroTINK → switch", "The channel"),
+    ]
+    tr = "".join(f"<tr><td>{a}</td><td>{b}</td><td>{c}</td></tr>" for a, b, c in rows)
+    return ("<h3>The wiring plan, before the carcass goes in</h3><p>Lay the channel's trunking, the conduits and every lead below, "
+            "label both ends, then build the base over them. Mains on one side of the trunking, HDMI, Cat6 and audio on the other.</p>"
+            f"<table class='tight'><tr><th>Device</th><th>Leads, and where they plug in</th><th>Route</th></tr>{tr}</table>")
+
+
+def buy_first_html():
+    """v39 (item 7): for each piece of the plan, a cheap thing to buy and adapt first; a build only where nothing made fits."""
+    sup = lambda *k: "<sup>" + ",".join(str(fit.ORDER.index(x) + 1) for x in k) + "</sup>"
+    rows = [
+        ("Media wall, bays 1–2", "Buy and adapt", f"Two IKEA BESTÅ frames{sup('besta')} on a ply plinth, behind an oak face frame"),
+        ("Media wall, bay 3", "Build", "No frame takes a 33 cm LP trough beside a slim game column: birch ply, cut list below"),
+        ("Uprights, shelves, worktop", "Build", "Solid oak scribed to your alcove; the merchant can cut it"),
+        ("Dining cabinet and table", "Build", f"Nothing made folds a table for six round six chairs; the nearest, a fold-down wall table{sup('foldtable')}, opens to 80 × 138 and holds no chairs"),
+        ("The bar beside the cabinet", "Build, then buy", f"The cupboard is scribed to a {n(G.BAR_BUILT['w'])} × {n(G.BAR_BUILT['d'])} gap; over it, an IKEA ENHET frame{sup('enhet')}; the counter from the worktop's offcut"),
+        ("Glass case", "Buy and adapt", f"Toughened glass cut to size{sup('glasscut')}; the frame from the oak offcuts"),
+        ("Record table", "Buy and adapt", f"Two IKEA KALLAX{sup('kallax')} on their backs, an oak lid, castors"),
+        ("Alcove shelves", "Buy", f"Two oak floating shelves{sup('floatshelf')}"),
+        ("Wall cabinets", "Buy", f"Two IKEA EKET{sup('eket')}"),
+        ("Shelf over the door", "Buy and adapt", f"Two IKEA KUGGIS boxes{sup('kuggis')}; the shelf from the worktop's offcut"),
+        ("Blanket basket · ottoman", "Buy", f"Dibor's Lakelyn{sup('lakelyn')} · the ISTOOLS ottoman{sup('istoolsott')}"),
+        ("Step drawers", "Build (a joiner)", f"Each tread needs a bearer once its riser is cut{sup('stepdrawers')}"),
+    ]
+    tr = "".join(f"<tr><td>{a}</td><td>{b}</td><td>{c}</td></tr>" for a, b, c in rows)
+    return ("<h3>Buy and adapt first</h3><p>For each piece: the cheap thing to buy, and a build only where nothing made fits.</p>"
+            f"<table class='tight'><tr><th>Piece</th><th>How</th><th>What</th></tr>{tr}</table>")
+
+
 def guide_html():
-    return (GUIDE_RULES + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html()
-            + GUIDE_TIME + GUIDE_PITFALLS + "<h3>The cutting list</h3>" + cuts_html())
+    return (GUIDE_RULES + buy_first_html() + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html() + wiring_html()
+            + GUIDE_TIME + GUIDE_PITFALLS + "<h3>The cutting list</h3>" + cuts_html() + nest_html())
 
 
 def guide_pdf_html():
@@ -993,16 +1112,12 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 22, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed in v37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, and a tidier 3D room.</b> <b>A fourth bar, built in</b> (the appendix, "A bar for drinks"): you asked for a bar "next to the dining cabinet ... a fixed, built-in counter-style unit (permanent joinery attached to the wall/floor), not a freestanding or wheeled trolley". It fills the {n(G.BAR_BUILT["w"])} cm of wall between the cabinet and the pipe boxing: a cupboard for {G.BAR_BUILT["bottles"]} bottles, an oak counter at {n(G.BAR_BUILT["counter"])}, a mirror back, glasses hanging from a rail, a display shelf. It's {n(G.BAR_BUILT["front"])} deep, so the open table door still lies back over it while you eat. <b>Your black shelf</b> (section 5): "must always end 10cm short of the right-hand wall": its window end now stops exactly 10 short of the pipe boxing, whatever else changes; last round's separate plant shelf is gone (that was our misreading of your 10 cm gap). <b>More storage</b> (the appendix): drawers in the bottom three steps, two alcove shelves in the window corner, a storage window seat, a bench with cubbies, a built-in cupboard, two wall cabinets over the sofa's corner, a hook rail over the door and two shoe cabinets, each sized from a real product or the room's own numbers. <b>Your red lamp's cap</b> is now a proper baseball cap: a six-panel structured crown, a flat stiff brim 1.8 times a usual one, green, brown and gold like your photo. <b>In the 3D room</b> the lights now live in <b>Views</b>; <b>Extras</b> is lined up into even rows, with <b>Clear all extras</b>; Layout has two more set-ups, <b>Games night</b> and <b>Drinks</b>. All of the new pieces are suggestions: none of them is in the costs until you pick it.</div>
-<div class="decision"><b>What changed in v36: more places for a bar, your blankets and your things, a shelf for your hanging plant, and one place in the 3D room to try them.</b> You said "explore any more bar ideas and where we could put it as well as more storage and where we could put it ... in the ottoman we will likely have games and cards ... a small 10cm gap from wall shelf with the hanging plant from the right side wall ... storage solution options for our blankets also, around 5 blankets. make sure its clear how to manage all these options in the 3D room". <b>A third place for a bar</b>: a 60-wide drinks cabinet by the sofa, under the oak run (the same build as the one under the glass case), alongside the case and the trolley; under the new stairs later. <b>The ottoman</b> holds twelve square board games in three layers and a row of card games (section 2). <b>Your five blankets</b>: a tall lidded basket at the sofa's open end, or an oak rail on the wall beside the dining cabinet. <b>More storage</b>: a lift-top coffee table, a shelf over the hall door with two lidded boxes, two boxes on your black shelf. <b>Your hanging plant</b> gets its own small oak shelf, its back 10 cm off the stairs wall so the strands fall through the gap. All of these are suggestions, sized from real listings and checked in the fit proof ("Storage and a bar"), not in the plan's costs until you choose. <b>In the 3D room, open Extras</b>: it now starts with one row per need (a bar, games and cards, blankets, more storage, the plant), each with its choices, a <b>See it</b> button and a line on where it goes and what it costs. The appendix "Storage and a bar: the options" has each one's picture and how to build the oak ones.</div>
-<div class="decision"><b>What changed in v35: the 3D room, steadier and quicker.</b> You said "it currently still crashes in the claude version and has some errors in the web mode when trying to make changes. it also is a bit slow on the render sometimes becoming HD". The cause: each change of lights, the table opening and some Look changes made the graphics card rebuild its shaders (the small programs that draw each surface), up to 90 of them, a freeze on a laptop and a crash on a phone. Now: <b>no rebuilds while you use the room</b> (the lights are a fixed set; off means turned down; the hidden parts' shaders are made in the quiet moments, off screen), so, once the room has settled for a minute, opening the table went from 18 s to under 0.1 s in our test browser; <b>every device starts in Fast</b> and moves to HD only if its first frames are quick; nothing is drawn while the plan's pages cover the room; if the graphics card gives up, the room comes back in Fast by itself; the console's "Unknown color" warnings are gone; and <b>anything that goes wrong is now noted</b> (a small message, and a log we can read next round, with the device it happened on), so if you still see a problem, it reaches us. Add <code>?perf</code> to the room's address to see its speed in a corner. The plan itself and the buy list are as in v34; some of v34's renders showed the new ottoman with its lid lifted by mistake, and those are re-made with it shut.</div>
-<div class="decision"><b>What changed in v34: your glass case is in the plan, a new storage ottoman, and two ways to a bar.</b> You said "i like the large glass display case on the chimney breast": <b>it's in the plan now</b> (section 4), with its glass and oak in the buy list, its own part in step 9 of the build guide and its checks in the fit proof. It takes the place of the two framed LPs, so their frames and the picture lights over them have gone. <b>A new storage ottoman</b> (section 2): you asked for one "similar size to what we have right now" that "would match the room or current sofa". Our pick is navy velvet, 76 square (yours is 75), with a padded lid that lifts off the box inside: ISTOOLS's Large Velvet Storage Ottoman. Dunelm's 62 cm one is the smaller choice. It's in the buy list and in the 3D room; tap it to lift the lid. <b>A bar for drinks</b> (the appendix): a drinks cabinet built in under the glass case, its oak front dropping to a counter (our pick), or the slim trolley beside the cabinet dressed as a drinks trolley. Both are drawn, checked and rendered, with A's build in full, and they're not in the costs until you choose. <b>In the 3D room</b>, more works from a tap: the blind rolls up, your vinyl stand's front records lift out, the trolley pulls out for dinner, the drinks cabinet opens, the ottoman's lid lifts, and every idea or suggestion you've switched on has its own card. Edit room's armchair, beanbag and bookcase look more like real pieces.<br><b>v33: one table, a more compact version of it, and a plan page that keeps count.</b> You said "The compact cabinet is our only choice for the table now or any upgraded more compact version for this as we're trying to optimise space". So <b>the compact cabinet is the only table</b>: the long sliding cabinet and the flip-top are set aside (appendix), out of the 3D room and the choices. <b>The more compact version</b> is the same two boxes round an {n(G.CAB80['top'][0])}-wide table: {n(G.CAB80['len'])} long, {n(G.CAB['len'] - G.CAB80['len'])} shorter, six still sit, but only four chairs fit inside (section 5, with its checks). You'd also like <b>grey padded folding chairs</b>, and sent their listing: folded they're 90 × 10 × 47, so <b>they're the plan's chairs now</b> and all six still pack into the cabinet, made {n(G.CAB['d'])} deep (two stand one behind the other), its chair box {n(G.CAB['bay_c'])} wide and its shelf at {n(G.CAB['shelf_y'])}: {n(G.CAB['len'])} long. The tie-on pads go (the chairs are padded). Their depth isn't in the listing: measure one (a check on site, section 5). You were "happy with upgrade plan", so the plan page has all six upgrades: on a phone the room fills the screen with <b>numbered pins</b> and a strip of places, the set-ups as chips under it; <b>one count</b> ({sum(1 for r in TRACK if r[0] == 'To buy')} things to buy, {len(steps())} steps) in Plan and Buy alike, and a Plan home with what's <b>waiting on you</b>, the checks on site and where the money goes; <b>Decide</b> for the three open choices (what goes beside the cabinet, 90 or 80 wide, where the light switch is), kept for both of you; <b>+ Add to plan</b> on each idea with a running total; the two widths <b>side by side</b>; and a <b>build day</b> screen for each step.</div>
-<div class="decision"><b>What changed in v18: your plant stand and your record shelf, and a room you can rearrange.</b> <b>Your new plant stand</b> (98 × 29.5 × 158: two five-tier towers and an open middle) and <b>your vinyl stand</b> (70 × 32 × 78: two face-out bays on top, wire dividers below) are in, at the sizes on the listings you sent (v18.1), with two layouts to choose from (section 4): <b>A, recommended</b>, the plant stand in the window's west corner, where it gets daylight from the window beside it, and the vinyl stand on the chimney breast under the “now playing” ledge, a step from the turntable; or <b>B</b>, the other way round. Your red lamp moves to the sofa's end either way. <b>The PC's clear side</b> now shows its graphics card, cooler, memory and fans. In the 3D room, <b>Edit room</b> lets you drag things around like a dolls' house, turn them, recolour them, take them out and add new ones (an armchair, a bookcase, a floor plant and more), and paint a wall, the ceiling or the skirting by tapping it; the menus are shorter for it. <b>HD with shadows</b> no longer asks more of the graphics card than it has, and if a phone does give up, the room comes back in Fast. More ideas for later (appendix). Fit proof {nfit} checks, none fail.<br><b>v17: the room finished round your notes.</b> <b>The sofa's open end</b> is now a proper ottoman end: the seat wraps round to the back as one long cushion and the frame stops 20 short, and the sofa stands 13 cm off the window wall, as in your photo. <b>The window</b> has its real deep sill, 22 cm into the reveal, with your plants along it (3D room), and the <b>curtains</b> now hang clear of it. <b>Even light by default:</b> every spot head points straight down, evenly spread, and a new <b>General</b> scene comes first; tilt a head only if its pool lands badly. Your <b>red lamp's top (green) head</b> lights the wall with your shelf. <b>The flip-top</b> is drawn as built: pegged breadboard ends and three brass hinges. <b>The stairs:</b> one wall all the way up in one colour, the living room ceiling's edge where it cuts off the view, and the banister on the room side only, as you said. <b>The PC</b> is drawn with its insides, and lights up in the 3D room (the "PC lit" button); the plan adds a <b>USB hub</b> by the sofa, a <b>remote power button</b> and a <b>dust filter</b> (section 6), and checks the soundbar against the TV's remote (section 3). Your <b>OBEGRÄNSAD</b> (905.262.63) is confirmed at IKEA's 52 × 36 × 6. The build guide PDF now <b>stands on its own</b>: each step has its own cut list and pictures. New <b>ideas</b>, off the plan and the costs, are in their own tab and in the 3D room's buttons, all off until you turn them on (appendix). Fit proof {nfit} checks, none fail.<br><b>v16: the whole wall, redesigned round everything we now know.</b> <b>No dead space in the record bay:</b> with LPs only, bay 3 splits in two. Under the turntable, two <b>snug LP crates</b> (a 33 cm trough, the width record shops use) still hold about {2 * g.TRAY_LPS} LPs face-out; beside them a <b>slim column</b> of three drawers: <b>two face-out game drawers</b> (about {g.SLIM_GAMES} DVD-size cases, flipped like the records) and a drawer for the <b>pads and remotes</b> with a charging lead, so nothing lies on the worktop (section 4). <b>The table by the stairs is now the default</b>, so the chimney breast is free: it takes a <b>“now playing” oak ledge</b> beside the turntable for the sleeve of what's on and the next two, under the two framed LPs. <b>Smart colour strips</b> in the upright grooves and under the side-wall run, in the same app as the bars' bulbs, so one scene sets the whole wall. On your shelf by the stairs: your <b>IKEA OBEGRÄNSAD</b>, black, its 16 × 16 white LEDs drawn showing a pixel music note; <b>the laser is there but off</b>; the <b>plant hangs from the shelf's window end</b>; and the <b>hollow pipe boxing</b> in the window corner (about 23 × 22, floor to ceiling) is drawn in, the shelf stopping just short of it. <b>Your hats</b> are on your red lamp, as in your photo: the graduation cap on top of the pole, the navy cap with its poem hung below the top head. <b>The sofa's end towards the TV is open</b>: no arm, one long seat cushion wrapping round to the back, an ottoman-style end. Fit proof {nfit} checks, none fail. Earlier rounds are in the appendix.</div>
+<div class="decision"><b>What changed:</b> the curtain pole 10 under the ceiling strip and the curtains just clear of the radiator, the rear speakers always in front of them, a quicker 3D room on PCs, and a slimmer plan: the firm version only. The other options are one line each in section 12; the 3D room shows them.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
 <figure class="render">{img("render_v13_join_clean.png", "The artisan oak media wall in Card Room Green, the table by the stairs")}
-<figcaption>Drawn to your measurements, in Card Room Green: the alcove with the turntable zone on the left and bay 3 split into the slim game column and the LP crates; the chimney breast free, with its “now playing” ledge (the table is by the stairs, behind this view); both spot bars. Full-resolution renders come with this plan.</figcaption></figure>
+<figcaption>Drawn to your measurements, in Card Room Green.</figcaption></figure>
 <div class="summary">
 <div><b>£{money(tl, th)}</b><span>the whole plan, item by item in section 11; no electrician on top</span></div>
 <div><b>{c[fit.PASS]} of {nfit}</b><span>fit checks pass outright; {c[fit.TIGHT]} are tight, {c[fit.CHECK]} need a check on site (section 3)</span></div>
@@ -1022,10 +1137,10 @@ def _plan(deck=False):
 </div>
 
 <h2 class="pb">2 · The room</h2>
-<p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is drawn from your photo<sup>{fit.ORDER.index("sofa") + 1}</sup>: its long side ends in line with the breast's reveal (about {n(g.SOFA_W)} cm); the return along the side wall is a typical {n(g.SOFA_D)} until you measure it. Since v17 its end towards the TV is an <b>ottoman end</b> (no arm; the seat wraps round, the back stops {n(g.SOFA_OTTOMAN)} short) and it stands {n(g.SOFA_BACK_Z - g.WINDOW_Z)} cm off the window wall, clear of the curtains. The window has a <b>deep sill</b>, {n(g.WINDOW_REVEAL)} cm into the reveal at {n(g.SILL["y"])} from the floor, with your plants along it.</p>
+<p>Everything is drawn from your hand-measured sketch; where the agent's floor plan disagrees, your tape wins. The L-sofa is from your photo<sup>{fit.ORDER.index("sofa") + 1}</sup>: about {n(g.SOFA_W)} long, the return a typical {n(g.SOFA_D)} until you measure it, an ottoman end towards the TV, {n(g.SOFA_BACK_Z - g.WINDOW_Z)} cm off the window wall.</p>
 <figure>{living_plan()}</figure>
-<figure class="render">{img("render_v38_3d_room.png", "The whole room in 3D, the Bright preset")}
-<figcaption>The whole room in 3D, from above the window side, the dining cabinet packed away by the stairs: your blue sofa with its open end, the rug, the bars running towards the window, the “now playing” ledge on the breast. On the plan page you can walk round it, switch the table's wall, slide every light, colour the smart bulbs, paint the walls, ceiling and skirting separately, and save any view in HD.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_room.png", "The whole room in 3D, the Bright preset")}
+<figcaption>The whole room in 3D, from above the window side, the dining cabinet packed away by the stairs.</figcaption></figure>
 <table class="tight"><tr><th>From your sketch</th><th>mm</th><th>Notes</th></tr>
 <tr><td>Room, east to west along the window</td><td class="num">{n(g.ROOM_W*10)}</td><td>The media wall is the south wall, shared with the hall and garage</td></tr>
 <tr><td>Window wall to the alcove's back wall</td><td class="num">{n(g.ROOM_D*10)}</td><td>To the chimney breast's face: {n((g.ROOM_D - g.ALC_D)*10)}</td></tr>
@@ -1037,17 +1152,39 @@ def _plan(deck=False):
 <tr><td>West end: recess, door, stair box</td><td class="num">935 / 1045 / 660 / 820</td><td>Drawn roughly: please confirm which is which</td></tr>
 <tr><td>Stairs, beside the door</td><td class="num">820 wide</td><td>They go <b>up</b> to the first floor (you confirmed), behind a wooden banister; drawn rising away from the room until you send a photo</td></tr>
 </table>
-<p><b>From the sofa:</b> from the middle of the long side your eyes are about {s["view_dist"]/100:.2f} m from the screen, which a 55-inch fills at about {s["view_angle"]:.0f}°: right for TV and games. With the TV centred {n(g.TV_CX)} cm from the side wall, it sits about {abs(s["sofa_mid_off_axis_deg"]):.0f}° off-centre from the middle of the long side; the chaise's end is {n(s["chaise_dist"])} cm away. The screen's centre at 116.5 cm is 1–2.5° above a seated eye line. Both spot bars hang {n(g.BAR[2])} cm, so the lowest shade is at {n(g.CEIL - g.BAR[2])} cm: no headroom worries.</p>
+<p><b>From the sofa:</b> from the middle of the long side your eyes are about {s["view_dist"]/100:.2f} m from the screen, which a 55-inch fills at about {s["view_angle"]:.0f}°: right for TV and games. It's about {abs(s["sofa_mid_off_axis_deg"]):.0f}° off-centre; the screen's centre is just above a seated eye line. The lowest spot shade is at {n(g.CEIL - g.BAR[2])} cm.</p>
 <h3>Your new storage ottoman</h3>
-<p>You asked for "a new ottoman that is actually a storage ottoman ... similar size to what we have right now and would match the room or current sofa". Yours is 75 square and 44 high, in blue corduroy{sup("pouf")}. No one makes a navy cord storage ottoman that size: the cord ones are 55 square with a fixed top{sup("luxorcord")}. So we've matched the sofa's navy in velvet, which sits well with the cord, the oak and the Card Room Green.</p>
+<p>Yours is 75 square and 44 high, in blue cord{sup("pouf")}. No navy cord storage ottoman is made that size{sup("luxorcord")}, so the plan's is navy velvet.</p>
 <ul>
 <li><b>Our pick: ISTOOLS Large Velvet Storage Ottoman, 76 × 76, navy</b>{sup("istoolsott")}. It's the nearest size made to yours (1 cm wider each way), with a padded lid that lifts off, a box inside for your games and cards, and a wooden frame on short legs. They don't publish its height (we've drawn 45) and the price varies by size and colour (about £300 at 76): check both on the listing before ordering.</li>
 <li><b>Smaller and cheaper: Dunelm Square Opulent Velvet Storage Footstool, navy</b>, 62 × 62 × 39, 18 deep inside, £139–199{sup("opulent")}. It gives 14 cm back each way.</li>
 <li><b>Bigger: Dunelm Zoe Pinstripe Square Storage Footstool</b>, 96 × 96 × 49, navy, £99.50–199{sup("zoe")}. It's a coffee-table size, and too big for the gap beside your coffee table.</li>
 </ul>
-<p><b>Your games and cards in it.</b> Inside it is about {n(g.OTTO_GAMES["inner"])} square and {n(g.OTTOMAN["inner_h"])} deep (as drawn; check the real one when it comes). Square board games come in a {n(g.GAME_BOX[0])} × {n(g.GAME_BOX[1])} × {n(g.GAME_BOX[2])} box (Ticket to Ride's, the usual size{sup("ttr")}), so <b>{g.OTTO_GAMES["games"]} fit</b>: two by two, three layers deep. That leaves a {n(g.OTTO_GAMES["strip"])} cm strip along one side for the cards: decks ({n(g.CARD_DECK[0])} × {n(g.CARD_DECK[1])} × {n(g.CARD_DECK[2])}{sup("bicycle")}) stand on edge, about 38 to a row, or the small boxed card games. Keep the games you play most in the top layer.</p>
-<figure class="render">{img("render_v38_3d_ottoman.png", "The new storage ottoman, its lid lifted: games and cards inside")}
-<figcaption>The storage ottoman where yours stands, beside the coffee table, its padded lid lifted: twelve square games in three layers and a row of card decks along one side (in the 3D room, tap it: Lift the lid; or Extras, Games and cards).</figcaption></figure>
+<p><b>Your games and cards in it.</b> Inside it is about {n(g.OTTO_GAMES["inner"])} square and {n(g.OTTOMAN["inner_h"])} deep (as drawn; check the real one when it comes). Square board games come in a {n(g.GAME_BOX[0])} × {n(g.GAME_BOX[1])} × {n(g.GAME_BOX[2])} box (Ticket to Ride's, the usual size{sup("ttr")}), so <b>{g.OTTO_GAMES["games"]} fit</b>: two by two, three layers deep. A {n(g.OTTO_GAMES["strip"])} cm strip along one side takes about 38 card decks on edge{sup("bicycle")}.</p>
+<figure class="render">{img("render_v39_3d_ottoman.png", "The new storage ottoman, its lid lifted: games and cards inside")}
+<figcaption>The storage ottoman where yours stands, beside the coffee table, its padded lid lifted.</figcaption></figure>
+<h3>The storage you picked</h3>
+<table class="tight"><tr><th>What</th><th>Where</th><th>Size</th></tr>
+<tr><td>Shelf over the hall door, two lidded boxes{sup("kuggis")}</td><td>Over the architrave (check its height)</td><td>{n(g.DOOR_SHELF["x"][1] - g.DOOR_SHELF["x"][0])} × {n(g.DOOR_SHELF["d"])} at {n(g.DOOR_SHELF["y"])}; boxes 35 × 26 × 15</td></tr>
+<tr><td>Two lidded boxes on your black shelf{sup("kuggis")}</td><td>Either side of the laser</td><td>35 × 26 × 15 each</td></tr>
+<tr><td>Two oak alcove shelves{sup("floatshelf")}</td><td>The window corner, over the plant stand</td><td>two {n(g.ALCOVE_SHELVES["w"])} × {n(g.ALCOVE_SHELVES["d"])}, tops at {n(g.ALCOVE_SHELVES["tops"][0])} and {n(g.ALCOVE_SHELVES["tops"][1])}</td></tr>
+<tr><td>Two wall cabinets, glass doors{sup("eket")}</td><td>The side wall over the sofa's corner, past the PC shelf</td><td>two {n(g.EKET[0])} cubes, {n(g.WALL_CABS["y0"])} to {n(g.WALL_CABS["y0"] + g.EKET[2])} up</td></tr>
+<tr><td>Drawers in the bottom three steps{sup("stepdrawers")}</td><td>The stairs by the door</td><td>fronts {n(g.STAIR_DRAWERS["w"])} × {n(g.STAIR_DRAWERS["h"])}, {n(g.STAIR_DRAWERS["depth"])} deep</td></tr>
+<tr><td>Blanket basket, water hyacinth{sup("lakelyn")}</td><td>Against the side wall at the sofa's open end</td><td>{n(g.BLANKET_BASKET["d"])} × {n(g.BLANKET_BASKET["w"])} × {n(g.BLANKET_BASKET["h"])}: five throws folded long{sup("ofelia")} stack {n(5 * g.THROW_LONG[2])} of its {n(g.BLANKET_BASKET["inner"][2])}</td></tr>
+</table>
+<p>Fix the wall cabinets and the shelves into plugs in the solid wall, anti-tip as the makers say. The step drawers are a joiner's job: each tread needs a bearer once its riser is cut, so build them with the new stairs.</p>
+<figure class="render">{img("render_v39_3d_sg_stairdrawers.png", "Drawers in the bottom three steps, pulled out")}
+<figcaption>The step drawers, pulled out.</figcaption></figure>
+<h3>The record table</h3>
+<p>Your coffee table's 90 × 50, from two IKEA KALLAX{sup("kallax")} on their backs: two bins of LPs, spine-up, about {g.RECORD_TABLE["per_bin"]} in each. An oak lid lifts on a piano hinge along the TV side; it rolls on castors. {n(g.RECORD_TABLE["h"])} high.</p>
+<figure class="render">{img("render_v39_3d_sg_recordtable.png", "The record table with its lid up")}
+<figcaption>Lid up: about {g.RECORD_TABLE["lps"]} LPs in two bins.</figcaption></figure>
+<ul>
+<li><b>Buy:</b> two KALLAX 42 × 42 (£19 each){sup("kallax")}; an 18 mm oak board, 60 × 120{sup("snowdonoak")}; 12 mm ply{sup("wickesply")}; four 50 mm castors, 50 kg each{sup("castor50")}; a piano hinge cut to 83{sup("piano32")}; two lid stays{sup("lidstay")}.</li>
+<li><b>Make:</b> build both KALLAX and screw them together side by side. Screw the ply ({n(g.RECORD_TABLE["carcass"][0] + 1)} × {n(g.RECORD_TABLE["carcass"][1] + 0.3)}) to the open backs; a castor 4 in from each corner.</li>
+<li><b>The lid:</b> the oak cut to 90 × 50, corners rounded, oiled; hinged to the TV side's top edge, 3.5 over each end; a stay each end, stopping at about 80°.</li>
+<li><b>Check:</b> loaded, about {g.RECORD_TABLE["kg"]} kg; the castors take 200. The records stand on the ply, not the KALLAX shelves.</li>
+</ul>
 <h3>The house</h3>
 <figure>{house()}</figure>
 <p>Deco A and Switch 1 sit with the Hub 5 and the gaming PCs in bedroom 3; both Cat6 runs go across the landing and drop through the airing cupboard, which sits over the alcove's corner (section 9).</p>
@@ -1055,7 +1192,7 @@ def _plan(deck=False):
 <h2 class="pb">3 · The media wall</h2>
 
 <figure class="render">{img("render_v13_join_key_scene.png", "Render with numbered parts")}
-<figcaption>Numbered view: the game drawer and the lower LP crate are pulled out 30 cm, with a view of each from above. Dashed lines show what's hidden: gold for data, audio and low-voltage leads, coral for mains. The sofa isn't drawn so the base stays in view; the room plan shows it.</figcaption></figure>
+<figcaption>Numbered view: the game drawer and the lower LP crate are pulled out 30 cm.</figcaption></figure>
 {key_table()}
 
 <h3>Built to your alcove: {n(g.ALC_W)} wide, {n(g.ALC_D)} deep, {n(g.CEIL)} to the ceiling</h3>
@@ -1110,7 +1247,7 @@ def _plan(deck=False):
 <p>Seven drawers in the alcove base, all drawn to scale from above: <b>A</b> the game drawer (bay 1), <b>B</b> the hidden plinth drawer under bay 2, <b>C</b> and <b>D</b> the two face-out LP crates and <b>E</b> to <b>G</b> the slim drawers beside them (bay 3). Each one shows its compartments, what goes in them and how many, and its runners. Every front is a plain oak lip with a finger pull cut underneath.</p>
 <figure>{drawer_layouts()}</figure>
 <figure class="render">{img("render_v13_drawers.png", "Every drawer out: the game drawer, the upper LP crate, a slim game drawer and the plinth drawer")}
-<figcaption>Every drawer out, in place: the game drawer, the upper LP crate and the middle slim game drawer 30 cm out, the plinth drawer 25 cm out. In use, open one LP crate at a time (a full one is about 30 kg).</figcaption></figure>
+<figcaption>Every drawer out, in place: the game drawer, an LP crate and a slim drawer 30 cm out.</figcaption></figure>
 <h3>The game drawer (bay 1, bottom row)</h3>
 <p>Unchanged. Two display bins at the front show covers face-out even with the drawer shut (Xbox left, PS2 right, a small tray between them); behind them the rest of the games stand on edge with the spine on top, so every title faces up when you roll it out.</p>
 <figure>{game_drawer()}</figure>
@@ -1142,20 +1279,18 @@ def _plan(deck=False):
 <li>Drip trays or a waterproof mat under the pots protect the slats and the carpet.</li>
 <li>Felt pads under the vinyl stand.</li></ul></li>
 </ul>
-<figure class="render">{img("render_v38_3d_plants_corner.png", "Layout A: your plant stand in the window corner")}
-<figcaption>Layout A, from the 3D room: your plant stand in the window's west corner, its towers and open middle full of plants.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_records_breast.png", "Layout A: your vinyl stand on the breast")}
+<figure class="render">{img("render_v39_3d_plants_corner.png", "Layout A: your plant stand in the window corner")}
+<figcaption>Layout A, from the 3D room: your plant stand in the window's west corner.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_records_breast.png", "Layout A: your vinyl stand on the breast")}
 <figcaption>Layout A: your vinyl stand on the chimney breast, under the “now playing” ledge, beside the turntable.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_plants_breast.png", "Layout B: the plant stand on the breast")}
-<figcaption>Layout B: the plant stand on the breast instead; the vinyl stand goes back to the window corner.</figcaption></figure>
 <p>The vinyl is in one place, in the alcove: the deck on the worktop, the records in the two LP crates right underneath it, the preamp tucked under the shelf above, and (v16) the “now playing” ledge on the breast an arm's reach away. Pull a crate, pick a record, play it, and stand its sleeve on the ledge.</p>
 <figure>{drawer()}</figure>
 <h3>The glass display case on the chimney breast</h3>
-<p>You picked it: a tall glass case on the breast, {n(ideas.CASE["x"][1] - ideas.CASE["x"][0])} × {n(ideas.CASE["y"][1] - ideas.CASE["y"][0])} × {n(ideas.CASE["d"])} deep, centred from {n(ideas.CASE["y"][0])} to {n(ideas.CASE["y"][1])}, {n(g.CEIL - ideas.CASE["y"][1])} under the ceiling. It's no deeper than a picture ledge, so nothing stands on the floor for it. Three 6 mm glass shelves on pins make four spaces for collectibles, boxed games, 7-inch singles, small plants or ceramics, behind a 4 mm toughened glass front that lifts off{sup("glasscut")}. It's lit inside by a warm strip on the strips' app. The frame is oak from the offcuts (or painted black or white: try them in the 3D room's Look), on a hidden oak cleat, about 16 kg empty. It takes the two framed LPs' place, over the “now playing” ledge and your vinyl stand. The build is part of step 9, and the glass and oak are in the buy list (about £90–170).</p>
-<figure class="render">{img("render_v38_3d_glass_case.png", "The glass display case on the chimney breast")}
+<p>You picked it: a tall glass case on the breast, {n(ideas.CASE["x"][1] - ideas.CASE["x"][0])} × {n(ideas.CASE["y"][1] - ideas.CASE["y"][0])} × {n(ideas.CASE["d"])} deep, centred from {n(ideas.CASE["y"][0])} to {n(ideas.CASE["y"][1])}, {n(g.CEIL - ideas.CASE["y"][1])} under the ceiling. Three 6 mm glass shelves on pins, a 4 mm toughened front that lifts off{sup("glasscut")}, a warm strip inside. An oak frame from the offcuts on a hidden cleat, about 16 kg empty. Step 9 builds it; about £90–170.</p>
+<figure class="render">{img("render_v39_3d_glass_case.png", "The glass display case on the chimney breast")}
 <figcaption>The case on the breast with collectibles, the “now playing” ledge and your vinyl stand under it.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_case_mixed.png", "The case with a black frame and a bit of each")}
-<figcaption>The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants, boxed games. A white frame, and singles and tapes, are in the 3D room's Look.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_case_mixed.png", "The case with a black frame and a bit of each")}
+<figcaption>The same case with a black frame and a bit of everything: 7-inch singles, a cap and figures, small plants.</figcaption></figure>
 <h3>How bay 3 works (v16)</h3>
 <ul>
 <li><b>Why it changed:</b> with LPs only, v15's trays had about 10 cm of empty width each side. Now a 12 mm divider splits the bay: the LP crates take only the width LPs need, and the rest becomes a slim column that does a job.</li>
@@ -1194,12 +1329,20 @@ def _plan(deck=False):
 
 <h2 class="pb">5 · The dining wall</h2>
 {cab_html()}
-{cab80_html()}
+<h3>The bar beside the cabinet</h3>
+<p>A back-bar {n(g.BAR_BUILT["w"])} wide between the cabinet and the pipe boxing, {n(g.BAR_BUILT["front"])} deep: no deeper than the open table door. Below, a cupboard on a recessed plinth, two doors and a shelf: {g.BAR_BUILT["bottles"]} bottles of 70 cl{sup("bottles")}. On top, an oak counter at {n(g.BAR_BUILT["counter"])}, worktop height{sup("worktop")}. Above, a 3 mm acrylic mirror{sup("acrylicmirror")} and an IKEA ENHET frame{sup("enhet")} ({n(g.ENHET[0])} × {n(g.ENHET[1])} × {n(g.ENHET[2])}) from {n(g.BAR_BUILT["enhet_y0"])}, {n(g.BAR_BUILT["enhet_head"])} under your black shelf. With the table door back, {n(g.BAR_BUILT["covered"])} of it is behind the door: set the drinks out first.</p>
+<figure class="render">{img("render_v39_3d_beside_bar.png", "The bar beside the dining cabinet, shut")}
+<figcaption>The bar beside the dining cabinet, under your black shelf.</figcaption></figure>
+<figure class="render">{img("render_v39_3d_beside_bar_open.png", "The bar open")}
+<figcaption>Open: the bottles inside, glasses on the frame.</figcaption></figure>
+<ul>
+<li><b>Build:</b> 18 mm oak-faced ply as for the cabinet: two ends scribed to the cabinet and the wall, a floor on a 3 cm plinth set back 2, a shelf at {n(g.BAR_BUILT["mid"])}, a 6 mm back, two doors on soft-close hinges; the 27 mm oak counter screwed up through the ends; the carcass screwed to the wall, the plinth to the floor. Then the mirror, stuck on, and the ENHET frame on its own fixings, anchored as IKEA says.</li>
+</ul>
 
 <h2 class="pb">6 · The side wall</h2>
-<p>One oak line at {n(g.LEDGE_TOP)} cm runs over the TV between the uprights and, past the turntable zone, along the side wall. The side wall's part is <b>one run</b>, {n(g.SIDE_RUN_T)} cm thick all along: a 7 cm record ledge with four more LPs face-out that <b>sweeps out in one smooth curve</b> to the 28 cm shelf the PC sits on, ending in a 5 cm radius like the table's corners. A warm LED strip in a groove under its front edge washes the wall below it, on the uprights' driver and dimmer. Two separate shelves at two depths become one piece of furniture, and it moves the PC out of the TV's sightlines.</p>
+<p>One oak line at {n(g.LEDGE_TOP)} cm runs over the TV between the uprights and, past the turntable zone, along the side wall. On the side wall it's <b>one run</b>, {n(g.SIDE_RUN_T)} thick: a 7 cm ledge with four LPs face-out that sweeps out to the 28 cm PC shelf. A warm LED strip under its front edge washes the wall below.</p>
 <figure class="render">{img("render_v13_side.png", "The PC side wall")}
-<figcaption>The side wall from the room: the oak run round the corner with its four LPs, sweeping out under the PC, the keyboard tray's housing underneath and the LED's glow below it, the curtains at the window, and nothing else on the wall: the leads run inside it, the sofa below (drawn from your photo), and the media wall end-on at the right. The chimney breast is cut away so the wall reads end-on; its outline is dashed, with the depths marked: the alcove is 38 deep, so 38 of the 46 cm base sits inside it and 8 stands proud (picked out in gold), and the 30 cm uprights and shelves sit wholly inside.</figcaption></figure>
+<figcaption>The side wall from the room: the oak run round the corner with its four LPs.</figcaption></figure>
 <figure>{pc_shelf()}</figure>
 <ul>
 <li><b>The run:</b> {n(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} cm long, {n(g.SIDE_RUN_T)} thick, cut from one 225 × 30 × 4 oak board to a full-size template: 7 deep along the LPs (with a 1.5 cm lip), easing out to {n(g.PC_SHELF_D)} over {n(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} cm just past the last LP. It sits on an oak cleat screwed to the side wall, dowelled to the left upright's front edge.</li>
@@ -1245,7 +1388,7 @@ def _plan(deck=False):
 <h3>Paint: Farrow &amp; Ball Card Room Green No. 79</h3>
 <p>The room is colour-drenched in Card Room Green: walls, ceiling, alcove, chimney breast, skirting and the radiator. The door and its frame stay white, as they are (v20): a crisp edge to the green, like the window. There's no trunking left to paint. It's a soft grey-green that lets the oak and the records lead.</p>
 <figure>{img("paint_grid.png", "The artisan oak render in four greens")}
-<figcaption>The wall in Card Room Green (chosen) beside Sage Green, Treron and the earlier deep green. Screen colours are approximate and the renders are lit as in the evening: judge from painted samples.</figcaption></figure>
+<figcaption>The wall in Card Room Green (chosen) beside Sage Green, Treron and the earlier deep green.</figcaption></figure>
 <ul>
 <li><b>Finishes:</b> Estate or Modern Emulsion on walls, ceiling, alcove and breast; Estate Eggshell in the same colour on skirting and radiator (the door stays white) (Modern Eggshell if the skirting takes knocks).</li>
 <li><b>Order:</b> paint before anything is fixed, so nothing needs cutting in round the uprights, shelves or the dining wall.</li>
@@ -1314,6 +1457,7 @@ def _plan(deck=False):
 <li><b>The sub:</b> its mains lead from the 10-gang drops through the slot behind the TV to the back of bay 2, about 1 m. Keep the channel behind the sub clear: its port needs the air.</li>
 <li><b>Airflow:</b> console bays stay open-backed; the Series X has 15 cm each side and 21 above.</li>
 </ul>
+{wiring_html()}
 <h3>Network</h3>
 <figure>{network()}</figure>
 <ul>
@@ -1368,7 +1512,11 @@ def _plan(deck=False):
 </ul>
 
 <h2 class="pb">10 · Build guide, for a first-time builder</h2>
-{guide_html()}
+<p>Every step in full, the tools, the techniques, the cutting list and the nested sheets are in the Build Guide (its own PDF, and Build on the plan page). Here: what to buy first, the order of work and the wiring.</p>
+{buy_first_html()}
+<h3>The order of work</h3>
+{steps_table_html()}
+{wiring_html()}
 
 <h2 class="pb">11 · Buy list and tracker</h2>
 <p>Every purchase and job, in build order, comes to about £{money(tl, th)}, with no electrician on top: the electrics are your own job, and the tools for them are on the list. Each phase carries its part's coloured label. Estimates are approximate UK prices; changed and new items are marked. Tick items off and write in what you paid.</p>
@@ -1377,180 +1525,14 @@ def _plan(deck=False):
 <h3>By phase</h3>
 <table class="tight"><tr><th>Phase</th><th>Estimate (£)</th><th>Biggest item</th></tr>{ptot}</table>
 <p class="note">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles.</p>
-<table class="tracker"><thead><tr><th>Status</th><th>Item</th><th>Qty</th><th>Estimate (£)</th><th>Paid (£)</th></tr></thead><tbody>
-{tracker_rows()}</tbody></table>
+<p>The full tracker, row by row with a box for what you paid, is the Build Guide's shopping list (and Buy on the plan page).</p>
 
-<h2 class="pb">12 · Agreed, later ideas, sources</h2>
-<h3>Agreed so far</h3>
-<ul class="agreed">
-<li>From your answers (21 Oct): the stairs wall is solid, so the dining cabinet's top goes into plugs and screws; the light fittings and the socket are your own job; no more questions: where the plan assumes a size, the fit proof's checks say what to measure on site first.</li>
-<li>From your v13.6 message: the legs store as part of the table (in the leaf's frame); the electrics are your own job; each step labelled with its part.</li>
-<li>From your v13 message: less cladding (done: no slats, spine, sub box or reeding; cables chased into the wall); the stairs go up; the drawer layouts drawn.</li>
-<li>From your answers (v12.1): the sofa's long side ends in line with the breast's reveal; the door hinges on the breast side and opens in; the side wall and breast are solid (plugs and screws, no stud fixings); the PC is an average gaming case (allowed for at 23 × 45.3 × 46.6).</li>
-<li>Artisan oak, Card Room Green with matching eggshell skirting, every record face-out, the game drawer as designed.</li>
-<li>The TV in line with the sofa, the turntable by the side wall with the Series X above it and the records below.</li>
-<li>The ledge wrapping round onto the side wall, with the PC above the sofa.</li>
-<li>A fold-down oak dining table on the chimney breast; the spot bars on the existing ceiling points; the sub back in the media wall, in bay 2 (v13.5).</li>
-</ul>
-<h3>Later ideas</h3>
-<ul>
-<li><b>For the room (v17):</b> glass plant shelves in the window (the glass case on the breast is in the plan now), a C-table for the sofa's open end, and small ones (v18: TV backlight that follows the picture, cushions in the rug's colours, a plant uplight, a rug pad): see the appendix “Ideas for later”, and the Ideas tab and buttons in the 3D room.</li>
-<li><b>Dave and Emma's watch log:</b> a shared film and TV log, like a Spotify Blend for what you watch: log each film or episode, mark whether you watched it together, rate it, and later get suggestions for what to watch next. To be shaped up separately.</li>
-</ul>
+<h2 class="pb">12 · Other options and sources</h2>
+{other_options_html()}
 <h3>Sources</h3>
 <p class="note">Numbered sources are the item sizes used in the fit proof (section 3).</p>
 {fit.sources_html(OTHER_SOURCES)}
-
-<h2 class="pb">Appendix · Ideas for later (not in the plan or the costs)</h2>
-{ideas.pdf_html()}
-<figure class="render">{img("render_v38_3d_ideas_window.png", "Idea: glass plant shelves in the window")}
-<figcaption>Idea only, from the 3D room: glass plant shelves across the window's reveal, beside your plant stand in the west corner.</figcaption></figure>
-<h3>A bar for drinks: three ways (suggestions, not in the plan or the costs yet)</h3>
-<p>You asked about "integrating a wall bar in here for drinks/spirits or whether another area could facilitate a bar of some kind and how id build it in". Two ways fit this room, both in the 3D room (Extras, and each one's card in Ideas), both with their numbers checked in the fit proof ("A bar for drinks").</p>
-<p><b>A · A drinks cabinet under the glass case (our pick).</b> It's built in where you asked: an oak box the case's width, {n(g.DRINKS["x"][1] - g.DRINKS["x"][0])} × {n(g.DRINKS["y"][1] - g.DRINKS["y"][0])} × {n(g.DRINKS["d"])} deep, hung on the chimney breast from {n(g.DRINKS["y"][0])} to {n(g.DRINKS["y"][1])}, just under the case. Its oak front is a fall-front: it drops on a piano hinge onto two soft-close stays and becomes a {n(g.DRINKS["x"][1] - g.DRINKS["x"][0] - 2 * g.DRINKS["t"])} × {n(g.DRINKS["inner_h"])} counter at {n(g.DRINKS["counter"])}, a standing bar's height, {n(g.DRINKS["reach"])} out from the breast. Inside, {g.DRINKS["n"]} bottles stand in a row (the tallest 70 cl bottle we found is {n(g.DRINKS_BOTTLE[0])}, the widest {n(g.DRINKS_BOTTLE[1])} across{sup("bottles")}) on a mirror back, lit by a warm strip under the top. The glasses live on the case's bottom shelf, just above. It takes the “now playing” ledge's place; your vinyl stand's face-out top bays show what's on instead. Shut, it reads as one oak piece with the case. About £80–130.</p>
-<ul>
-<li><b>Cut:</b> from 18 mm oak-faced ply (the dining cabinet's sheet has room): two ends {n(g.DRINKS["y"][1] - g.DRINKS["y"][0])} × {n(g.DRINKS["d"])}, a top and a floor {n(g.DRINKS["x"][1] - g.DRINKS["x"][0] - 2 * g.DRINKS["t"])} × {n(g.DRINKS["d"])}, the fall-front {n(g.DRINKS["x"][1] - g.DRINKS["x"][0] - 2 * g.DRINKS["t"] - 0.4)} × {n(g.DRINKS["inner_h"])}; a 9 mm ply back {n(g.DRINKS["x"][1] - g.DRINKS["x"][0] - 2 * g.DRINKS["t"])} × {n(g.DRINKS["inner_h"])}; 3 mm silver acrylic mirror the same size{sup("acrylicmirror")}; two oak cleat strips {n(g.DRINKS["x"][1] - g.DRINKS["x"][0] - 10)} long, bevelled at 45°.</li>
-<li><b>Buy:</b> a pair of soft-close flap stays for an 18 mm flap (Blum, through Howdens{sup("flapstay")}), a piano hinge cut to {n(g.DRINKS["x"][1] - g.DRINKS["x"][0] - 2 * g.DRINKS["t"] - 0.4)} (from the cabinet's 1800 × 32{sup("piano32")}), a brass knob, a warm white LED strip, 85 cm, on the strips' app.</li>
-<li><b>Build:</b> glue and screw the box (the ends outside the top and the floor); pin the mirror to the back and screw the back on from behind; screw the hinge along the floor's front edge and the flap to it, inset between the ends; fit the stays to Blum's template, one each end; stick the strip under the top's front edge and run its lead out of the back.</li>
-<li><b>Hang:</b> one cleat on the box's back, 8 under its top; the other on the breast, level, its top at {n(g.DRINKS["y"][1] - 8)}, into plugs every 20 cm (full, with nine bottles, it's about 20 kg). Fix its bottom edge with two mirror plates, then load it.</li>
-</ul>
-<figure class="render">{img("render_v38_3d_bar_shut.png", "The glass case with the drinks cabinet under it, shut")}
-<figcaption>Shut: the case with its collectibles, the drinks cabinet's oak front under it and your vinyl stand on the floor below (Bright).</figcaption></figure>
-<figure class="render">{img("render_v38_3d_sg_barcase.png", "The drinks cabinet open, its front a counter")}
-<figcaption>Open: the front down on its stays as a counter at {n(g.DRINKS["counter"])}, nine bottles on the mirror back, lit from above. In the 3D room, tap it: Open the bar.</figcaption></figure>
-<p><b>B · The slim trolley as a drinks trolley.</b> Nothing to build: if you pick the slim trolley for the gap beside the dining cabinet (section 5), dress it as a bar: bottles on the top tray, glasses below, then the mixers and an ice bucket. It pulls out for dinner, before the table door opens, to stand behind the window-side diners, clear of the door's swing; it can't reach the table's far end, because with six sat down the sofa's end and the chairs leave no way past. About £36–70, the trolley and an ice bucket.</p>
-<figure class="render">{img("render_v38_3d_beside_trolley_out.png", "The slim trolley pulled out for dinner")}
-<figcaption>The trolley pulled out for dinner, behind the window-side chairs and clear of the open table door.</figcaption></figure>
-<p><b>C · A drinks cabinet by the sofa (new in v36).</b> The same build as A, made {n(g.BAR_SIDE["w"])} wide for {g.BAR_SIDE["n"]} bottles, on the side wall at the sofa's open end, between the media wall and the sofa: from {n(g.BAR_SIDE["y"][0])} to {n(g.BAR_SIDE["y"][1])} up, {n(g.BAR_SIDE["run_gap"])} under the oak run (the glasses stand on the run). It's the bar you reach from where you sit; its front drops to a counter at {n(g.BAR_SIDE["counter"])}, over the media wall's drawers (they pull out under the worktop, 20 below it). Build it as A: the top and the floor {n(g.BAR_SIDE["w"] - 2 * g.BAR_SIDE["t"])} long, the fall-front and the mirror {n(g.BAR_SIDE["w"] - 2 * g.BAR_SIDE["t"] - 0.4)}, the hinge cut to the same; about £60–100.</p>
-<figure class="render">{img("render_v38_3d_sg_barside.png", "C: the drinks cabinet by the sofa, open")}
-<figcaption>C, open: the drinks cabinet on the side wall by the sofa's open end, its front down as a counter, five bottles on the mirror back (Cosy, evening).</figcaption></figure>
-<p><b>D · A bar built in beside the dining cabinet (new in v37).</b> You asked for one "next to the dining cabinet ... a fixed, built-in counter-style unit (permanent joinery attached to the wall/floor), not a freestanding or wheeled trolley". The only wall beside the cabinet is the {n(g.BAR_BUILT["w"])} cm between its window end and the pipe boxing, and the open table door lies back over most of it while you eat, so the bar is a back-bar no deeper than the door's line: {n(g.BAR_BUILT["front"])} at the counter, {n(g.BAR_BUILT["door_clear"])} behind the door. Below, a cupboard on a recessed plinth with two doors and a shelf: {g.BAR_BUILT["bottles"]} bottles of 70 cl, two rows of five on each shelf{sup("bottles")}. On top, an oak counter at {n(g.BAR_BUILT["counter"])}, worktop height{sup("worktop")}. Above it a 3 mm acrylic mirror{sup("acrylicmirror")} and an IKEA ENHET wall frame{sup("enhet")} ({n(g.ENHET[0])} × {n(g.ENHET[1])} × {n(g.ENHET[2])}, two shelves) from {n(g.BAR_BUILT["enhet_y0"])}: {n(g.BAR_BUILT["enhet_gap"])} over the counter to pour, {n(g.BAR_BUILT["enhet_head"])} under your black shelf, glasses and bottles on its shelves, a warm strip under it. The bar ends flush with your shelf, so your hanging plant's strands fall through the 10 cm gap beside it, clear of the table door. Set the drinks out before you open the table: with the door back, {n(g.BAR_BUILT["covered"])} of the bar is behind it. </p>
-<figure class="render">{img("render_v38_3d_beside_bar.png", "D: the bar built in beside the dining cabinet, shut")}
-<figcaption>D, shut: the bar built in beside the dining cabinet, under your black shelf.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_beside_bar_open.png", "D: the built-in bar open")}
-<figcaption>D, open (Cosy, evening): the doors back, the bottles inside, glasses on the rail (in the 3D room, Layout, Try a set-up: Drinks).</figcaption></figure>
-<ul>
-<li><b>D, to build:</b> 18 mm oak-faced ply as for the dining cabinet: two ends scribed to the cabinet's end and the wall, a floor on a 3 cm plinth set back 2, a shelf at {n(g.BAR_BUILT["mid"])}, a 6 mm back, two doors on soft-close hinges; the 27 mm oak counter screwed up through the ends; the carcass screwed to the wall and the plinth to the floor. Over it the mirror, stuck to the wall, and the ENHET frame on its own fixings, anchored as IKEA says.</li>
-</ul>
-<p><b>Later, with your new stairs:</b> when the stairs are redone, the space under them could take a bar or a wine rack too, and the step drawers above; we'll draw it when the new stairs are known.</p>
-
-<h3>The ceiling, to try for later</h3>
-<p>Look → The ceiling shows nine designs in the room, in any paint: as it is, smooth, four Artex patterns (stipple, swirl, fan, basket weave), oak-effect beams, coffers and an LED cove. Rough costs: smooth £300–700{sup("skimartex")}; a pattern £200–600, a plasterer's day or two{sup("skimartex")}; three 12 × 12 faux oak beams about £1,050{sup("pubeam")}; coffers £450–900; an LED cove £750–850 in uplighter coving and tape{sup("orac")}. Test the old Artex for asbestos before anyone sands it (a £35 kit{sup("artextest")}). The beams, ribs and cove all clear both spot bars' turning circles. The cove stops short of the media wall's uprights and the light box.</p>
-<h3>Storage and a bar: the options, and where they go (suggestions)</h3>
-<p>You asked for more places for a bar and for storage, room for your games and cards, a home for about five blankets, and a small shelf for your hanging plant, with "how to manage all these options in the 3D room" made clear. Each one below is a suggestion: not in the plan's costs until you pick it; the numbers are checked in the fit proof ("Storage and a bar").</p>
-<table class="tight"><tr><th>For</th><th>The option</th><th>Where it goes</th><th>Size</th><th class="num">About £</th></tr>
-<tr><td>A bar</td><td>A · under the glass case</td><td>The chimney breast, 96–136 up</td><td>90 × 39 × 20, nine bottles</td><td class="num">80–130</td></tr>
-<tr><td></td><td>B · the slim trolley</td><td>Beside the dining cabinet; out for dinner</td><td>20 × 43.2 × 86.5</td><td class="num">36–70</td></tr>
-<tr><td></td><td>C · by the sofa</td><td>The side wall at the sofa's open end, under the oak run</td><td>{n(g.BAR_SIDE["w"])} × 39 × 20, {g.BAR_SIDE["n"]} bottles</td><td class="num">60–100</td></tr>
-<tr><td>Games and cards</td><td>In your new ottoman</td><td>On the rug by the coffee table</td><td>{g.OTTO_GAMES["games"]} square games, a row of decks</td><td class="num">(in the plan)</td></tr>
-<tr><td>Five blankets</td><td>A tall water hyacinth basket{sup("lakelyn")} (in the plan)</td><td>Against the side wall at the sofa's open end</td><td>{n(g.BLANKET_BASKET["d"])} × {n(g.BLANKET_BASKET["w"])} × {n(g.BLANKET_BASKET["h"])}: five throws folded long use {n(5 * g.THROW_LONG[2])} of its {n(g.BLANKET_BASKET["inner"][2])}</td><td class="num">36–42</td></tr>
-<tr><td></td><td>The lidded seagrass basket{sup("cotswold")} (the fallback)</td><td>The same corner</td><td>{n(g.BLANKET_COTSWOLD["w"])} × {n(g.BLANKET_COTSWOLD["d"])} × {n(g.BLANKET_COTSWOLD["h"])}</td><td class="num">90–110</td></tr>
-<tr><td></td><td>An oak blanket rail</td><td>The wall beside the dining cabinet (the open table door lies back over it while you eat)</td><td>{n(g.BESIDE["rail"]["w"])} wide, four rails, 12 off the wall</td><td class="num">25–45</td></tr>
-<tr><td>More storage</td><td>The record table{sup("kallax")} (in the plan)</td><td>Your coffee table's place</td><td>90 × 50 × {n(g.RECORD_TABLE["h"])}, about {g.RECORD_TABLE["lps"]} LPs</td><td class="num">170–210</td></tr>
-<tr><td></td><td>A lift-top coffee table{sup("homelife")} (the fallback)</td><td>Your coffee table's place</td><td>90 × 50 × 48, lifts to 53.5</td><td class="num">39–80</td></tr>
-<tr><td></td><td>A shelf over the hall door, two lidded boxes{sup("kuggis")}</td><td>Over the door's architrave (the clock suggestion's place)</td><td>{n(g.DOOR_SHELF["x"][1] - g.DOOR_SHELF["x"][0])} × {n(g.DOOR_SHELF["d"])} at {n(g.DOOR_SHELF["y"])}; boxes 35 × 26 × 15</td><td class="num">35–60</td></tr>
-<tr><td></td><td>Two lidded boxes on your black shelf</td><td>Either side of the laser</td><td>35 × 26 × 15 each</td><td class="num">20–30</td></tr>
-<tr><td>A bar (v37)</td><td>D · built in beside the dining cabinet</td><td>The wall between the cabinet and the pipe boxing</td><td>{n(g.BAR_BUILT["w"])} × {n(g.BAR_BUILT["front"])}, a counter at {n(g.BAR_BUILT["counter"])}{sup("worktop")}, {g.BAR_BUILT["bottles"]} bottles</td><td class="num">110–200</td></tr>
-<tr><td>Shoes (v37)</td><td>Two shoe cabinets{sup("trones")}</td><td>The same wall beside the cabinet (one thing there at a time)</td><td>two {n(g.TRONES[0])} × {n(g.TRONES[1])} × {n(g.TRONES[2])}, about eight pairs</td><td class="num">25–30</td></tr>
-<tr><td>The window corner (v37)</td><td>A storage window seat{sup("seat")}</td><td>The window wall's corner by the pipe boxing, in the plant stand's place</td><td>{n(g.WINDOW_SEAT["x"][1] - g.WINDOW_SEAT["x"][0])} × {n(g.WINDOW_SEAT["d"])} × {n(g.WINDOW_SEAT["h"])}, a lift-up lid</td><td class="num">160–280</td></tr>
-<tr><td></td><td>A bench with cubbies{sup("shoebench")}</td><td>Your hall; or the window corner</td><td>{n(g.HALL_BENCH["w"])} × {n(g.HALL_BENCH["d"])} × {n(g.HALL_BENCH["h"])}, ten cubbies</td><td class="num">80–130</td></tr>
-<tr><td></td><td>A built-in cupboard{sup("wardrobe")}</td><td>The window corner, floor to ceiling</td><td>{n(g.WARDROBE["x"][1] - g.WARDROBE["x"][0])} × {n(g.WARDROBE["d"])}, two doors</td><td class="num">450–800</td></tr>
-<tr><td>More storage (v37)</td><td>Two oak alcove shelves{sup("floatshelf")}</td><td>The window corner, over the plant stand</td><td>two {n(g.ALCOVE_SHELVES["w"])} × {n(g.ALCOVE_SHELVES["d"])} at {n(g.ALCOVE_SHELVES["tops"][0])} and {n(g.ALCOVE_SHELVES["tops"][1])}</td><td class="num">70–110</td></tr>
-<tr><td></td><td>Two wall cabinets{sup("eket")}</td><td>The side wall over the sofa's corner</td><td>two {n(g.EKET[0])} cubes, glass doors</td><td class="num">70–100</td></tr>
-<tr><td></td><td>Drawers in the bottom three steps{sup("stepdrawers")}</td><td>The stairs by the door (or the new stairs)</td><td>fronts {n(g.STAIR_DRAWERS["w"])} × {n(g.STAIR_DRAWERS["h"])}, {n(g.STAIR_DRAWERS["depth"])} deep</td><td class="num">180–320</td></tr>
-<tr><td></td><td>A hook rail over the door{sup("overdoor")}</td><td>Over the hall door's top</td><td>{n(g.OVERDOOR["w"])} × {n(g.OVERDOOR["d"])} × {n(g.OVERDOOR["h"])}, six hooks</td><td class="num">12–25</td></tr>
-</table>
-<p><b>In the 3D room:</b> open <b>Extras</b> (the sparkle button). It starts with a row for each: <b>A bar for drinks</b> (pick one of the four, or None), <b>Games and cards</b> (lift the ottoman's lid), <b>Your blankets</b> (pick one), <b>The window corner</b> (pick one) and <b>More storage</b> (switch on any). <b>Clear all extras</b> at the top puts the room back to the plan. One thing goes in each place: the window corner takes one of its three (your plant stand steps aside while it's there), and the built-in cupboard leaves no way to reach the wall beside the dining cabinet, so the two take turns. Picking one shows it and takes you to it; <b>See it</b> takes you back; the line under each row says where it goes, its size and its rough cost. Tap the piece in the room to change its colour, move it (the floor pieces) or take it away. Everything you pick shows in <b>Your picks</b> with a rough total, and a link from Views, <b>Copy link to this view</b>, opens the room with your picks on.</p>
-<p><b>Your blankets.</b> <b>The plan's basket</b> is Dibor's Lakelyn, large{sup("lakelyn")}: water hyacinth with a cotton lining, {n(g.BLANKET_BASKET["h"])} high, {n(g.BLANKET_BASKET["d"])} along the wall and only {n(g.BLANKET_BASKET["w"])} out, £42. Fold each throw long (in four, then in half) to about {n(g.THROW_LONG[0])} × {n(g.THROW_LONG[1])}{sup("ofelia")}; five stack {n(5 * g.THROW_LONG[2])} high in its {n(g.BLANKET_BASKET["inner"][2])}. It has no lid, so the top throw keeps it tidy. <b>The fallback</b> is the lidded Cotswold basket you first picked (£99, 45 × 45). <b>The oak rail</b> is still an option beside the cabinet.</p>
-<figure class="render">{img("render_v38_3d_sg_blanketbasket.png", "The water hyacinth basket at the sofa's open end")}
-<figcaption>The water hyacinth basket for your blankets, against the side wall at the sofa's open end.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_beside_rail.png", "The oak blanket rail beside the dining cabinet")}
-<figcaption>The oak blanket rail beside the dining cabinet: five blankets over four oak rails, 12 off the wall, behind the open table door's line.</figcaption></figure>
-<ul>
-<li><b>The rail, to build:</b> two oak uprights {n(g.BESIDE["rail"]["h"])} × {n(g.BESIDE["rail"]["up"][0])} × {n(g.BESIDE["rail"]["up"][1])} from the oak offcuts, screwed to the wall {n(g.BESIDE["rail"]["w"] - g.BESIDE["rail"]["up"][0])} apart (two plugs each); at {", ".join(n(y) for y in g.BESIDE["rail"]["rails"])} up, an oak arm 12 long glued and screwed to each upright, and a 28 mm oak dowel{sup("oakdowel")} {n(g.BESIDE["rail"]["w"])} long between each pair, glued into a 28 mm hole near the arm's end. Oil it with the dining cabinet.</li>
-</ul>
-<p><b>More storage.</b> <b>The record table</b> (below) takes your coffee table's place; the Homelife lift-top (£39–80{sup("homelife")}) is its fallback. <b>The shelf over the hall door</b> is an oak board {n(g.DOOR_SHELF["x"][1] - g.DOOR_SHELF["x"][0])} × {n(g.DOOR_SHELF["d"])} on two brackets, {n(g.DOOR_SHELF["y"])} up (over a usual 7 cm architrave: check yours), with two IKEA KUGGIS lidded boxes, 35 × 26 × 15{sup("kuggis")}, for what you use a few times a year; it takes the clock suggestion's place. <b>Two more boxes</b> stand on your black shelf, either side of the laser, for chargers, batteries and bulbs by the table. Later, the new stairs could take cupboards under them.</p>
-<h3>The record table</h3>
-<p>Your coffee table's 90 × 50, made from two IKEA KALLAX cubes{sup("kallax")} laid on their backs: two 33 cm bins of LPs, spine-up, about {g.RECORD_TABLE["per_bin"]} in each, to flick through from the sofa. An oak lid lifts on a piano hinge along the TV side. It rolls on castors to clean under. It's {n(g.RECORD_TABLE["h"])} high, half a centimetre over the lift-top.</p>
-<figure class="render">{img("render_v38_3d_sg_recordtable.png", "The record table with its lid up")}
-<figcaption>The record table, lid up: about {g.RECORD_TABLE["lps"]} LPs in two bins (in the 3D room, tap it: Lift the lid).</figcaption></figure>
-<ul>
-<li><b>Buy:</b> two KALLAX 42 × 42 (£19 each){sup("kallax")}; an 18 mm oak board, 60 × 120{sup("snowdonoak")}; 12 mm ply{sup("wickesply")}; four 50 mm castors, 50 kg each{sup("castor50")}; a piano hinge cut to 83{sup("piano32")}; two lid stays{sup("lidstay")}.</li>
-<li><b>Make:</b> build both KALLAX as IKEA says and screw them together side by side (four 30 mm screws). Cut the ply to {n(g.RECORD_TABLE["carcass"][0] + 1)} × {n(g.RECORD_TABLE["carcass"][1] + 0.3)} and screw it to the open backs. Then fit a castor 4 in from each corner.</li>
-<li><b>The lid:</b> cut the oak to 90 × 50, round its corners and oil it. Hinge it to the TV side's top edge, centred, so it overhangs 3.5 at each end. Fit a stay inside each end and set it to stop at about 80°.</li>
-<li><b>Check:</b> loaded, it weighs about {g.RECORD_TABLE["kg"]} kg; the four castors take 200. The records stand on the ply, not on the KALLAX's shelves (13 kg each).</li>
-</ul>
-<figure class="render">{img("render_v38_3d_sg_doorshelf.png", "The shelf over the hall door")}
-<figcaption>The oak shelf over the hall door with its two lidded boxes.</figcaption></figure>
-<p><b>Your black shelf, 10 cm off the boxing.</b> Last round we read your "small 10cm gap from wall shelf with the hanging plant from the right side wall" as a second, small shelf standing 10 off the wall. You've told us what you meant: "The shelf on the wall alongside the stairs must always end 10cm short of the right-hand wall ... It should never touch the right wall"{sup("shelfgap")}. Facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side, so your 2 m shelf now ends exactly {n(g.SHELF_B["gap"])} short of it (it was drawn 2 short), with the hanging plant at that end as in your photo. It's a fixed rule: the 3D room puts it there whatever else moves, and nothing else is measured from it any more (the dining cabinet stays where it was). The small plant shelf has gone. One thing to measure: the shelf's other end now sits {n(g.STAIRS_WALL_Z[0] - g.SHELF_B["z"][0])} past the stair box; if yours is about 41, the shelf is about 194 long, and the gap still stays 10.</p>
-<figure class="render">{img("render_v38_3d_shelf_gap.png", "Your black shelf, 10 cm short of the pipe boxing")}
-<figcaption>Your black shelf's window end, {n(g.SHELF_B["gap"])} cm short of the pipe boxing, the hanging plant on it.</figcaption></figure>
-<p><b>Your red lamp's cap.</b> It looked like a beret; it's now a baseball cap, after your photo: a fitted, structured six-panel crown (seams, a button on top, an eyelet in each panel), {n(g.HATS["crown_h"])} tall on an oval about 61 round, and a flat, stiff brim {n(g.HATS["brim_len"])} long, {g.HATS["brim_x"]:g} times a usual {n(g.HATS["brim_std"])}{sup("capspec")}: a green crown, a brown brim, gold stitching across the front and along the brim. It hangs on the pole as yours does, tipped so the brim stands out.</p>
-<figure class="render">{img("render_v38_3d_lamp_cap.png", "Your red lamp's cap: a structured baseball cap, the brim oversized")}
-<figcaption>Your cap on the red lamp: the structured crown and the long, stiff brim.</figcaption></figure>
-<p><b>More storage (v37).</b> You asked for "under-stair drawers, alcove shelving, window seat with storage, wall-mounted cabinets, built-in wardrobes, shoe storage, a hallway bench with cubbies, and over-door racks". Where each one can go in this room:</p>
-<ul>
-<li><b>Drawers in the bottom three steps</b>{sup("stepdrawers")}: oak fronts {n(g.STAIR_DRAWERS["w"])} × {n(g.STAIR_DRAWERS["h"])} in the risers, {n(g.STAIR_DRAWERS["depth"])} deep on 350 runners, a finger-pull in each. Each tread needs a bearer under it once its riser is cut, so it's a joiner's job, and best built into your new stairs from the start. In the 3D room, tap them to pull them out.</li>
-<li><b>Alcove shelving</b>{sup("floatshelf")}: the room's two real alcoves are taken (the TV's is the media wall, the one by the breast is the hall door), so the free one is the window corner by the pipe boxing: two oak floating shelves {n(g.ALCOVE_SHELVES["w"])} × {n(g.ALCOVE_SHELVES["d"])} at {n(g.ALCOVE_SHELVES["tops"][0])} and {n(g.ALCOVE_SHELVES["tops"][1])}, {n(g.ALCOVE_SHELVES["over_stand"])} above the plant stand, on hidden rods into the solid wall.</li>
-<li><b>A storage window seat</b>{sup("seat")}: the sofa and the radiator fill the window itself, so it goes in the window corner beside it, in the plant stand's place: {n(g.WINDOW_SEAT["x"][1] - g.WINDOW_SEAT["x"][0])} × {n(g.WINDOW_SEAT["d"])}, {n(g.WINDOW_SEAT["h"])} high with its cushion, a lift-up lid on a piano hinge{sup("piano32")} over {n(g.WINDOW_SEAT["inside"][0])} × {n(g.WINDOW_SEAT["inside"][1])} × {n(g.WINDOW_SEAT["inside"][2])} inside (your five blankets fit).</li>
-<li><b>A bench with cubbies</b>{sup("shoebench")}: {n(g.HALL_BENCH["w"])} × {n(g.HALL_BENCH["d"])} × {n(g.HALL_BENCH["h"])}, ten open cubbies under a padded seat. It's made for your hall; the hall isn't in the 3D room, so it's shown in the window corner, where it also fits with {n((g.CORNER["w"] - g.HALL_BENCH["w"]) / 2)} cm to spare each side.</li>
-<li><b>A built-in cupboard</b>{sup("wardrobe")}: a hanging rail needs 60 deep, and the window corner is the only place with that much free floor: {n(g.WARDROBE["x"][1] - g.WARDROBE["x"][0])} wide × {n(g.WARDROBE["d"])} deep, floor to ceiling, two hinged doors (sliding ones would need 71). It's big for a living room, it takes the plant stand's corner, it stands {n(g.WARDROBE["behind_chairs"])} behind the seated window-side chairs (open it with the table folded), and it leaves no way to reach the wall beside the dining cabinet.</li>
-<li><b>Two wall cabinets</b>{sup("eket")}: IKEA EKET cubes with glass doors on the side wall over the sofa's corner, just past the PC shelf's end, {n(g.WALL_CABS["y0"])} to {n(g.WALL_CABS["y0"] + g.EKET[2])} up: closed storage where nothing else can go.</li>
-<li><b>Shoe storage</b>{sup("trones")}: two IKEA TRONES, 18 deep, stacked on the wall beside the dining cabinet (Layout, Beside the cabinet), about eight pairs; better in the hall if there's room there.</li>
-<li><b>A hook rail over the door</b>{sup("overdoor")}: six hooks over the hall door's top. The open door stands only {n(g.OVERDOOR["open_gap"])} off the breast's side, so keep the room side to slim things (a bag, a lead), or hang it on the hall side for coats.</li>
-</ul>
-<figure class="render">{img("render_v38_3d_sg_windowseat.png", "The storage window seat in the window corner")}
-<figcaption>The storage window seat in the window corner, in the plant stand's place.</figcaption></figure>
-<figure class="render">{img("render_v38_3d_sg_stairdrawers.png", "Drawers in the bottom three steps, pulled out")}
-<figcaption>Drawers in the bottom three steps, pulled out (in the 3D room, tap them).</figcaption></figure>
-<figure class="render">{img("render_v38_3d_beside_shoes.png", "Two shoe cabinets beside the dining cabinet")}
-<figcaption>Two shoe cabinets on the wall beside the dining cabinet, behind the open table door's line.</figcaption></figure>
-<h3>Suggested furniture and decor (v21): each on or off in the 3D room</h3>
-{ideas.suggest_html()}
-<figure class="render">{img("render_v38_3d_suggest.png", "Suggested furniture and decor, all on")}
-<figcaption>Every suggestion switched on at once (3D room, “Suggested furniture and decor”). Each one on its own is in the gallery below.</figcaption></figure>
-{item_gallery()}
-<figure class="render">{img("render_v38_3d_decor.png", "Decor to try: rug, cushions, curtains")}
-<figcaption>Decor to try (3D room, Decor): a sage-stripe rug, rust and ochre cushions with a throw on the arm, white linen curtains. Also: a jute or deep blue rug, blue or sage cushions, sage, blue or rust curtains.</figcaption></figure>
-
-<!--keep--><h2 class="pb">Appendix · Earlier rounds</h2>
-<div class="decision"><b>v32: the table opens slowly, every idea in the room with its own render, and a cost overview.</b> You asked to "slow down the playback of the table opening to show clearly how it puts together and opens". <b>Watch it open</b> now takes about forty seconds, in thirteen steps, each on a card you can pause, or step back and on: the chair door, four chairs out, the table door, the pads and two more chairs, then the table itself, jointed as it is built. The folded pair tilts out on the piano hinge at the rail, the first two legs fold down, it lowers onto them, the second half flips over on its three flip-top hinges, its own legs fold down and it lies flat; then the six chairs come in. You can look round while it plays, and opening or folding the table from the room runs part by part too. <b>Every idea, every suggestion and every piece in Edit room's Add list has its own full 3D render</b> ({len(__import__("item_shots").items())} in all: the appendix and the plan page's Ideas), and every idea is now in the 3D room: the TV backlight, the plant uplight, the rug pad, the scene button, stair nightlights and a record-care caddy (the pads drawer it was meant for is full, so it moved to your vinyl stand). <b>Three new suggestions:</b> picture lights over your two framed LPs, a blackout roller blind, and lights inside the dining cabinet that come on as a door opens. On the plan page, “Show it in my room” on each card switches it on and takes you to it. <b>The cost overview</b> (sections 1 and 11) lists each piece with what to buy for it and about what it costs, ready to copy as a shopping list. <b>The plan page:</b> the 3D room's tools are always on screen, and the plan's other sections fold into a Menu button.<br><b>v31: The cabinet checked for a smaller build, cushions for the chairs, what could go beside it, and an easier 3D room.</b> You asked for "the best compact build that doesnt bulk up the living room while keeping as many chairs as we can in the unit". We tried every way it could be smaller (section 5). <b>It's now {n(G.CAB["d"])} deep, flush with the pipe boxing's face</b>, and all six chairs are still inside. Nothing else would make it smaller without losing a chair or the {n(G.CAB["len_open"])} × {n(G.CAB["top"][0])} table. <b>The chairs</b> are the plain FRÖSVI in solid beech (£20): a slatted wooden seat and no cushion. So they get <b>tie-on seat pads</b>: Dunelm Esme, 40 × 40 × 3, £9, in olive, honey or ivory. The six pads hang on the table door's back, two across and three high; the hinge rail and the linen shelf now stand back to make room for them. <b>Beside the cabinet</b>, on the {n(G.BESIDE["len"])} cm to the pipe boxing, there are four options: leave it clear, hang a tall mirror (our pick), park a slim trolley, or build a low oak shelf. All of them stay behind the open door's line. <b>In the 3D room:</b> moving round is calmer, and you can set your eye height (sitting, standing or any height, or R and F on a keyboard). You can look round from where you stand, and turn on move buttons on the room that keep going while held. There are new views: sitting at the table, and beside the cabinet. The Layout panel is regrouped. It shows the cabinet opening step by step and the floor it needs when open, and has set-ups to try: dinner for six, lunch for four, film night, an everyday morning. The buy list keeps your ticks.</div>
-<div class="decision"><b>v30: a smaller dining cabinet, your answers in, and a room you can tap.</b> You asked for "a smaller build on the cabinet". <b>The compact cabinet</b> is now the plan: the same {n(G.CAB["len_open"])} table and the same six chairs in <b>two oak boxes</b>, {n(G.CAB["len"])} × {n(G.CAB["d"])} instead of {n(G.OPTC["z"][0] - G.OPTC["z"][1])} × {n(G.OPTC["d"])}, giving you {n(G.CAB["freed"])} cm of wall back by the pipe boxing. Two chairs lie on their sides under the folded table, four stand in a box one chair wide, and the seat pads hang on the table door. The two doors hang on full-height piano hinges where the boxes meet, and each turns right back, flat against the other. v29 ruled hinged doors out because a door hinged at the stair end could only fold back where the first chair sits; these hinge in the middle instead, so nothing stays out in the room. Your FRÖSVI chairs stay. It costs about £{money(sum(r[4] for r in cabinet_rows()), sum(r[5] for r in cabinet_rows()))} against the sliding one's £{money(*slide_cost())}. You asked to see both, so <b>the sliding cabinet</b> is the alternative in section 5 and in the 3D room. The drawings, the fit proof, the buy list (your ticks kept), the cutting list and step 11 are redone for the compact one. <b>Your answers:</b> the stairs wall is solid, so the cabinet goes up with plugs and screws, and the electrics are your own job. That was the last question, so the questions and the Ask section are gone. <b>In the 3D room, tap something to work it:</b> the dining cabinet opens for four or six, folds, and opens either door. The drawers pull out; the lamp, the spot bars, the TV, the curtains, the light box and the PC switch on and off.<br><b>v29: the dining cabinet, upgraded.</b> You asked for a full upgrade of the table's design. Shut, the cabinet is now <b>two tall oak sliding doors</b> between oak ends, on a soft-close Häfele track, with nothing of the table or the chairs on show: slide door A over door B and the table comes down; slide B behind A and the chairs come out. Hinged doors couldn't work here: at the stair end a door has nowhere to fold back except where the first chair sits. The <b>table</b> is {n(G.OPTC["len"])} × {n(G.OPTC["top"][0])} (two halves {n(G.OPTC["top"][1])} long), flush at the joint, with breadboard ends, eased corners and tapered legs; six still sit in comfort and a seventh at the end. The six chairs are <b>slatted folding chairs</b> with sage seat pads, folded in the chair bay; the drawer and the linen shelf are inside, behind door A. The drawings, the cutting list, the buy list (your ticks kept) and step 11's instructions are redone for it, and nowhere in the plan is the flip-top the default any more: it's the alternative in section 5.<br><b>v28: the 3D room shows itself round, and shares.</b> Under Tools → Views, <b>Take the tour</b> flies round the room in {len(__import__("room3d_page").tour())} stops, a line about each: the whole room, the media wall, the PC wall, the breast, the dining cabinet opened for six, the sofa, the window and the view from above. <b>Copy link to this view</b> gives a link that opens the room just as you have it: where you're looking from, the table, the lights, the paint, the decor and the suggestions. Every suggestion now comes in <b>two or three versions</b> (a cream, terracotta or black pot; an oak, black or brass rim; mustard, sage or cream), chosen under Tools → Extras once it's switched on, and named in Your picks. The plan page's PDF buttons work again. The plan itself doesn't change.<br><b>v27: the dining cabinet is the plan, made for six.</b> You asked to use the cabinet as the main table, for six, with the chairs inside it. It now leads section 5: one oak cabinet under your shelf, a {n(g.OPTC['len'])} × {n(g.OPTC['top'][0])} table that swings down out of its bay, <b>six in comfort</b>, three a side, with the coffee table left where it is, and <b>all six chairs inside it</b> (four on the floor, two on the shelf, the seat pads beside them). The halves are shorter than v26's (90 instead of 112.5), so each is lighter and there's room over the folded table for a <b>linen flap</b>. <b>Step 11 of the build guide</b> is now the cabinet's build, in sixteen stages with every size, with two new drawings: the carcass from the front, and the table's halves from underneath. The buy list carries the cabinet; the flip-top stays in section 5 as the alternative. <b>Your rear speakers</b> are drawn where they stand (section 9, from your photos): directly behind the sofa, one at each end of its long side, both just above the sofa's back. The brick under the stairs is drawn painted, as it has a wall in front of it. On the plan page the 3D room opens on the cabinet, the flip-top's chair cupboard can come off the wall in Edit room, and Edit room clips things to walls more easily: a quarter turn keeps a piece against its wall, and <b>Back to the wall</b> pushes it there.<br><b>v26: option C, the dining cabinet, and up to eight at the table.</b> A second way to build the stairs wall, beside the flip-top (which stays the plan): <b>one oak cabinet</b> under your shelf, with the table standing up in one bay and all eight chairs folded in the other, so nothing shows when it's packed away. Open, the table is {n(g.OPTC['len'])} × {n(g.OPTC['top'][0])}: <b>eight at a squeeze, six in comfort</b>, the most this room takes (section 5 shows why a ninth won't fit). It costs more than the flip-top and the chair cupboard; it isn't in the totals unless you choose it. On the plan page, the 3D room's Tools panel is tidier (its title and buttons stay put, every tab opens at the top, and on a laptop it docks to the right with the room beside it); a <b>Hide labels</b> button takes the numbered stickers off the room; and Look and Extras have more to try.<br><b>v25: Demma Home Improvements, and three lighting presets.</b> The plan page is a new app: your room in 3D is the home screen, with numbered stickers on it (tap one for its key facts, to open its chapter, or to fly there), one <b>Tools</b> button for every 3D control, and the plan, the build steps, the buy list, the ideas and the questions sliding up over the room. Questions are answered with a tap or a photo. <b>The lights</b> have three presets instead of six buttons: <b>Bright</b>, <b>Cosy</b> and <b>Film</b> (section 8). Dinner is now a rule (the table open lifts bar 2 over it) and daytime a switch, so they work with any preset; step 12 sets the three in the app. The plan itself doesn't change.<br><b>v24: less to read, and a cleaner page.</b> The round numbers are out of the text (the history stays here and in the appendix), long captions fold behind <b>More</b>, and the notes on how the media wall's layout was chosen moved to the appendix. The plan page has a new look: each section in its own card, a contents list down the side on a computer (a row of chips on a phone) that follows where you are, a floating tab bar, clearer tables, and a footer with the downloads. The plan itself doesn't change.<br><b>v23: more ways to build the chairs in, and the room as it really is.</b> <b>Chairs built into the table</b> (section 5): as well as the chair cupboard, four chairs can hang <b>behind the folded top</b> on a deeper backboard, out of sight, and a <b>fold-down oak seat</b> can go in the gap at the stair end, a fifth place that's always there. Both are options for you to choose, and both are in the fit proof. <b>Under the stairs</b> is a brick side wall with plasterboard beneath, as you said: drawn in brick, so chairs five and six go in the garage. <b>Your sofa's ottoman</b>, square, blue corduroy, the size of one of its seats, is on the rug beside the coffee table (and moves in Edit room). <b>Your sockets</b> are drawn where they are: the single in the corner in front of the left Xbox game drawer (the one the plan makes a double), a double behind the sofa's short side, below and left of the PC, which now powers the rear speakers (the 12-way strip is off the buy list), and a double behind the plant stand in the window corner, for your lamp and the grow lights. The floating <b>banister end at the top of the stairs</b> is gone. The plan page has a <b>new colour</b> and four <b>page looks</b> (Card Room, Oak &amp; linen, Sofa blue, Plain) and larger text to choose from; the questions are a list now, with no answer boxes; and the 3D room has <b>six more suggestions</b> to switch on or off (twelve in all).</div>
-<div class="decision"><b>v22: the plan page is quicker to use.</b> The first round of the optimisation plan: under the 3D room the controls are now in <b>five drawers</b> (Views, Layout, Lights, Look, Extras), one open at a time, and on a phone the picture stays in sight while you choose. <b>Your picks</b> (in Extras) lists every idea, suggestion and decor choice you've switched on with their rough cost added up, to copy as a note or save for the next round. The <b>build steps</b> open one at a time, starting at the first one not done, with a Next step button, or all at once if you'd rather read straight through: on a phone the tab is under a third as long. The <b>3D room</b> draws less each frame (about half as many draws; your plant stand alone went from 152 pieces to 7) and shows a picture while it loads; in Fast each spot bar lights with two of its heads. The shared plan page links its pictures instead of carrying them, so it opens much faster. The plan itself doesn't change.<br><b>v21: the 3D room opens on the whole room, and suggestions you can turn on or off.</b> You asked for the first 3D view "at the best viewing to see most if not all the room without clipping or obstruction": it now opens on <b>The whole room</b>, from above the window side with the wall nearest you <b>cut away</b> like a dolls' house, so the media wall, the breast, the door, the stairs, the table's wall, the PC wall and the sofa are all in one picture. Every view was checked: <b>From the window</b> no longer stands behind your red lamp; the chair cupboard, the dining table, the sofa, the bird's eye and the dolls' house views were re-aimed; the chimney breast and the window wall have their own buttons; and on a phone each view now takes in as much of the room across as on a computer. <b>Suggested furniture and decor</b> (appendix), each with its own on/off button in the 3D room and all off to start: a tall floor plant and a round side table at the sofa's open end, a knitted pouffe, a large print over the sofa, a clock over the door and a tray for the coffee table. Edit room's Add list gains a rattan armchair, a blanket ladder, an oak bench and an arc floor lamp. The plan itself doesn't change.<br><b>v20: the table packs away with its chairs, a taller glass case, and decor to try.</b> You asked "is it not possible to build the chair storage into the table setup. i want it to be a fully pack away setup": it is. <b>An oak chair cupboard</b> is built in at the table's window end, {n(g.CHAIR_STORE["cupboard"]["z"][0] - g.CHAIR_STORE["cupboard"]["z"][1])} wide × {n(g.CHAIR_STORE["cupboard"]["d"])} deep × {n(g.CHAIR_STORE["cupboard"]["h"])} tall, flush with the pipe boxing and under your shelf, with <b>four folded chairs inside</b> (two on its floor, two on its shelf) behind two doors on push latches (about £120–240; section 5). Fold the table and shut the doors and the whole wall is packed away. <b>Six</b> fit if it's built {n(g.CHAIR_STORE["cupboard"]["d6"])} deep; otherwise chairs five and six go in the garage. Thanks for the <b>25 cm</b> window ledge: that matches the drawing (22 into the reveal and 3 of nose). <b>The door and its frame are white</b>, as you said, in every drawing and the 3D room. No HD crashes, so the HD question is gone. <b>The glass display case</b> idea is now <b>85 tall</b> with three glass shelves (90 wide, 12 deep), and in the 3D room a new <b>Decor</b> group tries five things inside it (collectibles, retro games, 7-inch singles and tapes, plants and ceramics, a bit of each), three frames (oak, black, white), four rugs, three cushion colourways and five curtain colours; Edit room's Add list has a floor vase, a pouffe, a basket, a floor mirror and a lantern. Fit proof {nfit} checks, none fail.<br><b>v19: somewhere for the chairs, every LP counted, and a better edit mode.</b> First, <b>two folded chairs on hooks</b> in the {n(g.CHAIR_STORE["hooks"]["z"][0] - g.CHAIR_STORE["hooks"]["z"][1])} cm gap at the table's window end (still the cheap way, about £8–15). The gap at the stair end is {n(g.CHAIR_FOLDED[0] - (g.CHAIR_STORE["stair_gap"][0] - g.CHAIR_STORE["stair_gap"][1]))} cm too narrow; under the stairs and the garage are the other two places. The LP count now includes your vinyl stand: <b>about {LPS} LPs</b>, {g.WALL_LPS} in the wall, all face-out, and {g.STAND_LPS} in the stand. In the 3D room's Edit room: <b>undo</b>, things <b>snap to a wall</b> within 5 cm, <b>copy</b> what you've added, each thing shows its <b>size</b>, the <b>sofa moves</b> too, and on the shared plan page one layout can be <b>saved for both of you</b>.</div>
-<div class="decision"><b>v15.</b> Your notes on the room as it really is: <b>your sofa</b> is drawn in blue corduroy, two seats then the corner, its long side running to about 40 cm short of the window's end, with no cushion; <b>your red lamp</b> with its colour bulbs (green on top, pink, then purple); on your shelf by the stairs, <b>your IKEA light box</b> at the left end, <b>your laser</b> in the middle (its dots on the ceiling) and the <b>plant hanging</b> down off the shelf; <b>your hat</b> on an oak peg by the stairs; <b>soft grey carpet</b> (your photo shows it already is), a <b>designed rug</b> that fits in front of the sofa (230 × 160), and <b>your curtains</b> from your photo: long hessian pencil-pleat panels to the floor on a wooden pole just under the ceiling strip (open or drawn in the 3D room). The <b>record trays take LPs only</b>: one trough the full width, with room to flip with both hands. The <b>side wall</b> looks better: the ledge and the PC shelf become <b>one oak run</b> that sweeps out in a curve to the PC, with a warm LED glow underneath. <b>Both spot bars now run from the TV towards the window</b> and take <b>smart colour bulbs</b> (E14, under the bar's 6 W), so there are no dimmers to fit; the light is set softer and aimed at walls and shelves, for less spotty light. In the 3D room every light has a <b>slider</b>, the bars and the lamp a <b>colour</b>, and the <b>walls, ceiling and skirting</b> each have their own paint colour. And a <b>new dining table that stays on the wall and seats more</b>: a flip-top gate-leg table. Its second half flips out on brass hinges to make 110 × 160, on a folding oak gate leg: four with room, six elbows-in, seven by the stairs; no lifting off, no leaf or legs to store (section 5). Your <b>curtains</b> are Dunelm hessian on a wooden pole with rings and ball finials.<br><b>v13.</b> You asked for less cladding all over the place, so it's gone: no slatted cable spine, no slatted PC screen, no slat panel behind the turntable, no slatted sub box, no reeded table. The PC's leads now run in conduit <b>chased into the solid side wall</b>, so there's no trunking either; the sub stands under a <b>plain oak cover</b> (below); the folded table is a <b>plain oiled oak panel</b> between its pegged breadboard ends. The oak that's left is the joinery that does a job: the uprights, the shelves, the ledges, the worktop, the face frame and the table. The <b>stairs go up</b> to the first floor (drawn rising away from the room; tell us if they run the other way). New: <b>the drawer layouts</b>, every drawer to scale with what goes in it (section 3). The slat-wall alternative is retired.<br><b>v13.1–13.2:</b> the sub gets a <b>plain oak cover</b> with no sides: spills run off it, the sub can't tip, and nothing blocks its driver or port (section 5). A new render shows <b>every drawer out</b>, and the viewer can lay <b>rough measurements</b> over any view. The <b>stairwell opening</b> now starts just after the door, over the banister, and the sofa is drawn as yours. <b>Six at the table</b> now use the leaf too: 170 × 80, {n((g.TABLE[0] + g.LEAF[0]) / 2)} cm a diner on the long sides and {n(-g.FREE_Z[0])} cm off the breast, every clearance checked. The <b>side view</b> now shows how deep the alcove is round the wall: 38 of the 46 cm base inside it, 8 proud, the uprights and shelves wholly inside.<br><b>v13.3:</b> the build guide is now step by step, each step with what to buy before it and what to check after it; the buy list shows what each phase costs; and the network and power section lists what each part does, both setup stages and what plugs into every socket (section 9).<br><b>v13.5:</b> the sub is back in the media wall. The two Xbox bricks lie flat at the back of their shelves by the power leads, the RetroTINK and the HDMI switch move into the space that frees in bay 1, and the sub takes the lower left of bay 2, under the TV, on an isolation riser beside the PS2 and PS1 (section 3). The dining wall has nothing under it now, so eight can sit down without moving anything.<br><b>v13.7:</b> four <b>lighting scenes</b> (TV night, dinner, records, everyday evening), each drawn on the room plan with every light's level, so you know where to set each dimmer (section 8).<br><b>v13.8:</b> the whole plan is back on your own deck (the one you can edit, with your saved answers), and the summaries now follow the fit proof and the questions list, so they can't fall out of date: the PC case is answered and off the list, and the three checks on site are the TV's plugs, the RetroTINK's size and the sub's vibration.<br><b>v13.6:</b> the <b>leaf carries the legs</b>: a slim oak frame underneath holds all eight oak legs in clips, so the folded table stays a plain panel, nothing new stands in the room, and the leaf goes wherever the chairs are kept (section 5). <b>The electrics are your own job</b>: swapping the socket for a double, the two dimmers and the two spot bars are like-for-like and not notifiable in England, so there's no electrician's visit; there is a safe routine and a clear point to stop and call one (section 9). The PC now runs from the 10-gang. Every step and every buy-list phase carries a <b>coloured label</b> for its part (Network, Media wall, Dining table and so on), and one list says what we still need from you.<br><b>v14:</b> a <b>second place for the table</b>: on the wall by the stairs, under your 2 m shelf (section 5 compares the two). The plan page now has a <b>3D room</b> you can walk round: switch the table's wall, fold it or set it for four or six, change the paint, the lighting scene and where the floor lamp stands, and save any view as an HD picture.</div>
-
-<h2 class="pb">Appendix · Options we set aside</h2>
-<h3>The table options we set aside</h3>
-<p>You chose the compact cabinet as the only table. The two others were drawn, checked and costed in earlier rounds (the previous plan has them in full):</p>
-<table class="tight"><tr><th>Option</th><th>Why not</th></tr>
-<tr><td>The long sliding cabinet, {n(G.OPTC['z'][0] - G.OPTC['z'][1])} × {n(G.OPTC['d'])}, about £{money(*slide_cost())}</td><td>The same table and six chairs, but {n(G.OPTC['z'][0] - G.OPTC['z'][1] - G.CAB['len'])} longer: each sliding door needs a door's width to park in, so no wall is left by the pipe boxing</td></tr>
-<tr><td>The flip-top on the wall, by the stairs (B) or on the chimney breast (A), about £{money(*fliptop_cost())} with its chair cupboard</td><td>Its chairs needed a cupboard or hooks beside it, it seats five in comfort, and folded it shows as a panel; the cabinet keeps the table and the chairs out of sight</td></tr>
-<tr><td>The flip-top's chair cupboard, the chairs behind its top, a fold-down seat at the stair end</td><td>They went with the flip-top</td></tr>
-</table>
-<!--keep-->{scenes_v24_html()}<!--/keep-->
-<h3>How the media wall's layout was chosen</h3>
-<div class="why"><b>Why this layout, and what we ruled out</b>
-<ul>
-<li><b>The TV in the middle (v10):</b> left two {n(25.25)} cm gaps either side, too narrow for a turntable, so the vinyl had to move out to the chimney breast. Moving the TV joins them into one {n(g.RZ_W)} cm zone.</li>
-<li><b>The turntable with the Series X beside it:</b> 45.2 + 20.5 cm won't go in 50.5. The Series X goes up on a shelf instead, above the lid's swing, where it gets more air than it had in v10 (15 cm each side, 21 above).</li>
-<li><b>The vinyl cabinet on the breast as well as a table:</b> a table needs the breast's full width, and a cabinet in front would put the diners 44 cm further into the room.</li>
-<li><b>A gateleg table in the recess:</b> it would block the door; the breast is the only clear wall.</li>
-</ul></div>
-<h3>Options we rejected along the way</h3>
-<table class="tight"><tr><th>Option</th><th>Why not</th></tr>
-<tr><td>Slatted oak cladding: cable spine, PC screen, turntable panel, sub box, reeded table (v12)</td><td>You asked for less cladding: the chased conduit and plain oak do the same jobs more quietly</td></tr>
-<tr><td>The slat wall alternative (v7–v12)</td><td>Cladding over the whole alcove; the oak uprights won</td></tr>
-<tr><td>The vinyl cabinet on the chimney breast (v10)</td><td>The breast is the only clear wall for a table; the turntable fits in the alcove now</td></tr>
-<tr><td>Hub as router, Decos as access points</td><td>Loses HomeShield and parental controls</td></tr>
-<tr><td>All-wireless mesh · powerline</td><td>Speed drops at each hop · slower and less stable than Cat6</td></tr>
-<tr><td>Records spine-up in one drawer</td><td>Showed only a handful of covers; face-out trays show every one</td></tr>
-<tr><td>A green feature wall only · white skirting</td><td>The drench ties the room together; white cuts a bright line round it</td></tr>
-<tr><td>Bluetooth from the turntable</td><td>Compresses the sound; the AUX lead keeps full quality</td></tr>
-<tr><td>Lifting the table off onto eight legs, with a 60 cm leaf that stores the legs (v13.1–v14)</td><td>You wanted it to stay on the wall and seat more: the flip-top's half and gate leg do both (v15)</td></tr>
-<tr><td>Folding legs fixed under the table · a box for the legs under the dining wall · the plinth drawer (v13.6)</td><td>They'd show on the folded panel and stand it 5 cm off the wall · it sits where the chairs push back with six · too short for 71 cm legs. The leaf carries them instead.</td></tr>
-<tr><td>An electrician's visit for the socket, dimmers and fittings (v13.6)</td><td>You're doing them yourselves: like-for-like, not notifiable; a new socket behind the sofa and a fused spur are dropped</td></tr>
-</table>
-<!--/keep--></body></html>"""
+</body></html>"""
     DECK = False
     html = tidy.strip_versions(html).replace("<!--keep-->", "").replace("<!--/keep-->", "")   # v24: no round markers in the text
     return html, tl, th, c, css

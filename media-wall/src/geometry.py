@@ -396,8 +396,13 @@ def side_run_depth(z):
 CARPET_COL = "#8f9194"                      # soft cool grey
 RUG = dict(x=(100.0, 330.0), z=(-198.0, -38.0), border=8.0)   # 230 × 160: from the return's seat to past the breast, sofa front to 30 short of the base
 RUG_COLS = ("#efe7d8", "#c7643a", "#d9a441", "#2f4a6e", "#7a8a6a")   # cream ground, rust, ochre, deep blue (the sofa), sage
-CURTAIN = dict(rail_y=CEIL - 7.0, drop_to=1.5, stack=44.0, ext=30.0, col="#b9a47f", folds=11, pole=2.8, finial=7.0, pole_col="#a9794b",
-               z=ALC_D - ROOM_D + 11.0)          # v17: the panels hang 11 in front of the wall, clear of the sill's nose and the radiator
+# v39, client: "roughly 10cm above curtain pole so shift it down and ensure wall/radiator do not clip through and speakers sit infront
+# at all times": the ceiling strip (CEIL - 0.6) runs 10 above the pole's top; the panels hang 0.5 in front of the radiator's face (their
+# folds 1.3 deep each way), and behind the rear speakers (REAR_STAND below)
+RADIATOR_Y = (15.0, 70.0)
+RADIATOR_FACE = WINDOW_Z + 3.0 + 7.0                                   # -299: 3 off the wall, 7 deep
+CURTAIN = dict(rail_y=CEIL - 0.6 - 10.0 - 2.8, drop_to=1.5, stack=44.0, ext=30.0, col="#b9a47f", folds=11, pole=2.8, finial=7.0, pole_col="#a9794b",
+               amp=1.2, z=RADIATOR_FACE + 0.4 + 1.2)                  # rail 221.6 (9.6 over the window's head); panels -297.4, 0.2 behind the sofa
 # v17, client: "curtains should not render going through the window sill, i also have deep window sills that allow for lots of plants".
 WINDOW_Y = (88.0, 212.0)                    # the window's opening, sill to head
 WINDOW_REVEAL = 22.0                        # the frame sits back in the wall: a deep reveal
@@ -705,8 +710,15 @@ BESIDE["opts"] = {"clear": dict(name="Left clear (the plan)"), "mirror": dict(na
 # above the sofa's back (scaled against the 80 cm back in your photo).
 REAR_SPK = (9.0, 14.4, 10.9)                   # W, H, D
 REAR_STAND = dict(base=(11.0, 11.0, 1.5), pole=2.5, top=96.0)   # a weighted base, a pole, the speaker on a plate at 96
-REAR_SPOTS = [(SOFA_X[0] + REAR_STAND["base"][0] / 2, SOFA_BACK_Z - 6.5),    # left: behind the sofa's corner end, in the corner
-              (SOFA_X[1] - REAR_STAND["base"][0] / 2, SOFA_BACK_Z - 6.5)]    # right: behind the sofa's window end
+# v39: the speakers sit in front of the curtains, open or drawn, and clear of the radiator: each pole stands in the 3 cm between the
+# radiator's face and the sofa's back (the drawn curtain slips behind it), its flat base slides under the radiator, and the speaker
+# sits over the sofa's back (80), 16 above it. REAR_SPOTS are the speakers' centres; the pole and base sit behind them.
+REAR_STAND["pole_z"] = round((RADIATOR_FACE + SOFA_BACK_Z) / 2, 2)                       # -297.5
+REAR_STAND["dent"] = RADIATOR_FACE + 0.1                                                  # the drawn curtain, pressed flat behind a pole
+REAR_STAND["base_z"] = (WINDOW_Z + 1.5, SOFA_BACK_Z - 0.5)                                # -307.5 .. -296.5, under the radiator (15 up)
+_spk_z = REAR_STAND["dent"] + 0.5 + REAR_SPK[2] / 2                                       # its back 0.5 in front of the curtain
+REAR_SPOTS = [(SOFA_X[0] + REAR_STAND["base"][0] / 2, round(_spk_z, 2)),     # left: behind the sofa's corner end, in the corner
+              (SOFA_X[1] - REAR_STAND["base"][0] / 2, round(_spk_z, 2))]     # right: behind the sofa's window end
 
 
 # ---------------------------------------------------------------- v34, client: "one thing ive been thinking about is maybe integrating a
