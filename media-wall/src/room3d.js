@@ -148,7 +148,7 @@ try {
   throw e;
 }
 gl.outputColorSpace = THREE.SRGBColorSpace;
-gl.toneMapping = THREE.ACESFilmicToneMapping;
+gl.toneMapping = THREE.AgXToneMapping;   // v44: AgX over ACES: the wall reads nearer Card Room Green and the glass case and window keep their highlights
 /* v39, client: "PC should be using GPU in order to speed up and keep frames high since most PCs will have 1060 or higher": the renderer
    asks for the high-performance GPU; a PC whose browser reports a real graphics card starts in HD (no Fast-then-HD second set of shaders
    to build) and keeps full resolution while you move unless its frames actually slow down. */
@@ -160,7 +160,8 @@ if (BIG_GPU && !S.picked) S.quality = "hd";
    move), and a capable chip (any iPhone's Apple GPU, Adreno 6xx and up, Mali-G57 and up, Immortalis, Xclipse) goes on to HD when its
    first frames are quick, and back to Fast if HD runs slow. */
 const GOOD_PHONE = SMALL && /apple gpu|adreno[^0-9]*([6-9]\d{2})|mali-g(5[7-9]|6\d|7\d|[1-9]\d{2})|immortalis|xclipse/i.test(GPU);
-gl.shadowMap.type = THREE.PCFShadowMap;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
+const LIVE_SHADOW = BIG_GPU ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap, LIVE_MAP = BIG_GPU ? 2048 : 1024;   // v44: a real graphics card gets the pictures' soft 2048 shadows live
+gl.shadowMap.type = LIVE_SHADOW;   // v14.1: PCF while you look round; the saved HD pictures use soft shadows
 gl.shadowMap.autoUpdate = false;          // v14.1: shadows don't move with the camera, so they're redrawn only when the room changes
 const reshadow = () => { gl.shadowMap.needsUpdate = true; };
 /* v35, client: "it currently still crashes in the shared version ... it also is a bit slow on the render sometimes becoming HD".
@@ -282,7 +283,7 @@ function canvasTex(w, h, draw, srgb = true) {
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   if (srgb) t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = Math.min(8, gl.capabilities.getMaxAnisotropy());
+  t.anisotropy = Math.min(BIG_GPU ? 16 : 8, gl.capabilities.getMaxAnisotropy());   // v44: as sharp at a slant as the card allows
   return t;
 }
 function rnd(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
@@ -2598,7 +2599,7 @@ function spotHead(group, apex, dir, col, lightList, kSpot, colKey, shadeMat, bar
   const sp = new THREE.SpotLight(WARM, 1, 0, 0.66, 1.0, 2);
   sp.position.copy(apex.clone().add(dir.clone().multiplyScalar(0.14)));
   sp.target.position.copy(apex.clone().add(dir.clone().multiplyScalar(3)));
-  sp.shadow.mapSize.set(1024, 1024); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.camera.near = 0.05; sp.shadow.radius = 6;
+  sp.shadow.mapSize.set(LIVE_MAP, LIVE_MAP); sp.shadow.bias = -0.0004; sp.shadow.normalBias = 0.02; sp.shadow.camera.near = 0.05; sp.shadow.radius = 6;
   sp.userData = { k: kSpot, glow, colKey, barIx };   // v35: barIx, its place on a spot bar (Fast lights every other one)
   scene.add(sp, sp.target); lightList.push(sp);
 }
@@ -2805,7 +2806,10 @@ function applyLight() {
   const on = (L.strip * 1.0 + L.uprights * 0.3 + L.bar1 * 0.5 + L.bar2 * 0.5 + L.lamp * 0.35 + (L.bias > 0 ? 8 : 0) + (S.lbox ? 4 : 0)) / 100;
   hemi.intensity = day ? 0.5 + (hd ? 0 : 0.25) : 0.05 + on * 0.36 + (hd ? 0 : (L.strip * 0.0075 + L.uprights * 0.0015 + (L.bias > 0 ? 0.08 : 0)));
   win.visible = hd || day;
-  MATS.forEach(m => { if ("envMapIntensity" in m) m.envMapIntensity = day ? 0.25 : 0.12; });
+  // v44: the room's reflections by surface: glass, the TV and gloss pots catch more of them, matte paint and fabric less
+  MATS.forEach(m => { if (!("envMapIntensity" in m)) return;
+    if (m.userData.envK === undefined) m.userData.envK = m.roughness < 0.25 ? 2.4 : m.roughness < 0.5 ? 1.5 : m.roughness > 0.85 ? 0.7 : 1;
+    m.envMapIntensity = (day ? 0.25 : 0.12) * m.userData.envK; });
   gl.toneMappingExposure = day ? 0.5 : 0.62;
   if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); if (LIVE && started) precompile(); }
   reshadow();
@@ -4091,7 +4095,7 @@ function setAbove(show) {   // the floor above (the stairwell's upper walls) hid
 let need = 2, moving = false, still_t = 0, lowRes = false, dragT = 0, slowDev = !BIG_GPU;   // v35: slowDev until the speed check says otherwise (v39: not on a real graphics card)
 const MV = []; let mvLast = 0;   // v39: the gaps between frames while the room moves: slow ones turn on the lower resolution while you drag
 function dirty() { need = Math.max(need, 2); }
-function fullRatio() { const d = window.devicePixelRatio || 1; if (SMALL) return Math.min(d, GOOD_PHONE ? 2 : 1.5); return S.quality === "hd" ? Math.min(d, 1.5) : Math.min(d, 1) * 0.85; }   // v39: phones at their own sharpness
+function fullRatio() { const d = window.devicePixelRatio || 1; if (SMALL) return Math.min(d, GOOD_PHONE ? 2 : 1.5); return S.quality === "hd" ? (BIG_GPU ? Math.min(Math.max(d, 1.5), 2) : Math.min(d, 1.5)) : Math.min(d, 1) * 0.85; }   // v39: phones at their own sharpness; v44: a real graphics card draws HD at 1.5–2×
 /* v21: narrower screens (phones show the room at 4:3) widen the field of view so every view takes in as much of the room across as at 16:9 */
 let baseFov = 50;
 const fitFov = (fov, asp = camera.aspect) => asp >= 16 / 9 ? fov : Math.min(95, 2 * Math.atan(Math.tan(fov * Math.PI / 360) * (asp < 0.8 ? 1.45 : 16 / 9) / asp) * 180 / Math.PI);   // v33: portrait, tighter
@@ -4222,10 +4226,10 @@ function still(w, h) {
   aoComposer(w, h, 1).render();                                                           // v40: ambient occlusion in every picture
   MATS.forEach(m => { if (m.userData.trans) m.transmission = 0; });
   const url = canvas.toDataURL("image/png");
-  gl.shadowMap.type = THREE.PCFShadowMap; S.quality = wasQ;
+  gl.shadowMap.type = LIVE_SHADOW; S.quality = wasQ;
   gl.shadowMap.enabled = was;
   MATS.forEach(m => m.needsUpdate = true);
-  Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(1024, 1024); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
+  Object.values(lights).flat().forEach(l => { if (l.isSpotLight) { l.shadow.mapSize.set(LIVE_MAP, LIVE_MAP); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
   LIVE = true;
   applyLight();
   gl.setPixelRatio(pr); gl.setSize(size.x, size.y, false); camera.aspect = asp; camera.fov = fov0; applyShift(); dirty();
