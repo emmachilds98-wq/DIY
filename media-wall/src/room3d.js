@@ -2700,6 +2700,7 @@ function drop(group, list) {   // take a fixture and its lights out of the scene
 }
 let built = {};
 function applyState() {
+  solidDirty();
   S.site = "C"; S.cab = "compact"; if (S.cabw !== "80") S.cabw = "90";   // v33, client: "the compact cabinet is our only choice for the table now"
   if (cab && cab.userData.w !== cabC().top[0]) rebuildCab();
   for (const k of Object.keys(G)) if (/^[AB]_/.test(k)) G[k].visible = k === `${S.site}_${S.dining}`;
@@ -2834,6 +2835,7 @@ function spotOf(id) {
   return { x: L.x ?? d0.x, z: L.z ?? d0.z, rot: L.rot ?? d0.rot ?? 0 };
 }
 function placeAll() {
+  solidDirty();                                                                     // v41: the furniture's boxes again
   for (const it of Object.values(MOV)) {
     if (it.lamp) continue;                                  // the lamp is rebuilt where it stands (buildLamp)
     if (it.fixed) { it.pivot.visible = !(S.layout[it.id] || {}).off && (!it.when || it.when()); continue; }   // v27: built in where it stands
@@ -3409,6 +3411,50 @@ function clampRoom(p, target = false) {   // the target (what you orbit round) m
   const q = v3(x, y, z), moved = q.distanceToSquared(p) > 1e-10;
   p.copy(q); return moved;
 }
+/* v41, client: "the camera stops you passing through walls or furniture": the furniture's boxes (each piece that stands in the room,
+   whichever is showing), worked out again when something moves; the eye is pushed out of any it's inside, unless it's above that
+   piece (you can still look down over the sofa) or under it (a shelf over your head) */
+let SOLID = null;
+const solidDirty = () => { SOLID = null; };
+function solidBoxes() {
+  if (SOLID) return SOLID;
+  const objs = [G.sofa, S.drawers ? G.unit_out : G.unit_in, cab, ...Object.values(MOV).map(m => m && m.pivot), ...Object.values(BES || {}), ...Object.values(SUGG_G)];
+  SOLID = [];
+  for (const o of objs) {
+    if (!o || !o.isObject3D || !shown(o)) continue;
+    const b = new THREE.Box3(), t = new THREE.Box3(); o.updateWorldMatrix(true, true);
+    o.traverseVisible(c => { if (!c.isMesh || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); b.union(t.copy(c.geometry.boundingBox).applyMatrix4(c.matrixWorld)); });   // only what's showing (not the folded table's hidden parts)
+    if (b.isEmpty()) continue;
+    const sz = b.getSize(new THREE.Vector3()); if (sz.x > 4 || sz.z > 4) continue;   // never a whole-room group
+    SOLID.push(b.expandByVector(new THREE.Vector3(0.12, 0, 0.12)));                  // 12 cm round each: the eye stays off the surface
+  }
+  return SOLID;
+}
+function collide(p = camera.position) {    // true if it moved the eye
+  let moved = false;
+  for (const b of solidBoxes()) {
+    if (p.y > b.max.y + 0.05 || p.y < b.min.y - 0.2) continue;
+    if (p.x <= b.min.x || p.x >= b.max.x || p.z <= b.min.z || p.z >= b.max.z) continue;
+    const dx0 = p.x - b.min.x, dx1 = b.max.x - p.x, dz0 = p.z - b.min.z, dz1 = b.max.z - p.z, m = Math.min(dx0, dx1, dz0, dz1);
+    if (m === dx0) p.x = b.min.x; else if (m === dx1) p.x = b.max.x; else if (m === dz0) p.z = b.min.z; else p.z = b.max.z;
+    moved = true;
+  }
+  return moved;
+}
+/* v41, client: "a double-tap on the floor flies you to that spot, looking across the room": stand there at eye height (155), facing the
+   room's middle (or the media wall from the middle itself) */
+let lastTap = null;
+function floorHop(e) {
+  ray.setFromCamera(ndc(e), camera);
+  const hit = ray.intersectObjects(scene.children, true).find(h => h.object.isMesh && shown(h.object) && !clippedAt(h.point));
+  const f = floorAt(e); if (!f || (hit && hit.point.y > 0.03)) return false;     // only the floor itself
+  const p = v3(f.x, 155, f.z); clampRoom(p); collide(p); const x = -p.x / M, z = p.z / M;
+  const cx = R.W / 2, cz = (R.WINDOW_Z + R.ALC_D) / 2, far = Math.hypot(x - cx, z - cz) < 60;
+  const at = far ? [R.ALC_W / 2, 110, R.ALC_D] : [cx, 100, cz];
+  if (S.cam === "look") { S.cam = "orbit"; applyCam(false); syncButtons(); }
+  flyTo([x, 155, z], at, 60, false, false, 900); walked = true;
+  return true;
+}
 function walk(kind, k = 1) {        // about 15 cm a press on the floor plane; turns 10°; v31: up and down 10 cm; k < 1 while a button's held
   if (tween) return;
   walked = true; controls.maxDistance = 6;
@@ -3427,7 +3473,7 @@ function walk(kind, k = 1) {        // about 15 cm a press on the floor plane; t
     const d = kind === "f" ? fwd.multiplyScalar(step) : kind === "b" ? fwd.multiplyScalar(-step) : kind === "r" ? side.multiplyScalar(step) : side.multiplyScalar(-step);
     camera.position.add(d); controls.target.add(d);
   }
-  clampRoom(camera.position); clampRoom(controls.target, true);
+  clampRoom(camera.position); clampRoom(controls.target, true); collide();
   controls.update(); dirty(); syncEye();
 }
 const WALK_KEYS = { w: "f", arrowup: "f", s: "b", arrowdown: "b", a: "l", arrowleft: "l", d: "r", arrowright: "r", q: "tl", e: "tr",
@@ -3971,6 +4017,9 @@ if (act) {
     const t = tapDown; tapDown = null;
     if (!t || S.edit || Math.hypot(e.clientX - t[0], e.clientY - t[1]) > 6 || performance.now() - t[2] > 600) return;
     if (MEAS.on) { measureTap(e); return; }                                   // v39: measure in 3D
+    const now = performance.now(), dbl = lastTap && now - lastTap.t < 380 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30;
+    lastTap = dbl ? null : { t: now, x: e.clientX, y: e.clientY };
+    if (dbl && floorHop(e)) return;                                           // v41: a double-tap on the floor flies you there
     let id = pickItem(e); if (!id) return;
     const r = stage.getBoundingClientRect();
     if (tryOpts) { const pl = placeOf(id); if (pl) id = `opt:${pl}:${placeIx(pl, id)}`; }             // v39: Try options: what else could go here
@@ -4040,7 +4089,7 @@ function frame(now) {
   if (changed) { need = 2; lostCheck(); }
   if (cabTween(now)) need = 2;                                    // v30: the cabinet's doors swinging or sliding
   if (showTick(now)) need = 2;                                    // v32: "Watch it open"
-  if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true))) need = 2;   // v17: never outside the room
+  if (!tween && !freeAbove() && (clampRoom(camera.position) | clampRoom(controls.target, true) | collide())) need = 2;   // v17: never outside the room; v41: nor in the furniture
   const active = moving || changed || !!tween;
   if (active && mvLast && now - mvLast < 250) { MV.push(now - mvLast); if (MV.length >= 24) { const m = MV.sort((a, b) => a - b)[12]; MV.length = 0;
     if (m > 28) slowDev = true; else if (m < 14 && !lowRes && BIG_GPU) slowDev = false; } }
@@ -4281,7 +4330,7 @@ function extrasRule(kind, k, on) {
   const off = (...ks) => { S.sugg = Object.assign({}, S.sugg); ks.forEach(x => { if (x !== k) S.sugg[x] = false; }); };
   if (kind === "sugg") {
     if (["windowseat", "hallbench", "wardrobe"].includes(k)) off("windowseat", "hallbench", "wardrobe");
-    if (k === "wardrobe") { off("alcoveshelves", "bartrolley"); if (S.beside !== "clear") { S.beside = "clear"; toast("The cupboard blocks the wall beside the cabinet, so it's clear now"); } }
+    if (k === "wardrobe") { off("alcoveshelves", "bartrolley"); if (S.beside !== "clear") { S.beside = "clear"; toast("The cupboard takes the wall beside the cabinet"); } }
     if (k === "alcoveshelves") off("wardrobe");
   }
   if (kind === "beside" && k !== "clear") { if (S.sugg.wardrobe) off("wardrobe"); if (k !== "trolley") off("bartrolley"); }
@@ -4356,6 +4405,7 @@ function wholeRoom() {
   setView("room"); qs("#r3d-home")?.classList.remove("lost");
 }
 qs("#r3d-home")?.addEventListener("click", wholeRoom);
+qs("#r3d-wallsel")?.addEventListener("change", e => { lookWall = e.target.value; syncButtons(); });   // v41: which wall the paints go on
 document.addEventListener("keydown", e => { if ((e.key === "h" || e.key === "H") && !e.ctrlKey && !e.metaKey && !e.altKey && !/input|textarea|select/i.test(e.target.tagName)) wholeRoom(); });
 let lostT = 0;
 function lostCheck() {   // inside the room and nearly facing a wall, or looking at the floor or ceiling close up: the button glows, once a while
@@ -4373,7 +4423,7 @@ function setTry(on) {
   tryOpts = !!on; root.classList.toggle("trying", tryOpts);
   const t = qs("#r3d-try"); if (t) t.setAttribute("aria-checked", String(tryOpts));
   const bk = qs("#r3d-back"); if (bk) bk.hidden = !tryOpts;
-  if (!tryOpts) { closeAct(); backToPlan(); } else toast("Tap a place to see what else could go there");
+  if (!tryOpts) { closeAct(); backToPlan(); } else { window.DemmaTools?.close(); toast("Tap a place to see what else could go there"); }
   updatePlanBar();
 }
 qs("#r3d-try")?.addEventListener("click", () => setTry(!tryOpts));
@@ -4400,6 +4450,7 @@ function syncButtons() {
   const bn = qs("#r3d-boost"); if (bn) bn.hidden = !tableOpen(); press("lamp", S.lamp);
   const wh = (lookWall === "all" ? paintHex() : chHex("w:" + lookWall)).toLowerCase();                 // v38: the paint row shows the chosen wall's paint
   qsa("[data-paint]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === b.dataset.paint : R.PAINTS[b.dataset.paint].hex.toLowerCase() === wh)));
+  const ws = qs("#r3d-wallsel"); if (ws && ws.value !== lookWall) ws.value = lookWall;   // v41: the wall picker is a list now
   qsa("[data-lookwall]").forEach(b => { const k = b.dataset.lookwall; b.setAttribute("aria-pressed", String(k === lookWall)); const i = b.querySelector("i"); if (i) i.style.setProperty("--c", k === "all" ? paintHex() : chHex("w:" + k)); });
   const wm = qs("[data-wallmatch]"); if (wm) { wm.hidden = lookWall === "all"; wm.disabled = !S.walls[lookWall]; }
   press("drawers", S.drawers ? "out" : "in"); press("quality", S.quality); press("view", S.view);
@@ -4535,7 +4586,7 @@ function start() {
   precompile();                                                                         // v35: hidden parts' shaders, while the room's idle
   lookFromHash();                                                                       // v28: a shared #look- link (after the first compile, so its note shows)
   try {                                                                                 // v30: once, say the room's things can be tapped
-    if (!localStorage.getItem("mw30-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tip: tap the cabinet, drawers or lamp to work them"), 1800); localStorage.setItem("mw30-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
+    if (!localStorage.getItem("mw41-taphint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("Tap things to work them. Double-tap the floor to walk."), 1800); localStorage.setItem("mw41-taphint", "1"); localStorage.setItem("mw31-camhint", "1"); }
     else if (!localStorage.getItem("mw31-camhint") && !/^#look-/.test(location.hash)) { setTimeout(() => toast("View → Move round sets your eye height"), 1800); localStorage.setItem("mw31-camhint", "1"); }   // v31
   } catch (e) {}
   // for the headless stills (shot3d.py): set the options and a view, then take a picture
@@ -4549,7 +4600,7 @@ function start() {
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, leafTexture, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, floorHop, collide, solidBoxes, leafTexture, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
     errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
     perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning

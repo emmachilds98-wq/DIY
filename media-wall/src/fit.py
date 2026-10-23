@@ -223,7 +223,7 @@ def zones():
             ("Game drawer", "box 54.3 × 35 on 350 mm runners; cases 19 × 13.5 × 1.4", ref("runners", "media"), "25.2 tall row, 40 deep", "about 3 above the leaning cases; 5 behind the box", PASS),
             ("Depth with the leads", "console 27.4 + HDMI plug about 5", ref("consoles"), "40 deep, back open", "about 7.6, then the 4 cm channel", PASS),
         ])
-        bay2 = ("Bay 2, PlayStation and the sub (BESTÅ frame on the plinth)", f"56.8 wide inside, 40 deep; under the PS3's shelf, the sub's column {r1(sc)} wide, a 12 mm ply divider, then {r1(pc_)} for the PS2 over the PS1", [
+        bay2 = ("Bay 2, PlayStation and the sub (BESTÅ frame on the plinth)", f"56.8 × 40 inside: the sub's column {r1(sc)}, a 12 mm divider, then {r1(pc_)} for the PS2 over the PS1", [
             ("PS3, original, + controller basket", "32.5 × 27.4 × 9.8", ref("consoles"), "23.7 tall row, full width", "13.9 above; 24.3 beside for the basket", PASS),
             ("The sub in its column", f"{r1(g.SUB[0])} × {r1(g.SUB[2])} × {r1(g.SUB[1])} tall, on a {r1(g.SUB_RISER_H)} isolation riser", ref("hisense"), f"{r1(sc)} wide × {r1(g.SUB_COL_TOP - g.SUB_COL_FLOOR)} tall", f"1 each side, {r1(g.SUB_COL_TOP - g.SUB_IN['y'][1])} above; it mustn't touch the divider or the frame", TIGHT),
             ("The sub's driver and port", "front-firing driver, rear port; its front flush with the face frame", ref("hisense", "subport"), f"{r1(g.SUB_PORT_GAP)} from the port to the wall, through the open back and the channel", "inside the 15–30 advised for a rear port, at its low end: keep the channel behind bay 2 clear (Switch 2 and the retro 6-way go behind bay 1)", TIGHT),
@@ -286,7 +286,7 @@ def zones():
             ("The side-wall socket beside the slim drawers (v38)", f"socket {r1(g.BASE_FRONT_Z - g.SOCKET['z'])} in front of the base, {r1(g.SOCKET['y'])} up", "",
              f"the middle slim drawer pulled out passes {r1(g.BAYS[2][0] + 2.6)} from the wall", "the plugs must stand less than that off the wall: flat (angled) plugs, leads down; measure yours", CHECK),
         ]),
-        ("The side wall: one oak run from the corner to the PC", f"one board line at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep along the LPs, sweeping out to {r1(g.PC_SHELF_D)} under the PC (v15)", [
+        ("The side wall: one oak run from the corner to the PC", f"at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep by the LPs, {r1(g.PC_SHELF_D)} under the PC", [
             ("The sweep from the ledge to the PC shelf", f"front edge 7 → {r1(g.PC_SHELF_D)} over {r1(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} (z {r1(g.SIDE_SWEEP[0])} to {r1(g.SIDE_SWEEP[1])})", "", f"the last wrap LP ends at z {r1(g.WRAP_Z[0] - 1.5 - 4 * g.LP - 3 * 1.4)}; the PC starts at z {r1(g.PC_Z[0])}",
              f"the LP stands on the start of the curve; {r1(g.SIDE_SWEEP[1] - g.PC_Z[0])} between the full depth and the case", PASS),
             ("Four more LPs on the wrap ledge", f"4 × {r1(g.LP)} + gaps = {r1(4 * g.LP + 3 * 1.4)}", ref("media"), f"{r1(wrap_len)} long", f"{r1(wrap_len - 4 * g.LP - 3 * 1.4 - 1.5)}", PASS),
@@ -762,15 +762,15 @@ def cab_zone():
     lo_top, up0, up_top = C["plinth"] + ch, C["shelf_y"] + C["t"], C["shelf_y"] + C["t"] + ch
     near = max(x for x, z, f in C["seats"]["six"] if f == "w") + g.CHAIR_PADDED["w"] / 2      # the window side's chair nearest the cabinet: its side
     slide = G.OPTC["z"][0] - G.OPTC["z"][1]
-    return ("The compact dining cabinet (the plan)", f"two oak boxes side by side, {r1(C['len'])} × {r1(C['d'])} × {r1(C['h'])} under your shelf, hinged doors; "
-            f"the table {r1(C['len_open'])} × {r1(C['top'][0])} open, six chairs inside", [
+    return ("The compact dining cabinet (the plan)", f"two oak boxes, {r1(C['len'])} × {r1(C['d'])} × {r1(C['h'])}, hinged doors; "
+            f"table {r1(C['len_open'])} × {r1(C['top'][0])} open, six chairs inside", [
         ("The cabinet under your shelf", f"{r1(C['h'])} tall", ref("photo20"), f"shelf's underside about {r1(under)}", f"{r1(under - C['h'])}: room to tip it up into place", PASS),
         ("Its length", f"z {r1(C['z'][0])} to {r1(C['z'][1])}: the table box {r1(C['z_t'][0] - C['z_t'][1])}, the chair box {r1(C['z_c'][0] - C['z_c'][1])}",
          ref("photo20", "room", "solidwall"), "the shelf's length; the stair's foot before it stays clear",
-         f"{r1(C['freed'])} of bare wall back by the pipe boxing; {r1(slide - C['len'])} shorter than the sliding cabinet", PASS),
+         f"{r1(C['freed'])} of bare wall back by the pipe boxing", PASS),
         ("Its depth", f"{r1(C['d'])} to the doors' faces", ref("room"), f"the pipe boxing beside it is {r1(g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])} deep",
          (f"flush with the boxing's face" if abs(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0])) < 0.05 else
-          f"{r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than the boxing") + f", {r1(G.OPTC['d'] - C['d'])} less than the sliding cabinet", PASS),
+          f"{r1(C['d'] - (g.PIPE_BOX['x'][1] - g.PIPE_BOX['x'][0]))} prouder than the boxing") + "", PASS),
         ("The two doors and their hinges", f"inset oak-faced ply: the table door {r1(C['door_tw'])} × {r1(C['door_h'])}, about {C['door_kg'][0]:.0f} kg; the chair door "
          f"{r1(C['door_cw'])} wide, about {C['door_kg'][1]:.0f} kg", ref("piano32"), "a full-height stainless piano hinge each, screwed every 10 cm into a solid oak edge",
          "the hinge's load isn't published: hang the table door, open it flat, and check its far end doesn't drop before you load the cabinet", CHECK),
@@ -797,8 +797,8 @@ def cab_zone():
         ("Four chairs in the chair bay", f"one across ({r1(cw)}), two deep ({r1(2 * cdep)}), {r1(ch)} tall", ref("padded"), f"the bay {r1(bay_c)} wide, {r1(in_d)} deep; the shelf at {r1(C['shelf_y'])}",
          f"{r1((bay_c - cw) / 2)} each side, {r1(in_d - 2 * cdep)} deep; two on the floor ({r1(C['plinth'])}–{r1(lo_top)}, {r1(C['shelf_y'] - lo_top)} under the shelf), "
          f"two on the shelf ({r1(up0)}–{r1(up_top)}, {r1(C['h'] - C['t_top'] - up_top)} under the top)", TIGHT),
-        ("Your trailing plant on the shelf", f"strands {r1(pb['trail'][0])}–{r1(pb['trail'][1])} long, the pot at z {r1(pb['z'])}", ref("photo20"),
-         f"the open table door's end at z {r1(C['door_t_open'][1])}", f"{r1(C['door_t_open'][1] - pb['z'])} short of the pot: tuck the strands aside, or slide the pot to the shelf's end", CHECK),
+        ("Your trailing plant on the shelf", f"strands {r1(pb['trail'][0])}–{r1(pb['trail'][1])} long, through the shelf's {r1(g.SHELF_B_GAP)} gap", ref("photo20"),
+         "the open table door's swing", f"{r1(_strand_clear())} clear of it; the pot stands on the shelf, over the door's top", PASS),   # v41: since v38 the strands hang through the gap
         ("Stair side: three chairs", f"{st['stair'][1]:.1f} of edge each", ref("dining", "padded", "costwaychair"), f"{r1(st['stair'][2])} from the far end to the cabinet",
          "55 is the squeeze, 60 the aim: three sit in comfort", PASS),
         # v33: the padded chairs' depth isn't in the listing's words (drawn at a like-for-like chair's 61): the stair side's backs then reach
@@ -979,8 +979,6 @@ def case_zone():
          "the bottom one takes tumblers and coupes (about 9–14) if you build the drinks cabinet under it", PASS),
         ("Depth, front to back", f"{r1(C['d'])} deep, a 4 mm front, 6 mm shelves", ref("glasscut"), "the vinyl stand below it stands 32 out",
          "it stays no further out than a picture ledge; the stand and its sleeves sit under it", PASS),
-        ("With layout B instead (the plant stand on the breast)", f"the stand {r1(P_['h'])} tall", ref("plantstand"), f"the case from {r1(C['y'][0])}",
-         "they can't share the breast: the case is drawn with layout A (the plan); with B it would hang elsewhere", CHECK),
     ])
 
 
@@ -1313,11 +1311,10 @@ def zones():
 
 def measure_html():
     """v38: the measuring sheet: every CHECK in the plan's tables on one page, what we drew, and a box to write yours in."""
-    rows = [(t, item, sp, spare) for t, _s, rs in zones() if not t.startswith(("Storage and a bar", "More storage", "The more compact", "A bar for drinks"))
-            for item, _size, _src, sp, spare, st in rs if st == CHECK]
+    rows = [(t, item, sp, spare) for t, _s, rs in firm_zones() for item, _size, _src, sp, spare, st in rs if st == CHECK]   # v41: the plan's own checks
     trs = "".join(f"<tr><td>{item}<br><span class='note'>{t}</span></td><td>{sp}</td><td>{spare}</td><td class='box'></td></tr>" for t, item, sp, spare in rows)
-    return (f"<h3>Measuring sheet: {len(rows)} things to check before you buy</h3><p>Measure each, write it in, and send us the page: the plan "
-            "is redrawn to your numbers.</p><table class='fit measure'><tr><th>What</th><th>We drew</th><th>Why it matters</th><th>Yours (cm)</th></tr>"
+    return (f"<h3>Measuring sheet: {len(rows)} things to check before you buy</h3><p>One session with a tape: measure each, write it in, "
+            "send us the page.</p><table class='fit measure'><tr><th>What</th><th>We drew</th><th>Why it matters</th><th>Yours (cm)</th></tr>"
             + trs + "</table>")
 
 
@@ -1359,6 +1356,14 @@ ORDER.extend(["skimartex", "artextest", "pubeam", "orac"])
 
 # ---------------------------------------------------------------- v39: the plan's fit proof is the firm plan's (options: one line each, section 12)
 OPTION_ZONES = ("The more compact version", "Beside the compact cabinet", "A bar for drinks", "Storage and a bar", "More storage, and a bar")
+
+
+def _strand_clear():            # v41: how far the hanging plant's strands are from the table door's swing (clash.py's numbers)
+    import clash, math
+    (_, (hx, hz), rad, _y) = clash.door_sweeps()[0]
+    xs, zs = clash.strands_x(), clash.strands_z()
+    near = min(math.hypot(x - hx, z - hz) for x in xs for z in zs)
+    return near - rad
 
 
 def firm_zones():

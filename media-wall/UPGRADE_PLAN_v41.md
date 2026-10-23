@@ -84,3 +84,5 @@ straight down. The drawers' Reset view is gone. Items 6 and 7 below are partly d
 - The side-wall socket: its distance from the alcove's back wall and its height (Decide has asked since v38).
 - When the stairs change, do you want the step drawers built with them, or dropped from the plan's total until then?
 - Is there anything on the page you use most that should stay exactly where it is?
+
+**Done 23 Oct (v41, round 37):** all of the above, plus double-tap the floor to stand there and the camera kept out of the furniture. The rings on Plan stay for now (compact, and they link to each sheet).

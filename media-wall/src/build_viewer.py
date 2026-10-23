@@ -605,7 +605,7 @@ def ideas_panel():
     cards = [item_card(f"3d_id_{k}", "idea", k, title, size, cost, why, where) for k, title, size, cost, why, where, _in3d in I.IDEAS]
     lo, hi = I.low_high()
     return (f'<div class="qhead"><h2 class="ptitle">Ideas for later</h2><span class="caption">Suggestions only: not in the plan, the buy list or the costs</span></div>'
-            f'<p class="caption">Each is off until you turn it on; “Show it in my room” takes you to it. All together about £{lo}–{hi}.</p>'
+            f'<p class="caption">Each is off until you turn it on. All together about £{lo}–{hi}.</p>'
             f'<div class="opts">{"".join(cards)}</div>' + suggest_block() + add_block() + decor_block())
 
 
@@ -618,7 +618,7 @@ def suggest_block():
     return (f'<div class="qhead"><h2 class="ptitle">Suggested furniture and decor</h2><span class="caption">Each one on or off, in the 3D room: none are in the plan or the costs</span></div>'
             f'<div class="gallery"><figure><button type="button" class="g3d" data-full="3d_suggest"><img data-art="3d_suggest" alt="{html.escape(CAP3D["3d_suggest"])}" loading="lazy"></button>'
             f'<figcaption>{html.escape(CAP3D["3d_suggest"])}</figcaption></figure></div>'
-            f'<p class="caption">Each is off until you turn it on, in two or three versions. All {len(I.SUGGEST)} together about £{lo}–{hi}.</p>'
+            f'<p class="caption">Each is off until you turn it on. All {len(I.SUGGEST)} together about £{lo}–{hi}.</p>'
             f'<div class="opts">{rows}</div>'
             f"<button type='button' class='btn' data-r3d='{json.dumps({'site': 'C', 'view': 'door', 'sugg': allon})}'>See them all in the 3D room</button>")
 
@@ -914,7 +914,7 @@ def before_after(prefix=""):
         out += (f'<figure class="ba" style="--ba:50%"><div class="ba-box"><img src="{prefix}art/ba_{k}_after.webp" alt="{html.escape(t)}: the plan in 3D" loading="lazy" width="1200" height="900">'
                 f'<img class="ba-before" src="{prefix}art/ba_{k}_before.webp" alt="{html.escape(t)}: your photo" loading="lazy" width="1200" height="900">'
                 f'<input type="range" min="0" max="100" value="50" aria-label="{html.escape(t)}: slide between your photo and the plan" oninput="this.closest(\'.ba\').style.setProperty(\'--ba\', this.value + \'%\')"></div>'
-                f'<figcaption><b>{html.escape(t)}.</b> {html.escape(cap)}. Slide: your photo on the left, the plan on the right.</figcaption></figure>')
+                f'<figcaption><b>{html.escape(t)}.</b> {html.escape(cap)}. Slide to compare.</figcaption></figure>')
     return f'<div class="ba-grid">{out}</div>'
 
 
@@ -1084,23 +1084,22 @@ def _page(site=False):
       <p class="caption">The numbered key works on the main view. The pale yellow sizes are rough; the chapters' drawings are exact.</p></section>
   </div></div>"""),
         chapter("fit", f"""<div class="panel" id="checks">
-    <p class="caption">Every item in the wall against its published size: {fc[fit.PASS]} of {nfit} fit outright, {fc[fit.TIGHT]} are tight and {fc[fit.CHECK]} need a check on site.</p>
+    <p class="caption">Each item against its published size: {fc[fit.PASS]} of {nfit} fit, {fc[fit.TIGHT]} tight, {fc[fit.CHECK]} to check on site.</p>
     <div class="qhead">{fit_head}<button class="btn" id="fit-only" type="button" aria-pressed="false">Show only tight and to-check</button></div>
     <div id="fit-zones">{fit_body}</div>
     <div class="doc">{sec["12"]}</div></div>"""),
-        chapter("downloads", f'<div class="block"><p class="caption">The plan and the build guide as PDFs, and the drawn pictures. For a 3D picture, use Save as HD picture in the room (View).</p>'
+        chapter("downloads", f'<div class="block"><p class="caption">The plan and the guide as PDFs, and the drawings. For a 3D picture: View, Save as HD picture.</p>'
                              f'<p><a class="btn primary" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> '
                              f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>{downloads_html(site)}{notice}'
                              f'<p class="caption">Demma Home Improvements · Portsmouth Close · living room · v{VERSION}</p></div>'),
     ])
     build_body = f"""<section class="panel" id="build">
-    <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div></div>
+    <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div><label class="sdone sall" for="s-all"><input type="checkbox" id="s-all"> All open</label></div>
     <div class="segbar" id="segbar" style="--n:{len(steps())}" aria-hidden="true">{segbar}</div>
-    <p class="caption" id="s-note">Tick each step when it's done; it saves for both of you. "Buy first" opens that part of the buy list.</p>
-    <div class="group pfilter"><span class="label" id="l-part">Show one part</span>
+    <p class="caption sr-only" id="s-note">Tick each step when it's done; it saves for both of you.</p>
+    <div class="group pfilter"><span class="label sr-only" id="l-part">Show one part</span>
       <div class="seg" role="group" aria-labelledby="l-part" id="part-filter"><button type="button" data-part="" aria-pressed="true">All parts</button>{part_buttons}</div>
       <p class="caption" id="pf-note" aria-live="polite"></p></div>
-    <div class="row sall"><label class="sdone" for="s-all"><input type="checkbox" id="s-all"> Show all steps open</label><span class="caption">One step at a time otherwise: it opens on the first one not done.</span></div>
     <ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol>
     <div class="block" id="cuts">
       <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
@@ -1111,10 +1110,10 @@ def _page(site=False):
   </section>"""
     buy_body = f"""<section class="panel" id="buy">
     <div class="tiles">
-      <div><strong id="t-plan">£{money(lo_tot, hi_tot)}</strong><span id="t-plans">the whole plan, {sum(1 for r in rows if r["kind"] == "buy")} things to buy; no electrician on top</span></div>
-      <div><strong id="t-done">0 of {sum(1 for r in rows if r["kind"] == "buy")}</strong><span>things bought · <b id="t-left">nothing ticked yet</b></span></div>
-      <div><strong id="t-paid">£0</strong><span>paid so far, from the amounts you enter</span></div>
-      <div><strong id="t-jobs">0 of {len(rows) - sum(1 for r in rows if r["kind"] == "buy")}</strong><span>jobs on the list done (the {len(steps())} build steps tick in Build)</span></div>
+      <div><strong id="t-plan">£{money(lo_tot, hi_tot)}</strong><span id="t-plans">the plan</span></div>
+      <div><strong id="t-done">0 of {sum(1 for r in rows if r["kind"] == "buy")}</strong><span>bought <b id="t-left" hidden>nothing ticked yet</b></span></div>
+      <div><strong id="t-paid">£0</strong><span>paid</span></div>
+      <div><strong id="t-jobs">0 of {len(rows) - sum(1 for r in rows if r["kind"] == "buy")}</strong><span>jobs done</span></div>
     </div>
     <div class="picked" id="picked" hidden><div class="qhead"><h3 class="ptitle">Added by you</h3><span class="caption" id="picked-sum"></span></div><ul id="picked-l"></ul></div>
     {cost_overview()}
@@ -1125,7 +1124,7 @@ def _page(site=False):
         <button type="button" data-filter="buys" aria-pressed="false">Things to buy</button>
         <button type="button" data-filter="jobs" aria-pressed="false">Jobs only</button>
       </div></div>
-    <p class="caption" id="t-note">Each phase says which build step it's needed for. Tick each item off and write in what you paid; it saves for both of you.</p>
+    <p class="caption" id="t-note">Each phase names the step it's for. Tick what you buy and note what you paid; you both see it.</p>
     <div id="tracker">{"".join(ph_html)}</div>
     <details class="fold"><summary>Cost by phase, low to high</summary>{cost_chart(phases)}</details>
     <p class="notice">Already owned: Virgin Hub 5, three Deco X1500s, two TL-SG105S switches (both become spares), LG OLED C6 55" and its stand, a 10-gang, the Hisense AX5100G 5.1 soundbar, the Series X fan stand, the turntable, the L-sofa and all the consoles. Estimates are approximate UK prices.</p>

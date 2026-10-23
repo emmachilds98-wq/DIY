@@ -1,12 +1,15 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Round 37 (v41, below): `UPGRADE_PLAN_v41.md` done, plus easier viewing: double-tap the floor to stand there, and the camera
+  stays out of the furniture.** Fit 87/22/12/0, £4,374–8,245 (picks £401–552; can wait £440–930). Plan 76 pages, guide 65. QA fails []
+  errors [] at 390 and 1280, text budget 0 over; taptest all taps ok. Merged to main. **Next:** the client's "save each set-up"
+  (round 33), then the side-wall socket. **Never write the cap's poem out in code or text.**
 - **Round 36 (v40.2): the room's price pill off (it shows only while trying options), a Whole room button (and H) in its place
   that flies back to the view from above and stops looking round; it glows when you're up against a wall or looking straight down.
   The drawers' Reset view went (Whole room replaces it).** Merged to main.
 - **Round 35 (v40.1, below): your banister from the client's photo** (a square post, two flat slats, no spindles, white), merged to
-  main. **The rest of `UPGRADE_PLAN_v41.md` (the picks' build step, the fit proof cleaned, the measuring sheet, the calmer page) waits
-  for the client's go.**
+  main.
 - **v40 (round 34, below): HD plants (a leaf library, seven kinds, one texture atlas), ambient occlusion (GTAO) in every HD picture
   and live in HD on real graphics cards, plant style and pot finish in Look, three option lines in section 12, the flip-top's chair
   cupboard and fold-down seat removed.** Fit 86/22/14/0, £4,374–8,245 (unchanged: nothing new is in the build). Plan 75 pages, guide 62.
@@ -105,6 +108,22 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 37: v41 (the build step for your picks, the measuring sheet, a calmer page, easier viewing)
+- Client (23 Oct): "Yes do all except for the you are here and then execute the plan as well then merge to live" (after our offer:
+  double-tap the floor to fly there, the camera kept out of walls and furniture, a "you are here" marker).
+- **Viewing (`room3d.js`):** `floorHop` (a double tap on the floor, 380 ms / 30 px) flies to that spot at eye height, facing the room;
+  `solidBoxes`/`collide` push the camera out of the sofa, the units, the cabinet, the movable pieces and the options (rebuilt on
+  `solidDirty`, from `placeAll` and `applyState`), every frame and in `walk`.
+- **Build:** step 14 "Your picks" (the bar, record table, wall cabinets, alcove shelves, door shelf and boxes; step drawers with the
+  joiner) in `build_doc.py` and `instructions.py`; `costs.py` splits "Your picks" and "Can wait" (ottoman, rug, step drawers). The fit
+  proof lost its stale rows (sliding doors, layout B, the plant row now PASS through the gap); `fit.measure_html` is one measuring
+  sheet for the open checks, first in the guide. VERSION 41; v40 outputs in `out/v40`.
+- **Page:** Whole room is the dock's first bubble; Try options is in Room (it closes the drawer); the plan bar shows only while
+  trying; no drawer footers (Full screen in View, the light status in Lights' heading); Look's wall picker is one select; Buy's
+  tiles are one strip; Build opens on the steps (filters in one scrolling row, "All open" beside the count); 19 long captions cut
+  (`qa.text_budget` 0 over). `taptest.py` opens Room before Try options. Backups `*_v40_backup.*`.
+- Not done: the rings on Plan stay (compact, they link to Build/Buy/Decide); the plan's single summary line can replace them later.
 
 ## Update 23 Oct 2026, round 35: v40.1 (the banister, from the client's photo)
 - Client (23 Oct, with `inputs/photo_stairs_banister_23oct.jpg`): "Stairs should have our bannister which is the two slat of wood going up

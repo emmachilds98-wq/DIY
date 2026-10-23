@@ -2,14 +2,19 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v40: real-looking plants, softer shading, plant options
+## Media wall and dining wall, v41: a build step for your picks, one measuring sheet, an easier room
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device) or the shared plan page on Claude, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (answers and ticks saved for both of you)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v40%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v41%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New since v40:** a **Whole room** button on the room (or press H) takes you back to the view from above whenever you get lost; the price is off the room (Plan and Buy still show it). And your banister from your photo: a square post at the foot and two flat slats up to the wall by the door, in white.
+**New in v41** ("improve the build further and optimise the ui design")
+- **Easier to look round:** double-tap the floor to stand there; the camera no longer goes through the sofa or the units; **Whole room** (or H) flies back to the view from above.
+- **A build step for your picks** (step 14): the bar, the record table, the wall cabinets, the alcove shelves, the shelf over the door and the boxes; the step drawers go with the new stairs.
+- **One measuring sheet** first in the guide: everything still to check on site, with a box to write each in.
+- **Costs split:** your picks £401–552 and can wait £440–930 (the ottoman, the rug, the step drawers).
+- **Your banister** from your photo, and a calmer page: Try options in Room, one paint picker, the steps first in Build, shorter words.
 
 **New in v40** ("more HD realistic plants, better rendering and graphics", more options, optimisations)
 - **Real-looking plants:** every leaf is shaped, folded and textured (veins, variegation, its own shade of green), in seven kinds: golden pothos, snake plant, monstera, Boston fern, spider plant, calathea and a rubber plant. The pots are turned, with soil and a terracotta texture. They're quicker to draw than the old blobs.

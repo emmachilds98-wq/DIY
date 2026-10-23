@@ -13,7 +13,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "40"
+VERSION = "41"
 REVISION = "37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, the lights in Views, Extras lined up"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
@@ -218,7 +218,7 @@ BIGGEST = {"1 Network, now": "two 8-port switches", "2 Cables and power": "the e
 # v13.6, client: "make the build plan easy to tell how to find which part ie network/media wall/table etc".
 # Every step and every buy-list phase carries one or more of these coloured part labels.
 PARTS = {"Prep": "#6b6862", "Network": "#2a73d9", "Power & cables": "#c4482c", "Paint": "#4f7a52",
-         "Media wall": "#8a5a32", "Dining table": "#b0700f", "Lighting": "#8f7a00", "AV": "#7a4fb0"}
+         "Media wall": "#8a5a32", "Dining table": "#b0700f", "Lighting": "#8f7a00", "AV": "#7a4fb0", "Your picks": "#3f7f6a"}
 PHASE_PART = {"1 Network, now": ["Network"], "2 Cables and power": ["Power & cables", "Network"], "3 Paint": ["Paint"],
               "4 Base unit": ["Media wall"], "5 Oak joinery": ["Media wall"], "6 Dining wall": ["Dining table"], "7 Lighting": ["Lighting"],
               "8 TV, consoles and AV": ["AV"], "9 Vinyl kit": ["AV"], "10 Finishing": ["AV", "Network"]}
@@ -769,6 +769,15 @@ def steps():
                  "Network stage 2: plug each Cat6 run into its Deco, check Deco B and C show \"Ethernet\", and give the Series X and PC high priority.",
                  "Label both outlets of the double socket and each HDMI switch input; set the sub and rear levels from the sofa."],
              check="Everything on the network's \"done when\" list, and every source plays through the soundbar."),
+        # v41: the client's picks (geometry.FIRM) get their own step: they were in the buy list with no build
+        dict(n=14, part=["Your picks"], title="Your picks: the bar, the record table, the shelves and cabinets", who="You + a helper", time="1–2 days", buy=[], see=[("dining", "The bar")],
+             do=[f"The bar: scribe its ply cupboard ({n(G.BAR_BUILT['w'])} × {n(G.BAR_BUILT['d'])} × {n(G.BAR_BUILT['counter'] - G.BAR_BUILT['top_t'])} on a {n(G.BAR_BUILT['plinth'])} plinth) between the cabinet and your shelf's end, keeping the 10 cm gap clear; fix it to the wall and the cabinet, then the counter and the ENHET frame over it, its bottom at {n(G.BAR_BUILT['enhet_y0'])}.",
+                 f"The record table: screw the two KALLAX together on their backs, the 12 mm ply base and four castors under them, the oak lid ({n(G.RECORD_TABLE['w'])} × {n(G.RECORD_TABLE['d'])}) on two hinges with two lid stays.",
+                 f"The wall cabinets: the two EKET on IKEA's rail over the sofa's corner, bottoms at {n(G.WALL_CABS['y0'])}, the rail into the solid wall.",
+                 f"The alcove shelves: two oak floating shelves {n(G.ALCOVE_SHELVES['w'])} × {n(G.ALCOVE_SHELVES['d'])}, tops at {n(G.ALCOVE_SHELVES['tops'][0])} and {n(G.ALCOVE_SHELVES['tops'][1])}, brackets into the solid wall.",
+                 f"Over the hall door: the oak shelf {n(G.DOOR_SHELF['x'][1] - G.DOOR_SHELF['x'][0])} × {n(G.DOOR_SHELF['d'])}, top at {n(G.DOOR_SHELF['top'])}, clear of the architrave; two KUGGIS boxes on it and two on your black shelf.",
+                 "The step drawers: with the new stairs, by the joiner (a bearer under each tread)."],
+             check="Each piece level and fixed; the bar's door clears the open table door; the record table rolls and its lid stays up; the 10 cm gap is clear."),
     ]]
 
 
@@ -893,7 +902,7 @@ GUIDE_TECHNIQUES = """<h3>Six techniques you'll use</h3>
 </ol>
 """
 
-GUIDE_TIME = "<p>Roughly 16–20 working days spread over a few weekends, the electrics and the Cat6 included, plus the paint drying. Steps 6–11 can be split: the base and the dining cabinet first, the oak joinery once you're confident.</p>"
+GUIDE_TIME = "<p>Roughly 17–22 working days spread over a few weekends, the electrics and the Cat6 included, plus the paint drying. Steps 6–11 can be split: the base and the dining cabinet first, the oak joinery once you're confident.</p>"
 
 GUIDE_PITFALLS = """<h3>Where beginners usually go wrong</h3>
 <ul>
@@ -1099,7 +1108,7 @@ def buy_first_html():
 
 
 def guide_html():
-    return (GUIDE_RULES + buy_first_html() + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html() + wiring_html()
+    return (GUIDE_RULES + fit.measure_html() + buy_first_html() + guide_tools() + GUIDE_TECHNIQUES + "<h3>The order of work</h3>" + steps_table_html() + wiring_html()
             + GUIDE_TIME + GUIDE_PITFALLS + "<h3>The cutting list</h3>" + cuts_html() + nest_html())
 
 
@@ -1126,7 +1135,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> real-looking plants in the 3D room and its pictures, soft shading where things meet, and three plant options to try (a plant style, one pot finish, self-watering inserts), one line each in section 12. The build is unchanged.</div>
+<div class="decision"><b>What changed:</b> a build step for your picks (step 14), one measuring sheet first in the guide, the costs split into for move-in and can wait, your banister from the photo, and the fit proof cleaned.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">

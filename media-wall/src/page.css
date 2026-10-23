@@ -332,3 +332,18 @@ body.sheet-open .hnav { display: none; }
 .ba-box::after { content: ""; position: absolute; top: 0; bottom: 0; left: var(--ba); width: 3px; margin-left: -1.5px; background: #fff; box-shadow: 0 0 6px #0008; pointer-events: none; }
 .ba-box input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
 .ba figcaption { font-size: 14px; color: var(--mut2); margin-top: 6px; }
+
+/* v41 (the calmer page): one slim progress strip instead of the rings and the four tiles; Build opens on its steps */
+.rings3 { gap: 8px; }
+.rings3 .ring { grid-template-columns: 40px 1fr; grid-template-rows: auto auto; justify-items: start; align-items: center; column-gap: 10px; row-gap: 0; padding: 8px 14px 8px 8px; border-radius: 999px; text-align: left; }
+.rings3 .ring svg { width: 40px; height: 40px; grid-row: 1 / 3; }
+.rings3 .ring b { margin-top: 0; height: auto; font-size: 16px; display: block; }
+.rings3 .ring span { font-size: 12.5px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 10px; }
+.tiles div { background: none !important; padding: 0 !important; border-radius: 0 !important; display: flex; align-items: baseline; gap: 6px; min-height: 0; }
+.tiles strong { font-size: 17px; } .tiles span { font-size: 13px; color: var(--mut, #6b6560); }
+#part-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+#part-filter button { flex: none; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.qhead .sall { min-height: 36px; padding: 3px 12px 3px 4px; font-size: 14px; }
+.qhead .sall input { width: 26px; height: 26px; }

@@ -163,7 +163,7 @@ function paintTracker() {
   $("#t-done").textContent = done + " of " + buys;
   $("#t-jobs").textContent = jobsDone + " of " + jobs;
   $("#t-paid").textContent = money(paid);
-  $("#t-left").textContent = !done ? "nothing ticked yet" : leftHi ? "about " + money(leftLo) + "–" + money(leftHi).slice(1) + " still to buy" : "everything bought";
+  $("#t-left").hidden = !done; $("#t-left").textContent = !done ? "nothing ticked yet" : leftHi ? "about " + money(leftLo) + "–" + money(leftHi).slice(1) + " still to buy" : "everything bought";
 }
 function saveTrack(id, patch) {
   const r = DATA.track.find(x => x.id === id);
@@ -222,7 +222,7 @@ paintSteps();
   const [d, u] = await Promise.all([use("db"), use("user")]);
   user = u;
   if (!d) {
-    $("#t-note").textContent = "Each phase says which build step it's needed for. Ticks and amounts are kept on this device only from this view.";
+    $("#t-note").textContent = "Each phase names the step it's for. Ticks and amounts stay on this device only.";
     $("#s-note").textContent = "Tick each step when it's done; from this view the ticks are kept on this device only.";
     return;
   }
