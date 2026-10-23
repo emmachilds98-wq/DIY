@@ -1,6 +1,6 @@
 // v39: the page opens from the device after the first visit (network first for the page, so a new round shows; cache first for the
-// rest: three.js from its CDN, the fonts and the pictures). Version 39.
-const C = "demma-v39";
+// rest: three.js from its CDN, the fonts and the pictures). Version 40.
+const C = "demma-v40";
 self.addEventListener("install", e => { self.skipWaiting(); e.waitUntil(caches.open(C).then(c => c.addAll(["./", "manifest.webmanifest"]).catch(() => {}))); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {

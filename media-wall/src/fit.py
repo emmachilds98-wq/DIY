@@ -1164,6 +1164,13 @@ SOURCES["shelfgap"] = ("Client, 22 Oct 2026: \"The shelf on the wall alongside t
                        "actually installed\" (facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side)")
 SOURCES["worktop"] = ("Homebuilding & Renovating: the UK's usual worktop height is 900 mm to the top (homebuilding.co.uk/advice/kitchen-worktop-height); "
                       "a raised bar counter 1000 to 1200")
+SOURCES["persillade"] = ("IKEA UK: PERSILLADE plant pot, 12 cm, £3 (003.157.26); the range runs to 24 cm (ikea.com/gb)")
+ORDER.append("persillade")
+SOURCES["elhoinsert"] = ("elho: self-watering insert, 15 cm across, 12 cm high, holds 1.2 litres, for a 16–17 cm pot, £6.99 (elho.com)")
+ORDER.append("elhoinsert")
+SOURCES["snakeplant"] = ("Boma Garden Centre: Sansevieria trifasciata 'Laurentii', 12 cm pot, £14.99; Gardening Express: variegated snake plant, "
+                         "12 cm pot, 30–50 cm tall, £8.99 on offer")
+ORDER.append("snakeplant")
 SOURCES["fbcover"] = ("Farrow & Ball: Estate Emulsion covers up to 14 m² a litre a coat (70 m² per 5 L), two coats recommended "
                       "(farrow-ball.com paint calculator; DIY.ie listing, 35 m² per 2.5 L)")
 ORDER.append("fbcover")

@@ -1,6 +1,11 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **v40 (round 34, below): HD plants (a leaf library, seven kinds, one texture atlas), ambient occlusion (GTAO) in every HD picture
+  and live in HD on real graphics cards, plant style and pot finish in Look, three option lines in section 12, the flip-top's chair
+  cupboard and fold-down seat removed.** Fit 86/22/14/0, £4,374–8,245 (unchanged: nothing new is in the build). Plan 75 pages, guide 62.
+  Branch `claude/clever-johnson-c9tqld` restarted from main's v39. **Next:** still the client's "save each set-up" (round 33's last
+  bullet; they may set up Firebase), then the side-wall socket. **Never write the cap's poem out in code or text.**
 - **v39 (round 33, below): the 3D room quick on PC graphics cards, the approved page redesign, item 13 and item 7, the plan the firm
   version only (75 pages), no more HD stills (the client takes them in the site).** Fit 86/22/14/0, £4,374–8,245. **Next:** the client
   wants a place to save each set-up they make in the site and track design changes so the next agent can pick them up; they may set
@@ -94,6 +99,36 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 34: v40 (HD plants, ambient occlusion, plant options, dead code out)
+- Client (23 Oct): "Another agent has been working within the GitHub repo tree. Look through branches and continue the work to write and
+  perform next upgrade. Focusing on more HD realistic plants, better rendering and graphics as well as adding more options where you see
+  fit in the current room plan as well as any further optimisations in design or build." Plan: `UPGRADE_PLAN_v40.md`.
+- **Branches:** `main` (v39, PRs #36–#39) held everything; `tender-dijkstra` = main; the older branches are merged rounds. This branch was
+  restarted from main (its v38 commits were already merged). A half-done v38 light card left uncommitted by the restart was superseded
+  by v39's (kept as a patch outside the repo, not needed).
+- **Plants** (`room3d.js`, backup `room3d_v40a_backup.js`): `FLORA_KINDS` (outlines), `leafTexture` (canvas: midrib, veins, variegation,
+  cut-outs for monstera and fern), `leafGeo` (a grid along the outline, folded and curled), `leafAt` (placed face-up with a random roll
+  and its own tint, as vertex colours), `stemAlong`, `vineAlong` (pothos trailing), `FLORA_BUILD` (pothos, snake, monstera, fern,
+  spider, calathea; the floor plant is a rubber plant, `ficus`), `potGeo` (a turned pot, rim and lip) with soil and a terracotta
+  texture. Everything green shares one atlas material (`floraAtlas`, 4 × 2 cells: seven kinds, then stalk grey and soil), so a group's
+  greenery is one mesh; `floraBatch`/`floraFlush` merge a group's plants (`userData.floraHold` defers it; `mergeStatic` skips
+  `userData.flora`). `potPlant(g, x, y, z, rad, h, trail, r, potM, leafM, o)` keeps its old signature (leafM ignored; `o.kind`,
+  `o.terracotta`, `o.edgeZ` to trail over a shelf's front). Room view 448 → 443 calls, geometries 832 → 627.
+- **Look → Plants:** `decor.plants` (mix / lush / easy) and `decor.pots` (mine / terracotta / white / black). The plan's plants (stand,
+  sill, the shelf's pothos) are `floraSpot`s, rebuilt in place by `floraRebuild` on a change; no new shaders.
+- **Ambient occlusion:** `EffectComposer` (4× MSAA target) → `GTAOPass` → `OutputPass`. `still()` always uses it; live when `aoLive()`
+  (HD on `BIG_GPU`; `?ao` forces it, `?noao` stops it). The cutaway's planes are on GTAO's normal material; the warm-up draws into a
+  HalfFloat target in AO mode so the shaders match (tested with `?ao`: 100 programs before and after opening the table). `R3D.perf().ao`.
+- **Options (section 12, `build_doc.other_options_html`):** easy-care plants, one pot finish, self-watering inserts; sources `snakeplant`,
+  `persillade`, `elhoinsert` (fit.SOURCES). Paint by wall from v38 is unchanged.
+- **Dead code out:** `buildChairStore` (the flip-top's chair cupboard, its hooks, eight chairs), the fold-down seat (`seatUp/seatDown`),
+  their picks and cards; `placeChairs` now only places the cabinet's.
+- **Pictures:** no HD stills to `out/` (the client's rule); eight page/PDF pictures re-rendered with the new plants and AO
+  (`3d_room`, `3d_window_bright`, `3d_plants_corner`, `3d_sofa_cosy`, `3d_doll`, `3d_shelf_gap`, `3d_c_plan`, `3d_sg_alcoveshelves`) by a
+  scratch script that writes only `art/*.webp` and `render_v40_*.png`.
+- **Checks:** `qa.py` fails [] errors [] at 390 and 1280 (calls 543/560, programs 63, warm 0); `taptest.py` every tap works; fit unchanged.
+  v39 outputs in `out/v39/`.
 
 ## Update 23 Oct 2026, round 33: v39 (the 3D room quick on PC graphics cards; the approved page redesign; item 13; the plan slimmed to the firm version)
 - Client (23 Oct): the page redesign canvas came back with no changes (approval); "the render is still slow on PC ... PC should be using
