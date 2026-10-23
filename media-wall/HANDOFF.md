@@ -133,6 +133,8 @@
   (still to ask).
 - **Checks:** `qa.py` errors [] and fails [] at 390 and 1280 (programs 61, calls 596/629 in Fast on SwiftShader, frame 7 ms);
   `taptest.py` every tap works at both, Try options ‹ › and Back to my plan included; `clash.py` 0 clashes, 0 close.
+- PRs #36 (code) and #37 (outputs) merged into main. Backups `*_v39a_backup.*`, `fit_v39b_backup.py`, `room3d_v39b_backup.js`; v38 outputs in
+  `out/v38/`. Deck 71ff published at v39 (version 1792776835-8d98; 20 new pictures in its store, `deck_assets.json` 157).
 - **Next, the client's ask: save each set-up made in the site, and track design changes for the next agent.** Proposal: on the shared
   plan page (deck 71ff, which already has a shared database), a **Save this set-up** button writes the room's whole state (`S`), its look
   link, a name, who and when to a `setups` collection; a **My set-ups** list reopens any of them, newest first, with what changed from
