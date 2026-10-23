@@ -908,6 +908,19 @@ def ring(key, hue, label, go):
             f'<circle class="vl" cx="40" cy="40" r="34"/></svg><b id="d-{k}">0</b><span>{label}</span></a>')
 
 
+def before_after(prefix=""):
+    """v39, UPGRADE_PLAN_v38 item 13 ("before and after: your own photos beside the 3D room from the same spot, with a slider")."""
+    pairs = (("stairs", "The stairs wall, from the sofa", "Your dining cabinet and the bar where the black shelf's clutter is"),
+             ("window", "The window and the sofa, from the stairs", "The media wall, the record table and your lamp"))
+    out = ""
+    for k, t, cap in pairs:
+        out += (f'<figure class="ba" style="--ba:50%"><div class="ba-box"><img src="{prefix}art/ba_{k}_after.webp" alt="{html.escape(t)}: the plan in 3D" loading="lazy" width="1200" height="900">'
+                f'<img class="ba-before" src="{prefix}art/ba_{k}_before.webp" alt="{html.escape(t)}: your photo" loading="lazy" width="1200" height="900">'
+                f'<input type="range" min="0" max="100" value="50" aria-label="{html.escape(t)}: slide between your photo and the plan" oninput="this.closest(\'.ba\').style.setProperty(\'--ba\', this.value + \'%\')"></div>'
+                f'<figcaption><b>{html.escape(t)}.</b> {html.escape(cap)}. Slide: your photo on the left, the plan on the right.</figcaption></figure>')
+    return f'<div class="ba-grid">{out}</div>'
+
+
 def _page(site=False):
     """v25 (Demma Home Improvements, option 1c "Room as map"): the 3D room is the home screen; a rail (a bottom bar on phones) opens
     the Plan, Build, Buy and Ideas sheets over it (v30: the Ask sheet is gone); the Tools button holds every 3D control. Every v24 panel id, data-* hook and
@@ -1008,6 +1021,8 @@ def _page(site=False):
       <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
+      <div class="sec-h"><h2>Before and after</h2></div>
+      {before_after(prefix)}
       <div class="sec-h"><h2>Chapters</h2></div>
       <div class="tilegrid">{tiles}</div>
       <div class="sec-h"><h2>The table: 90 or 80 wide, side by side</h2><a class="btn" href="#dining" data-go="dining" data-find="The table">See it in full</a></div>
@@ -1203,8 +1218,43 @@ def site():
     head, rest = body.split("</style>", 1)
     return ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            # v39, item 13 ("quicker on phones: the room as an installable page, works offline, opens fast"): a manifest, an icon and a service worker
+            '<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#2f4a3c">\n<link rel="apple-touch-icon" href="media-wall/src/art/icon-192.png">\n'
             '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%239a6634%22/%3E%3C/svg%3E">\n'
-            + head + "</style>\n</head>\n<body>" + rest + "</body>\n</html>\n")
+            + head + "</style>\n</head>\n<body>" + rest
+            + "<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>\n"
+            + "</body>\n</html>\n")
+
+
+def pwa_files():
+    """v39, item 13: the installable page's manifest, service worker and icons (GitHub Pages serves them from the repo's root)."""
+    from PIL import Image, ImageDraw
+    root = HERE.parent.parent
+    for size in (192, 512):
+        im = Image.new("RGBA", (size, size), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+        d.rounded_rectangle((0, 0, size - 1, size - 1), radius=size // 5, fill="#2b2638")
+        r, gap = size * 0.16, size * 0.08
+        for i, col in enumerate(("#f6b89a", "#9fdcc0", "#c8b6f0", "#f2d878")):
+            cx = size / 2 + (-1 if i % 2 == 0 else 1) * (r + gap / 2); cy = size / 2 + (-1 if i < 2 else 1) * (r + gap / 2)
+            d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=col)
+        im.save(HERE / "art" / f"icon-{size}.png")
+    (root / "manifest.webmanifest").write_text(json.dumps({
+        "name": "Demma Home Improvements", "short_name": "Demma", "start_url": "./", "scope": "./", "display": "standalone",
+        "background_color": "#151a16", "theme_color": "#2f4a3c",
+        "icons": [{"src": f"media-wall/src/art/icon-{n}.png", "sizes": f"{n}x{n}", "type": "image/png", "purpose": "any maskable"} for n in (192, 512)]}, indent=1))
+    (root / "sw.js").write_text(f"""// v39: the page opens from the device after the first visit (network first for the page, so a new round shows; cache first for the
+// rest: three.js from its CDN, the fonts and the pictures). Version {VERSION}.
+const C = "demma-v{VERSION}";
+self.addEventListener("install", e => {{ self.skipWaiting(); e.waitUntil(caches.open(C).then(c => c.addAll(["./", "manifest.webmanifest"]).catch(() => {{}}))); }});
+self.addEventListener("activate", e => {{ e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())); }});
+self.addEventListener("fetch", e => {{
+  const r = e.request; if (r.method !== "GET") return;
+  const u = new URL(r.url), page = r.mode === "navigate" || (u.origin === location.origin && (u.pathname.endsWith("/") || u.pathname.endsWith("index.html")));
+  if (page) {{ e.respondWith(fetch(r).then(res => {{ const cp = res.clone(); caches.open(C).then(c => c.put(r, cp)); return res; }}).catch(() => caches.match(r).then(m => m || caches.match("./")))); return; }}
+  if (/\\.pdf$/.test(u.pathname)) return;                                   // the PDFs come from the network
+  e.respondWith(caches.match(r).then(m => m || fetch(r).then(res => {{ if (res.ok || res.type === "opaque") {{ const cp = res.clone(); caches.open(C).then(c => c.put(r, cp)); }} return res; }})));
+}});
+""")
 
 
 def publish_files():
@@ -1258,6 +1308,7 @@ if __name__ == "__main__":
     (HERE / "media_wall_viewer.html").write_text(page())
     (HERE / "media_wall_viewer_inline.html").write_text(inline_images(page()))
     (HERE.parent.parent / "index.html").write_text(site())
+    pwa_files()                                                     # v39: installable from GitHub Pages
     (HERE / "publish_files.json").write_text(json.dumps(publish_files(), indent=1))
     todo = deck_assets_todo()
     print("viewer ok", len(publish_files()), "files;", len(todo), "pictures not yet in the deck's asset store" + (" (inlined)" if todo else ""))

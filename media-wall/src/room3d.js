@@ -3778,8 +3778,25 @@ function headNames(id) {
   const spec = id === "bar1" ? R.BAR1 : (bar2 && bar2.userData.spec) || R.BAR1, names = { "#a9c7ab": "Sage", "#a7d0d8": "Blue", "#e8b53f": "Mustard", "#e79c95": "Pink" };
   return spec.heads.map((h, i) => names[(h.col || "").toLowerCase()] || `Head ${i + 1}`);
 }
+/* v39 (item 6's floor line): while a fixture's card is open, a line from its chosen head to where its beam lands, and a ring there */
+const AIMG = { g: null, k: "" };
+function clearAim() { if (AIMG.g) { scene.remove(AIMG.g); AIMG.g.traverse(o => o.geometry && o.geometry.dispose()); AIMG.g = null; AIMG.k = ""; dirty(); } }
+function showAim(k) {
+  clearAim(); const id = k.split(":")[0], l = (lights[id] || []).find(x => x.userData.hk === k); if (!l || !l.isSpotLight) return;
+  scene.updateMatrixWorld(); const p = l.getWorldPosition(new THREE.Vector3()), dir = l.target.getWorldPosition(new THREE.Vector3()).sub(p).normalize();
+  const near0 = ray.near; ray.set(p, dir); ray.near = 0.2;
+  const hit = ray.intersectObjects(scene.children, true).find(h => h.object.isMesh && shown(h.object) && h.object.material !== measMat && !clippedAt(h.point)); ray.near = near0;
+  const end = hit ? hit.point : p.clone().addScaledVector(dir, p.y / Math.max(0.05, -dir.y)), len = end.distanceTo(p);
+  const g = AIMG.g = new THREE.Group(); g.renderOrder = 998;
+  const line = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, len, 6), measMat); line.position.copy(p).add(end).multiplyScalar(0.5);
+  line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); line.renderOrder = 998; g.add(line);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.075, 32), measMat), nrm = hit && hit.face ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld) : new THREE.Vector3(0, 1, 0);
+  ring.position.copy(end).addScaledVector(nrm, 0.005); ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), nrm); ring.renderOrder = 998; g.add(ring);
+  scene.add(g); AIMG.k = k; dirty();
+}
 function fixCard(id, on) {
   const d = fixDeg(id), names = headNames(id), i = Math.min(actHead[id] || 0, names.length - 1), k = `${id}:${i}`, h = headOf(k);
+  requestAnimationFrame(() => { if (actId) showAim(k); });                 // v39: where this head lands
   const ci = HEAD_COLS.findIndex(c => c[0] === (h.col || null)), aim = [h.yaw ? `${h.yaw > 0 ? "right" : "left"} ${Math.abs(h.yaw)}°` : "", h.tilt ? `${h.tilt > 0 ? "up" : "down"} ${Math.abs(h.tilt)}°` : ""].filter(Boolean).join(", ");
   const st = `${on ? "On" : "Off"} · ${d ? `turned ${d}°` : "at the plan's angle"} · ${names[i]}: ${h.on === false ? "off" : `${h.lv ?? 100}%`}${aim ? `, aimed ${aim}` : ""}`;
   return [FIX_NAME[id], st, [
@@ -3842,12 +3859,12 @@ function placeAct() {
 }
 let actMoreOpen = false;
 function openAct(id, xy) {
-  if (popId) closePop();
+  if (popId) closePop(); clearAim();
   if (String(id).split(":").slice(0, 2).join(":") !== String(actId || "").split(":").slice(0, 2).join(":")) actMoreOpen = false;   // v39: a new card opens folded
   actId = id; actXY = xy; act.hidden = false; renderAct();
   if (!act.hidden) { const f = qs("#r3d-acts button"); if (f) f.focus({ preventScroll: true }); }
 }
-function closeAct() { actId = null; if (act) act.hidden = true; }
+function closeAct() { actId = null; if (act) act.hidden = true; clearAim(); }
 if (act) {
   act.addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -4432,7 +4449,7 @@ function start() {
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
     errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
     perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning
