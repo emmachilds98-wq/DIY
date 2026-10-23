@@ -274,7 +274,6 @@ details.r3d-more[open] > summary::before { content: "– "; }
 .stk { background: var(--cream); padding: 10px 16px; gap: 8px; transform: translate(-50%, -50%); }
 .stk b { width: 10px; height: 10px; background: oklch(0.6 0.12 var(--h)); }
 .stk:hover, .stk[aria-expanded=true] { transform: translate(-50%, -50%) scale(1.06); }
-.r3d-lbl { display: none !important; }
 .r3d-planbar { position: absolute; left: 50%; transform: translateX(-50%); bottom: 104px; z-index: 6; display: flex; gap: 8px; align-items: center; width: min(560px, calc(100% - 24px)); justify-content: space-between; pointer-events: none; }
 .r3d-planbar > * { pointer-events: auto; }
 .r3d-plansum { background: color-mix(in oklab, var(--cream) 94%, transparent); border-radius: 999px; padding: 12px 16px; font: 600 14px Figtree, system-ui, sans-serif; box-shadow: var(--shade); }
@@ -288,12 +287,24 @@ details.r3d-more[open] > summary::before { content: "– "; }
    lost": the total shows only while trying options (as the change they make); Whole room flies back to the view from above */
 .r3d:not(.trying) .r3d-plansum, .r3d:not(.trying) .r3d-planbar { display: none; }
 .r3d-planbar { justify-content: center; }
-.r3d-bub.lost i { animation: r3dLost 1.6s ease-in-out 3; }
-#r3d-home { width: auto; min-width: 58px; white-space: nowrap; }
+.r3d-minib.lost { animation: r3dLost 1.6s ease-in-out 3; }
 .r3d-tryrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .r3d-painth { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .r3d-wallsel { min-height: 40px; border: 0; border-radius: 999px; padding: 0 14px; background: #efe7d8; color: var(--ink); font: 600 14px Figtree, system-ui, sans-serif; }
 #r3d-lightsh .r3d-litst { font: 500 13px Figtree, system-ui, sans-serif; color: var(--mut); margin-left: 6px; }
+/* v45, client: "Make whole room and remove labels button smaller buttons on the room not a part of the navigations tab buttons":
+   two small pills under the Plan/Build/Buy bar, icon only on a phone */
+.r3d-mini { position: fixed; top: max(72px, calc(env(safe-area-inset-top) + 60px)); right: 16px; z-index: 31; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; transition: right .3s; }
+.r3d .r3d-mini .r3d-minib { position: static; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px 0 9px; border: 0; border-radius: 999px;
+  background: color-mix(in oklab, var(--cream) 92%, transparent); color: var(--ink); font: 600 13px Figtree, system-ui, sans-serif; box-shadow: var(--shade); cursor: pointer; transition: transform .25s var(--spring); }
+.r3d .r3d-mini .r3d-minib:hover { transform: scale(1.05); }
+.r3d .r3d-mini .r3d-minib .ms { font-size: 18px; }
+.r3d.nogl .r3d-mini, .r3d.editing .r3d-mini { display: none; }
+.r3d.touring .r3d-mini { visibility: hidden; }
+@media (min-width: 900px) { .r3d.tools-open .r3d-mini { right: calc(min(420px, 38vw) + 32px); } }
+@media (max-width: 899px) { .r3d-mini { top: max(64px, calc(env(safe-area-inset-top) + 52px)); right: 12px; }
+  .r3d .r3d-mini .r3d-minib { width: 40px; height: 40px; min-height: 40px; padding: 0; justify-content: center; }
+  .r3d .r3d-mini .r3d-minib .t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
 @keyframes r3dLost { 50% { box-shadow: 0 0 0 6px oklch(0.8 0.12 85 / .55), var(--shade); } }
 .r3d-back { position: absolute; left: 16px; top: max(84px, calc(env(safe-area-inset-top) + 72px)); z-index: 6; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--cream); color: var(--ink); font: 700 14px Figtree, system-ui, sans-serif; box-shadow: var(--shade); cursor: pointer; }
 .r3d-back[hidden] { display: none; }
@@ -688,7 +699,7 @@ def section(gallery=""):
       <i class="r3d-tourbar"><b id="r3d-showbar"></b></i></div>
     <div class="r3d-toast" id="r3d-toast" role="status" hidden></div>
     <div class="r3d-pad" id="r3d-pad" role="group" aria-label="Move the camera (hold a button to keep moving)" hidden><button type="button" data-walk="tl" aria-label="Turn left" title="Turn left"><span class="ms" aria-hidden="true">rotate_left</span></button><button type="button" data-walk="f" aria-label="Walk forward" title="Walk forward"><span class="ms" aria-hidden="true">arrow_upward</span></button><button type="button" data-walk="tr" aria-label="Turn right" title="Turn right"><span class="ms" aria-hidden="true">rotate_right</span></button><button type="button" data-walk="u" aria-label="Up" title="Up"><span class="ms" aria-hidden="true">keyboard_arrow_up</span></button><button type="button" data-walk="l" aria-label="Step left" title="Step left"><span class="ms" aria-hidden="true">arrow_back</span></button><button type="button" data-walk="b" aria-label="Walk back" title="Walk back"><span class="ms" aria-hidden="true">arrow_downward</span></button><button type="button" data-walk="r" aria-label="Step right" title="Step right"><span class="ms" aria-hidden="true">arrow_forward</span></button><button type="button" data-walk="dn" aria-label="Down" title="Down"><span class="ms" aria-hidden="true">keyboard_arrow_down</span></button></div>
-    <button type="button" class="r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the numbered labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button>
+    <div class="r3d-mini" role="group" aria-label="The view"><button type="button" class="r3d-minib" id="r3d-home" title="The whole room, from above (H)"><span class="ms" aria-hidden="true">home</span><span class="t">Whole room</span></button><button type="button" class="r3d-minib r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button></div>
     <div class="r3d-pop" id="r3d-pop" role="dialog" aria-modal="false" aria-labelledby="r3d-pop-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
       <h3 id="r3d-pop-h"></h3><ul class="facts"></ul><div class="acts"><button type="button" class="go" data-popgo="plan">Open in the plan</button><button type="button" data-popgo="fly">Fly here</button></div></div>
     <div class="r3d-pop r3d-act" id="r3d-act" role="dialog" aria-modal="false" aria-labelledby="r3d-act-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
@@ -703,7 +714,7 @@ def section(gallery=""):
         <button type="button" data-sel="copy" hidden>Copy</button><button type="button" data-sel="remove">Remove</button><button type="button" data-sel="done">Done</button></div></div>
   </div>
   <div class="r3d-dock"><button type="button" class="r3d-toolsbtn" data-tools-toggle aria-expanded="false" aria-controls="r3d-panel"><span class="ms" aria-hidden="true">tune</span>Tools</button>
-    <div class="r3d-bubbles" role="tablist" aria-label="3D room controls"><button type="button" class="r3d-bub" id="r3d-home" style="--h:200" title="The whole room, from above (H)"><i class="ms" aria-hidden="true">home</i>Whole room</button><button type="button" class="r3d-bub r3d-menub" id="r3d-menub" aria-expanded="false" aria-controls="rail-list" style="--h:280" hidden><i class="ms" aria-hidden="true">menu</i>Menu</button>{bubbles}
+    <div class="r3d-bubbles" role="tablist" aria-label="3D room controls"><button type="button" class="r3d-bub r3d-menub" id="r3d-menub" aria-expanded="false" aria-controls="rail-list" style="--h:280" hidden><i class="ms" aria-hidden="true">menu</i>Menu</button>{bubbles}
       <button type="button" class="r3d-bub" id="r3d-editbtn" aria-pressed="false" style="--h:25" title="Move, turn, recolour, remove and add things; tap a wall to paint it"><i class="ms" aria-hidden="true">edit</i>Edit</button></div></div>
   <div class="r3d-panel" id="r3d-panel" role="region" aria-label="3D room controls" hidden><button type="button" class="r3d-px" data-tools-toggle aria-label="Close the tools"><span class="ms" aria-hidden="true">close</span></button>
     <div class="r3d-pscroll">{drawers}</div>
