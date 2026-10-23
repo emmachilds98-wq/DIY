@@ -247,7 +247,7 @@ def zones():
             ("Switch 2 (TL-SG108) and the retro 6-way in the channel", "15.8 × 10.1 × 2.5; 6-way about 34 × 6 × 4", ref("sg108"), "4 cm channel", "on their edges", TIGHT),
         ])
     zs = [
-        ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the left one now a corner post on the side wall; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
+        ("The TV between the uprights", f"{r1(g.TV_GAP)} between the oak uprights, the right one a corner post against the breast; the ledge's underside at {r1(g.LEDGE_UNDER)}", [
             ("LG OLED C6 55 in, on its stand", f"{r1(g.TV_W)} × {r1(g.TV_H)} × {r1(g.TV_D)} panel; {r1(g.TV_STAND_H)} tall on the stand", ref("lg"), f"{r1(g.TV_GAP)} wide", f"{r1(g.TV_CLEAR)} each side", PASS),
             ("Top of the screen", f"{r1(g.TV_TOP)} (bottom {r1(g.TV_BOTTOM)}, centre {r1(g.TV_CENTRE)})", ref("lg"), f"ledge at {r1(g.LEDGE_UNDER)}", f"{r1(g.LEDGE_UNDER - g.TV_TOP)}", PASS),
             ("LG stand base", f"{r1(g.TV_STAND_W)} × {r1(g.TV_STAND_D)}", ref("lg"), f"worktop {r1(g.BASE_D)} deep", "set 2 cm off the wall: 11 cm in front of it for the soundbar's leads", PASS),
@@ -255,14 +255,14 @@ def zones():
             ("The TV's remote receiver, bottom centre of the screen's frame", f"screen bottom {r1(g.TV_BOTTOM)}", ref("lg"), f"soundbar top {r1(sb_top)}, in front of the stand's foot", f"{r1(sb_top - g.TV_BOTTOM)} over the frame's edge: sit the bar on the worktop 2 cm proud of the stand's foot, not against it, so the remote's beam from the sofa clears it; if a button stutters, pair LG's Magic Remote (it talks to the TV by radio)", CHECK),
             ("The TV's HDMI plugs, with the screen 2.15 from the corner post", "C6 sockets face sideways on the back panel", ref("lg"), "behind the screen", "plugs stay behind the panel; if a stiff lead pushes out, use 90° HDMI adapters", CHECK),
         ]),
-        ("The turntable zone, right of the TV", f"{r1(g.RZ_W)} wide × {r1(g.BASE_D)} deep, worktop {r1(g.WORKTOP)} to the Series X shelf's underside at {r1(g.LID_CLEAR_TO)}", [
+        ("The turntable zone, left of the TV", f"{r1(g.RZ_W)} wide × {r1(g.BASE_D)} deep, worktop {r1(g.WORKTOP)} to the Series X shelf's underside at {r1(g.LID_CLEAR_TO)}", [
             ("Turntable, AT-LP120X size (worst case)", f"{r1(g.DECK[0])} × {r1(g.DECK[2])} × {r1(g.DECK[1])} with its lid", ref("atlp120"), f"{r1(g.RZ_W)} wide", f"{r1(deck_side)} each side", TIGHT),
             ("Its depth, with room behind for the lid's hinges", f"{r1(g.DECK[2])}, front 2 cm in from the worktop's edge", ref("atlp120"), f"{r1(g.BASE_D)} deep, to the painted wall" if g.PLAIN else f"{r1(g.BASE_D)} deep, less the {r1(panel)} slatted panel", f"{r1(g.ALC_D - panel - g.DECK_Z[1])} behind it", TIGHT if g.ALC_D - panel - g.DECK_Z[1] < 8 else PASS),
             ("Lid open", f"cover {r1(g.LID[0])} × {r1(g.LID[1])}; standing up, its top at about {r1(round(g.LID_TOP_OPEN))}", ref("lid"), f"shelf underside {r1(g.LID_CLEAR_TO)}", f"about {r1(round(g.LID_CLEAR_TO - g.LID_TOP_OPEN))}", PASS),
             ("Phono preamp, hung under the shelf at the back", f"about {r1(g.PREAMP[0])} × {r1(g.PREAMP[2])} × {r1(g.PREAMP[1])}", "", f"{r1(pre_bottom)}–{r1(g.LID_CLEAR_TO)}, at the back", f"{r1(pre_bottom - g.LID_TOP_OPEN)} over the open lid's edge; lift the lid gently", TIGHT),
             ("Series X fan stand on the shelf", f"{r1(fx)} × {r1(fz)} (assumed; model to confirm)", "", f"{r1(g.RZ_W)} × {r1(g.RZ_SHELF_D)} shelf", f"{r1(sx_side)} each side", PASS),
             ("Xbox Series X, standing", f"{r1(sx)} × {r1(sd)} × {r1(sh)} tall", ref("xbox"), f"top at {r1(g.SX_TOP)}", f"{r1(g.HIGH_UNDER - g.SX_TOP)} clear above (Microsoft's minimum is 4); 15 each side, inside the 10–15 it recommends", PASS),
-            ("Deco B on the high shelf, right", "11 × 11 × 11.4", ref("deco"), f"{r1(g.RZ_W)} wide, {r1(g.CEIL - g.HIGH_TOP)} to the ceiling", "beside the framed 7-inch, 27 clear above", PASS),
+            ("Deco B on the high shelf, at the breast end", "11 × 11 × 11.4", ref("deco"), f"{r1(g.UP_R[0] - g.UP_L[1] - 95)} wide past the lidded box, {r1(g.CEIL - g.HIGH_TOP)} to the ceiling", "beside the lidded box, 27 clear above", PASS),
         ]),
         ("Shelves above the TV", f"ledge top {r1(g.LEDGE_TOP)}, 7 deep; high shelf top {r1(g.HIGH_TOP)}, {r1(g.HIGH_D)} deep; ceiling {r1(g.CEIL)}", [
             ("Four LPs on the record ledge", f"4 × {r1(g.LP)} = {r1(lp4)} wide", ref("media"), f"{r1(g.TV_GAP)} long", f"{r1(g.TV_GAP - lp4)}: snug, as drawn", PASS),
@@ -283,6 +283,8 @@ def zones():
              f"{r1(g.SLIM_DRAWERS[1]['yb'] - g.SLIM_DRAWERS[0]['yb'] - 1.2 - g.GAME_CASE[1] * 0.985)} clear over the cases", PASS),
             ("Pads in the top slim drawer", f"4 pads on edge, two side by side: 2 × {r1(g.PAD[2])} = {r1(2 * g.PAD[2])} across, {r1(g.PAD[0])} long", ref("pads"), f"{r1(g.SLIM_INSIDE)} wide, {r1(g.TRAY_TOP_PANEL - g.SLIM_DRAWERS[2]['yb'] - 1.2)} tall",
              f"{r1(g.SLIM_INSIDE - 2 * g.PAD[2])} across; {r1(g.PAD[1])} tall in {r1(g.TRAY_TOP_PANEL - g.SLIM_DRAWERS[2]['yb'] - 1.2)}; the remotes in front", TIGHT),
+            ("The side-wall socket beside the slim drawers (v38)", f"socket {r1(g.BASE_FRONT_Z - g.SOCKET['z'])} in front of the base, {r1(g.SOCKET['y'])} up", "",
+             f"the middle slim drawer pulled out passes {r1(g.BAYS[2][0] + 2.6)} from the wall", "the plugs must stand less than that off the wall: flat (angled) plugs, leads down; measure yours", CHECK),
         ]),
         ("The side wall: one oak run from the corner to the PC", f"one board line at {r1(g.LEDGE_TOP)}, {r1(g.SIDE_RUN_T)} thick, {r1(g.SIDE_RUN_Z[0] - g.SIDE_RUN_Z[1])} long: 7 deep along the LPs, sweeping out to {r1(g.PC_SHELF_D)} under the PC (v15)", [
             ("The sweep from the ledge to the PC shelf", f"front edge 7 → {r1(g.PC_SHELF_D)} over {r1(g.SIDE_SWEEP[0] - g.SIDE_SWEEP[1])} (z {r1(g.SIDE_SWEEP[0])} to {r1(g.SIDE_SWEEP[1])})", "", f"the last wrap LP ends at z {r1(g.WRAP_Z[0] - 1.5 - 4 * g.LP - 3 * 1.4)}; the PC starts at z {r1(g.PC_Z[0])}",

@@ -54,7 +54,14 @@ WT = 3.0                                  # solid oak worktop
 WORKTOP = CARCASS_TOP + WT                # 76
 FILLER = 3.0
 BAY_W = 60.0
+# v38, client: "Move the vinyl and Xbox to the left side of the media cabinet so the tv is more centre to the sofa. Adjust the games to be
+# in line with the tv and vinyls on the left with the player": MW_SWAP mirrors the wall. The turntable zone (the deck, the Series X over
+# it) goes to the side wall's end, the TV to the breast's end (its centre 67.75 -> 118.25, the sofa's middle at 135), and the bays follow:
+# bay 3's records under the turntable on the left, bays 1 and 2 (the consoles and the games) under the TV.
+MW_SWAP = True
 BAYS = [(FILLER + i * BAY_W, FILLER + (i + 1) * BAY_W) for i in range(3)]   # (3,63) (63,123) (123,183)
+if MW_SWAP:
+    BAYS = BAYS[::-1]                                                         # bay 1 (Xbox) 123..183, bay 2 63..123, bay 3 (records) 3..63
 BAY_NAMES = ["Bay 1 · Xbox", "Bay 2 · PlayStation", "Bay 3 · records"]
 PLINTH_DRAWER = dict(x=(BAYS[1][0] + 3.0, BAYS[1][1] - 3.0), y=(1.6, 7.6), box=(52.0, 34.0, 5.0))   # hidden, push to open
 
@@ -67,6 +74,9 @@ TV_CLEAR = 2.15                           # each side of the screen, inside the 
 TV_GAP = TV_W + 2 * TV_CLEAR              # 126.5 between the uprights
 UP_L = (0.0, UP_T)                        # the left upright is now a corner post against the side wall
 UP_R = (UP_T + TV_GAP, 2 * UP_T + TV_GAP) # 131 .. 135.5
+if MW_SWAP:                               # v38: the corner post at the breast's end, the TV's other upright beside the turntable zone
+    UP_L = (ALC_W - 2 * UP_T - TV_GAP, ALC_W - UP_T - TV_GAP)   # 50.5 .. 55
+    UP_R = (ALC_W - UP_T, ALC_W)                                # 181.5 .. 186
 TV_CX = UP_L[1] + TV_GAP / 2              # 67.75
 TV_SHIFT = ALC_W / 2 - TV_CX              # 25.25 nearer the side wall than v10
 TV_X = (TV_CX - TV_W / 2, TV_CX + TV_W / 2)
@@ -79,6 +89,8 @@ SIDE_ZONE = 0.0                            # v10's left zone is gone
 
 # the right-hand zone: the turntable on the worktop, the Series X on an oak shelf above it
 RZ = (UP_R[1], ALC_W)                      # 135.5 .. 186
+if MW_SWAP:
+    RZ = (0.0, UP_L[0])                    # v38: 0 .. 50.5, by the side wall
 RZ_W = RZ[1] - RZ[0]                       # 50.5
 DECK = (45.2, 14.2, 35.2)                  # Audio-Technica AT-LP120XUSB, worst case (W, H with lid, D)
 DECK_X = (RZ[0] + (RZ_W - DECK[0]) / 2, RZ[0] + (RZ_W + DECK[0]) / 2)   # 138.15 .. 183.35
@@ -241,7 +253,7 @@ SOCKET = dict(x=0.0, z=-22.0, y=30.0)      # on the east wall, just in front of 
 # drawn at socket height, 30 up). The first is SOCKET above (one, which the plan swaps for a double); the other two are doubles.
 SOCKET2 = dict(x=0.0, z=-140.0, y=30.0)    # behind the sofa's return, a little nearer the media wall than the PC (-134 .. -179): the rears, the PC
 SOCKET3 = dict(x=WINDOW_X[1] + 44.0, z=WINDOW_Z, y=30.0)   # 352: on the window wall behind the plant stand (layout A), near the lamp
-SOCKETS = [dict(SOCKET, gang=1, wall="x", name="in the corner in front of the left Xbox game drawer"),
+SOCKETS = [dict(SOCKET, gang=1, wall="x", name="in the corner in front of the records bay" if MW_SWAP else "in the corner in front of the left Xbox game drawer"),
            dict(SOCKET2, gang=2, wall="x", name="behind the sofa's short side, left of and below the PC"),
            dict(SOCKET3, gang=2, wall="z", name="behind the plant stand in the window corner, near the lamp")]
 

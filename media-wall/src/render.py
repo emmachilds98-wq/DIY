@@ -42,6 +42,16 @@ CEIL, ALC_W, ALC_D = G.CEIL, G.ALC_W, G.ALC_D
 WORKTOP = G.WORKTOP
 RAISE = G.PLINTH     # bays 1-2 stand on a 9 cm plinth
 UP_L, UP_R = G.UP_L, G.UP_R
+# v38: MW_SWAP mirrors the upper wall (MX, about the alcove's middle) and moves bays 1 and 3 whole (B1X, B3X)
+MX = (lambda x: ALC_W - x) if G.MW_SWAP else (lambda x: x)
+B1X = G.BAYS[0][0] - G.FILLER
+B3X = G.BAYS[2][0] - G.FILLER - 2 * G.BAY_W
+RZ_GX = UP_L[1] - 2.25 if G.MW_SWAP else UP_R[0] + 2.25   # the groove behind the upright beside the turntable zone
+DECO_X = (UP_R[0] if G.MW_SWAP else ALC_W) - 4.0 - 11.0    # Deco B on the high shelf's breast end, by the Cat6 corner
+# the high shelf: books (56 cm of them) and the lidded box over the TV; v38 moves the framed print over the turntable, beside the 7-inch
+BOOKS_END = UP_L[1] + 57.5 if G.MW_SWAP else 62.0
+BOX_X = UP_L[1] + 65.0 if G.MW_SWAP else 70.0
+PRINT_X = G.RZ[0] + 27.0 if G.MW_SWAP else 106.0
 BX1 = G.BREAST_X[1]  # west edge of the chimney breast
 STYLE = "joinery"    # "joinery" (main) or "slats"
 
@@ -1018,13 +1028,13 @@ def high_shelf():
             o.append(box(x, top, zb, tw, th_, rnd.choice([15.5, 16, 17]), rnd.choice(BOOK_COLS), side="#222"))
             o.append(box(x + tw * 0.2, top + th_ * 0.62, zb - 0.01, tw * 0.6, 1.0, 0.1, "#f2efe6"))
             x += tw + 0.1
-    xe = books(UP_L[1] + 1.5, 62)
+    xe = books(UP_L[1] + 1.5, BOOKS_END)
     o.append(box(xe + 0.3, top, 20, 1.8, 16, 15, OAK, OAK_T, OAK_S))
-    bx = 70.0      # one lidded box for cables and controllers
+    bx = BOX_X     # one lidded box for cables and controllers
     o.append(box(bx, top, 18, 30, 21, 19, "#a7a29a", "#bcb7ae", "#8f8a82"))
     o.append(box(bx, top + 21, 18, 30, 1.5, 19, "#b3aea6", "#c4bfb6", "#9a958c"))
     o.append(_line(P(bx + 11, top + 13, 17.99), P(bx + 19, top + 13, 17.99), "#77736b", 2))
-    o.append(box(106.0, top, 33, 22, 24, 2, "url(#art1)", side="#555"))          # framed print
+    o.append(box(PRINT_X, top, 33, 22, 24, 2, "url(#art1)", side="#555"))          # framed print
     # right of the TV: the framed "now playing" 7-inch and Deco B
     fx = RZ[0] + 2.5
     o.append(box(fx, top, 32, 21.3, 21.3, 1.6, "#141414", "#222", "#0d0d0d"))
@@ -1032,10 +1042,10 @@ def high_shelf():
     o.append(art_on(q, [("#f0c24b", 0, 1, 0, 1), ("#1f3a52", 0.12, 0.88, 0.12, 0.88), ("#e8603c", 0.3, 0.7, 0.3, 0.7)]))
     c = P(fx + 10.65, top + 10.65, 31.97)
     o.append(f'<circle cx="{c[0]:.1f}" cy="{c[1]:.1f}" r="{1.4 * S * K(32):.1f}" fill="#f6efe0"/>')
-    dx = ALC_W - 4.0 - 11.0
+    dx = DECO_X
     o.append(box(dx, top, 22, 11, 11.4, 11, WHT, WHT_T, WHT_S, extra='rx="6"'))
     if STYLE == "joinery":   # 12 V lead and patch lead along the back of the shelf into the groove behind the right upright
-        a_, b_, c_ = P(dx + 1, top + 0.3, 32.5), P(UP_R[1] + 4, top + 0.3, 36.5), P(UP_R[0] + 2.25, top + 0.3, ALC_D - 0.4)
+        a_, b_, c_ = P(dx + 1, top + 0.3, 32.5), P(UP_R[0] - 2 if G.MW_SWAP else UP_R[1] + 4, top + 0.3, 36.5), P(UP_R[0] + 2.25, top + 0.3, ALC_D - 0.4)
         o.append(f'<path d="M{a_[0]:.1f},{a_[1]:.1f} Q{b_[0]:.1f},{b_[1]:.1f} {c_[0]:.1f},{c_[1]:.1f}" stroke="#2b2b2b" stroke-width="2.2" fill="none"/>')
     st, en = P(dx + 8, top + 8, 33), P(ALC_W - 2.5, CEIL, ALC_D - 2.5)    # Cat6 down from the ceiling corner
     o.append(f'<path d="M{st[0]:.1f},{st[1]:.1f} Q{en[0]-6:.1f},{st[1]-10:.1f} {en[0]:.1f},{en[1]:.1f}" stroke="#7d8c84" stroke-width="2" fill="none" opacity="0.85"/>')
@@ -1069,7 +1079,7 @@ def rz_slats():
     if STYLE != "joinery" or G.PLAIN:
         return ""
     sw, sg, sd = G.RZ_SLATS
-    x1, x2 = RZ[0] + 0.3, ALC_W - 0.3
+    x1, x2 = RZ[0] + 0.3, RZ[1] - 0.3
     o = [quad_front(x1, WORKTOP, ALC_D - 0.3, x2 - x1, G.HIGH_UNDER - WORKTOP, "#3a2a1c")]
     n = int((x2 - x1 + sg) // (sw + sg))
     xs0 = x1 + (x2 - x1 - (n * sw + (n - 1) * sg)) / 2
@@ -1159,12 +1169,13 @@ def uprights():
         o.append(_line(P(x2 - 0.5, WORKTOP, zf - 0.02), P(x2 - 0.5, CEIL, zf - 0.02), "#8f5e33", 1))
         p = P((x1 + x2) / 2, G.HIGH_TOP - 2.0, zf - 0.03)      # peg where the high shelf is housed
         o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.6" fill="#5e3d22"/><circle cx="{p[0]-0.6:.1f}" cy="{p[1]-0.6:.1f}" r="1" fill="#8a5c36"/>')
-    p = P((UP_R[0] + UP_R[1]) / 2, G.LEDGE_TOP - 1.2, zf - 0.03)  # and where the ledge is housed (the left one is behind the wrap)
-    o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.4" fill="#5e3d22"/>')
+    for up in ((UP_L, UP_R) if G.MW_SWAP else (UP_R,)):   # and where the ledge is housed (v37: the left one is behind the wrap)
+        p = P((up[0] + up[1]) / 2, G.LEDGE_TOP - 1.2, zf - 0.03)
+        o.append(f'<circle cx="{p[0]:.1f}" cy="{p[1]:.1f}" r="2.4" fill="#5e3d22"/>')
     for xe in (UP_L[1], UP_R[0]):
         o.append(_line(P(xe, 79, 22), P(xe, G.HIGH_UNDER - 3, 22), "#ffe2b0", 2, 'opacity="0.85"'))
     # flush wedged through-tenons on the right upright's TV face (the Series X shelf)
-    xf = UP_R[0] - 0.03
+    xf = UP_L[1] + 0.03 if G.MW_SWAP else UP_R[0] - 0.03
     th_t = 2.4
     ym = G.RZ_SHELF_TOP - 0.8 - th_t / 2
     for zc in TENON_Z:
@@ -1178,7 +1189,7 @@ def led_lines():
     if STYLE != "slats":
         return ""
     o = []
-    for (x1, x2, y, z) in [(1, ALC_W - 1, G.HIGH_UNDER, 12), (RZ[0] + 1, ALC_W - 1, G.RZ_SHELF_TOP - G.RZ_SHELF_T, 16)]:
+    for (x1, x2, y, z) in [(1, ALC_W - 1, G.HIGH_UNDER, 12), (RZ[0] + 1, RZ[1] - 1, G.RZ_SHELF_TOP - G.RZ_SHELF_T, 16)]:
         o.append(_line(P(x1, y - 0.1, z), P(x2, y - 0.1, z), "#ffe2b0", 2.2, 'opacity="0.9"'))
     return "\n".join(o)
 
@@ -1428,12 +1439,11 @@ def _unit():
     o = []
     o.append(poly([P(-1, 0.05, 0), P(ALC_W + 1, 0.05, 0), P(ALC_W + 1, 0.05, -10), P(-1, 0.05, -10)], "#000", 'opacity="0.18" filter="url(#soft)"'))
 
-    def bays12():
-        # bay 1 (Xbox) 0..60 and bay 2 (PlayStation) 60..120 in BESTÅ coordinates, contents unchanged from v9
+    def bay1():
+        # bay 1 (Xbox) in its own BESTÅ coordinates 0..60 (v38: placed at bay 1, which MW_SWAP moves to the TV's end)
         q = []
-        for (a, b) in [(1.6, 58.4), (61.6, 118.4)]:
-            q.append(bay_interior(a, b, 1.6, 62.4))
-            q.append(poly([P(a, 62.4, 2), P(b, 62.4, 2), P(b, 40, 2), P(a, 40, 2)], "url(#warmpool)", 'opacity="0.9"'))
+        q.append(bay_interior(1.6, 58.4, 1.6, 62.4))
+        q.append(poly([P(1.6, 62.4, 2), P(58.4, 62.4, 2), P(58.4, 40, 2), P(1.6, 40, 2)], "url(#warmpool)", 'opacity="0.9"'))
         q.append(ply_shelf(1.6, 58.4, 26.8)); q.append(ply_shelf(1.6, 58.4, 44.6))
         if G.SUB_IN_WALL:
             # v13.5: the bricks lie flat at the back of their rows, by the power leads; the RetroTINK and the HDMI
@@ -1447,6 +1457,15 @@ def _unit():
         else:
             q.append(xbox360(5, 28.6, 6)); q.append(box(38.5, 28.6, 9, 18, 6.2, 10, "#262628", "#333336", "#1a1a1c"))
             q.append(xboxone(5, 46.4, 6)); q.append(box(40.5, 46.4, 9, 16, 5.6, 9, "#262628", "#333336", "#1a1a1c"))
+        if GAME_OPEN == 0:
+            q.append(game_drawer(0))
+        return "\n".join(q)
+
+    def bays12():
+        # bay 2 (PlayStation) 60..120 in the BESTÅ coordinates of v9 (bay 1 was 0..60 beside it)
+        q = []
+        q.append(bay_interior(61.6, 118.4, 1.6, 62.4))
+        q.append(poly([P(61.6, 62.4, 2), P(118.4, 62.4, 2), P(118.4, 40, 2), P(61.6, 40, 2)], "url(#warmpool)", 'opacity="0.9"'))
         if G.SUB_IN_WALL:
             # v13.5: bay 2's lower part splits: the sub's column on the left (under the TV), a 12 mm ply divider,
             # and the PS2 over the PS1 on a part shelf on the right
@@ -1473,10 +1492,9 @@ def _unit():
         q.append(box(99, 38.7, 4, 17.5, 10, 16, "#c9a26a", "#d8b480", "#a98455"))
         for i in range(5):
             q.append(box(99.2, 39.5 + i * 2, 3.99, 17.1, 0.25, 0.1, "#a8834f"))
-        if GAME_OPEN == 0:
-            q.append(game_drawer(0))
         return "\n".join(q)
-    o.append(place(G.FILLER, RAISE, 0, bays12))
+    o.append(place(G.BAYS[1][0] - 60.0, RAISE, 0, bays12))
+    o.append(place(G.BAYS[0][0], RAISE, 0, bay1))
 
     # bay 3: 18 mm ply carcass from the floor. v16: a 12 mm ply divider splits it: the LP column on the right, under the turntable (two
     # snug face-out crates), the slim column on the left (two face-out game drawers, the pads and remotes drawer on top)
@@ -1494,22 +1512,23 @@ def _unit():
 
     (b1a, b1b), (b2a, b2b), _ = G.BAYS
     o.append(face_frame(0, ALC_W, [(b1a + 2.6, b1b - 2.6, 11.6), (b2a + 2.6, b2b - 2.6, 11.6), (b3a + 2.6, G.FACE_STILE[0], 2.6), (G.FACE_STILE[1], b3b - 2.6, 2.6)]))
-    o.append(_line(P(0, 9, -0.02), P(b2b, 9, -0.02), "#000", 1, 'stroke-opacity="0.2"'))
+    o.append(_line(P(min(b1a, b2a) - G.FILLER, 9, -0.02), P(max(b1b, b2b) + G.FILLER, 9, -0.02), "#000", 1, 'stroke-opacity="0.2"'))   # v38: the plinth's line under bays 1 and 2
     # the hidden slim drawer in the plinth under bay 2: a push-to-open front in the bottom rail
     pxa, pxb = G.PLINTH_DRAWER["x"]
     pya, pyb = G.PLINTH_DRAWER["y"]
     o.append(quad_front(pxa, pya, -0.03, pxb - pxa, pyb - pya, "none", 'stroke="#000" stroke-opacity="0.32" stroke-width="1.2"'))
     if PLINTH_OPEN > 0:
         o.append(plinth_drawer(PLINTH_OPEN))
-    o.append(place(G.FILLER, RAISE, 0, lambda: game_drawer(GAME_OPEN) if GAME_OPEN > 0 else game_drawer(0, "lip")))
+    o.append(place(G.BAYS[0][0], RAISE, 0, lambda: game_drawer(GAME_OPEN) if GAME_OPEN > 0 else game_drawer(0, "lip")))
     o.append(record_tier(G.TRAY_UPPER[0], REC_OPEN_UP) if REC_OPEN_UP > 0 else record_tier(G.TRAY_UPPER[0], 0, "lip"))
     o.append(record_tier(G.TRAY_LOWER[0], REC_OPEN) if REC_OPEN > 0 else record_tier(G.TRAY_LOWER[0], 0, "lip"))
     for k, d in enumerate(G.SLIM_DRAWERS):
         o.append(slim_drawer(d, SLIM_OPEN) if (k == 1 and SLIM_OPEN > 0) else slim_drawer(d, 0, "lip"))
     o.append(worktop_top(0, ALC_W, G.BASE_D))
     # brush-lined cable slot behind the TV, and a grommet behind the deck
-    o.append(poly([P(14, 76.02, 41), P(120, 76.02, 41), P(120, 76.02, 44.5), P(14, 76.02, 44.5)], "#2a1f16", 'opacity="0.85"'))
-    o.append(ellipse_flat(160.75, 76.02, 42.5, 3.0, 1.6, "#2a1f16", 'opacity="0.85"'))
+    sl0, sl1 = G.TV_CX - 53.75, G.TV_CX + 52.25                              # v38: the slot follows the TV, the grommet the deck
+    o.append(poly([P(sl0, 76.02, 41), P(sl1, 76.02, 41), P(sl1, 76.02, 44.5), P(sl0, 76.02, 44.5)], "#2a1f16", 'opacity="0.85"'))
+    o.append(ellipse_flat((G.DECK_X[0] + G.DECK_X[1]) / 2, 76.02, 42.5, 3.0, 1.6, "#2a1f16", 'opacity="0.85"'))
     return "\n".join(o)
 
 
@@ -2085,7 +2104,7 @@ def wall_shadows():
     o = [quad_front(0, WORKTOP, ALC_D - 0.05, 7, CEIL - WORKTOP, "url(#shadeL)"),
          quad_front(ALC_W - 7, WORKTOP, ALC_D - 0.05, 7, CEIL - WORKTOP, "url(#shadeR)")]
     for (x1, x2, yu, dh) in [(0, ALC_W, G.HIGH_UNDER, 7), (UP_L[1], UP_R[0], G.LEDGE_UNDER, 5),
-                             (RZ[0], ALC_W, G.RZ_SHELF_TOP - G.RZ_SHELF_T, 6)]:
+                             (RZ[0], RZ[1], G.RZ_SHELF_TOP - G.RZ_SHELF_T, 6)]:
         o.append(quad_front(x1, yu - dh, ALC_D - 0.1, x2 - x1, dh, "url(#shadeDown)"))
     return "\n".join(o)
 
@@ -2183,34 +2202,36 @@ def services(show_hidden):
     o = []
     GOLD, CORAL = "#ffd37a", "#ff9b7a"
     bf = G.BASE_FRONT_Z
-    groove_x = UP_R[0] + 2.25
-    gang = (12, WORKTOP + 1, 34)
+    groove_x, deco_x = RZ_GX, UP_R[0] + 2.25
+    gang = (MX(12), WORKTOP + 1, 34)
     # Deco B's leads: along the shelf, down the groove behind the right upright, through the worktop to the 10-gang and Switch 2
-    o.append(path([(176, G.HIGH_TOP + 1, 31), (groove_x, G.HIGH_TOP + 1, ALC_D - 0.5), (groove_x, 77, ALC_D - 0.5),
-                   (groove_x, 70, 35), (60, 70, 35), (40, WORKTOP + 1, 34)], GOLD))
+    o.append(path([(DECO_X + 5, G.HIGH_TOP + 1, 31), (deco_x, G.HIGH_TOP + 1, ALC_D - 0.5), (deco_x, 77, ALC_D - 0.5),
+                   (deco_x, 70, 35), (MX(60), 70, 35), (MX(40), WORKTOP + 1, 34)], GOLD))
     # Cat6 from the airing cupboard above, through the ceiling in the alcove's right corner
     o.append(path([(ALC_W - 2.5, CEIL, ALC_D - 2.5), (ALC_W - 2.5, G.HIGH_TOP + 6, ALC_D - 2.5), (182, G.HIGH_TOP + 6, 28)], GOLD))
     # vinyl: deck -> preamp under the shelf -> down the groove -> along the back of the worktop -> soundbar AUX
     pre = (RZ[0] + 9, G.RZ_SHELF_TOP - 7, 30)
     o.append(path([(G.DECK_X[0] + 34, 86, 28), (G.DECK_X[0] + 34, 110, 33), pre], GOLD, 2.0))
-    o.append(path([pre, (groove_x, 125, ALC_D - 0.5), (groove_x, 77, ALC_D - 0.5), (100, 77, 33), (100, 77, 4), (G.TV_CX + 30, 79, 1)], GOLD, 2.0))
+    o.append(path([pre, (groove_x, 125, ALC_D - 0.5), (groove_x, 77, ALC_D - 0.5), (MX(100), 77, 33), (MX(100), 77, 4), (G.TV_CX + 30, 79, 1)], GOLD, 2.0))
     # Series X: HDMI and power down the groove
-    o.append(path([(160, G.RZ_SHELF_TOP + 3, 33), (groove_x + 0.5, G.RZ_SHELF_TOP + 3, ALC_D - 0.5), (groove_x + 0.5, 78, ALC_D - 0.5), (118, 78, 34)], GOLD, 1.8))
+    sxc = (G.SX_X[0] + G.SX_X[1]) / 2
+    o.append(path([(sxc, G.RZ_SHELF_TOP + 3, 33), (groove_x + 0.5, G.RZ_SHELF_TOP + 3, ALC_D - 0.5), (groove_x + 0.5, 78, ALC_D - 0.5), (MX(118), 78, 34)], GOLD, 1.8))
     # PC: HDMI down the trunking, along the skirting, into the plinth notch and the channel
     o.append(path([(1.2, G.PC_SHELF_TOP - 6, G.PC_SHELF_Z[1] + 3), (1.2, 8, G.PC_SHELF_Z[1] + 3), (1.2, 8, bf - 0.5), (5, 5, 36), (110, 5, 36), (110, 77, 34)], GOLD, 2.0))
     # mains from the side-wall socket: left outlet to the 10-gang behind the TV, right outlet (the retro switch) to the 6-way
-    o.append(path([(1.5, 4, G.SOCKET["z"] - 2), (1.5, 4, bf - 0.5), (4, 4, bf + 20), (4, 4, 35), (14, 6, 35), (14, 77, 33), gang], CORAL, 2.0))
-    o.append(path([(1.5, 3, G.SOCKET["z"] + 2), (1.5, 3, bf - 0.5), (6, 3, 36), (66, 3, 36)], CORAL, 2.0))
+    o.append(path([(1.5, 4, G.SOCKET["z"] - 2), (1.5, 4, bf - 0.5), (1.5 if G.MW_SWAP else 4, 4, bf + 20), (1.5 if G.MW_SWAP else 4, 4, 35), (MX(14), 6, 35), (MX(14), 77, 33), gang], CORAL, 2.0))
+    o.append(path([(1.5, 3, G.SOCKET["z"] + 2), (1.5, 3, bf - 0.5), (6, 3, 36), (MX(66) if not G.MW_SWAP else MX(44), 3, 36)], CORAL, 2.0))
     # the sub's mains from the 10-gang: down the slot, along the channel to bay 3's end, out at the reveal, along the breast's skirting
     if G.SUB_IN_WALL:   # v13.5: the sub's lead from the 10-gang, down the slot to the back of bay 2
         sx = (G.SUB_IN["x"][0] + G.SUB_IN["x"][1]) / 2
-        o.append(path([(20, 77, 34), (20, 4, 36), (sx, 4, 36), (sx, G.SUB_IN["y"][0] + 4, G.SUB_IN["z"][1] + 1)], CORAL, 1.8))
+        o.append(path([(MX(20), 77, 34), (MX(20), 4, 36), (sx, 4, 36), (sx, G.SUB_IN["y"][0] + 4, G.SUB_IN["z"][1] + 1)], CORAL, 1.8))
     else:
         sx = G.SUB_POS["x"][0] + 4
         o.append(path([(20, 77, 34), (20, 4, 36), (182, 4, 36), (185, 4, -1), (sx, 4, -1)], CORAL, 1.8))
     # the 10-gang lying behind the TV; the retro 6-way in the channel (behind bay 1 now: bay 2's back is the sub's port)
     six = (10, 1, 44, 5.5, 36) if G.SUB_IN_WALL else (66, 1, 100, 5.5, 36)
     for (xa, ya, xb, yb, z) in ((10, WORKTOP, 66, WORKTOP + 4.5, 34), six):
+        xa, xb = sorted((MX(xa), MX(xb)))
         p1, p2 = P(xa, ya, z), P(xb, yb, z)
         o.append(f'<rect x="{p1[0]:.1f}" y="{p2[1]:.1f}" width="{p2[0]-p1[0]:.1f}" height="{p1[1]-p2[1]:.1f}" fill="{GOLD}" fill-opacity="0.15" stroke="{GOLD}" stroke-width="2" stroke-dasharray="6 4"/>')
     return "\n".join(o)
@@ -2226,8 +2247,8 @@ def dimensions():
     o.append(dim_line(a, b, f"chimney breast {G.BREAST_W:g} · the dining wall", ((a[0] + b[0]) / 2, a[1] + 20)))
     a, b = P(RZ[0], 224, 0), P(RZ[1], 224, 0)
     o.append(dim_line(a, b, f"{G.RZ_W:g} · turntable zone", ((a[0] + b[0]) / 2, a[1] - 8), size=14))
-    a, b = P(0, 224, 0), P(G.TV_CX, 224, 0)
-    o.append(dim_line(a, b, f"TV centre {G.TV_CX:g} from the side wall (was 93)", ((a[0] + b[0]) / 2, a[1] - 8), size=14))
+    a, b = P(0, 214, 0), P(G.TV_CX, 214, 0)
+    o.append(dim_line(a, b, f"TV centre {G.TV_CX:g} from the side wall", ((a[0] + b[0]) / 2 + (40 if G.MW_SWAP else 0), a[1] - 8), size=14))
     lx = BX1 + 2
     a, b = P(lx, 0, 0), P(lx, CEIL, 0)
     o.append(_line(a, b, LC, 1.2, 'stroke-opacity="0.6"'))
@@ -2244,9 +2265,10 @@ def dimensions():
         o.append(text(p[0] + 10, p[1] + 4.5 + dy, lab, size=14.5))
     # bays along the floor in front of the base
     zf = bf - (max(GAME_OPEN, REC_OPEN) + 4 if max(GAME_OPEN, REC_OPEN) > 0 else 1)
-    edges = [G.BAYS[0][0], G.BAYS[1][0], G.BAYS[2][0], G.BAYS[2][1]]
+    named = sorted(zip(G.BAYS, ["60 · Xbox bay + game drawer", "60 · PlayStation bay", "60 · record trays"]))
+    edges = [b[0] for b, _ in named] + [named[-1][0][1]]
     o.append(_line(P(edges[0], 0, zf), P(edges[-1], 0, zf), LC, 1.2, 'stroke-opacity="0.7"'))
-    labels = ["60 · Xbox bay + game drawer", "60 · PlayStation bay", "60 · record trays"]
+    labels = [n for _, n in named]
     for i, e in enumerate(edges):
         p = P(e, 0, zf)
         o.append(f'<line x1="{p[0]:.1f}" y1="{p[1] - 5:.1f}" x2="{p[0]:.1f}" y2="{p[1] + 5:.1f}" stroke="{LC}" stroke-opacity="0.75" stroke-width="1.2"/>')
@@ -2259,7 +2281,7 @@ def dimensions():
     a, b = P(x0, 0, zt), P(x1, 0, zt)
     o.append(dim_line(a, b, f"oak table {G.TABLE[0]:g} × {G.TABLE[1]:g}, folds up", ((a[0] + b[0]) / 2, a[1] + 20), size=14))
     if GAME_OPEN > 0:
-        x_ = G.FILLER + 58.4
+        x_ = G.BAYS[0][0] + 55.4
         a, b = P(x_, 0.2, bf - 0.6), P(x_, 0.2, bf - GAME_OPEN - 0.6)
         o.append(dim_line(a, b, op=0.75))
         o.append(text(b[0] - 12, b[1] - 2, f"rolls out {GAME_OPEN:g} cm", size=11.5, anchor="end"))
@@ -2371,15 +2393,16 @@ H_ = "H"
 JOIN_KEY = [
     (H_, "Oak joinery"),
     (1, (UP_R[0] + 2.25, 205, 8), f"Solid oak uprights, 4.5 × 30, worktop to ceiling ({G.UPRIGHT_LEN:g} long)"),
+    (2, ((UP_R[0] + UP_R[1]) / 2, 140, 8), "The right upright is a corner post against the breast") if G.MW_SWAP else
     (2, (2.25, 140, 8), "The left upright is a corner post against the side wall"),
-    (3, (UP_R[0], G.RZ_SHELF_TOP - 2, TENON_Z[0]), f"Flush wedged tenons carry the Series X shelf ({G.RZ_SHELF_TOP:g})"),
-    (4, (50, 214, 20), f"High shelf, top {G.HIGH_TOP:g}: books up to 30 cm"),
+    (3, (UP_L[1] if G.MW_SWAP else UP_R[0], G.RZ_SHELF_TOP - 2, TENON_Z[0]), f"Flush wedged tenons carry the Series X shelf ({G.RZ_SHELF_TOP:g})"),
+    (4, (UP_L[1] + 8 if G.MW_SWAP else 50, 214, 20), f"High shelf, top {G.HIGH_TOP:g}: books up to 30 cm"),
     (5, (G.TV_CX, 172, 34), "Record ledge above the TV: 4 LPs face-out"),
     (6, (3.5, 172, -60), "The oak run wraps the corner: 4 more LPs face-out"),
     (7, (UP_R[0], 104, 22), "LED groove in each upright: a smart colour strip washes the wall"),
-    (8, (RZ[0] + 12.6, 207, 31), "High shelf, right: a small framed sleeve"),
+    (8, (RZ[0] + 12.6, 207, 31), "High shelf, over the turntable: a small framed sleeve"),
     (H_, "On the worktop"),
-    (9, (40, 140, 26), f"LG OLED C6 55in · centre {G.TV_CENTRE:.1f} · now {G.TV_SHIFT:.0f} cm nearer the side wall"),
+    (9, (G.TV_X[0] + 35, 140, 26), f"LG OLED C6 55in · centre {G.TV_CENTRE:.1f} high, {G.TV_CX:g} from the side wall"),
     (10, (G.TV_CX - 30, 79, -7), "Soundbar · eARC, optical and AUX inputs"),
     (11, (G.DECK_X[0] + 14, 94, G.DECK_Z[0] + 4), "Turntable (AT-LP120X size allowed) · lid clear to 130"),
     (12, (G.SX_X[0] + 10, 156, 16), "Xbox Series X on its fan stand · 15 cm air each side"),
@@ -2387,16 +2410,16 @@ JOIN_KEY = [
     (14, (180, 74.6, G.BASE_FRONT_Z), f"Solid oak worktop {G.ALC_W:g} × {G.BASE_D:g} × 3, top at 76"),
     (H_, "In the alcove base"),
     (15, (93, 5, G.BASE_FRONT_Z), "Oak face frame; its bottom rail hides the 9 cm plinth"),
-    (16, (23, 59.4, G.BASE_FRONT_Z + 6), "Xbox One + HDMI switch · its brick flat at the back" if G.SUB_IN_WALL else "Xbox One + power brick · bay 1 top row"),
-    (17, (23, 41.6, G.BASE_FRONT_Z + 6), "Xbox 360 + RetroTINK · its brick flat at the back" if G.SUB_IN_WALL else "Xbox 360 + power brick · bay 1 middle row"),
-    (18, (15, 24, "drawer"), "Game drawer: 2 face-out bins, spine-up rows behind"),
+    (16, (23 + B1X, 59.4, G.BASE_FRONT_Z + 6), "Xbox One + HDMI switch · its brick flat at the back" if G.SUB_IN_WALL else "Xbox One + power brick · bay 1 top row"),
+    (17, (23 + B1X, 41.6, G.BASE_FRONT_Z + 6), "Xbox 360 + RetroTINK · its brick flat at the back" if G.SUB_IN_WALL else "Xbox 360 + power brick · bay 1 middle row"),
+    (18, (15 + B1X, 24, "drawer"), "Game drawer: 2 face-out bins, spine-up rows behind"),
     (19, (83, 52.5, G.BASE_FRONT_Z + 6), "PS3 + controller basket · bay 2 top row"),
     (20, (106, 33.3, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (83, 33.3, G.BASE_FRONT_Z + 6), "PS2 · bay 2, beside the sub" if G.SUB_IN_WALL else "PS2 + HDMI switch · bay 2 middle row"),
     (21, (106, 15.5, G.BASE_FRONT_Z + 6) if G.SUB_IN_WALL else (78, 15.5, G.BASE_FRONT_Z + 6), "PS1 · under the PS2" if G.SUB_IN_WALL else "PS1 + RetroTINK · bay 2 bottom row"),
-    (22, (162.5, 56, G.BASE_FRONT_Z + 1), f"Upper record tray: an LP crate, ~{G.TRAY_LPS} face-out, under the turntable"),
-    (23, (162.5, 22, "tray"), "Lower LP crate: the same, shown pulled out"),
-    (23, (133.7, 62, G.BASE_FRONT_Z + 1), "Slim drawer: pads and remotes, a charging lead"),
-    (23, (133.7, 30, G.BASE_FRONT_Z + 1), f"Two slim game drawers: ~{G.SLIM_DRAWERS[0]['n']} games each, face-out"),
+    (22, (162.5 + B3X, 56, G.BASE_FRONT_Z + 1), f"Upper record tray: an LP crate, ~{G.TRAY_LPS} face-out, under the turntable"),
+    (23, (162.5 + B3X, 22, "tray"), "Lower LP crate: the same, shown pulled out"),
+    (23, (133.7 + B3X, 62, G.BASE_FRONT_Z + 1), "Slim drawer: pads and remotes, a charging lead"),
+    (23, (133.7 + B3X, 30, G.BASE_FRONT_Z + 1), f"Two slim game drawers: ~{G.SLIM_DRAWERS[0]['n']} games each, face-out"),
     (24, (93, 4.6, G.BASE_FRONT_Z - 0.1), "Hidden slim drawer in the plinth, finger pull"),
     *([(34, ((G.SUB_IN["x"][0] + G.SUB_IN["x"][1]) / 2, 36, G.SUB_IN["z"][0]), "Sub · bay 2, under the TV, on an isolation riser")] if G.SUB_IN_WALL else []),
     (H_, "The chimney breast (the table is by the stairs)"),
@@ -2409,9 +2432,9 @@ JOIN_KEY = [
     (33, (0.3, 120, -160), "PC cables chased into the wall: no spine, no trunking"),
     (33, (14, G.PC_SHELF_TOP - 8, -160), "Keyboard tray under the shelf, rolls out (v6.1)"),
     (H_, "Power, network and light"),
-    (36, (ALC_W - 9.5, 203, 22), "Deco B: leads in the groove behind the right upright"),
+    (36, (DECO_X + 5.5, 203, 22), "Deco B: leads in the groove behind the right upright"),
     (37, (0.3, 36, G.SOCKET["z"]), "Double socket: its right switch is the retro switch"),
-    (38, (38, 78.6, 34), "10-gang extension, hidden behind the TV"),
+    (38, (MX(38), 78.6, 34), "10-gang extension, hidden behind the TV"),
     (39, (95, CEIL - 0.6, ALC_D - 0.8), "LED strip round the ceiling edge (as now)"),
     (40, (G.PEND_X, 226, G.PEND_Z), "Smart spot bar on the existing rose, TV to window"),
     (41, (G.BAR2_X, 222, G.BAR2_Z), "Second smart spot bar, existing point by the door"),
@@ -2474,7 +2497,7 @@ def callouts(items):
 
 
 KEYW = 660
-INSET_DRAWER = (24, 905)
+INSET_DRAWER = (1840, 820) if G.MW_SWAP else (24, 905)   # v38: by the stairs, clear of the records bay
 INSET_RECORD = (330, -127)
 
 
@@ -2545,7 +2568,7 @@ def _build(with_dims=True, numbered=False, game_open=0.0, rec_open=0.0, style="j
     o.append('</svg>')
     if numbered:
         title = "Key: artisan oak media wall" if STYLE == "joinery" else "Key: slat wall alternative"
-        o.append(key_panel2(W, key, title, f"v16 · LP crates and a slim game column in bay 3 · TV {G.TV_SHIFT:.0f} cm nearer the side wall · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
+        o.append(key_panel2(W, key, title, f"v38 · TV in line with the sofa · turntable, Series X and records on the left · alcove 186 × 38, ceiling 235 · sizes in cm", step=23.4))
     o.append('</svg>')
     return repaint("\n".join(o))
 
@@ -2704,7 +2727,7 @@ def media_end_on():
     o.append(tv())
     o.append(box(G.TV_CX - G.SOUNDBAR[0] / 2, WORKTOP, bf + 2, G.SOUNDBAR[0], G.SOUNDBAR[1], G.SOUNDBAR[2], "#1b1b1c", "#2a2a2c", "#121213"))
     o.append(box(UP_R[0], WORKTOP, zf, G.UP_T, CEIL - WORKTOP, G.UP_D, OAK, OAK_T, OAK_S, extra=GV))
-    o.append(box(UP_R[1], G.HIGH_UNDER, zf, ALC_W - UP_R[1], G.HIGH_T, G.HIGH_D, OAK, OAK_T, OAK_S, extra=GH))
+    o.append(box(RZ[0], G.HIGH_UNDER, zf, RZ[1] - RZ[0], G.HIGH_T, G.HIGH_D, OAK, OAK_T, OAK_S, extra=GH))   # v38: over the turntable zone
     o.append(rz_slats())
     o.append(rz_shelf())
     o.append(deck())
