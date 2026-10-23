@@ -26,8 +26,8 @@ differing designs so we can decide if we want it in future" (item 12).
 
    Plus, from the brief, **the bar built in beside the dining cabinet**. "Your picks" doesn't list what stands beside the cabinet, which
    is why it isn't in the note; make Your picks name the beside choice too (item 11).
-2. **"Edit orientation" (open).** We've read this as turning each light's head (where each spot points). If you also meant turning
-   furniture to any angle (today Edit room turns in 90° and 45° steps), say so; it's in item 6 as an extra.
+2. **"Edit orientation" (answered, 23 Oct):** "Turning the light fixture as a whole as well as the light heads": each fixture turns
+   as a whole (the two spot bars on their ceiling roses, the red lamp on its base), and each head turns and tilts on its own (item 6).
 3. **"The storage shelves on the wall" (answered by the picks):** all four stay: the alcove shelves, the wall cabinets, the shelf
    over the door and the boxes on your black shelf.
 4. **One measurement for the media wall swap (open):** how far the socket on the side wall is from the alcove's back wall, and how
@@ -129,16 +129,30 @@ paints and Any colour); in Edit room a tap paints only that wall, with **Same as
 layout carry it. The plan's paint section and buy list work out each colour's area from the geometry (less the window and the
 door) and the tins it needs (two coats).
 
-## 6. The lights: each lamp on its own, and where it points
+## 6. The lights: each fixture and each lamp, turned and set on its own
 
-**Today:** sliders per group (strips, uprights, bias, bar 1, bar 2, the red lamp), a colour per group, the heads aimed by the plan.
+**Today:** sliders per group (strips, uprights, bias, bar 1, bar 2, the red lamp), a colour per group; the bars are fixed "TV to
+window" (since v15) and the heads aimed by the plan.
 
-**New:** tap a spot bar or the red lamp and its card lists **each head**: on/off, brightness, colour and its **aim** (two sliders:
-turn and tilt, with a line on the floor showing where it lands; or drag the line). The presets still set everything, and "adjusted"
-shows when you've changed one. Keep v35's rule: a head that's off is turned down, not hidden, and aiming moves a target, so the
-graphics card makes no new shaders (`qa.py` checks it). Stills and links carry the per-head settings.
+**New**, from the client's answer ("Turning the light fixture as a whole as well as the light heads"): tap a spot bar or the red
+lamp and its card has two parts.
 
-**If question 2 says furniture too:** Edit room's selection gets a turn slider (15° steps, 1° with a key held) beside ⟳ and 45°.
+- **The fixture:** a **turn** dial for the whole fixture. Spot bar 1 and bar 2 turn on their ceiling roses (the 84 bar's ends sweep a
+  42 circle), in 15° steps, or freely with a key held; the red lamp turns on its base, its three heads with it, and still moves in Edit
+  room. **Reset** puts the fixture back to the plan's angle.
+- **Each head:** on/off, brightness, colour and its **aim** (turn and tilt sliders, with a line on the floor showing where it lands; or
+  drag the line). The bars' heads are adjustable on the real fitting (Dunelm Wolston: "adjustable heads"); the red lamp's three heads
+  likewise.
+- **Checks:** a turned bar must clear what's near it: bar 2 runs close to the stairs wall and its shelf, and over the table it lifts
+  for dinner. The clash check (item 10) covers each bar's sweep circle at its height, with a warning on the card if an angle hits the
+  wall, the shelf or the open table door. The plan's lighting section and its drawings say the bars' angles if they change from "TV to
+  window".
+- **The rules that stay:** the presets still set everything ("adjusted" shows when you've changed something); v35's fixed set of
+  lights holds (off means turned down, a turn moves the fixture's group and its lights' targets), so the graphics card makes no new
+  shaders (`qa.py` checks it). Stills, the saved layout and **Copy link to this view** carry every fixture's angle and every head's
+  settings.
+
+**Furniture too (an extra):** Edit room's selection gets the same turn dial (15° steps, free with a key held) beside ⟳ and 45°.
 
 ## 7. Cheap existing items first: the build and buy guides
 
@@ -224,7 +238,7 @@ plan's options table if you want it.
 
 ## 13. Order of work
 
-1. `geometry.FIRM` from section 0's picks (ask the two open questions in the same message as the design canvas, step 6).
+1. `geometry.FIRM` from section 0's picks (ask the one open question, the socket, with the design canvas in step 6).
 2. Item 10's clash check first, so every later change is checked as it's made.
 3. Item 2 (the door and the bar), then item 3 (the media wall swap, on its own branch, the main view checked before carrying on).
 4. Items 4, 5 and 6 (the stairs, the walls, the lights), then item 12 (the ceiling designs).
