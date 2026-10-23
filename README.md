@@ -98,7 +98,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 - **The brick under the stairs is painted**, as it has a wall in front of it.
 - **Edit room:** the flip-top's chair cupboard can come off the wall (select it, Remove; + Add puts it back). Things clip to a wall from 15 cm away (was 5), a quarter turn keeps a piece against its wall, and **Back to the wall** turns a piece and pushes it flat against the nearest wall.
 
-![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v37%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
+![The compact dining cabinet open for six](media-wall/out/Media%20wall%20v38%20-%203D%20-%20THE%20COMPACT%20DINING%20CABINET%20-%20open%20for%20six,%20the%20table%20door%20back%20flat%20-%20bright,%20table%20rule%20(HD).png)
 
 **v26** (option C, the dining cabinet; up to eight at the table; a tidier Tools panel)
 - **Option C, a second way to build the dining wall** (the flip-top stays the plan): one oak cabinet under your shelf. The table, 225 × 90 open, stands up in one bay; all eight folding chairs fold into the other, behind two doors. Packed away, nothing shows. In the 3D room: Tools, Layout, "C: the dining cabinet".
@@ -296,8 +296,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v37.pdf`](media-wall/out/Home_Network_Plan_v37.pdf) (116 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v37.pdf`](media-wall/out/Build_Guide_v37.pdf) (53 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v38.pdf`](media-wall/out/Home_Network_Plan_v38.pdf) (116 pages: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, build guide, buy list, sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v38.pdf`](media-wall/out/Build_Guide_v38.pdf) (53 pages: tools, techniques, order of work, step by step, each step with its own cut list and pictures)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
 - **Interactive viewer:** the Claude artifact, https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2 (your own account, still at v32 until it's republished: the room in 3D, the plan's chapters, build steps, buy tracker, the fit proof). A v13.6 copy was published from another account to QRfYUvbPVQpSHFgaDN4YMU; this one is the one to use. `index.html` at the root is the same page for GitHub Pages.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
