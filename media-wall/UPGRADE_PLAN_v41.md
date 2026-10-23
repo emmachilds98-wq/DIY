@@ -4,6 +4,13 @@ Client (23 Oct): "continue on from v40 now. Improve the build further and optimi
 upgrade." Starts from `main` at v40. The standing rules hold: the core plan (`geometry.FIRM`) gets the full build; options stay
 one line each; say less; no HD stills; no new shaders while the room is in use.
 
+## 0. Your banister (added 23 Oct, done first)
+
+From your photo: **a plain square post at the foot of the stairs and two flat slats raking up from it to the wall by the door, no
+spindles**, white like the capping of the low wall under them. The 3D room, the drawings and the plan's room table now show that
+(`geometry.BANISTER`: slat tops 90 and 52 above the nosings, 9 tall, 2.5 thick; the post 9 × 9, 112 tall). The photo is the
+source (`inputs/photo_stairs_banister_23oct.jpg`).
+
 ## What the review found
 
 **The build**

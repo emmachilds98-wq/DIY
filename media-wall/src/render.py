@@ -946,7 +946,7 @@ def west_end(sk):
     ry = lambda z: max(rise, (z - za) / going * rise)
     sb = lambda z: max(0.0, ry(z) - G.STAIR_STRING)
     def string(z1, z2):
-        return poly([P(sx0 - 0.6, sb(z1), z1), P(sx0 - 0.6, sb(z2), z2), P(sx0 - 0.6, ry(z2), z2), P(sx0 - 0.6, ry(z1), z1)], "#9c6a3f")   # v17: 0.6 off the risers
+        return poly([P(sx0 - 0.6, sb(z1), z1), P(sx0 - 0.6, sb(z2), z2), P(sx0 - 0.6, ry(z2), z2), P(sx0 - 0.6, ry(z1), z1)], G.BANISTER["col"][0])   # v41: painted white, as in your photo
     # v27, client: "paint the bricking on the stairs it has wall infront": the brick is behind a wall, so it's painted like the room
     def brick(z1, z2):
         return poly([P(sx0 - 0.5, 0, z1), P(sx0 - 0.5, 0, z2), P(sx0 - 0.5, sb(z2), z2), P(sx0 - 0.5, sb(z1), z1)], "url(#leftwall)")
@@ -964,34 +964,25 @@ def west_end(sk):
         return poly([P(xa, yfn(z1), z1), P(xb, yfn(z1), z1), P(xb, yfn(z2), z2), P(xa, yfn(z2), z2)], col)
     def side(x, yt, yb, z1, z2, col):           # a raking strip's side face at x, between two heights
         return poly([P(x, yb(z1), z1), P(x, yb(z2), z2), P(x, yt(z2), z2), P(x, yt(z1), z1)], col)
-    def rail(z1, z2):
-        top, bot = (lambda z: hy(z) + 1.0), (lambda z: hy(z) - 4.5)
-        return [side(xc + 3.25, top, bot, z1, z2, WOOD_S), side(xc - 3.25, top, bot, z1, z2, WOOD), rake(xc - 3.25, xc + 3.25, top, z1, z2, WOOD_T)]
-    def base_rail(z1, z2):
+    BN = G.BANISTER; WH, WH_T, WH_S = BN["col"]; ht = BN["slat_t"] / 2
+    def rail(z1, z2):                            # v41, your photo: two flat slats on edge, white, no spindles between them
+        q = []
+        for above, hh in BN["slats"]:
+            top, bot = (lambda z, a=above: ry(z) + a), (lambda z, a=above, h_=hh: ry(z) + a - h_)
+            q += [side(xc + ht, top, bot, z1, z2, WH_S), side(xc - ht, top, bot, z1, z2, WH), rake(xc - ht, xc + ht, top, z1, z2, WH_T)]
+        return q
+    def base_rail(z1, z2):                       # the low wall's capping, white
         top, bot = (lambda z: ry(z) + 3.0), ry
-        return [side(sx0 + 1.9, top, bot, z1, z2, WOOD_S), side(sx0 - 3.1, top, bot, z1, z2, WOOD), rake(sx0 - 3.1, sx0 + 1.9, top, z1, z2, WOOD_T)]
-    zt, zend = za + nw, za + 9 * going
-    far += base_rail(zb, zend)
+        return [side(sx0 + 1.9, top, bot, z1, z2, WH_S), side(sx0 - 3.1, top, bot, z1, z2, WH), rake(sx0 - 3.1, sx0 + 1.9, top, z1, z2, WH_T)]
+    zt = za + nw                                 # v41, your photo: the slats run from the post up to the wall by the door, and stop there
+    far += base_rail(zb, sz + 6 + (G.STAIR_N - 1) * going)
     near += base_rail(zt, zb)
-    z = zt + 5.25
-    while z < zend - 2:
-        (far if z >= zb else near).append(box(xc - 1.6, ry(z) + 3.0, z - 1.6, 3.2, hy(z) - 4.5 - ry(z) - 3.0, 3.2, "#c79a6b", "#d8ad80", "#a37a50"))
-        z += 10.5
-    far += rail(zb, zend)
     near += rail(zt, zb)
     o.append(f'<g clip-path="url(#{cid})">' + "\n".join(far) + '</g>')
     o.extend(near)
-    def newel(x, z, h):
-        q = [box(x, 0, z, nw, h, nw, WOOD, WOOD_T, WOOD_S),
-             box(x - 1, h, z - 1, nw + 2, 3, nw + 2, WOOD_T, WOOD_T, WOOD_S)]                      # the cap, 11 × 11 × 3
-        cx_, cz_, ty = x + nw / 2, z + nw / 2, h + 3
-        apex = P(cx_, ty + 3.5, cz_)
-        corners = [(x - 1, z - 1), (x + nw + 1, z - 1), (x + nw + 1, z + nw + 1), (x - 1, z + nw + 1)]
-        for k in range(4):                                                                            # the low pyramid on top
-            a_, b_ = corners[k], corners[(k + 1) % 4]
-            q.append(poly([P(a_[0], ty, a_[1]), P(b_[0], ty, b_[1]), apex], WOOD_T if k % 2 else WOOD))
-        return "\n".join(q)
-    o.append(newel(sx0 - nw / 2, sz, rail_h + 22))    # client: "i have no bannister or rail on wall side, only on the side closest into the room"
+    def newel(x, z, h):                          # v41, your photo: a plain square post, flat-topped, white
+        return box(x, 0, z, nw, h, nw, WH, WH_T, WH_S)
+    o.append(newel(sx0 - nw / 2, sz, BN["newel_h"]))    # client: "i have no bannister or rail on wall side, only on the side closest into the room"
     return "\n".join(o)
 
 

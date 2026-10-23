@@ -1164,7 +1164,7 @@ def _plan(deck=False):
 <tr><td>Window and radiator (north wall)</td><td class="num">2350 · 1370</td><td>Window starts 730 from the east wall; radiator ends 130 inside its west end; the glass from {n(g.WINDOW_Y[0]*10)} to {n(g.WINDOW_Y[1]*10)} up, set {n(g.WINDOW_REVEAL*10)} back in its reveal over a deep sill (v17, from your note; the depth is drawn, please check it)</td></tr>
 <tr><td>Skirting</td><td class="num">60 × 20</td><td>White now; Card Room Green eggshell in the plan</td></tr>
 <tr><td>West end: recess, door, stair box</td><td class="num">935 / 1045 / 660 / 820</td><td>Drawn roughly: please confirm which is which</td></tr>
-<tr><td>Stairs, beside the door</td><td class="num">820 wide</td><td>They go <b>up</b> to the first floor (you confirmed), behind a wooden banister; drawn rising away from the room until you send a photo</td></tr>
+<tr><td>Stairs, beside the door</td><td class="num">820 wide</td><td>They go <b>up</b> to the first floor, rising away from the room; on the room side a low white wall with your banister above it, from your photo: a square post at the foot and two flat slats up to the wall by the door<sup>{fit.ORDER.index("photo23stairs") + 1}</sup></td></tr>
 </table>
 <p><b>From the sofa:</b> from the middle of the long side your eyes are about {s["view_dist"]/100:.2f} m from the screen, which a 55-inch fills at about {s["view_angle"]:.0f}°: right for TV and games. It's about {abs(s["sofa_mid_off_axis_deg"]):.0f}° off-centre; the screen's centre is just above a seated eye line. The lowest spot shade is at {n(g.CEIL - g.BAR[2])} cm.</p>
 <h3>Your new storage ottoman</h3>

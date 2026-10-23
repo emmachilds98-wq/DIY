@@ -1164,6 +1164,9 @@ SOURCES["shelfgap"] = ("Client, 22 Oct 2026: \"The shelf on the wall alongside t
                        "actually installed\" (facing the stairs wall, the right-hand wall at the shelf's height is the pipe boxing's side)")
 SOURCES["worktop"] = ("Homebuilding & Renovating: the UK's usual worktop height is 900 mm to the top (homebuilding.co.uk/advice/kitchen-worktop-height); "
                       "a raised bar counter 1000 to 1200")
+SOURCES["photo23stairs"] = ("Your photo of the stairs (23 Oct 2026, inputs/photo_stairs_banister_23oct.jpg): a square newel post at the foot, two flat "
+                            "slats raking up from it to the wall by the door, no spindles; a low white wall with a capping under them")
+ORDER.append("photo23stairs")
 SOURCES["persillade"] = ("IKEA UK: PERSILLADE plant pot, 12 cm, £3 (003.157.26); the range runs to 24 cm (ikea.com/gb)")
 ORDER.append("persillade")
 SOURCES["elhoinsert"] = ("elho: self-watering insert, 15 cm across, 12 cm high, holds 1.2 litres, for a 16–17 cm pot, £6.99 (elho.com)")
