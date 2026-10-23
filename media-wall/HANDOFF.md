@@ -1,6 +1,11 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Round 39 (v44, below; `UPGRADE_PLAN_v44.md` done): Build in one card per thing you make (Buy · Cut · Build), Plan and Buy
+  trimmed with How to make it from Buy and the room, the C-table's own guide chapter, the plan PDF 34 pages, AgX colour and sharper HD
+  on real graphics cards.** Fit 92/22/12/0, £4,382–8,260. Plan 34 pages, guide 61. Merged to main in four steps (#50–#53). Next version
+  number: 45. **Next:** the client's "save each set-up" (round 33), then the side-wall socket. **Never write the cap's poem out in code
+  or text.**
 - **Round 38 (v43, below; `UPGRADE_PLAN_v43.md` done): the C-table is in the plan (built, steel-weighted foot: the sofa sits on the
   floor), the window sill's plants as the client has them (small left, tall middle, spider plants right), the plant stand our pick,
   a rubber plant in the leaf library, four new options (grow lights, curtain motors, LP ledges, a cordless lamp).** Fit 92/22/12/0,
@@ -114,6 +119,34 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 23 Oct 2026, round 39: v44 (Build in cards, Plan and Buy clearer, the plan PDF shorter, a sharper 3D room)
+- Client (23 Oct): "continue on from the v42 build with plans we have and my instruction to review the full plans, build and buy
+  areas to read more clearly and be easier to follow while still having everything I need, use design functions where needed to
+  improve. Increase render quality of 3D room wherever you can". Plan first: `UPGRADE_PLAN_v44.md` (#49).
+- **Design review** (`DESIGN_REVIEW_v44.md`, a structured critique at 390 before and after): Build was about 19 phone screens of step
+  cards with three buttons each; Plan and Buy each said things twice; the merchant's list was open; the PDFs were only at the bottom.
+- **Build** (`build_viewer.build_cards()`, `buy_list()`, `_tabs()`; new `STEP_JS`; CSS at the end of `page.css`): `details.mk`
+  cards (one open at a time, `name="mk"`) from `chapters.MAKE` and `JOBS`, plus a Start here card (steps 1 and 5, the rules, the
+  measuring sheet). Each has Buy · Cut · Build tabs (Jobs: Buy · Do); Buy is a phone list (name and £, the detail and shop under), the
+  cut drawings scroll sideways at 560 px. The 14 `li.step` rows keep `.sdone input#sd-N` (the ticks and `mw13-steps` carry over) in
+  the `#order` fold; a card shows ✓ when all its steps are ticked; `#b-next` names the next step. `DATA.stepcard` maps a step to its card:
+  `#step-N`, `data-step` and `data-mk` links open the card on Build (`window.stepCard`, `window.openCard`, routes `#mk-…`/`#job-…`).
+  The segbar and part filter are gone (page.js already tolerated their absence). Backups `*_v44a_backup.*`.
+- **Plan:** `.upnext` hidden (its ids stay for page.js), the 90/80 block gone, the money table folded (`plan_ui.py`), a plan PDF
+  button. **Buy:** `HOW` maps each cost piece to its card (How to make it); the build-order tracker and the cost chart sit in
+  `#buyorder` (the router reveals a phase inside it). `costs.SHORT` now names the C-table under Your picks.
+- **Room:** `actmk` buttons (How to make it) on the cabinet, the wall, the PC, the bar, and the plan's record table, C-table and fitted
+  pieces (`MAKE_CARD`); `demma-open` with `mk` opens the card.
+- **Guide:** the C-table is chapter 9 (`chapters.MAKE`, step 14's first sub-assembly from `ideas.ctable_parts()`); Bought and fitted is 10.
+- **Plan PDF 46 → 34** (`build_doc.concise()`, PDF only): drops Electrics, the sub, the network set-up and socket lists (`PDF_DROP4`),
+  the "looked over again" reviews and page 2's cost table; page breaks only before sections 2, 3, 5, 9 and 11 (`PDF_BREAK`);
+  pictures at most 92 mm tall; costs by piece and the sources in two columns (`doc.css`).
+- **3D:** AgX tone mapping (a daylight still's wall: AgX 34 from #899081, ACES 59); on BIG_GPU, HD at 1.5–2× (`fullRatio`), live
+  PCFSoft shadows at 2048 (`LIVE_SHADOW`, `LIVE_MAP`; `still()` restores them), anisotropy to 16; `envMapIntensity` scaled by roughness
+  (`userData.envK`: 2.4 glossy to 0.7 matte). Forced BIG_GPU in headless: HD 1.5×, AO on, errors 0. Phones unchanged.
+- **Checks:** `qa.py` errors [] and fails [] at 390 and 1280 (step 11 now checks the cabinet's card), text budget 0 over; `taptest.py`
+  errors [] at both; `clash.py` 0 clashes. v43 outputs in `out/v43/`.
 
 ## Update 23 Oct 2026, round 38: v43 (the C-table in the plan, the sill's plants, the stand our pick, four new options)
 - Client (23 Oct): "I want the c table in the current main plan and then review the room and suggest improvements and more item
