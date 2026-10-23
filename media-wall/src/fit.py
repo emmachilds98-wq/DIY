@@ -685,12 +685,13 @@ def rears_zone():
     (lx, lz), (rx, rz) = g.REAR_SPOTS
     curt0 = g.WINDOW_X[0] - g.CURTAIN["ext"]                       # the curtains' east stack starts here
     return ("Your rear speakers (v27.1, from your photos)", f"the AX5100G's rears, {r1(w)} × {r1(h)} × {r1(d)}, on stands behind each end of the sofa", [
-        ("In the gap behind the sofa", f"stands {r1(bw)} square at the base, the speakers {r1(d)} deep", ref("hisense", "rears27"), f"{r1(gap)} between the sofa's back and the window wall",
-         f"{r1(gap - max(d, bd))} spare: snug", TIGHT),
-        ("Left: behind the sofa's corner end", f"stand x {r1(lx - bw / 2)}–{r1(lx + bw / 2)}", ref("rears27"), f"the curtains' stack starts at x {r1(curt0)}",
-         f"{r1(curt0 - lx - bw / 2)} clear: the curtains draw past it", PASS),
-        ("Right: behind the sofa's window end", f"stand x {r1(rx - bw / 2)}–{r1(rx + bw / 2)}", ref("rears27"), f"the curtains hang at z {r1(g.CURTAIN['z'])}, in the same gap",
-         "closed, they fall over the stand and the speaker and muffle it: keep that end open when you watch", CHECK),
+        ("In the gap behind the sofa", f"each pole {r1(g.REAR_STAND['pole'])} across, its flat base under the radiator", ref("hisense", "rears27"),
+         f"{r1(g.SOFA_BACK_Z - g.RADIATOR_FACE)} between the radiator's face and the sofa's back",
+         f"{r1((g.SOFA_BACK_Z - g.RADIATOR_FACE - g.REAR_STAND['pole']) / 2)} each side of the pole: snug", TIGHT),
+        ("In front of the curtains", f"the speakers' backs at z {r1(lz - d / 2)}", ref("rears27"), f"the curtains, drawn, lie flat behind each pole at z {r1(g.REAR_STAND['dent'])}",
+         f"{r1(lz - d / 2 - g.REAR_STAND['dent'])} in front, open or drawn; the radiator {r1(g.REAR_STAND['dent'] - g.RADIATOR_FACE)} behind the cloth", PASS),
+        ("The curtain pole", f"its top at {r1(g.CURTAIN['rail_y'] + g.CURTAIN['pole'])}", ref("room"), f"the ceiling strip at {r1(g.CEIL - 0.6)}",
+         f"{r1(g.CEIL - 0.6 - g.CURTAIN['rail_y'] - g.CURTAIN['pole'])} under it, as in your photo; {r1(g.CURTAIN['rail_y'] - g.WINDOW_Y[1])} over the window's head", PASS),
         ("Above the sofa's back", f"the speakers {r1(g.REAR_STAND['top'])}–{r1(top)}", ref("rears27", "sofa"), f"the sofa's back {r1(g.SOFA_H)} tall",
          f"{r1(g.REAR_STAND['top'] - g.SOFA_H)} above it, about seated ear height, as in your photo", PASS),
         ("Power and the link cable", "the rears are linked by a cable; one plugs in", ref("hisense"), f"your double socket behind the sofa's short side (x {r1(g.SOCKET2['x'])}, z {r1(g.SOCKET2['z'])})",

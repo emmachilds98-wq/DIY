@@ -740,7 +740,12 @@ function buildShell() {
     shell.add(new THREE.Mesh(mergeGeometries(rings), wood)); }
   const panel = (x0, w, folds) => {
     const g = new THREE.PlaneGeometry(w * M, (CU.rail_y - CU.drop_to) * M, Math.round(folds * 8), 1), pos = g.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * 0.026);
+    // v39: folds CU.amp deep (clear of the radiator's face); behind each rear speaker's pole the cloth lies flat at the stand's dent
+    const amp = (CU.amp || 2.6) * M, ST = R.REAR_STAND, dentZ = ST && ST.dent !== undefined ? (CU.z - ST.dent) * M : 0, hw = (R.REAR_SPK ? R.REAR_SPK[0] / 2 : 0) + 2;
+    for (let i = 0; i < pos.count; i++) {
+      const rx = x0 + w / 2 + pos.getX(i) / M, fold = Math.sin(pos.getX(i) / (w * M) * Math.PI * 2 * folds / 2) * amp;
+      let k = 0; if (ST && ST.dent !== undefined) for (const [sx] of R.REAR_SPOTS) { const d = Math.abs(rx - sx); k = Math.max(k, d <= hw ? 1 : d < hw + 6 ? 1 - (d - hw) / 6 : 0); }
+      pos.setZ(i, fold * (1 - k) + dentZ * k); }
     g.computeVertexNormals();
     const m = new THREE.Mesh(g, cloth); m.position.copy(v3(x0 + w / 2, (CU.rail_y + CU.drop_to) / 2, CU.z)); m.rotation.y = Math.PI;
     return shadow(m);
@@ -2065,8 +2070,10 @@ function buildSeatAndPouf() {
     const grille = reg(new THREE.MeshStandardMaterial({ color: "#2b2c30", roughness: 0.95 })), steel = reg(new THREE.MeshStandardMaterial({ color: "#2a2a2c", roughness: 0.4, metalness: 0.6 }));
     R.REAR_SPOTS.forEach(([x, z], i) => {
       const g = new THREE.Group();
-      lb(g, 0, 0, 0, ST.base[0], ST.base[2], ST.base[1], steel);                     // the weighted base
-      lb(g, 0, ST.base[2], 0, ST.pole, ST.top - ST.base[2] - 0.8, ST.pole, steel);   // the pole
+      // v39: the speaker sits in front of the curtains; its pole stands in the gap behind the sofa, its flat base under the radiator
+      const pz = ST.pole_z !== undefined ? ST.pole_z - z : 0, bz = ST.base_z ? [ST.base_z[0] - z, ST.base_z[1] - z] : [-ST.base[1] / 2, ST.base[1] / 2];
+      lb(g, 0, 0, (bz[0] + bz[1]) / 2, ST.base[0], ST.base[2], bz[1] - bz[0], steel);  // the weighted base
+      lb(g, 0, ST.base[2], pz, ST.pole, ST.top - ST.base[2] - 0.8, ST.pole, steel);  // the pole
       lb(g, 0, ST.top - 0.8, 0, sw + 1, 0.8, sd, steel);                             // the top plate
       lb(g, 0, ST.top, 0, sw, sh, sd, blk);                                          // the speaker
       lb(g, 0, ST.top + 0.8, sd / 2 - 0.2, sw - 1.2, sh - 1.6, 0.6, grille);         // its grille, facing the room
