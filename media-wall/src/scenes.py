@@ -9,16 +9,16 @@ LAYERS = [("strip", "Ceiling LED strip", "its own controller"), ("uprights", "Up
 
 # v25, Emma: "the presets aren't great". Three presets instead of six buttons; dinner and daytime become two rules (below).
 SCENES = [
-    ("bright", "Bright", "Everything on at a comfortable, even level: tidying, chatting, finding the remote. The default.",
+    ("bright", "Bright", "Everything on at a comfortable, even level: tidying, chatting, finding the remote.",
      {"strip": 70, "uprights": 50, "bias": 0, "bar1": 60, "bar2": 60, "lamp": 50},
      ["All eight heads straight down, spread a little along each bar, so the pools overlap.",
       "The ceiling strip and the uprights fill the edges; the lamp adds a low warm layer.",
       "Turn the strip down first as the evening goes on: it's the flattest light in the room."]),
-    ("cosy", "Cosy", "Low and warm, for records and quiet evenings: light on the deck and the shelves, the lamp's colours on.",
-     {"strip": 20, "uprights": 55, "bias": 0, "bar1": 45, "bar2": 30, "lamp": 75},
+    ("cosy", "Cosy", "Low and warm, for records and quiet evenings: light on the deck and the shelves, the lamp's colours on. The default (v45).",
+     {"strip": 35, "uprights": 55, "bias": 0, "bar1": 45, "bar2": 40, "lamp": 75},   # v45: the strip and bar 2 up a touch, so the room still reads
      ["Bar 1's pink head on the turntable and the Series X, blue on the record ledge.",
       "The uprights' grooves up, washing the wall either side of the TV.",
-      "The lamp up for reading sleeves on the sofa; the ceiling strip nearly off."]),
+      "The lamp up for reading sleeves on the sofa; the ceiling strip low."]),
     ("film", "Film", "Films and games: the screen is the brightest thing in the room, with a little warm light round it so your eyes don't strain.",
      {"strip": 10, "uprights": 15, "bias": 100, "bar1": 0, "bar2": 10, "lamp": 60},
      ["Bar 1 off: its heads hang in front of the screen, and even tilted away they'd catch it.",
@@ -28,11 +28,12 @@ SCENES = [
 # the colour each preset sets in the bulbs' app (the page shows it under the tile)
 COLOURS = {"bright": "bars warm white 3000 K, every head straight down", "cosy": "bars 2700 K, the lamp's three colour bulbs on (green, pink, purple)",
            "film": "the bias light cool white behind the TV, the lamp low"}
-# Two rules in place of the other buttons. Table open (four or six): on top of whichever preset is on, bar 2 at least 80, bar 1 at
+# Two rules in place of the other buttons. Table open (four or six): on top of whichever preset is on, bar 2 between 45 and 55, the strip at most 40 (v45: 80 washed
+# the oak top out), bar 1 at
 # most 15, the TV's bias light off. Time of day is its own switch: daytime is the sun and the window, with any preset.
-TABLE_BOOST = {"bar2_min": 80, "bar1_max": 15, "bias": 0}
+TABLE_BOOST = {"bar2_min": 45, "bar2_max": 55, "bar1_max": 15, "strip_max": 40, "bias": 0}
 TOD = [("evening", "Evening"), ("day", "Daytime")]
-RULES = ["The table's open, so bar 2 lights it: on top of whichever preset is on, bar 2 comes up to at least 80, bar 1 down to 15 or less, and the TV's bias light goes off.",
+RULES = ["The table's open, so bar 2 lights it: on top of whichever preset is on, bar 2 sits between 45 and 55 and the ceiling strip at 40 or less (enough to eat by, not so much the oak washes out), bar 1 down to 15 or less, and the TV's bias light goes off.",
          "Evening or daytime is a switch of its own: daytime is the sun through the window, with any preset."]
 # where each old scene went (the page maps saved choices with this)
 OLD_TO_NEW = {"general": "bright", "everyday": "bright", "records": "cosy", "tv": "film", "dinner": "bright", "day": "bright"}
@@ -73,5 +74,5 @@ def level_word(v):
 def boosted(levels):
     """A preset's levels with the table open (TABLE_BOOST)."""
     lv = dict(levels)
-    lv["bar2"] = max(lv["bar2"], TABLE_BOOST["bar2_min"]); lv["bar1"] = min(lv["bar1"], TABLE_BOOST["bar1_max"]); lv["bias"] = TABLE_BOOST["bias"]
+    lv["bar2"] = min(max(lv["bar2"], TABLE_BOOST["bar2_min"]), TABLE_BOOST["bar2_max"]); lv["strip"] = min(lv["strip"], TABLE_BOOST["strip_max"]); lv["bar1"] = min(lv["bar1"], TABLE_BOOST["bar1_max"]); lv["bias"] = TABLE_BOOST["bias"]
     return lv

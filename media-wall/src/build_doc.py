@@ -13,8 +13,8 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "44"
-REVISION = "39: Build in one card per thing you make, the plan and the buy list clearer, the plan PDF shorter, a sharper 3D room"
+VERSION = "45"
+REVISION = "40: the Artex stipple ceiling and Cosy first, a softer light over the open table, two small room buttons"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -771,7 +771,7 @@ def steps():
                  "Take down the two old fittings. The light switches stay as they are: the smart bulbs need full power, so no dimmers.",
                  "Hang bar 1 on the rose between the TV and the sofa and bar 2 on the pendant point by the stairs, earth first, both running from the TV towards the window; fit the smart colour bulbs and point every head straight down, evenly spread; tilt one only if its pool lands badly.",
                  "The LED strips in the uprights' grooves and under the side-wall shelf on their plug-in driver (on the 10-gang), the ceiling strip through its notches, the bias light on the TV; your red lamp in its spot.",
-                 "Power back on, switches on: add the eight bulbs to the app, group them as bar 1 and bar 2, and save the three presets (Paint and light): Bright, Cosy and Film. With the table open, bar 2 comes up to 80 and bar 1 down to 15 (the table rule)."],
+                 "Power back on, switches on: add the eight bulbs to the app, group them as bar 1 and bar 2, and save the three presets (Paint and light): Bright, Cosy and Film. With the table open, bar 2 sits between 45 and 55, the ceiling strip at most 40, and bar 1 down to 15 (the table rule)."],
              check="Every bulb answers the app, the presets recall, and from the sofa no spot head shows in the screen or shines in your eyes."),
         dict(n=13, part=["AV", "Network"], title="Connect and finish", who="You", time="1 day", buy=["8 TV, consoles and AV", "9 Vinyl kit", "10 Finishing"], see=[("network", "AV"), ("network", "Network")],
              do=["TV inputs: HDMI 1 the PC, HDMI 2 the soundbar (eARC), HDMI 3 the Series X, HDMI 4 the HDMI switch (Xbox One, 360, PS3, RetroTINK).",
@@ -1155,7 +1155,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> a shorter plan; the Build Guide in one chapter per thing you make, the C-table with its own; on the page, Build in one card per thing (Buy · Cut · Build); a sharper 3D room.</div>
+<div class="decision"><b>What changed:</b> the 3D room opens on Cosy with the Artex stipple ceiling; with the table open, bar 2 sits at 45–55 and the ceiling strip at 40 or less, so the oak no longer washes out (section 8).</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -1454,9 +1454,9 @@ def _plan(deck=False):
 <li><b>Your red lamp:</b> the three-headed floor lamp you have, its colour bulbs green at the top, pink in the middle and purple at the bottom. A deep green room needs a low layer as well as the light from above; it's also the one to leave on for a film. It can stand in any of the three spots in the 3D room.</li>
 <li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>) on your two existing ceiling points, <b>both running from the TV towards the window</b> (v15). Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa; bar 2 on the pendant point by the stairs, along the west wall, so its end no longer comes near that wall. <b>Smart colour bulbs</b> (v15): eight E14 bulbs under the bar's 6 W, the WiZ Colour P45 (4.9 W, 4.5 × 10.1 cm) or, if it shows below a shade, the shorter Philips Hue lustre (5.1 W, 4.5 × 7.7 cm)<sup>{fit.ORDER.index("e14") + 1}</sup>. Smart bulbs need full power, so <b>no dimmers</b>: the wall switches stay as they are and stay on; level and colour come from the app (or an optional smart button). <b>Turn them as you like:</b> each bar turns on its rose and clears every wall at any angle (bar 2 by {n(__import__("clash").wall_room(G.BAR2_X, G.BAR2_Z) - G.BAR[0] / 2 - 7.5)} cm), and each head aims on its own; tap a bar or the red lamp in the 3D room to try it. </li>
 </ul>
-<p><b>Where the heads point (v17):</b> all eight heads straight down, evenly spread along each bar, so their pools overlap into one even light over the room: that's the <b>Bright</b> preset, the default. Tilt a head only if its pool lands badly (in the TV's screen from the sofa, or in someone's eyes). Set the bulbs to warm white (3000K) for Bright, 2700K for Cosy, and save colours for the presets you want them in.</p>
+<p><b>Where the heads point (v17):</b> all eight heads straight down, evenly spread along each bar, so their pools overlap into one even light over the room: that's the <b>Bright</b> preset. Tilt a head only if its pool lands badly (in the TV's screen from the sofa, or in someone's eyes). Set the bulbs to warm white (3000K) for Bright, 2700K for Cosy, and save colours for the presets you want them in.</p>
 <h3>Three lighting presets</h3>
-<p>Three presets instead of six buttons: <b>Bright</b> (the default), <b>Cosy</b> and <b>Film</b>, each set on the strip's controller, the inline dimmer on the uprights' LED driver, and the bars' and the lamp's smart bulbs in their app. Save the three as scenes in the app (and on the smart button if you get one). In the 3D room the Lights tab has the three tiles, the evening or daytime switch, and every light's slider folded under them.</p>
+<p>Three presets instead of six buttons: <b>Bright</b>, <b>Cosy</b> (the default) and <b>Film</b>, each set on the strip's controller, the inline dimmer on the uprights' LED driver, and the bars' and the lamp's smart bulbs in their app. Save the three as scenes in the app (and on the smart button if you get one). In the 3D room the Lights tab has the three tiles, the evening or daytime switch, and every light's slider folded under them.</p>
 {scenes_html()}
 
 <h2 class="pb">9 · Power, cables and network</h2>

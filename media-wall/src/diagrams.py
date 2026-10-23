@@ -1996,7 +1996,7 @@ def light_scene(key, table=False):
     o.append(t(X(g.TABLE_CX), Y(0) + 22, "dining wall", 9, "middle", 650, "#8f5b45"))
     o.append(t(X(g.ROOM_W), Y(g.ALC_D) + 34, "From above, to scale: the window at the top, the media wall bottom right. Glows show each light's level.", 9.5, "start", 400, MUTED))
     if table:
-        return svg(W, H, "\n".join(o), f"Lighting: {sc[1]}, with the table open", "The table rule on top of the preset: bar 2 at least 80, bar 1 at most 15, the TV's bias light off")
+        return svg(W, H, "\n".join(o), f"Lighting: {sc[1]}, with the table open", "The table rule on top of the preset: bar 2 between 45 and 55, the ceiling strip at most 40, bar 1 at most 15, the TV's bias light off")
     return svg(W, H, "\n".join(o), f"Lighting {'preset' if key in ('bright', 'cosy', 'film') else 'scene'}: {sc[1]}", sc[2])
 
 

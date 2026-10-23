@@ -48,7 +48,7 @@ addEventListener("unhandledrejection", e => { const r = e.reason || {}; noteErro
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
 const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the plan
-              scene: "bright", tod: "evening", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,
+              scene: "cosy", tod: "evening", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,   // v45: Cosy first
               quality: SMALL ? "fast" : "hd", view: "room",   // v21: the whole room first
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
               lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
@@ -71,6 +71,9 @@ if (R.FIRM) { DEF.sugg = Object.fromEntries(R.FIRM.sugg.map(k => [k, true])); DE
   DEF.ideas = Object.fromEntries((R.FIRM.ideas || []).map(k => [k, true])); }   // v43: the C-table is in the plan   // v18: the window corner holds the plant stand or the record shelf   // v16: the table by the stairs by default; the laser off
 const KEY = "mw18-3d";
 const S = Object.assign({}, DEF, store.get(KEY, {}));
+if (!S.v45) {   // v45, client: "stipple ceiling as default and cosy lighting": once, a saved room moves to them; your own choices stay after
+  S.v45 = 1; S.scene = "cosy"; S.tod = "evening"; S.lv = null; S.decor = Object.assign({}, S.decor, { ceiling: "stipple" });
+}
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
@@ -119,7 +122,7 @@ function setWall(id, v) {        // a paint's key, a colour, or "match"; the wal
    v25: three presets (bright, cosy, film); dinner is a rule (the table open lifts bar 2), daytime a switch (S.tod) that works with any
    preset. Saved choices from the old six buttons map across once. */
 const SCENES = JSON.parse(document.getElementById("scenes-data").textContent);
-const LIGHT_RULES = JSON.parse((document.getElementById("lightrules-data") || {}).textContent || '{"boost":{"bar2_min":80,"bar1_max":15,"bias":0},"old":{}}');
+const LIGHT_RULES = JSON.parse((document.getElementById("lightrules-data") || {}).textContent || '{"boost":{"bar2_min":45,"bar2_max":55,"bar1_max":15,"strip_max":40,"bias":0},"old":{}}');
 const OLD_SCENE = LIGHT_RULES.old || {};
 function oldScene(o) {               // an old scene key in o (saved state, a link, a still) becomes a preset, with daytime as a switch
   if (o.scene && !(o.scene in SCENES) && o.scene in OLD_SCENE) { if (o.scene === "day") o.tod = "day"; o.scene = OLD_SCENE[o.scene]; if (o === S) S.lv = null; }
@@ -133,7 +136,7 @@ if (!S.lv) S.lv = Object.assign({}, SCENES[S.scene].levels);
 const tableOpen = () => S.dining && S.dining !== "folded";
 function lvl(k) {                     // a layer's level: the slider, the table rule when the flip-top is open, then the master slider
   let v = S.lv[k] ?? 0;
-  if (tableOpen()) { const B = LIGHT_RULES.boost; if (k === "bar2") v = Math.max(v, B.bar2_min); else if (k === "bar1") v = Math.min(v, B.bar1_max); else if (k === "bias") v = B.bias; }
+  if (tableOpen()) { const B = LIGHT_RULES.boost; if (k === "bar2") v = Math.min(Math.max(v, B.bar2_min), B.bar2_max ?? 100); else if (k === "strip") v = Math.min(v, B.strip_max ?? 100); else if (k === "bar1") v = Math.min(v, B.bar1_max); else if (k === "bias") v = B.bias; }
   return Math.max(0, Math.min(100, v * S.master / 100));
 }
 
