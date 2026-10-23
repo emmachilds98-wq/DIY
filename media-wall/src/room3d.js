@@ -2431,6 +2431,14 @@ const FLORA_BUILD = {
       stemAlong(B, [base.clone(), mid, end], 0.0035, "#3f6b30");
       leafAt(B, "monstera", end, dirOf(a + (r() - 0.5) * 0.4, -0.1 + r() * 0.35), size * (0.32 + r() * 0.14) * M, r, { fold: 0.12, curl: 0.12 }); }
   },
+  ficus(B, base, size, r) {                   // v43: a rubber plant: one upright stem, broad glossy leaves spiralling up it
+    const H = size * 0.95 * M, lean = r() * Math.PI * 2, top = base.clone().add(new THREE.Vector3(Math.cos(lean) * 0.015, H, Math.sin(lean) * 0.015));
+    stemAlong(B, [base.clone(), base.clone().add(new THREE.Vector3(0, H * 0.5, 0)), top], 0.004, "#5b4a32");
+    const n = 9 + Math.round(size / 6);
+    for (let k = 0; k < n; k++) { const t = 0.25 + 0.75 * k / (n - 1), a = k * 2.4, p = base.clone().lerp(top, t);
+      const tip = p.clone().add(dirOf(a, 0.5).multiplyScalar(0.02)); stemAlong(B, [p, tip], 0.0015, "#4a5a30");
+      leafAt(B, "ficus", tip, dirOf(a + (r() - 0.5) * 0.3, 0.15 + t * 0.45 + r() * 0.2), size * (0.3 - t * 0.08) * M, r, { fold: 0.08, curl: 0.1 }); }
+  },
   fern(B, base, size, r) {                    // arching fronds all round
     const n = 14 + Math.round(r() * 8);
     for (let k = 0; k < n; k++) { const a = r() * Math.PI * 2;
@@ -2498,17 +2506,25 @@ function potPlant(g, x, y, z, rad, h, trail, r, potM, leafM, o = {}) {
   if (!g.userData.floraHold) floraFlush(g);
 }
 
-function sillPlants(x0, x1, y, zBack, zFront) {   // v40: seven pots on the deep sill, the trailers over its nose
+/* v43, client: "we have taller ones in the middle, spider plants on the right and some smaller ones on left" (the window sill, from the
+   room). The room's x runs right to left as you face the window, so the spider plants are at the low-x end; no pot stands behind a
+   rear speaker. */
+const SILL_ROW = [   // [from the sill's low-x end (cm), radius, how tall it grows, kind, strands over the nose]
+  [12, 7, 12, "spider", 0], [36, 7.5, 13, "spider", 0], [60, 7, 12, "spider", 0],      // on the right: spider plants, full
+  [92, 7.5, 18, "snake", 0], [122, 8, 20, "ficus", 0],                                 // in the middle: the tall ones
+  [160, 5, 6, "calathea", 0], [210, 5, 5, "fern", 0], [226, 5.5, 5, "pothos", 2],     // on the left: the smaller ones
+];
+function sillPlants(x0, x1, y, zBack, zFront) {
   const potCols = ["#d8cfc0", "#b5643f", "#2f2f2f", "#e9e4da", "#8a9a7b"], potMs = potCols.map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: c === "#e9e4da" ? 0.3 : 0.7 })));
   const g = new THREE.Group(); g.name = "sillplants"; shell.add(g);
+  const clear = x => !(R.REAR_SPOTS || []).some(([sx, sz]) => Math.abs(sx - x) < 14 && sz > zBack - 5);   // keep clear of the rear speakers
   floraSpot(g, () => {
-    const r = rnd(29), hold = { userData: { floraHold: true } }, n = 7, zc = (zBack + zFront) / 2, step = (x1 - x0 - 30) / (n - 1);
-    for (let i = 0; i < n; i++) {
-      const x = x0 + 15 + i * step + (r() - 0.5) * 6, rad = 5 + r() * 3.5, z = zc + (r() - 0.5) * 4, trail = i % 3 === 1;
-      potPlant(hold, x, y, z, rad, trail ? 6 : 8 + r() * 10, trail ? 3 : 0, r, potMs[i % potMs.length], null, { terracotta: i % potMs.length === 1, edgeZ: zFront });
-    }
+    const r = rnd(29), hold = { userData: { floraHold: true } }, zc = (zBack + zFront) / 2;
+    SILL_ROW.forEach(([dx, rad, h, kind, trail], i) => {
+      let x = Math.min(x1 - rad - 2, x0 + dx); while (!clear(x) && x > x0 + rad) x -= 4;
+      potPlant(hold, x, y, zc + (r() - 0.5) * 3, rad, h, trail, r, potMs[i % potMs.length], null, { terracotta: i % potMs.length === 1, edgeZ: zFront, kind });
+    });
     floraFlush(hold, g); });
-
 }
 
 /* ---------------------------------------------------------------- lights */
@@ -2902,12 +2918,21 @@ function buildPlantsAndRecords() {
       }
     };
     const L = [xs[0] - pt / 2, xs[1]], Rr = [xs[2], xs[3] + pt / 2], Mi = [xs[1], xs[2]];
-    PS.tower.forEach((y, ti) => { tier(L[0], L[1], y, ti === 4 ? 1 : 1 + (r() < 0.5 ? 1 : 0)); tier(Rr[0], Rr[1], y, ti === 4 ? 1 : 1 + (r() < 0.5 ? 1 : 0)); });
-    PS.middle.forEach((y, mi) => tier(Mi[0], Mi[1], y, 1));
+    PS.tower.forEach(y => { tier(L[0], L[1], y, 0); tier(Rr[0], Rr[1], y, 0); });
+    PS.middle.forEach(y => tier(Mi[0], Mi[1], y, 0));
     for (const z of [-d / 2 + pt / 2, d / 2 - pt / 2]) lb(g, 0, h - 2, z, w, 2, pt, wood);  // the top rails across the open middle
-    standPots.push([0, PS.middle[0] + 1.2, 0, 9, 22, 0, 0]);
+    /* v43, client: "the plant shelf is not built yet give it what you think will look best": one plant a tier so each reads, trailing
+       pothos and spider plants up top spilling down the towers, a monstera in the tall open middle and a snake plant over it, calathea
+       and fern lower down, a small snake plant and a ficus at the bottom. [x, tier top, radius, how tall, kind, strands, pot] */
+    const cx = t => (t[0] + t[1]) / 2, TOP = y => y + 1.2;
+    [[L, 4, 6.5, 7, "pothos", 3, 0], [Rr, 4, 7, 12, "spider", 0, 3], [L, 3, 7, 12, "spider", 0, 0], [Rr, 3, 6, 6, "pothos", 2, 2],
+     [L, 2, 6.5, 9, "calathea", 0, 1], [Rr, 2, 6, 8, "fern", 0, 3], [L, 1, 6, 8, "fern", 0, 4], [Rr, 1, 6.5, 9, "calathea", 0, 0],
+     [L, 0, 7, 12, "snake", 0, 4], [Rr, 0, 7, 11, "ficus", 0, 1]]
+      .forEach(([t, ti, rad, hh, kind, tr, pm]) => standPots.push([cx(t), TOP(PS.tower[ti]), 0, rad, hh, tr, pm, kind]));
+    standPots.push([0, TOP(PS.middle[0]), 0, 9.5, 24, 0, 0, "monstera"], [0, TOP(PS.middle[1]), 0, 7.5, 18, 0, 4, "snake"]);
     floraSpot(g, () => { const rr = rnd(173); g.userData.floraHold = true;
-      for (const [px, py, pz, rad, h, tr, pm] of standPots) potPlant(g, px, py, pz, rad, h, tr, rr, pots[pm], null, { terracotta: pm === 2, edgeZ: d / 2 });
+      for (const [px, py, pz, rad, h, tr, pm, kind] of standPots) potPlant(g, px, py, pz, rad, h, tr, rr, pots[pm], null,
+        { terracotta: pm === 2, edgeZ: d / 2, kind: FLORA_STYLE === "easy" ? undefined : kind });
       g.userData.floraHold = false; floraFlush(g); });
     movable("plants", "Your plant stand", g, () => { const [x, z, f] = R.PLANT_LAYOUTS[S.plants].plants; return { x, z, rot: f < 0 ? 180 : 0 }; }, w, d, [wood], false, { when: () => !cornerHides("plants") });   // v37: a window-corner pick takes its place
     // v32: the idea of an uplight on the floor under the stand's open middle, throwing the leaves up the wall behind
