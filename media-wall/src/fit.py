@@ -626,8 +626,9 @@ def optc_zone():
          f"three in comfort; backs at z {r1(w_back)}, {r1(w_back - plant_face)} clear of your plant stand", PASS),
         ("The far end and the coffee table", f"the table ends at x {r1(C['tx'][0])}", ref("dining"), f"the coffee table to x {r1(g.COFFEE['x'][1])}",
          f"{r1(C['tx'][0] - g.COFFEE['x'][1])} between them: the coffee table stays put; a seventh chair fits at the end ({r1(st['end_clear'])} behind its back)", PASS),
-        ("The ottoman", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
-         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end: push it to the sofa while you eat", CHECK),
+        ("The ottoman (v38: a dinner spot)", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
+         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end, so while you eat it goes in front of the media wall (x {r1(g.SOFA_POUF['dinner']['x'][0])}–{r1(g.SOFA_POUF['dinner']['x'][1])}): "
+         f"{r1(C['tx'][0] - g.SOFA_POUF['dinner']['x'][1])} clear of the table's end", PASS),
         ("The table's side and the sofa", f"window edge at z {r1(C['tz'][1])}", ref("sofa"), f"the sofa's front at z {r1(g.SOFA_FRONT_Z)}",
          f"{r1(C['tz'][1] - g.SOFA_FRONT_Z)} between them: the table passes the sofa's end", PASS),
         ("Light over the table", "bar 2 on the existing pendant point", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})",
@@ -807,8 +808,9 @@ def cab_zone():
          f"three in comfort; backs at z {r1(w_back)}, {r1(w_back - plant_face)} clear of your plant stand", PASS),
         ("The far end and the coffee table", f"the table ends at x {r1(C['tx'][0])}", ref("dining"), f"the coffee table to x {r1(g.COFFEE['x'][1])}",
          f"{r1(C['tx'][0] - g.COFFEE['x'][1])} between them: the coffee table stays put; a seventh chair fits at the end ({r1(st['end_clear'])} behind its back)", PASS),
-        ("The ottoman", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
-         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end: push it to the sofa while you eat", CHECK),
+        ("The ottoman (v38: a dinner spot)", f"{r1(g.SOFA_POUF['w'])} square", ref("pouf"), f"the open table reaches x {r1(C['tx'][0])}; the ottoman to x {r1(g.SOFA_POUF['x'][1])}",
+         f"{r1(g.SOFA_POUF['x'][1] - C['tx'][0])} under the table's end, so while you eat it goes in front of the media wall (x {r1(g.SOFA_POUF['dinner']['x'][0])}–{r1(g.SOFA_POUF['dinner']['x'][1])}): "
+         f"{r1(C['tx'][0] - g.SOFA_POUF['dinner']['x'][1])} clear of the table's end", PASS),
         ("The table's side and the sofa", f"window edge at z {r1(C['tz'][1])}", ref("sofa"), f"the sofa's front at z {r1(g.SOFA_FRONT_Z)}",
          f"{r1(C['tz'][1] - g.SOFA_FRONT_Z)} between them: the table passes the sofa's end", PASS),
         ("Light over the table", "bar 2 on the existing pendant point", ref("photo20"), f"point about ({r1(g.BAR2_X)}, {r1(g.BAR2_Z)})",

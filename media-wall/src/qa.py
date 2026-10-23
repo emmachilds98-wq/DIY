@@ -28,6 +28,9 @@ POKE = """sel => { const root = document.querySelector(sel); if (!root) return [
 
 def run(p, w, h):
     rep = {"viewport": f"{w}x{h}", "errors": [], "fails": [], "notes": []}
+    import clash                                              # v38: the plan's pieces never overlap, still or moving
+    for kind, a, b_, d in clash.report():
+        (rep["fails"] if kind == "clash" else rep["notes"]).append(f"{kind}: {a} × {b_}: {d}")
     try:
         b = p.chromium.launch(args=ARGS)
     except Exception:

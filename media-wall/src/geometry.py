@@ -844,3 +844,7 @@ FIRM = dict(
           "doorshelf": "white", "liftcoffee": "oak"},
     beside="bar", cabw="90", decor={"rug": "stripes"},
 )
+# v38 (the clash check): with the table out for six, the ottoman can't stay by the coffee table (the table's end reaches 7 into it, and
+# pushing it to the sofa doesn't clear that); its dinner spot is in front of the media wall, clear of the table, the chairs and the
+# vinyl stand. The 3D room moves it there while the table is out (unless you've placed it yourself).
+SOFA_POUF["dinner"] = dict(x=(190.0, 266.0), z=(-115.0, -39.0))
