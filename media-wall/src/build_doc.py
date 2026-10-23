@@ -553,13 +553,13 @@ def cost_overview_html():
     """v32: every thing to buy, by piece, a short name and its estimate (costs.py), the subtotals and the total."""
     import costs
     ov = costs.overview(TRACK)
-    rows = []
+    tabs = []   # v44: one small table per piece, two columns in print
     for p, lo, hi, items in ov:
-        rows.append(f"<tr class='total'><td colspan='2'>{p}</td><td class='num'>£{money(lo, hi)}</td></tr>")
-        rows += [f"<tr><td class='num'>{costs.qty(q)}</td><td>{nm}</td><td class='num'>£{money(a, b)}</td></tr>" for q, nm, a, b in items]
+        tabs.append(f"<table class='tight cost'><tr class='total'><td colspan='2'>{p}</td><td class='num'>£{money(lo, hi)}</td></tr>"
+                    + "".join(f"<tr><td class='num'>{costs.qty(q)}</td><td>{nm}</td><td class='num'>£{money(a, b)}</td></tr>" for q, nm, a, b in items) + "</table>")
     tl, th = sum(r[1] for r in ov), sum(r[2] for r in ov)
-    rows.append(f"<tr class='total'><td colspan='2'>All of it</td><td class='num'>£{money(tl, th)}</td></tr>")
-    return "<table class='tight cost'><tr><th>Qty</th><th>To buy</th><th>About</th></tr>" + "".join(rows) + "</table>"
+    return (f"<div class='costcols'>{''.join(tabs)}</div>"
+            f"<table class='tight cost'><tr class='total'><td>All of it</td><td class='num'>£{money(tl, th)}</td></tr></table>")
 
 
 def money(a, b):
@@ -1594,7 +1594,10 @@ def _plan(deck=False):
 # each thing's built, the cut lists, the wiring, the order of work) and the long reference pages; the plan page keeps them all
 PDF_DROP = ("Measuring sheet", "Console sizes", "The drawer layouts", "The game drawer", "How bay 3 works", "Storage options, to scale",
             "How it's built", "Joinery cut list", "Three lighting presets", "Cable routes", "The wiring plan", "Sound layout",
-            "Buy and adapt first", "The order of work", "By phase")
+            "Buy and adapt first", "The order of work", "By phase",
+            "Electrics: your own job", "The sub in the media wall", "What it costs, piece by piece")   # v44: section 11 has the costs by piece; the guide's chapter B has the electrics; the sub's detail is on the page
+PDF_DROP4 = ("What each part does", "Stage 1", "Stage 2", "Socket by socket")   # v44: the network set-up and the sockets are the guide's chapters A and B
+PDF_BREAK = ("2 · ", "3 · ", "5 · ", "9 · ", "11 · ")   # v44: a new page only for these; the rest follow on
 
 
 def concise(html):
@@ -1603,6 +1606,9 @@ def concise(html):
         title = re.sub(r"<[^>]+>", "", m.group(2))
         return "" if title.startswith(PDF_DROP) else m.group(0)
     html = re.sub(r"(<h3[^>]*>(.*?)</h3>.*?)(?=<h[23][ >]|</body>)", drop, html, flags=re.S)
+    html = re.sub(r"(<h4[^>]*>(.*?)</h4>.*?)(?=<h[234][ >]|</body>)", lambda m: "" if re.sub(r"<[^>]+>", "", m.group(2)).startswith(PDF_DROP4) else m.group(0), html, flags=re.S)
+    html = re.sub(r'<div class="why"><b>[^<]*looked over again.*?</ul></div>', "", html, flags=re.S)   # v44: reviews, on the page
+    html = re.sub(r'<h2 class="pb">(?!(?:' + "|".join(map(re.escape, PDF_BREAK)) + '))', "<h2>", html)
     html = re.sub(r"<!--fit-->.*?<!--/fit-->", lambda m: fit.summary_html(), html, flags=re.S)
     html = re.sub(r"(<h2 class=\"pb\">10 · [^<]*</h2>).*?(?=<h2)", lambda m: m.group(1) + "<p>Everything to build is in the <b>Build Guide</b> (its own PDF): "
                   "one chapter per thing you make, each with its buy list, its cutting diagram and its steps.</p>" + build_contents(), html, count=1, flags=re.S)

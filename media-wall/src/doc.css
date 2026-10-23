@@ -111,3 +111,11 @@ table.measure td.box { width: 16%; min-width: 4em; height: 2.4em; border: 1.2px 
 .guide table.ckey, .guide table.buy { table-layout: fixed; }
 .guide table.ckey td { padding: 2pt 4pt; }
 .guide table.ckey td.note { font-size: 7.8pt; color: #4a4741; }
+/* v44: pictures no taller than a third of a page, so they don't push whole pages over */
+figure.render img { max-height: 92mm; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; }
+.p1 .hero figure.render img { max-height: none; }
+/* v44: the costs by piece and the sources in two columns */
+.costcols { columns: 2; column-gap: 7mm; }
+.costcols table { break-inside: avoid; margin: 0 0 4mm; font-size: 7.6pt; width: 100%; }
+ol.sources { columns: 2; column-gap: 7mm; font-size: 6.8pt; line-height: 1.3; padding-left: 5mm; }
+ol.sources li { break-inside: avoid; margin-bottom: 1.2mm; overflow-wrap: anywhere; }
