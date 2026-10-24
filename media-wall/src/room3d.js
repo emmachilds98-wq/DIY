@@ -761,8 +761,20 @@ function buildShell() {
   const fw = 6, mid = (wx0 + wx1) / 2;
   // v17: the frame sits back in a deep reveal (the jambs and head in the wall paint), with a deep white sill for the plants
   const REV = R.WINDOW_REVEAL, FZ = WZ - REV;
-  [[wx0, wy0, fw, wy1 - wy0], [wx1 - fw, wy0, fw, wy1 - wy0], [wx0, wy0, wx1 - wx0, fw], [wx0, wy1 - fw, wx1 - wx0, fw], [mid - 3, wy0, 6, wy1 - wy0],
-   [wx0, wy0 + 0.68 * (wy1 - wy0), wx1 - wx0, 5]].forEach(([x, y, w, h]) => cube(x, y, FZ - 4, w, h, 7, white));
+  /* v47.2, from the client's photo of the back of the house: three sections (narrow sides, a wide middle), a row of top lights, and white
+     Georgian bars on the glass: two panes across in each side, three in the middle, three down under the top lights */
+  const WD = R.WINDOW_DESIGN || { sections: [0.5, 0.5], top: 0.68, cols: [1, 1], rows: 1, frame: fw, mullion: 6, transom: 5, bar: 1.6 };
+  const ww = wx1 - wx0, wh = wy1 - wy0, ty = wy0 + WD.top * wh;
+  const parts = [[wx0, wy0, WD.frame, wh], [wx1 - WD.frame, wy0, WD.frame, wh], [wx0, wy0, ww, WD.frame], [wx0, wy1 - WD.frame, ww, WD.frame], [wx0, ty - WD.transom / 2, ww, WD.transom]];
+  let sx = wx0; const secs = WD.sections.map(f => { const a = sx; sx += f * ww; return [a, sx]; });
+  secs.slice(0, -1).forEach(([, b]) => parts.push([b - WD.mullion / 2, wy0, WD.mullion, wh]));
+  parts.forEach(([x, y, w, h]) => cube(x, y, FZ - 4, w, h, 7, white));
+  secs.forEach(([a, b], i) => {                                                                    // the bars, on the room side of the glass
+    const x0 = a + (i ? WD.mullion / 2 : WD.frame), x1 = b - (i < secs.length - 1 ? WD.mullion / 2 : WD.frame), n = WD.cols[i] || 1;
+    for (let k = 1; k < n; k++) cube(x0 + (x1 - x0) * k / n - WD.bar / 2, wy0 + WD.frame, FZ - 0.8, WD.bar, wh - 2 * WD.frame, 1.2, white);
+    const y0 = wy0 + WD.frame, y1 = ty - WD.transom / 2;
+    for (let r = 1; r < WD.rows; r++) cube(x0, y0 + (y1 - y0) * r / WD.rows - WD.bar / 2, FZ - 0.8, x1 - x0, WD.bar, 1.2, white);
+  });
   cube(wx0 - 2, wy0, FZ, 2, wy1 - wy0, REV, wallP); cube(wx1, wy0, FZ, 2, wy1 - wy0, REV, wallP);   // the reveal's jambs
   cube(wx0 - 2, wy1, FZ, wx1 - wx0 + 4, 2, REV, wallP);                                          // ... and its head
   const SL = R.SILL;

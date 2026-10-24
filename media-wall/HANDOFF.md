@@ -22,6 +22,13 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
 
+## Update 24 Oct 2026: v47.2 (the real window)
+- Client (with the agent's photo of the back of the house, `inputs/photo_house_rear_24oct.jpg`): "The middle window is the living room":
+  the room is on the first floor, so the garden is seen from above (as the backdrop already shows).
+- `geometry.WINDOW_DESIGN` (read off the photo): white uPVC in three sections (0.24 / 0.52 / 0.24 of the width), a row of top lights at
+  0.80 of the height, Georgian bars (2 / 3 / 2 panes across, 3 down under the top lights), 1.6 wide. `room3d.js` draws the frame,
+  mullions, transom and bars from it (was one mullion and a transom at 0.68). Exported in scene3d.json.
+
 ## Update 24 Oct 2026: v47.1 (the garden through the window)
 - Client (with a video through the window, `inputs/photo_garden_window_24oct.jpg` is its sharpest frame): "Can we somehow make the room
   look less dark through it and not just a blank black window". Then a sharper summer photo (`inputs/photo_garden_summer_24oct.jpg`,
