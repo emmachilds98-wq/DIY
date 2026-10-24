@@ -43,7 +43,7 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 - **The garden:** 25 m to the far fence (`house/HOUSE.md`); `garden_window.py` `WALL` 30 → 25 (the views barely change: mean 3/255).
 - **Plan:** v49; the window row says 14° east of north; What changed; an OpenStreetMap/postcodes.io/NOAA source.
 - **The shared page:** the 29 inlined pictures uploaded to its asset store (`deck_assets.json` 163): the inline copy 1.8 MB.
-- **Checks:** `clash.py` 0; `qa.py` and `taptest.py` (below). v48 outputs in `out/v48/` (v47's removed; they're in git).
+- **Checks:** `clash.py` 0; `qa.py` errors [] fails [] at 390 and 1280; `taptest.py` errors [] at both. v48 outputs in `out/v48/` (v47's removed; they're in git).
 
 ## Update 24 Oct 2026, round 43: v48 (the rest of `UPGRADE_PLAN_v48.md`: the sun, the room's own reflections, glow, sharper HD pictures)
 - Client: "Should include new garden view and more upgrades" (the go for v48's sections 2–8; section 1, the garden, was v48.1/48.2).
