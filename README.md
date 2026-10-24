@@ -2,12 +2,17 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v41: a build step for your picks, one measuring sheet, an easier room
+## Media wall and dining wall, v42: one chapter per thing you make, a shorter plan, an easier Build
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 144 cm long and flush with the pipe boxing. It's the only table now; a more compact version with an 80-wide table is 134 cm long and keeps four chairs inside. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v41%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v42%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+
+**New in v42** ("each thing I'm making will need a buy list, clear image diagram with cuttings and clear build instructions")
+- **The Build Guide, one chapter per thing you make:** the media wall base, the worktop, the uprights and shelves, the side wall and PC shelf, the dining cabinet, the bar, the glass case, the record table, the fitted pieces. Each: a picture, what to buy (with price and shop), every part drawn to scale with its size, then the numbered steps. The jobs (network, cables, paint, lighting, connecting up) follow.
+- **A shorter plan:** 46 pages (was 76); the build is in the guide.
+- **On the page:** Build opens on "Things to make", each with Buy · Cut · Build; tap a piece in the room or in Buy for "How to make it"; both PDFs one tap from Plan and Build.
 
 **New in v41** ("improve the build further and optimise the ui design")
 - **Easier to look round:** double-tap the floor to stand there; the camera no longer goes through the sofa or the units; **Whole room** (or H) flies back to the view from above.
@@ -318,9 +323,9 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v39.pdf`](media-wall/out/Home_Network_Plan_v39.pdf) (PLANPAGES pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, buy first and the wiring plan, the cost overview, other options and sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v39.pdf`](media-wall/out/Build_Guide_v39.pdf) (GUIDEPAGES pages: buy and adapt first, tools, techniques, order of work, the wiring plan, the cut list on the fewest sheets, step by step, each step with its own cut list and pictures)
-- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v33/`)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v42.pdf`](media-wall/out/Home_Network_Plan_v42.pdf) (46 pages, your plan only: the room, each piece, the costs, the options, the sources)
+- **The build guide:** [`media-wall/out/Build_Guide_v42.pdf`](media-wall/out/Build_Guide_v42.pdf) (60 pages: one chapter per thing you make, each with its buy list, its parts drawn to scale and its steps; then the jobs, and the cutting list for the merchant)
+- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (earlier versions in `v9/` to `v41/`)
 - **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 

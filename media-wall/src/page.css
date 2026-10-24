@@ -347,3 +347,33 @@ body.sheet-open .hnav { display: none; }
 .sr-only { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .qhead .sall { min-height: 36px; padding: 3px 12px 3px 4px; font-size: 14px; }
 .qhead .sall input { width: 26px; height: 26px; }
+/* v42: Build in chapters (chapters.py): things to make, each with Buy · Cut · Build; the jobs as chips */
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 6px 0 12px; }
+.mk-card { display: grid; gap: 4px; padding: 0 0 10px; border: 0; border-radius: 16px; background: var(--soft, #efe7d8); color: var(--ink); text-align: left; cursor: pointer; overflow: hidden; font: inherit; }
+.mk-card img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: #e4dccb; }
+.mk-card b { padding: 0 10px; font-size: 14px; line-height: 1.25; }
+.mk-card span { padding: 0 10px; font-size: 12.5px; color: var(--mut, #6b6862); }
+.mk-card[aria-pressed="true"] { outline: 3px solid var(--ink); }
+.mk-jobs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 14px; }
+.mk-jobs .label { margin-right: 4px; }
+.mk-jobs .chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.mk-view { border-radius: 18px; background: #fffdf8; box-shadow: 0 0 0 1px #e6e3dc; padding: 12px 14px; margin: 0 0 18px; }
+.mk-tabs { margin: 8px 0 10px; }
+.mk-p table { width: 100%; font-size: 13px; }
+.mk-p svg { width: 100%; height: auto; }
+.mk-p .cutfig { margin: 6px 0 10px; }
+.mk-steps { list-style: none; padding: 0; display: grid; gap: 8px; }
+.mk-steps li { display: grid; gap: 2px; justify-items: start; }
+.pdfrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
+.cmk { margin: 6px 0 2px; }
+/* v42: Plan home's three counts as one line */
+.rings3 { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.rings3 .ring { display: inline-flex; align-items: baseline; gap: 5px; width: auto; height: auto; padding: 0; background: none; box-shadow: none; }
+.rings3 .ring svg { display: none; }
+.mk-buy { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.mk-buy li div { display: flex; justify-content: space-between; gap: 10px; }
+.mk-buy li span { white-space: nowrap; font-weight: 600; }
+.mk-buy small { display: block; color: var(--mut, #6b6862); font-size: 12.5px; line-height: 1.35; margin-top: 2px; }
+.mk-tot { text-align: right; margin: 10px 0 0; }
+.pdfrow a.btn { text-decoration: none; }
+.mk-p .cutfig { max-width: 640px; }

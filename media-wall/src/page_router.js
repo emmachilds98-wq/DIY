@@ -60,11 +60,12 @@ function routeHash(h, push) {
   let m;
   if ((m = h.match(/^step-(\d+)$/))) { openSheet("build"); openStep(m[1]); jumpTo(document.getElementById(h)); return; }
   if (/^q-/.test(h)) { openSheet("plan"); return; }
+  if ((m = h.match(/^mk-(\w+)$/))) { openSheet("build"); if (window.openMake) openMake(m[1]); return; }   // v42: a chapter of the build
   if ((m = h.match(/^ph-(\d+)$/))) { openSheet("buy"); const d = document.getElementById(h); if (d) { d.open = true; jumpTo(d); } return; }
   const g = GO[h]; if (g) { if (!g[0]) closeSheets(); else openSheet(g[0], { chapter: g[1] }); }
 }
 addEventListener("popstate", () => routeHash(location.hash));
-addEventListener("demma-open", e => { const d = e.detail || {}; go(d.chapter || d.sheet);
+addEventListener("demma-open", e => { const d = e.detail || {}; if (d.make && window.openMake) { openMake(d.make); return; } go(d.chapter || d.sheet);
   if (d.item) { const el = document.getElementById("it-" + d.item); if (el) { reveal(el); jumpTo(el); } } });   // v33: a tapped idea or suggestion's own card
 document.addEventListener("click", e => {
   const a = e.target.closest("[data-go], [data-nav], [data-close]"); if (!a) return;

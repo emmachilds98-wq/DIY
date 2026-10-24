@@ -13,7 +13,7 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "41"
+VERSION = "42"
 REVISION = "37: a bar built in beside the dining cabinet, more storage, your black shelf 10 cm off the boxing, the lamp's cap, the lights in Views, Extras lined up"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
@@ -1135,7 +1135,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> a build step for your picks (step 14), one measuring sheet first in the guide, the costs split into for move-in and can wait, your banister from the photo, and the fit proof cleaned.</div>
+<div class="decision"><b>What changed:</b> the Build Guide is now one chapter per thing you make, each with its buy list, its parts drawn to scale and its steps; this plan is shorter (the build is in the guide).</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">

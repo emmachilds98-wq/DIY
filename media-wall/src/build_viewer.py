@@ -646,13 +646,13 @@ def decor_block():
 def cost_overview():
     """v32, client: "a cost overview that shows each piece and list breakdown of shopping items ... clear buy list and estimated cost
     without incorporating large explanations": each piece, its things to buy (quantity × short name) and their estimates."""
-    import costs
+    import costs, chapters as CH
     ov = costs.overview(TRACK)
     tl, th = sum(r[1] for r in ov), sum(r[2] for r in ov)
     cards = "".join(
         f'<details class="cpiece"><summary><span class="cpn">{html.escape(p)}</span><span class="cpc">£{money(lo, hi)}</span><span class="cpi">{len(items)} to buy</span></summary>'
         f'<table class="ctab"><tbody>' + "".join(f'<tr><td class="q">{html.escape(costs.qty(q))}</td><td>{html.escape(n)}</td><td class="m">£{money(a, b)}</td></tr>' for q, n, a, b in items)
-        + '</tbody></table></details>' for p, lo, hi, items in ov)
+        + '</tbody></table>' + (f'<p class="cmk"><button type="button" class="btn" data-mk="{CH.PIECE_CHAPTER[p]}">How to make it</button></p>' if p in CH.PIECE_CHAPTER else '') + '</details>' for p, lo, hi, items in ov)
     return (f'<div class="qhead"><h3 class="ptitle">Cost overview</h3><span class="caption">Each piece, what to buy for it, and about what it costs: £{money(tl, th)} in all</span></div>'
             f'<div class="cpieces">{cards}</div>'
             f'<p class="cfoot"><button type="button" class="btn" id="co-copy"><span class="ms" aria-hidden="true">content_copy</span> Copy the shopping list</button>'
@@ -1013,7 +1013,7 @@ def _page(site=False):
 
     plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
       <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the compact dining cabinet, the network and power: about <b id="d-total">£{money(lo_tot, hi_tot)}</b> in all.</p></div>
-      {PU.plan_home(ring, sum(1 for r in rows if r["kind"] == "buy"), len(steps())).replace("{MONEY}", PU.money_html(TRACK))}
+      {PU.plan_home(ring, sum(1 for r in rows if r["kind"] == "buy"), len(steps())).replace("{MONEY}", PU.money_html(TRACK)).replace("{PDFS}", f'<a class="btn" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> The plan (PDF)</a><a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> The build guide (PDF)</a>')}
       <div class="upnext"><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
         <p><span id="d-nextmeta"></span> · <a href="#build" data-go="build" data-step="1" id="d-nextgo">Open it</a></p></div>
@@ -1096,15 +1096,15 @@ def _page(site=False):
     <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div><label class="sdone sall" for="s-all"><input type="checkbox" id="s-all"> All open</label></div>
     <div class="segbar" id="segbar" style="--n:{len(steps())}" aria-hidden="true">{segbar}</div>
     <p class="caption sr-only" id="s-note">Tick each step when it's done; it saves for both of you.</p>
-    <div class="group pfilter"><span class="label sr-only" id="l-part">Show one part</span>
-      <div class="seg" role="group" aria-labelledby="l-part" id="part-filter"><button type="button" data-part="" aria-pressed="true">All parts</button>{part_buttons}</div>
-      <p class="caption" id="pf-note" aria-live="polite"></p></div>
+    <p class="pdfrow"><a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> The build guide (PDF)</a></p>
+    {__import__("chapters").page_html(money)}
+    <div class="qhead"><h2 class="ptitle">The order of work</h2></div>
     <ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol>
-    <div class="block" id="cuts">
-      <div class="qhead"><h2 class="ptitle">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
+    <details class="fold" id="cuts"><summary>Cutting list for the timber merchant</summary><div class="block">
+      <div class="qhead"><h2 class="ptitle sr-only">Cutting list for the timber merchant</h2><div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div></div>
       <textarea id="cuts-box" class="caption" rows="8" hidden readonly aria-label="The cutting list as text">{html.escape(cuts_text())}</textarea>
       <div class="doc">{deck_section(cuts_html())}</div>
-    </div>
+    </div></details>
     <details class="fold"><summary>Before you start: how the guide works, time, tools, techniques and pitfalls</summary><div class="doc">{GUIDE_RULES}{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div></details>
   </section>"""
     buy_body = f"""<section class="panel" id="buy">
@@ -1162,6 +1162,7 @@ const SITE = {json.dumps(site)};
 <script>""" + STEP_JS + """</script>
 <script>""" + __import__("tidy").MORE_JS + """</script>
 <script>""" + (HERE / "page_router.js").read_text() + """</script>
+<script>""" + __import__("chapters").PAGE_JS + """</script>
 """
     # the build parts in the page's pastels (the PDF keeps its own colours)
     for name, hue in PAGE_PART.items():

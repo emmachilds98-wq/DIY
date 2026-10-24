@@ -1,6 +1,11 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
+- **Round 38 (v42, below): no mention of Claude anywhere the client sees (page, README, PDFs; `qa.py`'s `names` check); the Build
+  Guide in one chapter per thing you make (`chapters.py`: picture, Buy, Cut to scale, Build), the jobs A–E after, 60 pages; the plan
+  PDF 46 pages (was 76: `build_doc.concise` drops what the guide carries, PDF only); Build on the page opens on "Things to make" with
+  the same Buy · Cut · Build tabs, "How to make it" from the room and from Buy's cost overview, PDF buttons on Plan and Build.**
+  The plan and each stage were merged to `main` as they were done (client: "Ensure plan is available in GitHub at all times").
 - **Round 37 (v41, below): `UPGRADE_PLAN_v41.md` done, plus easier viewing: double-tap the floor to stand there, and the camera
   stays out of the furniture.** Fit 87/22/12/0, £4,374–8,245 (picks £401–552; can wait £440–930). Plan 76 pages, guide 65. QA fails []
   errors [] at 390 and 1280, text budget 0 over; taptest all taps ok. Merged to main. **Next:** the client's "save each set-up"
@@ -108,6 +113,27 @@
   1280 × 720 ones).
 - **Every number lives in `src/geometry.py`**; the fit proof is `src/fit.py` (cite a source for every size). Open questions: `src/questions.py`
   (empty since v30: the client answered the last ones and asked for the section to go; the Ask sheet is gone).
+
+## Update 24 Oct 2026, round 38: v42 (no Claude references; one chapter per thing you make; shorter plan; Build in chapters)
+- Client (23 Oct): "Make no reference to Claude as being the editor or viewing there and then optimise PDFs in there to be more concise
+  for what I need. Each thing I'm making will need a buy list, clear image diagram with cuttings and clear build instructions. Then
+  review the areas in the site to make it better for user flow. Add to plan and continue. Ensure plan is available in GitHub at all
+  times." Plan: `UPGRADE_PLAN_v42.md`, merged first.
+- **Names:** the page's link to the Claude plan page and "tell Claude" are gone; the runtime hook is `window.sharedStore` (inert on
+  GitHub Pages); README points only to GitHub Pages. `qa.no_assistant_names()` fails if the page, `sw.js` or either PDF names it.
+- **`chapters.py`:** `MAKE` (nine things: base, worktop, uprights, side wall, cabinet, bar, glass case, record table, fitted) and `JOBS`
+  (A network, B cables, C paint, D lighting, E connect), each with its steps (and which sub-assemblies of a shared step), its buy-list
+  rows (by the start of their text; the chapters plus "Also on the list" add up to the plan's total exactly) and a picture. Cut:
+  `parts(key)` takes the cutting list's rows by project (`_project_of`, using `CUT_STEP`) plus a few offcut parts with geometry sizes
+  (`_extra`); ply is nested on boards, oak drawn to scale; letters key the table. `guide_html` builds the guide, `page_html`/`PAGE_JS`
+  the page's Build sheet. Steps' "step N" become "chapter X" in the guide (`_retarget`).
+- **Plan PDF:** `build_doc.concise()` (PDF only, `deck=False`) drops `PDF_DROP` sections, swaps the fit proof for `fit.summary_html()`
+  and section 10 for the chapters table. The page keeps every section.
+- **Page:** Build: PDF button, Things to make (cards), Jobs (chips), a reader with Buy · Cut · Build (Build links open the step cards,
+  which keep the ticks), the order of work, the merchant's list in a fold. The part filter is gone. `#mk-<key>` routes; room cards
+  (cabinet, media wall, PC, the bar, your picks) say "How to make it" (`actmake`); Buy's cost overview pieces too. Plan home: the
+  three counts in one line, PDF buttons.
+- Backups `build_doc_v41_backup.py`, `doc_v41_backup.css`. VERSION 42; v41 outputs in `out/v41`.
 
 ## Update 23 Oct 2026, round 37: v41 (the build step for your picks, the measuring sheet, a calmer page, easier viewing)
 - Client (23 Oct): "Yes do all except for the you are here and then execute the plan as well then merge to live" (after our offer:

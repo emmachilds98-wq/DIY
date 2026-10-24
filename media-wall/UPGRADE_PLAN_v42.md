@@ -78,3 +78,6 @@ From a review of the page at phone and desktop size:
 3. The guide in chapters (`build_doc.py`, `instructions.py`, a new parts diagram), then the shorter plan PDF.
 4. The page's flow (Build in chapters, How to make it, Buy links, the PDF buttons).
 5. Rebuild, `qa.py`, `taptest.py`, HANDOFF round 38, README, merged to `main`.
+
+**Done 24 Oct (v42, round 38):** all of the above, merged to `main` stage by stage. The guide came to 60 pages, not 40: every chapter
+keeps its full steps and its drawings to scale. The plan PDF is 46 pages.

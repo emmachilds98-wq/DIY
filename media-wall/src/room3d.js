@@ -3827,6 +3827,7 @@ function pickItem(e) {
   return null;
 }
 const btn = (label, attrs, on, cls, aria) => ({ label, attrs, on, cls, aria });
+const MAKES = { recordtable: "recordtable", wallcabs: "fitted", alcoveshelves: "fitted", doorshelf: "fitted", shelfboxes: "fitted" };   // v42: your picks' chapters in the guide
 function actItems(id) {     // [title, how it is now, buttons]
   const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
   if (id === "nowplay") return ["Now playing, on the ledge", `${NOWP[S.nowp % NOWP.length].name}`, [   // v39: which LP faces out
@@ -3855,7 +3856,7 @@ function actItems(id) {     // [title, how it is now, buttons]
                     btn(d.chairs ? "Shut the chair door" : "Open the chair door", { chairs: d.chairs ? "cupboard" : "open" })] : []),
       btn("Watch it open, step by step", { showopen: "1" }),
       btn(S.cabw === "80" ? "Show the 90-wide table (the plan)" : "Show the 80-wide version (10 shorter)", { cabw: S.cabw === "80" ? "90" : "80" }),
-      btn("Look at it", { view: "dining" }), btn("Read about it", { actgo: "dining" })]];
+      btn("Look at it", { view: "dining" }), btn("How to make it", { actmake: "cabinet" })]];
   }
   if (id === "table") return [S.site === "A" ? "The flip-top on the breast (the alternative)" : "The flip-top by the stairs (the alternative)", folded ? "Folded" : `Open for ${S.dining}`, [
       btn("Open for six", { dining: "six" }, S.dining === "six"), btn("Open for four", { dining: "four" }, S.dining === "four"),
@@ -3864,19 +3865,19 @@ function actItems(id) {     // [title, how it is now, buttons]
       btn(S.drawers ? "Push the drawers in" : "Pull the drawers out", { drawers: S.drawers ? "in" : "out" }),
       btn(lv("bias") ? "TV off" : "TV on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"),
       btn("Choose the LP on the ledge", { actopen: "nowplay" }),               // v39: "a now playing swap: tap the turntable"
-      btn("Look at it", { view: "wall" }), btn("Read about it", { actgo: "wall" })]];
+      btn("Look at it", { view: "wall" }), btn("How to make it", { actmake: "base" })]];
   if (id === "tv") return ["The TV", lv("bias") ? "On, its bias light behind it" : "Off", [
       btn(lv("bias") ? "Turn it off" : "Turn it on", { layer: "bias:" + (lv("bias") ? "off" : "on") }), btn("Film lights", { scene: "film" }, S.scene === "film"), btn("Look at it", { view: "sofa" })]];
   if (id === "lamp" || id === "bar1" || id === "bar2") return fixCard(id, lv(id));
   if (id === "curtains") return ["The curtains", S.curtains ? "Drawn" : "Open", [btn(S.curtains ? "Open them" : "Draw them", { tog: "curtains" })]];
   if (id === "lbox") return ["Your OBEGRÄNSAD light box", S.lbox ? "On" : "Off", [btn(S.lbox ? "Turn it off" : "Turn it on", { tog: "lbox" })]];
-  if (id === "pc") return ["Your PC", S.pc ? "Lit" : "Dark", [btn(S.pc ? "Lights off" : "Lights on", { tog: "pc" }), btn("Look at it", { view: "pc" }), btn("Read about it", { actgo: "side" })]];
+  if (id === "pc") return ["Your PC", S.pc ? "Lit" : "Dark", [btn(S.pc ? "Lights off" : "Lights on", { tog: "pc" }), btn("Look at it", { view: "pc" }), btn("How to make it", { actmake: "sidewall" })]];
   if (id === "beside") { const B = R.BESIDE, cur = S.beside;           // v34
     return ["Beside the cabinet", (B.opts[cur] || {}).name || cur, [
       ...Object.entries(B.opts).map(([k, o]) => btn(o.name, { beside: k }, cur === k)),
       ...(cur === "bar" ? [btn(S.barflap ? "Close the bar" : "Open the bar", { barflap: S.barflap ? "shut" : "open" })] : []),   // v37
       ...(cur === "trolley" ? [btn(S.trolley === "out" ? (cabDoors().table ? "Park it by the wall (once the table is folded)" : "Park it by the wall") : (cabDoors().table ? "Pull it out (once the table is folded)" : "Pull it out for dinner"), { trolley: S.trolley === "out" ? "park" : "out" })] : []),
-      btn("Look at it", { view: "beside" }), btn("Read about it", { actgo: "dining" })]]; }
+      btn("Look at it", { view: "beside" }), cur === "bar" ? btn("How to make it", { actmake: "bar" }) : btn("Read about it", { actgo: "dining" })]]; }
   if (id === "records") return ["Your vinyl stand", S.lp ? "The front record of each bay lifted out" : "Two face-out bays on top, LPs filed below", [
       btn(S.lp ? "Put the records back" : "Lift out the front records", { lp: S.lp ? "in" : "out" }),
       btn(S.ideas.clean ? "Take away the record-care caddy" : "Add a record-care caddy (an idea)", { idea: "clean" }, !!S.ideas.clean),
@@ -3893,6 +3894,7 @@ function actItems(id) {     // [title, how it is now, buttons]
       ...(k === "stairdrawers" ? [btn(S.sdraw ? "Push the drawers in" : "Pull the drawers out", { sdraw: S.sdraw ? "in" : "out" })] : []),   // v37
       ...(sg ? (SVAR[k] || []).map(([v, n]) => btn(n, { svar: `${k}:${v}` }, svarOf(k) === v)) : []),
       ...(it && !it.fixed ? [btn("Move it", { actedit: it.id })] : []),
+      ...(firm && MAKES[k] ? [btn("How to make it", { actmake: MAKES[k] })] : []),   // v42: the guide's chapter for it
       btn("Take it away", sg ? { sugg: k } : { idea: k }), btn("See its card", { actideas: (sg ? "sugg-" : "idea-") + k })]]; }
   if (id === "mov:pouf") return ["Your storage ottoman", S.lid ? "The lid off: your board games in three layers, the cards along one side" : "Navy velvet, its padded lid on: your games and cards inside", [   // v34
       btn(S.lid ? "Put the lid back" : "Lift the lid", { lid: S.lid ? "on" : "off" }), btn("Move it", { actedit: "pouf" }), btn("Read about it", { actgo: "c-room" })]];
@@ -4000,6 +4002,7 @@ if (act) {
     if (b.classList.contains("x")) { closeAct(); return; }
     const d = b.dataset;
     if (d.actgo) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: d.actgo } })); return; }
+    if (d.actmake) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { make: d.actmake } })); return; }   // v42
     if (d.actideas) { closeAct(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "ideas", item: d.actideas } })); return; }   // v34
     if (d.actedit) { const id = d.actedit; closeAct(); setEdit(true); select(id); return; }
     if (fixAct(d, e.shiftKey)) return;                                   // v38: a fixture's turn, its heads

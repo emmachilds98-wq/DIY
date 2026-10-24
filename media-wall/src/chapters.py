@@ -211,20 +211,20 @@ def _pieces(ps):
 
 def _svg(sheet, size, scale, title):
     L, W = size
-    pad = 14
+    pad = 16
     r = [f'<svg viewBox="0 0 {L * scale + 2:.0f} {W * scale + 2 + pad:.0f}" width="100%" role="img" aria-label="{title}">',
-         f'<text x="1" y="10" font-size="9" fill="#4a4741" font-family="Inter, sans-serif">{title}</text>',
+         f'<text x="1" y="11" font-size="10.5" fill="#4a4741" font-family="Inter, sans-serif">{title}</text>',
          f'<rect x="1" y="{1 + pad}" width="{L * scale:.1f}" height="{W * scale:.1f}" fill="#f4efe6" stroke="#8a7f70"/>']
     for lab, x, y, l, w in sheet["parts"]:
         X, Y, Wd, Ht = 1 + x * scale, 1 + pad + y * scale, l * scale, w * scale
         r.append(f'<rect x="{X:.1f}" y="{Y:.1f}" width="{Wd:.1f}" height="{Ht:.1f}" fill="#d9b98c" stroke="#5a4632" stroke-width="0.8"/>')
-        big = min(14, Ht * 0.5, Wd * 0.45)
+        big = min(15, Ht * 0.5, Wd * 0.45)
         if big >= 5:
-            two = Ht >= 26 and Wd >= 46
+            two = Ht >= 30 and Wd >= 54
             cy = Y + Ht / 2 + (-2 if two else big / 3)
             r.append(f'<text x="{X + Wd / 2:.1f}" y="{cy:.1f}" font-size="{big:.1f}" font-weight="700" text-anchor="middle" fill="#2a2430" font-family="Inter, sans-serif">{lab}</text>')
             if two:
-                r.append(f'<text x="{X + Wd / 2:.1f}" y="{cy + 10:.1f}" font-size="7.5" text-anchor="middle" fill="#2a2430" font-family="Inter, sans-serif">{n(l)} × {n(w)}</text>')
+                r.append(f'<text x="{X + Wd / 2:.1f}" y="{cy + 12:.1f}" font-size="9.5" text-anchor="middle" fill="#2a2430" font-family="Inter, sans-serif">{n(l)} × {n(w)}</text>')
     r.append("</svg>")
     return "".join(r)
 
@@ -402,3 +402,76 @@ def merchant_html():
                    "<tr><th>Code</th><th>Part</th><th class='num'>Size (cm)</th><th class='num'>Qty</th></tr>"
                    + "".join(f"<tr><td><b>{a}</b></td><td>{b}</td><td class='num'>{c}</td><td class='num'>{d}</td></tr>" for a, b, c, d in rows) + "</table>")
     return "".join(out)
+
+
+# ---------- the plan page's Build sheet (v42, "make it better for user flow"): the same chapters, Buy · Cut · Build
+def _art(pic):
+    import build_doc as B
+    return B.DECK_ART.get(pic) or pic.split("_", 2)[2].rsplit(".", 1)[0]
+
+
+def _step_links(spec):
+    import build_doc as B
+    steps = {s["n"]: s for s in B.steps()}
+    out = []
+    for num, heads in spec:
+        st = steps[num]
+        part = f"<span class='caption'>{', '.join(h.lower() if i else h for i, h in enumerate(heads))}</span>" if heads else ""
+        out.append(f"<li><a class='btn' href='#step-{num}' data-step='{num}'>Step {num} · {st['title']}</a>{part}</li>")
+    return "<ul class='mk-steps'>" + "".join(out) + "</ul>"
+
+
+def buy_list(rows, money):
+    """The page's buy list for a chapter: one line each (quantity, name, price, shop), the detail under it."""
+    if not rows:
+        return "<p class='caption'>Nothing to buy.</p>"
+    li = "".join(f"<li><div><b>{q} × {nm}</b><span>£{money(a, b)}</span></div><small>{w} · {full}</small></li>" for q, nm, full, a, b, w in rows)
+    return f"<ul class='mk-buy'>{li}</ul><p class='mk-tot'><b>About £{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}</b></p>"
+
+
+def page_html(money):
+    cards, jobs, views = [], [], []
+    for i, c in enumerate(MAKE, 1):
+        key, title, what, pic, spec, buy, time, who = c
+        rows = buy_rows(buy)
+        cost = money(sum(r[3] for r in rows), sum(r[4] for r in rows))
+        cards.append(f"<button type='button' class='mk-card' data-mk='{key}' aria-pressed='false'><img data-art='{_art(pic)}' alt='' loading='lazy'>"
+                     f"<b>{i} · {title}</b><span>{time} · £{cost}</span></button>")
+        views.append(f"<section class='mk-ch' id='mkc-{key}' hidden><div class='qhead'><h3 class='ptitle'>{i} · {title}</h3>"
+                     f"<button type='button' class='btn' data-mkclose>Close</button></div><p class='caption'>{what} {time} · {who} · £{cost}</p>"
+                     "<div class='seg mk-tabs' role='group' aria-label='Show'><button type='button' data-mkt='buy' aria-pressed='true'>Buy</button>"
+                     "<button type='button' data-mkt='cut' aria-pressed='false'>Cut</button><button type='button' data-mkt='build' aria-pressed='false'>Build</button></div>"
+                     f"<div class='mk-p' data-p='buy'>{buy_list(rows, money)}</div><div class='mk-p doc' data-p='cut' hidden>{cut_html(key)}</div>"
+                     f"<div class='mk-p' data-p='build' hidden>{_step_links(spec)}</div></section>")
+    for j in JOBS:
+        key, title, what, spec, buy, time = j
+        rows = buy_rows(buy)
+        jobs.append(f"<button type='button' class='chip mk-job' data-mk='{key}' aria-pressed='false'>{JOB_LETTER[key]} · {title}</button>")
+        views.append(f"<section class='mk-ch' id='mkc-{key}' hidden><div class='qhead'><h3 class='ptitle'>{JOB_LETTER[key]} · {title}</h3>"
+                     f"<button type='button' class='btn' data-mkclose>Close</button></div><p class='caption'>{what} {time} · £{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}</p>"
+                     f"<div class='mk-p' data-p='buy'>{buy_list(rows, money)}</div><div class='mk-p'>{_step_links(spec)}</div></section>")
+    return ("<div class='qhead'><h2 class='ptitle'>Things to make</h2></div><div class='mk-grid'>" + "".join(cards) + "</div>"
+            "<div class='mk-jobs'><span class='label'>Jobs</span>" + "".join(jobs) + "</div>"
+            "<div class='mk-view' id='mk-view' hidden>" + "".join(views) + "</div>")
+
+
+PAGE_JS = r"""(() => { const v = document.getElementById("mk-view"); if (!v) return;
+  const open = k => { const ch = k && document.getElementById("mkc-" + k); $$(".mk-ch", v).forEach(s => { s.hidden = s !== ch; }); v.hidden = !ch;
+    $$("[data-mk]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mk === k)));
+    if (ch) { arts(ch); setTimeout(() => jumpTo(ch), 80); } };
+  window.openMake = k => { if (typeof openSheet === "function" && curSheet !== "build") openSheet("build"); open(k);
+    try { history.replaceState(history.state, "", "#mk-" + k); } catch (e) {} };
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-mk]"); if (b) { e.preventDefault(); window.openMake(b.dataset.mk); return; }
+    if (e.target.closest("[data-mkclose]")) { open(null); return; }
+    const t = e.target.closest("[data-mkt]"); if (!t) return;
+    const ch = t.closest(".mk-ch"); $$("[data-mkt]", ch).forEach(x => x.setAttribute("aria-pressed", String(x === t)));
+    $$(".mk-p", ch).forEach(p => { p.hidden = p.dataset.p !== t.dataset.mkt; });
+  });
+  const m = location.hash.match(/^#mk-(\w+)$/); if (m) window.openMake(m[1]);
+})();"""
+
+# the buy list's pieces, and which chapter makes (or fits) them
+PIECE_CHAPTER = {"The media wall": "base", "The side wall and the PC": "sidewall", "The dining cabinet": "cabinet", "The chimney breast": "glasscase",
+                 "Your picks": "fitted", "Lighting": "lighting", "Paint": "paint", "Network": "network", "Electrics (your own job)": "cables",
+                 "Power and cables": "connect", "TV, consoles and AV": "connect", "Vinyl kit": "connect"}
