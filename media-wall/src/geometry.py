@@ -43,9 +43,11 @@ STAIR_N = 13
 # going up from one end pole": a plain square newel post at the foot and two flat slats on edge raking up from it to the wall at the
 # top, no spindles, painted white like the capping of the low wall under them. Heights above the pitch line (the nosings).
 BANISTER = dict(slats=((90.0, 9.0), (52.0, 9.0)), slat_t=2.5, newel=9.0, newel_h=112.0, col=("#ece9e2", "#f7f5f0", "#cfcac0"))
-# v48 §6: the sun through the living room window, for the 3D room by day: degrees round from straight out of the window towards +x, and
-# up. A stand-in (a mid-afternoon sun) until the client says which way the back of the house faces (house/HOUSE.md).
-SUN = dict(az=-12.0, el=45.0)
+# v49: the sun through the living room window, for the 3D room by day: degrees round from straight out of the window towards +x (west:
+# the left, looking out), and up. The back of the house faces 14° east of north (house/HOUSE.md), so the sun comes in only on spring and
+# summer mornings, low from the right: this is 7 am in June, the morning it reaches furthest in (from the sun's path at 51.39 N).
+FACING = 14.0                                # the window's outward direction, degrees east of north (OpenStreetMap)
+SUN = dict(az=-61.0, el=18.0)
 LANDING_Y = STAIR_N * STAIR_RISE             # 253.5
 LANDING_D = 90.0                             # at least the flight's width (Approved Document K)
 DOOR_X = (BREAST_X[1] + 12.0, BREAST_X[1] + 95.0)   # 315.5 .. 398.5 in the recess (drawn where the agent's plan shows it)

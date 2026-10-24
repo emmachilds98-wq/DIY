@@ -4728,8 +4728,8 @@ root.addEventListener("input", e => {
 /* ---------------------------------------------------------------- go: built the first time the room is on screen (v14.1) */
 let started = false;
 /* v48 §6: the sun by day, through the window: it casts the frame, the bars and the sill's plants onto the sill, the sofa and the floor.
-   Its direction (geometry.SUN: degrees round from straight out of the window towards the room's +x, and up) is a stand-in until the client
-   says which way the back of the house faces. Always in the scene (a light coming and going would rebuild every shader), dark by night
+   Its direction (geometry.SUN: degrees round from straight out of the window towards the room's +x, and up): v49, 7 am in June, low from
+   the right (the back faces 14° east of north: the only sun the room gets is on spring and summer mornings). Always in the scene (a light coming and going would rebuild every shader), dark by night
    and in Fast, which has no shadows. */
 const SUNCFG = { lux: 80 };   // tuned on stills: the bars' shadows read on the sofa, the ottoman and the rug, the floor not washed out
 function buildSun() {

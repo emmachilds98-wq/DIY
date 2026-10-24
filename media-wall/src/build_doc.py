@@ -13,8 +13,8 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "48"
-REVISION = "43: the garden from one floor up, the sun through the window, the room's own reflections, a soft glow, sharper HD pictures"
+VERSION = "49"
+REVISION = "44: the window faces north-north-east: the real sun; the 25 m garden"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -621,6 +621,7 @@ OTHER_SOURCES = [
     "Pontata: Card Room Green vs Little Greene Sage Green (approximate screen colours)",
     "Homebase and NC Tiles: Farrow &amp; Ball Card Room Green No. 79 in Modern Eggshell and Estate Eggshell",
     "haart Medway: floor plans and listing photos for the house (Portsmouth Close)",
+    "OpenStreetMap: Portsmouth Close and Darnley Road, Strood (the back of the house faces 14° east of north); postcodes.io: ME2 2QY (51.391 N, 0.468 E); the sun's path from the NOAA solar position formulas",
     "ConsoleMods: PS2 Component Video Out setting",
     "GOV.UK: Electrical safety, Approved Document P (2013 edition, for use in England): notifiable work is a new circuit, a replacement consumer unit, or an addition or alteration to a circuit in a special location (round a bath or shower); like-for-like replacements and additions to existing circuits elsewhere are not notifiable (gov.uk/government/publications/electrical-safety-approved-document-p)",
     "IET Electrical: Part P, England and Wales (notifiable and non-notifiable work); Planning Portal: Electrics, Building Regulations (non-notifiable work must still meet the regulations, BS 7671)",
@@ -1153,9 +1154,9 @@ def _plan(deck=False):
 
 <div class="p1">
 <h1>Home Network &amp; Media Wall Plan</h1>
-<p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
+<p class="byline">Revised Oct 24, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> in the 3D room, the garden as you see it from one floor up, the real window, the sun casting the window's bars by day, the room's own reflections and a soft glow round the lights by evening, and sharper HD pictures.</div>
+<div class="decision"><b>What changed:</b> the window faces north-north-east, so no sun reaches the TV; the 3D room's daytime sun is a June morning, low from the right; the garden runs 25 m to the far fence.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -1190,7 +1191,7 @@ def _plan(deck=False):
 <tr><td>Ceiling</td><td class="num">{n(g.CEIL*10)}</td><td></td></tr>
 <tr><td>TV alcove, east wall to the breast</td><td class="num">{n(g.ALC_W*10)} × {n(g.ALC_D*10)}</td><td>Floor to ceiling</td></tr>
 <tr><td>Chimney breast</td><td class="num">{n(g.BREAST_W*10)}</td><td>Projects 380 on the alcove side, 390 on the west side: the dining wall</td></tr>
-<tr><td>Window and radiator (north wall)</td><td class="num">2350 · 1370</td><td>Window starts 730 from the east wall; radiator ends 130 inside its west end; the glass from {n(g.WINDOW_Y[0]*10)} to {n(g.WINDOW_Y[1]*10)} up, set {n(g.WINDOW_REVEAL*10)} back in its reveal over a deep sill (v17, from your note; the depth is drawn, please check it)</td></tr>
+<tr><td>Window and radiator (north wall, facing 14° east of north)</td><td class="num">2350 · 1370</td><td>Window starts 730 from the east wall; radiator ends 130 inside its west end; the glass from {n(g.WINDOW_Y[0]*10)} to {n(g.WINDOW_Y[1]*10)} up, set {n(g.WINDOW_REVEAL*10)} back in its reveal over a deep sill (v17, from your note; the depth is drawn, please check it)</td></tr>
 <tr><td>Skirting</td><td class="num">60 × 20</td><td>White now; Card Room Green eggshell in the plan</td></tr>
 <tr><td>West end: recess, door, stair box</td><td class="num">935 / 1045 / 660 / 820</td><td>Drawn roughly: please confirm which is which</td></tr>
 <tr><td>Stairs, beside the door</td><td class="num">820 wide</td><td>They go <b>up</b> to the first floor, rising away from the room; on the room side a low white wall with your banister above it, from your photo: a square post at the foot and two flat slats up to the wall by the door<sup>{fit.ORDER.index("photo23stairs") + 1}</sup></td></tr>

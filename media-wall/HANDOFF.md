@@ -1,41 +1,49 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-**Current: v48 (round 43, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
+**Current: v49 (round 44, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
 viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 65), guide 66
-(phone 141). Next version: 49. `UPGRADE_PLAN_v48.md` done but for path-traced pictures (section 7's "traces the light"; see round 43).
+(phone 141). Next version: 50. The house: **13 Portsmouth Close, Strood, ME2 2QY**; the back faces 14° east of north; garden 25 m.
 **The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
-- **What's left, in order (24 Oct, end of round 43; nothing is half-done, all work is on `main`):**
-  1. **Ask the client** (each answer is a one-line change): which way the back of the house faces (then set `geometry.SUN` az/el,
-     rebuild); the garden's length to the far fence (`house/HOUSE.md`, `garden_window.py`; the photos put it at 15–17 m); whether they
-     want path-traced "near-photo" pictures (v48 §7: three-gpu-pathtracer, minutes per picture: only on their yes); the side-wall
-     socket's distance and height (fit proof CHECK row).
+- **What's left, in order (24 Oct, end of round 44; nothing is half-done, all work is on `main`):**
+  1. **Ask the client** (each answer is a one-line change): whether they want path-traced "near-photo" pictures (v48 §7:
+     three-gpu-pathtracer, minutes per picture: only on their yes); the side-wall socket's distance and height (fit proof CHECK row).
   2. **Save each set-up** (round 33's ask, still open): a Save this set-up button writing `S`, its look link, a name, who and when to a
      `setups` collection in the shared viewer's db, and a My set-ups list (round 33's last bullet has the design). They may set up
      Firebase instead: ask before building.
-  3. **The viewer's pictures:** 29 are inlined (`src/deck_assets_todo.txt`); upload them to the artifact's asset store (round 13's
-     notes) so the inline copy shrinks.
-  4. **Tidy:** the branches `compassionate-wright-a150qf` (v11) and `optimistic-lovelace-7phxl6` (v37) each hold one superseded commit;
+  3. **Tidy:** the branches `compassionate-wright-a150qf` (v11) and `optimistic-lovelace-7phxl6` (v37) each hold one superseded commit;
      delete them if the client agrees.
-  5. Each round: plan first (`UPGRADE_PLAN_vNN.md`, merged), work in small merged steps, rebuild, `qa.py`/`taptest.py`/`clash.py`,
+  4. Each round: plan first (`UPGRADE_PLAN_vNN.md`, merged), work in small merged steps, rebuild, `qa.py`/`taptest.py`/`clash.py`,
      HANDOFF round, README, republish the viewer. Merge to `main` as you go: sessions can end without warning.
- short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
-  code), then the work merged to `main` in steps, the plan PDF and the viewer updated. Rules are in `CLAUDE.md` (core plan
-  `geometry.FIRM` gets the full build; options one line each; say less; no HD stills; every size from a cited source).
+  Rules are in `CLAUDE.md` (core plan `geometry.FIRM` gets the full build; options one line each; say less; no HD stills; every
+  size from a cited source).
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 build_doc.py && python3 build_viewer.py`
   (no `shot3d.py`: the client takes pictures in the room). Version: `VERSION` in `build_doc.py`; move the last version's outputs to
   `out/vNN/` first.
 - **Checks:** `python3 clash.py` (0 clashes), `python3 qa.py <dir>` and `python3 taptest.py <dir>` ("errors" and "fails" []). Headless
   runs need `THREE_LOCAL` pointing at a local three@0.160 package (round 28) and Chromium at `/opt/pw-browsers/chromium`.
 - **The viewer artifact:** `python3 build_viewer.py`, then publish `src/media_wall_viewer_inline.html` to the URL above (no files map,
-  no `capabilities`). Pictures not yet in its asset store are inlined (`src/deck_assets_todo.txt`); round 13's notes below say how to
-  upload them.
+  no `capabilities`). A new or changed picture is inlined until it's uploaded (`src/deck_assets_todo.txt`): upload with the Artifact
+  tool (`asset: true`, `file_paths`, 25 a call), add `{name: {sha, url}}` to `src/deck_assets.json`, run `build_viewer.py` again.
 - **Backups:** `src/backups/` (copy a file there before a large edit); old upgrade plans in `media-wall/plans/`.
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
+
+## Update 24 Oct 2026, round 44: v49 (`UPGRADE_PLAN_v49.md`: the real sun, the 25 m garden, a lighter page)
+- Client: "This is the rear side of 13 Portsmouth close facing Darnley road. Me2 2qy. Roughly 25m long. Continue any other upgrades".
+- **Which way it faces:** ME2 2QY from postcodes.io (51.391 N, 0.468 E); OpenStreetMap's buildings round Portsmouth Close (the API's
+  `map` call on a small box; Nominatim and Overpass refused): the terrace at the head of the close has its long walls on 104°, its back
+  towards Darnley Road, so the back faces 14° east of north (`geometry.FACING`). The plan already called the window wall "north".
+- **The sun** (NOAA formulas at 51.39 N): into the window only late March to mid September, 05:30–08:30 BST at midsummer, 5–30° up,
+  45–80° to the right; none from equinox to equinox. `geometry.SUN` az −61 el 18 (7 am in June). **Sign:** the room's x runs west from
+  the east wall, so +az is to the LEFT looking out; the first try (+61) put the sun in the west. Now the bars land on the dining cabinet.
+- **The garden:** 25 m to the far fence (`house/HOUSE.md`); `garden_window.py` `WALL` 30 → 25 (the views barely change: mean 3/255).
+- **Plan:** v49; the window row says 14° east of north; What changed; an OpenStreetMap/postcodes.io/NOAA source.
+- **The shared page:** the 29 inlined pictures uploaded to its asset store (`deck_assets.json` 163): the inline copy 1.8 MB.
+- **Checks:** `clash.py` 0; `qa.py` and `taptest.py` (below). v48 outputs in `out/v48/` (v47's removed; they're in git).
 
 ## Update 24 Oct 2026, round 43: v48 (the rest of `UPGRADE_PLAN_v48.md`: the sun, the room's own reflections, glow, sharper HD pictures)
 - Client: "Should include new garden view and more upgrades" (the go for v48's sections 2–8; section 1, the garden, was v48.1/48.2).

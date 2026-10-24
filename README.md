@@ -2,25 +2,25 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v48: the garden from one floor up, the sun through the window, a more real room
+## Media wall and dining wall, v49: the real sun (the window faces north-north-east), the 25 m garden
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 147 cm long and 23 deep. It's the only table now. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v48%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v49%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
 **The garden through the window, from one floor up** (from your photos of the view): from across the room you see the trees at the end of the garden, the roofs and the hill opposite; walk up to the glass and the lawn is below you. Day, and dusk in the evening.
 
+**New in v49** ("This is the rear side of 13 Portsmouth close facing Darnley road ... Roughly 25m long")
+- **The back of the house faces 14° east of north.** The sun only comes in on spring and summer mornings, low from the right, and never reaches the TV. The 3D room's daytime sun is now 7 am in June: it lays the window's bars across the dining cabinet.
+- **The garden runs 25 m** to the far fence; the view through the window ends there.
+- **The shared page loads quicker:** its pictures are stored with it, not packed into the page (about 4 MB down to 1.8 MB).
+
 **New in v48** ("improving the renders graphics and quality of the render even further", "It's a floor up so take perspective into account")
 - **The garden as you see it**, from one floor up: built from your photos of the view, with the lawn below the sill and the trees and roofs beyond; the real window (three sections, top lights, Georgian bars).
-- **The sun by day** comes through the window and lays the bars' and the plants' shadows across the sofa and the rug. Its direction is a guess until you tell us which way the back of the house faces.
+- **The sun by day** comes through the window and lays the bars' shadows across the room.
 - **By evening** the room reflects itself (the TV, the glass case, the window at night), and the lights have a soft glow, on a PC with a graphics card.
 - **Save as HD picture** is sharper: drawn at twice the size, with finer shadows.
-
-**New in v47** ("ways we can make the information read easier and clearer ... fitting everything correctly in mobile and pc views")
-- The jobs' icons in Build show again (they had turned into words).
-- On a phone, Plan's chapters sit two to a row, so all eleven fit in about one screen; long notes under Waiting on you stop at two lines.
-- The media wall's heights list the dining cabinet's top (189) in place of the old fold-up table.
 
 **New in v46** ("drill down into tasks for each piece of the room when I click on them or look in the plans", "default view could balance lighting throughout the room using all fixtures")
 - **The room, piece by piece, any order:** six places (the media wall, the side wall and PC, the chimney breast and door, the dining wall, the sofa, the window corner). Tap a place's label in the 3D room to see its pieces; tap a piece (or find it in Build) for its card: **Check · Buy · Cut · Build**, a tick for each task and each thing to buy, and a ring showing how much is done. No more "step 1 of 14".
@@ -48,7 +48,7 @@ Earlier versions (v9 to v44) and what each changed are in [`media-wall/HANDOFF.m
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v48%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v49%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)
@@ -64,9 +64,9 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v48.pdf`](media-wall/out/Home_Network_Plan_v48.pdf) (35 pages, your plan only, with clickable contents and bookmarks); for a phone, [`Home_Network_Plan_v48_phone.pdf`](media-wall/out/Home_Network_Plan_v48_phone.pdf)
-- **The build guide:** [`media-wall/out/Build_Guide_v48.pdf`](media-wall/out/Build_Guide_v48.pdf) (66 pages, by place and piece: each with Check, Buy, Cut and Build; the jobs; the merchant's cutting list); for a phone, [`Build_Guide_v48_phone.pdf`](media-wall/out/Build_Guide_v48_phone.pdf)
-- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (the previous version in `v47/`; older ones are in the git history)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v49.pdf`](media-wall/out/Home_Network_Plan_v49.pdf) (35 pages, your plan only, with clickable contents and bookmarks); for a phone, [`Home_Network_Plan_v49_phone.pdf`](media-wall/out/Home_Network_Plan_v49_phone.pdf)
+- **The build guide:** [`media-wall/out/Build_Guide_v49.pdf`](media-wall/out/Build_Guide_v49.pdf) (66 pages, by place and piece: each with Check, Buy, Cut and Build; the jobs; the merchant's cutting list); for a phone, [`Build_Guide_v49_phone.pdf`](media-wall/out/Build_Guide_v49_phone.pdf)
+- **All renders and plans:** [`media-wall/out/`](media-wall/out/) (the previous version in `v48/`; older ones are in the git history)
 - **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)
 

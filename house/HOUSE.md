@@ -5,6 +5,18 @@ The living room's media wall is the first project (`media-wall/`). The client pl
 house in one place so later rooms start from it. Sizes are the agent's unless marked; the living room's own measured sizes win
 over the agent's (they are in `media-wall/HANDOFF.md` section 1 and `media-wall/src/geometry.py`).
 
+## Where it is (the client, 24 Oct 2026)
+
+**13 Portsmouth Close, Strood, ME2 2QY**; the back faces Darnley Road. The terrace at the head of the close: its long walls run on a
+bearing of 104°, so **the back of the house faces 14° east of north** (north-north-east; OpenStreetMap buildings and roads, the
+postcode at 51.391 N, 0.468 E from postcodes.io).
+
+- **Sun through the back windows** (the sun's path at 51.39 N): only from late March to mid September, early in the morning (05:30–08:30
+  BST at midsummer), low (5–30° up) and from the right, 45–80° off straight out; at midsummer a last grazing few minutes from the left
+  about 20:00. From the autumn to the spring equinox, none. The front (south-south-west) gets the sun the rest of the day.
+- The living room: no sun on the TV or the screen wall, ever; by day even, cool north light. The 3D room's daytime sun is 7 am in June
+  (`geometry.SUN`, 61° right of straight out, 18° up).
+
 ## Sources
 
 | File | What it is |
@@ -52,8 +64,8 @@ The living room measured: 467 wide along the window, 347 from the window to the 
 - The summer photo was taken from the dormer (the roof's tiles at its foot): one storey higher than the living room, so it looks down
   more steeply than the room does. The video frame is from the living room itself.
 - Summer: green and full (the summer photo); spring: bare trees (the video, the view photos).
-- **About 15 m long** from the back wall to the trees at the end (estimated from the view photos: the camera's direction from the
-  fences, its height from the man on the lawn; the neighbour's shed fronts line up with the end). A birch clump and a conifer at the end.
+- **About 25 m long** to the far fence (the client, 24 Oct). The photos see the lawn to the trees at about 17 m (the camera's direction
+  from the fences, its height from the man on the lawn; the neighbour's shed fronts line up with it); the rest is under the trees. A birch clump and a conifer at the end.
 - **Beyond:** a long low building with grey roofs behind the end fences, then a valley and a hill of terraced houses opposite, a little
   above the living room's eye level. The right-hand neighbour has a shed with a shingle roof at the end (a trampoline, a rotary dryer).
 - **Camera heights** (from the view photos, `media-wall/src/garden_window.py`): upstairs window about 6.7 m above the lawn; the living
@@ -62,6 +74,6 @@ The living room measured: 467 wide along the window, 347 from the window to the 
 ## Not known yet (ask the client when a room needs it)
 
 - Ceiling heights other than the living room's; floor-to-floor heights; wall thicknesses.
-- The garden's measured length and width (15 m is an estimate); which way the back of the house faces (sun through the living room window).
+- The garden's width.
 - The kitchen's layout; where the stairs sit on each floor beyond the living room's stair box.
 - Window sizes for every room but the living room.
