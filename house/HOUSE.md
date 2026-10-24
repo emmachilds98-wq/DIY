@@ -13,6 +13,7 @@ over the agent's (they are in `media-wall/HANDOFF.md` section 1 and `media-wall/
 | `media-wall/inputs/photo_house_rear_24oct.jpg` | The agent's photo of the back of the house and the garden |
 | `media-wall/inputs/photo_garden_summer_24oct.jpg` | The garden in summer, taken from the dormer (1449 × 2576) |
 | `media-wall/inputs/photo_garden_window_24oct.jpg` | A frame of the client's video through the living room window |
+| `media-wall/inputs/photo_view_wide_24oct.jpg`, `photo_view_centre_24oct.jpg`, `photo_view_right_24oct.jpg` | The view out of the back, taken from upstairs (overcast, spring): wide, centre (looking down) and right |
 | `media-wall/inputs/room_sketch_accurate_mm.png` | The client's measured sketch of the living room (mm) |
 | `media-wall/inputs/photo_stairs_*`, `room_photo_*`, `photo_current_living_room.png` | The living room and the stairs up from it |
 
@@ -48,11 +49,17 @@ The living room measured: 467 wide along the window, 347 from the window to the 
   trampoline over the right fence.
 - The summer photo was taken from the dormer (the roof's tiles at its foot): one storey higher than the living room, so it looks down
   more steeply than the room does. The video frame is from the living room itself.
-- Summer: green and full (the summer photo); spring: bare trees (the video).
+- Summer: green and full (the summer photo); spring: bare trees (the video, the view photos).
+- **About 15 m long** from the back wall to the trees at the end (estimated from the view photos: the camera's direction from the
+  fences, its height from the man on the lawn; the neighbour's shed fronts line up with the end). A birch clump and a conifer at the end.
+- **Beyond:** a long low building with grey roofs behind the end fences, then a valley and a hill of terraced houses opposite, a little
+  above the living room's eye level. The right-hand neighbour has a shed with a shingle roof at the end (a trampoline, a rotary dryer).
+- **Camera heights** (from the view photos, `media-wall/src/garden_window.py`): upstairs window about 6.7 m above the lawn; the living
+  room's standing eye about 4.1 m.
 
 ## Not known yet (ask the client when a room needs it)
 
 - Ceiling heights other than the living room's; floor-to-floor heights; wall thicknesses.
-- The garden's length and width; which way the back of the house faces (sun through the living room window).
+- The garden's measured length and width (15 m is an estimate); which way the back of the house faces (sun through the living room window).
 - The kitchen's layout; where the stairs sit on each floor beyond the living room's stair box.
 - Window sizes for every room but the living room.

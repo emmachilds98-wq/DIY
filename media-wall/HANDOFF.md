@@ -3,8 +3,8 @@
 ## START HERE (next agent)
 **Current: v47 (round 42, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
 viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 63), guide 66
-(phone 76). Next version: 48: plan in `media-wall/UPGRADE_PLAN_v48.md` (render quality; the garden seen from one floor
-up), waiting on the client's go. **The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
+(phone 76). Next version: 48: plan in `media-wall/UPGRADE_PLAN_v48.md` (render quality); section 1 (the garden seen from one floor
+up) done (v48.1); the rest waits on the client's go. **The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
 - **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
@@ -22,6 +22,20 @@ up), waiting on the client's go. **The whole house's facts** (floors, rooms, the
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
+
+## Update 24 Oct 2026: v48.1 (the garden from one floor up)
+- Client (three photos of the view, `inputs/photo_view_{wide,centre,right}_24oct.jpg`): "2 images taken looking to the right and centre
+  of the window at the right height". They show roof tiles under the window, so they were taken upstairs (the living room window has
+  brick under it in the agent's photo, and the client's living-room video shows a straight drop to the patio).
+- `garden_window.py` (rewritten; old one in backups): each photo's direction from the fences' vanishing point (wide: 20.6° right, 6.1°
+  down; centre: matched to it on fence posts and the shed, 1.8° right, 26.3° down; f 1400 px). The man on the lawn puts the camera about
+  6.7 m above the lawn. The photos are laid onto a ground 6.7 m down and a wall 30 m out, and looked at from the living room's eye
+  (`geometry.GARDEN_VIEW`: the window's middle, 150 up, 60 in; 2.6 m lower and 0.45 right of the upstairs camera). The living-room video
+  frame fills the ground nearer the house (f 980, 7° left, 17° down); the far left is the right-hand gardens mirrored; the rest is filled
+  softly. One picture, ±70° across, 40° up, 65° down, 4096 × 2225 (day 0.2 MB, dusk 0.1 MB). The summer photo is no longer used.
+- `room3d.js` hangs it square-on, `d` = 10 m out from that eye, at the size its angles give, so it lines up from anywhere in the room:
+  from across the room the trees, the roofs and the hill; at the glass, the lawn below. Needs `opencv-python-headless` to rerun.
+- `house/HOUSE.md`: the garden about 15 m long (estimated), what's beyond, the camera heights.
 
 ## Update 24 Oct 2026: v48 plan (render quality) and the house notes
 - Client: "Eventually we're going to build the whole house so keep any info you need. Can we now plan on improving the renders graphics

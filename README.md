@@ -9,7 +9,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 
 ![The media wall, main view](media-wall/out/Media%20wall%20v47%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**The garden through the window** (from your video): the 3D room's window shows your garden, sunny in daytime and at dusk in the evening, with a little evening light coming in, instead of a black window.
+**The garden through the window, from one floor up** (from your photos of the view): from across the room you see the trees at the end of the garden, the roofs and the hill opposite; walk up to the glass and the lawn is below you. Day, and dusk in the evening.
 
 **New in v47** ("ways we can make the information read easier and clearer ... fitting everything correctly in mobile and pc views")
 - The jobs' icons in Build show again (they had turned into words).

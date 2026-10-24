@@ -782,8 +782,12 @@ function buildShell() {
   const glass = reg(new THREE.MeshPhysicalMaterial({ color: "#dfe8ee", roughness: 0.02, transparent: true, opacity: 0.12, depthWrite: false }));
   const pane = new THREE.Mesh(new THREE.PlaneGeometry((wx1 - wx0) * M, (wy1 - wy0) * M), glass);
   pane.position.copy(v3(mid, (wy0 + wy1) / 2, FZ - 1)); shell.add(pane);
-  view = new THREE.Mesh(new THREE.PlaneGeometry(24, 12), new THREE.MeshBasicMaterial({ map: SKY.night, toneMapped: false }));
-  view.position.copy(v3(mid, 270, FZ - 700)); shell.add(view);   // v47.1: the garden, 7 m out: from the room you see the lawn, the path and the trees, as from the window
+  /* v48, client: "It's a floor up so take perspective into account": the garden picture is made from one eye in the room (the window's
+     middle, at standing height), straight out and level (garden_window.py), so hung square-on at d from that eye, at the size its angles
+     give, it lines up: the lawn well below the sill, the trees and the hill across the valley at eye level, from anywhere in the room */
+  const GV = R.GARDEN_VIEW || { eye: [mid, 150, WZ + 60], d: 1000, tan: [2.747, 0.839, 2.145] }, [tx, tu, td] = GV.tan;
+  view = new THREE.Mesh(new THREE.PlaneGeometry(2 * GV.d * tx * M, GV.d * (tu + td) * M), new THREE.MeshBasicMaterial({ map: SKY.night, toneMapped: false }));
+  view.position.copy(v3(GV.eye[0], GV.eye[1] + GV.d * (tu - td) / 2, GV.eye[2] - GV.d)); shell.add(view);
   sillPlants(wx0, wx1, SL.y, FZ + 2, WZ + SL.nose - 1);
   // the radiator under the window, painted in
   const [rx0, rx1] = R.RADIATOR_X, [ry0, ry1] = R.RADIATOR_Y, radP = paintMat(lum("#3b6e56") / BASE_L, true, false, "trim");

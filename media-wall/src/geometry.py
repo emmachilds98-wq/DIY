@@ -414,6 +414,10 @@ WINDOW_REVEAL = 22.0                        # the frame sits back in the wall: a
 # the first floor): white uPVC in three sections, the sides a quarter of the width each, a row of top lights over them, Georgian bars
 # (two panes across in each side, three in the middle, three down under the top lights). Proportions read off the photo
 WINDOW_DESIGN = dict(sections=(0.24, 0.52, 0.24), top=0.80, cols=(2, 3, 2), rows=3, frame=6.0, mullion=6.0, transom=5.0, bar=1.6)
+# v48: the garden through the window, seen from the living room (one storey above the lawn, house/HOUSE.md). garden_window.py makes
+# one picture from this eye (the window's middle, 150 up, 60 in from the glass), straight out and level, ±70° across, 40° up, 65° down
+# (tangents); room3d.js hangs it d out from the eye so it lines up from anywhere in the room
+GARDEN_VIEW = dict(eye=((WINDOW_X[0] + WINDOW_X[1]) / 2, 150.0, WINDOW_Z + 60.0), d=1000.0, tan=(2.747, 0.839, 2.145))
 SILL = dict(nose=3.0, t=3.0, y=WINDOW_Y[0]) # a white sill across the reveal, 3 proud of the wall, plants along it
                                             # the client's curtains (photo 20 Oct, inputs/photo_room_curtains_evening.jpg; "hessian curtains
                                             # from dunelm with a wood rail"): natural hessian, pencil pleat, to the floor (Dunelm's pencil-pleat
