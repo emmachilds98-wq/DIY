@@ -24,8 +24,9 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 
 ## Update 24 Oct 2026: v47.1 (the garden through the window)
 - Client (with a video through the window, `inputs/photo_garden_window_24oct.jpg` is its sharpest frame): "Can we somehow make the room
-  look less dark through it and not just a blank black window".
-- `src/art/garden_day.webp` (the frame cropped above the window bar, widened to 2:1 with soft mirrored edges) and `garden_dusk.webp`
+  look less dark through it and not just a blank black window". Then a sharper summer photo (`inputs/photo_garden_summer_24oct.jpg`,
+  1449 × 2576), which the window now uses: cropped from mid-tree to above the gutter (0, 560, 1449, 2370).
+- `src/art/garden_day.webp` (the photo widened to 2:1 with soft mirrored edges) and `garden_dusk.webp`
   (the same graded to blue hour, the room's warm light on the patio). Both in `DATA.img`; `room3d.js` loads them over the drawn sky
   (`SKY.day` / `SKY.night`, the same material, no new shader). The backdrop plane is 24 × 12 m, 7 m out, its centre at 270 so the lawn,
   the path and the trees show through the window. Evening light through the glass: `win` 11, `#7d89b8` (was 4, near black).
