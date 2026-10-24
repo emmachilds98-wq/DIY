@@ -488,6 +488,13 @@ function skyTex(day) {
   });
 }
 const SKY = { day: skyTex(true), night: skyTex(false) };
+/* v47.1, client (with a video through the window): "Can we somehow make the room look less dark through it and not just a blank black
+   window": the garden itself (art/garden_day, from the video; art/garden_dusk, the same at blue hour for the evening), in place of the
+   drawn sky as soon as each picture arrives. Same material, so no new shader */
+{ const IMG = (typeof DATA !== "undefined" && DATA.img) || {};
+  for (const [k, slot] of [["garden_day", "day"], ["garden_dusk", "night"]]) if (IMG[k])
+    new THREE.TextureLoader().load(IMG[k], t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; SKY[slot] = t;
+      if (view && (slot === "day") === (S.tod === "day")) { view.material.map = t; view.material.needsUpdate = true; dirty(); } }); }
 
 /* ---------------------------------------------------------------- materials */
 const MATS = [];
@@ -763,8 +770,8 @@ function buildShell() {
   const glass = reg(new THREE.MeshPhysicalMaterial({ color: "#dfe8ee", roughness: 0.02, transparent: true, opacity: 0.12, depthWrite: false }));
   const pane = new THREE.Mesh(new THREE.PlaneGeometry((wx1 - wx0) * M, (wy1 - wy0) * M), glass);
   pane.position.copy(v3(mid, (wy0 + wy1) / 2, FZ - 1)); shell.add(pane);
-  view = new THREE.Mesh(new THREE.PlaneGeometry(40, 14), new THREE.MeshBasicMaterial({ map: SKY.night, toneMapped: false }));
-  view.position.copy(v3(mid, 300, FZ - 900)); shell.add(view);
+  view = new THREE.Mesh(new THREE.PlaneGeometry(24, 12), new THREE.MeshBasicMaterial({ map: SKY.night, toneMapped: false }));
+  view.position.copy(v3(mid, 270, FZ - 700)); shell.add(view);   // v47.1: the garden, 7 m out: from the room you see the lawn, the path and the trees, as from the window
   sillPlants(wx0, wx1, SL.y, FZ + 2, WZ + SL.nose - 1);
   // the radiator under the window, painted in
   const [rx0, rx1] = R.RADIATOR_X, [ry0, ry1] = R.RADIATOR_Y, radP = paintMat(lum("#3b6e56") / BASE_L, true, false, "trim");
@@ -2829,7 +2836,7 @@ function applyLight() {
   if (G.frames) G.frames.position.y = S.site !== "A" && S.plants === "breast" ? 0.3 : 0;                        // v18.1: up 30 over the 158 plant stand
   if (ideaLed) ideaLed.color.set(day ? "#8a8578" : "#fff1d6");
   curtShut.visible = !!S.curtains; curtOpen.visible = !S.curtains;
-  win.intensity = day ? 75 : 4; win.color.set(day ? "#e3ecff" : "#3b4a7a");
+  win.intensity = day ? 75 : 11; win.color.set(day ? "#e3ecff" : "#7d89b8");   // v47.1: dusk light, not black
   view.material.map = day ? SKY.day : SKY.night; view.material.needsUpdate = true;
   // bounce light: a real room's walls relight it; this stands in for that, in proportion to what's on. v15: more of it, so the room
   // reads evenly lit rather than as pools under each head

@@ -22,6 +22,14 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
 
+## Update 24 Oct 2026: v47.1 (the garden through the window)
+- Client (with a video through the window, `inputs/photo_garden_window_24oct.jpg` is its sharpest frame): "Can we somehow make the room
+  look less dark through it and not just a blank black window".
+- `src/art/garden_day.webp` (the frame cropped above the window bar, widened to 2:1 with soft mirrored edges) and `garden_dusk.webp`
+  (the same graded to blue hour, the room's warm light on the patio). Both in `DATA.img`; `room3d.js` loads them over the drawn sky
+  (`SKY.day` / `SKY.night`, the same material, no new shader). The backdrop plane is 24 × 12 m, 7 m out, its centre at 270 so the lawn,
+  the path and the trees show through the window. Evening light through the glass: `win` 11, `#7d89b8` (was 4, near black).
+
 ## Update 24 Oct 2026, round 42: v47 (a review at phone and PC sizes)
 - Client (24 Oct): "Review for further upgrades and ways we can make the information read easier and clearer for understanding.
   Fitting everything correctly in mobile and pc views". Reviewed every sheet and chapter on main's v46.1 at 390 and 1280 (this

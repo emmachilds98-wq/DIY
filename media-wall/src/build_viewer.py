@@ -1023,6 +1023,7 @@ def _page(site=False):
     imgs = {k: f"{prefix}art/{k}.webp" for k in [f"art_{s}_{p}" for s in ("join", "four", "six", "side", "drawers") for p in ("card_room", "deep", "sage", "treron")] + ["key_join", "doc_paint", "doc_skirt"]}
     imgs.update({f"dims_{v}": f"{prefix}art/dims_{v}.webp" for v in ("join", "four", "six", "drawers", "side")})
     imgs.update({k: f"{prefix}art/{k}.webp" for k, *_ in SHOTS3D})
+    imgs.update({k: f"{prefix}art/{k}.webp" for k in ("garden_day", "garden_dusk")})   # v47.1: the garden through the window
     rows = track_rows()
     phases = phase_data(rows)
     _, lo_tot, hi_tot = phase_totals()
