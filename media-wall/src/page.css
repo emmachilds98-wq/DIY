@@ -471,3 +471,14 @@ figure.zoomable::after { content: "⤢"; position: absolute; right: 10px; top: 1
   .sheet table:not(.tstack), .r3d-dpanel table:not(.tstack) { table-layout: fixed; width: 100% !important; max-width: 100%; }
   .sheet table:not(.tstack) td, .sheet table:not(.tstack) th { overflow-wrap: anywhere; }
 }
+
+/* v47 (the review at 390 and 1280): the job cards' icons (".mkic" set the display font over the icon font, so "bolt" showed as a
+   word); Plan's chapter tiles two to a row on a phone (eleven took three screens); Waiting on you's notes to two lines on a phone */
+.mkic.ms { font-family: "Material Symbols Rounded"; font-weight: normal; }
+@media (max-width: 599px) {
+  .tilegrid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ctile { min-height: 0; padding: 12px; gap: 6px; border-radius: 20px; font-size: 15px; }
+  .ctile i { width: 34px; height: 34px; }
+  .ctile small { font-size: 12px; }
+  .waitl .wt span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}

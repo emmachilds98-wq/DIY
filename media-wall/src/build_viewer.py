@@ -951,7 +951,7 @@ def chapter_facts(rows, fc, nfit):
     import render as RR
     g = G
     chips = lambda *xs: '<ul class="facts">' + "".join(f"<li>{x}</li>" for x in xs) + "</ul>"
-    heights = [(g.CEIL, "Ceiling"), (g.HIGH_TOP, "High shelf"), (g.LEDGE_TOP, "Record ledges, the PC shelf"), (g.FOLDED_TOP, "The table, folded"),
+    heights = [(g.CEIL, "Ceiling"), (g.HIGH_TOP, "High shelf"), (g.LEDGE_TOP, "Record ledges, the PC shelf"), (g.CAB["h"], "The dining cabinet's top"),
                (g.RZ_SHELF_TOP, "Series X shelf"), (116.5, "TV centre"), (g.NOW_LEDGE["top"], "“Now playing” ledge"), (g.WORKTOP, "Oak worktop"), (g.PLINTH, "Plinth")]
     flist = '<ul class="flist">' + "".join(f"<li><b>{v:g}</b><span>{html.escape(t)}</span></li>" for v, t in sorted(heights, key=lambda x: -x[0])) + "</ul>"
     paints = "".join(f'<li><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:{h};vertical-align:-2px;margin-right:6px"></span>{html.escape(n.replace("Farrow & Ball ", "").replace("Little Greene ", ""))}{" (chosen)" if k == "card_room" else ""}</li>'

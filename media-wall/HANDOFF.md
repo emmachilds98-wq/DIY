@@ -1,9 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-**Current: v46 (round 41, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
+**Current: v47 (round 42, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
 viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 63), guide 66
-(phone 76). Next version: 47.
+(phone 76). Next version: 48.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
 - **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
@@ -21,6 +21,21 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
+
+## Update 24 Oct 2026, round 42: v47 (a review at phone and PC sizes)
+- Client (24 Oct): "Review for further upgrades and ways we can make the information read easier and clearer for understanding.
+  Fitting everything correctly in mobile and pc views". Reviewed every sheet and chapter on main's v46.1 at 390 and 1280 (this
+  session's own v46 plan, #61, was closed: the other session's v46/v46.1 had already done tables as cards and the PC layout).
+- **The job cards' icons showed as words** ("bolt", "straighten"): v44's `.mkic` rule set the display font over the icon font.
+  `.mkic.ms` puts the icon font back (`page.css`, v47 block).
+- **Plan's chapter tiles two to a row on a phone** (eleven took three screens); Plan at 390 is 3,033 px long, was 3,862.
+- **Waiting on you's notes** clamp to two lines on a phone.
+- **A stale height:** the media wall chapter listed "153.3 The table, folded" (the old fold-up table): now "189 The dining cabinet's top"
+  (`build_viewer.chapter_facts`).
+- **Fine as they are:** Build and Buy at both sizes (two to a row on a PC, one on a phone), every chapter's tables as cards on a phone,
+  nothing scrolling sideways (`qa.py`).
+- **Checks:** `qa.py` errors [] fails [] at 390 and 1280, text budget 0 over; `taptest.py` errors []; `clash.py` 0. v46 outputs in
+  `out/v46/` (`out/v45` dropped).
 
 ## Update 24 Oct 2026, round 41b: v46.1 (everything fits a phone screen)
 - Client (24 Oct): "I want plans and images to fit in my phone screen not scroll as it renders it essentially unusable on mobile. I want
