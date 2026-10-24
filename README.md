@@ -12,6 +12,7 @@ with the compact dining cabinet under your shelf by the stairs: the table and th
 **New in v46** ("drill down into tasks for each piece of the room when I click on them or look in the plans", "default view could balance lighting throughout the room using all fixtures")
 - **The room, piece by piece, any order:** six places (the media wall, the side wall and PC, the chimney breast and door, the dining wall, the sofa, the window corner). Tap a place's label in the 3D room to see its pieces; tap a piece (or find it in Build) for its card: **Check · Buy · Cut · Build**, a tick for each task and each thing to buy, and a ring showing how much is done. No more "step 1 of 14".
 - **Easy to read on a phone or a PC:** on a PC the pieces sit two across and the open one takes the row; both PDFs have clickable contents and bookmarks, the build guide is grouped by place and piece, and each PDF has a **phone edition** (a narrow page, bigger type).
+- **Fits a phone:** nothing scrolls sideways. Drawings and cutting layouts fit the screen (tap one for full screen, pinch to zoom); wide tables turn into one card per row on a phone, in the page and in the phone PDFs.
 - **Evening light by default:** every fixture on and balanced (the ceiling strip, the uprights, all eight spot heads, the lamp and a new **Accents** layer: the glass case, the bar's strip, the PC). Measured in pictures of the room: the brightest part is under three times the darkest, on a PC and on a phone (phones were six times before). **Brightness** and **Warmth** set the whole room in two moves.
 
 

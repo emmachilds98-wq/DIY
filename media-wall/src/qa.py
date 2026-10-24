@@ -63,6 +63,19 @@ def run(p, w, h):
             if not pg.evaluate("id => { window.openCard(id); const c = document.getElementById(id); const ok = !!(c && c.open && c.querySelector('[data-tab=build]')); if (c) c.open = false; return ok; }", cid):
                 fail(f"place {pl}: piece {cid} doesn't open")
     rep["notes"].append(f"places {len(places)}, pieces {pg.evaluate('() => document.querySelectorAll(\'details.mk[data-piece]\').length')}, tasks {pg.evaluate('() => document.querySelectorAll(\'input[data-task]\').length')}")
+    # v46.1, client: "I want plans and images to fit in my phone screen not scroll": on a phone nothing in a sheet scrolls sideways
+    if w <= 640:
+        wide = []
+        for ch in pg.evaluate("() => ['plan', ...[...document.querySelectorAll('#sh-plan .chapter')].map(c => c.dataset.ch), 'build', 'buy']"):
+            pg.evaluate("h => { location.hash = '#' + h; }", ch); pg.wait_for_timeout(500)
+            pg.evaluate("() => document.querySelectorAll('.sheet.open details').forEach(d => d.open = true)"); pg.wait_for_timeout(300)
+            wide += [f"{ch}: {x}" for x in pg.evaluate("""() => [...document.querySelectorAll('.sheet.open .sbd *')].filter(el => {
+                const cs = getComputedStyle(el); return el.offsetParent && /(auto|scroll)/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 2; })
+              .map(el => el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0] + ' ' + el.scrollWidth + '>' + el.clientWidth)""")]
+            pg.evaluate("() => document.querySelectorAll('.sheet.open details').forEach(d => d.open = false)")
+        for x in sorted(set(wide))[:12]:
+            fail(f"scrolls sideways on a phone: {x}")
+        pg.evaluate("() => { location.hash = '#room'; }"); pg.wait_for_timeout(500)
     for s in SHEETS:
         pg.evaluate("s => { location.hash = '#' + s; }", s)
         pg.wait_for_timeout(500)

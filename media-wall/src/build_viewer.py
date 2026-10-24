@@ -1240,6 +1240,7 @@ const SITE = {json.dumps(site)};
 """ + (HERE / "page.js").read_text() + """
 </script>
 <script>""" + STEP_JS + """</script>
+<script>""" + FIT_JS + """</script>
 <script>""" + __import__("tidy").MORE_JS + """</script>
 <script>""" + (HERE / "page_router.js").read_text() + """</script>
 """
@@ -1323,6 +1324,65 @@ STEP_JS = r"""(() => {
   });
   paint(); syncSteps();
   setTimeout(paint, 1500);   // after the buy list's saved ticks have loaded
+})();"""
+
+
+# v46.1, client: "I want plans and images to fit in my phone screen not scroll ... I want to see full plans when images are involved or
+# tables / cad designs". Each table's cells carry their column's name (so a wide one can stack into a card per row on a phone), and a
+# tap on a drawing, a cutting layout or a picture opens it full screen, fitted, to pinch, drag or double-tap to zoom.
+FIT_JS = r"""(() => {
+  const label = t => {
+    const rows = [...t.rows]; if (!rows.length) return;
+    const hdr = rows.find(r => r.cells.length && [...r.cells].every(c => c.tagName === "TH")); if (!hdr) return;
+    const names = []; [...hdr.cells].forEach(c => { for (let i = 0; i < (c.colSpan || 1); i++) names.push(c.textContent.trim()); });
+    if (names.length < 4) return;
+    hdr.classList.add("hdr"); t.classList.add("tstack");
+    rows.forEach(r => { if (r === hdr) return; let i = 0;
+      if (r.cells.length === 1 && (r.cells[0].colSpan || 1) >= names.length - 1) { r.classList.add("sec"); return; }
+      [...r.cells].forEach(c => { if (names[i] && !c.hasAttribute("data-label")) c.dataset.label = names[i]; i += c.colSpan || 1; }); });
+  };
+  document.querySelectorAll(".sheet table, .r3d-dpanel table, .ov table").forEach(label);
+  /* the full-screen viewer */
+  const v = document.createElement("div"); v.className = "zoomv"; v.hidden = true; v.setAttribute("role", "dialog"); v.setAttribute("aria-modal", "true"); v.setAttribute("aria-label", "Drawing, full screen");
+  v.innerHTML = '<div class="zbar"><span class="zt"></span><button type="button" class="zx">Close</button></div><div class="zstage"><div class="zin"></div></div><p class="zhint">Pinch or double-tap to zoom, drag to move. Turn your phone sideways for a bigger view.</p>';
+  document.body.appendChild(v);
+  const stage = v.querySelector(".zstage"), zin = v.querySelector(".zin"); let st = { s: 1, x: 0, y: 0, s0: 1 }, back = null;
+  const put = () => { zin.style.transform = `translate(${st.x}px, ${st.y}px) scale(${st.s})`; };
+  const clamp = () => { const W = stage.clientWidth, H = stage.clientHeight, w = zin.offsetWidth * st.s, h = zin.offsetHeight * st.s;
+    st.x = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, st.x)); st.y = h <= H ? (H - h) / 2 : Math.min(0, Math.max(H - h, st.y)); };
+  const fit = () => { const W = stage.clientWidth, H = stage.clientHeight; zin.style.width = W + "px";
+    st.s0 = Math.min(1, H / Math.max(1, zin.offsetHeight)); st.s = st.s0; clamp(); put(); };
+  const zoomAt = (k, cx, cy) => { const ns = Math.max(st.s0, Math.min(st.s0 * 8, st.s * k)), r = ns / st.s; st.x = cx - (cx - st.x) * r; st.y = cy - (cy - st.y) * r; st.s = ns; clamp(); put(); };
+  function openZoom(fig) {
+    const src = fig.querySelector("svg, img"); if (!src) return;
+    back = document.activeElement; zin.textContent = "";
+    if (src.tagName.toLowerCase() === "img") { const im = new Image(); im.src = src.currentSrc || src.src; im.alt = src.alt || ""; im.onload = fit; zin.appendChild(im); }
+    else { const c = src.cloneNode(true); c.removeAttribute("style"); c.setAttribute("width", "100%"); c.removeAttribute("height"); zin.appendChild(c); }
+    const cap = fig.querySelector("figcaption"); v.querySelector(".zt").textContent = cap ? cap.textContent.slice(0, 70) : "";
+    v.hidden = false; document.body.classList.add("ov-open"); requestAnimationFrame(fit); v.querySelector(".zx").focus();
+  }
+  const closeZoom = () => { v.hidden = true; zin.textContent = ""; document.body.classList.toggle("ov-open", !!document.querySelector(".ov:not([hidden])")); if (back) back.focus({ preventScroll: true }); };
+  v.querySelector(".zx").addEventListener("click", closeZoom);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !v.hidden) { e.stopPropagation(); closeZoom(); } }, true);
+  addEventListener("resize", () => { if (!v.hidden) fit(); });
+  const pts = new Map(); let last = null, lastTap = 0;
+  stage.addEventListener("pointerdown", e => { stage.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); last = null;
+    const now = Date.now(); if (pts.size === 1 && now - lastTap < 320) { const r = stage.getBoundingClientRect(); st.s > st.s0 * 1.05 ? (st.s = st.s0, clamp(), put()) : zoomAt(2.5, e.clientX - r.left, e.clientY - r.top); lastTap = 0; } else lastTap = now; });
+  stage.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; const prev = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+    const r = stage.getBoundingClientRect();
+    if (pts.size === 1) { st.x += e.clientX - prev[0]; st.y += e.clientY - prev[1]; clamp(); put(); return; }
+    const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), mx = (a[0] + b[0]) / 2 - r.left, my = (a[1] + b[1]) / 2 - r.top;
+    if (last) zoomAt(d / last, mx, my); last = d; });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) last = null; };
+  stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up);
+  stage.addEventListener("wheel", e => { e.preventDefault(); const r = stage.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+  const mark = root => (root || document).querySelectorAll(".sheet figure, .r3d-dpanel figure").forEach(f => {
+    if (f.classList.contains("zoomable") || f.closest("button, a, .ba, .gallery") || !f.querySelector(":scope > svg, :scope > img, :scope > .dia svg")) return;
+    f.classList.add("zoomable"); f.tabIndex = 0; f.setAttribute("role", "button"); f.setAttribute("aria-label", "Show full screen"); });
+  mark();
+  document.addEventListener("click", e => { const f = e.target.closest("figure.zoomable"); if (f && !e.target.closest("a, button")) openZoom(f); });
+  document.addEventListener("keydown", e => { const f = e.target.closest && e.target.closest("figure.zoomable"); if (f && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openZoom(f); } });
+  window.fitTables = label;
 })();"""
 
 
