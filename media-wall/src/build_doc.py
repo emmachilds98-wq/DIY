@@ -1456,7 +1456,7 @@ def _plan(deck=False):
 </ul>
 <p><b>Where the heads point (v17):</b> all eight heads straight down, evenly spread along each bar, so their pools overlap into one even light over the room: that's the <b>Bright</b> preset. Tilt a head only if its pool lands badly (in the TV's screen from the sofa, or in someone's eyes). Set the bulbs to warm white (3000K) for Bright, 2700K for Cosy, and save colours for the presets you want them in.</p>
 <h3>Four lighting presets</h3>
-<p>Four presets: <b>Evening</b> (the default: every light on and balanced), <b>Bright</b>, <b>Cosy</b> and <b>Film</b>, each set on the strip's controller, the inline dimmer on the uprights' LED driver, and the bars' and the lamp's smart bulbs in their app. Save the three as scenes in the app (and on the smart button if you get one). In the 3D room the Lights tab has the four tiles, Brightness and Warmth, the evening or daytime switch, and every light's slider folded under them.</p>
+<p>Four presets: <b>Evening</b> (the default: every light on and balanced), <b>Bright</b>, <b>Cosy</b> and <b>Film</b>, set on the strip's controller, the uprights' dimmer and the bulbs' app; save them as scenes there. In the 3D room, Lights has the four tiles, Brightness, Warmth and each light's slider.</p>
 {scenes_html()}
 
 <h2 class="pb">9 · Power, cables and network</h2>
