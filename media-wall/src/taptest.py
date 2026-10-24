@@ -22,9 +22,17 @@ def run(w, h):
         pg.on("pageerror", lambda e: errs.append(str(e)[:200])); pg.on("console", lambda m: errs.append(m.text[:200]) if m.type == "error" else None)
         pg.goto(BASE); pg.wait_for_function("window.R3D && window.R3D.ready", timeout=180000)
         pg.evaluate("() => document.querySelectorAll('.stk').forEach(s => s.style.pointerEvents = 'none')")   # the stickers sit over things
+        def settle():   # v48: wait for the camera to stop flying (the garden made the fly slower headless; a tap mid-flight missed)
+            pg.wait_for_function("""() => { const c = R3D._dbg.camera.position, k = c.x.toFixed(4) + c.y.toFixed(4) + c.z.toFixed(4);
+              window.__camn = window.__camk === k ? (window.__camn || 0) + 1 : 0; window.__camk = k; return window.__camn >= 3; }""", polling=400, timeout=20000)   # still for three readings 0.4 s apart: under load frames can be 0.25 s apart
         def tap(pt, label):
-            pg.keyboard.press("Escape"); pg.wait_for_timeout(100)
-            x, y = pg.evaluate(PROJ, pt); pg.mouse.click(x, y); pg.wait_for_timeout(400)
+            pg.keyboard.press("Escape"); pg.wait_for_timeout(100); settle()
+            x, y = pg.evaluate(PROJ, pt); pg.wait_for_timeout(300); pg.mouse.click(x, y)   # v48: a click in the same instant as the script call could miss under load
+            try:   # v48: wait for the card (a busy machine can take over 0.4 s to show it); no second tap, which would close it
+                pg.wait_for_function("() => !document.getElementById('r3d-act').hidden", timeout=3000)
+            except Exception:
+                pass
+            pg.wait_for_timeout(200)
             vis = pg.evaluate("() => !document.getElementById('r3d-act').hidden")
             t = pg.evaluate("() => document.getElementById('r3d-act-h').textContent") if vis else None
             bs = pg.evaluate("() => [...document.querySelectorAll('#r3d-act .acts button')].map(b => b.textContent)") if vis else []   # v39: Details too
