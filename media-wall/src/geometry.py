@@ -410,6 +410,10 @@ CURTAIN = dict(rail_y=CEIL - 0.6 - 10.0 - 2.8, drop_to=1.5, stack=44.0, ext=30.0
 # v17, client: "curtains should not render going through the window sill, i also have deep window sills that allow for lots of plants".
 WINDOW_Y = (88.0, 212.0)                    # the window's opening, sill to head
 WINDOW_REVEAL = 22.0                        # the frame sits back in the wall: a deep reveal
+# v47.2, from the client's photo of the back of the house (inputs/photo_house_rear_24oct.jpg: "The middle window is the living room", on
+# the first floor): white uPVC in three sections, the sides a quarter of the width each, a row of top lights over them, Georgian bars
+# (two panes across in each side, three in the middle, three down under the top lights). Proportions read off the photo
+WINDOW_DESIGN = dict(sections=(0.24, 0.52, 0.24), top=0.80, cols=(2, 3, 2), rows=3, frame=6.0, mullion=6.0, transom=5.0, bar=1.6)
 SILL = dict(nose=3.0, t=3.0, y=WINDOW_Y[0]) # a white sill across the reveal, 3 proud of the wall, plants along it
                                             # the client's curtains (photo 20 Oct, inputs/photo_room_curtains_evening.jpg; "hessian curtains
                                             # from dunelm with a wood rail"): natural hessian, pencil pleat, to the floor (Dunelm's pencil-pleat
