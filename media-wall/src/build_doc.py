@@ -13,8 +13,8 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "45"
-REVISION = "40: the Artex stipple ceiling and Cosy first, a softer light over the open table, two small room buttons"
+VERSION = "46"
+REVISION = "41: the build by place and piece, Evening light by default, a phone edition of the PDFs"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -166,7 +166,7 @@ TRACK = [
     ("To buy", "Smart colour strips for the upright grooves and under the side-wall run, in the same app as the bulbs: about 4.5 m of RGB and tunable-white strip (Philips Hue Lightstrip Plus, or WiZ's strip kits, cut at their marks), three aluminium channels with opal diffusers, plug-in power on the 10-gang (no fused spur); a 6500K bias light for the TV stays plain white <b>(changed in v16: smart colour, so the whole wall changes with a scene)</b>", "7 Lighting", "1", 90, 220),
     ("To buy", "Two Dunelm Elements Wolston 4-light spotlight bars, £49 each (bulbs above) <b>(changed: two)</b>", "7 Lighting", "2", 98, 110),
     ("To buy", "Optional: a smart button for the bars, so a scene is one press rather than the app (WiZ remote or Hue dimmer switch) <b>(new in v15)</b>", "7 Lighting", "1", 0, 25),
-    ("To do", "Set up the smart bulbs in their app: group them as bar 1 and bar 2, then save the three presets (Bright, Cosy, Film; Paint and light) with their levels and colours, and the table rule; your red lamp's bulbs go in the same scenes <b>(new in v15)</b>", "7 Lighting", "", None, None),
+    ("To do", "Set up the smart bulbs in their app: group them as bar 1 and bar 2, then save the four presets (Evening, Bright, Cosy, Film; Paint and light) with their levels and colours, and the table rule; your red lamp's bulbs go in the same scenes <b>(new in v15)</b>", "7 Lighting", "", None, None),
     ("To buy", "Later: aluminium channel and opal diffuser for the existing ceiling LED strip (optional)", "7 Lighting", "1", 0, 80),
     ("To buy", "5-in-1 4K60 HDMI switch with remote", "8 TV, consoles and AV", "1", 20, 35),
     ("To do", "Measure the PC-to-TV cable route (about 4–5 m along the skirting)", "8 TV, consoles and AV", "", None, None),
@@ -771,7 +771,7 @@ def steps():
                  "Take down the two old fittings. The light switches stay as they are: the smart bulbs need full power, so no dimmers.",
                  "Hang bar 1 on the rose between the TV and the sofa and bar 2 on the pendant point by the stairs, earth first, both running from the TV towards the window; fit the smart colour bulbs and point every head straight down, evenly spread; tilt one only if its pool lands badly.",
                  "The LED strips in the uprights' grooves and under the side-wall shelf on their plug-in driver (on the 10-gang), the ceiling strip through its notches, the bias light on the TV; your red lamp in its spot.",
-                 "Power back on, switches on: add the eight bulbs to the app, group them as bar 1 and bar 2, and save the three presets (Paint and light): Bright, Cosy and Film. With the table open, bar 2 sits between 45 and 55, the ceiling strip at most 40, and bar 1 down to 15 (the table rule)."],
+                 "Power back on, switches on: add the eight bulbs to the app, group them as bar 1 and bar 2, and save the four presets (Paint and light): Evening, Bright, Cosy and Film. With the table open, bar 2 sits between 45 and 55, the ceiling strip at most 40, and bar 1 down to 15 (the table rule)."],
              check="Every bulb answers the app, the presets recall, and from the sofa no spot head shows in the screen or shines in your eyes."),
         dict(n=13, part=["AV", "Network"], title="Connect and finish", who="You", time="1 day", buy=["8 TV, consoles and AV", "9 Vinyl kit", "10 Finishing"], see=[("network", "AV"), ("network", "Network")],
              do=["TV inputs: HDMI 1 the PC, HDMI 2 the soundbar (eARC), HDMI 3 the Series X, HDMI 4 the HDMI switch (Xbox One, 360, PS3, RetroTINK).",
@@ -1155,7 +1155,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> the 3D room opens on Cosy with the Artex stipple ceiling; with the table open, bar 2 sits at 45–55 and the ceiling strip at 40 or less, so the oak no longer washes out (section 8).</div>
+<div class="decision"><b>What changed:</b> the build is by place and piece, in any order (the Build Guide, and Build on the plan page); the room opens on Evening, every light on and balanced, with Brightness and Warmth; a phone edition of both PDFs.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
@@ -1455,8 +1455,8 @@ def _plan(deck=False):
 <li><b>Two spot bars</b> in the style of Dunelm's Wolston (£49 each; 84 × 16 cm, 22.4 cm drop; 4 × E14, 6 W max<sup>{fit.ORDER.index("wolston") + 1}</sup>) on your two existing ceiling points, <b>both running from the TV towards the window</b> (v15). Bar 1 hangs on the rose straight out from the TV unit, halfway to the sofa; bar 2 on the pendant point by the stairs, along the west wall, so its end no longer comes near that wall. <b>Smart colour bulbs</b> (v15): eight E14 bulbs under the bar's 6 W, the WiZ Colour P45 (4.9 W, 4.5 × 10.1 cm) or, if it shows below a shade, the shorter Philips Hue lustre (5.1 W, 4.5 × 7.7 cm)<sup>{fit.ORDER.index("e14") + 1}</sup>. Smart bulbs need full power, so <b>no dimmers</b>: the wall switches stay as they are and stay on; level and colour come from the app (or an optional smart button). <b>Turn them as you like:</b> each bar turns on its rose and clears every wall at any angle (bar 2 by {n(__import__("clash").wall_room(G.BAR2_X, G.BAR2_Z) - G.BAR[0] / 2 - 7.5)} cm), and each head aims on its own; tap a bar or the red lamp in the 3D room to try it. </li>
 </ul>
 <p><b>Where the heads point (v17):</b> all eight heads straight down, evenly spread along each bar, so their pools overlap into one even light over the room: that's the <b>Bright</b> preset. Tilt a head only if its pool lands badly (in the TV's screen from the sofa, or in someone's eyes). Set the bulbs to warm white (3000K) for Bright, 2700K for Cosy, and save colours for the presets you want them in.</p>
-<h3>Three lighting presets</h3>
-<p>Three presets instead of six buttons: <b>Bright</b>, <b>Cosy</b> (the default) and <b>Film</b>, each set on the strip's controller, the inline dimmer on the uprights' LED driver, and the bars' and the lamp's smart bulbs in their app. Save the three as scenes in the app (and on the smart button if you get one). In the 3D room the Lights tab has the three tiles, the evening or daytime switch, and every light's slider folded under them.</p>
+<h3>Four lighting presets</h3>
+<p>Four presets: <b>Evening</b> (the default: every light on and balanced), <b>Bright</b>, <b>Cosy</b> and <b>Film</b>, each set on the strip's controller, the inline dimmer on the uprights' LED driver, and the bars' and the lamp's smart bulbs in their app. Save the three as scenes in the app (and on the smart button if you get one). In the 3D room the Lights tab has the four tiles, Brightness and Warmth, the evening or daytime switch, and every light's slider folded under them.</p>
 {scenes_html()}
 
 <h2 class="pb">9 · Power, cables and network</h2>
@@ -1593,7 +1593,7 @@ def _plan(deck=False):
 # v42 (client: "optimise PDFs in there to be more concise for what I need"): the plan PDF drops what the build guide now carries (how
 # each thing's built, the cut lists, the wiring, the order of work) and the long reference pages; the plan page keeps them all
 PDF_DROP = ("Measuring sheet", "Console sizes", "The drawer layouts", "The game drawer", "How bay 3 works", "Storage options, to scale",
-            "How it's built", "Joinery cut list", "Three lighting presets", "Cable routes", "The wiring plan", "Sound layout",
+            "How it's built", "Joinery cut list", "Four lighting presets", "Cable routes", "The wiring plan", "Sound layout",
             "Buy and adapt first", "The order of work", "By phase",
             "Electrics: your own job", "The sub in the media wall", "What it costs, piece by piece")   # v44: section 11 has the costs by piece; the guide's chapter B has the electrics; the sub's detail is on the page
 PDF_DROP4 = ("What each part does", "Stage 1", "Stage 2", "Socket by socket")   # v44: the network set-up and the sockets are the guide's chapters A and B
@@ -1611,15 +1611,22 @@ def concise(html):
     html = re.sub(r'<h2 class="pb">(?!(?:' + "|".join(map(re.escape, PDF_BREAK)) + '))', "<h2>", html)
     html = re.sub(r"<!--fit-->.*?<!--/fit-->", lambda m: fit.summary_html(), html, flags=re.S)
     html = re.sub(r"(<h2 class=\"pb\">10 · [^<]*</h2>).*?(?=<h2)", lambda m: m.group(1) + "<p>Everything to build is in the <b>Build Guide</b> (its own PDF): "
-                  "one chapter per thing you make, each with its buy list, its cutting diagram and its steps.</p>" + build_contents(), html, count=1, flags=re.S)
-    return html
+                  "each piece of the room by place, with what to check, buy, cut and build; any order.</p>" + build_contents(), html, count=1, flags=re.S)
+    import re as _re
+    secs = _re.findall(r'<h2[^>]*>(\d+) · ([^<]+)</h2>', html)
+    html = _re.sub(r'<h2([^>]*)>(\d+) · ([^<]+)</h2>', lambda m: f'<h2{m.group(1)} id="sec-{m.group(2)}">{m.group(2)} · {m.group(3)}</h2>', html)
+    toc = ("<nav class='toc'><b>Contents</b><ol>" + "".join(f"<li><a href='#sec-{n}'>{t}</a></li>" for n, t in secs) + "</ol></nav>")
+    return html.replace("<h2", toc + "<h2", 1)
 
 
 def build_contents():
-    import chapters
-    rows = "".join(f"<tr><td class='num'>{i}</td><td>{c[1]}</td><td>{c[6]}</td></tr>" for i, c in enumerate(chapters.MAKE, 1))
-    rows += "".join(f"<tr><td class='num'>{chapters.JOB_LETTER[j[0]]}</td><td>{j[1]}</td><td>{j[5]}</td></tr>" for j in chapters.JOBS)
-    return f"<table class='tight'><tr><th class='num'>Ch.</th><th>In the guide</th><th>Time</th></tr>{rows}</table>"
+    import pieces as P
+    rows = []
+    for pid, name, ps in P.by_place():
+        rows.append(f"<tr class='ph'><td colspan='3'>{name}</td></tr>")
+        num = {p["key"]: c for c, p in P.numbered()}
+        rows += [f"<tr><td class='num'>{num[p['key']]}</td><td>{p['title']}</td><td>{p['time']}</td></tr>" for p in ps]
+    return f"<table class='tight'><tr><th class='num'>No.</th><th>In the guide, by place</th><th>Time</th></tr>{''.join(rows)}</table>"
 
 
 def plan_sections():
@@ -1644,10 +1651,25 @@ def build():
 <h1>Media Wall &amp; Dining Wall: Build Guide</h1>
 <p class="byline">Version {VERSION} · for Emma and Dave · sizes in cm</p>
 <figure class="render small">{img("render_v13_join_clean.png", "The finished wall")}</figure>
-{chapters.guide_html(money)}
+{__import__("pieces").guide_html(money)}
 </body></html>"""
     (HERE / "guide.html").write_text(tidy.strip_versions(guide))
     print("totals", tl, th, "fit", c)
+
+
+PHONE_CSS = """
+/* v46: the phone edition: a narrow page, bigger type, one column */
+body { font-size: 11pt; line-height: 1.5; }
+h1 { font-size: 22pt; } h2 { font-size: 18pt; } h3 { font-size: 13pt; } h3.piece { font-size: 17pt; }
+table { font-size: 9pt; } table.tight td, table.tight th { padding: 3pt 4pt; }
+figure.render.small img, figure.render img, figure.small img, figure.joinery img, .guide figure.render.chap img { width: 100% !important; }
+figure.small figcaption, figure.joinery figcaption { width: 100%; }
+.need { grid-template-columns: 1fr; }
+.guide figure.cutfig.half { display: block; width: 100%; margin: 4pt 0 8pt; }
+.guide ol.order { columns: 1; }
+.p1 figure.render img { width: 100%; }
+nav.toc ol { columns: 1; }
+"""
 
 
 def pdf():
@@ -1657,18 +1679,26 @@ def pdf():
         return ('<div style="width:100%;font-family:Inter,sans-serif;font-size:8px;color:#8a867e;padding:0 18mm;'
                 f'display:flex;justify-content:space-between"><span>{name} · v{VERSION}</span>'
                 '<span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>')
+    def foot_phone(name):
+        return ('<div style="width:100%;font-family:Inter,sans-serif;font-size:7px;color:#8a867e;padding:0 6mm;'
+                f'display:flex;justify-content:space-between"><span>{name}</span><span><span class="pageNumber"></span>/<span class="totalPages"></span></span></div>')
     with sync_playwright() as p:
         b = _launch(p)
         for src, out, name in (("plan.html", PDF_NAME, "Home Network &amp; Media Wall Plan"), ("guide.html", GUIDE_NAME, "Build Guide")):
             pg = b.new_page()
             pg.goto((HERE / src).resolve().as_uri())
             pg.wait_for_timeout(500)
-            pg.pdf(path=str(HERE.parent / "out" / out), format="A4", print_background=True,
+            pg.pdf(path=str(HERE.parent / "out" / out), format="A4", print_background=True, outline=True, tagged=True,
                    margin={"top": "16mm", "bottom": "18mm", "left": "18mm", "right": "18mm"},
                    display_header_footer=True, header_template="<div></div>", footer_template=footer(name))
+            # v46, client: "more optimised for viewing in mobile and pc": the same document on a phone-shaped page
+            pg.add_style_tag(content="@page { size: 110mm 196mm; }" + PHONE_CSS)
+            pg.wait_for_timeout(300)
+            pg.pdf(path=str(HERE.parent / "out" / out.replace(".pdf", "_phone.pdf")), width="110mm", height="196mm", print_background=True, outline=True, tagged=True,
+                   margin={"top": "7mm", "bottom": "9mm", "left": "6mm", "right": "6mm"},
+                   display_header_footer=True, header_template="<div></div>", footer_template=foot_phone(name))
             pg.close()
         b.close()
-
 
 if __name__ == "__main__":
     build()

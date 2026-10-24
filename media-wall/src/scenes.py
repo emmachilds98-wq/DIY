@@ -5,28 +5,36 @@ section 8 and the viewer's scene buttons."""
 
 LAYERS = [("strip", "Ceiling LED strip", "its own controller"), ("uprights", "Uprights' grooves and the side shelf", "the strips' app (smart colour since v16)"),
           ("bias", "TV bias light", "comes on with the TV"), ("bar1", "Bar 1, between the TV and the sofa", "smart bulbs: the app"),
-          ("bar2", "Bar 2, by the stairs", "smart bulbs: the app"), ("lamp", "Your red lamp", "its colour bulbs: the app")]
+          ("bar2", "Bar 2, by the stairs", "smart bulbs: the app"), ("lamp", "Your red lamp", "its colour bulbs: the app"),
+          ("accent", "Accents: the glass case, the bar's strip, the PC", "their own switches or plugs")]   # v46
 
 # v25, Emma: "the presets aren't great". Three presets instead of six buttons; dinner and daytime become two rules (below).
 SCENES = [
+    # v46, client: "default view could balance lighting throughout the room using all fixtures and making a good setting": every fixture
+    # on, set so no part of the room is more than about three times as bright as another (measured in stills, HANDOFF round 41)
+    ("evening", "Evening", "Every light on and balanced: the walls, the shelves, the sofa and the table all read, nothing glares. The default.",
+     {"strip": 60, "uprights": 60, "bias": 0, "bar1": 35, "bar2": 35, "lamp": 70, "accent": 75},   # measured: the brightest zone 2.7 times the darkest (HD), 2.2 (Fast)
+     ["The ceiling strip and the uprights light the walls; both bars' heads spread over the media wall, the sofa and the table.",
+      "The lamp warms the window corner; the glass case, the bar's strip and the PC add small points of light.",
+      "Brightness turns the whole room up or down; Warmth goes from candle-warm to neutral white."]),
     ("bright", "Bright", "Everything on at a comfortable, even level: tidying, chatting, finding the remote.",
-     {"strip": 70, "uprights": 50, "bias": 0, "bar1": 60, "bar2": 60, "lamp": 50},
+     {"strip": 70, "uprights": 50, "bias": 0, "bar1": 60, "bar2": 60, "lamp": 50, "accent": 80},
      ["All eight heads straight down, spread a little along each bar, so the pools overlap.",
       "The ceiling strip and the uprights fill the edges; the lamp adds a low warm layer.",
       "Turn the strip down first as the evening goes on: it's the flattest light in the room."]),
-    ("cosy", "Cosy", "Low and warm, for records and quiet evenings: light on the deck and the shelves, the lamp's colours on. The default (v45).",
-     {"strip": 35, "uprights": 55, "bias": 0, "bar1": 45, "bar2": 40, "lamp": 75},   # v45: the strip and bar 2 up a touch, so the room still reads
+    ("cosy", "Cosy", "Low and warm, for records and quiet evenings: light on the deck and the shelves, the lamp's colours on.",
+     {"strip": 35, "uprights": 55, "bias": 0, "bar1": 45, "bar2": 40, "lamp": 75, "accent": 60},   # v45: the strip and bar 2 up a touch, so the room still reads
      ["Bar 1's pink head on the turntable and the Series X, blue on the record ledge.",
       "The uprights' grooves up, washing the wall either side of the TV.",
       "The lamp up for reading sleeves on the sofa; the ceiling strip low."]),
     ("film", "Film", "Films and games: the screen is the brightest thing in the room, with a little warm light round it so your eyes don't strain.",
-     {"strip": 10, "uprights": 15, "bias": 100, "bar1": 0, "bar2": 10, "lamp": 60},
+     {"strip": 10, "uprights": 15, "bias": 100, "bar1": 0, "bar2": 10, "lamp": 60, "accent": 35},
      ["Bar 1 off: its heads hang in front of the screen, and even tilted away they'd catch it.",
       "The bias light and your red lamp do the work.",
       "Bar 2 just glowing on the framed LPs, so the far end of the room isn't a black hole."]),
 ]
 # the colour each preset sets in the bulbs' app (the page shows it under the tile)
-COLOURS = {"bright": "bars warm white 3000 K, every head straight down", "cosy": "bars 2700 K, the lamp's three colour bulbs on (green, pink, purple)",
+COLOURS = {"evening": "everything warm white (Warmth in the middle), the lamp's three colour bulbs on", "bright": "bars warm white 3000 K, every head straight down", "cosy": "bars 2700 K, the lamp's three colour bulbs on (green, pink, purple)",
            "film": "the bias light cool white behind the TV, the lamp low"}
 # Two rules in place of the other buttons. Table open (four or six): on top of whichever preset is on, bar 2 between 45 and 55, the strip at most 40 (v45: 80 washed
 # the oak top out), bar 1 at

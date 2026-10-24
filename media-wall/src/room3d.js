@@ -48,10 +48,10 @@ addEventListener("unhandledrejection", e => { const r = e.reason || {}; noteErro
 const SMALL = window.matchMedia && matchMedia("(pointer: coarse), (max-width: 700px)").matches;   // phones and tablets start on Fast
 const WARM = "#ffe2b8";
 const DEF = { site: "C", dining: "folded",   // v27: the dining cabinet is the plan
-              scene: "cosy", tod: "evening", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,   // v45: Cosy first
+              scene: "evening", tod: "evening", paint: "card_room", custom: "#899081", lamp: "corner", drawers: false,   // v45: Cosy first
               quality: SMALL ? "fast" : "hd", view: "room",   // v21: the whole room first
               // v15: every light on a slider (the scenes fill them in), the smart bars and the lamp in any colour, ceiling and skirting paints
-              lv: null, master: 100, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
+              lv: null, master: 100, warm: 50, col: { strips: WARM, bar1: WARM, bar2: WARM, lamp0: R.LAMP_RGB[0], lamp1: R.LAMP_RGB[1], lamp2: R.LAMP_RGB[2] },
               ceil: "match", skirt: "match", laser: false, lbox: true, curtains: false, pc: true, ideas: {},   // v17: ideas all off
               // v18: the plant stand and the record shelf's layout, your own moves (edit mode) and the things you've added; the grow lights
               plants: "corner", layout: {}, added: [], grow: true,
@@ -74,6 +74,9 @@ const S = Object.assign({}, DEF, store.get(KEY, {}));
 if (!S.v45) {   // v45, client: "stipple ceiling as default and cosy lighting": once, a saved room moves to them; your own choices stay after
   S.v45 = 1; S.scene = "cosy"; S.tod = "evening"; S.lv = null; S.decor = Object.assign({}, S.decor, { ceiling: "stipple" });
 }
+if (!S.v46) {   // v46, client: "default view could balance lighting throughout the room using all fixtures": once, a saved room moves to Evening
+  S.v46 = 1; S.scene = "evening"; S.lv = null; S.master = 100; }
+
 S.col = Object.assign({}, DEF.col, S.col || {});
 if (!S.ideas || typeof S.ideas !== "object") S.ideas = {};
 if (!S.sugg || typeof S.sugg !== "object") S.sugg = {};
@@ -131,8 +134,9 @@ function oldScene(o) {               // an old scene key in o (saved state, a li
 oldScene(S);
 if (!(S.scene in SCENES)) S.scene = DEF.scene;
 if (S.tod !== "day") S.tod = "evening";
-const LAYERS = ["strip", "uprights", "bias", "bar1", "bar2", "lamp"];
+const LAYERS = ["strip", "uprights", "bias", "bar1", "bar2", "lamp", "accent"];   // v46: accent, the glass case, the bar, the PC and the like
 if (!S.lv) S.lv = Object.assign({}, SCENES[S.scene].levels);
+if (S.lv.accent === undefined) S.lv.accent = SCENES[S.scene].levels.accent ?? 70;      // v46: a room saved before Accents
 const tableOpen = () => S.dining && S.dining !== "folded";
 function lvl(k) {                     // a layer's level: the slider, the table rule when the flip-top is open, then the master slider
   let v = S.lv[k] ?? 0;
@@ -183,6 +187,7 @@ function lightIn(l) {                 // in the renderer's set for this quality
   const hd = S.quality === "hd";
   if (l.userData.owner) return hd;     // an idea's or a suggestion's light: always in HD's set (at nothing while it's hidden), never in Fast's
   if (l.isRectAreaLight) return hd;
+  if (l.userData.fill) return !hd;      // v46: Fast's stand-ins for the area lights
   if (!hd && l.userData.barIx !== undefined) return l.userData.barIx % 2 === 0;
   return true;
 }
@@ -1160,7 +1165,7 @@ function buildCab(C = cabC()) {
       const zc = (a_ + b_) / 2, y = C.h - C.t_top, lit = new THREE.Group();
       ibox(g, xi + 1, y - 1.2, zc - 20, 2.2, 1.2, 40, barM);
       const led = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.002, 0.38), glowC); led.position.copy(v3(xi + 2.1, y - 1.25, zc)); lit.add(led);
-      const pl = new THREE.PointLight("#ffd29a", 1.6, 1.6, 2); pl.position.copy(v3(xi + 4, y - 6, zc)); lit.add(pl); SVAR_MATS.cablights.push(pl);
+      const pl = new THREE.PointLight("#ffd29a", 1.6, 1.6, 2); pl.userData.accent = 1.6; pl.position.copy(v3(xi + 4, y - 6, zc)); lit.add(pl); SVAR_MATS.cablights.push(pl);
       g.add(lit); cabLit.push(lit);
     }
     cab.add(g); }
@@ -1325,6 +1330,7 @@ function buildBeside() {
     for (const yy of [ey, ey + eh / 3, ey + eh * 2 / 3, ey + eh - 1.2]) bx(g, W - ed, yy, ez0, ed, 1.2, ew, steelE);   // bottom, two shelves, top
     const led = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.004, (ew - 6) * M), new THREE.MeshBasicMaterial({ color: "#ffd59a", toneMapped: false }));
     led.position.copy(v3(W - ed + 3, ey - 0.25, (z0 + z1) / 2)); g.add(led);                                  // a warm strip under it, over the counter
+    { const bl = new THREE.PointLight("#ffd59a", 1, 0.9, 2); bl.position.copy(v3(W - ed + 2, ey - 3, (z0 + z1) / 2)); bl.userData.accent = 1.1; g.add(bl); }   // v46: it lights the counter (Accents)
     const clear = reg(new THREE.MeshPhysicalMaterial({ color: "#eef3f4", roughness: 0.05, transmission: 0.6, transparent: true, opacity: 0.5 }));
     const glassGeo = new THREE.LatheGeometry([[0.0, 0], [3.6, 0], [3.6, 0.3], [0.35, 0.6], [0.35, 10], [2.2, 11.2], [4.2, 15.5], [4.0, 21], [3.6, R.BAR_GLASS_H]].map(([r, y]) => new THREE.Vector2(r * M, y * M)), 20);
     for (let i = 0; i < 3; i++) { const gl2 = new THREE.Mesh(glassGeo, clear); gl2.position.copy(v3(W - 7.5, ey + 1.2, ez0 + 8 + i * 12)); g.add(gl2); }   // three wine glasses on the bottom
@@ -1707,7 +1713,7 @@ function buildSuggest() {
     shell.add(g); }
   { const g = SUGG_G.shelfled = new THREE.Group(), sb = R.SHELF_B;
     SVAR_MATS.shelfled = [ownGlow("#ffd59a")]; const strip = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.004, (sb.z[0] - sb.z[1] - 4) * M), SVAR_MATS.shelfled[0]); strip.position.copy(v3(R.W - sb.d + 2, sb.top - sb.t - 0.3, (sb.z[0] + sb.z[1]) / 2)); g.add(strip);
-    const pl = new THREE.PointLight("#ffd29a", 1.2, 2.2, 2); SVAR_MATS.shelfled.push(pl); pl.position.copy(v3(R.W - sb.d / 2, sb.top - sb.t - 8, (sb.z[0] + sb.z[1]) / 2)); g.add(pl);
+    const pl = new THREE.PointLight("#ffd29a", 1.2, 2.2, 2); pl.userData.accent = 1.2; SVAR_MATS.shelfled.push(pl); pl.position.copy(v3(R.W - sb.d / 2, sb.top - sb.t - 8, (sb.z[0] + sb.z[1]) / 2)); g.add(pl);
     shell.add(g); }
   SVAR_MATS.basket = [mat("#b89a6c")];
   floor("basket", "Seagrass basket (suggested)", 40, 40, 322, -70, g => {
@@ -2133,6 +2139,7 @@ function buildIdeas() {
     ibox(g, x0, y0, z0 - 0.4, x1 - x0, y1 - y0, 0.4, glassM, false);                       // the toughened glass front
     ideaLed = new THREE.MeshBasicMaterial({ color: "#fff1d6", toneMapped: false });
     ibox(g, x0 + f, y1 - f - 0.5, z0 + 2, x1 - x0 - 2 * f, 0.5, 1.2, ideaLed, false);
+    { const cl = new THREE.PointLight("#ffe6c4", 1, 1.1, 2); cl.position.copy(v3((x0 + x1) / 2, y1 - f - 3, z0 + 4)); cl.userData.accent = 1.4; g.add(cl); }   // v46: its LED lights the shelves (Accents)
     const pal = ["#1d2a4a", "#a33b2b", "#e2c35a", "#2f6b5a", "#d9d4c7", "#d0682f", "#6c4a8a", "#1b1c1f", "#f2efe6", "#3a78b5"]
       .map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.6 })));
     const glaze = ["#e8e2d4", "#9bb0a0", "#c7643a", "#2f4a6e", "#d9a441"].map(c => reg(new THREE.MeshStandardMaterial({ color: c, roughness: 0.3 })));
@@ -2242,7 +2249,7 @@ function buildIdeas() {
       const st = new THREE.Mesh(new THREE.BoxGeometry((sx1 - sx0 - 6) * M, 0.003, 0.012), stripM); st.position.copy(v3((sx0 + sx1) / 2, yb - 0.2, zn + 0.9)); g.add(st);
       const w_ = new THREE.Mesh(new THREE.PlaneGeometry((sx1 - sx0 - 4) * M, 14 * M), washM); w_.position.copy(v3((sx0 + sx1) / 2, yb - 7.2, zn + 1.45)); w_.rotation.y = Math.PI; g.add(w_);
     }
-    const l = new THREE.PointLight("#ffcf8a", 0.7, 1.2, 2); l.position.copy(v3((sx0 + sx1) / 2, 14, front - 6)); g.add(l);
+    const l = new THREE.PointLight("#ffcf8a", 0.7, 1.2, 2); l.userData.accent = 0.7; l.position.copy(v3((sx0 + sx1) / 2, 14, front - 6)); g.add(l);
     shell.add(g); }
   // 7. the rug's non-slip pad: the corner by the door turned back to show it (the pad trimmed 2.5 inside the rug's edge)
   if (MOV.rug) { const g = IDEA_G.rugpad = new THREE.Group(), RG = R.RUG, hx = (RG.x[1] - RG.x[0]) / 2, hz = (RG.z[1] - RG.z[0]) / 2, L = 46;
@@ -2275,7 +2282,7 @@ function pcLit() {
   const ramM = new THREE.MeshBasicMaterial({ color: "#ff5ad1", toneMapped: false });
   for (let k = 0; k < 4; k++) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.004, 0.007), ramM); r.position.copy(v3(4.5, st + 37.2, cz0 + 21.85 + k * 1.3)); pcGlow.add(r); }
   shell.add(pcGlow);
-  pcLight = new THREE.PointLight("#9d7bff", 3, 0.6, 2); pcLight.position.copy(v3(2.5 + cw / 2, st + ch / 2, (cz0 + cz1) / 2)); shell.add(pcLight);
+  pcLight = new THREE.PointLight("#9d7bff", 3, 0.6, 2); pcLight.userData.accent = 3; pcLight.position.copy(v3(2.5 + cw / 2, st + ch / 2, (cz0 + cz1) / 2)); shell.add(pcLight);
 }
 // v17: "i also have deep window sills that allow for lots of plants there": a row of pots along the sill, upright and trailing
 /* ---------------------------------------------------------------- v40: the plants, in HD
@@ -2552,7 +2559,7 @@ function sillPlants(x0, x1, y, zBack, zFront) {
 }
 
 /* ---------------------------------------------------------------- lights */
-const lights = { strip: [], uprights: [], bias: [], bar1: [], bar2: [], lamp: [], tv: [] };
+const lights = { strip: [], uprights: [], bias: [], bar1: [], bar2: [], lamp: [], tv: [], fill: [] };
 const hemi = new THREE.HemisphereLight("#e2e0da", "#b39a7c", 0.05); scene.add(hemi);
 function area(color, w, h, pos, look) {
   const l = new THREE.RectAreaLight(color, 1, w * M, h * M);
@@ -2566,12 +2573,22 @@ function buildLights() {
   lights.strip.push(area(warm, Wd, 6, [Wd / 2, C - 4, WZ + 4], [Wd / 2, 0, WZ + 4]));
   lights.strip.push(area(warm, R.STAIR_FRONT - WZ, 6, [Wd - 4, C - 4, (R.STAIR_FRONT + WZ) / 2], [Wd - 4, 0, (R.STAIR_FRONT + WZ) / 2]));
   lights.strip.push(area(warm, R.WELL_X0, 6, [R.WELL_X0 / 2, C - 4, -4], [R.WELL_X0 / 2, 0, -4]));
-  lights.strip.forEach(l => l.userData.k = 520);
+  lights.strip.forEach(l => { l.userData.k = 520; l.userData.warm = true; });
   // the uprights' grooves wash the wall either side of the TV
   for (const x of [(R.UP_L[0] + R.UP_L[1]) / 2, (R.UP_R[0] + R.UP_R[1]) / 2]) { const l = area("#ffcf96", 2, 112, [x, 134, 22], [x, 134, 40]); l.userData.k = 3500; l.userData.colKey = "strips"; lights.uprights.push(l); }
   // v15: the side run's strip washes the side wall below it
   const SR = R.SIDE_RUN, zr0 = SR.edge[0][1], zr1 = SR.edge[SR.edge.length - 1][1];
   const sw = area("#ffcf96", zr0 - zr1, 3, [9, SR.under - 1, (zr0 + zr1) / 2], [0, SR.under - 60, (zr0 + zr1) / 2]); sw.userData.k = 260; sw.userData.colKey = "strips"; lights.uprights.push(sw);
+  /* v46: Fast (most phones) leaves out the area lights above, so the media wall and the sofa fell dark while the spot heads lit the
+     floor six times brighter. Five plain point lights stand in for them in Fast only (no shadows): four along the strip's walls, one
+     in front of the uprights; each follows its layer's slider */
+  const fillSpot = (pos, at, k, fill, colKey, ang) => { const f = new THREE.SpotLight("#ffe0bf", 1, 0, ang, 1.0, 2); f.position.copy(v3(...pos)); f.target.position.copy(v3(...at));
+    f.userData = { k, fill, warm: !colKey, colKey }; scene.add(f, f.target); lights.fill.push(f); };
+  fillSpot([40, C - 12, (AD + WZ) / 2], [0, 40, (AD + WZ) / 2], 75, "strip", null, 1.25);                          // the PC's side wall
+  fillSpot([Wd / 2, C - 12, WZ + 45], [Wd / 2, 40, WZ], 75, "strip", null, 1.25);                                  // the window wall
+  fillSpot([Wd - 45, C - 12, (R.STAIR_FRONT + WZ) / 2], [Wd, 40, (R.STAIR_FRONT + WZ) / 2], 60, "strip", null, 1.25);   // the stairs wall
+  fillSpot([R.WELL_X0 / 2, C - 12, -45], [R.WELL_X0 / 2, 40, AD], 40, "strip", null, 1.25);                       // the media wall and the breast
+  fillSpot([R.ALC_W / 2, 200, -90], [R.ALC_W / 2, 125, AD], 85, "uprights", "strips", 1.0);                       // the uprights' wash
   // bias light behind the TV, onto the wall
   const [tx0, tx1] = R.TV_X, [ty0, ty1] = R.TV_Y;
   const b = area("#e9efff", tx1 - tx0 - 10, ty1 - ty0 - 10, [(tx0 + tx1) / 2, (ty0 + ty1) / 2, R.TV_Z + 5], [(tx0 + tx1) / 2, (ty0 + ty1) / 2, 60]);
@@ -2766,20 +2783,30 @@ function applyState() {
   try { applyNow(); } catch (e) {}                                       // v39: the ledge's LP
   dirty();
 }
+/* v46, client: "default view could balance lighting throughout the room using all fixtures ... then optimise and upgrade settings":
+   Warmth, one setting for every warm-white light (candle-warm to neutral white; the middle is the bulbs' warm white), unless you've
+   given a light its own colour */
+const WARMTH = [new THREE.Color("#ffbf86"), new THREE.Color(WARM), new THREE.Color("#fff3e4")];   // candle-warm, the bulbs' warm white, neutral
+function warmColour() { const w = Math.max(0, Math.min(100, S.warm ?? 50)) / 50; return w <= 1 ? WARMTH[0].clone().lerp(WARMTH[1], w) : WARMTH[1].clone().lerp(WARMTH[2], w - 1); }
 function applyLight() {
   const day = S.tod === "day", hd = S.quality === "hd";
   const L = {}; LAYERS.forEach(k => L[k] = lvl(k));          // v15: the sliders (a scene button fills them in), times the master
+  const warmC = warmColour();                                 // v46: Warmth
   const set = (list, lv) => list.forEach(l => {
     l.intensity = (l.userData.k || 1) * Math.pow(lv / 100, 1.6);
     l.visible = lv > 0;
-    if (l.userData.colKey) l.color.set(S.col[l.userData.colKey] || WARM);   // the smart bulbs' colour
+    if (l.userData.colKey) { const c = S.col[l.userData.colKey]; if (c && c !== WARM) l.color.set(c); else l.color.copy(warmC); }   // the smart bulbs' colour, or Warmth
+    else if (l.userData.warm) l.color.copy(warmC);
     if (l.isSpotLight) { l.castShadow = hd && lv > 0; if (l.userData.glow) l.userData.glow.material.color.set(lv > 0 ? (S.col[l.userData.colKey] || "#fff3dc") : "#3a3a3a"); }
   });
   const area = hd ? 1 : 0;      // Fast leaves out the area lights (the most expensive) and lifts the fill to make up
   set(lights.strip, L.strip * area); set(lights.uprights, L.uprights * area); set(lights.bias, L.bias * area); set(lights.bar1, L.bar1); set(lights.bar2, L.bar2);
-  if (!hd) for (const bar of [lights.bar1, lights.bar2]) bar.forEach((l, i) => {   // v22: Fast lights each bar with two of its four heads, twice as bright
-    if (i % 2) l.visible = false; else l.intensity *= 2; });
+  if (!hd) for (const bar of [lights.bar1, lights.bar2]) bar.forEach((l, i) => {   // v22: Fast lights each bar with two of its four heads (v46: 1.6 times as bright, the fill does the rest)
+    if (i % 2) l.visible = false; else l.intensity *= 1.6; });
+  lights.fill.forEach(l => { const lv = hd ? 0 : L[l.userData.fill]; l.intensity = l.userData.k * Math.pow(lv / 100, 1.6); l.visible = lv > 0;
+    if (l.userData.colKey) { const c = S.col[l.userData.colKey]; l.color.copy(c && c !== WARM ? new THREE.Color(c) : warmC); } else l.color.copy(warmC); });
   set(lights.lamp, (S.layout.lamp || {}).off ? 0 : L.lamp);  // v15: the lamp's colour bulbs dim in their app (v18: or it's been removed)
+  scene.traverse(o => { if (o.isLight && o.userData.accent) o.intensity = o.userData.accent * 1.5 * Math.pow(L.accent / 100, 1.6); });   // v46: Accents (70 is about the old fixed level)
   for (const l of [...lights.bar1, ...lights.bar2, ...lights.lamp]) {   // v38: each head's own switch, level and colour
     const h = headOf(l.userData.hk); if (!l.userData.hk || !Object.keys(h).length) continue;
     const g = l.userData.glow;
@@ -2806,7 +2833,7 @@ function applyLight() {
   view.material.map = day ? SKY.day : SKY.night; view.material.needsUpdate = true;
   // bounce light: a real room's walls relight it; this stands in for that, in proportion to what's on. v15: more of it, so the room
   // reads evenly lit rather than as pools under each head
-  const on = (L.strip * 1.0 + L.uprights * 0.3 + L.bar1 * 0.5 + L.bar2 * 0.5 + L.lamp * 0.35 + (L.bias > 0 ? 8 : 0) + (S.lbox ? 4 : 0)) / 100;
+  const on = (L.strip * 1.0 + L.uprights * 0.3 + L.bar1 * 0.5 + L.bar2 * 0.5 + L.lamp * 0.35 + L.accent * 0.06 + (L.bias > 0 ? 8 : 0) + (S.lbox ? 4 : 0)) / 100;
   hemi.intensity = day ? 0.5 + (hd ? 0 : 0.25) : 0.05 + on * 0.36 + (hd ? 0 : (L.strip * 0.0075 + L.uprights * 0.0015 + (L.bias > 0 ? 0.08 : 0)));
   win.visible = hd || day;
   // v44: the room's reflections by surface: glass, the TV and gloss pots catch more of them, matte paint and fabric less
@@ -3817,7 +3844,11 @@ function openPop(id) {
   qs("#r3d-pop-h").textContent = H.name;                                 // v39: three places, no numbers
   const ul = qs(".facts", pop); ul.textContent = "";
   H.facts.forEach(f => { const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); });
-  pop.hidden = false; placePop(el); qs(".go", pop).focus({ preventScroll: true }); syncPlaces();
+  const pcs = qs(".r3d-pcs", pop); pcs.textContent = "";                // v46: its pieces, each opening its card in Build
+  (H.pieces || []).forEach(([cid, title]) => { const li = document.createElement("li"), b = document.createElement("button"), pr = window.PIECEP && PIECEP.of(cid);
+    b.type = "button"; b.dataset.mk = cid; b.innerHTML = `<span>${title}</span><small>${pr ? `${pr.done} of ${pr.total}` : ""}</small><i class="ms" aria-hidden="true">chevron_right</i>`;
+    li.appendChild(b); pcs.appendChild(li); });
+  pop.hidden = false; placePop(el); (qs(".r3d-pcs button", pop) || qs(".acts button", pop)).focus({ preventScroll: true }); syncPlaces();
 }
 function closePop() { if (popId && stickEls[popId]) stickEls[popId].setAttribute("aria-expanded", "false"); popId = null; if (pop) pop.hidden = true; try { syncPlaces(); } catch (e) {} }
 qsa(".stk").forEach(b => b.addEventListener("click", e => { e.stopPropagation();
@@ -3832,6 +3863,7 @@ if (pop) pop.addEventListener("click", e => {
   else if (b.dataset.popgo === "plan") { closePop(); window.dispatchEvent(new CustomEvent("demma-open", { detail: { sheet: "plan", chapter: H.chapter } })); }
 });
 canvas.addEventListener("pointerdown", () => { if (popId) closePop(); });
+document.addEventListener("click", e => { if (e.target.closest("#r3d-pop [data-mk]")) closePop(); }, true);   // v46: a piece opens in Build
 /* v33, the phone home: the places strip under the room; a tap flies to the place and opens its card, docked above the dock */
 qsa("[data-place]").forEach(b => b.addEventListener("click", e => {
   e.stopPropagation(); const H = HOTS.find(h => h.id === b.dataset.place); if (!H) return;
@@ -3886,7 +3918,7 @@ function pickItem(e) {
   return null;
 }
 const btn = (label, attrs, on, cls, aria) => ({ label, attrs, on, cls, aria });
-const MAKE_CARD = { recordtable: "mk-recordtable", ctable: "mk-ctable", wallcabs: "mk-fitted", alcoveshelves: "mk-fitted", doorshelf: "mk-fitted", shelfboxes: "mk-fitted" };   // v44
+const MAKE_CARD = { recordtable: "mk-recordtable", ctable: "mk-ctable", wallcabs: "mk-wallcabs", alcoveshelves: "mk-alcove", doorshelf: "mk-doorshelf", shelfboxes: "mk-doorshelf" };   // v44
 function actItems(id) {     // [title, how it is now, buttons]
   const folded = S.dining === "folded", lv = k => (S.lv[k] ?? 0) > 0;
   if (id === "nowplay") return ["Now playing, on the ledge", `${NOWP[S.nowp % NOWP.length].name}`, [   // v39: which LP faces out
@@ -4532,7 +4564,9 @@ function syncButtons() {
   qsa("[data-paintcustom]").forEach(b => b.setAttribute("aria-pressed", String(lookWall === "all" ? S.paint === "custom" && S.custom.toLowerCase() === b.dataset.paintcustom.toLowerCase() : wh === b.dataset.paintcustom.toLowerCase())));
   if (S.ceil !== "match" && qs("#r3d-ceil")) qs("#r3d-ceil").value = S.ceil;
   if (S.skirt !== "match" && qs("#r3d-skirt")) qs("#r3d-skirt").value = S.skirt;
-  qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : (S.lv[k] ?? 0); i.value = v; qs(`[data-lvout="${k}"]`).textContent = `${Math.round(v)}%`; });
+  const warmWord = w => w < 25 ? "candle" : w < 45 ? "warm" : w <= 55 ? "warm white" : w < 80 ? "soft white" : "neutral";
+  qsa("[data-lv]").forEach(i => { const k = i.dataset.lv, v = k === "master" ? S.master : k === "warm" ? (S.warm ?? 50) : (S.lv[k] ?? 0); i.value = v;
+    qs(`[data-lvout="${k}"]`).textContent = k === "warm" ? warmWord(v) : `${Math.round(v)}%`; });
   qsa("[data-col]").forEach(i => { i.value = S.col[i.dataset.col] || WARM; });
   syncOpts();                                                                                       // v36
   if (actId) renderAct();                                                                           // v30: the item's card follows
@@ -4615,7 +4649,7 @@ qs("#r3d-custom").addEventListener("input", e => { if (lookWall === "all") { S.c
 // v15: the sliders, the colour bulbs, and the ceiling and skirting paints
 root.addEventListener("input", e => {
   const t = e.target, d = t.dataset;
-  if (d.lv) { const v = +t.value; if (d.lv === "master") S.master = v; else S.lv[d.lv] = v; qs(`[data-lvout="${d.lv}"]`).textContent = `${v}%`; syncButtons(); applyLight(); updateCaption(); }
+  if (d.lv) { const v = +t.value; if (d.lv === "master") S.master = v; else if (d.lv === "warm") S.warm = v; else S.lv[d.lv] = v; syncButtons(); applyLight(); updateCaption(); store.set(KEY, S); }
   else if (d.col) { S.col[d.col] = t.value; applyLight(); }
   else if (t.id === "r3d-ceil") { S.ceil = t.value; press("ceil", ""); repaint(); dirty(); }
   else if (t.id === "r3d-skirt") { S.skirt = t.value; press("skirt", ""); repaint(); dirty(); }

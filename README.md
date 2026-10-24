@@ -2,27 +2,20 @@
 
 Home projects for Emma and Dave's house (Portsmouth Close).
 
-## Media wall and dining wall, v45: the stipple ceiling, Cosy lighting, a softer light over the table
+## Media wall and dining wall, v46: the room piece by piece, easy to read anywhere, balanced light
 
 The artisan oak media wall in Farrow & Ball Card Room Green, drawn to the measured room (alcove 186 × 38 cm, ceiling 235),
 with the compact dining cabinet under your shelf by the stairs: the table and the six chairs in two oak boxes, 147 cm long and 23 deep. It's the only table now. Everything below shows here on GitHub; nothing needs downloading. **Open the plan:** https://emmachilds98-wq.github.io/DIY/ (GitHub Pages: everything, including the room in 3D; ticks stay on that device)
 
-![The media wall, main view](media-wall/out/Media%20wall%20v45%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
+![The media wall, main view](media-wall/out/Media%20wall%20v46%20-%20artisan%20oak%20-%20Card%20Room%20Green,%20table%20by%20the%20stairs%20(HD).png)
 
-**New in v45** ("stipple ceiling as default and cosy lighting that still allows nice view of the room", "stop over lighting the dining table")
-- **The room opens as you'd live in it:** Cosy lighting in the evening, with an Artex stipple ceiling. Cosy has a little more light (the ceiling strip and bar 2 up a touch), so you can still see the whole room. The other ceilings are still in Look.
-- **The dining table isn't washed out:** with the table open, bar 2 sits at 45–55 (it used to jump to 80) and the ceiling strip stays at 40 or less, so the oak top reads as oak.
-- **Whole room** and **Hide labels** are small buttons on the room, under Plan, Build and Buy; the bottom bar is View, Room, Look and Edit.
-- **A tidier repo:** old files are gone (the outputs of v9 to v43, about 920 replaced 3D pictures, old backups): about 5.4 GB less, and still in the git history if ever needed. Backups go in `media-wall/src/backups/`, old upgrade plans in `media-wall/plans/`.
+**New in v46** ("drill down into tasks for each piece of the room when I click on them or look in the plans", "default view could balance lighting throughout the room using all fixtures")
+- **The room, piece by piece, any order:** six places (the media wall, the side wall and PC, the chimney breast and door, the dining wall, the sofa, the window corner). Tap a place's label in the 3D room to see its pieces; tap a piece (or find it in Build) for its card: **Check · Buy · Cut · Build**, a tick for each task and each thing to buy, and a ring showing how much is done. No more "step 1 of 14".
+- **Easy to read on a phone or a PC:** on a PC the pieces sit two across and the open one takes the row; both PDFs have clickable contents and bookmarks, the build guide is grouped by place and piece, and each PDF has a **phone edition** (a narrow page, bigger type).
+- **Evening light by default:** every fixture on and balanced (the ceiling strip, the uprights, all eight spot heads, the lamp and a new **Accents** layer: the glass case, the bar's strip, the PC). Measured in pictures of the room: the brightest part is under three times the darkest, on a PC and on a phone (phones were six times before). **Brightness** and **Warmth** set the whole room in two moves.
 
-**New in v44** ("read more clearly and be easier to follow while still having everything I need", "increase render quality")
-- **Build, one card per thing you make:** the media wall base, the worktop, the uprights, the side wall, the dining cabinet, the bar, the glass case, the record table, the C-table and the fitted pieces, each with **Buy · Cut · Build** tabs, plus five Jobs (network, cables, paint, lighting, connect). The 14 step ticks sit in one fold with a Next line; the merchant's cutting list is folded. About 3 phone screens closed (was 19).
-- **How to make it** from a piece's cost in Buy, or from the piece itself in the 3D room, opens its card.
-- **Plan and Buy say each thing once:** Up next and the 90/80 comparison are gone; the build-order shopping list is in one fold under the costs by piece.
-- **The plan PDF is 34 pages** (was 46): what the guide already has comes out, the pictures are smaller, the costs and sources run in two columns. **The C-table has its own chapter** in the build guide.
-- **A sharper 3D room:** truer colour (the wall nearer Card Room Green, the glass case and window no longer blown out); on a PC graphics card, HD at up to 2× sharpness, soft shadows as you look round and crisper textures; reflections by surface.
 
-Earlier versions (v9 to v43) and what each changed are in [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md) and the git history.
+Earlier versions (v9 to v44) and what each changed are in [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md) and the git history.
 
 ### Key heights (cm from the floor)
 | Height | What |
@@ -41,7 +34,7 @@ Earlier versions (v9 to v43) and what each changed are in [`media-wall/HANDOFF.m
 ![Drawer layouts](media-wall/out/Drawer%20layouts%20-%20where%20each%20drawer%20is%20and%20what%20goes%20in%20it.png)
 
 ### Every drawer out
-![Every drawer out](media-wall/out/Media%20wall%20v45%20-%20every%20drawer%20out%20(HD).png)
+![Every drawer out](media-wall/out/Media%20wall%20v46%20-%20every%20drawer%20out%20(HD).png)
 
 ### What fits where
 ![Storage options](media-wall/out/Storage%20options%20-%20what%20fits%20each%20space.png)
@@ -57,8 +50,8 @@ the 23 × 22 cm box by the window · how many LPs, singles and games · wired po
 surge protection, switches and length · console model numbers · the second ceiling point's exact spot · the RetroTINK's size on arrival.
 
 ### Documents
-- **The full plan:** [`media-wall/out/Home_Network_Plan_v45.pdf`](media-wall/out/Home_Network_Plan_v45.pdf) (34 pages, your plan only: room, media wall and fit proof, records, dining wall, side wall, joinery, paint and light, power and network, the costs by piece, other options and sources)
-- **The build guide:** [`media-wall/out/Build_Guide_v45.pdf`](media-wall/out/Build_Guide_v45.pdf) (61 pages: one chapter per thing you make, each with Buy, Cut and Build; the jobs; the merchant's cutting list and the sheets at the back)
+- **The full plan:** [`media-wall/out/Home_Network_Plan_v46.pdf`](media-wall/out/Home_Network_Plan_v46.pdf) (35 pages, your plan only, with clickable contents and bookmarks); for a phone, [`Home_Network_Plan_v46_phone.pdf`](media-wall/out/Home_Network_Plan_v46_phone.pdf)
+- **The build guide:** [`media-wall/out/Build_Guide_v46.pdf`](media-wall/out/Build_Guide_v46.pdf) (66 pages, by place and piece: each with Check, Buy, Cut and Build; the jobs; the merchant's cutting list); for a phone, [`Build_Guide_v46_phone.pdf`](media-wall/out/Build_Guide_v46_phone.pdf)
 - **All renders and plans:** [`media-wall/out/`](media-wall/out/) (the previous version in `v44/`; older ones are in the git history)
 - **Interactive viewer:** https://emmachilds98-wq.github.io/DIY/ (`index.html` at the root): the room in 3D, the plan's chapters, build steps, buy tracker.
 - **Where things stand:** [`media-wall/HANDOFF.md`](media-wall/HANDOFF.md)

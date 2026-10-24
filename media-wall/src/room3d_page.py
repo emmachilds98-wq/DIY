@@ -48,6 +48,10 @@ CSS = """
 .r3d-pop h3 { margin: 0 34px 8px 0; font: 600 19px Fredoka, system-ui, sans-serif; }
 .r3d-pop .facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding: 0; list-style: none; }
 .r3d-pop .facts li { background: oklch(0.92 0.06 var(--h)); border-radius: 999px; padding: 5px 11px; font-size: 13px; font-weight: 600; }
+.r3d-pcs { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
+.r3d-pcs button { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; gap: 8px; align-items: center; min-height: 44px; padding: 6px 8px 6px 14px; border: 0; border-radius: 14px; background: oklch(0.95 0.04 var(--h)); color: var(--ink); font: 600 14.5px Figtree, system-ui, sans-serif; text-align: left; cursor: pointer; }
+.r3d-pcs small { font-weight: 500; color: var(--mut); white-space: nowrap; }
+.r3d-pcs .ms { font-size: 20px; }
 .r3d-pop .acts { display: flex; gap: 8px; }
 .r3d-pop .acts button { flex: 1; min-height: 44px; border: 0; border-radius: 999px; font: 600 14px Fredoka, system-ui, sans-serif; cursor: pointer; background: var(--soft); color: var(--ink); }
 .r3d-pop .acts button.go { background: oklch(0.8 0.11 var(--h)); }
@@ -118,7 +122,9 @@ CSS = """
 .r3d-gal img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .r3d-gal figcaption { display: none; }
 /* Lights: three big tiles, the time-of-day switch, the table rule, the sliders folded */
-.r3d-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.r3d-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.r3d-top { margin: 4px 0 10px; }
+.r3d-warm { accent-color: #e8a25a; background: linear-gradient(90deg, #ffbf86, #ffe2b8, #fff3e4); border-radius: 999px; }
 .r3d-tiles button { display: grid; gap: 4px; justify-items: start; text-align: left; min-height: 96px; padding: 12px; border: 0; border-radius: 22px; background: oklch(0.94 0.07 95); color: var(--ink);
   cursor: pointer; transition: transform .3s var(--spring); font: 500 12.5px Figtree, system-ui, sans-serif; }
 .r3d-tiles button .ms { font-size: 26px; }
@@ -337,7 +343,7 @@ def rules_json():
 
 LIGHTS = [("strip", "Ceiling LED strip", None), ("uprights", "Upright grooves and the side shelf (smart colour strips)", "strips"), ("bias", "TV bias light", None),
           ("bar1", "Bar 1, TV to window (smart colour)", "bar1"), ("bar2", "Bar 2, by the stairs (smart colour)", "bar2"),
-          ("lamp", "Red lamp: top, middle, bottom", "lamp")]
+          ("lamp", "Red lamp: top, middle, bottom", "lamp"), ("accent", "Accents: the glass case, the bar, the PC", None)]   # v46
 CEIL_PRESETS = [("match", "Same as the walls"), ("#f2f0ea", "White")]
 SKIRT_PRESETS = [("match", "Same as the walls"), ("#ece8dd", "Off-white"), ("#5e6a5b", "Green Smoke")]
 # v25: the five Tools tabs (were v22's drawers): (key, name, icon, hue)
@@ -447,11 +453,14 @@ def controls(gallery=""):
             cols = f'<input type="color" data-col="{col}" value="#ffe2b8" aria-label="{html.escape(lab)} colour"><button type="button" class="chip" data-colreset="{col}">Warm white</button>'
         rows.append(f'<div class="r3d-lv"><label for="lv-{k}">{html.escape(lab)}</label><input type="range" id="lv-{k}" min="0" max="100" step="1" data-lv="{k}">'
                     f'<output data-lvout="{k}">0%</output><span class="r3d-cols">{cols}</span></div>')
-    TILE_SUB = {"bright": "Everything on, even", "cosy": "Low and warm", "film": "Films and games"}   # v26: the tiles' second line, whole
-    icons = {"bright": "light_mode", "cosy": "local_fire_department", "film": "movie"}
+    TILE_SUB = {"evening": "Every light, balanced", "bright": "Everything up", "cosy": "Low and warm", "film": "Films and games"}   # v26: the tiles' second line, whole
+    icons = {"evening": "wb_twilight", "bright": "light_mode", "cosy": "local_fire_department", "film": "movie"}
     tiles = "".join(f'<button type="button" data-scene="{k}" aria-pressed="false"><span class="ms" aria-hidden="true">{icons.get(k, "lightbulb")}</span><b>{html.escape(n)}</b>'
                     f'<span>{html.escape(TILE_SUB.get(k, d.split(":")[0].split(",")[0]))}</span></button>' for k, n, d, *_ in scenes.SCENES)
-    lights = (f'<div class="grp"><span class="label">Three presets: tap one (tap it again to undo your changes)</span><div class="r3d-tiles" role="group" aria-label="Lighting presets">{tiles}</div></div>'
+    lights = (f'<div class="grp"><span class="label">Presets (tap again to undo your changes)</span><div class="r3d-tiles" role="group" aria-label="Lighting presets">{tiles}</div></div>'
+              # v46: the whole room in two moves, before the light-by-light sliders
+              '<div class="r3d-lvs r3d-top"><div class="r3d-lv r3d-master"><label for="lv-master">Brightness</label><input type="range" id="lv-master" min="0" max="100" step="1" data-lv="master"><output data-lvout="master">100%</output><span></span></div>'
+              '<div class="r3d-lv r3d-master"><label for="lv-warm">Warmth</label><input type="range" id="lv-warm" min="0" max="100" step="1" data-lv="warm" class="r3d-warm"><output data-lvout="warm">warm white</output><span></span></div></div>'
               # v39, item 13: your own scenes, next to the presets (this device)
               '<div class="grp" id="r3d-myscenes"><span class="label">Your own scenes</span><div class="seg" id="r3d-myscl"></div>'
               '<div class="seg r3d-find"><input type="text" id="r3d-myname" placeholder="Our evening" aria-label="Name for these lights" maxlength="24">'
@@ -459,8 +468,7 @@ def controls(gallery=""):
               f'<p class="r3d-boost" id="r3d-boost" hidden><span class="ms" aria-hidden="true">restaurant</span> The table\'s open, so bar 2 lights it.</p>'
               + seg("tod", scenes.TOD, "Time of day")
               + '<details class="r3d-more"><summary>Fine-tune each light</summary>'
-              f'<div class="r3d-lvs"><div class="r3d-lv r3d-master"><label for="lv-master">All lights</label><input type="range" id="lv-master" min="0" max="100" step="1" data-lv="master"><output data-lvout="master">100%</output><span></span></div>'
-              + "".join(rows) + '</div></details>'
+              '<div class="r3d-lvs">' + "".join(rows) + '</div></details>'
               '<div class="grp"><span class="label">Switch on or off</span><div class="seg" role="group" aria-label="Light box, laser, PC and curtains"><button type="button" data-tog="lbox" aria-pressed="false">IKEA light box</button>'
               '<button type="button" data-tog="laser" aria-pressed="false">Laser</button>'
               '<button type="button" data-tog="pc" aria-pressed="false">PC lit</button>'
@@ -656,15 +664,16 @@ def hotspots():
     rug_w, rug_d = g.RUG["x"][1] - g.RUG["x"][0], g.RUG["z"][1] - g.RUG["z"][0]
     pl = g.PLANT_LAYOUTS["corner"]["plants"]
     PS = g.PLANT_STAND
-    # v39 (the approved redesign): three places to tap, not six stickers
-    return [
-        dict(id="wall", short="Media wall", n=1, name="Media wall", hue=40, at=[g.ALC_W / 2, 150, g.ALC_D - 26], nrm=[0, -1], cut="wall", view="wall", chapter="wall",
-             facts=['LG C6 55" at 116.5', "Artisan oak, Card Room Green", ph("4 Base unit", "5 Oak joinery")]),
-        dict(id="dining", short="Dining wall", n=2, name="Dining wall and bar", hue=60, at=[g.ROOM_W - 12, 110, g.CAB["cz"]], nrm=[-1, 0], cut="stairs", view="dining", chapter="dining",
-             facts=[f"Table {g.CAB['len_open']:g} × {g.CAB['top'][0]:g}, six in comfort", "The bar beside it", ph("6 Dining wall")]),
-        dict(id="sofa", short="The sofa", n=3, name="The sofa", hue=250, at=[(g.SOFA_X[0] + g.SOFA_X[1]) / 2, 70, g.SOFA_BACK_Z + 55], nrm=None, cut="", view="sofa", chapter="c-room",
-             facts=["The record table", "The blanket basket", f"Rug {rug_w:g} × {rug_d:g}"]),
-    ]
+    # v46, client: "drill down into tasks for each piece of the room when I click on them": six places, each card lists its pieces
+    import pieces as P, chapters as C
+    out = []
+    for pid, name, hue, at, nrm, cut, view, chapter in P.PLACES:
+        ps = [p for p in P.PIECES if p["place"] == pid]
+        lo = sum(r[3] for p in ps for r in C.buy_rows(p["buy"])); hi = sum(r[4] for p in ps for r in C.buy_rows(p["buy"]))
+        out.append(dict(id=pid, short=name, n=len(out) + 1, name=name, hue=hue, at=at, nrm=nrm, cut=cut, view=view, chapter=chapter,
+                        facts=[f"{len(ps)} {'piece' if len(ps) == 1 else 'pieces'}", _money(lo, hi)],
+                        pieces=[[("job-" if p.get("job") else "mk-") + p["key"], p["title"]] for p in ps]))
+    return out
 
 
 def section(gallery=""):
@@ -701,7 +710,7 @@ def section(gallery=""):
     <div class="r3d-pad" id="r3d-pad" role="group" aria-label="Move the camera (hold a button to keep moving)" hidden><button type="button" data-walk="tl" aria-label="Turn left" title="Turn left"><span class="ms" aria-hidden="true">rotate_left</span></button><button type="button" data-walk="f" aria-label="Walk forward" title="Walk forward"><span class="ms" aria-hidden="true">arrow_upward</span></button><button type="button" data-walk="tr" aria-label="Turn right" title="Turn right"><span class="ms" aria-hidden="true">rotate_right</span></button><button type="button" data-walk="u" aria-label="Up" title="Up"><span class="ms" aria-hidden="true">keyboard_arrow_up</span></button><button type="button" data-walk="l" aria-label="Step left" title="Step left"><span class="ms" aria-hidden="true">arrow_back</span></button><button type="button" data-walk="b" aria-label="Walk back" title="Walk back"><span class="ms" aria-hidden="true">arrow_downward</span></button><button type="button" data-walk="r" aria-label="Step right" title="Step right"><span class="ms" aria-hidden="true">arrow_forward</span></button><button type="button" data-walk="dn" aria-label="Down" title="Down"><span class="ms" aria-hidden="true">keyboard_arrow_down</span></button></div>
     <div class="r3d-mini" role="group" aria-label="The view"><button type="button" class="r3d-minib" id="r3d-home" title="The whole room, from above (H)"><span class="ms" aria-hidden="true">home</span><span class="t">Whole room</span></button><button type="button" class="r3d-minib r3d-lbl" id="r3d-lbl" aria-pressed="true" title="Show or hide the labels on the room"><span class="ms" aria-hidden="true">label_off</span><span class="t">Hide labels</span></button></div>
     <div class="r3d-pop" id="r3d-pop" role="dialog" aria-modal="false" aria-labelledby="r3d-pop-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
-      <h3 id="r3d-pop-h"></h3><ul class="facts"></ul><div class="acts"><button type="button" class="go" data-popgo="plan">Open in the plan</button><button type="button" data-popgo="fly">Fly here</button></div></div>
+      <h3 id="r3d-pop-h"></h3><ul class="facts"></ul><ul class="r3d-pcs" aria-label="Its pieces"></ul><div class="acts"><button type="button" data-popgo="fly">Fly here</button><button type="button" data-popgo="plan">Read about it</button></div></div>
     <div class="r3d-pop r3d-act" id="r3d-act" role="dialog" aria-modal="false" aria-labelledby="r3d-act-h" hidden><button type="button" class="x" aria-label="Close"><span class="ms" aria-hidden="true">close</span></button>
       <h3 id="r3d-act-h"></h3><p class="st" id="r3d-act-st" aria-live="polite"></p><div class="acts" id="r3d-acts"></div></div>
     <div class="r3d-edit">

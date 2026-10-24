@@ -94,7 +94,7 @@ def plan_home(ring, nbuy, nsteps):
     """The top of the Plan home: three rings (one count) and the three lists beside them."""
     chk, nchk = checks_html()
     return f"""<div class="next3" id="next3" aria-label="Your next three things"></div>
-      <div class="rings rings3">{ring("build", 50, "steps built", "build")}{ring("buy", 165, "things bought", "buy")}{ring("choice", 280, "choices made", "decide")}</div>
+      <div class="rings rings3">{ring("build", 50, "tasks done", "build")}{ring("buy", 165, "things bought", "buy")}{ring("choice", 280, "choices made", "decide")}</div>
       <p class="caption" id="d-paid">£0 paid so far</p>
       <div class="home2">
         <section class="wait"><div class="sec-h"><h2>Waiting on you</h2><button type="button" class="btn" data-decide-open="0">Decide</button></div><ul class="waitl" id="waitl"></ul></section>

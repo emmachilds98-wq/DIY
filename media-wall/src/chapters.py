@@ -300,30 +300,6 @@ def picture(name, alt):
     return f"<figure class='render chap'>{B.thumb(name, alt)}</figure>"
 
 
-def chapter_html(i, c, money):
-    key, title, what, pic, spec, buy, time, who = c
-    rows = buy_rows(buy)
-    lo, hi = sum(r[3] for r in rows), sum(r[4] for r in rows)
-    return (f"<section class='chap' id='mk-{key}'><h2 class='pb'>{i} · {title}</h2>"
-            f"<p class='lede'>{what}</p><p class='meta'>{time} · {who} · about £{money(lo, hi)}</p>"
-            + picture(pic, title)
-            + "<h3>1 · Buy</h3>" + buy_html(rows, money)
-            + "<h3>2 · Cut</h3>" + cut_html(key)
-            + "<h3>3 · Build</h3>" + build_html(spec) + "</section>")
-
-
-def job_html(i, j, money):
-    key, title, what, spec, buy, time = j
-    rows = buy_rows(buy)
-    lo, hi = sum(r[3] for r in rows), sum(r[4] for r in rows)
-    extra = ""
-    if key == "cables":
-        import build_doc as B
-        extra = B.wiring_html()
-    return (f"<section class='chap job' id='job-{key}'><h2 class='pb'>{i} · {title}</h2><p class='lede'>{what}</p><p class='meta'>{time} · about £{money(lo, hi)}</p>"
-            "<h3>Buy</h3>" + buy_html(rows, money) + "<h3>Do</h3>" + build_html(spec) + extra + "</section>")
-
-
 def others(money):
     """The buy list's rows no chapter takes (the basket, the rug, the ottoman…): one table at the back."""
     import build_doc as B
@@ -339,68 +315,9 @@ def others(money):
     return buy_rows([p for p in pre if p] + [t for t, p in zip(rows, pre) if not p])
 
 
-# ---------- the guide around the chapters
-JOB_LETTER = {j[0]: "ABCDE"[i] for i, j in enumerate(JOBS)}
-STEP_TO = {1: "Start here", 2: "chapter A", 3: "chapter B", 4: "chapter C", 5: "Start here", 6: "chapter 1", 7: "chapter 2", 8: "chapter 1",
-           9: "chapter 3", 10: "chapter 4", 11: "chapter 5", 12: "chapter D", 13: "chapter E", 14: "chapters 6, 8, 9 and 10"}
-
-ORDER = [("A", "The network"), ("B", "Cables and the socket"), ("C", "Paint"), ("Start here", "Mark the heights"), ("1", "The media wall base"),
-         ("2", "The oak worktop"), ("3", "The oak uprights and shelves"), ("4", "The side-wall run and the PC shelf"), ("5", "The dining cabinet and table"),
-         ("D", "Lighting"), ("E", "Connect and finish"), ("6–10", "The bar, the glass case, the record table, the C-table, the fitted pieces")]
-
 RULES = """<div class="callout"><b>Five rules</b><ul>
 <li><b>Check every wall before you drill</b> with the detector; never straight above, below or beside a socket or switch.</li>
 <li><b>Measure twice, cut once.</b> Walls are rarely square: cut to the smallest measurement.</li>
 <li><b>Two people for anything over 15 kg:</b> the uprights, the worktop, the table, the TV.</li>
-<li><b>Electrics:</b> isolate, lock off and prove dead every time. Anything new is an electrician's (chapter B's stop list).</li>
+<li><b>Electrics:</b> isolate, lock off and prove dead every time. Anything new is an electrician's (the stop list in Cables and the socket).</li>
 <li><b>Dry-fit everything</b> before glue or screws.</li></ul></div>"""
-
-
-def _retarget(html):
-    """The steps' "step 9" become this guide's chapters."""
-    def rep(m):
-        to = STEP_TO.get(int(m.group(2)))
-        return to if to else m.group(0)
-    return re.sub(r"\b([Ss])tep (\d+)\b(?!\s*·)", rep, html)
-
-
-def guide_html(money, rules_extra=""):
-    import build_doc as B, fit
-    tr = []
-    for i, c in enumerate(MAKE, 1):
-        r = buy_rows(c[5])
-        tr.append(f"<tr><td class='num'><b>{i}</b></td><td>{c[1]}</td><td>{c[6]}</td><td class='num'>{money(sum(x[3] for x in r), sum(x[4] for x in r))}</td></tr>")
-    for j in JOBS:
-        r = buy_rows(j[4])
-        tr.append(f"<tr><td class='num'><b>{JOB_LETTER[j[0]]}</b></td><td>{j[1]}</td><td>{j[5]}</td><td class='num'>{money(sum(x[3] for x in r), sum(x[4] for x in r))}</td></tr>")
-    oth = others(money)
-    tr.append(f"<tr><td></td><td>Also on the list (the basket, the rug, the ottoman…)</td><td></td><td class='num'>{money(sum(x[3] for x in oth), sum(x[4] for x in oth))}</td></tr>")
-    tl, th = B.phase_totals()[1:]
-    contents = ("<h2>What you're making</h2><table class='tight contents'><tr><th class='num'>Ch.</th><th>What</th><th>Time</th><th class='num'>£</th></tr>"
-                + "".join(tr) + f"<tr class='tot'><td></td><td><b>Everything</b></td><td>about 17–22 days</td><td class='num'><b>{money(tl, th)}</b></td></tr></table>"
-                "<p class='note'>Each chapter: <b>Buy</b> (what that thing needs), <b>Cut</b> (every part drawn to scale with its size) and <b>Build</b> "
-                "(numbered steps, then a check). The merchant's full cutting list and the sheet layouts are at the back.</p>")
-    order = ("<h3>The order of work</h3><ol class='order'>" + "".join(f"<li><b>{a}</b> · {t}</li>" for a, t in ORDER) + "</ol>")
-    start = ("<h2 class='pb'>Start here</h2>" + RULES + order
-             + "<h3>Measure and mark</h3>" + build_html([(1, None), (5, None)], full_step_extras=False)
-             + fit.measure_html())
-    make = "".join(chapter_html(i, c, money) for i, c in enumerate(MAKE, 1))
-    jobs = "".join(job_html(JOB_LETTER[j[0]], j, money) for j in JOBS)
-    back = ("<h2 class='pb'>Good to know</h2>" + B.GUIDE_TECHNIQUES + B.GUIDE_PITFALLS + B.guide_tools()
-            + "<h3>Also on the list</h3>" + buy_html(oth, money)
-            + "<h2 class='pb'>For the timber merchant</h2>" + merchant_html() + B.nest_html(figs=False))
-    return _retarget(contents + start + make + jobs + back)
-
-
-def merchant_html():
-    """The whole cutting list for the merchant, by what it's cut from, each part with its chapter and letter (no notes: they're in the chapters)."""
-    by = {}
-    for i, c in enumerate(MAKE, 1):
-        for letter, name, size, qty, grp, _note, _d in parts(c[0]):
-            by.setdefault(grp, []).append((f"{i}{letter}", name, size, qty))
-    out = ["<p>Every part, by what it's cut from. The code is the chapter and the part's letter in it. Finished sizes in cm, length × width × thickness.</p>"]
-    for grp, rows in by.items():
-        out.append(f"<h4>{grp}</h4><table class='tight ckey'><colgroup><col style='width:9%'><col style='width:41%'><col style='width:38%'><col></colgroup>"
-                   "<tr><th>Code</th><th>Part</th><th class='num'>Size (cm)</th><th class='num'>Qty</th></tr>"
-                   + "".join(f"<tr><td><b>{a}</b></td><td>{b}</td><td class='num'>{c}</td><td class='num'>{d}</td></tr>" for a, b, c, d in rows) + "</table>")
-    return "".join(out)

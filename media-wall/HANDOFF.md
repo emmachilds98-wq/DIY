@@ -1,8 +1,9 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-**Current: v45 (round 40, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
-viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 34 pages, guide 61. Next version: 46.
+**Current: v46 (round 41, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
+viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 63), guide 66
+(phone 76). Next version: 47.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
 - **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
@@ -20,6 +21,33 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
+
+## Update 24 Oct 2026, round 41: v46 (the room piece by piece, any order; easy to read on phone and PC; Evening light, every fixture)
+- Client (24 Oct): "drill down into tasks for each piece of the room when I click on them or look in the plans", "I don't need step by
+  step what item to do first", "more optimised for viewing in mobile and pc", and "default view could balance lighting throughout the
+  room using all fixtures ... then optimise and upgrade settings". Plan first: `UPGRADE_PLAN_v46.md` (#58).
+- **`pieces.py`** is the one list: `PLACES` (six: wall, side, breast, dining, sofa, window; label anchor, normal, cutaway, view),
+  `PIECES` (chapters.MAKE by place; "bought and fitted" split into `wallcabs` (sofa), `alcove` (window), `doorshelf` (breast)),
+  `JOB_PIECES` (the five jobs, "The whole room"), `NEEDS` (one "first" line per piece), `CHECKS` (fit's CHECK rows to pieces),
+  `tasks(piece)` (each sub-assembly of its steps; a one-section piece gets a task per instruction), and `guide_html` (the guide).
+- **Page (`build_viewer.piece_cards`, `STEP_JS`):** Build is the places, each with its piece cards (Check · Buy · Cut · Build, a
+  progress ring). Task ticks are this device's (`mw46-tasks`); buy ticks mirror the buy list's own (`data-buyproxy` → `#c-<id>`). A
+  step ticks itself when all its tasks are done (unticks when one isn't); steps ticked before v46 tick their tasks once. The 14 steps
+  sit at the bottom in "Every step in one list" (Build day still works). `window.PIECEP` gives progress to the room and to Plan's "next
+  three" (Carry on with a piece; buy for it). On a PC (≥1000 px) the cards sit two across, the open one spans the row.
+- **Room:** six labels from `pieces.PLACES` (`room3d_page.hotspots`); a label's card lists its pieces with "n of m" and opens each card
+  (`#r3d-pop .r3d-pcs [data-mk]`). Room cards' How to make it point at the split pieces (`MAKE_CARD`).
+- **Light:** Evening is the default (`scenes.SCENES`, `DEF.scene`, `S.v46` moves a saved room once): strip 60, uprights 60, bars 35,
+  lamp 70, accent 75. New layer `accent` (`userData.accent` on the glass case's and the bar's new point lights, the PC, the cabinet's
+  and shelf's option lights, the step lights). Fast (phones) had no area lights: five Fast-only wall-wash spots (`lights.fill`,
+  `lightIn` → !hd) follow the strip and uprights sliders; Fast's bar heads ×1.6 (was ×2). Measured with a zone-brightness harness
+  (stills from five views, nine zones): Fast brightest/darkest 6.3 → 2.2, HD 2.7. **Brightness** (`S.master`) and **Warmth** (`S.warm`,
+  candle-warm ↔ the bulbs' warm white ↔ neutral, `WARMTH`) sit under the presets; each light's slider under Fine-tune.
+- **PDFs:** the guide by place and piece (`pieces.guide_html`: contents with links, Start here, then each place and its pieces with
+  Check/Buy/Cut/Build, Good to know, the merchant's list coded by piece number); no order of work. The plan PDF gets a clickable contents
+  and section ids; both get bookmarks (`outline=True`) and a phone edition (110 × 196 mm, `PHONE_CSS`, `*_phone.pdf`). The page links them.
+- **Removed:** `chapters.guide_html`, `ORDER`, `STEP_TO`, chapter numbering. `qa.py` checks every label's pieces open, and the phone
+  PDFs' links and names. Backups `src/backups/*_v45_backup.*`. v45 outputs in `out/v45/`; `out/v44` dropped.
 
 ## Update 23 Oct 2026, round 40: v45 (the stipple ceiling and Cosy first, a softer light over the open table, two small room buttons, a tidy)
 - Client (23 Oct): "I want [Artex] stipple ceiling as default and cosy lighting that still allows nice view of the room and stop over

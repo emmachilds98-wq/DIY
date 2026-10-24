@@ -52,6 +52,17 @@ def run(p, w, h):
     if sw > cw:
         fail(f"page scrolls sideways {sw} > {cw}")
     pg.screenshot(path=f"{OUT}/qa_{w}_room.png")
+    # v46: every place's label lists its pieces, and each piece's card opens (from the room, then from Plan's Build)
+    places = pg.evaluate("() => [...document.querySelectorAll('.stk[data-hot]')].map(s => s.dataset.hot)")
+    for pl in places:
+        got = pg.evaluate("""pl => { const s = document.querySelector('.stk[data-hot=' + pl + ']'); s.hidden = false; s.click();
+          const ids = [...document.querySelectorAll('#r3d-pop .r3d-pcs [data-mk]')].map(b => b.dataset.mk); document.querySelector('#r3d-pop .x').click(); return ids; }""", pl)
+        if not got:
+            fail(f"place {pl}: no pieces on its card")
+        for cid in got:
+            if not pg.evaluate("id => { window.openCard(id); const c = document.getElementById(id); const ok = !!(c && c.open && c.querySelector('[data-tab=build]')); if (c) c.open = false; return ok; }", cid):
+                fail(f"place {pl}: piece {cid} doesn't open")
+    rep["notes"].append(f"places {len(places)}, pieces {pg.evaluate('() => document.querySelectorAll(\'details.mk[data-piece]\').length')}, tasks {pg.evaluate('() => document.querySelectorAll(\'input[data-task]\').length')}")
     for s in SHEETS:
         pg.evaluate("s => { location.hash = '#' + s; }", s)
         pg.wait_for_timeout(500)
@@ -138,7 +149,8 @@ def run(p, w, h):
 
 def links():
     bad = []
-    for f in (f"media-wall/out/Home_Network_Plan_v{VERSION}.pdf", f"media-wall/out/Build_Guide_v{VERSION}.pdf"):
+    for f in (f"media-wall/out/Home_Network_Plan_v{VERSION}.pdf", f"media-wall/out/Build_Guide_v{VERSION}.pdf",
+              f"media-wall/out/Home_Network_Plan_v{VERSION}_phone.pdf", f"media-wall/out/Build_Guide_v{VERSION}_phone.pdf"):   # v46: the phone editions
         try:
             with urllib.request.urlopen(urllib.request.Request(BASE + f, method="HEAD")) as r:
                 if r.status != 200:
@@ -153,7 +165,8 @@ def no_assistant_names():
     from pypdf import PdfReader
     word = "cl" + "aude"
     hits = []
-    for f in ("index.html", "sw.js", f"media-wall/out/Home_Network_Plan_v{VERSION}.pdf", f"media-wall/out/Build_Guide_v{VERSION}.pdf"):
+    for f in ("index.html", "sw.js", f"media-wall/out/Home_Network_Plan_v{VERSION}.pdf", f"media-wall/out/Build_Guide_v{VERSION}.pdf",
+              f"media-wall/out/Home_Network_Plan_v{VERSION}_phone.pdf", f"media-wall/out/Build_Guide_v{VERSION}_phone.pdf"):
         path = ROOT / f
         if not path.exists():
             hits.append(f"{f} missing"); continue
