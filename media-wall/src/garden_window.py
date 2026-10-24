@@ -5,7 +5,7 @@ photo_view_centre_24oct.jpg fill its edges) were taken from the window upstairs,
 one storey above the living room (the roof's tiles show under the window). Each photo's direction was found from the fences, which
 run straight out from the house (their vanishing point), and the centre photo was matched to the wide one on fence posts and the
 neighbour's shed. The view is rebuilt from the living room's eye, 2.6 m lower, by laying the photos onto the garden (the lawn as a
-ground 6.7 m below the camera, a wall 30 m out for the rest) and looking at that from the living room. The result is one perspective
+ground 6.7 m below the camera, a wall 25 m out, the far fence, for the rest) and looking at that from the living room. The result is one perspective
 picture from geometry.GARDEN_VIEW's eye, straight out and level; room3d.js hangs it as a plane d out so it lines up from the room.
 Needs opencv-python-headless (pip) to run; the outputs are committed."""
 import numpy as np, cv2
@@ -16,7 +16,7 @@ IN = "/home/user/DIY/media-wall/inputs/"
 F = 1400.0                                   # the phone's focal length in pixels (2000 × 1500 frames; checked on the man's height)
 CAM_H = 6.7                                  # the upstairs camera above the lawn (m)
 EYE = np.array([0.45, -2.6, 0.4])            # the living room's eye (window centre, 150 up, 60 in) from the upstairs camera (m)
-WALL = 30.0                                  # how far out the far wall stands (m)
+WALL = 25.0                                  # the far fence, 25 m out (the client, v49; the lawn runs to the trees at about 17)
 TX, TUP, TDN = G.GARDEN_VIEW["tan"]           # the picture spans ±70° across, 40° up, 65° down (tangents)
 OW = 4096; OH = int(round(OW * (TUP + TDN) / (2 * TX)))
 
