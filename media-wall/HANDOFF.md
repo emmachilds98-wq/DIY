@@ -23,6 +23,17 @@ up) done (v48.1); the rest waits on the client's go. **The whole house's facts**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
 
+## Update 24 Oct 2026: v48.3 (a review of v47.1–v48.2)
+- Client: "I've worked on further upgrades can you review where I got with another agent". Every branch checked: all the other
+  session's work (v47.1 to v48.2) is on `main`; `compassionate-wright` (v11) and `optimistic-lovelace` (v37) hold one superseded commit each.
+- **The garden looked hazy:** the window's glass (`#dfe8ee`, opacity 0.12) took v44's glossy-surface reflections (2.4×), a white veil
+  over the view. Now opacity 0.06 and `userData.envK = 0.4`: the garden through the window measures mean 143 and contrast 56 (the
+  client's photo 132 and 60; before 156 and 46).
+- **Taps measure from the touch** (`e.timeStamp`, was `performance.now()` in the handler): a slow frame between down and up no longer
+  turns a tap into a long press.
+- **`taptest.py`** waits for the camera to stop (three still readings 0.4 s apart), pauses 0.3 s before each click and waits up to
+  3 s for the card: the lamp's tap had failed whenever `qa.py` ran alongside (two headless browsers). Twice under load: errors [].
+
 ## Update 24 Oct 2026: v48.2 (the whole view in one photo)
 - Client: "Full image from that level" (`inputs/photo_view_full_24oct.jpg`, the ultra-wide lens, upstairs again: the gutter at its
   foot). Now the main source in `garden_window.py`: fitted to the wide photo on ten points (fence posts, the trampoline, the warehouse,
