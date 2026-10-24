@@ -13,7 +13,8 @@ over the agent's (they are in `media-wall/HANDOFF.md` section 1 and `media-wall/
 | `media-wall/inputs/photo_house_rear_24oct.jpg` | The agent's photo of the back of the house and the garden |
 | `media-wall/inputs/photo_garden_summer_24oct.jpg` | The garden in summer, taken from the dormer (1449 × 2576) |
 | `media-wall/inputs/photo_garden_window_24oct.jpg` | A frame of the client's video through the living room window |
-| `media-wall/inputs/photo_view_wide_24oct.jpg`, `photo_view_centre_24oct.jpg`, `photo_view_right_24oct.jpg` | The view out of the back, taken from upstairs (overcast, spring): wide, centre (looking down) and right |
+| `media-wall/inputs/photo_view_full_24oct.jpg` | The whole view out of the back from upstairs (ultra-wide, overcast, spring): the best one |
+| `media-wall/inputs/photo_view_wide_24oct.jpg`, `photo_view_centre_24oct.jpg`, `photo_view_right_24oct.jpg` | The same view: wide, centre (looking down) and right |
 | `media-wall/inputs/room_sketch_accurate_mm.png` | The client's measured sketch of the living room (mm) |
 | `media-wall/inputs/photo_stairs_*`, `room_photo_*`, `photo_current_living_room.png` | The living room and the stairs up from it |
 
@@ -44,7 +45,8 @@ The living room measured: 467 wide along the window, 347 from the window to the 
 ## The garden (left and right as seen from the house)
 
 - A lawn about the width of the house, running away from it; a paved path down the left side.
-- Cordylines (cabbage palms) by the path, a tall one near the house; bulbs and shrubs along the path's fence.
+- Cordylines (cabbage palms) by the path, a big clump near the house; a patio by the house with a round table and chairs.
+- The left-hand neighbour: a gravel garden with pots and a lawn beyond; a low brown fence between.
 - Close-board fences on both sides; tall trees with fine, divided leaves (ash-like) fill the far end in summer; the neighbour's
   trampoline over the right fence.
 - The summer photo was taken from the dormer (the roof's tiles at its foot): one storey higher than the living room, so it looks down
