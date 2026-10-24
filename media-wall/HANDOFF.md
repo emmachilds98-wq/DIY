@@ -22,6 +22,21 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
 
+## Update 24 Oct 2026, round 41b: v46.1 (everything fits a phone screen)
+- Client (24 Oct): "I want plans and images to fit in my phone screen not scroll as it renders it essentially unusable on mobile. I want
+  to see full plans when images are involved or tables / cad designs."
+- **Cause:** tables had `min-width: 560px` (`.tscroll`), fit tables 640, drawings 640 (`figure.dia`), cutting layouts 560, each in a
+  sideways-scrolling box. All gone (`page.css`, v46.1 block); drawings and layouts are 100% wide.
+- **`FIT_JS` (build_viewer):** every table's cells get `data-label` (their column's name); a table with 4+ columns gets `tstack` (not
+  `stk`: that's the room's sticker class) and, under 640 px, is one card per row, each value under its label. Narrower tables use a
+  fixed layout and wrap in their cells. Headings no longer stick (they piled up once their boxes stopped scrolling). Long links wrap.
+- **Full screen:** a tap on any drawing, cutting layout or picture in a sheet (`figure.zoomable`, ⤢ badge) opens `.zoomv`: fitted to the
+  screen, pinch / drag / double-tap / wheel to zoom.
+- **Phone PDFs:** `build_doc.PHONE_LABEL_JS` + `PHONE_CSS` stack the same tables before the phone edition prints (guide phone edition
+  141 pages: nothing squeezed).
+- **QA:** `qa.py` fails if anything in a sheet scrolls sideways at a phone's width; audited 79 places (every Plan chapter, every Build
+  card tab, Buy, the drawers) at 390 and 360: none.
+
 ## Update 24 Oct 2026, round 41: v46 (the room piece by piece, any order; easy to read on phone and PC; Evening light, every fixture)
 - Client (24 Oct): "drill down into tasks for each piece of the room when I click on them or look in the plans", "I don't need step by
   step what item to do first", "more optimised for viewing in mobile and pc", and "default view could balance lighting throughout the

@@ -1672,6 +1672,25 @@ nav.toc ol { columns: 1; }
 """
 
 
+PHONE_CSS += """
+table.tstack, table.tstack tbody, table.tstack tr { display: block; width: auto !important; }
+table.tstack tr.hdr, table.tstack thead { display: none; }
+table.tstack tr { padding: 4pt 0; border-bottom: 1px solid #e6e3dc; break-inside: avoid; }
+table.tstack td, table.tstack tr > th { width: auto !important; max-width: none !important; min-width: 0 !important; height: auto !important; display: block; position: relative; padding: 1pt 0 1pt 36% !important; border: 0 !important; background: none !important; text-align: left !important; white-space: normal !important; }
+table.tstack td::before, table.tstack tr > th::before { content: attr(data-label); position: absolute; left: 0; top: 1pt; width: 33%; font-size: 7.5pt; letter-spacing: .04em; text-transform: uppercase; color: #6b6862; font-weight: 400; }
+table.tstack td:not([data-label]), table.tstack td[data-label=""] { padding-left: 0 !important; }
+table.tstack tr.sec td, table.tstack tr.ph td { padding-left: 0 !important; font-weight: 650; }
+"""
+PHONE_LABEL_JS = """() => document.querySelectorAll("table:not(.contents)").forEach(t => {
+  const rows = [...t.rows], hdr = rows.find(r => r.cells.length && [...r.cells].every(c => c.tagName === "TH")); if (!hdr) return;
+  const names = []; [...hdr.cells].forEach(c => { for (let i = 0; i < (c.colSpan || 1); i++) names.push(c.textContent.trim()); });
+  if (names.length < 4) return;
+  hdr.classList.add("hdr"); t.classList.add("tstack");
+  rows.forEach(r => { if (r === hdr) return; let i = 0;
+    if (r.cells.length === 1 && (r.cells[0].colSpan || 1) >= names.length - 1) { r.classList.add("sec"); return; }
+    [...r.cells].forEach(c => { if (names[i]) c.dataset.label = names[i]; i += c.colSpan || 1; }); }); })"""
+
+
 def pdf():
     from playwright.sync_api import sync_playwright
     from shot import _launch
@@ -1692,6 +1711,7 @@ def pdf():
                    margin={"top": "16mm", "bottom": "18mm", "left": "18mm", "right": "18mm"},
                    display_header_footer=True, header_template="<div></div>", footer_template=footer(name))
             # v46, client: "more optimised for viewing in mobile and pc": the same document on a phone-shaped page
+            pg.evaluate(PHONE_LABEL_JS)      # v46.1: a wide table becomes a card per row, each value under its column's name
             pg.add_style_tag(content="@page { size: 110mm 196mm; }" + PHONE_CSS)
             pg.wait_for_timeout(300)
             pg.pdf(path=str(HERE.parent / "out" / out.replace(".pdf", "_phone.pdf")), width="110mm", height="196mm", print_background=True, outline=True, tagged=True,
