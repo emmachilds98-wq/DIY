@@ -1,5 +1,6 @@
 # Notes for Claude and other agents
 
+- The client will do the whole house in time: keep every house fact in `house/HOUSE.md` (add to it as they share more).
 - Start with `media-wall/HANDOFF.md`: it holds the current state, the client's decisions, the true room geometry and the next tasks in order.
 - The client (Emma, with Dave) iterates in short messages and expects an updated plan (PDF) and the viewer artifact each round. **No HD stills** (client, 23 Oct 2026: "we dont need the hd still i can take them in the site"): `shot3d.py` is no longer part of the rebuild; the plan uses the newest still made (`build_doc.latest`), and the client takes pictures with Save as HD picture in the room. Keep their words: "face-out", "spine-up", "artisan oak", "tray".
 - **Core plan vs options (client, 23 Oct 2026):** "We want the core plan build and info then the additional items are just for looking at possible other designs and we don't need full build unless I say." The core plan (`geometry.FIRM`, see `plans/UPGRADE_PLAN_v38.md`) gets the full build, buy list and fit proof. Options are only to look at in the 3D room, with one line each (what, where, size, rough cost, source): no build steps, no buy rows, no guide pages, unless the client asks for one by name.

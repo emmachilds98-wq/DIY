@@ -3,7 +3,8 @@
 ## START HERE (next agent)
 **Current: v47 (round 42, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
 viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 63), guide 66
-(phone 76). Next version: 48.
+(phone 76). Next version: 48: plan in `media-wall/UPGRADE_PLAN_v48.md` (render quality; the garden seen from one floor
+up), waiting on the client's go. **The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
 - **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
@@ -21,6 +22,15 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
+
+## Update 24 Oct 2026: v48 plan (render quality) and the house notes
+- Client: "Eventually we're going to build the whole house so keep any info you need. Can we now plan on improving the renders graphics
+  and quality of the render even further for the next upgrade. It's a floor up so take perspective into account."
+- `house/HOUSE.md`: every fact about the house (the agent's floor plans, the back of the house, the garden, the photos, what's unknown).
+  The living room floor is about 2.6 m above the lawn: from the sofa the sill hides the lawn; at the glass you look down on it.
+- `media-wall/UPGRADE_PLAN_v48.md`: the garden as a 3D ground with the summer photo projected from the dormer, glass reflections, the
+  room's own reflections, procedural surfaces, glow, sun, and a path-traced Save as HD picture (three-gpu-pathtracer 0.0.23 is the
+  last release for three r151 to r179; ours is r160). Plan only so far.
 
 ## Update 24 Oct 2026: v47.2 (the real window)
 - Client (with the agent's photo of the back of the house, `inputs/photo_house_rear_24oct.jpg`): "The middle window is the living room":
