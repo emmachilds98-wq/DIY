@@ -63,3 +63,6 @@ Starts from `main` at v45. The standing rules hold: the core plan gets the full 
 2. Section 3 (light), merged.
 3. Section 1 and the phone/PC layout of section 2, merged.
 4. The PDFs (section 2), rebuild, checks, HANDOFF, README, merged.
+
+**Done 24 Oct (v46, round 41):** all of the above. Light measured: on a phone the brightest part of the room was 6.3 times the darkest,
+now 2.2 (2.7 on a PC). 93 tasks across 17 pieces and jobs. Plan 35 pages, guide 66; their phone editions 63 and 76.

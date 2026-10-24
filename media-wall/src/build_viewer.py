@@ -663,51 +663,79 @@ def buy_list(rows):
             '<p><a href="#buy" data-go="buy">Tick them off in Buy</a></p>')
 
 
-def build_cards():
-    """(the Things to make cards, the Jobs cards, the Start here card, {step: card id})."""
-    import build_doc as B, chapters as C
+def piece_cards(rows):
+    """v46, client: "drill down into tasks for each piece of the room when I click on them or look in the plans": the room by place, each
+    place's pieces, each piece one card: Check, Buy (ticks shared with the buy list), Cut and Build (a tick per task). No order.
+    Returns (the places' html, {step: the card that holds it})."""
+    import build_doc as B, chapters as C, pieces as P
     was, B.DECK = B.DECK, True
     try:
-        to, mk, jb = {1: "mk-start", 5: "mk-start"}, [], []
-        days = lambda spec: [n for n, h in spec]
-        def head(num, title, meta, pic=None):
-            im = f'<span class="mkpic">{B.thumb(pic, title)}</span>' if pic else f'<span class="mkpic mkic" aria-hidden="true">{num}</span>'
-            return (f'<summary>{im}<span class="mkt"><b>{f"{num} · " if pic else ""}{html.escape(title)}</b><small>{meta}</small></span>'
-                    f'<span class="mkd ms" aria-hidden="true">check_circle</span></summary>')
-        def bday(spec):
-            ws = [n for n, h in spec if h is None]
-            return "".join(f'<p><button type="button" class="btn" data-bday="{n}"><span class="ms" aria-hidden="true">handyman</span> Build day: step <b>{n}</b> on one screen</button></p>' for n in ws)
-        for i, c in enumerate(C.MAKE, 1):
-            key, title, what, pic, spec, buy, time, who = c
-            rows = C.buy_rows(buy)
-            for n, _h in spec:
-                to.setdefault(n, f"mk-{key}")
-            body = _tabs(key, [("Buy", buy_list(rows)), ("Cut", C.cut_html(key)), ("Build", C.build_html(spec) + bday(spec))])
-            mk.append(f'<details class="mk" name="mk" id="mk-{key}" data-steps="{" ".join(map(str, days(spec)))}" style="--h:{(i * 37 + 20) % 360}">'
-                      + head(i, title, f"{time} · {who} · £{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}", pic)
-                      + f'<div class="mkb"><p class="lede">{what}</p>{body}</div></details>')
-        for j in C.JOBS:
-            key, title, what, spec, buy, time = j
-            rows = C.buy_rows(buy)
-            for n, _h in spec:
-                to.setdefault(n, f"job-{key}")
-            extra = B.wiring_html() if key == "cables" else ""
-            body = _tabs(key, [("Buy", buy_list(rows)), ("Do", C.build_html(spec) + extra + bday(spec))])
-            jb.append(f'<details class="mk job" name="mk" id="job-{key}" data-steps="{" ".join(map(str, days(spec)))}">'
-                      + head(C.JOB_LETTER[key], title, f"{time} · £{money(sum(r[3] for r in rows), sum(r[4] for r in rows))}")
-                      + f'<div class="mkb"><p class="lede">{what}</p>{body}</div></details>')
-        start = ('<details class="mk job" name="mk" id="mk-start" data-steps="1 5">' + head("★", "Start here: mark the heights", "Steps 1 and 5 · ½ day")
-                 + '<div class="mkb"><div class="doc">' + C.RULES + C.build_html([(1, None), (5, None)], full_step_extras=False) + bday([(1, None), (5, None)])
+        to = {1: "mk-start", 5: "mk-start"}
+        SB = {st["n"]: st for st in B.steps()}
+        name_of = {}
+        for p in P.all_pieces():
+            for n, _h in p["spec"]:
+                name_of.setdefault(n, []).append(p["title"])
+        def retarget(h):          # an instruction's "step 9" names the piece instead
+            def rep(m):
+                ns = name_of.get(int(m.group(2)))
+                return f"<i>{ns[0].lower() if not ns[0].startswith(('The', 'Cables')) else ns[0]}</i>" if ns else m.group(0)
+            return re.sub(r"\b([Ss])tep (\d+)\b(?!\s*·)", rep, h)
+        buyid = lambda pre: [r for r in rows if r["kind"] == "buy" and any(_plain(r["item"]).startswith(x) for x in pre)]
+        def head(p, cid, ntot, cost):
+            pic = f'<span class="mkpic">{B.thumb(p["pic"], p["title"])}</span>' if p.get("pic") else f'<span class="mkpic mkic ms" aria-hidden="true">{"construction" if not p.get("job") else "bolt"}</span>'
+            meta = " · ".join(x for x in (p["time"], p["who"], f"£{cost}" if cost else "") if x)
+            return (f'<summary>{pic}<span class="mkt"><b>{html.escape(p["title"])}</b><small>{meta}</small></span>'
+                    f'<span class="mkp" data-prog="{cid}" style="--p:0"><b>0</b>/{ntot}</span></summary>')
+        def card(p):
+            key = p["key"]; cid = ("job-" if p.get("job") else "mk-") + key
+            for n, _h in p["spec"]:
+                to.setdefault(n, cid)
+            brows, trows = buyid(p["buy"]), P.tasks(p)
+            cost = money(sum(r["lo"] for r in brows), sum(r["hi"] for r in brows)) if brows else ""
+            chk = P.checks(key)
+            need = P.NEEDS.get(key)
+            check = ((f'<p class="mkneed"><span class="ms" aria-hidden="true">link</span> <b>First:</b> {html.escape(need)}</p>' if need else "")
+                     + ("<ul class='mkchk'>" + "".join(f"<li><b>{it}</b><span>{sp}</span><small>{sa}</small></li>" for it, sp, sa in chk) + "</ul>" if chk
+                        else "<p class='caption'>Nothing to measure first beyond the heights (Before you start).</p>"))
+            buy = ("<ul class='mkbuy'>" + "".join(
+                f'<li><label><input type="checkbox" data-buyproxy="{r["id"]}"><span><b>{html.escape(str(r["qty"]) + " × " if r["qty"] else "")}{_short_item(r["item"])}</b>'
+                f'<small>£{r["est"]}</small></span></label></li>' for r in brows) + f'</ul><p><a href="#buy" data-go="buy">The whole buy list</a></p>' if brows else "<p class='caption'>Nothing to buy.</p>")
+            tasks = ("<ol class='mktasks'>" + "".join(
+                f'<li data-task="{tid}" data-step="{n}"><label class="tk"><input type="checkbox" data-task="{tid}"><span>{html.escape(t)}</span></label>'
+                f'<details class="how"><summary>How</summary><ol>{"".join(f"<li>{retarget(x)}</li>" for x in items)}</ol></details></li>'
+                for tid, t, items, n in trows) + "</ol>")
+            draw = "".join(f"<figure>{getattr(__import__('diagrams'), B.DIAGRAMS[d])()}</figure>" for n, h in p["spec"] if h is None
+                           for d in C.CH_DRAW.get(n, []) if d in B.DIAGRAMS)
+            bday = "".join(f'<button type="button" class="btn" data-bday="{n}"><span class="ms" aria-hidden="true">handyman</span> Build day</button>' for n, h in p["spec"] if h is None)
+            chk_step = "".join(f"<p class='callout'><b>Check when done:</b> {SB[n]['check']}</p>" for n, h in p["spec"] if h is None)
+            build = tasks + (f"<details class='fold'><summary>Drawings</summary>{draw}</details>" if draw else "") + chk_step + bday
+            panes = [("Check", check), ("Buy", buy)] + ([("Cut", C.cut_html(p["cut"]))] if p["cut"] else []) + [("Build", build)]
+            nt = len(trows) + len(brows)
+            return (f'<details class="mk{" job" if p.get("job") else ""}" name="mk" id="{cid}" data-piece="{key}" data-steps="{" ".join(str(n) for n, _h in p["spec"])}">'
+                    + head(p, cid, nt, cost) + f'<div class="mkb"><p class="lede">{html.escape(p["what"])}</p>{_tabs(key, panes)}</div></details>')
+        start = ('<details class="mk job" name="mk" id="mk-start" data-steps="1 5"><summary><span class="mkpic mkic ms" aria-hidden="true">straighten</span>'
+                 '<span class="mkt"><b>Before you start: measure and mark</b><small>½ day · You</small></span></summary>'
+                 '<div class="mkb"><div class="doc">' + C.RULES + C.build_html([(1, None), (5, None)], full_step_extras=False)
                  + f'<details class="fold"><summary>The measuring sheet</summary>{fit.measure_html()}</details></div></div></details>')
-        fix = lambda h: deck_section(C._retarget(h))
-        return fix("".join(mk)), fix("".join(jb)), fix(start), to
+        out = []
+        for pid, name, ps in P.by_place():
+            cards = "".join(card(p) for p in ps) + (start if pid == "whole" else "")
+            out.append(f'<section class="place" id="pl-{pid}"><div class="sec-h"><h2>{html.escape(name)}</h2><span class="plp" data-plprog="{pid}"></span></div><div class="mks">{cards}</div></section>')
+        return deck_section("".join(out)), to
     finally:
         B.DECK = was
 
 
+def _short_item(item):
+    """A buy row's name: its own words up to the first colon or bracket."""
+    t = _plain(item)
+    return html.escape(re.split(r"[:(]", t)[0].strip().rstrip(","))
+
+
 # v44: each cost piece's card in Build
 HOW = {"The media wall": "mk-base", "The side wall and the PC": "mk-sidewall", "The dining cabinet": "mk-cabinet", "The chimney breast": "mk-glasscase",
-       "Your picks": "mk-fitted", "Lighting": "job-lighting", "Paint": "job-paint", "Network": "job-network", "Electrics (your own job)": "job-cables",
+       "Lighting": "job-lighting", "Paint": "job-paint", "Network": "job-network", "Electrics (your own job)": "job-cables",
        "Power and cables": "job-cables", "TV, consoles and AV": "job-connect", "Vinyl kit": "job-connect"}
 
 
@@ -909,7 +937,7 @@ CHAPTERS = [("c-room", "The room", "home", 50, "Sizes, the door, the stairs, the
             ("side", "The side wall", "desktop_windows", 235, "One oak run out to the PC"),
             ("joinery", "Oak joinery", "carpenter", 70, "Joints, the cutting list"),
             ("dining", "The dining wall", "table_restaurant", 50, "The dining cabinet, six chairs inside"),
-            ("paint", "Paint & light", "palette", 165, "Card Room Green, three presets"),
+            ("paint", "Paint & light", "palette", 165, "Card Room Green, four presets"),
             ("network", "Network & power", "router", 25, "Decos, switches, the electrics"),
             ("views", "Drawn views", "draw", 125, "Every view in four greens"),
             ("fit", "Fit proof", "straighten", 95, "Every item against its size"),
@@ -955,7 +983,7 @@ def chapter_facts(rows, fc, nfit):
 def preset_cards():
     """v25: the three lighting presets as cards (levels, colour, notes) and the two rules, for the Paint & light chapter."""
     import scenes as SC
-    icons = {"bright": "light_mode", "cosy": "local_fire_department", "film": "movie"}
+    icons = {"evening": "wb_twilight", "bright": "light_mode", "cosy": "local_fire_department", "film": "movie"}
     cards = "".join(
         f'<article class="opt noimg" style="background:oklch(0.94 0.07 95) !important"><div class="ob"><span class="label"><span class="ms" aria-hidden="true">{icons[k]}</span> Preset</span><h3>{html.escape(n)}</h3>'
         f'<p>{html.escape(d)}</p><p class="caption">{html.escape(SC.COLOURS[k])}</p>'
@@ -1021,7 +1049,7 @@ def _page(site=False):
                    + lis.replace("in Olive (or Honey or Ivory)", '<span data-pickpads>in Olive (or Honey or Ivory)</span>'))
         ph_html.append(f'<details class="phase" id="ph-{p["idx"]}" data-ph="{html.escape(p["name"])}"{" open" if p["idx"] == 0 else ""}><summary><span>{part_chip(PHASE_PART[p["name"]])} {html.escape(p["name"])}</span>'
                        f'<span class="pf"><span>{cost}{when}</span><span class="pd">0 of {len(items)} done</span></span></summary><ul class="items">{lis}</ul></details>')
-    mk_cards, job_cards, start_card, STEP_CARD = build_cards()   # v44: one card per thing you make
+    places_html, STEP_CARD = piece_cards(rows)   # v46: the room by place, a card per piece
     step_cards = [
         f'<li class="step" id="step-{s["n"]}" data-s="{s["n"]}" data-parts="{html.escape("|".join(s["part"]))}"><div class="shead"><span class="sn">{s["n"]}</span>'
         f'<a class="sgo" href="#{STEP_CARD[s["n"]]}" data-mk="{STEP_CARD[s["n"]]}"><h3>{html.escape(s["title"])}</h3><span class="smeta">{html.escape(s["who"])} · {html.escape(s["time"])}</span></a>'
@@ -1065,7 +1093,7 @@ def _page(site=False):
 
     plan_home = f"""<div class="plan-home" id="plan-home"><div class="panel" id="overview">
       <div><p class="hello" id="hello">Evening, Emma &amp; Dave</p><p>The artisan oak media wall in Card Room Green, the compact dining cabinet, the network and power: about <b id="d-total">£{money(lo_tot, hi_tot)}</b> in all.</p>
-        <p class="row"><a class="btn" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> The plan (PDF)</a></p></div>
+        <p class="row"><a class="btn" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> The plan (PDF)</a><a class="btn" href="{base}Home_Network_Plan_v{VERSION}_phone.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">smartphone</span> Phone edition</a></p></div>
       {PU.plan_home(ring, sum(1 for r in rows if r["kind"] == "buy"), len(steps())).replace("{MONEY}", PU.money_html(TRACK))}
       <div class="upnext" hidden><span class="n" id="d-nextn">1</span><div><span class="label">Up next</span><h3 id="d-next">Measure and count</h3></div>
         <button type="button" class="done-btn" id="d-nextdone" data-s="1"><span class="ms" aria-hidden="true">check_circle</span>Done</button>
@@ -1140,20 +1168,15 @@ def _page(site=False):
     <div class="doc">{sec["12"]}</div></div>"""),
         chapter("downloads", f'<div class="block"><p class="caption">The plan and the guide as PDFs, and the drawings. For a 3D picture: View, Save as HD picture.</p>'
                              f'<p><a class="btn primary" href="{base}Home_Network_Plan_v{VERSION}.pdf" target="_blank" rel="noopener">The plan (PDF)</a> '
-                             f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>{downloads_html(site)}{notice}'
+                             f'<a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener">Build guide (PDF)</a></p>'
+                             f'<p class="caption">For a phone: <a href="{base}Home_Network_Plan_v{VERSION}_phone.pdf" target="_blank" rel="noopener">the plan</a> · <a href="{base}Build_Guide_v{VERSION}_phone.pdf" target="_blank" rel="noopener">the build guide</a> (a narrow page, bigger type).</p>{downloads_html(site)}{notice}'
                              f'<p class="caption">Demma Home Improvements · Portsmouth Close · living room · v{VERSION}</p></div>'),
     ])
     build_body = f"""<section class="panel" id="build">
-    <div class="qhead"><div class="meter"><span class="bar"><i id="s-bar"></i></span><span id="s-count">0 of {len(steps())} steps done</span></div>
-      <a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> Build guide (PDF)</a></div>
-    <p class="caption sr-only" id="s-note">Tick each step when it's done; it saves for both of you.</p>
-    <div class="bnext" id="b-next" hidden><span class="label">Next</span><a href="#build" id="b-nexta" data-mk=""><b id="b-nextt"></b> <span class="caption" id="b-nextm"></span></a></div>
-    <details class="fold" id="order"><summary>The order of work: {len(steps())} steps, tick each when done</summary><ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol></details>
-    {start_card}
-    <div class="sec-h"><h2>Things to make</h2></div>
-    <div class="mks">{mk_cards}</div>
-    <div class="sec-h"><h2>Jobs</h2></div>
-    <div class="mks">{job_cards}</div>
+    <div class="qhead"><div class="meter"><span class="bar"><i id="k-bar"></i></span><span id="k-count">0 tasks done</span></div>
+      <span class="row"><a class="btn" href="{base}Build_Guide_v{VERSION}.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">download</span> Build guide (PDF)</a><a class="btn" href="{base}Build_Guide_v{VERSION}_phone.pdf" target="_blank" rel="noopener"><span class="ms" aria-hidden="true">smartphone</span> Phone</a></span></div>
+    <p class="caption">Any order: open a piece, then Check, Buy, Cut and Build. Tap a place in the room to jump here.</p>
+    {places_html}
     <details class="fold" id="cuts"><summary>For the timber merchant: the cutting list</summary>
       <div class="row"><button class="btn" id="copy-cuts" type="button">Copy as text</button><span class="caption" id="cuts-st" aria-live="polite"></span></div>
       <textarea id="cuts-box" class="caption" rows="8" hidden readonly aria-label="The cutting list as text">{html.escape(cuts_text())}</textarea>
@@ -1161,6 +1184,7 @@ def _page(site=False):
       <div class="doc">{deck_section(cuts_html())}</div>
     </details>
     <details class="fold"><summary>Good to know: time, tools, techniques and pitfalls</summary><div class="doc">{GUIDE_TIME}{guide_tools()}{GUIDE_TECHNIQUES}{GUIDE_PITFALLS}</div></details>
+    <details class="fold" id="order"><summary>Every step in one list (<span id="s-count">0 of {len(steps())} steps done</span>)</summary><p class="caption">A step ticks itself when its tasks are done.</p><span class="bar sr-only"><i id="s-bar"></i></span><ol class="steps-list" id="steps-ol">{"".join(step_cards)}</ol></details>
   </section>"""
     buy_body = f"""<section class="panel" id="buy">
     <div class="tiles">
@@ -1238,34 +1262,67 @@ SKIN_JS = r"""(() => {
 })();"""
 
 
-# v44: Build in cards. A step's tick lives in the order of work; a card shows done when all its steps are; a link to a step
-# ("before step 6", the plan's next three, #step-6) opens that step's card on its Build tab.
+# v46: Build by place and piece. Each piece's card has a tick per task (this device: mw46-tasks) and per thing to buy (the buy list's own
+# ticks, mirrored). A step ticks itself when all its tasks are done (and a step ticked before v46 ticks its tasks), so Plan's counts and
+# Build day keep working. window.PIECEP gives the room's labels and Plan each piece's progress.
 STEP_JS = r"""(() => {
-  const cards = $$(".mk"), lis = $$(".steps-list > li.step"); if (!cards.length) return;
+  const cards = $$(".mk"); if (!cards.length) return;
+  const TK = "mw46-tasks", T = store.get(TK, {});
   const tab = (card, name) => { const bs = $$(".tabs [data-tab]", card); if (!bs.length) return;
     const b = bs.find(x => x.dataset.tab === name) || bs[0];
     bs.forEach(x => { const on = x === b; x.setAttribute("aria-selected", String(on)); document.getElementById(x.getAttribute("aria-controls")).hidden = !on; }); };
-  const open = (id, name) => { const c = document.getElementById(id); if (!c) return null; c.open = true; if (name) tab(c, name); arts(c); return c; };
+  const firstTab = c => { const left = $$("[data-task]:not(input)", c).some(li => !T[li.dataset.task]); return left && c.dataset.started ? "build" : "check"; };
+  const open = (id, name) => { const c = document.getElementById(id); if (!c) return null; c.open = true; tab(c, name || firstTab(c)); arts(c); return c; };
   window.stepCard = n => open(DATA.stepcard[n], "build");
-  window.openCard = id => open(id, "build");
+  window.openCard = id => open(id);
   document.addEventListener("click", e => {
     const t = e.target.closest(".tabs [data-tab]"); if (t) { tab(t.closest(".mk"), t.dataset.tab); return; }
     const a = e.target.closest("[data-mk]"); if (!a || !a.dataset.mk) return;
     e.preventDefault(); e.stopPropagation();
-    const show = () => { const c = open(a.dataset.mk, a.dataset.tab || "build"); if (c) jumpTo(c); };
+    const show = () => { const c = open(a.dataset.mk, a.dataset.tab); if (c) jumpTo(c); };
     if (!a.closest("#sh-build") && window.go) { window.go("build"); setTimeout(show, 60); } else show();
   }, true);
   cards.forEach(c => c.addEventListener("toggle", () => { if (c.open) arts(c); }));
+  const tasksOf = n => $$(`li[data-task][data-step="${n}"]`).map(li => li.dataset.task);
+  const stepBox = n => document.getElementById("sd-" + n);
+  // a step ticked before v46 ticks its tasks, once
+  $$(".steps-list > li.step").forEach(li => { const n = li.dataset.s, ts = tasksOf(n);
+    if (li.classList.contains("done") && ts.length && ts.every(t => T[t] === undefined)) ts.forEach(t => { T[t] = true; }); });
+  store.set(TK, T);
+  const buyDone = id => { const c = document.getElementById("c-" + id); return !!(c && c.checked); };
+  let syncing = false;
   const paint = () => {
-    const done = n => { const li = document.getElementById("step-" + n); return li && li.classList.contains("done"); };
-    cards.forEach(c => c.classList.toggle("done", c.dataset.steps.split(" ").every(done)));
-    const nx = lis.find(li => !li.classList.contains("done")), box = $("#b-next"); if (!box) return;
-    box.hidden = false;
-    if (nx) { $("#b-nextt").textContent = nx.dataset.s + " · " + $("h3", nx).textContent; $("#b-nextm").textContent = $(".smeta", nx).textContent; $("#b-nexta").dataset.mk = DATA.stepcard[nx.dataset.s]; }
-    else { $("#b-nextt").textContent = "Every step done"; $("#b-nextm").textContent = "Enjoy the room."; $("#b-nexta").dataset.mk = ""; }
+    $$("input[data-task]").forEach(i => { i.checked = !!T[i.dataset.task]; i.closest("li").classList.toggle("done", i.checked); });
+    $$("input[data-buyproxy]").forEach(i => { i.checked = buyDone(i.dataset.buyproxy); i.closest("li").classList.toggle("done", i.checked); });
+    let all = 0, got = 0; const per = {};
+    cards.forEach(c => { const ts = $$("input[data-task], input[data-buyproxy]", c), k = ts.filter(i => i.checked).length;
+      all += $$("input[data-task]", c).length; got += $$("input[data-task]", c).filter(i => i.checked).length;
+      const p = $(`[data-prog="${c.id}"]`); if (p) { p.firstChild.textContent = k; p.style.setProperty("--p", ts.length ? k / ts.length : 0); }
+      c.classList.toggle("done", ts.length > 0 && k === ts.length); c.dataset.started = k ? "1" : "";
+      per[c.id] = { id: c.id, title: $(".mkt b", c).textContent, done: k, total: ts.length, place: c.closest(".place")?.id.slice(3) }; });
+    $$("[data-plprog]").forEach(el => { const ps = Object.values(per).filter(x => x.place === el.dataset.plprog), d = ps.reduce((a, x) => a + x.done, 0), t = ps.reduce((a, x) => a + x.total, 0);
+      el.textContent = t ? `${d} of ${t} done` : ""; });
+    const kc = $("#k-count"); if (kc) kc.textContent = `${got} of ${all} tasks done`;
+    const kb = $("#k-bar"); if (kb) kb.style.width = (all ? 100 * got / all : 0) + "%";
+    window.PIECEP.per = per; window.PIECEP.tasks = [got, all];
+    if (window.PICKS) PICKS.paint();
   };
-  const ol = $("#steps-ol"); if (ol) new MutationObserver(paint).observe(ol, { subtree: true, attributes: true, attributeFilter: ["class"] });
-  paint();
+  const syncSteps = () => { if (syncing) return; syncing = true;
+    $$(".steps-list > li.step").forEach(li => { const n = li.dataset.s, ts = tasksOf(n), box = stepBox(n); if (!ts.length || !box || box.disabled) return;
+      const want = ts.every(t => T[t]); if (box.checked !== want) { box.checked = want; box.dispatchEvent(new Event("change", { bubbles: true })); } });
+    syncing = false; };
+  window.PIECEP = { per: {}, tasks: [0, 0],
+    current() { const a = Object.values(this.per).filter(x => x.done > 0 && x.done < x.total); return a.sort((x, y) => y.done / y.total - x.done / x.total)[0] || null; },
+    of(id) { return this.per[id] || null; } };
+  document.addEventListener("change", e => {
+    const t = e.target.closest("input[data-task]");
+    if (t) { T[t.dataset.task] = t.checked; store.set(TK, T); if (t.checked && window.cheer && !$$(`input[data-task]`, t.closest(".mk")).some(i => !i.checked)) cheer("Piece done", t); paint(); syncSteps(); return; }
+    const b = e.target.closest("input[data-buyproxy]");
+    if (b) { const c = document.getElementById("c-" + b.dataset.buyproxy); if (c && !c.disabled && c.checked !== b.checked) { c.checked = b.checked; c.dispatchEvent(new Event("change", { bubbles: true })); } paint(); return; }
+    if (e.target.closest("#tracker")) paint();
+  });
+  paint(); syncSteps();
+  setTimeout(paint, 1500);   // after the buy list's saved ticks have loaded
 })();"""
 
 

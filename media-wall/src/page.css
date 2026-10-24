@@ -388,3 +388,38 @@ details.mk[open] > summary { background: oklch(0.95 0.04 var(--h, 50)); }
 .blist li.tot { background: none; }
 .tp figure.cutfig { overflow-x: auto; margin: 0 0 12px; }
 .tp figure.cutfig svg { min-width: 560px; }
+/* v46: Build by place and piece: a progress ring on each card, a tick per task and per thing to buy; on a PC the cards sit two across
+   and the open one takes the row */
+.place { margin: 6px 0 18px; }
+.place .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.plp { font-size: 13.5px; color: var(--mut2, #5e5868); }
+.mkp { --p: 0; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; font-size: 12.5px; color: var(--mut2, #5e5868);
+  background: radial-gradient(closest-side, var(--surface) 76%, transparent 78% 100%), conic-gradient(oklch(0.62 0.13 165) calc(var(--p) * 360deg), var(--soft, #ece4d6) 0); }
+.mkp b { font-size: 15px; color: var(--ink); }
+details.mk.done .mkp { background: oklch(0.62 0.13 165); color: #fff; }
+details.mk.done .mkp b { color: #fff; }
+.mkic { font-size: 30px; color: var(--ink); }
+.mkneed { display: flex; gap: 6px; align-items: baseline; background: oklch(0.95 0.05 85); border-radius: 14px; padding: 8px 12px; margin: 6px 0 10px; }
+.mkchk, .mkbuy, .mktasks { list-style: none; padding: 0; margin: 4px 0 10px; display: grid; gap: 8px; }
+.mkchk li { display: grid; gap: 2px; border-radius: 14px; background: var(--soft, #efe7d8); padding: 10px 12px; }
+.mkchk small { color: var(--mut2, #5e5868); }
+.mkbuy label, .mktasks .tk { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; cursor: pointer; }
+.mkbuy label > span { display: flex; justify-content: space-between; gap: 10px; }
+.mkbuy small { white-space: nowrap; font-weight: 600; }
+.mkbuy input, .mktasks input { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; margin: 0; background: #fff; box-shadow: inset 0 0 0 2px var(--line, #d8d0c0); display: grid; place-items: center; cursor: pointer; }
+.mkbuy input:checked, .mktasks input:checked { background: oklch(0.62 0.13 165); box-shadow: none; }
+.mkbuy input:checked::after, .mktasks input:checked::after { content: "✓"; color: #fff; font-weight: 700; }
+.mkbuy li.done b, .mktasks li.done .tk span { text-decoration: line-through; text-decoration-color: oklch(0.62 0.13 165); color: var(--mut2, #5e5868); }
+.mktasks > li { border-radius: 16px; background: var(--soft, #efe7d8); padding: 10px 12px; }
+.mktasks .tk span { font-weight: 600; line-height: 1.35; padding-top: 3px; }
+.mktasks details.how { margin: 6px 0 0 40px; }
+.mktasks details.how summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--mut2, #5e5868); }
+.mktasks details.how ol { padding-left: 18px; margin: 6px 0 0; }
+.mktasks details.how li { margin: 4px 0; line-height: 1.45; }
+@media (min-width: 1000px) {
+  .place .mks { grid-template-columns: 1fr 1fr; align-items: start; }
+  .place .mks > details.mk[open] { grid-column: 1 / -1; }
+  .place details.mk[open] .mkb { display: grid; grid-template-columns: minmax(0, 1fr); }
+}
+.tp.doc ul.mkchk, .tp.doc ul.mkbuy, .tp.doc ol.mktasks { padding-left: 0; margin-left: 0; }
+.tp.doc ol.mktasks > li, .tp.doc ul.mkbuy > li, .tp.doc ul.mkchk > li { margin: 0; }

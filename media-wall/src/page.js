@@ -83,7 +83,8 @@ $("#fit-only").addEventListener("click", e => {
 function ring(id, n, t) { const a = document.getElementById(id), c = a && a.querySelector(".vl"); if (!c) return; const L = 2 * Math.PI * 34; c.style.strokeDasharray = L; c.style.strokeDashoffset = L * (1 - (t ? n / t : 0)); }
 function dash() {
   const st = $$(".step"), sd = $$(".step.done"), next = st.find(x => !x.classList.contains("done"));
-  $("#d-steps").textContent = sd.length + "/" + st.length; ring("d-steps-bar", sd.length, st.length);
+  const tk = window.PIECEP ? PIECEP.tasks : [sd.length, st.length];   // v46: tasks, not steps
+  $("#d-steps").textContent = tk[0] + "/" + tk[1]; ring("d-steps-bar", tk[0], tk[1]);
   $$("#segbar i").forEach(i => i.classList.toggle("on", !!document.querySelector("#step-" + i.dataset.s + ".done")));
   const nx = $("#d-next"), nb = $("#d-nextdone");
   if (next) { nx.textContent = $("h3", next).textContent; $("#d-nextn").textContent = next.dataset.s; $("#d-nextmeta").textContent = $(".smeta", next).textContent; nb.hidden = false; nb.dataset.s = next.dataset.s; $("#d-nextgo").dataset.step = next.dataset.s; }
@@ -223,7 +224,7 @@ paintSteps();
   user = u;
   if (!d) {
     $("#t-note").textContent = "Each phase names the step it's for. Ticks and amounts stay on this device only.";
-    $("#s-note").textContent = "Tick each step when it's done; from this view the ticks are kept on this device only.";
+    const sn = $("#s-note"); if (sn) sn.textContent = "Ticks are kept on this device only.";
     return;
   }
   db = d;
@@ -352,16 +353,22 @@ window.PICKS = (() => {
     const n3 = $("#next3");
     if (n3) {
       const di0 = D.findIndex(d => !st.decide[d.key]), step = BD.find(s => !$("#step-" + s.n + ".done"));
+      const PP = window.PIECEP, cur = PP ? PP.current() : null, allDone = PP ? PP.tasks[1] > 0 && PP.tasks[0] === PP.tasks[1] : !step;   // v46: a piece, not a step
       const need = step ? DATA.track.filter(r => r.kind === "buy" && step.buy.includes(r.phase) && !(tget(r.id) ? tget(r.id).done : r.done)) : [];
       const lo = need.reduce((a, r) => a + (r.lo || 0), 0), hi = need.reduce((a, r) => a + (r.hi || 0), 0);
       const card = (h, ic, k, t, sub, btn, attrs) => `<div class="n3" style="--h:${h}"><span class="ms" aria-hidden="true">${ic}</span><div><span class="label">${k}</span><b>${esc(t)}</b><span>${esc(sub)}</span></div><button type="button" class="btn" ${attrs}>${btn}</button></div>`;
       n3.innerHTML = '<h2>Your next three</h2><div class="n3s">'
         + (di0 >= 0 ? card(280, "how_to_vote", "Decide", D[di0].title, `${D.length - made} of ${D.length} choices still open`, "Choose", `data-decide-open="${di0}"`)
                     : card(280, "how_to_vote", "Decide", "Every choice made", "Change any of them from Waiting on you", "Review", 'data-decide-open="0"'))
-        + (step ? card(50, "construction", `Build · step ${step.n} of ${BD.length}`, step.title, `${step.who} · ${step.time}`, "Build day", `data-bday="${step.n}"`)
-                : card(50, "construction", "Build", "Every step done", "Enjoy the room", "Steps", 'data-go="build"'))
-        + (step && need.length ? card(165, "shopping_bag", `Buy before step ${step.n}`, `${need.length} ${need.length === 1 ? "thing" : "things"} to buy`, `about ${rng(lo, hi)}`, "The list", `data-go="buy" data-phase="${(DATA.phases.find(p => step.buy.includes(p.name)) || {}).idx ?? ""}"`)
-                               : card(165, "shopping_bag", "Buy", step ? `Nothing to buy for step ${step.n}` : "Everything bought", `${DATA.track.filter(r => r.kind === "buy").length} things on the list`, "The list", 'data-go="buy"'))
+        + (cur ? card(50, "construction", "Carry on", cur.title, `${cur.done} of ${cur.total} done`, "Open", `data-mk="${cur.id}"`)
+               : allDone ? card(50, "construction", "Build", "Every piece done", "Enjoy the room", "Your room", 'data-go="build"')
+               : card(50, "construction", "Build", "Start with any piece", "Tap a place in the room, or pick a piece", "Your room", 'data-go="build"'))
+        + (() => {   // v46: what's still to buy for the piece you're on, else everything left
+          const left = DATA.track.filter(r => r.kind === "buy" && !(tget(r.id) ? tget(r.id).done : r.done));
+          const pl = cur ? $$(`#${cur.id} input[data-buyproxy]`).filter(i => !i.checked).length : 0;
+          return pl ? card(165, "shopping_bag", "Buy for " + cur.title, `${pl} ${pl === 1 ? "thing" : "things"} still to buy`, "Ticks match the buy list", "Its list", `data-mk="${cur.id}" data-tab="buy"`)
+               : card(165, "shopping_bag", "Buy", left.length ? `${left.length} things still to buy` : "Everything bought", `${DATA.track.filter(r => r.kind === "buy").length} on the list`, "The list", 'data-go="buy"');
+        })()
         + "</div>";
     }
     txt("#d-choice", made + "/" + D.length); ring("d-choice-bar", made, D.length);
