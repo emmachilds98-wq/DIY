@@ -23,6 +23,13 @@ up) done (v48.1); the rest waits on the client's go. **The whole house's facts**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
 
+## Update 24 Oct 2026: v48.2 (the whole view in one photo)
+- Client: "Full image from that level" (`inputs/photo_view_full_24oct.jpg`, the ultra-wide lens, upstairs again: the gutter at its
+  foot). Now the main source in `garden_window.py`: fitted to the wide photo on ten points (fence posts, the trampoline, the warehouse,
+  the conifer, the shed), f 800 px (103° across), 2.0° right, 6.0° down, 5° roll, 19 px apart on average; it puts the lawn's end 17.1
+  m out (the others 16.6). The wide and centre photos and the room's video fill only what it doesn't see, each colour-matched to what's
+  there. The left-hand neighbour's garden and your patio (the round table, the chairs, the cordylines) are now in the view.
+
 ## Update 24 Oct 2026: v48.1 (the garden from one floor up)
 - Client (three photos of the view, `inputs/photo_view_{wide,centre,right}_24oct.jpg`): "2 images taken looking to the right and centre
   of the window at the right height". They show roof tiles under the window, so they were taken upstairs (the living room window has

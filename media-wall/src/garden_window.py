@@ -1,6 +1,7 @@
 """v48: the garden through the 3D room's window, seen from the living room: art/garden_day.webp and art/garden_dusk.webp.
 
-The client's photos of the view (inputs/photo_view_wide_24oct.jpg, photo_view_centre_24oct.jpg) were taken from the window upstairs,
+The client's photos of the view (inputs/photo_view_full_24oct.jpg, the whole view; photo_view_wide_24oct.jpg and
+photo_view_centre_24oct.jpg fill its edges) were taken from the window upstairs,
 one storey above the living room (the roof's tiles show under the window). Each photo's direction was found from the fences, which
 run straight out from the house (their vanishing point), and the centre photo was matched to the wide one on fence posts and the
 neighbour's shed. The view is rebuilt from the living room's eye, 2.6 m lower, by laying the photos onto the garden (the lawn as a
@@ -23,13 +24,17 @@ def Rm(yaw, pitch, roll):   # rows: the camera's right, down and forward in the 
     sy, cy, sp, cp = np.sin(yaw), np.cos(yaw), np.sin(pitch), np.cos(pitch)
     fwd = np.array([sy * cp, sp, cy * cp]); right = np.array([cy, 0, -sy]); down = np.array([sp * sy, -cp, sp * cy])
     return np.array([np.cos(roll) * right + np.sin(roll) * down, -np.sin(roll) * right + np.cos(roll) * down, fwd])
-CAMS = {   # photo, (yaw, pitch, roll) in degrees, the part of the frame that's the view (not the window frame or the roof)
-    "wide": ("photo_view_wide_24oct.jpg", (20.6, -6.1, 0.0)),
-    "centre": ("photo_view_centre_24oct.jpg", (1.8, -26.3, -1.0)),
+CAMS = {   # photo, (yaw, pitch, roll) in degrees, focal length (px); first the one that sees most, then the ones that fill in
+    # the full view (the ultra-wide lens, 103° across): fitted to the wide photo on ten points (fence posts, the trampoline, the
+    # warehouse, the conifer, the shed), 19 px apart on average; it puts the lawn's end 17.1 m out (the others: 16.6)
+    "full": ("photo_view_full_24oct.jpg", (2.0, -6.0, -5.0), 800.0),
+    "wide": ("photo_view_wide_24oct.jpg", (20.6, -6.1, 0.0), F),
+    "centre": ("photo_view_centre_24oct.jpg", (1.8, -26.3, -1.0), F),
 }
 def valid(name, h, w):
     m = np.ones((h, w), np.uint8)
     yy, xx = np.mgrid[0:h, 0:w]
+    if name == "full": m[xx < 215 + 0.075 * yy] = 0; m[yy > 1462 - xx * 0.043 - 12] = 0                   # the open casement; the gutter
     if name == "wide": m[(xx > 1300) & (yy > 1500 - (xx - 1330) * (230 / 670) - 12)] = 0                 # the roof tiles, bottom right
     if name == "centre": m[yy < 398] = 0; m[yy > 1288] = 0                                              # the transom and above; the gutter and below
     return m
@@ -44,12 +49,12 @@ with np.errstate(divide="ignore", invalid="ignore"):
 X = EYE + D * np.minimum(tg, tw)[..., None]                                        # where each ray meets the garden
 
 layers = {}
-for name, (fn, (yw, pt, rl)) in CAMS.items():
+for name, (fn, (yw, pt, rl), fl) in CAMS.items():
     img = cv2.cvtColor(cv2.imread(IN + fn), cv2.COLOR_BGR2RGB).astype(np.float32)
     h, w = img.shape[:2]; R = Rm(*np.radians([yw, pt, rl]))
     c = X @ R.T
     with np.errstate(divide="ignore", invalid="ignore"):
-        mx = (w / 2 + F * c[..., 0] / c[..., 2]).astype(np.float32); my = (h / 2 + F * c[..., 1] / c[..., 2]).astype(np.float32)
+        mx = (w / 2 + fl * c[..., 0] / c[..., 2]).astype(np.float32); my = (h / 2 + fl * c[..., 1] / c[..., 2]).astype(np.float32)
     mx[c[..., 2] <= 0] = -1; my[c[..., 2] <= 0] = -1
     m = valid(name, h, w)
     dist = cv2.distanceTransform(np.pad(m, 1), cv2.DIST_L2, 5)[1:-1, 1:-1]          # fade out near the frame's edges
@@ -69,24 +74,19 @@ vwt = np.clip(cv2.distanceTransform(np.pad(vm, 1), cv2.DIST_L2, 5)[1:-1, 1:-1] /
 layers["room"] = (cv2.remap(vid, mx, my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0),
                   cv2.remap(vwt, mx, my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0))
 
-# the centre photo was a sunnier day: match its colour to the wide one where both see the same thing
-(cw, ww), (cc, wc) = layers["wide"], layers["centre"]
-both = (ww > 0.5) & (wc > 0.5)
-if both.sum() > 1000:
-    for k in range(3):
-        a, b = cc[..., k][both], cw[..., k][both]
-        cc[..., k] = (cc[..., k] - a.mean()) * (b.std() / max(a.std(), 1e-3)) + b.mean()
-cv_, wv = layers["room"]
-both = (ww + wc > 0.5) & (wv > 0.5)
-ref = np.where((ww > wc)[..., None], cw, cc)
-if both.sum() > 1000:                                                              # the video was sunny and hazy: match it too
-    for k in range(3):
-        a, b = cv_[..., k][both], ref[..., k][both]
-        cv_[..., k] = (cv_[..., k] - a.mean()) * (b.std() / max(a.std(), 1e-3)) + b.mean()
-wc2 = wc * (1 - ww)                                                                # the wide photo first; the centre one fills in
-wv2 = wv * np.clip(1 - ww - wc2, 0, 1)                                             # then the room's video
-tot = ww + wc2 + wv2
-out = (cw * ww[..., None] + cc * wc2[..., None] + cv_ * wv2[..., None]) / np.maximum(tot, 1e-6)[..., None]
+# in turn: each photo's colour matched to what's already there where both see the same thing (other days, other light), then it
+# fills only what the ones before it don't cover
+out = np.zeros((OH, OW, 3), np.float32); tot = np.zeros((OH, OW), np.float32)
+for name in list(CAMS) + ["room"]:
+    col, wgt = layers[name]
+    both = (tot > 0.5) & (wgt > 0.5)
+    if both.sum() > 1000:
+        for k in range(3):
+            a, b = col[..., k][both], out[..., k][both] / tot[both]
+            col[..., k] = (col[..., k] - a.mean()) * (b.std() / max(a.std(), 1e-3)) + b.mean()
+    w2 = wgt * np.clip(1 - tot, 0, 1)
+    out += col * w2[..., None]; tot += w2
+out /= np.maximum(tot, 1e-6)[..., None]
 have = tot > 0.02
 
 # the far left, which neither photo sees: the gardens on the right, mirrored (the fences still run to the same point), then whatever is
