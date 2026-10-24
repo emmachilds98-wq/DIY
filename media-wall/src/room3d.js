@@ -12,6 +12,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";   // v48 §5: the lights' glow
 
 const root = document.getElementById("r3d");
 const SC = JSON.parse(document.getElementById("scene3d-data").textContent);
@@ -201,7 +202,7 @@ function adoptLight(l, scn) {
   Object.defineProperty(l, "visible", { configurable: true, get: () => (LIVE ? lightIn(l) : on()), set: x => { v = x; } });
   Object.defineProperty(l, "intensity", { configurable: true, get: () => (on() ? i : 0), set: x => { i = x; } });
   Object.defineProperty(l, "castShadow", { configurable: true, set: x => { cs = x; },
-    get: () => (LIVE ? S.quality === "hd" && l.isSpotLight && (l === lights.bar1[0] || l === lights.bar2[0]) : cs) });
+    get: () => (LIVE ? S.quality === "hd" && ((l.isSpotLight && (l === lights.bar1[0] || l === lights.bar2[0])) || !!l.userData.sun) : cs) });   // v48: and the sun
 }
 function adoptLights(scn) {           // after anything that builds lights (the start, applyState, Edit room's add)
   const found = []; scn.traverse(o => { if (o.isLight && !o.userData.adopted) found.push(o); });
@@ -249,7 +250,11 @@ function aoComposer(w, h, pr) {
     AO.g.updateGtaoMaterial({ radius: 0.3, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 16, distanceFallOff: 1 });
     AO.g.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
     clipMat(AO.g.normalMaterial);                                    // the cutaway cuts the depth it shades from, too
-    AO.c.addPass(AO.g); AO.c.addPass(new OutputPass());
+    AO.c.addPass(AO.g);
+    // v48 §5, client: "improving the renders graphics and quality": a soft glow round what's brighter than white (the LED strips, the lamp's
+    // shades, the lit spot heads, the screen), in HD on a real graphics card and in every saved picture; the phone's Fast view has none
+    AO.b = new UnrealBloomPass(new THREE.Vector2(w, h), 0.2, 0.4, 2.2); AO.c.addPass(AO.b); bloomLevels(S.tod === "day");
+    AO.c.addPass(new OutputPass());
   }
   AO.c.setPixelRatio(pr); AO.c.setSize(w, h);
   return AO.c;
@@ -563,7 +568,7 @@ function kindMat(kind) {
     stairs: () => Object.assign(new THREE.MeshStandardMaterial({ vertexColors: true, map: OAK_TEX, bumpMap: OAK_BUMP, bumpScale: 0.35, roughness: 0.58 }), { userData: { noTint: true } }),
     plain: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.72 }),
     dark: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0.05 }),
-    fabric: () => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, bumpMap: CORD, bumpScale: 0.9 }),
+    fabric: () => new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.9, bumpMap: CORD, bumpScale: 0.9, sheen: 0.45, sheenRoughness: 0.6, sheenColor: new THREE.Color("#ffffff") }),   // v48 §4: the cord's soft sheen at the edges
     led: () => new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false }),
     glass: () => new THREE.MeshPhysicalMaterial({ color: "#ffffff", roughness: 0.04, transmission: 0, transparent: true, opacity: 0.16, depthWrite: false }),
     art: () => new THREE.MeshStandardMaterial({ map: ART_TEX, roughness: 0.5 }),
@@ -673,7 +678,7 @@ function rect(cx, cy, cz, w, h, normal, mat) {     // a wall patch w × h (cm) c
   m.position.copy(v3(cx, cy, cz));
   const n = new THREE.Vector3(-normal[0], normal[1], normal[2]);
   m.lookAt(m.position.clone().add(n));
-  m.receiveShadow = true;
+  m.receiveShadow = true; m.castShadow = true;   // v48 §6: walls keep the sun out (it came through every wall but the window's)
   const uv = m.geometry.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * w / 100, uv.getY(i) * h / 100);
   shell.add(m); return m;
 }
@@ -740,7 +745,7 @@ function buildShell() {
   paintMats.set("ceilglow", reg(ceilMat));
   for (const [xa, xb, za, zb] of [[0, wx, WZ, RZ], [wx, Wd, WZ, front]]) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry((xb - xa) * M, (zb - za) * M), ceilMat);
-    m.rotation.x = Math.PI / 2; m.position.copy(v3((xa + xb) / 2, C, (za + zb) / 2)); m.receiveShadow = true; shell.add(m);
+    m.rotation.x = Math.PI / 2; m.position.copy(v3((xa + xb) / 2, C, (za + zb) / 2)); m.receiveShadow = true; m.castShadow = true; shell.add(m);   // v48: and the ceiling
   }
   // skirting, eggshell in the wall colour
   const sk = R.SKIRT_H, st = 2;
@@ -779,7 +784,7 @@ function buildShell() {
   cube(wx0 - 2, wy1, FZ, wx1 - wx0 + 4, 2, REV, wallP);                                          // ... and its head
   const SL = R.SILL;
   cube(wx0 - 4, SL.y - SL.t, FZ - 1, wx1 - wx0 + 8, SL.t, REV + 1 + SL.nose, white);              // the deep sill
-  const glass = reg(new THREE.MeshPhysicalMaterial({ color: "#dfe8ee", roughness: 0.02, transparent: true, opacity: 0.06, depthWrite: false }));
+  const glass = winGlass = reg(new THREE.MeshPhysicalMaterial({ color: "#dfe8ee", roughness: 0.02, transparent: true, opacity: 0.06, depthWrite: false }));
   glass.userData.envK = 0.4;   // review after v48: v44's glossy-surface reflections (2.4×) laid a white veil over the garden; the pane stays faint
   const pane = new THREE.Mesh(new THREE.PlaneGeometry((wx1 - wx0) * M, (wy1 - wy0) * M), glass);
   pane.position.copy(v3(mid, (wy0 + wy1) / 2, FZ - 1)); shell.add(pane);
@@ -2293,7 +2298,7 @@ function buildIdeas() {
     MOV.rug.pivot.children[0].add(g); }
   Object.values(IDEA_G).forEach(gr => gr.visible = false);
 }
-let view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut, pcGlow, pcLight;
+let winGlass, sun, view, ledMat, ceilGlow, ceilMat, lboxFace, laserDots, runLed, curtOpen, curtShut, pcGlow, pcLight;
 // v17: the PC lit up behind its clear side window: glowing fan rings (three front, one rear), an RGB strip along the top, a light inside
 function pcLit() {
   const [cw, ch, cd] = R.PC_CASE, [cz1, cz0] = R.PC_Z, st = R.PC_SHELF_TOP, x = 2.5 + cw - 4.2;
@@ -2812,6 +2817,40 @@ function applyState() {
    given a light its own colour */
 const WARMTH = [new THREE.Color("#ffbf86"), new THREE.Color(WARM), new THREE.Color("#fff3e4")];   // candle-warm, the bulbs' warm white, neutral
 function warmColour() { const w = Math.max(0, Math.min(100, S.warm ?? 50)) / 50; return w <= 1 ? WARMTH[0].clone().lerp(WARMTH[1], w) : WARMTH[1].clone().lerp(WARMTH[2], w - 1); }
+/* v44: the room's reflections by surface: glass, the TV and gloss pots catch more of them, matte paint and fabric less. v48 §2: the window
+   by night is a faint mirror of the lit room over the dusk garden (as real glass is), by day a light sky sheen */
+function envLevels(day) {
+  const own = ENV.tex && scene.environment === ENV.tex, g = own ? ENV.gain : 1;
+  if (winGlass) { winGlass.userData.envK = day ? 0.4 : 1.2; winGlass.opacity = day ? 0.06 : 0.1; }
+  MATS.forEach(m => { if (!("envMapIntensity" in m)) return;
+    if (m.userData.envK === undefined) m.userData.envK = m.roughness < 0.25 ? 2.4 : m.roughness < 0.5 ? 1.5 : m.roughness > 0.85 ? 0.7 : 1;
+    m.envMapIntensity = (day ? 0.25 : 0.12) * m.userData.envK * g; });
+}
+/* v48 §3: reflections from the room itself, not a stock studio. A cube camera in the middle of the room takes it in six directions once
+   the room has changed and settled (1.2 s), in HD on a real graphics card (where the room already draws into a target of the same kind,
+   so no new shaders) and in every saved picture; phones and Fast keep the studio. */
+const ENV = { rt: null, cam: null, pm: null, tex: null, studio: null, t: 0, gain: 0.8, use: true };
+function roomEnv() {
+  if (!started || !ENV.use) return;
+  if (S.tod === "day") { if (ENV.studio && scene.environment !== ENV.studio) { scene.environment = ENV.studio; envLevels(true); } return; }   // by day the bright garden in the window swamped it: the studio stays
+  if (!ENV.rt) { ENV.rt = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType }); ENV.cam = new THREE.CubeCamera(0.05, 40, ENV.rt); ENV.pm = new THREE.PMREMGenerator(gl); }
+  ENV.cam.position.copy(v3(R.W / 2, 125, (R.WINDOW_Z + R.RECESS_Z) / 2));
+  const clip = gl.localClippingEnabled; gl.localClippingEnabled = false;   // the whole room, not the cutaway
+  const sunI = sun ? sun.intensity : 0; if (sun) sun.intensity = 0;            // the sun's patch stays out of the reflections (it lit the room twice)
+  try { ENV.cam.update(gl, scene); } finally { gl.localClippingEnabled = clip; if (sun) sun.intensity = sunI; }
+  const t = ENV.pm.fromCubemap(ENV.rt.texture).texture;
+  if (ENV.tex) ENV.tex.dispose();
+  ENV.tex = t; scene.environment = t; envLevels(S.tod === "day"); dirty();
+}
+const BLOOM = [16, 0.3, 0.3];   // threshold (linear, before exposure), strength, radius
+function bloomLevels(day) {   // only the light sources glow: by evening, above the brightest lit wall; never by day (the walls are brighter)
+  if (AO.b) { const [th, st, rad] = AO.bt || BLOOM; AO.b.enabled = !day && AO.bloom !== false; AO.b.threshold = th; AO.b.strength = st; AO.b.radius = rad; }
+}
+function envSoon() {
+  clearTimeout(ENV.t);
+  if (started && aoLive()) ENV.t = setTimeout(roomEnv, 1200);
+  else if (ENV.studio && scene.environment !== ENV.studio) { scene.environment = ENV.studio; envLevels(S.tod === "day"); }
+}
 function applyLight() {
   const day = S.tod === "day", hd = S.quality === "hd";
   const L = {}; LAYERS.forEach(k => L[k] = lvl(k));          // v15: the sliders (a scene button fills them in), times the master
@@ -2860,10 +2899,9 @@ function applyLight() {
   const on = (L.strip * 1.0 + L.uprights * 0.3 + L.bar1 * 0.5 + L.bar2 * 0.5 + L.lamp * 0.35 + L.accent * 0.06 + (L.bias > 0 ? 8 : 0) + (S.lbox ? 4 : 0)) / 100;
   hemi.intensity = day ? 0.5 + (hd ? 0 : 0.25) : 0.05 + on * 0.36 + (hd ? 0 : (L.strip * 0.0075 + L.uprights * 0.0015 + (L.bias > 0 ? 0.08 : 0)));
   win.visible = hd || day;
-  // v44: the room's reflections by surface: glass, the TV and gloss pots catch more of them, matte paint and fabric less
-  MATS.forEach(m => { if (!("envMapIntensity" in m)) return;
-    if (m.userData.envK === undefined) m.userData.envK = m.roughness < 0.25 ? 2.4 : m.roughness < 0.5 ? 1.5 : m.roughness > 0.85 ? 0.7 : 1;
-    m.envMapIntensity = (day ? 0.25 : 0.12) * m.userData.envK; });
+  envLevels(day); bloomLevels(day);
+  if (sun) sun.intensity = day && hd ? SUNCFG.lux : 0;                                   // v48 §6: the sun, by day in HD
+  envSoon();
   gl.toneMappingExposure = day ? 0.5 : 0.62;
   if (gl.shadowMap.enabled !== hd) { gl.shadowMap.enabled = hd; MATS.forEach(m => m.needsUpdate = true); sizeRenderer(); if (LIVE && started) precompile(); }
   reshadow();
@@ -2941,7 +2979,7 @@ function placeAll() {
   if (selBox) selBox.update();
   reshadow();
 }
-const SHADOW_CAP = Math.max(0, Math.min(4, (gl.capabilities.maxTextures || 16) - 10));
+const SHADOW_CAP = Math.max(0, Math.min(4, (gl.capabilities.maxTextures || 16) - 11));   // v48: the sun's shadow takes one texture unit
 function capShadows(n) {   // the brightest n spotlights cast shadows; the rest light without them
   const sp = Object.values(lights).flat().filter(l => l.isSpotLight && l.visible).sort((a, b) => b.intensity - a.intensity);
   sp.forEach((l, i) => { l.castShadow = i < n; });
@@ -4277,14 +4315,19 @@ function still(w, h) {
   LIVE = false; syncRig();                                                                 // v35: the lights as they always were, for the picture
   const was = gl.shadowMap.enabled, wasQ = S.quality; gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap;
   if (wasQ !== "hd") { S.quality = "hd"; applyLight(); gl.shadowMap.enabled = true; }
-  const big = SMALL ? 1024 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows
+  const big = SMALL ? 1024 : BIG_GPU ? 4096 : 2048;   // v18: phones keep 1024 maps for the picture, and at most six spots cast shadows; v48: 4096 on a real card
   Object.values(lights).flat().forEach(l => { if (l.isSpotLight && l.visible) { l.castShadow = true; l.shadow.mapSize.set(big, big); if (l.shadow.map) { l.shadow.map.dispose(); l.shadow.map = null; } } });
-  capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 10)));
+  capShadows(Math.max(0, Math.min(6, (gl.capabilities.maxTextures || 16) - 11)));
   MATS.forEach(m => { m.needsUpdate = true; if (m.userData.trans) m.transmission = m.userData.trans; });   // v39: real glass in the pictures
   updateCut(); reshadow();
-  aoComposer(w, h, 1).render();                                                           // v40: ambient occlusion in every picture
+  roomEnv();                                                                              // v48 §3: the room's own reflections in every picture
+  const ss = SMALL ? 1 : 2;                                                               // v48 §7: drawn at twice the size, then halved: smoother edges
+  gl.setPixelRatio(ss); gl.setSize(w, h, false);
+  const comp = aoComposer(w, h, ss); bloomLevels(S.tod === "day"); comp.render();         // v40: ambient occlusion in every picture (v48: and the glow, set for this picture)
   MATS.forEach(m => { if (m.userData.trans) m.transmission = 0; });
-  const url = canvas.toDataURL("image/png");
+  let url;
+  if (ss > 1) { const c2 = document.createElement("canvas"); c2.width = w; c2.height = h; const g2 = c2.getContext("2d"); g2.imageSmoothingQuality = "high"; g2.drawImage(canvas, 0, 0, w, h); url = c2.toDataURL("image/png"); }
+  else url = canvas.toDataURL("image/png");
   gl.shadowMap.type = LIVE_SHADOW; S.quality = wasQ;
   gl.shadowMap.enabled = was;
   MATS.forEach(m => m.needsUpdate = true);
@@ -4684,12 +4727,28 @@ root.addEventListener("input", e => {
 
 /* ---------------------------------------------------------------- go: built the first time the room is on screen (v14.1) */
 let started = false;
+/* v48 §6: the sun by day, through the window: it casts the frame, the bars and the sill's plants onto the sill, the sofa and the floor.
+   Its direction (geometry.SUN: degrees round from straight out of the window towards the room's +x, and up) is a stand-in until the client
+   says which way the back of the house faces. Always in the scene (a light coming and going would rebuild every shader), dark by night
+   and in Fast, which has no shadows. */
+const SUNCFG = { lux: 80 };   // tuned on stills: the bars' shadows read on the sofa, the ottoman and the rug, the floor not washed out
+function buildSun() {
+  const SN = R.SUN || { az: -12, el: 45 }, az = SN.az * Math.PI / 180, el = SN.el * Math.PI / 180;
+  const wc = [(R.WINDOW_X[0] + R.WINDOW_X[1]) / 2, 120, R.WINDOW_Z], L = 700;
+  sun = new THREE.DirectionalLight("#fff0d8", 0); sun.userData.sun = true;
+  sun.position.copy(v3(wc[0] + Math.sin(az) * Math.cos(el) * L, wc[1] + Math.sin(el) * L, wc[2] - Math.cos(az) * Math.cos(el) * L));
+  sun.target.position.copy(v3(wc[0] - Math.sin(az) * 160, 0, wc[2] + 160));
+  sun.castShadow = true; sun.shadow.mapSize.set(SMALL ? 1024 : 2048, SMALL ? 1024 : 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 3;
+  const c = sun.shadow.camera; c.left = -5.5; c.right = 5.5; c.top = 5.5; c.bottom = -5.5; c.near = 0.5; c.far = 16; c.updateProjectionMatrix();   // the whole room: outside it the sun shone through walls
+  scene.add(sun, sun.target);
+}
 function start() {
   started = true;
   const t0 = performance.now();
   const pmrem = new THREE.PMREMGenerator(gl);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = ENV.studio = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   pmrem.dispose();
+  buildSun();
   gl.localClippingEnabled = true;
   scene.add(lightRig);                                                                  // v35: the fixed set of lights
   buildShell(); buildLights(); buildFurniture(); buildSuggest(); buildSeatAndPouf();
@@ -4722,7 +4781,7 @@ function start() {
       if (addp && CATALOGUE[addp.type]) { const a = { id: "a" + Date.now().toString(36), type: addp.type, x: addp.x, z: addp.z }; pushUndo(); addThing(a); if (addp.rot) setLayout(a.id, { rot: addp.rot }); placeAll(); store.set(KEY, S); dirty(); }
       if (showat != null) { showOpen(); if (SH) { SH.own = true; SH.paused = true; SH.t = showat; showPose(SH.t); showCard(); qs("#r3d-show").hidden = true; } }
       if (o.view) setView(o.view, true); if (aim) flyTo(aim.eye, aim.at, aim.fov || 55, false, true); },
-    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, THREE, S, MOV, floorHop, collide, solidBoxes, leafTexture, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
+    still, ready: true, buildMs: Math.round(performance.now() - t0), _dbg: { gl, scene, lights, get sun() { return sun; }, SUNCFG, get winGlass() { return winGlass; }, AO, ENV, envLevels, bloomLevels, roomEnv, THREE, S, MOV, floorHop, collide, solidBoxes, leafTexture, UNDO, camera, controls, VIEWS, MATS, OAK_TEX, CABP, SUGG_G, IDEA_G, CATALOGUE, BES, WORK, precompile, PRE, AIMG },
     errors: () => store.get("r3d-errors", []),                                       // v35: what the trap kept
     perf: perfInfo,                                                                   // v35: the counts to watch each round
     bench(n = 30) {   // ms per frame while orbiting at full resolution, for tuning

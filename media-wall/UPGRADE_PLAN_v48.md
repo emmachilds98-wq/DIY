@@ -69,7 +69,10 @@ Starts from `main` at v47.2. The standing rules hold: the core plan gets the ful
 - The garden, the heights and the window's design come from one place (`house/HOUSE.md` and `geometry.py`), so the next room (the
   kitchen below, a bedroom above) reuses the same garden and the same outside.
 
-**Section 1 done 24 Oct (v48.1)** from the client's three photos of the view (taken upstairs, rebuilt 2.6 m lower).
+**Section 1 done 24 Oct (v48.1, v48.2)** from the client's photos of the view (taken upstairs, rebuilt 2.6 m lower).
+**Sections 2–7 done 24 Oct (v48, HANDOFF round 43):** the sun (a stand-in direction until question 2 is answered), the room's own
+reflections and the glow by evening, the window's glass by time of day, the sofa's sheen, Save as HD picture at 2× with 4096 shadows.
+Not done: path-traced pictures (section 7's "traces the light"); it needs a large add-on and minutes per picture: your call.
 
 ## Questions for you (each makes one part right; we can start without them)
 

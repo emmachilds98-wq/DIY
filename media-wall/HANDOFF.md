@@ -1,10 +1,10 @@
 # Handoff: Home Network & Media Wall Plan
 
 ## START HERE (next agent)
-**Current: v47 (round 42, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
-viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 63), guide 66
-(phone 76). Next version: 48: plan in `media-wall/UPGRADE_PLAN_v48.md` (render quality); section 1 (the garden seen from one floor
-up) done (v48.1); the rest waits on the client's go. **The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
+**Current: v48 (round 43, below), on `main`, published with GitHub Pages (https://emmachilds98-wq.github.io/DIY/) and the shared
+viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £4,382–8,260. Plan 35 pages (phone edition 65), guide 66
+(phone 141). Next version: 49. `UPGRADE_PLAN_v48.md` done but for path-traced pictures (section 7's "traces the light"; see round 43).
+**The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
 - **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
@@ -22,6 +22,29 @@ up) done (v48.1); the rest waits on the client's go. **The whole house's facts**
 - **Open with the client:**
   - a way to save each set-up they make in the site and track design changes (round 33; they may set up Firebase);
   - the side-wall socket's distance and height;
+
+## Update 24 Oct 2026, round 43: v48 (the rest of `UPGRADE_PLAN_v48.md`: the sun, the room's own reflections, glow, sharper HD pictures)
+- Client: "Should include new garden view and more upgrades" (the go for v48's sections 2–8; section 1, the garden, was v48.1/48.2).
+- **§6 the sun** (`room3d.js` `buildSun`, `SUNCFG.lux` 80; `geometry.SUN` az −12°, el 45°, a stand-in until the client says which way the
+  back faces): a DirectionalLight always in the scene (dark by night and in Fast, so no shader rebuilds), shadow 2048 (1024 on a phone)
+  over the whole room. Every wall and the ceiling now cast shadows (`rect()`, the ceiling planes): with only the window wall casting,
+  the sun shone through the ceiling and washed the room (+17 brightness). The light rig's live shadow rule lets the sun cast in HD
+  (`userData.sun`). The window's bars and the sill plants fall across the sofa, the ottoman and the rug. `SHADOW_CAP` one lower.
+- **§3 the room's own reflections** (`roomEnv`, `envSoon`, `ENV`): a 256 cube capture from the room's middle, once the room has settled
+  (1.2 s), the sun left out of it; evenings only (by day the bright garden in the window swamped it: the studio stays), in HD on a real
+  graphics card and in every saved picture; `ENV.gain` 0.8. Phones and Fast keep the studio.
+- **§2 glass:** the window's pane `envK` 0.4 by day, 1.2 by night, opacity 0.06/0.10 (`envLevels`): a faint mirror of the room at night.
+- **§5 glow** (`UnrealBloomPass` in the AO composer, `BLOOM` [16, 0.3, 0.3], `bloomLevels`): evenings only, threshold 16 (linear) so only
+  the sources glow (the TV's backlight, the case light, the strips); at 0.9–8 it washed the evening (mean +13, contrast −12).
+- **§4 surfaces:** the walls, carpet, oak and fabrics already had their textures (rounds 15–40); the sofa's cord gains a sheen (MeshPhysical).
+- **§7 Save as HD picture:** drawn at 2× and halved (not on a phone), shadows 4096 on a real card, the room's reflections and the glow.
+  Path tracing (three-gpu-pathtracer) not done: a large dependency and minutes per picture in a browser; ask the client first.
+- **Measured** (stills, mean/contrast of the luminance, main → v48): day by the window 145/54 → 147/57 (the sun's pattern), day media wall
+  181/48 → 182/46, evening window 135/45 → 138/44, evening media wall 157/55 → 159/52. Forced big-GPU path: evening uses the room's
+  reflections and glow, day the studio, programs steady (137) across switches, errors 0.
+- **Checks:** `qa.py` errors [] fails [] at 390 and 1280, text budget 0 over; `taptest.py` errors []; `clash.py` 0. v47 outputs in `out/v47/`.
+- **Test gotcha:** `still()` doesn't re-run `applyLight` when the quality is already HD, so a setting changed straight before a still
+  shows one picture late; set state with `R3D.set` first.
 
 ## Update 24 Oct 2026: v48.3 (a review of v47.1–v48.2)
 - Client: "I've worked on further upgrades can you review where I got with another agent". Every branch checked: all the other
