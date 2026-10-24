@@ -7,7 +7,21 @@ viewer (https://claude.ai/artifact/71ffwf5PRLhoLj6G5KTvm2).** Fit 92/22/12/0, £
 **The whole house's facts** (floors, rooms, the back of the house, the garden): `house/HOUSE.md`.
 **Never write the cap's poem out in code or text.** No mention of Claude in the page, the README or the PDFs.
 
-- **How the client works:** short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
+- **What's left, in order (24 Oct, end of round 43; nothing is half-done, all work is on `main`):**
+  1. **Ask the client** (each answer is a one-line change): which way the back of the house faces (then set `geometry.SUN` az/el,
+     rebuild); the garden's length to the far fence (`house/HOUSE.md`, `garden_window.py`; the photos put it at 15–17 m); whether they
+     want path-traced "near-photo" pictures (v48 §7: three-gpu-pathtracer, minutes per picture: only on their yes); the side-wall
+     socket's distance and height (fit proof CHECK row).
+  2. **Save each set-up** (round 33's ask, still open): a Save this set-up button writing `S`, its look link, a name, who and when to a
+     `setups` collection in the shared viewer's db, and a My set-ups list (round 33's last bullet has the design). They may set up
+     Firebase instead: ask before building.
+  3. **The viewer's pictures:** 29 are inlined (`src/deck_assets_todo.txt`); upload them to the artifact's asset store (round 13's
+     notes) so the inline copy shrinks.
+  4. **Tidy:** the branches `compassionate-wright-a150qf` (v11) and `optimistic-lovelace-7phxl6` (v37) each hold one superseded commit;
+     delete them if the client agrees.
+  5. Each round: plan first (`UPGRADE_PLAN_vNN.md`, merged), work in small merged steps, rebuild, `qa.py`/`taptest.py`/`clash.py`,
+     HANDOFF round, README, republish the viewer. Merge to `main` as you go: sessions can end without warning.
+ short messages; each round wants a plan first (`media-wall/UPGRADE_PLAN_vNN.md`, merged to `main` before
   code), then the work merged to `main` in steps, the plan PDF and the viewer updated. Rules are in `CLAUDE.md` (core plan
   `geometry.FIRM` gets the full build; options one line each; say less; no HD stills; every size from a cited source).
 - **Rebuild:** `cd media-wall/src && python3 make_images.py && python3 export3d.py && python3 build_doc.py && python3 build_viewer.py`
