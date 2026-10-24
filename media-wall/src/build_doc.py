@@ -13,8 +13,8 @@ from diagrams import (light_scene, leaf_case, fliptop, sub_box, drawer_layouts, 
                       cab_elevation, cab_carcass, cab_section, cab_plan)
 
 HERE = pathlib.Path(__file__).parent
-VERSION = "46"
-REVISION = "41: the build by place and piece, Evening light by default, a phone edition of the PDFs"
+VERSION = "47"
+REVISION = "42: the review at phone and PC sizes: the job icons, the chapter tiles two to a row on a phone, a stale height"
 PDF_NAME = f"Home_Network_Plan_v{VERSION}.pdf"
 GUIDE_NAME = f"Build_Guide_v{VERSION}.pdf"
 
@@ -1155,7 +1155,7 @@ def _plan(deck=False):
 <h1>Home Network &amp; Media Wall Plan</h1>
 <p class="byline">Revised Oct 23, 2026 · @emma · version {VERSION} (revision {REVISION}), drawn to your measurements</p>
 
-<div class="decision"><b>What changed:</b> the build is by place and piece, in any order (the Build Guide, and Build on the plan page); the room opens on Evening, every light on and balanced, with Brightness and Warmth; a phone edition of both PDFs.</div>
+<div class="decision"><b>What changed:</b> on the plan page, the jobs' icons show again, the chapters sit two to a row on a phone, and the media wall's heights list the dining cabinet's top (189) in place of the old fold-up table.</div>
 
 <h2>1 · The plan on a page</h2>
 <div class="hero">
